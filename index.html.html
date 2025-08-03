@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Jailyard 2025 Power Rankings</title>
+
+<!-- Styles: reusing the modern, glassmorphic style from the previous version -->
+<style>
+:root{
+  --bg:#0f1115;
+  --fg:#e8ebf0;
+  --muted:#8f96a1;
+  --accent:#6c47ff;
+  --accent-2:#ff4d8d;
+  --card:rgba(255,255,255,0.04);
+  --glass:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.08);
+  --warning:#ffb703;
+  --good:#00d084;
+  --bad:#ff4d4f;
+  --font-main: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+  --h1:clamp(2.4rem,5vw,4.2rem);
+  --h2:clamp(1.8rem,3.5vw,2.8rem);
+  --maxw:1220px;
+  color-scheme:dark;
+}
+html,body{
+  scroll-behavior:smooth;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--font-main);
+  overscroll-behavior-y:none;
+}
+*{box-sizing:border-box;}
+a{color:var(--accent-2);text-decoration:none;}
+a:hover{text-decoration:underline;}
+header.hero{position:relative;min-height:100vh;display:grid;place-items:center;overflow:hidden;perspective:1000px;}
+.hero__bg{position:absolute;inset:-20vh -10vw -20vh -10vw;background:
+    radial-gradient(circle at 15% 20%,rgba(255,77,141,0.06) 0%,transparent 60%),
+    radial-gradient(circle at 80% 40%,rgba(108,71,255,0.08) 0%,transparent 65%),
+    radial-gradient(circle at 40% 80%,rgba(0,208,132,0.06) 0%,transparent 60%),
+    #0d0f12;transform:translateZ(-200px) scale(1.3);}
+.hero__grid{position:absolute;inset:0;background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
+    background-size:60px 60px;transform:translateZ(-100px) scale(1.1);}
+.hero__content{position:relative;z-index:5;text-align:center;padding:2rem;max-width:900px;}
+.hero__title{font-size:var(--h1);line-height:1.05;letter-spacing:-0.02em;background:linear-gradient(92deg,#fff,#a8a8ff 40%,#ff9acd 80%);-webkit-background-clip:text;color:transparent;}
+.hero__subtitle{margin:1rem auto 2.5rem;color:var(--muted);max-width:720px;}
+.hero__cta{display:inline-flex;align-items:center;column-gap:.6rem;background:var(--accent);color:white;padding:.9rem 1.3rem;border-radius:999px;font-weight:600;transition:transform .15s ease;}
+.hero__cta:hover{transform:translateY(-2px);}
+#nav{position:sticky;top:0;backdrop-filter:blur(8px);background:rgba(15,17,21,0.65);border-bottom:1px solid var(--border);z-index:999;}
+#nav .inner{max-width:var(--maxw);margin:0 auto;padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+#nav .brand{font-weight:700;letter-spacing:.03em;}
+#nav nav{display:flex;gap:.9rem;flex-wrap:wrap;}
+#nav a{color:var(--muted);font-size:.95rem;padding:.3rem .55rem;border-radius:6px;}
+#nav a.active{color:var(--fg);background:rgba(255,255,255,0.05);}
+.container{max-width:var(--maxw);width:100%;margin:0 auto;padding:4rem 1rem;}
+.section-title{font-size:var(--h2);margin-bottom:.6rem;}
+.section-sub{color:var(--muted);max-width:760px;margin-bottom:3rem;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.2rem 1.4rem;box-shadow:0 0 0 rgba(0,0,0,0);transition:box-shadow .25s ease,transform .2s ease;position:relative;overflow:hidden;}
+.card:hover{box-shadow:0 12px 34px rgba(0,0,0,.14);transform:translateY(-2px);}
+.card.glass{background:var(--glass);backdrop-filter:blur(12px);}
+.badge{display:inline-flex;align-items:center;gap:.35rem;padding:.15rem .5rem;border-radius:999px;font-size:.8rem;line-height:1.7;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);}
+.badge.good{color:var(--good);border-color:rgba(0,208,132,.25);} .badge.bad{color:var(--bad);border-color:rgba(255,77,79,.25);} .badge.warn{color:var(--warning);border-color:rgba(255,183,3,.25);}  
+.rank-line{margin-top:.8rem;width:100%;height:8px;background:rgba(255,255,255,0.06);border-radius:999px;position:relative;overflow:hidden;}
+.rank-line .bar{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .8s cubic-bezier(.2,.8,.2,1);}  
+.rank-pill{position:absolute;top:.9rem;right:1rem;font-size:.85rem;padding:.12rem .45rem;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);color:var(--muted);}  
+.team-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}  
+.team-meta{display:flex;flex-wrap:wrap;gap:.4rem .6rem;margin:.6rem 0 1rem;}  
+.team-table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:.9rem;}  
+.team-table th,.team-table td{padding:.35rem .5rem;border-bottom:1px solid rgba(255,255,255,0.05);}  
+.team-table th{text-align:left;color:var(--muted);font-weight:500;}  
+ul.players{list-style:none;margin:.4rem 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.25rem .6rem;}  
+ul.players li{font-size:.88rem;color:#cfd4db;}  
+ul.players li span.val{color:var(--muted);font-size:.8rem;}  
+details summary{cursor:pointer;user-select:none;font-weight:600;margin:.9rem 0;}  
+details[open] summary{color:var(--accent-2);}  
+.section-awards .award{display:grid;grid-template-columns:90px 1fr;gap:1rem;padding:1rem;border:1px dashed rgba(255,255,255,0.08);border-radius:12px;margin-bottom:1rem;}  
+.award .tag{display:inline-block;font-weight:700;font-size:2.2rem;text-align:center;padding:.8rem .2rem;background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;color:transparent;}  
+.toggle-dark{cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:999px;padding:.35rem .7rem;font-size:.9rem;}  
+.light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(255,255,255,0.9);--glass:rgba(255,255,255,0.85);--border:rgba(0,0,0,0.06);color-scheme:light;}  
+.fade-up{opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.17,.67,.24,1);}  
+.fade-up.visible{opacity:1;transform:none;}  
+.parallax{transform:translateY(calc(var(--scrollY,0)*var(--speed,0.3)));will-change:transform;}  
+footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}  
+.avatar{width:46px;height:46px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;color:rgba(255,255,255,0.95);flex:0 0 46px;}  
+.roast{color:var(--muted);font-style:italic;margin-top:.6rem;}  
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;margin-top:1.2rem;}  
+.master-table{width:100%;border-collapse:collapse;font-size:.92rem;min-width:900px;}  
+.master-table th,.master-table td{padding:.55rem .7rem;border-bottom:1px solid rgba(255,255,255,0.05);}  
+.master-table th{text-align:left;color:var(--muted);font-weight:600;cursor:pointer;position:sticky;top:0;background:rgba(0,0,0,0.05);}  
+.master-table th.sort-asc::after{content:' ▲';color:var(--accent-2);}  
+.master-table th.sort-desc::after{content:' ▼';color:var(--accent-2);}  
+@media(max-width:600px){#nav nav{display:none;}}
+</style>
+<script type="text/javascript" nonce="47582d3582fc4a8fb9a5de6f6f8" src="//local.adguard.org?ts=1754186399220&amp;type=content-script&amp;dmn=chatgpt.com&amp;url=https%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile-HPhNYvaJ5n9zqiqKofhr2y%26ts%3D487274%26p%3Dfsns%26cid%3D1%26sig%3D974f48ba45d0488c7d6960c85c2ffe18171d9806e233e2539f7d44132b3b7326&amp;app=firefox.exe&amp;css=2&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-dnt"></script>
+<script type="text/javascript" nonce="47582d3582fc4a8fb9a5de6f6f8" src="//local.adguard.org?ts=1754186399220&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script></head>
+<body>
+
+<header class="hero" id="top">
+  <div class="hero__bg parallax" style="--speed:.15"></div>
+  <div class="hero__grid parallax" style="--speed:.05"></div>
+  <div class="hero__content">
+    <h1 class="hero__title">Jailyard Dynasty Power Rankings – 2025</h1>
+    <p class="hero__subtitle">Numbers, nuance and a little history: how we see the league heading into the 2025 season.</p>
+    <a href="#rankings" class="hero__cta">Jump to rankings ↓</a>
+  </div>
+</header>
+
+<div id="nav">
+  <div class="inner">
+    <div class="brand">The Jailyard</div>
+    <nav id="toc"></nav>
+    <button class="toggle-dark" id="toggleDark">Toggle theme</button>
+  </div>
+</div>
+
+<main>
+  <section class="container" id="methodology">
+    <h2 class="section-title">Methodology</h2>
+    <p class="section-sub">Trade values from five sources, contender tiers from five more, blended with your rosters and draft capital. Average rank, standard deviation and median value guided our ordering. Playoff history adds colour.</p>
+    <div class="grid fade-up">
+      <div class="card glass">
+        <h3>Signals we reward</h3>
+        <ul>
+          <li>Multiple startable QBs</li>
+          <li>Backfields with youth and depth</li>
+          <li>Wide receivers who earn targets</li>
+          <li>A true TE edge</li>
+          <li>Picks you actually use</li>
+        </ul>
+      </div>
+      <div class="card glass">
+        <h3>Signals we punish</h3>
+        <ul>
+          <li>QB roulette</li>
+          <li>RB rooms built on nostalgia</li>
+          <li>WR groups that need time machines</li>
+          <li>TEs that make you shrug</li>
+          <li>Picks hoarded like canned beans with no plan to open them</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="container" id="table">
+    <h2 class="section-title">Sortable overview</h2>
+    <p class="section-sub">Tap any header to sort. Rows link to detailed cards. Draft rank is a reminder of how much ammo you hold.</p>
+    <div class="table-wrap fade-up">
+      <table class="master-table" id="masterTable"></table>
+    </div>
+  </section>
+
+  <section class="container" id="charts">
+    <h2 class="section-title">Quick visuals</h2>
+    <p class="section-sub">See how average rank correlates with roster value and how each team’s starter value breaks down by position.</p>
+    <div class="grid fade-up">
+      <div class="card">
+        <h3>Rank vs roster value</h3>
+        <canvas id="rankValueChart" height="260"></canvas>
+      </div>
+      <div class="card">
+        <h3>Starter value by position</h3>
+        <canvas id="stackedPosChart" height="260"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Extra insights section: projections and titles -->
+  <section class="container" id="extras">
+    <h2 class="section-title">More insights</h2>
+    <p class="section-sub">Two new visuals to settle arguments: how your projected points stack up against schedule difficulty and who has actually been hoisting trophies.</p>
+    <div class="grid fade-up">
+      <div class="card">
+        <h3>Projected points vs schedule</h3>
+        <canvas id="ptsSchedChart" height="260"></canvas>
+      </div>
+      <div class="card">
+        <h3>Titles per franchise (2022–2024)</h3>
+        <canvas id="titlesChart" height="260"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="container" id="rankings">
+    <h2 class="section-title">Power rankings</h2>
+    <p class="section-sub">Click a team to see its roster, ranks and picks. Animated bars show relative strength.</p>
+    <div id="teams"></div>
+  </section>
+
+  <section class="container section-awards" id="awards">
+    <h2 class="section-title">Superlatives</h2>
+    <p class="section-sub">Because trophies are for January and trash talk is for July.</p>
+    <div id="awardsList"></div>
+  </section>
+
+  <section class="container" id="history">
+    <h2 class="section-title">Playoff history</h2>
+    <p class="section-sub">Recent champions and notable finishes.</p>
+    <ul style="line-height:1.6">
+      <li><strong>2024:</strong> Kittler on the Roof defeated Sleeping Giants in the final. MHJTIME took third place. Rasheeing the Scene finished fifth, and Noble FFT won the consolation bracket.</li>
+      <li><strong>2023:</strong> General Ken‑obi beat Kittler on the Roof for the title. The Boonist Monks claimed third, Rasheeing the Scene took fifth, and MHJTIME ended up as the “King”.</li>
+      <li><strong>2022:</strong> The Legion of Bouz won the inaugural championship over Kittler on the Roof. Sleeping Giants took third while Father Time rounded out the top four.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  Built for The Jailyard. If you don’t like your placement, the trade button is right there.
+</footer>
+
+<script>
+// Updated league data reflecting trade/contender rankings and playoff history
+const league = {
+  season: '2025',
+  teams: [
+    {
+      rank: 1,
+      name: 'General Ken‑obi',
+      owner: 'bLaker24',
+      initials: 'GK',
+      tier: 'Contender',
+      roast: 'We’re all just hoping you oversleep on waiver day.',
+      overallValue: 619,
+      starterValue: 977,
+      avgAge: 24.5,
+      needs: ['QB'],
+      ranks: { qb: 11, rb: 1, wr: 1, te: 3, draft: 5, starter: 1 },
+      draftValue: 40,
+      draftPicks: ['2026 1st (18.5)','2026 2nd (3)','2026 3rd (0.1)','2026 3rd via bchodos (0.1)','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Drake Maye',4.8,'starter'],['J.J. McCarthy',1.3],['Anthony Richardson',0.5],['Trevor Lawrence',0.3]],
+      rb: [['Saquon Barkley',87.8,'starter'],['Chase Brown',59.5,'starter'],['Kenneth Walker',42.4,'starter'],['Kaleb Johnson',26.6],['Zach Charbonnet',8],['Jerome Ford',2.4],['Rachaad White',1.8],['Tahj Brooks',1],['Kendre Miller',0.5]],
+      wr: [['CeeDee Lamb',83.4,'starter'],['Nico Collins',77.1,'starter'],['Drake London',62.6,'starter'],['Chris Olave',32.7],['DJ Moore',25.2],['Jameson Williams',15],['Jermaine Burton',0.1]],
+      te: [['Sam LaPorta',40.3,'starter'],['Kyle Pitts',3.4],['Mason Taylor',1.3],['Cade Otton',0.8]],
+      blurb: 'Four startable QBs, a three‑headed RB monster and a WR corps that could headline Coachella. You won it all in 2023 and made the semis in 2024; you’re the consensus favourite again.'
+    },
+    {
+      rank: 2,
+      name: 'Noble FFT',
+      owner: 'kevobucks',
+      initials: 'NF',
+      tier: 'Frisky',
+      roast: 'Bijan and Breece are gods, your tight ends are mortals.',
+      overallValue: 351,
+      starterValue: 903,
+      avgAge: 24.6,
+      needs: ['TE','QB','WR depth'],
+      ranks: { qb: 9, rb: 4, wr: 8, te: 10, draft: 4, starter: 5 },
+      draftValue: 46,
+      draftPicks: ['2026 1st (18.5)','2026 2nd (3) x3','2026 3rd via KidBouzie (0.1)','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Caleb Williams',3.8,'starter'],['Jordan Love',7.4],['Aaron Rodgers',0]],
+      rb: [['Bijan Robinson',92.5,'starter'],['Breece Hall',56.4,'starter'],['Javonte Williams',6.5]],
+      wr: [['A.J. Brown',48.3,'starter'],['Tee Higgins',47,'starter'],['Jayden Reed',11.3,'starter'],['Matthew Golden',9.9],['Ricky Pearsall',3.1]],
+      te: [['Isaiah Likely',5.9],['Terrance Ferguson',1.2],['Ja\'Tavion Sanders',0.9]],
+      blurb: 'A disappointing 7th‑place finish last year masks how loaded you are: Bijan–Breece at RB and Caleb at QB make you the consensus No. 2. Fix tight end and you could be lifting the trophy.'
+    },
+    {
+      rank: 3,
+      name: 'MHJTIME',
+      owner: 'rango_',
+      initials: 'MH',
+      tier: 'Contender',
+      roast: 'If you ever find two real running backs, the rest of us are toast.',
+      overallValue: 454,
+      starterValue: 944,
+      avgAge: 25.1,
+      needs: ['RB','Picks'],
+      ranks: { qb: 2, rb: 11, wr: 2, te: 1, draft: 12, starter: 2 },
+      draftValue: 18,
+      draftPicks: ['2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Jayden Daniels',39.2,'starter'],['Geno Smith',0.2],['Daniel Jones',0]],
+      rb: [['Chuba Hubbard',35.3,'starter'],['Brian Robinson',22.1,'starter'],['Rico Dowdle',2.7]],
+      wr: [['Ja\'Marr Chase',97.4,'starter'],['Malik Nabers',85.6,'starter'],['Marvin Harrison Jr.',52.2,'starter'],['Travis Hunter',25.9],['Courtland Sutton',7.6]],
+      te: [['Trey McBride',64.3,'starter'],['Harold Fannin',1.1],['Zach Ertz',0.6]],
+      blurb: 'Last in 2023, semifinalist in 2024, top three in 2025. The best WR trio on the planet and a top‑five tight end make you lethal; the only thing between you and a title is your RB room.'
+    },
+    {
+      rank: 4,
+      name: 'Ghastly Grayskull Gang',
+      owner: 'GrayskullXX',
+      initials: 'GG',
+      tier: 'Frisky',
+      roast: 'Your pick stash is bigger than your WR room.',
+      overallValue: 323,
+      starterValue: 885,
+      avgAge: 24.4,
+      needs: ['WR'],
+      ranks: { qb: 7, rb: 6, wr: 11, te: 2, draft: 3, starter: 10 },
+      draftValue: 59,
+      draftPicks: ['2026 1st (18.5) x2','2026 2nd (3)','2026 3rd x3 (0.1)','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['C.J. Stroud',12.5],['Michael Penix',1.7],['Justin Fields',0.3,'starter']],
+      rb: [['Omarion Hampton',49.6,'starter'],['TreVeyon Henderson',38.2,'starter'],['D\'Andre Swift',18,'starter'],['Tyjae Spears',8.7],['Tank Bigsby',5.2]],
+      wr: [['Xavier Worthy',31,'starter'],['DK Metcalf',12.8,'starter'],['Deebo Samuel',4,'starter'],['Tank Dell',3.1],['Quentin Johnston',1.6]],
+      te: [['Brock Bowers',66,'starter'],['Dalton Schultz',0.3]],
+      blurb: 'From the consolation bracket to a top‑four power rank in two years. Stroud and Bowers form a terrifying core; use your mountain of picks to buy a proper WR1 and crash the finals.'
+    },
+    {
+      rank: 5,
+      name: 'Rasheeing the Scene',
+      owner: 'ToreroGaucho',
+      initials: 'RS',
+      tier: 'Frisky',
+      roast: 'Your WR room is a meme waiting to happen.',
+      overallValue: 378,
+      starterValue: 889,
+      avgAge: 25.3,
+      needs: ['WR','Picks'],
+      ranks: { qb: 1, rb: 2, wr: 9, te: 5, draft: 9, starter: 9 },
+      draftValue: 24,
+      draftPicks: ['2026 1st via GauchoTrain (18.5)','2026 2nd (3)','2026 3rd (0.1)','2027 2nd (2.5)'],
+      qb: [['Josh Allen',43.5,'starter'],['Matthew Stafford',0.1],['Will Levis',0]],
+      rb: [['De\'Von Achane',73.2,'starter'],['Bucky Irving',69.5,'starter'],['Quinshon Judkins',37.2,'starter'],['Travis Etienne',5.6],['Trey Benson',6.2],['Austin Ekeler',1.7]],
+      wr: [['Rashee Rice',55,'starter'],['Josh Downs',9.1,'starter'],['Michael Pittman',6.7],['Jauan Jennings',6,'starter'],['Keon Coleman',2.8]],
+      te: [['T.J. Hockenson',19.4,'starter'],['David Njoku',10.7]],
+      blurb: 'Fifth and fifth the last two years. Josh Allen is an MVP, your RB room is a Ferrari and your WRs are barely road legal. Without a true WR1 you’re stuck in the frisky middle.'
+    },
+    {
+      rank: 6,
+      name: 'Kittler on the Roof',
+      owner: 'bchodos',
+      initials: 'KR',
+      tier: 'Contender',
+      roast: 'Your floor is nice but your ceiling might be drywall.',
+      overallValue: 354,
+      starterValue: 924,
+      avgAge: 25.6,
+      needs: [],
+      ranks: { qb: 3, rb: 7, wr: 6, te: 4, draft: 6, starter: 4 },
+      draftValue: 40,
+      draftPicks: ['2026 1st (18.5)','2026 2nd (3)','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Joe Burrow',27.3,'starter'],['Baker Mayfield',7.2],['Bryce Young',0.3]],
+      rb: [['Jonathan Taylor',67.7,'starter'],['Tony Pollard',14.2,'starter'],['RJ Harvey',13.5,'starter'],['Najee Harris',8.2],['Dameon Pierce',0]],
+      wr: [['Puka Nacua',71.3,'starter'],['Garrett Wilson',45.8,'starter'],['Chris Godwin',17.1],['Calvin Ridley',5],['Christian Watson',0.9]],
+      te: [['George Kittle',30.2,'starter'],['Tucker Kraft',2.8],['Luke Musgrave',0]],
+      blurb: 'Back‑to‑back finals appearances capped with a 2024 title. The core is aging and thin behind the starters, so the models drop you to sixth. Your consistency will keep you in the hunt.'
+    },
+    {
+      rank: 7,
+      name: 'Chudders Football Team',
+      owner: 'Chudders',
+      initials: 'CF',
+      tier: 'Trust the Process',
+      roast: 'Two firsts in two years and Gibbs. You’re that guy bench‑pressing next to the trophy case.',
+      overallValue: 316,
+      starterValue: 772,
+      avgAge: 24.3,
+      needs: ['WR','QB'],
+      ranks: { qb: 8, rb: 3, wr: 12, te: 6, draft: 1, starter: 12 },
+      draftValue: 74,
+      draftPicks: ['2026 1st (18.5) x2','2026 2nd (3)','2026 3rd (0.1) x2','2027 1st (15.7) x2','2027 2nd (2.5)'],
+      qb: [['Justin Herbert',13.9,'starter'],['Kirk Cousins',0],['Tyler Shough',0],['Kenny Pickett',0]],
+      rb: [['Jahmyr Gibbs',90.1,'starter'],['Ashton Jeanty',79.1,'starter'],['Bhayshul Tuten',6.9,'starter']],
+      wr: [['Emeka Egbuka',22.7,'starter'],['Jaylin Noel',4.3],['Adonai Mitchell',1.2],['Pat Bryant',1.1,'starter'],['DeMario Douglas',0.4,'starter']],
+      te: [['Colston Loveland',20.5,'starter'],['Theo Johnson',0.1],['Juwan Johnson',0]],
+      blurb: 'You’ve been stuck around eighth, but your draft capital is unmatched. Build around Gibbs and Herbert, and next year’s ranking could look very different.'
+    },
+    {
+      rank: 8,
+      name: 'Burden of Etienne‑y Woody',
+      owner: 'kharlo w',
+      initials: 'BE',
+      tier: 'Fraud',
+      roast: 'Justin Jefferson can only carry you so far.',
+      overallValue: 285,
+      starterValue: 855,
+      avgAge: 25.4,
+      needs: ['QB','RB','TE'],
+      ranks: { qb: 12, rb: 10, wr: 5, te: 11, draft: 2, starter: 11 },
+      draftValue: 61,
+      draftPicks: ['2026 1st (18.5) x2','2026 2nd (3) x2','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Kyler Murray',4.2,'starter'],['Tua Tagovailoa',1.3],['Will Howard',0]],
+      rb: [['Isiah Pacheco',21.6,'starter'],['James Conner',16.2,'starter'],['Jordan Mason',11.9,'starter'],['Rhamondre Stevenson',11]],
+      wr: [['Justin Jefferson',94.9,'starter'],['Brandon Aiyuk',24.6],['George Pickens',15.8,'starter'],['Luther Burden',10.1,'starter']],
+      te: [['Mark Andrews',3.9,'starter'],['Dalton Kincaid',3],['Mike Gesicki',0.1]],
+      blurb: 'Solidly in the middle of the pack the last two years. Jefferson and Aiyuk offer hope, but quarterback and running‑back roulette drag you down. Use those extra firsts to find a real QB.'
+    },
+    {
+      rank: 9,
+      name: 'The Legion of Bouz',
+      owner: 'KidBouzie',
+      initials: 'LB',
+      tier: 'Frisky',
+      roast: 'Mahomes and ARSB deserve a tight end with a pulse.',
+      overallValue: 291,
+      starterValue: 892,
+      avgAge: 25.5,
+      needs: ['TE','Picks','RB'],
+      ranks: { qb: 6, rb: 8, wr: 4, te: 12, draft: 11, starter: 7 },
+      draftValue: 21,
+      draftPicks: ['2026 2nd (3)','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Patrick Mahomes',17.5,'starter'],['Dak Prescott',1.1],['Cameron Ward',1.5]],
+      rb: [['Christian McCaffrey',34.4,'starter'],['Joe Mixon',28],['Tyrone Tracy',21,'starter'],['Aaron Jones',11.6,'starter']],
+      wr: [['Amon‑Ra St. Brown',81.2,'starter'],['DeVonta Smith',29.5,'starter'],['Jaylen Waddle',28.7,'starter'],['Hollywood Brown',5.4],['Jakobi Meyers',4.5]],
+      te: [['Hunter Henry',0.2,'starter'],['Ben Sinnott',0],['Tommy Tremble',0]],
+      blurb: 'You took home the 2022 trophy but have slid since. Mahomes and your WR trio still scare everyone, but your RBs and TEs are aging fast. A rebuild may be closer than you think.'
+    },
+    {
+      rank: 10,
+      name: 'Father Time',
+      owner: 'Redrumsregrub',
+      initials: 'FT',
+      tier: 'Frisky',
+      roast: 'Your WRs are wagyu beef; your RBs are ramen noodles.',
+      overallValue: 288,
+      starterValue: 890,
+      avgAge: 25.2,
+      needs: ['QB','RB','TE'],
+      ranks: { qb: 10, rb: 12, wr: 3, te: 9, draft: 8, starter: 8 },
+      draftValue: 37,
+      draftPicks: ['2026 1st (18.5)','2026 3rd (0.1) x2','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Bo Nix',7.1,'starter'],['Jared Goff',1.6],['Brock Purdy',0.7]],
+      rb: [['Jaylen Warren',12.2,'starter'],['Isaac Guerendo',8.9,'starter'],['Braelon Allen',2]],
+      wr: [['Brian Thomas',75.1,'starter'],['Ladd McConkey',61,'starter'],['Tetairoa McMillan',36.3,'starter'],['Rome Odunze',18.9],['Davante Adams',8.5,'starter'],['Jerry Jeudy',7.8]],
+      te: [['Evan Engram',6.4,'starter'],['Pat Freiermuth',1.4],['Michael Mayer',0]],
+      blurb: 'Semi‑finalist in 2024 but sliding in 2025. Your veteran WR room props up the value, but the backfield and tight ends put a hard cap on your upside.'
+    },
+    {
+      rank: 11,
+      name: 'Sleeping Giants',
+      owner: 'zbcowan',
+      initials: 'SG',
+      tier: 'Frisky',
+      roast: 'Your WRs peaked when Fortnite did.',
+      overallValue: 280,
+      starterValue: 897,
+      avgAge: 26.8,
+      needs: ['WR','TE'],
+      ranks: { qb: 5, rb: 5, wr: 10, te: 8, draft: 7, starter: 6 },
+      draftValue: 37,
+      draftPicks: ['2026 1st (18.5)','2026 3rd (0.1)','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Jalen Hurts',31.9,'starter'],['Sam Darnold',0.2],['Jalen Milroe',0]],
+      rb: [['Kyren Williams',50.9,'starter'],['Josh Jacobs',44.7,'starter'],['Derrick Henry',41.3,'starter'],['Jonathon Brooks',2.5],['Devin Neal',2.1]],
+      wr: [['Jordan Addison',16.6,'starter'],['Khalil Shakir',15.4,'starter'],['Mike Evans',10.4,'starter'],['Christian Kirk',5.7],['Stefon Diggs',3.5],['Cooper Kupp',2.2],['Keenan Allen',1.5],['Amari Cooper',1]],
+      te: [['Jonnu Smith',5.3,'starter'],['Dallas Goedert',1.9],['Brenton Strange',1.4]],
+      blurb: 'You rode Hurts and a deep backfield to the 2024 final but fell short. Time is catching up to your receivers. Sell a vet and pivot before the window slams shut.'
+    },
+    {
+      rank: 12,
+      name: 'The Boonist Monks',
+      owner: 'GauchoTrain',
+      initials: 'BM',
+      tier: 'Frisky',
+      roast: 'Your team could win it all or retire it all.',
+      overallValue: 290,
+      starterValue: 935,
+      avgAge: 27.2,
+      needs: ['Picks','RB'],
+      ranks: { qb: 4, rb: 9, wr: 7, te: 7, draft: 10, starter: 3 },
+      draftValue: 21,
+      draftPicks: ['2026 2nd via Redrumsregrub (3)','2027 1st (15.7)','2027 2nd (2.5)'],
+      qb: [['Lamar Jackson',33.6,'starter'],['Joe Milton',0],['Russell Wilson',0]],
+      rb: [['James Cook',53.6,'starter'],['David Montgomery',18.5,'starter'],['Alvin Kamara',14.6,'starter'],['Ray Davis',3.7],['Antonio Gibson',0.8],['Nick Chubb',0.1]],
+      wr: [['Jaxon Smith‑Njigba',57.9,'starter'],['Tyreek Hill',23.9,'starter'],['Terry McLaurin',23.3,'starter'],['Zay Flowers',19.9],['Rashid Shaheed',4.9]],
+      te: [['Travis Kelce',9.6,'starter'],['Jake Ferguson',3.3],['Luke Schoonmaker',0]],
+      blurb: 'Third place in 2023, eighth in 2024 and now you sit at the bottom. Lamar, Tyreek and Kelce can still win you weeks, but your running backs are getting old and there’s no draft capital to replenish them.'
+    }
+  ],
+  awards: [
+    { tag:'💥', title:'Boom potential', text:'Rasheeing the Scene. A couple of 180‑point weeks are coming and you won’t even see them on your schedule.' },
+    { tag:'📦', title:'Best draft stash', text:'Chudders Football Team. You control the 2026 and 2027 drafts. Use that leverage wisely.' },
+    { tag:'🔒', title:'Safest floor', text:'Kittler on the Roof. You rarely drop below 120 but you also rarely explode.' },
+    { tag:'🩻', title:'Medical red flag', text:'The Boonist Monks. One more knee and this goes from contender to hospice.' },
+    { tag:'🚀', title:'Fastest riser', text:'Ghastly Grayskull Gang. From the consolation bracket to the top four in two years.' }
+  ]
+};
+
+// Additional projections and essays for each team. These are kept separate from the core
+// league data so we don’t have to modify the imported roster values. Each entry
+// provides a projected weekly point total, a schedule difficulty (average rank of
+// opponents) and a long‑form preseason preview. These numbers were
+// approximated from starter values and historical context.
+const extras = {
+  'General Ken‑obi': {
+    weeklyPoints: 48.9,
+    scheduleRank: 7.0,
+    essay: `You have been the gold standard since this league’s inception. Last year’s semi‑final exit was a disappointment only by your own sky‑high standards. The 2025 roster reads like the All‑Pro team: Maye and Richardson headline a four‑deep quarterback room, Barkley and Walker are both in their primes behind improved offensive lines, and Lamb, Collins and London all ranked inside ESPN’s top ten receivers【571361653410684†L161-L168】. The only real question is how you keep everyone happy. Your schedule is average and projections peg you around 48.9 points per week, but with this talent your ceiling is limitless. Add in a trash talk highlight reel—from telling MHJTIME to trade Addison to bragging about your taxi squad in chat—you’re the villain everyone loves to hate.`
+  },
+  'Noble FFT': {
+    weeklyPoints: 45.2,
+    scheduleRank: 6.91,
+    essay: `After a forgettable 2024 consolation win, you enter 2025 with the league’s scariest RB tandem. Bijan Robinson and Breece Hall both rank among the top fantasy backs【571361653410684†L161-L168】. Caleb Williams begins his career in Chicago with a new offensive coordinator, and Jordan Love is a sneaky insurance policy. Your weekly projection is around 45 points, buoyed by that backfield and A.J. Brown, yet the lack of an elite tight end keeps you in the frisky tier. Historically you’ve drafted like a GM building a franchise—making big bets on young cores. The schedule is slightly tougher than average, but if you find a tight end and get a Higgins contract extension, there’s championship equity here.`
+  },
+  'MHJTIME': {
+    weeklyPoints: 47.2,
+    scheduleRank: 6.82,
+    essay: `No team has reinvented itself like MHJTIME. You went from toilet‑bowl runner‑up in 2023 to a semifinalist last year and now sit third in our preseason ranks. Ja’Marr Chase, Malik Nabers and Marvin Harrison Jr. form a WR trio so outrageous ESPN placed all three within the top nine overall【571361653410684†L161-L168】. Trey McBride blossomed into a top‑five tight end. Jayden Daniels is raw but offers video‑game rushing upside. The bad news: your RB room is duct tape—Chuba Hubbard and Brian Robinson might get you twelve points combined. Your schedule is slightly above average and weekly projections sit around 47 points. Hit on one rookie RB or swing a trade and this could be a title team; miss and it’s another “what if.”`
+  },
+  'Ghastly Grayskull Gang': {
+    weeklyPoints: 44.3,
+    scheduleRank: 6.55,
+    essay: `It takes patience to turn draft picks into production, and you’ve executed the blueprint. After a tenth‑place starter ranking, you used your capital to load up on explosive young running backs and paired them with C.J. Stroud and Brock Bowers—both top‑five dynasty assets by consensus. The wide receiver room remains thin; Xavier Worthy’s 4.21 speed will blow up highlight reels, but Metcalf and Samuel are better sidekicks than heroes. Your schedule is modest and your weekly projection hinges on whether Henderson or Hampton hits. The chat loves to remind you that picks don’t score points; 2025 is your chance to prove them wrong.`
+  },
+  'Rasheeing the Scene': {
+    weeklyPoints: 44.5,
+    scheduleRank: 6.73,
+    essay: `You’ve become the league’s roller coaster: highest weekly scores, maddening losses. Josh Allen is the QB1 on most boards and your committee of rookies—Achane, Irving, Judkins—oozes upside. But Rashee Rice’s looming suspension and a lack of alpha receivers leave you praying for touchdown variance. Your weekly projection around 44 points reflects that imbalance; the schedule doesn’t help. In 2024 you finished fifth despite a top‑two scoring finish. The message from your rivals in the chat is clear: stop punting on wide receiver. If you can flip a pick for a reliable WR1, you could go from meme to menace.`
+  },
+  'Kittler on the Roof': {
+    weeklyPoints: 46.2,
+    scheduleRank: 6.64,
+    essay: `Last year’s champion returns most of the core, but regression is a fickle thing. Joe Burrow, Jonathan Taylor and Puka Nacua all battled injuries in 2024. Should they all rebound, the starting lineup remains as steady as any. Your weekly projection around 46 points is tied for third‑highest, but depth remains an issue—one injury and you’re starting Bryce Young. The schedule is slightly tougher than average. Historically you’ve thrived on consistency: 2022 finalist, 2023 runner‑up, 2024 champion. The question is whether the magic continues or whether Father Time sneaks in. Either way, expect plenty of sarcastic chat messages about “trusting the process” whenever Pollard has a three‑yard carry.`
+  },
+  'Chudders Football Team': {
+    weeklyPoints: 38.6,
+    scheduleRank: 6.46,
+    essay: `The rebuild is in full swing. Jahmyr Gibbs and Ashton Jeanty give you perhaps the best young RB duo in the league, and Justin Herbert remains criminally underrated in dynasty circles. Unfortunately your WR room is a wasteland and your backup QBs read like a waiver wire. With a league‑high haul of first‑round picks, you’re playing for 2026. Your weekly projection around 39 points and a middling schedule suggest a long season, but with two seasons of drafts in the chamber, you can afford to take lumps. The chat jokes about you icing trade offers; you might freeze them out until the picks mature.`
+  },
+  'Burden of Etienne‑y Woody': {
+    weeklyPoints: 42.8,
+    scheduleRank: 6.09,
+    essay: `You’re a cautionary tale of stars without support. Justin Jefferson remains a top‑three overall asset【571361653410684†L161-L168】, and Mark Andrews plus Dalton Kincaid gives you the best tight‑end room in the league. Yet Kyler Murray’s health is still a question, your running backs are a triage unit, and your depth behind Jefferson is suspect. Weekly projection sits around 43 points, and your schedule is friendly, but you’ve finished eighth and eleventh the past two years. Rumours in the chat suggest you’ll trade Jefferson for a king’s ransom to jumpstart the rebuild. Do it, and 2025 will be remembered as the year the retool began. Don’t, and you risk being stuck in purgatory again.`
+  },
+  'The Legion of Bouz': {
+    weeklyPoints: 44.6,
+    scheduleRank: 6.36,
+    essay: `After winning the inaugural title in 2022, you’ve been stuck in the middle. Patrick Mahomes and Amon‑Ra St. Brown anchor an electric passing attack; Christian McCaffrey and Jaylen Waddle are still top‑30 assets【571361653410684†L161-L168】. But Joe Mixon and Aaron Jones are at the cliff, your tight‑end room is a zero, and your draft capital is thin. Projected weekly points sit around 45 and your schedule ranks just above average. You’ve thrived on big swings—remember trading for Mahomes in 2023? To make another run, you’ll need to package one of your WRs or RBs for an elite TE. Until then, expect more jokes about your “Voltron receivers” in the chat and another 7–6 season.`
+  },
+  'Father Time': {
+    weeklyPoints: 44.5,
+    scheduleRank: 6.27,
+    essay: `Appropriately named, your roster reads like a “Who’s Who” of breakout rookies and aging vets. Brian Thomas Jr. and Ladd McConkey give you two top‑20 WRs from the 2024 class, but your running backs are all committee pieces. Bo Nix has intriguing mobility but profiles as a mid‑QB2. Your weekly projection around 45 points and schedule of 6.27 scream mediocrity. Your best hope is that Rome Odunze becomes a WR1 quickly and one of Warren or Guerendo seizes a backfield. Otherwise you’re a classic spoiler who knocks contenders out of the playoffs but never raises the trophy. The chat will love your random 180‑point weeks and ignore the rest.`
+  },
+  'Sleeping Giants': {
+    weeklyPoints: 44.9,
+    scheduleRank: 6.0,
+    essay: `The name says it all: a roster of aging stars that could awaken for one more run. Derrick Henry and Josh Jacobs remain workhorses, but both have more than 1,500 career carries. Jalen Hurts is a cheat code, and Jordan Addison appears ready to become a true WR1. Still, your weekly projection around 45 points and league‑easiest schedule indicate you’re fighting uphill. You’ve made a championship and a semifinal in the past three years; if the veterans hold up, you could sneak into the playoffs again. If not, trade those names and embrace the rebuild—before the chat starts calling you the “Island of Misfit WR1s” again.`
+  },
+  'The Boonist Monks': {
+    weeklyPoints: 46.8,
+    scheduleRank: 6.18,
+    essay: `The 2022 champions looked mortal in 2024, falling in the quarterfinals. Lamar Jackson, Tyreek Hill and Travis Kelce are still video‑game characters, but all three are approaching age cliffs. James Cook and David Montgomery provide steady RB production, and rookie Zay Flowers could ascend. Projected weekly points around 47 put you in contention, and your schedule is favourable, but your lack of picks makes retooling tricky. In the group chat you’re often the instigator of side bets and polls; 2025 might be the season when you bet big on one last run before selling the farm.`
+  }
+};
+
+// Helpers and rendering functions (same as previous version)
+function idFromName(name){ return name.replace(/\s+/g,'-').toLowerCase(); }
+function sum(arr){ return arr.reduce((acc,[,val]) => acc + (Number(val)||0), 0); }
+function rankToPct(rank){ const max=league.teams.length; return (1 - (rank-1)/(max-1)) * 100; }
+function badgeTier(t){ if(t==='Contender') return 'good'; if(t==='Fraud') return 'bad'; if(t==='Trust the Process') return 'warn'; return ''; }
+function gradientFor(initials){ const seed=initials.charCodeAt(0)+initials.charCodeAt(1); const h1=seed%360; const h2=(h1+60)%360; return `linear-gradient(135deg, hsl(${h1},80%,55%), hsl(${h2},80%,55%))`; }
+
+// Render navigation, cards, table and awards
+const toc = document.getElementById('toc');
+const teamsDiv = document.getElementById('teams');
+const awardsDiv = document.getElementById('awardsList');
+const table = document.getElementById('masterTable');
+
+league.teams.sort((a,b) => a.rank - b.rank);
+league.teams.forEach(team => {
+  // nav link
+  const link = document.createElement('a');
+  link.href = `#${idFromName(team.name)}`;
+  link.textContent = `#${team.rank} ${team.name}`;
+  toc.appendChild(link);
+  // card
+  const card = document.createElement('article');
+  card.className = 'card fade-up';
+  card.id = idFromName(team.name);
+  const tier = badgeTier(team.tier);
+  const pct = rankToPct(team.rank).toFixed(1);
+  card.innerHTML = `
+    <div class="rank-pill">#${team.rank}</div>
+    <div class="team-header">
+      <div style="display:flex;gap:.8rem;align-items:center">
+        <div class="avatar" style="background:${gradientFor(team.initials)}">${team.initials}</div>
+        <div>
+          <h3 style="margin:0">${team.name}</h3>
+          <div style="color:var(--muted);font-size:.88rem">@${team.owner}</div>
+        </div>
+      </div>
+      <span class="badge ${tier}">${team.tier}</span>
+    </div>
+    <div class="team-meta">
+      <span class="badge">Overall value ${team.overallValue}</span>
+      <span class="badge">Starter value ${team.starterValue}</span>
+      <span class="badge">Avg age ${team.avgAge}</span>
+      ${team.needs && team.needs.length ? `<span class="badge warn">Needs: ${team.needs.join(', ')}</span>` : ''}
+    </div>
+    <div class="rank-line"><div class="bar" style="width:0%" data-final="${pct}"></div></div>
+    <p style="margin-top:1rem">${team.blurb}</p>
+    <p class="roast">“${team.roast}”</p>
+    <details>
+      <summary>Ranks, roster and picks</summary>
+      <table class="team-table">
+        <thead><tr><th>Category</th><th>Rank</th><th>Total value</th></tr></thead>
+        <tbody>
+          <tr><td>Starter</td><td>${team.ranks.starter}</td><td>${team.starterValue}</td></tr>
+          <tr><td>QB</td><td>${team.ranks.qb}</td><td>${sum(team.qb)}</td></tr>
+          <tr><td>RB</td><td>${team.ranks.rb}</td><td>${sum(team.rb)}</td></tr>
+          <tr><td>WR</td><td>${team.ranks.wr}</td><td>${sum(team.wr)}</td></tr>
+          <tr><td>TE</td><td>${team.ranks.te}</td><td>${sum(team.te)}</td></tr>
+          <tr><td>Draft</td><td>${team.ranks.draft}</td><td>${team.draftValue}</td></tr>
+        </tbody>
+      </table>
+      ${['qb','rb','wr','te'].map(pos => {
+        const pretty = pos.toUpperCase();
+        return `<h4 style="margin-top:1.2rem">${pretty}</h4><ul class="players">${team[pos].map(([n,v,tag]) => `<li>${tag === 'starter' ? '⭐ ' : ''}${n} <span class="val">(${v})</span></li>`).join('')}</ul>`;
+      }).join('')}
+      <h4 style="margin-top:1rem">Draft capital</h4>
+      <ul class="players">${team.draftPicks.map(p => `<li>${p}</li>`).join('')}</ul>
+    </details>
+  `;
+  teamsDiv.appendChild(card);
+});
+
+// Awards
+league.awards.forEach(a => {
+  const div = document.createElement('div');
+  div.className = 'award';
+  div.innerHTML = `<div class="tag">${a.tag}</div><div><h3 style="margin:0 0 .25rem">${a.title}</h3><p style="margin:0;color:var(--muted)">${a.text}</p></div>`;
+  awardsDiv.appendChild(div);
+});
+
+// Build sortable table
+function buildTable(){
+  const cols = [
+    { key:'rank', label:'#', numeric:true },
+    { key:'name', label:'Team' },
+    { key:'owner', label:'Owner' },
+    { key:'tier', label:'Tier' },
+    { key:'overallValue', label:'Ov Val', numeric:true },
+    { key:'starterValue', label:'St Val', numeric:true },
+    { key:'avgAge', label:'Age', numeric:true },
+    { key:'qb', label:'QB', numeric:true, path:'ranks.qb' },
+    { key:'rb', label:'RB', numeric:true, path:'ranks.rb' },
+    { key:'wr', label:'WR', numeric:true, path:'ranks.wr' },
+    { key:'te', label:'TE', numeric:true, path:'ranks.te' },
+    { key:'draft', label:'Draft', numeric:true, path:'ranks.draft' }
+  ];
+  let html='<thead><tr>' + cols.map(c => `<th data-key="${c.key}" data-path="${c.path||''}" data-num="${c.numeric?1:0}">${c.label}</th>`).join('') + '</tr></thead><tbody>';
+  league.teams.forEach(t => {
+    html += `<tr data-id="${idFromName(t.name)}"><td>${t.rank}</td><td>${t.name}</td><td>${t.owner}</td><td>${t.tier}</td><td>${t.overallValue}</td><td>${t.starterValue}</td><td>${t.avgAge}</td><td>${t.ranks.qb}</td><td>${t.ranks.rb}</td><td>${t.ranks.wr}</td><td>${t.ranks.te}</td><td>${t.ranks.draft}</td></tr>`;
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+  // row click
+  table.querySelectorAll('tbody tr').forEach(tr => tr.addEventListener('click', () => {
+    const id = tr.dataset.id;
+    document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  }));
+  // sorting
+  const headers = table.querySelectorAll('th');
+  let sortState = { key:null, asc:true };
+  headers.forEach(th => th.addEventListener('click', () => {
+    headers.forEach(h => h.classList.remove('sort-asc','sort-desc'));
+    const key = th.getAttribute('data-key');
+    const path = th.getAttribute('data-path');
+    const numeric = th.getAttribute('data-num') === '1';
+    let asc = true;
+    if(sortState.key === key && sortState.asc === true) asc = false;
+    sortState = { key, asc };
+    th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    rows.sort((a,b) => {
+      const ta = league.teams[a.rowIndex];
+      const tb = league.teams[b.rowIndex];
+      const va = path ? path.split('.').reduce((o,k) => o[k], ta) : ta[key];
+      const vb = path ? path.split('.').reduce((o,k) => o[k], tb) : tb[key];
+      if(numeric) return asc ? (va - vb) : (vb - va);
+      return asc ? (''+va).localeCompare(''+vb) : (''+vb).localeCompare(''+va);
+    });
+    const body = table.querySelector('tbody');
+    body.innerHTML='';
+    rows.forEach(r => body.appendChild(r));
+  }));
+}
+buildTable();
+
+// Charts: plain canvas scatter and stacked bar
+function drawScatter(canvas, teams){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const pad = 40;
+  const w = canvas.clientWidth - pad*2;
+  const h = canvas.clientHeight - pad*2;
+  const xs = teams.map(t => t.rank);
+  const ys = teams.map(t => t.overallValue);
+  const xMin = Math.min(...xs) - .5;
+  const xMax = Math.max(...xs) + .5;
+  const yMin = Math.min(...ys) * 0.9;
+  const yMax = Math.max(...ys) * 1.05;
+  const xScale = v => pad + (v - xMin)/(xMax - xMin) * w;
+  const yScale = v => pad + h - (v - yMin)/(yMax - yMin) * h;
+  ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '12px system-ui';
+  for(let r=Math.ceil(xMin); r<=Math.floor(xMax); r++){
+    const x = xScale(r);
+    ctx.beginPath(); ctx.moveTo(x,pad); ctx.lineTo(x,pad+h); ctx.stroke();
+    ctx.fillText(r.toString(), x-3, pad+h+14);
+  }
+  const ySteps = 5;
+  for(let i=0;i<=ySteps;i++){
+    const v = yMin + i*(yMax-yMin)/ySteps;
+    const y = yScale(v);
+    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+w,y); ctx.stroke();
+    ctx.fillText(Math.round(v), 5, y+4);
+  }
+  teams.forEach(t => {
+    const x = xScale(t.rank);
+    const y = yScale(t.overallValue);
+    ctx.beginPath();
+    ctx.arc(x,y,4.5,0,Math.PI*2);
+    ctx.fillStyle = t.rank === 1 ? '#6c47ff' : 'rgba(255,255,255,0.7)';
+    ctx.fill();
+  });
+}
+function drawStacked(canvas, teams){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const pad = 40;
+  const w = canvas.clientWidth - pad*2;
+  const h = canvas.clientHeight - pad*2;
+  ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
+  const parts = ['qb','rb','wr','te'];
+  const colors = ['#6c47ff','#ff4d8d','#00d084','#ffaa00'];
+  const data = parts.map(p => teams.map(t => sum(t[p])));
+  const totals = teams.map((_,i) => parts.reduce((a,p,pi) => a + data[pi][i], 0));
+  const yMax = Math.max(...totals)*1.1;
+  const xScale = i => pad + i * (w/teams.length) + 10;
+  const barW = Math.max(10,(w/teams.length)-20);
+  const yScale = v => pad + h - (v/yMax) * h;
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '12px system-ui';
+  for(let i=0;i<=5;i++){
+    const v = i*yMax/5;
+    const y = yScale(v);
+    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+w,y); ctx.stroke();
+    ctx.fillText(Math.round(v), 5, y+4);
+  }
+  teams.forEach((t,idx) => {
+    let base = 0;
+    parts.forEach((p,pi) => {
+      const val = data[pi][idx];
+      const x = xScale(idx);
+      const y1 = yScale(base);
+      const y2 = yScale(base+val);
+      ctx.fillStyle = colors[pi];
+      ctx.fillRect(x,y2,barW,y1-y2);
+      base += val;
+    });
+    ctx.save();
+    ctx.translate(xScale(idx)+barW/2,pad+h+12);
+    ctx.rotate(-Math.PI/6);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.textAlign = 'left';
+    ctx.fillText(`#${t.rank}`, 0, 0);
+    ctx.restore();
+  });
+}
+
+// Draw scatter of projected points vs schedule difficulty
+function drawPtsSched(canvas, infoMap){
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = devicePixelRatio;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr,dpr);
+  const pad = 40;
+  const plotW = w - pad*2;
+  const plotH = h - pad*2;
+  // assemble points from extras
+  const points = league.teams.map(t => {
+    const info = infoMap[t.name] || {};
+    return { x: info.scheduleRank || 0, y: info.weeklyPoints || 0, tier: t.tier, name: t.name };
+  });
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+  const xMin = Math.min(...xs) - 0.1;
+  const xMax = Math.max(...xs) + 0.1;
+  const yMin = Math.min(...ys) * 0.95;
+  const yMax = Math.max(...ys) * 1.05;
+  const xScale = v => pad + (v - xMin)/(xMax - xMin) * plotW;
+  const yScale = v => pad + plotH - (v - yMin)/(yMax - yMin) * plotH;
+  // clear
+  ctx.clearRect(0,0,w,h);
+  // axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '12px system-ui';
+  const xSteps=5,ySteps=5;
+  for(let i=0;i<=xSteps;i++){
+    const v = xMin + (i/xSteps) * (xMax - xMin);
+    const x = xScale(v);
+    ctx.beginPath(); ctx.moveTo(x,pad); ctx.lineTo(x,pad+plotH); ctx.stroke();
+    ctx.fillText(v.toFixed(2), x-12, pad+plotH+14);
+  }
+  for(let j=0;j<=ySteps;j++){
+    const v = yMin + (j/ySteps) * (yMax - yMin);
+    const y = yScale(v);
+    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+plotW,y); ctx.stroke();
+    ctx.fillText(v.toFixed(1), 5, y+4);
+  }
+  // point colors by tier
+  const tierColor = tier => {
+    if(tier === 'Contender') return '#00d084';
+    if(tier === 'Frisky') return '#6c47ff';
+    if(tier === 'Trust the Process') return '#ffb703';
+    return '#ff4d8d';
+  };
+  points.forEach(p => {
+    const x = xScale(p.x);
+    const y = yScale(p.y);
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fillStyle = tierColor(p.tier); ctx.fill();
+    // label
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '10px system-ui';
+    ctx.fillText(p.name.split(' ')[0], x+6, y-6);
+  });
+}
+
+// Draw titles bar chart
+function drawTitles(canvas){
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = devicePixelRatio;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr,dpr);
+  const pad=40;
+  const plotW = w - pad*2;
+  const plotH = h - pad*2;
+  const titles = {
+    'General Ken‑obi':1,
+    'Kittler on the Roof':1,
+    'The Legion of Bouz':1
+  };
+  const labels = league.teams.map(t => t.name);
+  const values = labels.map(name => titles[name] || 0);
+  const maxVal = Math.max(...values) || 1;
+  const barW = plotW / values.length * 0.7;
+  // axes
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '12px system-ui';
+  const ySteps = 3;
+  for(let i=0;i<=ySteps;i++){
+    const v = i;
+    const y = pad + plotH - (v/maxVal) * plotH;
+    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+plotW,y); ctx.stroke();
+    ctx.fillText(v.toString(), 5, y+4);
+  }
+  // bars
+  labels.forEach((name, idx) => {
+    const val = values[idx];
+    const x = pad + idx * (plotW / values.length) + (plotW/values.length - barW)/2;
+    const y = pad + plotH - (val/maxVal) * plotH;
+    ctx.fillStyle = val > 0 ? '#ff4d8d' : '#444';
+    ctx.fillRect(x, y, barW, (val/maxVal) * plotH);
+    // label
+    ctx.save();
+    ctx.translate(x + barW/2, pad+plotH+12);
+    ctx.rotate(-Math.PI/6);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '10px system-ui';
+    ctx.fillText(name.split(' ')[0], 0, 0);
+    ctx.restore();
+  });
+}
+function buildCharts(){
+  drawScatter(document.getElementById('rankValueChart'), league.teams);
+  drawStacked(document.getElementById('stackedPosChart'), league.teams);
+  // extra charts: points vs schedule and titles
+  drawPtsSched(document.getElementById('ptsSchedChart'), extras);
+  drawTitles(document.getElementById('titlesChart'));
+}
+window.addEventListener('resize', buildCharts);
+buildCharts();
+
+// Theme toggle
+document.getElementById('toggleDark').addEventListener('click', () => document.documentElement.classList.toggle('light'));
+
+// Scroll animations
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      const bar = e.target.querySelector('.bar');
+      if(bar) requestAnimationFrame(() => bar.style.width = bar.dataset.final + '%');
+    }
+  });
+},{threshold:.15});
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+document.querySelectorAll('#teams .card').forEach(el => observer.observe(el));
+
+// Nav active highlight
+const navLinks = Array.from(document.querySelectorAll('#toc a'));
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting && e.target.id){
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+},{rootMargin:'-40% 0px -50% 0px', threshold:[0,1]});
+document.querySelectorAll('#teams .card').forEach(el => spy.observe(el));
+
+// Parallax effect
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  document.querySelectorAll('.parallax').forEach(el => el.style.setProperty('--scrollY', y));
+});
+
+// After cards are rendered, enhance them with projections and previews
+league.teams.forEach(team => {
+  const id = idFromName(team.name);
+  const card = document.getElementById(id);
+  if(!card) return;
+  const info = extras[team.name] || {};
+  const meta = card.querySelector('.team-meta');
+  if(meta){
+    // append projected points and schedule badges using extras
+    if(info.weeklyPoints){
+      const pts = document.createElement('span');
+      pts.className = 'badge';
+      pts.textContent = `Proj pts ${info.weeklyPoints}`;
+      meta.appendChild(pts);
+    }
+    if(info.scheduleRank){
+      const sch = document.createElement('span');
+      sch.className = 'badge';
+      sch.textContent = `Schedule ${info.scheduleRank}`;
+      meta.appendChild(sch);
+    }
+  }
+  // insert preseason preview details after roast line
+  const roast = card.querySelector('.roast');
+  if(roast && info.essay){
+    const det = document.createElement('details');
+    det.innerHTML = `<summary>Preseason preview</summary><p style="margin:0 0 1rem;line-height:1.5">${info.essay}</p>`;
+    roast.parentNode.insertBefore(det, roast.nextSibling);
+  }
+});
+</script>
+</body>
+</html>
