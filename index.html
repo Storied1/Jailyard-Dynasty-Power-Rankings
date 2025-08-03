@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Jailyard 2025</title>
+
+<!-- Landing page for The Jailyard.  It introduces the league hub and links to the preseason
+     rankings and weekly preview pages.  A parallax hero and vibrant call‑to‑action cards
+     set the tone for the season. -->
+
+<style>
+  :root{
+    --bg: #0e1014;
+    --fg: #e8ecf0;
+    --muted: #8a92a0;
+    --accent: #8b5cf6;
+    --accent2: #ec4899;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color-scheme: dark;
+  }
+  html, body{ margin:0; padding:0; background:var(--bg); color:var(--fg); }
+  *,*::before,*::after{ box-sizing:border-box; }
+  a{ color:inherit; text-decoration:none; }
+  header{
+    position:relative; height:100vh; overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+    background-image:url('assets/bg_hero.png'); background-size:cover; background-position:center;
+  }
+  header::before{ content:''; position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7)); }
+  .hero-content{ position:relative; z-index:1; }
+  .hero-title{ font-size:clamp(2.5rem,6vw,4.5rem); margin:0; font-weight:700; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; color:transparent; }
+  .hero-sub{ margin:1rem 0 3rem; font-size:1.2rem; color:var(--muted); max-width:800px; line-height:1.6; }
+  .cards{ display:flex; flex-wrap:wrap; gap:2rem; justify-content:center; position:relative; z-index:1; }
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:18px; padding:2rem 2rem 2.5rem; width:280px; text-align:center; color:var(--fg); transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .card:hover{ transform:translateY(-6px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+  .card img{ width:64px; height:64px; margin-bottom:1rem; }
+  .card h3{ margin:.5rem 0 1rem; font-size:1.3rem; }
+  .card p{ margin:0 0 1.4rem; font-size:.95rem; color:var(--muted); line-height:1.5; }
+  .card a{ display:inline-block; margin-top:1rem; padding:.6rem 1.4rem; border-radius:999px; background:var(--accent); color:#fff; font-weight:600; transition:background .2s ease; }
+  .card a:hover{ background:var(--accent2); }
+  footer{ padding:2rem 1rem; text-align:center; color:var(--muted); font-size:.85rem; }
+</style>
+</head>
+<body>
+<header>
+  <div class="hero-content">
+    <h1 class="hero-title">Welcome to The Jailyard</h1>
+    <p class="hero-sub">Your 2025 dynasty league HQ.  Dive into the preseason rankings or get the scoop on Week 1 — it’s all here in one place.</p>
+    <div class="cards">
+      <div class="card">
+        <img src="assets/icon_preseason.png" alt="Preseason icon">
+        <h3>Preseason Rankings</h3>
+        <p>Explore the updated power rankings, historical notes and projections for all twelve teams.</p>
+        <a href="preseason.html">View Rankings</a>
+      </div>
+      <div class="card">
+        <img src="assets/icon_week.png" alt="Week preview icon">
+        <h3>Week 1 Preview</h3>
+        <p>Read the opening essay, check the mailbag and see our picks for the first slate of games.</p>
+        <a href="week1.html">Week 1 Column</a>
+      </div>
+    </div>
+  </div>
+</header>
+<footer>
+  © 2025 The Jailyard Dynasty League.  All rights reserved.
+</footer>
+</body>
+</html>
