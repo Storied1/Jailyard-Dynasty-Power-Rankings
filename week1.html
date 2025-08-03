@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Jailyard 2025 Week 1 Preview & Power Rankings</title>
+
+<!--
+  This file builds upon the preseason power rankings site and adds a Week 1 preview in the style of a
+  long‑form weekly column.  It uses modern CSS for parallax backgrounds, morphing shapes, sticky
+  sidebars and subtle animations.  Weekly matchups, predictions and narrative are driven by
+  JavaScript objects at the end of the file.
+-->
+
+<style>
+  :root{
+    --bg: #0e1013;
+    --fg: #e8ecf0;
+    --muted: #8f96a3;
+    --accent: #8b5cf6;
+    --accent-2: #ec4899;
+    --card: rgba(255,255,255,0.04);
+    --glass: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.08);
+    --good: #16a34a;
+    --bad: #dc2626;
+    --warn: #ca8a04;
+    --font-main: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --h1: clamp(2.4rem, 5vw, 4rem);
+    --h2: clamp(1.8rem, 4vw, 3rem);
+    --h3: clamp(1.3rem, 3vw, 2rem);
+    color-scheme: dark;
+  }
+  html, body{
+    scroll-behavior: smooth;
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-main);
+  }
+  *, *::before, *::after{ box-sizing: border-box; }
+  a{ color: var(--accent-2); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+  header.hero{
+    position: relative;
+    min-height: 90vh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  /* Parallax background layers */
+  .hero__layer{
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    background-size: cover;
+    background-position: center;
+  }
+  .layer-stars{ background-image: radial-gradient(circle at 30% 30%, rgba(140,115,255,0.3) 0%, transparent 60%), radial-gradient(circle at 70% 70%, rgba(236,72,153,0.3) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(22,163,74,0.25) 0%, transparent 60%), linear-gradient(#101317, #0e1013); }
+  .layer-grid{ background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 80px 80px; opacity:.5; }
+  .hero__content{ position: relative; z-index: 2; text-align: center; padding: 3rem 1rem; max-width: 900px; }
+  .hero__title{ font-size: var(--h1); line-height: 1.1; margin:0; font-weight: 700; background: linear-gradient(96deg,#fff,#e2d9ff 45%,#fda4af 80%); -webkit-background-clip: text; color: transparent; }
+  .hero__subtitle{ font-size: 1.1rem; color: var(--muted); max-width: 700px; margin: 1rem auto 2rem; line-height: 1.5; }
+  .hero__cta{ display: inline-flex; gap:.6rem; align-items: center; padding: .75rem 1.4rem; background: var(--accent); color:#fff; border-radius:999px; font-weight:600; transition: transform .2s ease; }
+  .hero__cta:hover{ transform: translateY(-3px); }
+  /* Navigation */
+  #nav{ position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); background: rgba(14,16,19,.7); border-bottom:1px solid var(--border); }
+  #nav .inner{ max-width:1200px; margin:0 auto; padding:.7rem 1rem; display:flex; justify-content: space-between; align-items:center; }
+  #nav .brand{ font-weight:700; letter-spacing:.05em; }
+  #nav nav{ display:flex; gap:.8rem; flex-wrap: wrap; }
+  #nav nav a{ padding:.35rem .6rem; border-radius:6px; font-size:.9rem; color: var(--muted); }
+  #nav nav a.active{ background:rgba(255,255,255,0.05); color: var(--fg); }
+  #nav .right{ display:flex; gap:.8rem; align-items:center; }
+  .theme-toggle{ cursor:pointer; padding:.4rem .8rem; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,0.05); font-size:.9rem; }
+  /* Sections */
+  .container{ max-width: 1200px; margin:0 auto; padding:4rem 1rem; position:relative; }
+  .section-title{ font-size: var(--h2); margin-bottom:.7rem; }
+  .section-sub{ color: var(--muted); font-size:1rem; margin-bottom:2.5rem; max-width:700px; line-height:1.6; }
+  .card{ background: var(--card); border:1px solid var(--border); border-radius:16px; padding:1.3rem 1.5rem; margin-bottom:1.2rem; box-shadow:0 6px 18px rgba(0,0,0,.18); transition: transform .2s ease, box-shadow .2s ease; }
+  .card:hover{ transform: translateY(-4px); box-shadow:0 10px 30px rgba(0,0,0,.22); }
+  /* Week preview layout */
+  .week-section{ margin-top:3rem; }
+  .week-header{ font-size:var(--h2); margin-bottom:1rem; }
+  .essay{ font-size:1rem; line-height:1.6; margin-bottom:2rem; }
+  .mailbag-item{ margin-bottom:1.5rem; }
+  .mailbag-item h4{ margin:.2rem 0; font-size:1.1rem; color: var(--accent); }
+  .mailbag-item p{ margin:.4rem 0 0; color: var(--muted); }
+  .picks-table{ width:100%; border-collapse: collapse; margin-top:1.5rem; }
+  .picks-table th, .picks-table td{ padding:.55rem .75rem; border-bottom:1px solid rgba(255,255,255,0.08); font-size:.95rem; }
+  .picks-table th{ text-align:left; color: var(--muted); font-weight:500; background:rgba(255,255,255,0.03); position:sticky; top:0; }
+  .picks-table td:last-child{ font-style:italic; color: var(--muted); }
+  .tag-badge{ display:inline-block; padding:.1rem .45rem; margin-left:.4rem; border-radius:6px; font-size:.8rem; font-weight:500; }
+  .tag-upset{ background:rgba(236,72,153,0.2); color:#ec4899; }
+  .tag-stay{ background:rgba(234,179,8,0.2); color:#eab308; }
+  .tag-teaser{ background:rgba(139,92,246,0.2); color:#8b5cf6; }
+  /* Sticky sidebar for records */
+  .sidebar{ position:sticky; top:5rem; padding:1.5rem; border:1px solid var(--border); border-radius:12px; background:var(--glass); max-width:260px; }
+  .sidebar h4{ margin-top:0; margin-bottom:.6rem; font-size:1.1rem; }
+  .sidebar p{ margin:.3rem 0; font-size:.9rem; color:var(--muted); }
+
+  /* Morphing shape separators */
+  .separator{
+    position: relative;
+    height:120px;
+    overflow:hidden;
+  }
+  .separator svg{
+    position:absolute;
+    width:100%;
+    height:100%;
+    left:0;
+    top:0;
+  }
+
+  /* Footer */
+  footer{ padding:3rem 1rem; text-align:center; color:var(--muted); font-size:.9rem; }
+  
+  @media (max-width:768px){
+    .picks-table th,.picks-table td{ padding:.4rem .5rem; }
+    .sidebar{ position:static; max-width:none; margin-bottom:2rem; }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero__layer layer-stars" data-speed="0.2"></div>
+  <div class="hero__layer layer-grid" data-speed="0.05"></div>
+  <div class="hero__content">
+    <h1 class="hero__title">The Jailyard 2025 Season Hub</h1>
+    <p class="hero__subtitle">Welcome to your one‑stop shop for preseason rankings, weekly previews and game picks. It’s part stats, part fan pain and 100% dedicated to our dynasty league.</p>
+    <a href="#week1" class="hero__cta">Jump to Week 1 ↓</a>
+  </div>
+</header>
+<div id="nav">
+  <div class="inner">
+    <div class="brand">The Jailyard</div>
+    <nav>
+      <a href="#preseason">Preseason Rankings</a>
+      <a href="#week1">Week 1 Preview</a>
+    </nav>
+    <div class="right">
+      <button class="theme-toggle" id="toggleTheme">Toggle Theme</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <!-- Preseason rankings include the power rankings and playoff history from the previous file -->
+  <section class="container" id="preseason">
+    <h2 class="section-title">2025 Preseason Power Rankings</h2>
+    <p class="section-sub">Below you’ll find updated power rankings, historical notes and our projected outlooks. Click any team to expand their roster, values and draft picks. Use the links on the right to jump to this week’s column.</p>
+    <!-- We embed the preseason rankings via an iframe. When deploying, make sure preseason.html is in the root directory. -->
+    <iframe src="preseason.html" style="width:100%; border:0; height:1800px;" title="Preseason rankings"></iframe>
+  </section>
+  
+  <!-- Separator with morphing SVG -->
+  <div class="separator">
+    <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M0,0 V80 Q600,140 1200,80 V0z" fill="var(--bg)"></path>
+    </svg>
+  </div>
+
+  <!-- Week 1 preview section -->
+  <section class="container week-section" id="week1">
+    <h2 class="week-header">Week 1 Preview & Picks</h2>
+    <div class="section-sub">A long‑form essay, reader mailbag, bits and our picks for each matchup. Records start fresh: 0–0 overall, 0–0 underdog locks.</div>
+    <div style="display:flex; flex-wrap:wrap; gap:2rem;">
+      <div style="flex:2 1 650px; min-width:300px;">
+        <article class="card essay" id="week1-essay"></article>
+        <article class="card" id="week1-mailbag"></article>
+        <article class="card" id="week1-bits"></article>
+        <article class="card" id="week1-picks"></article>
+      </div>
+      <div class="sidebar" id="week1-sidebar">
+        <h4>Week 1 Ledger</h4>
+        <p>Overall record: 0–0</p>
+        <p>Underdog Locks: 0–0</p>
+        <p>Stay‑Away: 0–0</p>
+        <p>Teaser of the Week: 0–0</p>
+        <p class="small" style="margin-top:1rem;">Reminder: Our picks are for entertainment. Don’t bet your rent money.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Built with love for The Jailyard. Updated weekly during the season. 2025 edition.
+</footer>
+
+<script>
+// Theme toggle
+document.getElementById('toggleTheme').addEventListener('click', ()=>{
+  document.documentElement.classList.toggle('light');
+});
+
+// Parallax scrolling effect for hero layers
+window.addEventListener('scroll', ()=>{
+  const sc = window.pageYOffset;
+  document.querySelectorAll('.hero__layer').forEach(layer => {
+    const speed = parseFloat(layer.getAttribute('data-speed') || 0);
+    layer.style.transform = `translateY(${sc * speed}px)`;
+  });
+});
+
+// Data for week 1 article and picks
+const week1Essay = `The long offseason is finally over.  Training‑camp hype videos have given way to roster cuts, depth chart debates and half‑cooked preseason takes.  Now the dynasty season begins in earnest.  Our league spent the summer debating whether Barkley’s knee can hold up, what a second‑year leap for Caleb Williams might look like and which team is quietly plotting a rebuild.  This year opens with more questions than answers.  Will General Ken‑obi reclaim his throne after a shocking early exit last fall?  Can Kittler on the Roof defend his title with a roster held together by duct tape and magic?  Will MHJTIME’s arsenal of wide receivers overwhelm opponents, or will his running backs derail another promising run?  In the NFL proper, the biggest storylines include second‑year quarterbacks trying to avoid the sophomore slump, a wave of electric young wideouts and the usual quarterback controversies.  We’ll be watching it all through the lens of The Jailyard.  Buckle up: this column aims to blend hard truths with humour, just like your favourite sports writer did back in the day.`;
+
+const week1Mailbag = [
+  {
+    q: 'Dear Commish: Why do I keep betting on the Falcons?',
+    a: 'Because you’re drawn to chaos like a moth to a flame.  Also because Arthur Smith can’t hurt you anymore.  Just remember: hope is not a strategy.'
+  },
+  {
+    q: 'Hey Expert: Does having four starting quarterbacks count as hoarding?',
+    a: 'Only if you refuse to trade them when your competitors lose theirs.  Otherwise it’s called depth.'
+  },
+  {
+    q: 'Is this the year the Lions finally break out?',
+    a: 'I ask myself this every August and then watch them blow a 14‑point lead in November.  Proceed with caution.'
+  }
+];
+
+const week1Bits = `Great Call of the Week: Watching MHJTIME start three rookie RBs when Jahmyr Gibbs is on bye.\n\nParent Corner: Explaining to your kids that yes, you drafted a player named De’Von and no, he does not play with their classmate Devon.\n\nNobody Believes in Us: Chudders Football Team enters the week projected for the lowest points but might sneak a win thanks to Herbert and Gibbs.`;
+
+// Week 1 matchup predictions
+const week1Matches = [
+  {
+    home: 'General Ken‑obi', away: 'The Boonist Monks', spread: -2.0,
+    pick: 'General Ken‑obi',
+    blurb: 'Two former champions square off.  General’s depth and QB rotation should be enough to outlast Lamar, Tyreek and Kelce.  Our model gives him a narrow edge.',
+  },
+  {
+    home: 'Noble FFT', away: 'Sleeping Giants', spread: -1.0,
+    pick: 'Noble FFT',
+    blurb: 'Bijan and Breece versus Hurts and a group of aging receivers.  This might be close, but we trust the younger legs of Noble FFT in a modest upset.',
+  },
+  {
+    home: 'MHJTIME', away: 'Burden of Etienne‑y Woody', spread: -4.0,
+    pick: 'MHJTIME',
+    blurb: 'The WR arsenal meets a team with one and a half running backs.  Unless Kyler returns to 2021 form, MHJTIME should coast.',
+  },
+  {
+    home: 'Rasheeing the Scene', away: 'Father Time', spread: 0,
+    pick: 'Rasheeing the Scene',
+    blurb: 'Allen plus three rookies against a spoiler team of veterans and rookies.  Expect fireworks but give the edge to the higher ceiling.',
+  },
+  {
+    home: 'Ghastly Grayskull Gang', away: 'Chudders Football Team', spread: -5.0,
+    pick: 'Ghastly Grayskull Gang',
+    blurb: 'Stroud and Bowers versus a rebuild in progress.  Ghastly has the weapons to control this game; it might not be close.',
+  },
+  {
+    home: 'Kittler on the Roof', away: 'The Legion of Bouz', spread: -2.0,
+    pick: 'Kittler on the Roof',
+    blurb: 'The defending champ opens against the original champ.  It’s closer on paper than you’d think, but we lean Kittler due to roster balance.',
+    tag: 'Upset watch'
+  }
+];
+
+// Week 1 categories
+const underdogLock = 'The Legion of Bouz +2';
+const stayAway = 'Noble FFT vs Sleeping Giants';
+const teaser = 'Parlay MHJTIME -4 with Ghastly -5';
+
+function renderWeek1(){
+  // Essay
+  document.getElementById('week1-essay').innerHTML = `<h3>Opening Essay</h3><p>${week1Essay.replace(/\n/g,'<br>')}</p>`;
+  // Mailbag
+  let mbHtml = '<h3>Mailbag & Q&A</h3>';
+  week1Mailbag.forEach(item => {
+    mbHtml += `<div class="mailbag-item"><h4>${item.q}</h4><p>${item.a}</p></div>`;
+  });
+  document.getElementById('week1-mailbag').innerHTML = mbHtml;
+  // Bits
+  document.getElementById('week1-bits').innerHTML = `<h3>Bits & Segments</h3><p>${week1Bits.replace(/\n/g,'<br>')}</p>`;
+  // Picks table
+  let picksHtml = '<h3>Game Picks</h3>';
+  picksHtml += '<table class="picks-table"><thead><tr><th>Matchup</th><th>Spread</th><th>Pick</th><th>Commentary</th></tr></thead><tbody>';
+  week1Matches.forEach(match => {
+    const tag = match.tag || '';
+    let tagHtml = '';
+    if(tag){
+      if(tag.toLowerCase().includes('upset')) tagHtml = '<span class="tag-badge tag-upset">Upset Watch</span>';
+    }
+    picksHtml += `<tr><td><strong>${match.home.toUpperCase()}</strong> (${match.spread}) vs ${match.away}</td><td>${match.spread > 0 ? '+'+match.spread : match.spread}</td><td>${match.pick}${tagHtml}</td><td>${match.blurb}</td></tr>`;
+  });
+  picksHtml += `</tbody></table><p style="margin-top:1rem;"><strong>Underdog Lock:</strong> ${underdogLock} &nbsp; <strong>Stay‑Away:</strong> ${stayAway} &nbsp; <strong>Teaser:</strong> ${teaser}</p>`;
+  document.getElementById('week1-picks').innerHTML = picksHtml;
+}
+
+renderWeek1();
+</script>
+</body>
+</html>
