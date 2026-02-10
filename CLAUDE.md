@@ -10,9 +10,21 @@ A static website for "The Jailyard" — a 12-team fantasy football dynasty leagu
 
 ```
 /
-├── index.html          # Landing page — hero + nav cards linking to subpages
-├── preseason.html      # Main rankings page (~950 lines) — data, charts, team cards
-├── week1.html          # Week 1 preview column — essay, mailbag, game picks
+├── index.html          # Landing page — animated starfield, stat counters, nav cards
+├── preseason.html      # Preseason rankings — data, charts, search, comparison, team cards
+├── week1.html          # Week 1 preview column — essay, mailbag, matchup cards with win-prob bars
+├── season.html         # Season hub — weekly power rankings from Sleeper API (live or cached)
+├── fetch_sleeper.py    # Python script to fetch & cache all Sleeper data to data/
+├── data/               # Cached Sleeper API data (JSON) — created by fetch_sleeper.py
+│   ├── players.json    # Full NFL player database (~5MB, cached daily)
+│   └── 2025/           # Season-specific data
+│       ├── season_combined.json  # Combined data for season.html
+│       ├── league.json
+│       ├── users.json
+│       ├── rosters.json
+│       ├── matchups.json
+│       ├── brackets.json
+│       └── transactions.json
 ├── bg_hero.png         # Hero background image
 ├── icon_preseason.png  # Card icon for preseason link
 ├── icon_week.png       # Card icon for week preview link
@@ -21,8 +33,6 @@ A static website for "The Jailyard" — a 12-team fantasy football dynasty leagu
 ├── dontusedraft3       # Archived/legacy HTML version (do not modify)
 └── README.md           # Brief project description
 ```
-
-**Note:** `index.html` references images via `assets/` path prefix (e.g., `assets/bg_hero.png`) but images are at the root. This is a known path discrepancy — the site may be deployed behind a server that resolves these, or this may need to be fixed.
 
 ## Technology Stack
 

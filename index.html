@@ -209,6 +209,7 @@
 <nav class="topnav" id="topnav">
   <div class="brand">The Jailyard</div>
   <div class="links">
+    <a href="season.html">Season Hub</a>
     <a href="preseason.html">Rankings</a>
     <a href="week1.html">Week 1</a>
   </div>
@@ -223,12 +224,12 @@
     <h1 class="hero-title">Welcome to<br>The Jailyard</h1>
     <p class="hero-sub" id="typed"></p>
     <div class="hero-ctas">
-      <a href="preseason.html" class="btn btn-primary">
-        View Power Rankings
+      <a href="season.html" class="btn btn-primary">
+        2025 Season Hub
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
-      <a href="week1.html" class="btn btn-ghost">
-        Week 1 Preview
+      <a href="preseason.html" class="btn btn-ghost">
+        Preseason Rankings
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
     </div>
@@ -246,7 +247,7 @@
       <div class="stat-label">Teams</div>
     </div>
     <div class="stat-item">
-      <div class="stat-number" data-target="3">0</div>
+      <div class="stat-number" data-target="4">0</div>
       <div class="stat-label">Seasons</div>
     </div>
     <div class="stat-item">
@@ -265,13 +266,24 @@
     <h2>Explore the League</h2>
     <p>Everything you need to know about the 2025 season, all in one place.</p>
   </div>
-  <div class="page-cards">
+  <div class="page-cards" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+    <div class="page-card">
+      <div class="icon-wrap" style="background:rgba(236,72,153,0.1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      </div>
+      <h3>2025 Season Hub</h3>
+      <p>Week-by-week power rankings, matchup results, standings, top performers and trend charts pulled live from Sleeper.</p>
+      <a href="season.html" class="card-link">
+        Explore Season
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
     <div class="page-card">
       <div class="icon-wrap">
         <img src="icon_preseason.png" alt="Rankings">
       </div>
-      <h3>Preseason Power Rankings</h3>
-      <p>Sortable tables, data charts, team rosters and detailed analysis for all twelve franchises. See who's on top and who's rebuilding.</p>
+      <h3>Preseason Rankings</h3>
+      <p>Sortable tables, data charts, team rosters and detailed analysis for all twelve franchises.</p>
       <a href="preseason.html" class="card-link">
         View Rankings
         <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -282,7 +294,7 @@
         <img src="icon_week.png" alt="Week 1">
       </div>
       <h3>Week 1 Preview</h3>
-      <p>Opening essay, reader mailbag, game picks with spreads and our bold upset calls. The dynasty season starts here.</p>
+      <p>Opening essay, reader mailbag, game picks with spreads and our bold upset calls.</p>
       <a href="week1.html" class="card-link">
         Read the Column
         <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
