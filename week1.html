@@ -113,11 +113,66 @@
   }
 
   /* Footer */
-  footer{ padding:3rem 1rem; text-align:center; color:var(--muted); font-size:.9rem; }
-  
+  footer{ padding:3rem 1rem; text-align:center; color:var(--muted); font-size:.9rem; border-top:1px solid var(--border); }
+
+  /* --- Matchup cards (replaces table) --- */
+  .matchup-grid{ display:grid; gap:1rem; margin-top:1.5rem; }
+  .matchup-card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:1.2rem 1.4rem; transition:transform .2s,box-shadow .2s;
+    opacity:0; transform:translateY(15px); transition:all .5s cubic-bezier(.17,.67,.24,1);
+  }
+  .matchup-card.visible{ opacity:1; transform:none; }
+  .matchup-card:hover{ transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.2); }
+  .matchup-header{
+    display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin-bottom:.8rem; flex-wrap:wrap;
+  }
+  .matchup-header .team-name{ font-weight:700; font-size:1rem; flex:1; min-width:100px; }
+  .matchup-header .team-name.home{ text-align:right; }
+  .matchup-header .vs-pill{
+    padding:.15rem .6rem; border-radius:999px; font-size:.75rem; font-weight:700; letter-spacing:.04em;
+    background:rgba(139,92,246,0.12); color:var(--accent); flex-shrink:0;
+  }
+  .win-prob-bar{
+    height:8px; border-radius:999px; overflow:hidden; display:flex; margin-bottom:.6rem;
+    background:rgba(255,255,255,0.06);
+  }
+  .win-prob-bar .home-bar{ background:linear-gradient(90deg,var(--accent),#a78bfa); transition:width 1s cubic-bezier(.2,.8,.2,1); }
+  .win-prob-bar .away-bar{ background:linear-gradient(90deg,var(--accent-2),#f472b6); transition:width 1s cubic-bezier(.2,.8,.2,1); }
+  .prob-labels{
+    display:flex; justify-content:space-between; font-size:.78rem; color:var(--muted); margin-bottom:.6rem;
+  }
+  .matchup-blurb{ font-size:.9rem; color:var(--muted); line-height:1.5; }
+  .matchup-pick{
+    display:inline-flex; align-items:center; gap:.3rem; margin-top:.6rem;
+    font-size:.82rem; font-weight:600; color:var(--good);
+  }
+  .matchup-pick svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+
+  /* --- Scroll animations --- */
+  .fade-in{ opacity:0; transform:translateY(20px); transition:all .6s cubic-bezier(.17,.67,.24,1); }
+  .fade-in.visible{ opacity:1; transform:none; }
+
+  /* --- Special picks strip --- */
+  .special-picks{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-top:2rem;
+  }
+  .special-pick{
+    padding:1rem; border-radius:12px; border:1px solid var(--border); background:var(--card); text-align:center;
+  }
+  .special-pick .sp-label{ font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:.4rem; font-weight:600; }
+  .special-pick .sp-value{ font-weight:700; font-size:.95rem; }
+
+  /* --- Back to top --- */
+  .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(14,16,19,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
+  .back-to-top.show{opacity:1;transform:none;pointer-events:auto;}
+  .back-to-top:hover{background:var(--accent);}
+  .back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
+
   @media (max-width:768px){
     .picks-table th,.picks-table td{ padding:.4rem .5rem; }
     .sidebar{ position:static; max-width:none; margin-bottom:2rem; }
+    .matchup-header .team-name{ font-size:.9rem; }
   }
 </style>
 </head>
@@ -183,6 +238,11 @@
   </section>
 
 </main>
+
+<!-- Back to top -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
 
 <footer>
   Built with love for The Jailyard. Updated weekly during the season. 2025 edition.
@@ -263,33 +323,124 @@ const underdogLock = 'The Legion of Bouz +2';
 const stayAway = 'Noble FFT vs Sleeping Giants';
 const teaser = 'Parlay MHJTIME -4 with Ghastly -5';
 
+// Convert spread to approximate win probability (logistic model)
+function spreadToProb(spread){
+  // positive spread = home favored; returns home win %
+  return 1 / (1 + Math.pow(10, -spread / 7));
+}
+
 function renderWeek1(){
   // Essay
   document.getElementById('week1-essay').innerHTML = `<h3>Opening Essay</h3><p>${week1Essay.replace(/\n/g,'<br>')}</p>`;
+  document.getElementById('week1-essay').classList.add('fade-in');
   // Mailbag
   let mbHtml = '<h3>Mailbag & Q&A</h3>';
   week1Mailbag.forEach(item => {
     mbHtml += `<div class="mailbag-item"><h4>${item.q}</h4><p>${item.a}</p></div>`;
   });
   document.getElementById('week1-mailbag').innerHTML = mbHtml;
+  document.getElementById('week1-mailbag').classList.add('fade-in');
   // Bits
   document.getElementById('week1-bits').innerHTML = `<h3>Bits & Segments</h3><p>${week1Bits.replace(/\n/g,'<br>')}</p>`;
-  // Picks table
-  let picksHtml = '<h3>Game Picks</h3>';
-  picksHtml += '<table class="picks-table"><thead><tr><th>Matchup</th><th>Spread</th><th>Pick</th><th>Commentary</th></tr></thead><tbody>';
+  document.getElementById('week1-bits').classList.add('fade-in');
+
+  // Matchup cards with win probability bars
+  let picksHtml = '<h3>Game Picks</h3><div class="matchup-grid">';
   week1Matches.forEach(match => {
+    const homeProb = spreadToProb(match.spread);
+    const awayProb = 1 - homeProb;
+    const homePct = (homeProb * 100).toFixed(0);
+    const awayPct = (awayProb * 100).toFixed(0);
     const tag = match.tag || '';
     let tagHtml = '';
     if(tag){
-      if(tag.toLowerCase().includes('upset')) tagHtml = '<span class="tag-badge tag-upset">Upset Watch</span>';
+      if(tag.toLowerCase().includes('upset')) tagHtml = ' <span class="tag-badge tag-upset">Upset Watch</span>';
     }
-    picksHtml += `<tr><td><strong>${match.home.toUpperCase()}</strong> (${match.spread}) vs ${match.away}</td><td>${match.spread > 0 ? '+'+match.spread : match.spread}</td><td>${match.pick}${tagHtml}</td><td>${match.blurb}</td></tr>`;
+    picksHtml += `
+      <div class="matchup-card" data-home-pct="${homePct}" data-away-pct="${awayPct}">
+        <div class="matchup-header">
+          <span class="team-name home">${match.home}</span>
+          <span class="vs-pill">${match.spread > 0 ? '+' : ''}${match.spread}</span>
+          <span class="team-name">${match.away}</span>
+        </div>
+        <div class="win-prob-bar">
+          <div class="home-bar" style="width:0%"></div>
+          <div class="away-bar" style="width:0%"></div>
+        </div>
+        <div class="prob-labels">
+          <span>${homePct}%</span>
+          <span>Win probability</span>
+          <span>${awayPct}%</span>
+        </div>
+        <p class="matchup-blurb">${match.blurb}</p>
+        <div class="matchup-pick">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Pick: ${match.pick}${tagHtml}
+        </div>
+      </div>`;
   });
-  picksHtml += `</tbody></table><p style="margin-top:1rem;"><strong>Underdog Lock:</strong> ${underdogLock} &nbsp; <strong>Stay‑Away:</strong> ${stayAway} &nbsp; <strong>Teaser:</strong> ${teaser}</p>`;
+  picksHtml += '</div>';
+
+  // Special picks strip
+  picksHtml += `
+    <div class="special-picks">
+      <div class="special-pick">
+        <div class="sp-label">Underdog Lock</div>
+        <div class="sp-value">${underdogLock}</div>
+      </div>
+      <div class="special-pick">
+        <div class="sp-label" style="color:var(--warn)">Stay Away</div>
+        <div class="sp-value">${stayAway}</div>
+      </div>
+      <div class="special-pick">
+        <div class="sp-label" style="color:var(--accent)">Teaser of the Week</div>
+        <div class="sp-value">${teaser}</div>
+      </div>
+    </div>`;
+
   document.getElementById('week1-picks').innerHTML = picksHtml;
+  document.getElementById('week1-picks').classList.add('fade-in');
 }
 
 renderWeek1();
+
+// --- Scroll animations ---
+const scrollObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      // Animate win probability bars
+      const homeBar = e.target.querySelector('.home-bar');
+      const awayBar = e.target.querySelector('.away-bar');
+      if(homeBar && awayBar){
+        requestAnimationFrame(() => {
+          homeBar.style.width = e.target.dataset.homePct + '%';
+          awayBar.style.width = e.target.dataset.awayPct + '%';
+        });
+      }
+      scrollObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in, .matchup-card').forEach(el => scrollObserver.observe(el));
+
+// --- Active nav link highlighting ---
+const navAnchors = document.querySelectorAll('#nav nav a');
+const navSpy = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting && e.target.id){
+      navAnchors.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+document.querySelectorAll('section[id]').forEach(el => navSpy.observe(el));
+
+// --- Back to top ---
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('show', window.scrollY > 500);
+}, { passive: true });
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 </script>
 </body>
 </html>

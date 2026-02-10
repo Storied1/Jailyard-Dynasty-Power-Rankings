@@ -3,71 +3,423 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Jailyard 2025</title>
+<title>The Jailyard 2025 — Dynasty League HQ</title>
 
-<!-- Landing page for The Jailyard.  It introduces the league hub and links to the preseason
-     rankings and weekly preview pages.  A parallax hero and vibrant call‑to‑action cards
-     set the tone for the season. -->
+<!-- Social / SEO meta -->
+<meta name="description" content="The Jailyard: a 12-team dynasty fantasy football league. Preseason power rankings, weekly columns, game picks and data visualizations for the 2025 season." />
+<meta property="og:title" content="The Jailyard 2025 — Dynasty League HQ" />
+<meta property="og:description" content="Twelve managers enter, one champion leaves. Preseason power rankings, weekly previews and more." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
 
 <style>
   :root{
-    --bg: #0e1014;
+    --bg: #0b0d10;
     --fg: #e8ecf0;
-    --muted: #8a92a0;
+    --muted: #7a8194;
     --accent: #8b5cf6;
     --accent2: #ec4899;
-    --card: rgba(255,255,255,0.04);
-    --border: rgba(255,255,255,0.08);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --card: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.07);
+    --glow-1: rgba(139,92,246,0.15);
+    --glow-2: rgba(236,72,153,0.12);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     color-scheme: dark;
   }
-  html, body{ margin:0; padding:0; background:var(--bg); color:var(--fg); }
-  *,*::before,*::after{ box-sizing:border-box; }
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--bg); color:var(--fg); overflow-x:hidden; }
   a{ color:inherit; text-decoration:none; }
-  header{
-    position:relative; height:100vh; overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
-    background-image:url('assets/bg_hero.png'); background-size:cover; background-position:center;
+
+  /* --- Floating nav --- */
+  .topnav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:.7rem 1.5rem;
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(11,13,16,0.6); backdrop-filter:blur(12px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s, background .3s;
   }
-  header::before{ content:''; position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7)); }
-  .hero-content{ position:relative; z-index:1; }
-  .hero-title{ font-size:clamp(2.5rem,6vw,4.5rem); margin:0; font-weight:700; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; color:transparent; }
-  .hero-sub{ margin:1rem 0 3rem; font-size:1.2rem; color:var(--muted); max-width:800px; line-height:1.6; }
-  .cards{ display:flex; flex-wrap:wrap; gap:2rem; justify-content:center; position:relative; z-index:1; }
-  .card{
-    background:var(--card); border:1px solid var(--border); border-radius:18px; padding:2rem 2rem 2.5rem; width:280px; text-align:center; color:var(--fg); transition:transform .25s ease, box-shadow .25s ease;
+  .topnav.scrolled{ border-bottom-color:var(--border); background:rgba(11,13,16,0.85); }
+  .topnav .brand{ font-weight:700; letter-spacing:.04em; font-size:1rem; }
+  .topnav .links{ display:flex; gap:.6rem; }
+  .topnav .links a{
+    padding:.35rem .75rem; border-radius:999px; font-size:.88rem; color:var(--muted);
+    transition:color .2s, background .2s;
   }
-  .card:hover{ transform:translateY(-6px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
-  .card img{ width:64px; height:64px; margin-bottom:1rem; }
-  .card h3{ margin:.5rem 0 1rem; font-size:1.3rem; }
-  .card p{ margin:0 0 1.4rem; font-size:.95rem; color:var(--muted); line-height:1.5; }
-  .card a{ display:inline-block; margin-top:1rem; padding:.6rem 1.4rem; border-radius:999px; background:var(--accent); color:#fff; font-weight:600; transition:background .2s ease; }
-  .card a:hover{ background:var(--accent2); }
-  footer{ padding:2rem 1rem; text-align:center; color:var(--muted); font-size:.85rem; }
+  .topnav .links a:hover{ color:var(--fg); background:rgba(255,255,255,0.06); }
+
+  /* --- Hero section --- */
+  .hero{
+    position:relative; min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; text-align:center; overflow:hidden;
+  }
+  .hero canvas{
+    position:absolute; inset:0; width:100%; height:100%; z-index:0;
+  }
+  .hero-glow{
+    position:absolute; width:600px; height:600px; border-radius:50%; filter:blur(120px); opacity:.5; z-index:0;
+    pointer-events:none; transition:transform .4s ease-out;
+  }
+  .hero-glow.g1{ top:-10%; left:10%; background:var(--glow-1); }
+  .hero-glow.g2{ bottom:-15%; right:5%; background:var(--glow-2); }
+
+  .hero-content{
+    position:relative; z-index:2; padding:2rem 1.5rem; max-width:900px;
+  }
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:.45rem;
+    padding:.3rem .9rem; border-radius:999px; font-size:.78rem; font-weight:600;
+    background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.25);
+    color:var(--accent); margin-bottom:1.5rem; letter-spacing:.04em; text-transform:uppercase;
+  }
+  .hero-badge .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+  .hero-title{
+    font-size:clamp(2.8rem,7vw,5.5rem); font-weight:800; line-height:1.05;
+    letter-spacing:-.03em;
+    background:linear-gradient(135deg,#fff 0%,#c4b5fd 40%,#f9a8d4 70%,#fff 100%);
+    background-size:200% 200%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:shimmer 6s ease-in-out infinite;
+  }
+  @keyframes shimmer{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+  .hero-sub{
+    margin:1.2rem auto 0; font-size:clamp(1rem,2vw,1.25rem); color:var(--muted);
+    max-width:640px; line-height:1.65;
+  }
+  .hero-sub .typed-cursor{ display:inline-block; width:2px; height:1.1em; background:var(--accent); margin-left:2px; vertical-align:text-bottom; animation:blink .7s step-end infinite; }
+  @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .hero-ctas{
+    display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-top:2.5rem;
+  }
+  .btn{
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding:.85rem 1.6rem; border-radius:999px; font-weight:600; font-size:.95rem;
+    transition:transform .2s, box-shadow .2s;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; box-shadow:0 4px 20px rgba(139,92,246,0.3);
+  }
+  .btn-primary:hover{ box-shadow:0 8px 30px rgba(139,92,246,0.45); }
+  .btn-ghost{
+    background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--fg);
+  }
+  .btn-ghost:hover{ background:rgba(255,255,255,0.08); }
+
+  .scroll-indicator{
+    position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); z-index:2;
+    display:flex; flex-direction:column; align-items:center; gap:.4rem; color:var(--muted); font-size:.78rem;
+    animation:float 3s ease-in-out infinite;
+  }
+  .scroll-indicator svg{ width:20px; height:20px; stroke:var(--muted); fill:none; stroke-width:2; }
+  @keyframes float{ 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+
+  /* --- Stats ticker --- */
+  .stats-section{
+    position:relative; z-index:2; padding:5rem 1.5rem;
+    background:linear-gradient(180deg,var(--bg) 0%,rgba(15,17,22,1) 100%);
+  }
+  .stats-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:2rem;
+    max-width:900px; margin:0 auto; text-align:center;
+  }
+  .stat-item{ opacity:0; transform:translateY(30px); transition:all .7s cubic-bezier(.17,.67,.24,1); }
+  .stat-item.visible{ opacity:1; transform:none; }
+  .stat-number{
+    font-size:clamp(2.2rem,5vw,3.2rem); font-weight:800; letter-spacing:-.02em;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .stat-label{ font-size:.88rem; color:var(--muted); margin-top:.3rem; }
+
+  /* --- Cards section --- */
+  .pages-section{
+    position:relative; z-index:2; padding:5rem 1.5rem 6rem;
+  }
+  .pages-section .section-label{
+    text-align:center; margin-bottom:3rem;
+  }
+  .pages-section .section-label h2{
+    font-size:clamp(1.6rem,4vw,2.4rem); font-weight:700; margin-bottom:.5rem;
+  }
+  .pages-section .section-label p{ color:var(--muted); max-width:500px; margin:0 auto; }
+
+  .page-cards{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:1.5rem; max-width:900px; margin:0 auto;
+  }
+  .page-card{
+    position:relative; background:var(--card); border:1px solid var(--border);
+    border-radius:20px; padding:2rem 2rem 2.5rem; overflow:hidden;
+    transition:transform .3s cubic-bezier(.17,.67,.24,1), box-shadow .3s, border-color .3s;
+    opacity:0; transform:translateY(40px);
+  }
+  .page-card.visible{ opacity:1; transform:none; }
+  .page-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+    border-color:rgba(139,92,246,0.2);
+  }
+  .page-card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    opacity:0; transition:opacity .3s;
+  }
+  .page-card:hover::before{ opacity:1; }
+
+  .page-card .icon-wrap{
+    width:56px; height:56px; border-radius:14px; display:grid; place-items:center;
+    background:rgba(139,92,246,0.1); margin-bottom:1.2rem;
+  }
+  .page-card .icon-wrap img{ width:32px; height:32px; }
+  .page-card h3{ font-size:1.25rem; margin-bottom:.6rem; }
+  .page-card p{ color:var(--muted); font-size:.92rem; line-height:1.55; margin-bottom:1.5rem; }
+  .page-card .card-link{
+    display:inline-flex; align-items:center; gap:.4rem;
+    font-weight:600; font-size:.9rem; color:var(--accent);
+    transition:gap .2s, color .2s;
+  }
+  .page-card .card-link:hover{ gap:.7rem; color:var(--accent2); }
+  .page-card .card-link svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
+
+  /* --- Footer --- */
+  footer{
+    padding:3rem 1.5rem; text-align:center; color:var(--muted); font-size:.82rem;
+    border-top:1px solid var(--border);
+  }
+  footer .footer-brand{ font-weight:700; font-size:1rem; color:var(--fg); margin-bottom:.4rem; }
+
+  /* --- Responsive --- */
+  @media(max-width:600px){
+    .topnav .links{ display:none; }
+    .hero-glow{ width:300px; height:300px; }
+    .page-cards{ grid-template-columns:1fr; }
+    .stats-grid{ grid-template-columns:repeat(2,1fr); }
+  }
 </style>
 </head>
 <body>
-<header>
+
+<nav class="topnav" id="topnav">
+  <div class="brand">The Jailyard</div>
+  <div class="links">
+    <a href="preseason.html">Rankings</a>
+    <a href="week1.html">Week 1</a>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <canvas id="starfield"></canvas>
+  <div class="hero-glow g1"></div>
+  <div class="hero-glow g2"></div>
   <div class="hero-content">
-    <h1 class="hero-title">Welcome to The Jailyard</h1>
-    <p class="hero-sub">Your 2025 dynasty league HQ.  Dive into the preseason rankings or get the scoop on Week 1 — it’s all here in one place.</p>
-    <div class="cards">
-      <div class="card">
-        <img src="assets/icon_preseason.png" alt="Preseason icon">
-        <h3>Preseason Rankings</h3>
-        <p>Explore the updated power rankings, historical notes and projections for all twelve teams.</p>
-        <a href="preseason.html">View Rankings</a>
-      </div>
-      <div class="card">
-        <img src="assets/icon_week.png" alt="Week preview icon">
-        <h3>Week 1 Preview</h3>
-        <p>Read the opening essay, check the mailbag and see our picks for the first slate of games.</p>
-        <a href="week1.html">Week 1 Column</a>
-      </div>
+    <div class="hero-badge"><span class="dot"></span> 2025 Season</div>
+    <h1 class="hero-title">Welcome to<br>The Jailyard</h1>
+    <p class="hero-sub" id="typed"></p>
+    <div class="hero-ctas">
+      <a href="preseason.html" class="btn btn-primary">
+        View Power Rankings
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="week1.html" class="btn btn-ghost">
+        Week 1 Preview
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
     </div>
   </div>
-</header>
+  <div class="scroll-indicator">
+    Scroll
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-number" data-target="12">0</div>
+      <div class="stat-label">Teams</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="3">0</div>
+      <div class="stat-label">Seasons</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="3">0</div>
+      <div class="stat-label">Champions</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="500" data-suffix="+">0</div>
+      <div class="stat-label">Rostered Players</div>
+    </div>
+  </div>
+</section>
+
+<section class="pages-section">
+  <div class="section-label">
+    <h2>Explore the League</h2>
+    <p>Everything you need to know about the 2025 season, all in one place.</p>
+  </div>
+  <div class="page-cards">
+    <div class="page-card">
+      <div class="icon-wrap">
+        <img src="icon_preseason.png" alt="Rankings">
+      </div>
+      <h3>Preseason Power Rankings</h3>
+      <p>Sortable tables, data charts, team rosters and detailed analysis for all twelve franchises. See who's on top and who's rebuilding.</p>
+      <a href="preseason.html" class="card-link">
+        View Rankings
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="page-card">
+      <div class="icon-wrap">
+        <img src="icon_week.png" alt="Week 1">
+      </div>
+      <h3>Week 1 Preview</h3>
+      <p>Opening essay, reader mailbag, game picks with spreads and our bold upset calls. The dynasty season starts here.</p>
+      <a href="week1.html" class="card-link">
+        Read the Column
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
 <footer>
-  © 2025 The Jailyard Dynasty League.  All rights reserved.
+  <div class="footer-brand">The Jailyard</div>
+  &copy; 2025 The Jailyard Dynasty League. All rights reserved.
 </footer>
+
+<script>
+// --- Starfield canvas ---
+(function(){
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [], mouse = { x: 0.5, y: 0.5 };
+  const STAR_COUNT = 180;
+
+  function resize(){
+    W = canvas.width = canvas.clientWidth * devicePixelRatio;
+    H = canvas.height = canvas.clientHeight * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+  }
+  function initStars(){
+    stars = [];
+    for(let i = 0; i < STAR_COUNT; i++){
+      stars.push({
+        x: Math.random() * canvas.clientWidth,
+        y: Math.random() * canvas.clientHeight,
+        r: Math.random() * 1.4 + 0.3,
+        speed: Math.random() * 0.3 + 0.05,
+        alpha: Math.random() * 0.6 + 0.2,
+        drift: (Math.random() - 0.5) * 0.15
+      });
+    }
+  }
+  function draw(){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0, 0, w, h);
+    const mx = (mouse.x - 0.5) * 20;
+    const my = (mouse.y - 0.5) * 20;
+    stars.forEach(s => {
+      s.y -= s.speed;
+      s.x += s.drift;
+      if(s.y < -5){ s.y = h + 5; s.x = Math.random() * w; }
+      if(s.x < -5) s.x = w + 5;
+      if(s.x > w + 5) s.x = -5;
+      const px = s.x + mx * (s.r / 1.5);
+      const py = s.y + my * (s.r / 1.5);
+      ctx.beginPath();
+      ctx.arc(px, py, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,200,255,${s.alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  document.addEventListener('mousemove', e => {
+    mouse.x = e.clientX / window.innerWidth;
+    mouse.y = e.clientY / window.innerHeight;
+  });
+  resize(); initStars(); draw();
+})();
+
+// --- Nav scroll effect ---
+window.addEventListener('scroll', () => {
+  document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// --- Typewriter effect ---
+(function(){
+  const text = "Your 2025 dynasty league HQ. Dive into the preseason rankings or get the scoop on Week\u00a01 \u2014 it's all here in one place.";
+  const el = document.getElementById('typed');
+  let i = 0;
+  el.innerHTML = '<span class="typed-cursor"></span>';
+  function type(){
+    if(i < text.length){
+      el.innerHTML = text.slice(0, i + 1) + '<span class="typed-cursor"></span>';
+      i++;
+      setTimeout(type, 22 + Math.random() * 18);
+    } else {
+      // remove cursor after a pause
+      setTimeout(() => { el.innerHTML = text; }, 2000);
+    }
+  }
+  setTimeout(type, 800);
+})();
+
+// --- Animated stat counters ---
+(function(){
+  const items = document.querySelectorAll('.stat-item');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      const numEl = e.target.querySelector('.stat-number');
+      const target = parseInt(numEl.dataset.target);
+      const suffix = numEl.dataset.suffix || '';
+      const duration = 1200;
+      const start = performance.now();
+      function tick(now){
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        numEl.textContent = Math.round(eased * target) + suffix;
+        if(progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.4 });
+  items.forEach(item => io.observe(item));
+})();
+
+// --- Card entrance animations ---
+(function(){
+  const cards = document.querySelectorAll('.page-card');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if(!e.isIntersecting) return;
+      setTimeout(() => e.target.classList.add('visible'), i * 150);
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.15 });
+  cards.forEach(c => io.observe(c));
+})();
+
+// --- Parallax glow orbs on mouse move ---
+document.addEventListener('mousemove', e => {
+  const x = e.clientX / window.innerWidth;
+  const y = e.clientY / window.innerHeight;
+  document.querySelector('.hero-glow.g1').style.transform = `translate(${x * 30}px, ${y * 20}px)`;
+  document.querySelector('.hero-glow.g2').style.transform = `translate(${-x * 25}px, ${-y * 15}px)`;
+});
+</script>
 </body>
 </html>
