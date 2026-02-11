@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Jailyard — League Bible</title>
+<meta name="view-transition" content="same-origin" />
 <meta name="description" content="The complete history of The Jailyard dynasty league. Every record, rivalry, and Elo rating from inception to today." />
 <style>
 :root{
@@ -16,6 +17,8 @@
   font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   color-scheme:dark;
 }
+.light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(0,0,0,0.03);--glass:rgba(0,0,0,0.04);--border:rgba(0,0,0,0.08);color-scheme:light;}
+@view-transition{navigation:auto;}::view-transition-old(root){animation:vt-out .2s ease-in;}::view-transition-new(root){animation:vt-in .3s ease-out;}@keyframes vt-out{to{opacity:0;filter:blur(2px);}}@keyframes vt-in{from{opacity:0;filter:blur(2px);}}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--fg);overflow-x:hidden;}
@@ -28,7 +31,10 @@ a{color:inherit;text-decoration:none;}
 .topnav .brand a{color:var(--fg);text-decoration:none;}
 .topnav .links{display:flex;gap:.5rem;}
 .topnav .links a{padding:.3rem .65rem;border-radius:999px;font-size:.85rem;color:var(--muted);transition:color .2s,background .2s;}
-.topnav .links a:hover{color:var(--fg);background:rgba(255,255,255,0.06);}
+.topnav .links a:hover,.topnav .links a:focus-visible{color:var(--fg);background:rgba(255,255,255,0.06);}
+.topnav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
+.topnav .hamburger:hover,.topnav .hamburger:focus-visible{color:var(--fg);}
+.topnav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
 
 /* Hero */
 .hero{position:relative;min-height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden;padding-top:4rem;}
@@ -103,7 +109,9 @@ a{color:inherit;text-decoration:none;}
 .fran-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem;margin-bottom:.8rem;}
 .fran-stat-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
 .fran-stat-val{font-size:.88rem;font-weight:600;}
-.fran-champ{color:#f59e0b;}
+.fran-champ{color:#f59e0b;font-size:1.3rem;animation:trophy-glow 2s ease-in-out infinite;}
+@keyframes trophy-glow{0%,100%{filter:drop-shadow(0 0 2px rgba(245,158,11,0.3));}50%{filter:drop-shadow(0 0 8px rgba(245,158,11,0.6));}}
+.fran-champ-badge{font-size:.85rem;margin-left:.3rem;animation:trophy-glow 2s ease-in-out infinite;}
 .fran-expand{cursor:pointer;display:block;width:100%;padding:.45rem;border:1px solid var(--border);border-radius:8px;background:none;color:var(--muted);font-family:inherit;font-size:.8rem;transition:all .2s;}
 .fran-expand:hover{color:var(--fg);background:rgba(255,255,255,0.04);}
 .fran-seasons{margin-top:.6rem;}
@@ -122,6 +130,15 @@ a{color:inherit;text-decoration:none;}
 .h2h-table td.h2h-cell:hover{opacity:.8;}
 .h2h-legend{display:flex;align-items:center;gap:1rem;margin-top:.8rem;font-size:.78rem;color:var(--muted);}
 .h2h-legend .swatch{width:18px;height:12px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:.25rem;}
+.spotlight-btn{cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;padding:.65rem 1.4rem;border-radius:999px;font-weight:600;font-size:.9rem;font-family:inherit;transition:transform .2s,box-shadow .2s;}
+.spotlight-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(139,92,246,0.3);}
+.spotlight-card{margin-top:1rem;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;text-align:left;animation:spotlight-in .4s ease-out;}
+.spotlight-card h3{font-size:1.1rem;margin-bottom:.8rem;}
+.spotlight-card .game-row{display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.spotlight-card .game-row:last-child{border:none;}
+.spotlight-card .winner{color:var(--good);font-weight:600;}
+.spotlight-card .loser{color:var(--bad);}
+@keyframes spotlight-in{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 
 /* Elo */
 .elo-wrap{display:grid;grid-template-columns:1fr 200px;gap:1.5rem;align-items:start;}
@@ -155,7 +172,9 @@ a{color:inherit;text-decoration:none;}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.2s;}
 
 @media(max-width:800px){
-  .topnav .links{display:none;}
+  .topnav .hamburger{display:block;}
+  .topnav .links{display:none;position:absolute;top:100%;right:0;left:0;flex-direction:column;padding:.5rem 1rem 1rem;background:rgba(11,13,16,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+  .topnav .links.open{display:flex;}
   .hero{min-height:55vh;}
   .hero-glow{width:260px;height:260px;}
   .hero-stats{gap:1.5rem;}
@@ -165,17 +184,22 @@ a{color:inherit;text-decoration:none;}
   .tab{padding:.65rem .8rem;font-size:.82rem;}
   .fran-stats{grid-template-columns:1fr;}
 }
+.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
 </style>
 </head>
 <body>
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <nav class="topnav" id="topnav">
   <div class="brand"><a href="index.html">The Jailyard</a></div>
-  <div class="links">
+  <div class="links" id="navLinks">
     <a href="season.html">Season Hub</a>
     <a href="preseason.html">Rankings</a>
     <a href="week1.html">Week 1</a>
   </div>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
 </nav>
 
 <section class="hero" id="top">
@@ -456,14 +480,22 @@ function computeHistory(raw){
     eH[o1].push({season:g.season,week:g.week,elo:Math.round(elo[o1]*10)/10});
     eH[o2].push({season:g.season,week:g.week,elo:Math.round(elo[o2]*10)/10});
   }
-  // 4. H2H
+  // 4. H2H — store BOTH directions so every matrix cell is populated
   const h2h={};
   for(const g of games){
-    if(!g.o1||!g.o2)continue;const k=g.o1+'|'+g.o2;
-    if(!h2h[k])h2h[k]={wins:0,losses:0,pf:0,pa:0,games:[]};
-    h2h[k].pf+=g.p1;h2h[k].pa+=g.p2;
-    h2h[k].games.push({season:g.season,week:g.week,pts:g.p1,opp_pts:g.p2});
-    if(g.wo===g.o1)h2h[k].wins++;else if(g.wo===g.o2)h2h[k].losses++;
+    if(!g.o1||!g.o2)continue;
+    // Forward direction: o1 perspective
+    const k1=g.o1+'|'+g.o2;
+    if(!h2h[k1])h2h[k1]={wins:0,losses:0,pf:0,pa:0,games:[]};
+    h2h[k1].pf+=g.p1;h2h[k1].pa+=g.p2;
+    h2h[k1].games.push({season:g.season,week:g.week,pts:g.p1,opp_pts:g.p2});
+    if(g.wo===g.o1)h2h[k1].wins++;else if(g.wo===g.o2)h2h[k1].losses++;
+    // Reverse direction: o2 perspective
+    const k2=g.o2+'|'+g.o1;
+    if(!h2h[k2])h2h[k2]={wins:0,losses:0,pf:0,pa:0,games:[]};
+    h2h[k2].pf+=g.p2;h2h[k2].pa+=g.p1;
+    h2h[k2].games.push({season:g.season,week:g.week,pts:g.p2,opp_pts:g.p1});
+    if(g.wo===g.o2)h2h[k2].wins++;else if(g.wo===g.o1)h2h[k2].losses++;
   }
   for(const k in h2h){h2h[k].pf=Math.round(h2h[k].pf*10)/10;h2h[k].pa=Math.round(h2h[k].pa*10)/10;}
   // 5. Records
@@ -516,7 +548,9 @@ function computeHistory(raw){
   // Championships from brackets
   for(const s of seasons){
     const bkt=raw[s].bracket;if(!bkt||!bkt.length)continue;
-    const maxR=Math.max(...bkt.map(g=>g.r||0));
+    const rounds=bkt.filter(g=>typeof g.r==='number'&&g.r>0);
+    const maxR=rounds.length?Math.max(...rounds.map(g=>g.r)):0;
+    if(!maxR)continue;
     const r2o={};for(const rid in raw[s].rosterMap)r2o[parseInt(rid)]=raw[s].rosterMap[rid].owner_id;
     for(const game of bkt){
       if(game.r===maxR){
@@ -604,7 +638,7 @@ function buildFranchises(){
     const wpct=totalG?(s.all_time.wins/totalG):0;
     const eloTier=s.current_elo>=1550?'elite':s.current_elo>=1450?'mid':'low';
     h+=`<div class="fran-card reveal" data-oid="${oid}" data-wins="${s.all_time.wins}" data-winpct="${wpct.toFixed(4)}" data-elo="${s.current_elo}" data-pf="${s.all_time.pf}" data-champs="${s.championships}">`;
-    h+=`<div class="fran-header"><div class="fran-elo ${eloTier}">${Math.round(s.current_elo)}</div><div class="fran-info"><div class="fran-name">${name}</div><div class="fran-user">@${s.username}</div></div><div class="fran-record">${s.all_time.wins}-${s.all_time.losses}${s.all_time.ties?'-'+s.all_time.ties:''}</div></div>`;
+    h+=`<div class="fran-header"><div class="fran-elo ${eloTier}">${Math.round(s.current_elo)}</div><div class="fran-info"><div class="fran-name">${name}${s.championships?` <span class="fran-champ-badge" title="${s.championships}x Champion">👑</span>`:''}</div><div class="fran-user">@${s.username}</div></div><div class="fran-record">${s.all_time.wins}-${s.all_time.losses}${s.all_time.ties?'-'+s.all_time.ties:''}</div></div>`;
     h+=`<div class="fran-stats">`;
     h+=`<div><div class="fran-stat-label">Win %</div><div class="fran-stat-val">${(wpct*100).toFixed(1)}%</div></div>`;
     h+=`<div><div class="fran-stat-label">Points For</div><div class="fran-stat-val">${s.all_time.pf.toLocaleString()}</div></div>`;
@@ -693,6 +727,8 @@ function buildH2H(){
   });
   h+=`</tbody></table></div>`;
   h+=`<div class="h2h-legend reveal"><span><span class="swatch" style="background:rgba(16,185,129,0.5)"></span>Winning</span><span><span class="swatch" style="background:rgba(255,255,255,0.06)"></span>Even</span><span><span class="swatch" style="background:rgba(239,68,68,0.5)"></span>Losing</span></div>`;
+  h+=`<div class="reveal" style="text-align:center;margin-top:1.5rem;"><button class="spotlight-btn" id="rivalrySpotlight">🎲 Random Rivalry Spotlight</button></div>`;
+  h+=`<div class="spotlight-card reveal" id="spotlightCard" hidden></div>`;
   el.innerHTML=h;
   // Tooltip on hover
   el.querySelectorAll('.h2h-cell').forEach(td=>{
@@ -708,6 +744,31 @@ function buildH2H(){
     td.addEventListener('mouseleave',hideTT);
   });
   observeReveals(el);
+
+  // --- Random Rivalry Spotlight ---
+  document.getElementById('rivalrySpotlight').addEventListener('click', () => {
+    const keys = Object.keys(DATA.h2h).filter(k => DATA.h2h[k].games.length >= 2);
+    if(!keys.length) return;
+    const k = keys[Math.floor(Math.random() * keys.length)];
+    const [o1,o2] = k.split('|');
+    const n1 = displayName(DATA.franchise_map[o1]||{});
+    const n2 = displayName(DATA.franchise_map[o2]||{});
+    const rec = DATA.h2h[k];
+    let gh = `<h3>${n1} vs ${n2} &mdash; ${rec.wins}-${rec.losses} (${rec.games.length} games)</h3>`;
+    rec.games.forEach(g => {
+      const w = g.pts > g.opp_pts;
+      gh += `<div class="game-row"><span>${g.season} Wk ${g.week}</span><span class="${w?'winner':'loser'}">${g.pts.toFixed(1)}</span><span>vs</span><span class="${w?'loser':'winner'}">${g.opp_pts.toFixed(1)}</span></div>`;
+    });
+    const avgPf = (rec.pf / rec.games.length).toFixed(1);
+    const avgPa = (rec.pa / rec.games.length).toFixed(1);
+    gh += `<div style="margin-top:.8rem;font-size:.82rem;color:var(--muted)">Avg: ${n1} scores ${avgPf} &bull; ${n2} scores ${avgPa}</div>`;
+    const card = document.getElementById('spotlightCard');
+    card.hidden = false;
+    card.innerHTML = gh;
+    card.style.animation = 'none';
+    card.offsetHeight; // force reflow
+    card.style.animation = '';
+  });
 }
 
 function cellColor(pct){
@@ -757,7 +818,7 @@ function renderEloChart(){
   const H=380;
   cv.width=W*dpr;cv.height=H*dpr;
   cv.style.width=W+'px';cv.style.height=H+'px';
-  ctx.scale(dpr,dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
   const m={top:18,right:16,bottom:36,left:48};
   const pW=W-m.left-m.right,pH=H-m.top-m.bottom;
   const owners=Object.keys(DATA.elo_history).filter(o=>DATA.elo_history[o].length>0);
@@ -876,6 +937,28 @@ function observeReveals(root){
   },{threshold:0.1});
   (root||document).querySelectorAll('.reveal:not(.visible)').forEach(el=>io.observe(el));
 }
+
+// --- Mobile hamburger menu ---
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('#navLinks a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+// --- Nav scroll effect ---
+window.addEventListener('scroll', () => {
+  document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// --- Scroll progress bar ---
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
 </script>
 </body>
 </html>

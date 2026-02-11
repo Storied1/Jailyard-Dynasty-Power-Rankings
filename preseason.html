@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Jailyard 2025 Power Rankings</title>
+<meta name="view-transition" content="same-origin" />
 <meta name="description" content="2025 preseason dynasty power rankings for The Jailyard. How we saw the league before the season kicked off. Sortable tables, data charts, rosters and analysis." />
 <meta property="og:title" content="The Jailyard 2025 Power Rankings" />
 <meta property="og:description" content="2025 preseason power rankings for 12 teams. Charts, rosters and bold predictions before the season." />
@@ -83,7 +84,8 @@ details[open] summary{color:var(--accent-2);}
 .section-awards .award{display:grid;grid-template-columns:90px 1fr;gap:1rem;padding:1rem;border:1px dashed rgba(255,255,255,0.08);border-radius:12px;margin-bottom:1rem;}  
 .award .tag{display:inline-block;font-weight:700;font-size:2.2rem;text-align:center;padding:.8rem .2rem;background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;color:transparent;}  
 .toggle-dark{cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:999px;padding:.35rem .7rem;font-size:.9rem;}  
-.light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(255,255,255,0.9);--glass:rgba(255,255,255,0.85);--border:rgba(0,0,0,0.06);color-scheme:light;}  
+.light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(255,255,255,0.9);--glass:rgba(255,255,255,0.85);--border:rgba(0,0,0,0.06);color-scheme:light;}
+@view-transition{navigation:auto;}::view-transition-old(root){animation:vt-out .2s ease-in;}::view-transition-new(root){animation:vt-in .3s ease-out;}@keyframes vt-out{to{opacity:0;filter:blur(2px);}}@keyframes vt-in{from{opacity:0;filter:blur(2px);}}
 .fade-up{opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.17,.67,.24,1);}  
 .fade-up.visible{opacity:1;transform:none;}  
 .parallax{transform:translateY(calc(var(--scrollY,0)*var(--speed,0.3)));will-change:transform;}  
@@ -171,9 +173,11 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 /* --- Row hover in master table --- */
 .master-table tbody tr{cursor:pointer;transition:background .15s;}
 .master-table tbody tr:hover{background:rgba(108,71,255,0.06);}
+.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .1s linear;pointer-events:none;}
 </style>
 </head>
 <body>
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <header class="hero" id="top">
   <div class="hero__bg parallax" style="--speed:.15"></div>
@@ -407,7 +411,7 @@ const league = {
       ranks: { qb: 7, rb: 6, wr: 11, te: 2, draft: 3, starter: 10 },
       draftValue: 59,
       draftPicks: ['2026 1st (18.5) x2','2026 2nd (3)','2026 3rd x3 (0.1)','2027 1st (15.7)','2027 2nd (2.5)'],
-      qb: [['C.J. Stroud',12.5],['Michael Penix',1.7],['Justin Fields',0.3,'starter']],
+      qb: [['C.J. Stroud',12.5,'starter'],['Michael Penix',1.7],['Justin Fields',0.3]],
       rb: [['Omarion Hampton',49.6,'starter'],['TreVeyon Henderson',38.2,'starter'],['D\'Andre Swift',18,'starter'],['Tyjae Spears',8.7],['Tank Bigsby',5.2]],
       wr: [['Xavier Worthy',31,'starter'],['DK Metcalf',12.8,'starter'],['Deebo Samuel',4,'starter'],['Tank Dell',3.1],['Quentin Johnston',1.6]],
       te: [['Brock Bowers',66,'starter'],['Dalton Schultz',0.3]],
@@ -761,8 +765,8 @@ function buildTable(){
     { key:'draft', label:'Draft', numeric:true, path:'ranks.draft' }
   ];
   let html='<thead><tr>' + cols.map(c => `<th data-key="${c.key}" data-path="${c.path||''}" data-num="${c.numeric?1:0}">${c.label}</th>`).join('') + '</tr></thead><tbody>';
-  league.teams.forEach(t => {
-    html += `<tr data-id="${idFromName(t.name)}"><td>${t.rank}</td><td>${t.name}</td><td>${t.owner}</td><td>${t.tier}</td><td>${t.overallValue}</td><td>${t.starterValue}</td><td>${t.avgAge}</td><td>${t.ranks.qb}</td><td>${t.ranks.rb}</td><td>${t.ranks.wr}</td><td>${t.ranks.te}</td><td>${t.ranks.draft}</td></tr>`;
+  league.teams.forEach((t,idx) => {
+    html += `<tr data-id="${idFromName(t.name)}" data-idx="${idx}"><td>${t.rank}</td><td>${t.name}</td><td>${t.owner}</td><td>${t.tier}</td><td>${t.overallValue}</td><td>${t.starterValue}</td><td>${t.avgAge}</td><td>${t.ranks.qb}</td><td>${t.ranks.rb}</td><td>${t.ranks.wr}</td><td>${t.ranks.te}</td><td>${t.ranks.draft}</td></tr>`;
   });
   html += '</tbody>';
   table.innerHTML = html;
@@ -785,8 +789,8 @@ function buildTable(){
     th.classList.add(asc ? 'sort-asc' : 'sort-desc');
     const rows = Array.from(table.querySelectorAll('tbody tr'));
     rows.sort((a,b) => {
-      const ta = league.teams[a.rowIndex];
-      const tb = league.teams[b.rowIndex];
+      const ta = league.teams[parseInt(a.dataset.idx)];
+      const tb = league.teams[parseInt(b.dataset.idx)];
       const va = path ? path.split('.').reduce((o,k) => o[k], ta) : ta[key];
       const vb = path ? path.split('.').reduce((o,k) => o[k], tb) : tb[key];
       if(numeric) return asc ? (va - vb) : (vb - va);
@@ -894,12 +898,12 @@ function drawStacked(canvas, teams){
 function drawPtsSched(canvas, infoMap){
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
-  const dpr = devicePixelRatio;
+  const dpr = devicePixelRatio || 1;
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   canvas.width = w * dpr;
   canvas.height = h * dpr;
-  ctx.scale(dpr,dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const pad = 40;
   const plotW = w - pad*2;
   const plotH = h - pad*2;
@@ -957,12 +961,12 @@ function drawPtsSched(canvas, infoMap){
 function drawTitles(canvas){
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
-  const dpr = devicePixelRatio;
+  const dpr = devicePixelRatio || 1;
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   canvas.width = w * dpr;
   canvas.height = h * dpr;
-  ctx.scale(dpr,dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const pad=40;
   const plotW = w - pad*2;
   const plotH = h - pad*2;
@@ -1081,6 +1085,9 @@ league.teams.forEach(team => {
 // --- Hamburger menu toggle ---
 document.getElementById('hamburger').addEventListener('click', () => {
   document.getElementById('toc').classList.toggle('open');
+});
+document.querySelectorAll('#toc a').forEach(link => {
+  link.addEventListener('click', () => document.getElementById('toc').classList.remove('open'));
 });
 
 // --- Back-to-top button ---
@@ -1288,6 +1295,15 @@ btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth'
 
 // Observe tier dividers for fade-in
 document.querySelectorAll('.tier-divider').forEach(el => observer.observe(el));
+
+// --- Scroll progress bar ---
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
 </script>
 </body>
 </html>

@@ -1,0 +1,58 @@
+name: Fetch Sleeper Data
+
+on:
+  # Run manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      seasons:
+        description: 'Which seasons to fetch'
+        required: true
+        default: '--all'
+        type: choice
+        options:
+          - '--all'
+          - '--season 2025'
+          - '--season 2024'
+          - '--season 2023'
+          - '--season 2022'
+  # Run automatically every Sunday at 6 AM UTC during NFL season (Sep-Jan)
+  schedule:
+    - cron: '0 6 * 9-12 0'   # Sep-Dec Sundays
+    - cron: '0 6 * 1 0'      # January Sundays
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch Sleeper API data
+        run: python3 fetch_sleeper.py ${{ github.event.inputs.seasons || '--all' }}
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git add data/
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push data
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git commit -m "Update Sleeper data ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+          git push

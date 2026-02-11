@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Jailyard 2025 — Season Recap</title>
+<meta name="view-transition" content="same-origin" />
 <meta name="description" content="Complete 2025 season results for The Jailyard dynasty league. Weekly recaps, power rankings, matchup results, fun stats, and full analysis." />
 <meta property="og:title" content="The Jailyard 2025 — Season Recap" />
 <meta property="og:description" content="Weekly recaps, awards, power rankings, transactions, and fun statistics from the 2025 Jailyard dynasty season." />
@@ -25,6 +26,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);overflow-x:hid
 a{color:var(--accent2);text-decoration:none;}
 a:hover{text-decoration:underline;}
 .light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(0,0,0,0.03);--glass:rgba(0,0,0,0.04);--border:rgba(0,0,0,0.08);color-scheme:light;}
+@view-transition{navigation:auto;}::view-transition-old(root){animation:vt-out .2s ease-in;}::view-transition-new(root){animation:vt-in .3s ease-out;}@keyframes vt-out{to{opacity:0;filter:blur(2px);}}@keyframes vt-in{from{opacity:0;filter:blur(2px);}}
 
 /* --- Top nav --- */
 .topnav{position:sticky;top:0;z-index:100;padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(11,13,16,0.75);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);transition:background .3s;}
@@ -35,6 +37,16 @@ a:hover{text-decoration:underline;}
 .topnav a.nav-link:hover{color:var(--fg);background:rgba(255,255,255,0.05);}
 .theme-btn{cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:999px;padding:.3rem .65rem;font-size:.82rem;color:var(--muted);font-family:inherit;transition:color .2s,background .2s;}
 .theme-btn:hover{color:var(--fg);background:rgba(255,255,255,0.08);}
+.topnav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
+.topnav .hamburger:hover,.topnav .hamburger:focus-visible{color:var(--fg);}
+.topnav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
+
+/* --- Season selector --- */
+.season-bar{padding:.5rem 1.5rem;background:rgba(139,92,246,0.04);border-bottom:1px solid var(--border);display:flex;justify-content:center;gap:.4rem;align-items:center;}
+.season-btn{cursor:pointer;padding:.4rem 1rem;border-radius:999px;border:1px solid var(--border);background:none;color:var(--muted);font-size:.85rem;font-family:inherit;font-weight:600;transition:all .2s;white-space:nowrap;}
+.season-btn:hover{color:var(--fg);background:rgba(255,255,255,0.05);border-color:rgba(139,92,246,0.25);}
+.season-btn.active{color:#fff;background:var(--accent);border-color:var(--accent);box-shadow:0 2px 12px rgba(139,92,246,0.3);}
+.season-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-right:.5rem;font-weight:600;}
 
 /* --- Week selector --- */
 .week-bar{padding:.7rem 1.5rem;background:rgba(255,255,255,0.015);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
@@ -45,6 +57,9 @@ a:hover{text-decoration:underline;}
 .week-btn.active{color:#fff;background:var(--accent);border-color:var(--accent);box-shadow:0 2px 12px rgba(139,92,246,0.3);}
 .week-btn.playoff{border-color:rgba(236,72,153,0.25);}
 .week-btn.playoff.active{background:var(--accent2);border-color:var(--accent2);box-shadow:0 2px 12px rgba(236,72,153,0.3);}
+.week-btn.championship{border-color:rgba(245,158,11,0.4);position:relative;}
+.week-btn.championship.active{background:linear-gradient(135deg,#f59e0b,#eab308);border-color:#f59e0b;box-shadow:0 2px 16px rgba(245,158,11,0.4);}
+.week-btn.championship::after{content:'👑';font-size:.55rem;position:absolute;top:-6px;right:-2px;}
 
 /* --- Layout --- */
 .container{max-width:var(--maxw);margin:0 auto;padding:2.5rem 1.5rem;}
@@ -106,6 +121,24 @@ a:hover{text-decoration:underline;}
 .mu-tag.blowout{background:rgba(220,38,38,0.12);color:var(--bad);}
 .mu-starters{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem;}
 .mu-starters span{background:rgba(255,255,255,0.04);padding:.12rem .4rem;border-radius:5px;font-size:.72rem;}
+.mu-projected{font-size:.7rem;color:var(--muted);font-weight:400;margin-left:.3rem;opacity:.7;}
+
+/* --- Playoff matchup overrides --- */
+.matchup.playoff-game{border-color:rgba(236,72,153,0.2);background:linear-gradient(135deg,rgba(236,72,153,0.03),rgba(139,92,246,0.03));}
+.matchup.playoff-game .mu-vs{color:var(--accent2);}
+.playoff-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .55rem;border-radius:6px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.6rem;}
+.playoff-badge.semi{background:rgba(236,72,153,0.12);color:var(--accent2);}
+.playoff-badge.final{background:rgba(245,158,11,0.15);color:#f59e0b;}
+
+/* --- Championship card --- */
+.matchup.championship-game{border:2px solid rgba(245,158,11,0.3);background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(234,179,8,0.03));box-shadow:0 0 30px rgba(245,158,11,0.08);position:relative;overflow:hidden;}
+.matchup.championship-game::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f59e0b,#eab308,#f59e0b);animation:gold-shimmer 3s linear infinite;}
+@keyframes gold-shimmer{0%{background-position:0 0;}100%{background-position:200% 0;}}
+.matchup.championship-game::before{background-size:200% 100%;}
+.champ-celebration{text-align:center;padding:1.5rem;font-size:1.1rem;font-weight:700;animation:champ-in .6s ease-out;}
+.champ-celebration .trophy{font-size:3rem;display:block;margin-bottom:.5rem;animation:trophy-bounce 1.5s ease-in-out infinite;}
+@keyframes trophy-bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+@keyframes champ-in{from{opacity:0;transform:scale(0.8);}to{opacity:1;transform:scale(1);}}
 
 /* --- Standings table --- */
 .standings-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:14px;-webkit-overflow-scrolling:touch;}
@@ -181,7 +214,11 @@ footer a{color:var(--accent);}
 @media(max-width:768px){
   .g2{grid-template-columns:1fr;}
   .awards-grid{grid-template-columns:repeat(2,1fr);}
+  .topnav .hamburger{display:block;}
   .topnav .right .nav-link{display:none;}
+  .topnav .right.open .nav-link{display:block;}
+  .topnav .right{position:relative;}
+  .topnav .right.open{position:absolute;top:100%;left:0;right:0;display:flex;flex-direction:column;padding:.5rem 1rem 1rem;background:rgba(11,13,16,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
   .mu-team .score{font-size:1.2rem;}
   .stats-row{grid-template-columns:repeat(2,1fr);}
 }
@@ -189,9 +226,11 @@ footer a{color:var(--accent);}
   .awards-grid{grid-template-columns:1fr;}
   .g4{grid-template-columns:1fr 1fr;}
 }
+.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
 </style>
 </head>
 <body>
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <nav class="topnav">
   <div class="brand"><a href="index.html">The Jailyard</a></div>
@@ -201,7 +240,14 @@ footer a{color:var(--accent);}
     <a href="week1.html" class="nav-link">Week 1</a>
     <button class="theme-btn" onclick="document.documentElement.classList.toggle('light')">Theme</button>
   </div>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
 </nav>
+
+<div class="season-bar" id="seasonBar">
+  <span class="season-label">Season</span>
+</div>
 
 <div class="week-bar">
   <div class="inner" id="weekBar"></div>
@@ -232,13 +278,16 @@ const LEAGUE_IDS = {
   2024:'1048889097223266304',
   2025:'1180228858937966592'
 };
-const CURRENT_SEASON = 2025;
+const AVAILABLE_SEASONS = [2022, 2023, 2024, 2025];
+let currentSeason = 2025;
 const SLEEPER = 'https://api.sleeper.app/v1';
 
 // ========================
 // STATE
 // ========================
 let seasonData = null;
+let bracketData = null;
+let hasProjections = false;
 let leagueInfo = null;
 let usersMap = {};
 let rosterMap = {};
@@ -256,16 +305,27 @@ let currentView = 'recap';
 // ========================
 // DATA LOADING
 // ========================
-async function loadData() {
-  const lid = LEAGUE_IDS[CURRENT_SEASON];
+async function loadData(season) {
+  if (season) currentSeason = season;
+  const lid = LEAGUE_IDS[currentSeason];
+  if (!lid) { console.error('No league ID for season', currentSeason); return; }
+
+  // Reset state
+  seasonData = null; bracketData = null; hasProjections = false;
+  leagueInfo = null; usersMap = {}; rosterMap = {}; allMatchups = {};
+  allTransactions = {}; allRosters = null; weeklyStandings = {};
+  totalWeeksLoaded = 0; currentWeek = 1;
+
+  buildSeasonBar();
   const prog = document.getElementById('loadProgress');
+  document.getElementById('content').innerHTML = '<div class="loading" id="loadingState"><div class="spinner"></div><div>Loading '+currentSeason+' season data...</div><div id="loadProgress" style="font-size:.82rem;margin-top:.5rem;color:var(--muted)"></div></div>';
 
   // Try offline combined data first
   try {
-    const resp = await fetch('data/'+CURRENT_SEASON+'/season_combined.json');
+    const resp = await fetch('data/'+currentSeason+'/season_combined.json');
     if (resp.ok) {
       seasonData = await resp.json();
-      console.log('Loaded offline data');
+      console.log('Loaded offline data for', currentSeason);
       initFromOfflineData();
       return;
     }
@@ -273,7 +333,8 @@ async function loadData() {
 
   // Live API
   try {
-    if(prog) prog.textContent = 'Fetching league info...';
+    const progEl = document.getElementById('loadProgress');
+    if(progEl) progEl.textContent = 'Fetching league info...';
     const [leagueResp, usersResp, rostersResp] = await Promise.all([
       fetch(SLEEPER+'/league/'+lid),
       fetch(SLEEPER+'/league/'+lid+'/users'),
@@ -367,6 +428,9 @@ function initFromOfflineData() {
   if (d.transactions) {
     Object.entries(d.transactions).forEach(([w, txns]) => { allTransactions[parseInt(w)] = txns; });
   }
+  // Bracket data for playoff context
+  bracketData = d.brackets || null;
+  hasProjections = !!d.has_projections;
   initUI();
 }
 
@@ -604,7 +668,24 @@ function fmtPts(v) { return v!=null ? v.toFixed(1) : '—'; }
 // ========================
 // UI INIT
 // ========================
+function buildSeasonBar() {
+  const bar = document.getElementById('seasonBar');
+  // Keep the label, rebuild buttons
+  bar.innerHTML = '<span class="season-label">Season</span>';
+  AVAILABLE_SEASONS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'season-btn' + (s === currentSeason ? ' active' : '');
+    btn.textContent = s;
+    btn.addEventListener('click', () => {
+      if (s === currentSeason) return;
+      loadData(s);
+    });
+    bar.appendChild(btn);
+  });
+}
+
 function initUI() {
+  buildSeasonBar();
   buildWeekBar();
   currentWeek = totalWeeksLoaded || 1;
   setActiveWeek(currentWeek);
@@ -631,10 +712,26 @@ function buildWeekBar() {
   sep.style.cssText = 'width:1px;height:20px;background:var(--border);margin:0 .3rem;flex-shrink:0;';
   bar.appendChild(sep);
 
+  // Determine which week is the championship (last playoff week with data)
+  let champWeek = 0;
+  for (let w = totalWeeksLoaded; w >= playoffWeekStart; w--) {
+    if (weeklyStandings[w]) { champWeek = w; break; }
+  }
+
   for (let w = 1; w <= totalWeeksLoaded; w++) {
+    const isP = w >= playoffWeekStart;
+    const isChamp = isP && w === champWeek;
+    const poRound = w - playoffWeekStart + 1;
     const btn = document.createElement('button');
-    btn.className = 'week-btn' + (w >= playoffWeekStart ? ' playoff' : '');
-    btn.textContent = w >= playoffWeekStart ? 'PO '+(w-playoffWeekStart+1) : 'Wk '+w;
+    let cls = 'week-btn';
+    if (isChamp) cls += ' playoff championship';
+    else if (isP) cls += ' playoff';
+    btn.className = cls;
+
+    if (isChamp) btn.textContent = 'Championship';
+    else if (isP) btn.textContent = poRound === 1 ? 'Quarterfinals' : poRound === 2 ? 'Semifinals' : 'PO ' + poRound;
+    else btn.textContent = 'Wk ' + w;
+
     btn.dataset.week = w;
     btn.addEventListener('click', () => {
       currentWeek = w;
@@ -682,11 +779,25 @@ function renderWeek(week) {
   const trades = txns.filter(t=>t.type==='trade'&&t.status==='complete');
   const waivers = txns.filter(t=>(t.type==='waiver'||t.type==='free_agent')&&t.status==='complete');
 
-  const weekLabel = isP ? 'Playoff Round '+(week-playoffWeekStart+1) : 'Week '+week;
+  // Determine playoff context
+  let champWeek = 0;
+  for (let w = totalWeeksLoaded; w >= playoffWeekStart; w--) {
+    if (weeklyStandings[w]) { champWeek = w; break; }
+  }
+  const isChamp = isP && week === champWeek;
+  const poRound = week - playoffWeekStart + 1;
+  let weekLabel;
+  if (isChamp) weekLabel = '🏆 Championship';
+  else if (isP && poRound === 1) weekLabel = 'Quarterfinals';
+  else if (isP && poRound === 2) weekLabel = 'Semifinals';
+  else if (isP) weekLabel = 'Playoff Round ' + poRound;
+  else weekLabel = 'Week ' + week;
+
+  const seasonLabel = currentSeason + ' ' + weekLabel;
 
   let html = `
-    <h2 class="section-title">${weekLabel}</h2>
-    <p class="section-sub">Weekly recap, awards, power rankings, and top performers.</p>
+    <h2 class="section-title">${seasonLabel}</h2>
+    <p class="section-sub">${isChamp ? 'The championship round. One game to decide it all.' : isP ? 'Playoff round — win or go home.' : 'Weekly recap, awards, power rankings, and top performers.'}</p>
 
     <div class="view-tabs" id="viewTabs">
       <button class="vtab active" data-v="recap">Recap</button>
@@ -837,12 +948,36 @@ function renderRecap(week, area) {
 function renderMatchups(week, area) {
   const data = weeklyStandings[week];
   const matchups = data.matchups || [];
+  const isP = week >= playoffWeekStart;
+  // Determine if championship week
+  let champWeek = 0;
+  for (let w = totalWeeksLoaded; w >= playoffWeekStart; w--) {
+    if (weeklyStandings[w]) { champWeek = w; break; }
+  }
+  const isChamp = isP && week === champWeek;
+  const poRound = week - playoffWeekStart + 1;
+
   let h = '';
-  matchups.forEach(m => { h += '<div class="reveal">' + renderMatchupCard(m, true) + '</div>'; });
+  if (isP) {
+    const badge = isChamp ? 'final' : 'semi';
+    const label = isChamp ? '🏆 Championship Round' : poRound === 1 ? 'Quarterfinals' : 'Semifinals';
+    h += `<div class="reveal" style="text-align:center;margin-bottom:1.5rem"><span class="playoff-badge ${badge}">${label}</span></div>`;
+  }
+  matchups.forEach(m => { h += '<div class="reveal">' + renderMatchupCard(m, true, isP, isChamp) + '</div>'; });
+
+  // Championship winner celebration
+  if (isChamp && matchups.length) {
+    const finalGame = matchups[0]; // First matchup is usually the championship
+    const winnerId = finalGame.winner;
+    if (winnerId) {
+      const champ = teamDisplay(winnerId);
+      h += `<div class="reveal"><div class="champ-celebration"><span class="trophy">🏆</span>${currentSeason} Champions: <strong>${champ.name}</strong></div></div>`;
+    }
+  }
   area.innerHTML = h;
 }
 
-function renderMatchupCard(m, detailed) {
+function renderMatchupCard(m, detailed, isPlayoff, isChamp) {
   const t1 = teamDisplay(m.team1.roster_id), t2 = teamDisplay(m.team2.roster_id);
   const p1 = m.team1.points, p2 = m.team2.points;
   const total = p1+p2||1;
@@ -850,14 +985,30 @@ function renderMatchupCard(m, detailed) {
   const pct2 = ((p2/total)*100).toFixed(1);
   const w1 = m.winner===m.team1.roster_id, w2 = m.winner===m.team2.roster_id;
 
+  // Projected scores
+  const proj1 = m.team1.projected, proj2 = m.team2.projected;
+  const hasProj = proj1 > 0 || proj2 > 0;
+  const projStr1 = hasProj ? `<span class="mu-projected">(proj ${fmtPts(proj1)})</span>` : '';
+  const projStr2 = hasProj ? `<span class="mu-projected">(proj ${fmtPts(proj2)})</span>` : '';
+
   let tags = '';
   if (m.margin < 5) tags += '<span class="mu-tag close">Nail-biter</span>';
   else if (m.margin > 40) tags += '<span class="mu-tag blowout">Blowout</span>';
+  if (hasProj) {
+    const projFav = proj1 > proj2 ? m.team1.roster_id : m.team2.roster_id;
+    if (m.winner && m.winner !== projFav) tags += '<span class="mu-tag upset">Upset</span>';
+  }
 
   let details = '';
   if (detailed) {
-    const starters1 = (m.team1.top_starters||[]).slice(0,3).map(s=>`<span>${s.name} ${fmtPts(s.points)}</span>`).join('');
-    const starters2 = (m.team2.top_starters||[]).slice(0,3).map(s=>`<span>${s.name} ${fmtPts(s.points)}</span>`).join('');
+    const starters1 = (m.team1.top_starters||[]).slice(0,3).map(s=>{
+      const pj = s.projected > 0 ? ` <span class="mu-projected">(${fmtPts(s.projected)})</span>` : '';
+      return `<span>${s.name} ${fmtPts(s.points)}${pj}</span>`;
+    }).join('');
+    const starters2 = (m.team2.top_starters||[]).slice(0,3).map(s=>{
+      const pj = s.projected > 0 ? ` <span class="mu-projected">(${fmtPts(s.projected)})</span>` : '';
+      return `<span>${s.name} ${fmtPts(s.points)}${pj}</span>`;
+    }).join('');
     details = `<div class="mu-details" style="margin-top:.6rem;flex-direction:column;gap:.4rem">`;
     if (starters1) details += `<div style="font-size:.72rem;color:var(--muted)"><strong>${t1.name}:</strong> <span class="mu-starters" style="display:inline">${starters1}</span></div>`;
     if (starters2) details += `<div style="font-size:.72rem;color:var(--muted)"><strong>${t2.name}:</strong> <span class="mu-starters" style="display:inline">${starters2}</span></div>`;
@@ -867,11 +1018,13 @@ function renderMatchupCard(m, detailed) {
     details += '</div>';
   }
 
-  return `<div class="matchup">
+  const cardClass = isChamp ? 'matchup championship-game' : isPlayoff ? 'matchup playoff-game' : 'matchup';
+
+  return `<div class="${cardClass}">
     <div class="mu-teams">
-      <div class="mu-team"><span class="name">${t1.name}</span><span class="owner">@${t1.owner}</span><span class="score ${w1?'w':'l'}">${fmtPts(p1)}</span></div>
+      <div class="mu-team"><span class="name">${t1.name}</span><span class="owner">@${t1.owner}</span><span class="score ${w1?'w':'l'}">${fmtPts(p1)}${projStr1}</span></div>
       <div class="mu-vs">vs</div>
-      <div class="mu-team r"><span class="name">${t2.name}</span><span class="owner">@${t2.owner}</span><span class="score ${w2?'w':'l'}">${fmtPts(p2)}</span></div>
+      <div class="mu-team r"><span class="name">${t2.name}</span><span class="owner">@${t2.owner}</span><span class="score ${w2?'w':'l'}">${fmtPts(p2)}${projStr2}</span></div>
     </div>
     <div class="score-bar"><div class="t1" style="width:${pct1}%"></div><div class="t2" style="width:${pct2}%"></div></div>
     <div class="mu-details">${tags}<span>Margin: ${fmtPts(m.margin)}</span></div>
@@ -1044,7 +1197,7 @@ function renderTransactions(week, area) {
 
     let detail = '';
     // Adds
-    if (tx.adds) {
+    if (tx.adds && typeof tx.adds === 'object') {
       const adds = Object.entries(tx.adds).map(([pid, rid]) => {
         const p = playerInfo(pid);
         const t = teamDisplay(rid);
@@ -1053,7 +1206,7 @@ function renderTransactions(week, area) {
       detail += adds.join('<br>');
     }
     // Drops
-    if (tx.drops) {
+    if (tx.drops && typeof tx.drops === 'object') {
       const drops = Object.entries(tx.drops).map(([pid, rid]) => {
         const p = playerInfo(pid);
         const t = teamDisplay(rid);
@@ -1105,7 +1258,7 @@ function renderSeasonOverview() {
   const standings = data.standings||[];
 
   let h = `
-    <h2 class="section-title">2025 Season Overview</h2>
+    <h2 class="section-title">${currentSeason} Season Overview</h2>
     <p class="section-sub">${totalWeeksLoaded} weeks of data across ${standings.length} teams.</p>
   `;
 
@@ -1288,6 +1441,20 @@ function drawTrendChart(upToWeek) {
 // INIT
 // ========================
 loadData();
+
+// --- Mobile hamburger menu ---
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.querySelector('.topnav .right').classList.toggle('open');
+});
+
+// --- Scroll progress bar ---
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
 </script>
 </body>
 </html>
