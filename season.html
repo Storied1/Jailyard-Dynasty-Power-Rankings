@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Jailyard 2025 — Season Recap</title>
+<meta name="description" content="Complete 2025 season results for The Jailyard dynasty league. Weekly power rankings, matchup results, standings and analysis." />
+<style>
+:root{
+  --bg:#0b0d10; --fg:#e8ecf0; --muted:#7a8194;
+  --accent:#8b5cf6; --accent-2:#ec4899;
+  --good:#16a34a; --bad:#dc2626; --warn:#ca8a04;
+  --card:rgba(255,255,255,0.03); --glass:rgba(255,255,255,0.05);
+  --border:rgba(255,255,255,0.07);
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --maxw:1200px;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);overflow-x:hidden;}
+a{color:var(--accent-2);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(0,0,0,0.03);--glass:rgba(0,0,0,0.04);--border:rgba(0,0,0,0.08);color-scheme:light;}
+
+/* --- Top nav --- */
+.topnav{position:sticky;top:0;z-index:100;padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(11,13,16,0.75);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.topnav .brand{font-weight:700;letter-spacing:.04em;}
+.topnav .brand a{color:var(--fg);}
+.topnav .right{display:flex;align-items:center;gap:.6rem;}
+.topnav a.nav-link{color:var(--muted);font-size:.88rem;padding:.3rem .6rem;border-radius:999px;transition:color .2s,background .2s;}
+.topnav a.nav-link:hover{color:var(--fg);background:rgba(255,255,255,0.05);text-decoration:none;}
+.theme-btn{cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:999px;padding:.3rem .65rem;font-size:.85rem;color:var(--muted);}
+
+/* --- Week selector --- */
+.week-bar{padding:.8rem 1.5rem;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;}
+.week-bar .inner{max-width:var(--maxw);margin:0 auto;display:flex;gap:.35rem;align-items:center;}
+.week-btn{cursor:pointer;padding:.35rem .7rem;border-radius:999px;border:1px solid transparent;background:none;color:var(--muted);font-size:.82rem;font-family:inherit;font-weight:500;transition:all .15s;white-space:nowrap;}
+.week-btn:hover{color:var(--fg);background:rgba(255,255,255,0.05);}
+.week-btn.active{color:#fff;background:var(--accent);border-color:var(--accent);}
+.week-btn.playoff{border-color:rgba(236,72,153,0.3);}
+.week-btn.playoff.active{background:var(--accent-2);border-color:var(--accent-2);}
+
+/* --- Layout --- */
+.container{max-width:var(--maxw);margin:0 auto;padding:2.5rem 1.5rem;}
+.section-title{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;margin-bottom:.4rem;}
+.section-sub{color:var(--muted);margin-bottom:2rem;font-size:.95rem;}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1.2rem;}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;}
+
+/* --- Cards --- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.4rem;transition:transform .2s,box-shadow .2s;}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.15);}
+.card h3{font-size:1.05rem;margin-bottom:.8rem;}
+
+/* --- Matchup cards --- */
+.matchup{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.3rem;margin-bottom:.8rem;}
+.matchup-teams{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.6rem;}
+.matchup-team{flex:1;display:flex;flex-direction:column;gap:.15rem;}
+.matchup-team.right{text-align:right;align-items:flex-end;}
+.matchup-team .name{font-weight:700;font-size:.95rem;}
+.matchup-team .owner{font-size:.78rem;color:var(--muted);}
+.matchup-team .score{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;}
+.matchup-team .score.winner{color:var(--good);}
+.matchup-team .score.loser{color:var(--muted);}
+.matchup-vs{font-size:.7rem;color:var(--muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
+.score-bar{height:6px;border-radius:999px;overflow:hidden;display:flex;background:rgba(255,255,255,0.05);margin-bottom:.5rem;}
+.score-bar .t1{background:linear-gradient(90deg,var(--accent),#a78bfa);transition:width .8s cubic-bezier(.2,.8,.2,1);}
+.score-bar .t2{background:linear-gradient(90deg,var(--accent-2),#f472b6);transition:width .8s cubic-bezier(.2,.8,.2,1);}
+.matchup-top{display:flex;gap:.8rem;font-size:.78rem;color:var(--muted);margin-top:.4rem;flex-wrap:wrap;}
+.matchup-top span{background:rgba(255,255,255,0.04);padding:.1rem .45rem;border-radius:6px;}
+
+/* --- Standings table --- */
+.standings-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;}
+.standings-table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:700px;}
+.standings-table th,.standings-table td{padding:.5rem .65rem;border-bottom:1px solid rgba(255,255,255,0.04);}
+.standings-table th{text-align:left;color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;}
+.standings-table tbody tr{transition:background .15s;}
+.standings-table tbody tr:hover{background:rgba(139,92,246,0.06);}
+.rank-cell{font-weight:800;width:36px;text-align:center;}
+.change-up{color:var(--good);font-size:.75rem;}
+.change-down{color:var(--bad);font-size:.75rem;}
+.change-same{color:var(--muted);font-size:.75rem;}
+
+/* --- Power rank badge --- */
+.pr-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-weight:800;font-size:.8rem;}
+.pr-badge.top3{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;}
+.pr-badge.mid{background:rgba(255,255,255,0.06);color:var(--fg);}
+.pr-badge.bottom3{background:rgba(220,38,38,0.15);color:var(--bad);}
+
+/* --- Top performers --- */
+.performer{display:flex;align-items:center;gap:.7rem;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.performer:last-child{border-bottom:none;}
+.performer .perf-rank{width:24px;text-align:center;font-weight:700;color:var(--muted);font-size:.85rem;}
+.performer .perf-info{flex:1;}
+.performer .perf-name{font-weight:600;font-size:.9rem;}
+.performer .perf-meta{font-size:.78rem;color:var(--muted);}
+.performer .perf-pts{font-weight:800;font-size:1rem;color:var(--accent);}
+
+/* --- Charts --- */
+.chart-card{position:relative;}
+.chart-card canvas{width:100%;height:240px;}
+
+/* --- Stats row --- */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-bottom:2rem;}
+.stat-box{text-align:center;padding:1rem;border-radius:12px;background:var(--card);border:1px solid var(--border);}
+.stat-box .stat-val{font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.stat-box .stat-lbl{font-size:.78rem;color:var(--muted);margin-top:.2rem;}
+
+/* --- Loading / empty states --- */
+.loading{text-align:center;padding:4rem 1rem;color:var(--muted);}
+.loading .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:1rem;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:3rem;color:var(--muted);}
+
+/* --- Footer --- */
+footer{padding:3rem 1.5rem;text-align:center;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border);}
+
+/* --- Responsive --- */
+@media(max-width:600px){
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .topnav .right .nav-link{display:none;}
+  .matchup-team .score{font-size:1.1rem;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="brand"><a href="index.html">The Jailyard</a></div>
+  <div class="right">
+    <a href="history.html" class="nav-link">League Bible</a>
+    <a href="preseason.html" class="nav-link">Preseason</a>
+    <a href="week1.html" class="nav-link">Week 1 Column</a>
+    <button class="theme-btn" onclick="document.documentElement.classList.toggle('light')">Theme</button>
+  </div>
+</nav>
+
+<div class="week-bar">
+  <div class="inner" id="weekBar"></div>
+</div>
+
+<main>
+  <div class="container" id="content">
+    <div class="loading" id="loadingState">
+      <div class="spinner"></div>
+      <div>Loading season data...</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Built for The Jailyard. Data powered by the <a href="https://docs.sleeper.com/" style="color:var(--accent)">Sleeper API</a>.
+</footer>
+
+<script>
+// ========================
+// CONFIG
+// ========================
+const LEAGUE_IDS = {
+  2022: '792314138780090368',
+  2023: '918335334096846848',
+  2024: '1048889097223266304',
+  2025: '1180228858937966592',
+  2026: '1312884727480352768',
+};
+const CURRENT_SEASON = 2025;
+const SLEEPER_API = 'https://api.sleeper.app/v1';
+
+// ========================
+// STATE
+// ========================
+let seasonData = null;       // Combined data from fetch script (offline mode)
+let leagueInfo = null;
+let usersMap = {};           // user_id -> {username, team_name}
+let rosterMap = {};          // roster_id -> {owner_id, username, team_name, ...}
+let playersDb = null;        // player_id -> {name, position, team}
+let allMatchups = {};        // week -> [matchup entries]
+let allRosters = null;       // roster data
+let weeklyStandings = {};    // week -> computed standings
+let playoffWeekStart = 15;
+let totalWeeksLoaded = 0;
+let currentWeek = 1;
+
+// ========================
+// DATA LOADING
+// ========================
+async function loadData() {
+  const leagueId = LEAGUE_IDS[CURRENT_SEASON];
+
+  // Try offline data first (from fetch_sleeper.py)
+  try {
+    const resp = await fetch(`data/${CURRENT_SEASON}/season_combined.json`);
+    if (resp.ok) {
+      seasonData = await resp.json();
+      console.log('Loaded offline season data');
+      initFromOfflineData();
+      return;
+    }
+  } catch (e) {
+    console.log('No offline data, trying live API...');
+  }
+
+  // Live API mode
+  try {
+    const [leagueResp, usersResp, rostersResp] = await Promise.all([
+      fetch(`${SLEEPER_API}/league/${leagueId}`),
+      fetch(`${SLEEPER_API}/league/${leagueId}/users`),
+      fetch(`${SLEEPER_API}/league/${leagueId}/rosters`),
+    ]);
+    leagueInfo = await leagueResp.json();
+    const users = await usersResp.json();
+    allRosters = await rostersResp.json();
+
+    playoffWeekStart = leagueInfo?.settings?.playoff_week_start || 15;
+
+    // Build user map
+    users.forEach(u => {
+      usersMap[u.user_id] = {
+        username: u.display_name || 'Unknown',
+        team_name: (u.metadata || {}).team_name || '',
+      };
+    });
+
+    // Build roster map
+    allRosters.forEach(r => {
+      const user = usersMap[r.owner_id] || {};
+      rosterMap[r.roster_id] = {
+        roster_id: r.roster_id,
+        owner_id: r.owner_id,
+        username: user.username || 'Unknown',
+        team_name: user.team_name || '',
+        final_record: {
+          wins: r.settings?.wins || 0,
+          losses: r.settings?.losses || 0,
+          ties: r.settings?.ties || 0,
+          fpts: (r.settings?.fpts || 0) + (r.settings?.fpts_decimal || 0) / 100,
+          fpts_against: (r.settings?.fpts_against || 0) + (r.settings?.fpts_against_decimal || 0) / 100,
+        },
+      };
+    });
+
+    // Fetch matchups for all weeks
+    const maxWeek = playoffWeekStart + 3;
+    for (let w = 1; w <= maxWeek; w++) {
+      try {
+        const mResp = await fetch(`${SLEEPER_API}/league/${leagueId}/matchups/${w}`);
+        const matchups = await mResp.json();
+        if (!matchups || matchups.length === 0) break;
+        const hasScores = matchups.some(m => (m.points || 0) > 0);
+        if (!hasScores) break;
+        allMatchups[w] = matchups;
+        totalWeeksLoaded = w;
+      } catch (e) { break; }
+    }
+
+    // Try to load player names (large file, optional)
+    try {
+      const pResp = await fetch(`data/players.json`);
+      if (pResp.ok) playersDb = await pResp.json();
+    } catch (e) {}
+    if (!playersDb) {
+      try {
+        const pResp = await fetch(`${SLEEPER_API}/players/nfl`);
+        if (pResp.ok) playersDb = await pResp.json();
+      } catch (e) {}
+    }
+
+    computeAllWeeklyStandings();
+    initUI();
+  } catch (e) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty-state">
+        <h2>Could not load data</h2>
+        <p>Run <code>python3 fetch_sleeper.py</code> first to cache the data, or ensure you have internet access for the live Sleeper API.</p>
+        <p style="margin-top:1rem;font-size:.85rem;color:var(--muted)">${e.message}</p>
+      </div>`;
+  }
+}
+
+function initFromOfflineData() {
+  const d = seasonData;
+  playoffWeekStart = d.playoff_week_start || 15;
+
+  // Build roster map
+  Object.entries(d.roster_map).forEach(([rid, info]) => {
+    rosterMap[parseInt(rid)] = info;
+  });
+
+  totalWeeksLoaded = d.weeks.length;
+  weeklyStandings = {};
+  d.weeks.forEach(w => {
+    weeklyStandings[w.week] = w;
+  });
+
+  initUI();
+}
+
+// ========================
+// COMPUTE STANDINGS (LIVE MODE)
+// ========================
+function computeAllWeeklyStandings() {
+  const cumulative = {};
+  Object.keys(rosterMap).forEach(rid => {
+    cumulative[rid] = { wins: 0, losses: 0, ties: 0, pf: 0, pa: 0, history: [] };
+  });
+
+  for (let w = 1; w <= totalWeeksLoaded; w++) {
+    const matchups = allMatchups[w];
+    if (!matchups) continue;
+    const isPlayoff = w >= playoffWeekStart;
+
+    // Group by matchup_id
+    const groups = {};
+    matchups.forEach(m => {
+      const mid = m.matchup_id;
+      if (mid == null) return;
+      if (!groups[mid]) groups[mid] = [];
+      groups[mid].push(m);
+    });
+
+    const weekScores = {};
+    const matchupResults = [];
+    const topPlayers = [];
+
+    Object.values(groups).forEach(pair => {
+      if (pair.length !== 2) return;
+      const [t1, t2] = pair;
+      const p1 = t1.points || 0, p2 = t2.points || 0;
+      weekScores[t1.roster_id] = p1;
+      weekScores[t2.roster_id] = p2;
+
+      const winner = p1 > p2 ? t1.roster_id : p2 > p1 ? t2.roster_id : null;
+
+      // Top starters
+      function getTopStarters(entry) {
+        const starters = entry.starters || [];
+        const pts = entry.starters_points || [];
+        return starters.map((pid, i) => ({
+          pid, ...playerInfo(pid), points: pts[i] || 0
+        })).sort((a, b) => b.points - a.points).slice(0, 5);
+      }
+
+      matchupResults.push({
+        matchup_id: t1.matchup_id,
+        team1: { roster_id: t1.roster_id, points: p1, top_starters: getTopStarters(t1) },
+        team2: { roster_id: t2.roster_id, points: p2, top_starters: getTopStarters(t2) },
+        winner,
+      });
+
+      // All starters for top performers
+      [t1, t2].forEach(entry => {
+        (entry.starters || []).forEach((pid, i) => {
+          const pts = (entry.starters_points || [])[i] || 0;
+          if (pts > 0) topPlayers.push({ pid, ...playerInfo(pid), points: pts, roster_id: entry.roster_id });
+        });
+      });
+
+      // Update records
+      if (!isPlayoff) {
+        if (cumulative[t1.roster_id]) { cumulative[t1.roster_id].pf += p1; cumulative[t1.roster_id].pa += p2; }
+        if (cumulative[t2.roster_id]) { cumulative[t2.roster_id].pf += p2; cumulative[t2.roster_id].pa += p1; }
+        if (p1 > p2) {
+          if (cumulative[t1.roster_id]) cumulative[t1.roster_id].wins++;
+          if (cumulative[t2.roster_id]) cumulative[t2.roster_id].losses++;
+        } else if (p2 > p1) {
+          if (cumulative[t2.roster_id]) cumulative[t2.roster_id].wins++;
+          if (cumulative[t1.roster_id]) cumulative[t1.roster_id].losses++;
+        } else {
+          if (cumulative[t1.roster_id]) cumulative[t1.roster_id].ties++;
+          if (cumulative[t2.roster_id]) cumulative[t2.roster_id].ties++;
+        }
+      }
+    });
+
+    // Track weekly points
+    Object.keys(cumulative).forEach(rid => {
+      cumulative[rid].history.push(weekScores[rid] || 0);
+    });
+
+    topPlayers.sort((a, b) => b.points - a.points);
+
+    // Power rankings
+    const standings = Object.entries(cumulative).map(([rid, rec]) => {
+      const total = rec.wins + rec.losses + rec.ties;
+      const winPct = total > 0 ? (rec.wins + 0.5 * rec.ties) / total : 0;
+      const avgPf = Object.values(cumulative).reduce((a, r) => a + r.pf, 0) / Object.keys(cumulative).length;
+      const pfFactor = avgPf > 0 ? rec.pf / avgPf : 1;
+      const recent = rec.history.slice(-3);
+      const recentAvg = recent.length > 0 ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
+      const leagueRecentAvg = Object.values(cumulative).reduce((a, r) => {
+        const rc = r.history.slice(-3);
+        return a + (rc.length > 0 ? rc.reduce((x, y) => x + y, 0) / rc.length : 0);
+      }, 0) / Object.keys(cumulative).length;
+      const recentFactor = leagueRecentAvg > 0 ? recentAvg / leagueRecentAvg : 1;
+      const avgPa = Object.values(cumulative).reduce((a, r) => a + r.pa, 0) / Object.keys(cumulative).length;
+      const sosFactor = avgPa > 0 ? rec.pa / avgPa : 1;
+
+      const powerScore = 0.40 * winPct + 0.30 * pfFactor + 0.20 * recentFactor + 0.10 * sosFactor;
+
+      return {
+        roster_id: parseInt(rid), ...rec,
+        power_score: Math.round(powerScore * 10000) / 10000,
+        week_points: weekScores[rid] || 0,
+      };
+    });
+
+    standings.sort((a, b) => b.power_score - a.power_score);
+    standings.forEach((s, i) => s.power_rank = i + 1);
+
+    const scores = Object.values(weekScores);
+    weeklyStandings[w] = {
+      week: w,
+      is_playoff: w >= playoffWeekStart,
+      matchups: matchupResults,
+      standings,
+      top_performers: topPlayers.slice(0, 10),
+      highest_scorer: scores.length ? {
+        roster_id: parseInt(Object.entries(weekScores).sort((a, b) => b[1] - a[1])[0][0]),
+        points: Math.max(...scores)
+      } : null,
+      lowest_scorer: scores.length ? {
+        roster_id: parseInt(Object.entries(weekScores).sort((a, b) => a[1] - b[1])[0][0]),
+        points: Math.min(...scores)
+      } : null,
+    };
+  }
+}
+
+// ========================
+// HELPERS
+// ========================
+function playerInfo(pid) {
+  if (!playersDb || !playersDb[pid]) return { name: pid, position: '?', team: '?' };
+  const p = playersDb[pid];
+  return { name: `${p.first_name || ''} ${p.last_name || ''}`.trim(), position: p.position || '?', team: p.team || '?' };
+}
+
+function teamDisplay(rosterId) {
+  const r = rosterMap[rosterId];
+  if (!r) return { name: `Team ${rosterId}`, owner: '' };
+  return { name: r.team_name || r.username || `Team ${rosterId}`, owner: r.username || '' };
+}
+
+function prBadgeClass(rank, total) {
+  if (rank <= 3) return 'top3';
+  if (rank > total - 3) return 'bottom3';
+  return 'mid';
+}
+
+function changeArrow(current, previous) {
+  if (!previous) return '<span class="change-same">—</span>';
+  const diff = previous - current; // positive = moved up
+  if (diff > 0) return `<span class="change-up">+${diff}</span>`;
+  if (diff < 0) return `<span class="change-down">${diff}</span>`;
+  return '<span class="change-same">—</span>';
+}
+
+// ========================
+// UI RENDERING
+// ========================
+function initUI() {
+  buildWeekBar();
+  currentWeek = totalWeeksLoaded || 1;
+  setActiveWeek(currentWeek);
+  renderWeek(currentWeek);
+}
+
+function buildWeekBar() {
+  const bar = document.getElementById('weekBar');
+  bar.innerHTML = '';
+  for (let w = 1; w <= totalWeeksLoaded; w++) {
+    const btn = document.createElement('button');
+    btn.className = 'week-btn' + (w >= playoffWeekStart ? ' playoff' : '');
+    btn.textContent = w >= playoffWeekStart ? `Playoff ${w - playoffWeekStart + 1}` : `Week ${w}`;
+    btn.dataset.week = w;
+    btn.addEventListener('click', () => {
+      currentWeek = w;
+      setActiveWeek(w);
+      renderWeek(w);
+    });
+    bar.appendChild(btn);
+  }
+}
+
+function setActiveWeek(w) {
+  document.querySelectorAll('.week-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.week) === w));
+}
+
+function renderWeek(week) {
+  const data = weeklyStandings[week];
+  if (!data) {
+    document.getElementById('content').innerHTML = '<div class="empty-state">No data for this week.</div>';
+    return;
+  }
+
+  const prevData = weeklyStandings[week - 1] || null;
+  const prevRanks = {};
+  if (prevData) {
+    (prevData.standings || []).forEach(s => { prevRanks[s.roster_id] = s.power_rank; });
+  }
+
+  const isPlayoff = data.is_playoff;
+  const standings = data.standings || [];
+  const matchups = data.matchups || [];
+  const topPerformers = data.top_performers || [];
+  const total = standings.length;
+
+  // Stats
+  const allPts = standings.map(s => s.week_points).filter(p => p > 0);
+  const avgPts = allPts.length ? (allPts.reduce((a, b) => a + b, 0) / allPts.length).toFixed(1) : '—';
+  const highPts = data.highest_scorer ? data.highest_scorer.points.toFixed(1) : '—';
+  const lowPts = data.lowest_scorer ? data.lowest_scorer.points.toFixed(1) : '—';
+  const highTeam = data.highest_scorer ? teamDisplay(data.highest_scorer.roster_id).name : '—';
+
+  let html = `
+    <h2 class="section-title">${isPlayoff ? `Playoff Round ${week - playoffWeekStart + 1}` : `Week ${week}`}</h2>
+    <p class="section-sub">Power rankings, matchup results, and top performers.</p>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-val">${avgPts}</div><div class="stat-lbl">Avg Points</div></div>
+      <div class="stat-box"><div class="stat-val">${highPts}</div><div class="stat-lbl">High Score</div></div>
+      <div class="stat-box"><div class="stat-val">${lowPts}</div><div class="stat-lbl">Low Score</div></div>
+      <div class="stat-box"><div class="stat-val">${highTeam}</div><div class="stat-lbl">Top Scorer</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h3 class="section-title" style="font-size:1.15rem">Matchup Results</h3>
+        <div style="margin-top:1rem" id="matchupsArea"></div>
+      </div>
+      <div>
+        <h3 class="section-title" style="font-size:1.15rem">Power Rankings</h3>
+        <div style="margin-top:1rem">
+          <div class="standings-wrap">
+            <table class="standings-table">
+              <thead><tr>
+                <th>PR</th><th></th><th>Team</th><th>Record</th><th>PF</th><th>PA</th><th>This Week</th><th>Power</th>
+              </tr></thead>
+              <tbody id="standingsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:2.5rem">
+      <div class="grid-2">
+        <div class="card">
+          <h3>Top Performers</h3>
+          <div id="topPerformersArea"></div>
+        </div>
+        <div class="card chart-card">
+          <h3>Points Trend</h3>
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('content').innerHTML = html;
+
+  // Render matchups
+  const matchupsArea = document.getElementById('matchupsArea');
+  matchups.forEach(m => {
+    const t1 = teamDisplay(m.team1.roster_id);
+    const t2 = teamDisplay(m.team2.roster_id);
+    const p1 = m.team1.points, p2 = m.team2.points;
+    const total = p1 + p2 || 1;
+    const pct1 = ((p1 / total) * 100).toFixed(1);
+    const pct2 = ((p2 / total) * 100).toFixed(1);
+    const w1 = m.winner === m.team1.roster_id;
+    const w2 = m.winner === m.team2.roster_id;
+
+    const topStarters1 = (m.team1.top_starters || []).slice(0, 3).map(s => `<span>${s.name} ${s.points.toFixed(1)}</span>`).join('');
+    const topStarters2 = (m.team2.top_starters || []).slice(0, 3).map(s => `<span>${s.name} ${s.points.toFixed(1)}</span>`).join('');
+
+    matchupsArea.innerHTML += `
+      <div class="matchup">
+        <div class="matchup-teams">
+          <div class="matchup-team">
+            <span class="name">${t1.name}</span>
+            <span class="owner">@${t1.owner}</span>
+            <span class="score ${w1 ? 'winner' : 'loser'}">${p1.toFixed(1)}</span>
+          </div>
+          <span class="matchup-vs">vs</span>
+          <div class="matchup-team right">
+            <span class="name">${t2.name}</span>
+            <span class="owner">@${t2.owner}</span>
+            <span class="score ${w2 ? 'winner' : 'loser'}">${p2.toFixed(1)}</span>
+          </div>
+        </div>
+        <div class="score-bar">
+          <div class="t1" style="width:${pct1}%"></div>
+          <div class="t2" style="width:${pct2}%"></div>
+        </div>
+        <div class="matchup-top">${topStarters1}${topStarters2}</div>
+      </div>`;
+  });
+
+  // Render standings
+  const standingsBody = document.getElementById('standingsBody');
+  standings.forEach(s => {
+    const team = teamDisplay(s.roster_id);
+    const prevRank = prevRanks[s.roster_id];
+    const change = changeArrow(s.power_rank, prevRank);
+    const cls = prBadgeClass(s.power_rank, total);
+    standingsBody.innerHTML += `
+      <tr>
+        <td class="rank-cell"><span class="pr-badge ${cls}">${s.power_rank}</span></td>
+        <td>${change}</td>
+        <td><strong>${team.name}</strong><br><span style="font-size:.78rem;color:var(--muted)">@${team.owner}</span></td>
+        <td>${s.wins}-${s.losses}${s.ties ? `-${s.ties}` : ''}</td>
+        <td>${s.pf.toFixed(1)}</td>
+        <td>${s.pa.toFixed(1)}</td>
+        <td>${s.week_points.toFixed(1)}</td>
+        <td style="font-size:.82rem;color:var(--muted)">${s.power_score.toFixed(3)}</td>
+      </tr>`;
+  });
+
+  // Render top performers
+  const perfArea = document.getElementById('topPerformersArea');
+  topPerformers.slice(0, 8).forEach((p, i) => {
+    const owner = teamDisplay(p.roster_id);
+    perfArea.innerHTML += `
+      <div class="performer">
+        <div class="perf-rank">${i + 1}</div>
+        <div class="perf-info">
+          <div class="perf-name">${p.name}</div>
+          <div class="perf-meta">${p.position} — ${p.team} — ${owner.name}</div>
+        </div>
+        <div class="perf-pts">${p.points.toFixed(1)}</div>
+      </div>`;
+  });
+
+  // Draw trend chart
+  drawTrendChart(week);
+}
+
+// ========================
+// TREND CHART
+// ========================
+function drawTrendChart(upToWeek) {
+  const canvas = document.getElementById('trendChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const pad = { top: 20, right: 20, bottom: 30, left: 40 };
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+
+  // Gather data: for each roster, collect weekly points up to current week
+  const rosterIds = Object.keys(rosterMap).map(Number);
+  const series = {};
+  rosterIds.forEach(rid => { series[rid] = []; });
+
+  for (let wk = 1; wk <= upToWeek; wk++) {
+    const wd = weeklyStandings[wk];
+    if (!wd) continue;
+    const scores = {};
+    (wd.standings || []).forEach(s => { scores[s.roster_id] = s.week_points; });
+    rosterIds.forEach(rid => { series[rid].push(scores[rid] || 0); });
+  }
+
+  const allPts = Object.values(series).flat().filter(v => v > 0);
+  if (allPts.length === 0) return;
+  const yMin = Math.min(...allPts) * 0.85;
+  const yMax = Math.max(...allPts) * 1.1;
+  const weeks = series[rosterIds[0]]?.length || 1;
+
+  const xScale = i => pad.left + (i / Math.max(weeks - 1, 1)) * plotW;
+  const yScale = v => pad.top + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '11px system-ui';
+  for (let i = 0; i <= 4; i++) {
+    const v = yMin + (i / 4) * (yMax - yMin);
+    const y = yScale(v);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + plotW, y); ctx.stroke();
+    ctx.fillText(Math.round(v), 4, y + 4);
+  }
+  for (let i = 0; i < weeks; i++) {
+    ctx.fillText(`W${i + 1}`, xScale(i) - 8, pad.top + plotH + 16);
+  }
+
+  // Lines - color by power rank
+  const currentStandings = weeklyStandings[upToWeek]?.standings || [];
+  const rankMap = {};
+  currentStandings.forEach(s => { rankMap[s.roster_id] = s.power_rank; });
+
+  const colors = ['#8b5cf6', '#ec4899', '#16a34a', '#f59e0b', '#06b6d4', '#ef4444',
+                  '#a78bfa', '#f472b6', '#4ade80', '#fbbf24', '#22d3ee', '#fb923c'];
+
+  rosterIds.forEach((rid, idx) => {
+    const pts = series[rid];
+    if (pts.length < 2) return;
+    ctx.beginPath();
+    ctx.strokeStyle = colors[idx % colors.length];
+    ctx.lineWidth = rankMap[rid] <= 3 ? 2.5 : 1.2;
+    ctx.globalAlpha = rankMap[rid] <= 3 ? 1 : 0.4;
+    pts.forEach((p, i) => {
+      if (p === 0) return;
+      if (i === 0) ctx.moveTo(xScale(i), yScale(p));
+      else ctx.lineTo(xScale(i), yScale(p));
+    });
+    ctx.stroke();
+    // Label the top 3
+    if (rankMap[rid] <= 3 && pts.length > 0) {
+      const lastPt = pts[pts.length - 1];
+      ctx.fillStyle = colors[idx % colors.length];
+      ctx.font = '10px system-ui';
+      ctx.fillText(teamDisplay(rid).name.split(' ')[0], xScale(pts.length - 1) + 4, yScale(lastPt) + 3);
+    }
+  });
+  ctx.globalAlpha = 1;
+}
+
+// ========================
+// INIT
+// ========================
+loadData();
+</script>
+</body>
+</html>
