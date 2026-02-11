@@ -247,6 +247,34 @@
     100%{opacity:0;transform:translateY(100vh) rotate(720deg) scale(0.3);}
   }
 
+  /* --- Scroll progress bar --- */
+  .scroll-progress{
+    position:fixed; top:0; left:0; height:3px; z-index:200;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    width:0%; transition:width .1s linear; pointer-events:none;
+  }
+
+  /* --- Keyboard shortcut overlay --- */
+  .kbd-overlay{
+    position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.7);
+    backdrop-filter:blur(6px); display:none; place-items:center;
+    opacity:0; transition:opacity .2s;
+  }
+  .kbd-overlay.show{ display:grid; opacity:1; }
+  .kbd-box{
+    background:var(--bg); border:1px solid var(--border); border-radius:16px;
+    padding:2rem 2.5rem; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .kbd-box h3{ font-size:1.1rem; margin-bottom:1rem; }
+  .kbd-row{ display:flex; justify-content:space-between; align-items:center; padding:.45rem 0; border-bottom:1px solid var(--border); }
+  .kbd-row:last-child{ border:none; }
+  .kbd-row kbd{
+    display:inline-block; padding:.2rem .5rem; border-radius:6px; font-size:.8rem;
+    background:rgba(255,255,255,0.08); border:1px solid var(--border);
+    font-family:system-ui; min-width:24px; text-align:center;
+  }
+  .kbd-row span{ color:var(--muted); font-size:.88rem; }
+
   /* --- Responsive --- */
   @media(max-width:600px){
     .topnav .hamburger{ display:block; }
@@ -265,6 +293,23 @@
 </style>
 </head>
 <body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Keyboard shortcut overlay -->
+<div class="kbd-overlay" id="kbdOverlay">
+  <div class="kbd-box">
+    <h3>Keyboard Shortcuts</h3>
+    <div class="kbd-row"><span>Show this help</span><kbd>?</kbd></div>
+    <div class="kbd-row"><span>Go to League Bible</span><kbd>1</kbd></div>
+    <div class="kbd-row"><span>Go to Season Hub</span><kbd>2</kbd></div>
+    <div class="kbd-row"><span>Go to Rankings</span><kbd>3</kbd></div>
+    <div class="kbd-row"><span>Go to Week 1</span><kbd>4</kbd></div>
+    <div class="kbd-row"><span>Toggle theme</span><kbd>T</kbd></div>
+    <div class="kbd-row"><span>Back to top</span><kbd>Home</kbd></div>
+    <div class="kbd-row"><span>Close overlay</span><kbd>Esc</kbd></div>
+  </div>
+</div>
 
 <nav class="topnav" id="topnav">
   <a href="index.html" class="brand" style="text-decoration:none">The Jailyard</a>
@@ -569,6 +614,30 @@ document.querySelectorAll('#navLinks a').forEach(a => {
       }
     }
   });
+})();
+
+// --- Scroll progress bar ---
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
+
+// --- Keyboard shortcuts ---
+(function(){
+  const overlay = document.getElementById('kbdOverlay');
+  const pages = {1:'history.html',2:'season.html',3:'preseason.html',4:'week1.html'};
+  document.addEventListener('keydown', e => {
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    if(e.key==='?'){ overlay.classList.toggle('show'); return; }
+    if(e.key==='Escape'){ overlay.classList.remove('show'); return; }
+    if(e.key==='t'||e.key==='T'){ document.documentElement.classList.toggle('light'); return; }
+    if(e.key==='Home'){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+    if(pages[e.key]){ window.location.href=pages[e.key]; }
+  });
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('show'); });
 })();
 </script>
 </body>

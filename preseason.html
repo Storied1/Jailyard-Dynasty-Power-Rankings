@@ -173,9 +173,11 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 /* --- Row hover in master table --- */
 .master-table tbody tr{cursor:pointer;transition:background .15s;}
 .master-table tbody tr:hover{background:rgba(108,71,255,0.06);}
+.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .1s linear;pointer-events:none;}
 </style>
 </head>
 <body>
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <header class="hero" id="top">
   <div class="hero__bg parallax" style="--speed:.15"></div>
@@ -1293,6 +1295,15 @@ btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth'
 
 // Observe tier dividers for fade-in
 document.querySelectorAll('.tier-divider').forEach(el => observer.observe(el));
+
+// --- Scroll progress bar ---
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
 </script>
 </body>
 </html>

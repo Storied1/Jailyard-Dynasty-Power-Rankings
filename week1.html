@@ -193,9 +193,11 @@
     #nav nav.open{display:flex;flex-direction:column;gap:0;}
     #nav .inner{flex-wrap:wrap;}
   }
+.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .1s linear;pointer-events:none;}
 </style>
 </head>
 <body>
+<div class="scroll-progress" id="scrollProgress"></div>
 <header class="hero">
   <div class="hero__layer layer-stars" data-speed="0.2"></div>
   <div class="hero__layer layer-grid" data-speed="0.05"></div>
@@ -459,6 +461,15 @@ document.getElementById('hamburger').addEventListener('click', () => {
 document.querySelectorAll('#nav nav a').forEach(a => {
   a.addEventListener('click', () => document.querySelector('#nav nav').classList.remove('open'));
 });
+
+// --- Scroll progress bar ---
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
 </script>
 </body>
 </html>
