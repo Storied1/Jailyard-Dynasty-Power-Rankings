@@ -456,14 +456,22 @@ function computeHistory(raw){
     eH[o1].push({season:g.season,week:g.week,elo:Math.round(elo[o1]*10)/10});
     eH[o2].push({season:g.season,week:g.week,elo:Math.round(elo[o2]*10)/10});
   }
-  // 4. H2H
+  // 4. H2H — store BOTH directions so every matrix cell is populated
   const h2h={};
   for(const g of games){
-    if(!g.o1||!g.o2)continue;const k=g.o1+'|'+g.o2;
-    if(!h2h[k])h2h[k]={wins:0,losses:0,pf:0,pa:0,games:[]};
-    h2h[k].pf+=g.p1;h2h[k].pa+=g.p2;
-    h2h[k].games.push({season:g.season,week:g.week,pts:g.p1,opp_pts:g.p2});
-    if(g.wo===g.o1)h2h[k].wins++;else if(g.wo===g.o2)h2h[k].losses++;
+    if(!g.o1||!g.o2)continue;
+    // Forward direction: o1 perspective
+    const k1=g.o1+'|'+g.o2;
+    if(!h2h[k1])h2h[k1]={wins:0,losses:0,pf:0,pa:0,games:[]};
+    h2h[k1].pf+=g.p1;h2h[k1].pa+=g.p2;
+    h2h[k1].games.push({season:g.season,week:g.week,pts:g.p1,opp_pts:g.p2});
+    if(g.wo===g.o1)h2h[k1].wins++;else if(g.wo===g.o2)h2h[k1].losses++;
+    // Reverse direction: o2 perspective
+    const k2=g.o2+'|'+g.o1;
+    if(!h2h[k2])h2h[k2]={wins:0,losses:0,pf:0,pa:0,games:[]};
+    h2h[k2].pf+=g.p2;h2h[k2].pa+=g.p1;
+    h2h[k2].games.push({season:g.season,week:g.week,pts:g.p2,opp_pts:g.p1});
+    if(g.wo===g.o2)h2h[k2].wins++;else if(g.wo===g.o1)h2h[k2].losses++;
   }
   for(const k in h2h){h2h[k].pf=Math.round(h2h[k].pf*10)/10;h2h[k].pa=Math.round(h2h[k].pa*10)/10;}
   // 5. Records
@@ -757,7 +765,7 @@ function renderEloChart(){
   const H=380;
   cv.width=W*dpr;cv.height=H*dpr;
   cv.style.width=W+'px';cv.style.height=H+'px';
-  ctx.scale(dpr,dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
   const m={top:18,right:16,bottom:36,left:48};
   const pW=W-m.left-m.right,pH=H-m.top-m.bottom;
   const owners=Object.keys(DATA.elo_history).filter(o=>DATA.elo_history[o].length>0);

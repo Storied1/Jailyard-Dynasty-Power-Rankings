@@ -1044,7 +1044,7 @@ function renderTransactions(week, area) {
 
     let detail = '';
     // Adds
-    if (tx.adds) {
+    if (tx.adds && typeof tx.adds === 'object') {
       const adds = Object.entries(tx.adds).map(([pid, rid]) => {
         const p = playerInfo(pid);
         const t = teamDisplay(rid);
@@ -1053,7 +1053,7 @@ function renderTransactions(week, area) {
       detail += adds.join('<br>');
     }
     // Drops
-    if (tx.drops) {
+    if (tx.drops && typeof tx.drops === 'object') {
       const drops = Object.entries(tx.drops).map(([pid, rid]) => {
         const p = playerInfo(pid);
         const t = teamDisplay(rid);

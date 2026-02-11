@@ -761,8 +761,8 @@ function buildTable(){
     { key:'draft', label:'Draft', numeric:true, path:'ranks.draft' }
   ];
   let html='<thead><tr>' + cols.map(c => `<th data-key="${c.key}" data-path="${c.path||''}" data-num="${c.numeric?1:0}">${c.label}</th>`).join('') + '</tr></thead><tbody>';
-  league.teams.forEach(t => {
-    html += `<tr data-id="${idFromName(t.name)}"><td>${t.rank}</td><td>${t.name}</td><td>${t.owner}</td><td>${t.tier}</td><td>${t.overallValue}</td><td>${t.starterValue}</td><td>${t.avgAge}</td><td>${t.ranks.qb}</td><td>${t.ranks.rb}</td><td>${t.ranks.wr}</td><td>${t.ranks.te}</td><td>${t.ranks.draft}</td></tr>`;
+  league.teams.forEach((t,idx) => {
+    html += `<tr data-id="${idFromName(t.name)}" data-idx="${idx}"><td>${t.rank}</td><td>${t.name}</td><td>${t.owner}</td><td>${t.tier}</td><td>${t.overallValue}</td><td>${t.starterValue}</td><td>${t.avgAge}</td><td>${t.ranks.qb}</td><td>${t.ranks.rb}</td><td>${t.ranks.wr}</td><td>${t.ranks.te}</td><td>${t.ranks.draft}</td></tr>`;
   });
   html += '</tbody>';
   table.innerHTML = html;
@@ -785,8 +785,8 @@ function buildTable(){
     th.classList.add(asc ? 'sort-asc' : 'sort-desc');
     const rows = Array.from(table.querySelectorAll('tbody tr'));
     rows.sort((a,b) => {
-      const ta = league.teams[a.rowIndex];
-      const tb = league.teams[b.rowIndex];
+      const ta = league.teams[parseInt(a.dataset.idx)];
+      const tb = league.teams[parseInt(b.dataset.idx)];
       const va = path ? path.split('.').reduce((o,k) => o[k], ta) : ta[key];
       const vb = path ? path.split('.').reduce((o,k) => o[k], tb) : tb[key];
       if(numeric) return asc ? (va - vb) : (vb - va);
@@ -894,12 +894,12 @@ function drawStacked(canvas, teams){
 function drawPtsSched(canvas, infoMap){
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
-  const dpr = devicePixelRatio;
+  const dpr = devicePixelRatio || 1;
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   canvas.width = w * dpr;
   canvas.height = h * dpr;
-  ctx.scale(dpr,dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const pad = 40;
   const plotW = w - pad*2;
   const plotH = h - pad*2;
@@ -957,12 +957,12 @@ function drawPtsSched(canvas, infoMap){
 function drawTitles(canvas){
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
-  const dpr = devicePixelRatio;
+  const dpr = devicePixelRatio || 1;
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   canvas.width = w * dpr;
   canvas.height = h * dpr;
-  ctx.scale(dpr,dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const pad=40;
   const plotW = w - pad*2;
   const plotH = h - pad*2;

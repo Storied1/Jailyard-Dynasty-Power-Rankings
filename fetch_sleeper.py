@@ -597,19 +597,22 @@ def build_league_history(seasons):
         o1, o2 = game["o1"], game["o2"]
         if not o1 or not o2:
             continue
-        key = (o1, o2)
-        if key not in h2h:
-            h2h[key] = {"wins": 0, "losses": 0, "pf": 0, "pa": 0, "games": []}
-        h2h[key]["pf"] += game["p1"]
-        h2h[key]["pa"] += game["p2"]
-        h2h[key]["games"].append({
-            "season": game["season"], "week": game["week"],
-            "pts": game["p1"], "opp_pts": game["p2"],
-        })
-        if game["winner_owner"] == o1:
-            h2h[key]["wins"] += 1
-        elif game["winner_owner"] == o2:
-            h2h[key]["losses"] += 1
+        # Store BOTH directions so every matrix cell is populated
+        for a, b, pa_, pb_ in [(o1, o2, game["p1"], game["p2"]),
+                                (o2, o1, game["p2"], game["p1"])]:
+            key = (a, b)
+            if key not in h2h:
+                h2h[key] = {"wins": 0, "losses": 0, "pf": 0, "pa": 0, "games": []}
+            h2h[key]["pf"] += pa_
+            h2h[key]["pa"] += pb_
+            h2h[key]["games"].append({
+                "season": game["season"], "week": game["week"],
+                "pts": pa_, "opp_pts": pb_,
+            })
+            if game["winner_owner"] == a:
+                h2h[key]["wins"] += 1
+            elif game["winner_owner"] == b:
+                h2h[key]["losses"] += 1
 
     # Convert to serializable format
     h2h_serial = {}

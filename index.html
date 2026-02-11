@@ -329,9 +329,10 @@
   const STAR_COUNT = 180;
 
   function resize(){
-    W = canvas.width = canvas.clientWidth * devicePixelRatio;
-    H = canvas.height = canvas.clientHeight * devicePixelRatio;
-    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    const dpr = devicePixelRatio || 1;
+    W = canvas.width = canvas.clientWidth * dpr;
+    H = canvas.height = canvas.clientHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   function initStars(){
     stars = [];
