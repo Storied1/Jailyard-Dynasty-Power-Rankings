@@ -1,5 +1,5 @@
-# Cached Sleeper API data (large JSON files, regenerate with fetch_sleeper.py)
-data/
+# Large temporary files (players.json is ~5MB, only needed during fetch)
+data/players.json
 
 # Python bytecode cache
 __pycache__/
