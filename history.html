@@ -151,6 +151,9 @@ a{color:inherit;text-decoration:none;}
 .reveal{opacity:0;transform:translateY(25px);transition:opacity .6s cubic-bezier(.17,.67,.24,1),transform .6s cubic-bezier(.17,.67,.24,1);}
 .reveal.visible{opacity:1;transform:none;}
 
+/* View Transition crossfade */
+::view-transition-old(root),::view-transition-new(root){animation-duration:.2s;}
+
 @media(max-width:800px){
   .topnav .links{display:none;}
   .hero{min-height:55vh;}
@@ -240,9 +243,10 @@ function displayName(f){return(f&&(f.team_name||f.username))||'Unknown';}
   let W,H,nodes=[],mouse={x:-999,y:-999};
   const N=45,DIST=140;
   function resize(){
-    W=cv.width=cv.clientWidth*(devicePixelRatio||1);
-    H=cv.height=cv.clientHeight*(devicePixelRatio||1);
-    ctx.scale(devicePixelRatio||1,devicePixelRatio||1);
+    const dpr=devicePixelRatio||1;
+    W=cv.width=cv.clientWidth*dpr;
+    H=cv.height=cv.clientHeight*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   }
   function init(){
     nodes=[];
@@ -322,10 +326,14 @@ document.querySelectorAll('.tab').forEach(btn=>{
   });
 });
 function showPanel(id){
-  document.querySelectorAll('.panel').forEach(p=>p.hidden=true);
-  const p=document.getElementById('p-'+id);
-  if(p){p.hidden=false;p.offsetHeight;/* force reflow for animation */}
-  if(id==='elo'&&DATA)requestAnimationFrame(()=>renderEloChart());
+  const swap=()=>{
+    document.querySelectorAll('.panel').forEach(p=>p.hidden=true);
+    const p=document.getElementById('p-'+id);
+    if(p){p.hidden=false;p.style.animation='none';p.offsetHeight;p.style.animation='';}
+    if(id==='elo'&&DATA)requestAnimationFrame(()=>renderEloChart());
+  };
+  // Use View Transitions API if available for smooth crossfade
+  if(document.startViewTransition){document.startViewTransition(swap);}else{swap();}
 }
 window.addEventListener('resize',moveIndicator);
 setTimeout(moveIndicator,50);
@@ -362,6 +370,12 @@ async function boot(){
   animateNum(document.getElementById('hsSeas'),DATA.seasons.length);
   animateNum(document.getElementById('hsGames'),DATA.total_games);
   animateNum(document.getElementById('hsFran'),Object.keys(DATA.franchise_map).length);
+  // Show generated timestamp
+  if(DATA.generated_at){
+    const ts=document.createElement('div');ts.style.cssText='text-align:center;color:var(--muted);font-size:.75rem;padding:.5rem 0;';
+    ts.textContent='Data generated: '+DATA.generated_at;
+    document.querySelector('footer').prepend(ts);
+  }
   // Build all panels
   buildRecords();
   buildFranchises();
@@ -517,7 +531,7 @@ function buildH2H(){
       const pf=rec.pf.toFixed(1),pa=rec.pa.toFixed(1);
       showTT(e.clientX,e.clientY,`<div class="tt-head">${n1} vs ${n2}</div><div>Record: <b>${rec.wins}-${rec.losses}</b></div><div>PF: ${pf} &nbsp; PA: ${pa}</div><div>Games: ${rec.games.length}</div>`);
     });
-    td.addEventListener('mousemove',e=>showTT(e.clientX,e.clientY,ttEl.innerHTML));
+    td.addEventListener('mousemove',e=>{const r=ttEl.getBoundingClientRect();let tx=e.clientX+12,ty=e.clientY+12;if(tx+r.width>innerWidth-8)tx=e.clientX-r.width-12;if(ty+r.height>innerHeight-8)ty=e.clientY-r.height-12;ttEl.style.left=tx+'px';ttEl.style.top=ty+'px';});
     td.addEventListener('mouseleave',hideTT);
   });
   observeReveals(el);
@@ -658,7 +672,7 @@ document.addEventListener('mousemove',e=>{
   const maxLen=Math.max(...owners.map(o=>DATA.elo_history[o].length));
   const m={left:48,right:16};const pW=cv.parentElement.clientWidth-m.left-m.right;
   const gi=Math.round((eloMouseX-m.left)/pW*(maxLen-1));
-  if(gi<0)return;
+  if(gi<0||gi>=maxLen)return;
   const refH=DATA.elo_history[owners[0]]||[];
   const refE=refH[gi];
   let html=refE?`<div class="tt-head">${refE.season} — Week ${refE.week}</div>`:'';
