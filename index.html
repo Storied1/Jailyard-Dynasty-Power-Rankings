@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Jailyard — Dynasty League HQ</title>
+<meta name="view-transition" content="same-origin" />
 
 <!-- Social / SEO meta -->
 <meta name="description" content="The Jailyard: a 12-team dynasty fantasy football league since 2022. Season recaps, all-time records, Elo ratings, power rankings, and full league history." />
@@ -11,6 +12,11 @@
 <meta property="og:description" content="Four seasons. Twelve managers. One dynasty league to rule them all. Explore the complete history of The Jailyard." />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
+
+<!-- Speculation Rules: prerender linked pages for instant navigation -->
+<script type="speculationrules">
+{"prerender":[{"where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}
+</script>
 
 <style>
   :root{
@@ -25,6 +31,11 @@
     --glow-2: rgba(236,72,153,0.12);
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     color-scheme: dark;
+  }
+  html.light{
+    --bg:#f7f9fc; --fg:#111418; --muted:#5f6672;
+    --card:rgba(0,0,0,0.03); --glow-1:rgba(139,92,246,0.08); --glow-2:rgba(236,72,153,0.06);
+    --border:rgba(0,0,0,0.08); color-scheme:light;
   }
   *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
   html{ scroll-behavior:smooth; }
@@ -47,7 +58,14 @@
     padding:.35rem .75rem; border-radius:999px; font-size:.88rem; color:var(--muted);
     transition:color .2s, background .2s;
   }
-  .topnav .links a:hover{ color:var(--fg); background:rgba(255,255,255,0.06); }
+  .topnav .links a:hover, .topnav .links a:focus-visible{ color:var(--fg); background:rgba(255,255,255,0.06); }
+  .btn:focus-visible, .card-link:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:999px; }
+  .topnav .hamburger{
+    display:none; background:none; border:none; cursor:pointer; padding:.4rem;
+    color:var(--muted); transition:color .2s;
+  }
+  .topnav .hamburger:hover, .topnav .hamburger:focus-visible{ color:var(--fg); }
+  .topnav .hamburger svg{ width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:2; }
 
   /* --- Hero section --- */
   .hero{
@@ -195,9 +213,51 @@
   }
   footer .footer-brand{ font-weight:700; font-size:1rem; color:var(--fg); margin-bottom:.4rem; }
 
+  /* --- View Transitions --- */
+  @view-transition{ navigation:auto; }
+  ::view-transition-old(root){ animation:fade-out .2s ease-in; }
+  ::view-transition-new(root){ animation:fade-in .3s ease-out; }
+  @keyframes fade-out{ to{opacity:0;filter:blur(2px);} }
+  @keyframes fade-in{ from{opacity:0;filter:blur(2px);} }
+
+  /* --- Fun facts ticker --- */
+  .fun-ticker{
+    overflow:hidden; background:rgba(139,92,246,0.06); border-top:1px solid var(--border);
+    padding:.75rem 0; position:relative;
+  }
+  .fun-ticker-inner{
+    display:flex; gap:4rem; white-space:nowrap;
+    animation:ticker 40s linear infinite;
+    width:max-content;
+  }
+  .fun-ticker-inner:hover{ animation-play-state:paused; }
+  .fun-ticker-item{
+    display:inline-flex; align-items:center; gap:.5rem; font-size:.85rem; color:var(--muted);
+  }
+  .fun-ticker-item .emoji{ font-size:1.1rem; }
+  @keyframes ticker{ 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  /* --- Easter egg confetti --- */
+  .confetti-piece{
+    position:fixed; width:10px; height:10px; z-index:9999; pointer-events:none;
+    animation:confetti-fall 3s ease-in forwards;
+  }
+  @keyframes confetti-fall{
+    0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1);}
+    100%{opacity:0;transform:translateY(100vh) rotate(720deg) scale(0.3);}
+  }
+
   /* --- Responsive --- */
   @media(max-width:600px){
-    .topnav .links{ display:none; }
+    .topnav .hamburger{ display:block; }
+    .topnav .links{
+      display:none; position:absolute; top:100%; right:0; left:0;
+      flex-direction:column; padding:.5rem 1rem 1rem;
+      background:rgba(11,13,16,0.95); backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+    }
+    .topnav .links.open{ display:flex; }
+    .topnav .links a{ padding:.65rem .75rem; }
     .hero-glow{ width:300px; height:300px; }
     .page-cards{ grid-template-columns:1fr; }
     .stats-grid{ grid-template-columns:repeat(2,1fr); }
@@ -207,17 +267,20 @@
 <body>
 
 <nav class="topnav" id="topnav">
-  <div class="brand">The Jailyard</div>
-  <div class="links">
+  <a href="index.html" class="brand" style="text-decoration:none">The Jailyard</a>
+  <div class="links" id="navLinks">
     <a href="history.html">League Bible</a>
     <a href="season.html">Season Hub</a>
     <a href="preseason.html">Rankings</a>
     <a href="week1.html">Week 1</a>
   </div>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
 </nav>
 
 <section class="hero" id="top">
-  <canvas id="starfield"></canvas>
+  <canvas id="starfield" aria-hidden="true"></canvas>
   <div class="hero-glow g1"></div>
   <div class="hero-glow g2"></div>
   <div class="hero-content">
@@ -314,6 +377,10 @@
     </div>
   </div>
 </section>
+
+<div class="fun-ticker" aria-hidden="true">
+  <div class="fun-ticker-inner" id="ticker"></div>
+</div>
 
 <footer>
   <div class="footer-brand">The Jailyard</div>
@@ -439,12 +506,70 @@ window.addEventListener('scroll', () => {
 })();
 
 // --- Parallax glow orbs on mouse move ---
-document.addEventListener('mousemove', e => {
-  const x = e.clientX / window.innerWidth;
-  const y = e.clientY / window.innerHeight;
-  document.querySelector('.hero-glow.g1').style.transform = `translate(${x * 30}px, ${y * 20}px)`;
-  document.querySelector('.hero-glow.g2').style.transform = `translate(${-x * 25}px, ${-y * 15}px)`;
+(function(){
+  const g1 = document.querySelector('.hero-glow.g1');
+  const g2 = document.querySelector('.hero-glow.g2');
+  document.addEventListener('mousemove', e => {
+    const x = e.clientX / window.innerWidth;
+    const y = e.clientY / window.innerHeight;
+    g1.style.transform = `translate(${x * 30}px, ${y * 20}px)`;
+    g2.style.transform = `translate(${-x * 25}px, ${-y * 15}px)`;
+  });
+})();
+
+// --- Mobile hamburger menu ---
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
 });
+document.querySelectorAll('#navLinks a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+// --- Fun facts ticker ---
+(function(){
+  const facts = [
+    {e:'🏈', t:'4 seasons and counting since 2022'},
+    {e:'🏆', t:'3 different champions in 4 years'},
+    {e:'📊', t:'500+ players rostered across all teams'},
+    {e:'🔥', t:'The longest win streak in league history spans multiple seasons'},
+    {e:'💥', t:'The biggest blowout was over 80 points'},
+    {e:'🎯', t:'Head-to-head rivalries tracked across every matchup'},
+    {e:'📈', t:'Elo ratings update after every game with margin weighting'},
+    {e:'🧠', t:'12 GMs battling for dynasty supremacy'},
+    {e:'⚡', t:'All data pulled live from the Sleeper API'},
+    {e:'🎲', t:'Luck index measures who overperformed their expected wins'},
+  ];
+  const ticker = document.getElementById('ticker');
+  const html = facts.map(f => `<span class="fun-ticker-item"><span class="emoji">${f.e}</span>${f.t}</span>`).join('');
+  ticker.innerHTML = html + html; // duplicate for seamless loop
+})();
+
+// --- Konami code easter egg ---
+(function(){
+  const code = [38,38,40,40,37,39,37,39,66,65]; // up up down down left right left right B A
+  let idx = 0;
+  document.addEventListener('keydown', e => {
+    if(e.keyCode === code[idx]){ idx++; } else { idx = 0; }
+    if(idx === code.length){
+      idx = 0;
+      const colors = ['#8b5cf6','#ec4899','#10b981','#f59e0b','#3b82f6','#ef4444','#06b6d4'];
+      for(let i = 0; i < 100; i++){
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = Math.random()*100 + 'vw';
+        el.style.top = -10 + 'px';
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.borderRadius = Math.random()>.5?'50%':'2px';
+        el.style.width = (Math.random()*8+6) + 'px';
+        el.style.height = (Math.random()*8+6) + 'px';
+        el.style.animationDuration = (Math.random()*2+2) + 's';
+        el.style.animationDelay = (Math.random()*0.8) + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+      }
+    }
+  });
+})();
 </script>
 </body>
 </html>

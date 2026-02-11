@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Jailyard 2025 Week 1 Preview & Power Rankings</title>
+<meta name="view-transition" content="same-origin" />
 <meta name="description" content="The Jailyard 2025 Week 1 preview column. Opening essay, reader mailbag, game picks and matchup predictions from before the season." />
 
 <!--
@@ -32,6 +33,16 @@
     --h3: clamp(1.3rem, 3vw, 2rem);
     color-scheme: dark;
   }
+  html.light{
+    --bg:#f7f9fc; --fg:#111418; --muted:#5f6672;
+    --card:rgba(0,0,0,0.03); --glass:rgba(0,0,0,0.04); --border:rgba(0,0,0,0.08);
+    color-scheme:light;
+  }
+  @view-transition{ navigation:auto; }
+  ::view-transition-old(root){ animation:vt-out .2s ease-in; }
+  ::view-transition-new(root){ animation:vt-in .3s ease-out; }
+  @keyframes vt-out{ to{opacity:0;filter:blur(2px);} }
+  @keyframes vt-in{ from{opacity:0;filter:blur(2px);} }
   html, body{
     scroll-behavior: smooth;
     margin: 0;
@@ -72,7 +83,10 @@
   #nav nav a{ padding:.35rem .6rem; border-radius:6px; font-size:.9rem; color: var(--muted); }
   #nav nav a.active{ background:rgba(255,255,255,0.05); color: var(--fg); }
   #nav .right{ display:flex; gap:.8rem; align-items:center; }
-  .theme-toggle{ cursor:pointer; padding:.4rem .8rem; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,0.05); font-size:.9rem; }
+  .theme-toggle{ cursor:pointer; padding:.4rem .8rem; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,0.05); font-size:.9rem; color:var(--muted); }
+  #nav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
+  #nav .hamburger:hover,#nav .hamburger:focus-visible{color:var(--fg);}
+  #nav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
   /* Sections */
   .container{ max-width: 1200px; margin:0 auto; padding:4rem 1rem; position:relative; }
   .section-title{ font-size: var(--h2); margin-bottom:.7rem; }
@@ -174,6 +188,10 @@
     .picks-table th,.picks-table td{ padding:.4rem .5rem; }
     .sidebar{ position:static; max-width:none; margin-bottom:2rem; }
     .matchup-header .team-name{ font-size:.9rem; }
+    #nav .hamburger{display:block;}
+    #nav nav{display:none;width:100%;}
+    #nav nav.open{display:flex;flex-direction:column;gap:0;}
+    #nav .inner{flex-wrap:wrap;}
   }
 </style>
 </head>
@@ -199,6 +217,9 @@
     <div class="right">
       <button class="theme-toggle" id="toggleTheme">Toggle Theme</button>
     </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
   </div>
 </div>
 
@@ -245,7 +266,7 @@ document.getElementById('toggleTheme').addEventListener('click', ()=>{
 
 // Parallax scrolling effect for hero layers
 window.addEventListener('scroll', ()=>{
-  const sc = window.pageYOffset;
+  const sc = window.scrollY;
   document.querySelectorAll('.hero__layer').forEach(layer => {
     const speed = parseFloat(layer.getAttribute('data-speed') || 0);
     layer.style.transform = `translateY(${sc * speed}px)`;
@@ -430,6 +451,14 @@ window.addEventListener('scroll', () => {
   btt.classList.toggle('show', window.scrollY > 500);
 }, { passive: true });
 btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// --- Mobile hamburger menu ---
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.querySelector('#nav nav').classList.toggle('open');
+});
+document.querySelectorAll('#nav nav a').forEach(a => {
+  a.addEventListener('click', () => document.querySelector('#nav nav').classList.remove('open'));
+});
 </script>
 </body>
 </html>
