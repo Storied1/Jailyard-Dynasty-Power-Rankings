@@ -15,6 +15,7 @@ on:
           - '--season 2024'
           - '--season 2023'
           - '--season 2022'
+          - '--season 2026'
   # Run automatically every Sunday at 6 AM UTC during NFL season (Sep-Jan)
   schedule:
     - cron: '0 6 * 9-12 0'   # Sep-Dec Sundays
