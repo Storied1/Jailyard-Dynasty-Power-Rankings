@@ -14,9 +14,11 @@ A static website for "The Jailyard" — a 12-team fantasy football dynasty leagu
 ├── preseason.html      # Preseason rankings — data, charts, search, comparison, team cards
 ├── week1.html          # Week 1 preview column — essay, mailbag, matchup cards with win-prob bars
 ├── season.html         # Season hub — weekly power rankings from Sleeper API (live or cached)
+├── history.html        # League Bible — all-time records, franchise profiles, H2H matrix, Elo chart
 ├── fetch_sleeper.py    # Python script to fetch & cache all Sleeper data to data/
 ├── data/               # Cached Sleeper API data (JSON) — created by fetch_sleeper.py
 │   ├── players.json    # Full NFL player database (~5MB, cached daily)
+│   ├── league_history.json  # Cross-season analytics (Elo, H2H, records) for history.html
 │   └── 2025/           # Season-specific data
 │       ├── season_combined.json  # Combined data for season.html
 │       ├── league.json
@@ -83,6 +85,8 @@ league.teams.forEach(team => {
 | `index.html` | Entry point / hub | Parallax hero, CTA cards |
 | `preseason.html` | Main application | Sortable table, expandable team cards, Canvas charts, scroll animations |
 | `week1.html` | Weekly column | Embeds preseason as iframe, adds essay/mailbag/picks |
+| `season.html` | Season hub | Week selector, matchup results, power rankings, trend charts (Sleeper API) |
+| `history.html` | League Bible | All-time records, franchise profiles, H2H heatmap, Elo trajectory chart |
 
 ## Code Conventions
 

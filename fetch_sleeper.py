@@ -456,6 +456,368 @@ def main():
     print("Open season.html in a browser to view the results.")
     print(f"{'='*60}")
 
+    # If fetching all seasons, also build the cross-season history
+    if len(seasons) > 1:
+        print("\nBuilding cross-season league history...")
+        build_league_history(seasons)
+
+
+def build_league_history(seasons):
+    """
+    Build a comprehensive cross-season dataset for history.html.
+    Computes: Elo ratings, all-time records, H2H rivalry matrix,
+    franchise career stats, and record book entries.
+    """
+    # Load each season's combined data
+    all_seasons = {}
+    for s in seasons:
+        path = DATA_DIR / str(s) / "season_combined.json"
+        if path.exists():
+            with open(path) as f:
+                all_seasons[s] = json.load(f)
+            print(f"  Loaded {s} season data")
+        else:
+            print(f"  WARNING: No data for {s}, skipping")
+
+    if not all_seasons:
+        print("  No season data found. Run fetch for individual seasons first.")
+        return
+
+    # ---------------------------------------------------------------
+    # 1. Identify franchises across seasons using owner_id
+    # ---------------------------------------------------------------
+    franchise_map = {}  # owner_id -> {username, team_name, seasons}
+    for s, data in sorted(all_seasons.items()):
+        for rid_str, info in data.get("roster_map", {}).items():
+            oid = info.get("owner_id", "")
+            if oid not in franchise_map:
+                franchise_map[oid] = {
+                    "owner_id": oid,
+                    "username": info.get("username", "Unknown"),
+                    "team_name": info.get("team_name", ""),
+                    "seasons": {},
+                }
+            franchise_map[oid]["seasons"][s] = int(rid_str)
+            # Update display name to latest
+            if info.get("username"):
+                franchise_map[oid]["username"] = info["username"]
+            if info.get("team_name"):
+                franchise_map[oid]["team_name"] = info["team_name"]
+
+    print(f"  Identified {len(franchise_map)} franchises across {len(all_seasons)} seasons")
+
+    # ---------------------------------------------------------------
+    # 2. Gather all matchups across all seasons
+    # ---------------------------------------------------------------
+    all_games = []  # [{season, week, r1_owner, r2_owner, p1, p2, winner_owner, is_playoff}]
+    for s, data in sorted(all_seasons.items()):
+        rid_to_owner = {}
+        for rid_str, info in data.get("roster_map", {}).items():
+            rid_to_owner[int(rid_str)] = info.get("owner_id", "")
+
+        for week_data in data.get("weeks", []):
+            week = week_data["week"]
+            is_playoff = week_data.get("is_playoff", False)
+            for m in week_data.get("matchups", []):
+                r1 = m["team1"]["roster_id"]
+                r2 = m["team2"]["roster_id"]
+                p1 = m["team1"]["points"]
+                p2 = m["team2"]["points"]
+                o1 = rid_to_owner.get(r1, "")
+                o2 = rid_to_owner.get(r2, "")
+                w = m.get("winner")
+                winner_owner = rid_to_owner.get(w, "") if w else None
+
+                all_games.append({
+                    "season": s, "week": week,
+                    "o1": o1, "o2": o2,
+                    "p1": p1, "p2": p2,
+                    "winner_owner": winner_owner,
+                    "is_playoff": is_playoff,
+                })
+
+    print(f"  Processed {len(all_games)} total matchups")
+
+    # ---------------------------------------------------------------
+    # 3. Elo Rating System
+    # ---------------------------------------------------------------
+    K = 32
+    MEAN_REGRESSION = 0.15  # Regress 15% toward 1500 between seasons
+
+    elo = {oid: 1500.0 for oid in franchise_map}
+    elo_history = {oid: [] for oid in franchise_map}
+    prev_season = None
+
+    for game in all_games:
+        # Regress toward mean between seasons
+        if prev_season is not None and game["season"] != prev_season:
+            for oid in elo:
+                elo[oid] = elo[oid] + MEAN_REGRESSION * (1500 - elo[oid])
+        prev_season = game["season"]
+
+        o1, o2 = game["o1"], game["o2"]
+        if not o1 or not o2 or o1 not in elo or o2 not in elo:
+            continue
+
+        # Expected scores
+        e1 = 1 / (1 + 10 ** ((elo[o2] - elo[o1]) / 400))
+        e2 = 1 - e1
+
+        # Actual scores (margin-weighted: bigger wins move Elo more)
+        margin = abs(game["p1"] - game["p2"])
+        margin_mult = max(1, (margin / 20) ** 0.5)  # sqrt scaling
+        k_adj = K * margin_mult
+
+        if game["winner_owner"] == o1:
+            s1, s2 = 1, 0
+        elif game["winner_owner"] == o2:
+            s1, s2 = 0, 1
+        else:
+            s1, s2 = 0.5, 0.5
+
+        elo[o1] += k_adj * (s1 - e1)
+        elo[o2] += k_adj * (s2 - e2)
+
+        elo_history[o1].append({
+            "season": game["season"], "week": game["week"],
+            "elo": round(elo[o1], 1),
+        })
+        elo_history[o2].append({
+            "season": game["season"], "week": game["week"],
+            "elo": round(elo[o2], 1),
+        })
+
+    print(f"  Elo ratings computed (top: {max(elo.values()):.0f}, bottom: {min(elo.values()):.0f})")
+
+    # ---------------------------------------------------------------
+    # 4. Head-to-Head Rivalry Matrix
+    # ---------------------------------------------------------------
+    h2h = {}  # (o1, o2) -> {wins, losses, pf, pa, games: [{season, week, p1, p2}]}
+    for game in all_games:
+        o1, o2 = game["o1"], game["o2"]
+        if not o1 or not o2:
+            continue
+        key = (o1, o2)
+        if key not in h2h:
+            h2h[key] = {"wins": 0, "losses": 0, "pf": 0, "pa": 0, "games": []}
+        h2h[key]["pf"] += game["p1"]
+        h2h[key]["pa"] += game["p2"]
+        h2h[key]["games"].append({
+            "season": game["season"], "week": game["week"],
+            "pts": game["p1"], "opp_pts": game["p2"],
+        })
+        if game["winner_owner"] == o1:
+            h2h[key]["wins"] += 1
+        elif game["winner_owner"] == o2:
+            h2h[key]["losses"] += 1
+
+    # Convert to serializable format
+    h2h_serial = {}
+    for (o1, o2), data in h2h.items():
+        h2h_serial[f"{o1}|{o2}"] = data
+
+    # ---------------------------------------------------------------
+    # 5. All-Time Records Book
+    # ---------------------------------------------------------------
+    records = {
+        "highest_score": {"points": 0},
+        "lowest_winning_score": {"points": 99999},
+        "biggest_blowout": {"margin": 0},
+        "highest_combined": {"points": 0},
+        "lowest_combined": {"points": 99999},
+    }
+
+    # Streak tracking
+    streaks = {oid: {"current_w": 0, "current_l": 0, "best_w": 0, "best_l": 0}
+               for oid in franchise_map}
+
+    for game in all_games:
+        o1, o2 = game["o1"], game["o2"]
+        p1, p2 = game["p1"], game["p2"]
+        if not o1 or not o2:
+            continue
+
+        combined = p1 + p2
+        margin = abs(p1 - p2)
+        f1 = franchise_map.get(o1, {})
+        f2 = franchise_map.get(o2, {})
+        name1 = f1.get("team_name") or f1.get("username", "?")
+        name2 = f2.get("team_name") or f2.get("username", "?")
+
+        # Highest single-week score
+        for pts, name, opp_name, oid in [(p1, name1, name2, o1), (p2, name2, name1, o2)]:
+            if pts > records["highest_score"]["points"]:
+                records["highest_score"] = {
+                    "points": pts, "team": name, "opponent": opp_name,
+                    "season": game["season"], "week": game["week"], "owner_id": oid,
+                }
+
+        # Lowest winning score
+        if p1 != p2:
+            winner_pts = max(p1, p2)
+            winner_name = name1 if p1 > p2 else name2
+            loser_name = name2 if p1 > p2 else name1
+            winner_oid = o1 if p1 > p2 else o2
+            if winner_pts < records["lowest_winning_score"]["points"]:
+                records["lowest_winning_score"] = {
+                    "points": winner_pts, "team": winner_name, "opponent": loser_name,
+                    "season": game["season"], "week": game["week"], "owner_id": winner_oid,
+                }
+
+        # Biggest blowout
+        if margin > records["biggest_blowout"]["margin"]:
+            records["biggest_blowout"] = {
+                "margin": round(margin, 2), "winner": name1 if p1 > p2 else name2,
+                "loser": name2 if p1 > p2 else name1,
+                "score": f"{max(p1,p2):.1f}-{min(p1,p2):.1f}",
+                "season": game["season"], "week": game["week"],
+            }
+
+        # Combined scores
+        if combined > records["highest_combined"]["points"]:
+            records["highest_combined"] = {
+                "points": round(combined, 2), "teams": f"{name1} vs {name2}",
+                "score": f"{p1:.1f}-{p2:.1f}",
+                "season": game["season"], "week": game["week"],
+            }
+        if combined < records["lowest_combined"]["points"] and combined > 0:
+            records["lowest_combined"] = {
+                "points": round(combined, 2), "teams": f"{name1} vs {name2}",
+                "score": f"{p1:.1f}-{p2:.1f}",
+                "season": game["season"], "week": game["week"],
+            }
+
+        # Win/loss streaks
+        if not game["is_playoff"]:
+            for oid in [o1, o2]:
+                if oid not in streaks:
+                    continue
+                won = game["winner_owner"] == oid
+                if won:
+                    streaks[oid]["current_w"] += 1
+                    streaks[oid]["current_l"] = 0
+                    streaks[oid]["best_w"] = max(streaks[oid]["best_w"], streaks[oid]["current_w"])
+                else:
+                    streaks[oid]["current_l"] += 1
+                    streaks[oid]["current_w"] = 0
+                    streaks[oid]["best_l"] = max(streaks[oid]["best_l"], streaks[oid]["current_l"])
+
+    # Find longest streaks
+    best_win_streak = max(streaks.values(), key=lambda x: x["best_w"])
+    best_win_oid = [oid for oid, s in streaks.items() if s["best_w"] == best_win_streak["best_w"]][0]
+    f = franchise_map.get(best_win_oid, {})
+    records["longest_win_streak"] = {
+        "count": best_win_streak["best_w"],
+        "team": f.get("team_name") or f.get("username", "?"),
+        "owner_id": best_win_oid,
+    }
+
+    best_loss_streak = max(streaks.values(), key=lambda x: x["best_l"])
+    best_loss_oid = [oid for oid, s in streaks.items() if s["best_l"] == best_loss_streak["best_l"]][0]
+    f = franchise_map.get(best_loss_oid, {})
+    records["longest_losing_streak"] = {
+        "count": best_loss_streak["best_l"],
+        "team": f.get("team_name") or f.get("username", "?"),
+        "owner_id": best_loss_oid,
+    }
+
+    # ---------------------------------------------------------------
+    # 6. Franchise Career Stats
+    # ---------------------------------------------------------------
+    franchise_stats = {}
+    for oid, info in franchise_map.items():
+        stats = {
+            "owner_id": oid,
+            "username": info["username"],
+            "team_name": info.get("team_name", ""),
+            "seasons_played": len(info["seasons"]),
+            "all_time": {"wins": 0, "losses": 0, "ties": 0, "pf": 0, "pa": 0},
+            "playoff_appearances": 0,
+            "championships": 0,
+            "finals": 0,
+            "season_results": [],
+            "current_elo": round(elo.get(oid, 1500), 1),
+            "peak_elo": 0,
+            "best_win_streak": streaks.get(oid, {}).get("best_w", 0),
+        }
+
+        # Peak Elo
+        if oid in elo_history:
+            stats["peak_elo"] = max((e["elo"] for e in elo_history[oid]), default=1500)
+
+        # Per-season results
+        for s, data in sorted(all_seasons.items()):
+            rid_str = str(info["seasons"].get(s, ""))
+            if rid_str in data.get("roster_map", {}):
+                r = data["roster_map"][rid_str]
+                rec = r.get("final_record", {})
+                w, l, t = rec.get("wins", 0), rec.get("losses", 0), rec.get("ties", 0)
+                pf = rec.get("fpts", 0)
+                pa = rec.get("fpts_against", 0)
+
+                stats["all_time"]["wins"] += w
+                stats["all_time"]["losses"] += l
+                stats["all_time"]["ties"] += t
+                stats["all_time"]["pf"] += pf
+                stats["all_time"]["pa"] += pa
+
+                stats["season_results"].append({
+                    "season": s, "wins": w, "losses": l, "ties": t,
+                    "pf": round(pf, 1), "pa": round(pa, 1),
+                })
+
+        stats["all_time"]["pf"] = round(stats["all_time"]["pf"], 1)
+        stats["all_time"]["pa"] = round(stats["all_time"]["pa"], 1)
+        franchise_stats[oid] = stats
+
+    # Detect championships and finals from bracket data
+    for s, data in sorted(all_seasons.items()):
+        brackets_path = DATA_DIR / str(s) / "brackets.json"
+        if brackets_path.exists():
+            with open(brackets_path) as f:
+                brackets = json.load(f)
+            winners = brackets.get("winners", [])
+            if winners:
+                # Find the championship game (highest round)
+                max_round = max((g.get("r", 0) for g in winners), default=0)
+                for game in winners:
+                    if game.get("r") == max_round:
+                        rid_to_owner = {}
+                        for rid_str, info in all_seasons[s].get("roster_map", {}).items():
+                            rid_to_owner[int(rid_str)] = info.get("owner_id", "")
+                        champ_rid = game.get("w")
+                        r1 = game.get("t1")
+                        r2 = game.get("t2")
+                        for rid in [r1, r2]:
+                            oid = rid_to_owner.get(rid, "")
+                            if oid in franchise_stats:
+                                franchise_stats[oid]["finals"] += 1
+                        champ_oid = rid_to_owner.get(champ_rid, "")
+                        if champ_oid in franchise_stats:
+                            franchise_stats[champ_oid]["championships"] += 1
+
+    # ---------------------------------------------------------------
+    # 7. Build final output
+    # ---------------------------------------------------------------
+    history = {
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "seasons": list(all_seasons.keys()),
+        "total_games": len(all_games),
+        "franchise_map": {oid: {"username": f["username"], "team_name": f.get("team_name", "")}
+                          for oid, f in franchise_map.items()},
+        "records": records,
+        "elo_current": {oid: round(e, 1) for oid, e in elo.items()},
+        "elo_history": elo_history,
+        "h2h": h2h_serial,
+        "franchise_stats": franchise_stats,
+    }
+
+    out_path = DATA_DIR / "league_history.json"
+    with open(out_path, "w") as f:
+        json.dump(history, f, indent=2)
+    print(f"  League history saved to {out_path} ({os.path.getsize(out_path) / 1024:.0f} KB)")
+    print(f"  Open history.html in a browser to explore.")
+
 
 if __name__ == "__main__":
     main()
