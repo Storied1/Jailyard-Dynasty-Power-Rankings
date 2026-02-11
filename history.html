@@ -352,14 +352,187 @@ function animateNum(el,target,dur){
 }
 
 /* ==============================
-   DATA LOADING
+   DATA LOADING + LIVE API FALLBACK
    ============================== */
+const LEAGUE_IDS={2022:'792314138780090368',2023:'918335334096846848',2024:'1048889097223266304',2025:'1180228858937966592'};
+const SLEEPER='https://api.sleeper.app/v1';
+
+async function sleeper(ep){try{const r=await fetch(SLEEPER+ep);return r.ok?await r.json():null;}catch(e){return null;}}
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+
 async function loadData(){
+  // Try cached file first
   try{
     const r=await fetch('data/league_history.json');
-    if(!r.ok)throw new Error('not found');
-    return await r.json();
-  }catch(e){return null;}
+    if(r.ok)return await r.json();
+  }catch(e){}
+  // Fallback: fetch live from Sleeper API and compute client-side
+  const prog=document.querySelector('#loading p');
+  try{return await fetchLiveHistory(msg=>{if(prog)prog.textContent=msg;});}
+  catch(e){console.error('Live fetch failed:',e);return null;}
+}
+
+async function fetchLiveHistory(prog){
+  const seasons=Object.keys(LEAGUE_IDS).map(Number).sort();
+  const raw={};
+  for(const s of seasons){
+    prog('Fetching '+s+' season\u2026');
+    const lid=LEAGUE_IDS[s];
+    const [league,users,rosters,bracket]=await Promise.all([
+      sleeper('/league/'+lid),sleeper('/league/'+lid+'/users'),
+      sleeper('/league/'+lid+'/rosters'),sleeper('/league/'+lid+'/winners_bracket'),
+    ]);
+    if(!league)continue;
+    const userMap={};
+    (users||[]).forEach(u=>{userMap[u.user_id]={username:u.display_name||'Unknown',team_name:(u.metadata||{}).team_name||''};});
+    const rosterMap={};
+    (rosters||[]).forEach(r=>{
+      const oid=r.owner_id||'',ui=userMap[oid]||{},st=r.settings||{};
+      rosterMap[r.roster_id]={roster_id:r.roster_id,owner_id:oid,
+        username:ui.username||'Unknown',team_name:ui.team_name||'',
+        final_record:{wins:st.wins||0,losses:st.losses||0,ties:st.ties||0,
+          fpts:(st.fpts||0)+(st.fpts_decimal||0)/100,
+          fpts_against:(st.fpts_against||0)+(st.fpts_against_decimal||0)/100}};
+    });
+    const pws=(league.settings||{}).playoff_week_start||15;
+    prog('Fetching '+s+' matchups\u2026');
+    const matchups={};
+    for(let w=1;w<=pws+3;w++){
+      const md=await sleeper('/league/'+lid+'/matchups/'+w);
+      if(!md||!md.some(m=>(m.points||0)>0))break;
+      matchups[w]=md;await wait(50);
+    }
+    raw[s]={rosterMap,matchups,bracket,playoff_week_start:pws};
+  }
+  if(!Object.keys(raw).length)return null;
+  prog('Computing cross-season analytics\u2026');
+  await wait(10);
+  return computeHistory(raw);
+}
+
+function computeHistory(raw){
+  const seasons=Object.keys(raw).map(Number).sort();
+  // 1. Franchise map
+  const fm={};
+  for(const s of seasons){
+    const rm=raw[s].rosterMap;
+    for(const rid in rm){
+      const i=rm[rid],oid=i.owner_id;if(!oid)continue;
+      if(!fm[oid])fm[oid]={username:i.username,team_name:i.team_name,seasons:{}};
+      fm[oid].seasons[s]=parseInt(rid);
+      if(i.username)fm[oid].username=i.username;
+      if(i.team_name)fm[oid].team_name=i.team_name;
+    }
+  }
+  // 2. Gather all games
+  const games=[];
+  for(const s of seasons){
+    const d=raw[s],r2o={};
+    for(const rid in d.rosterMap)r2o[parseInt(rid)]=d.rosterMap[rid].owner_id;
+    for(const wStr in d.matchups){
+      const week=parseInt(wStr),isP=week>=d.playoff_week_start,groups={};
+      d.matchups[wStr].forEach(m=>{const mid=m.matchup_id;if(mid!=null){if(!groups[mid])groups[mid]=[];groups[mid].push(m);}});
+      for(const mid in groups){
+        const pair=groups[mid];if(pair.length!==2)continue;
+        const [t1,t2]=pair,o1=r2o[t1.roster_id]||'',o2=r2o[t2.roster_id]||'';
+        const p1=t1.points||0,p2=t2.points||0;
+        let wo=null;if(p1>p2)wo=o1;else if(p2>p1)wo=o2;
+        games.push({season:s,week,o1,o2,p1,p2,wo,isP});
+      }
+    }
+  }
+  // 3. Elo
+  const K=32,MR=0.15,elo={},eH={};
+  for(const oid in fm){elo[oid]=1500;eH[oid]=[];}
+  let pS=null;
+  for(const g of games){
+    if(pS!==null&&g.season!==pS)for(const oid in elo)elo[oid]+=MR*(1500-elo[oid]);
+    pS=g.season;
+    const {o1,o2}=g;if(!o1||!o2||!(o1 in elo)||!(o2 in elo))continue;
+    const e1=1/(1+Math.pow(10,(elo[o2]-elo[o1])/400));
+    const mg=Math.abs(g.p1-g.p2),mm=Math.max(1,Math.sqrt(mg/20)),ka=K*mm;
+    let s1,s2;if(g.wo===o1){s1=1;s2=0;}else if(g.wo===o2){s1=0;s2=1;}else{s1=.5;s2=.5;}
+    elo[o1]+=ka*(s1-e1);elo[o2]+=ka*(s2-(1-e1));
+    eH[o1].push({season:g.season,week:g.week,elo:Math.round(elo[o1]*10)/10});
+    eH[o2].push({season:g.season,week:g.week,elo:Math.round(elo[o2]*10)/10});
+  }
+  // 4. H2H
+  const h2h={};
+  for(const g of games){
+    if(!g.o1||!g.o2)continue;const k=g.o1+'|'+g.o2;
+    if(!h2h[k])h2h[k]={wins:0,losses:0,pf:0,pa:0,games:[]};
+    h2h[k].pf+=g.p1;h2h[k].pa+=g.p2;
+    h2h[k].games.push({season:g.season,week:g.week,pts:g.p1,opp_pts:g.p2});
+    if(g.wo===g.o1)h2h[k].wins++;else if(g.wo===g.o2)h2h[k].losses++;
+  }
+  for(const k in h2h){h2h[k].pf=Math.round(h2h[k].pf*10)/10;h2h[k].pa=Math.round(h2h[k].pa*10)/10;}
+  // 5. Records
+  const rec={highest_score:{points:0},lowest_winning_score:{points:99999},biggest_blowout:{margin:0},highest_combined:{points:0},lowest_combined:{points:99999}};
+  const str={};for(const oid in fm)str[oid]={cw:0,cl:0,bw:0,bl:0};
+  for(const g of games){
+    if(!g.o1||!g.o2)continue;
+    const f1=fm[g.o1]||{},f2=fm[g.o2]||{};
+    const n1=f1.team_name||f1.username||'?',n2=f2.team_name||f2.username||'?';
+    const comb=g.p1+g.p2,margin=Math.abs(g.p1-g.p2);
+    for(const [pts,nm,op,oid] of [[g.p1,n1,n2,g.o1],[g.p2,n2,n1,g.o2]]){
+      if(pts>rec.highest_score.points)rec.highest_score={points:pts,team:nm,opponent:op,season:g.season,week:g.week,owner_id:oid};
+    }
+    if(g.p1!==g.p2){
+      const wp=Math.max(g.p1,g.p2),wn=g.p1>g.p2?n1:n2,ln=g.p1>g.p2?n2:n1,woid=g.p1>g.p2?g.o1:g.o2;
+      if(wp<rec.lowest_winning_score.points)rec.lowest_winning_score={points:wp,team:wn,opponent:ln,season:g.season,week:g.week,owner_id:woid};
+    }
+    if(margin>rec.biggest_blowout.margin)rec.biggest_blowout={margin:Math.round(margin*100)/100,winner:g.p1>g.p2?n1:n2,loser:g.p1>g.p2?n2:n1,score:Math.max(g.p1,g.p2).toFixed(1)+'-'+Math.min(g.p1,g.p2).toFixed(1),season:g.season,week:g.week};
+    if(comb>rec.highest_combined.points)rec.highest_combined={points:Math.round(comb*100)/100,teams:n1+' vs '+n2,score:g.p1.toFixed(1)+'-'+g.p2.toFixed(1),season:g.season,week:g.week};
+    if(comb<rec.lowest_combined.points&&comb>0)rec.lowest_combined={points:Math.round(comb*100)/100,teams:n1+' vs '+n2,score:g.p1.toFixed(1)+'-'+g.p2.toFixed(1),season:g.season,week:g.week};
+    if(!g.isP){for(const oid of [g.o1,g.o2]){if(!(oid in str))continue;const won=g.wo===oid;if(won){str[oid].cw++;str[oid].cl=0;str[oid].bw=Math.max(str[oid].bw,str[oid].cw);}else{str[oid].cl++;str[oid].cw=0;str[oid].bl=Math.max(str[oid].bl,str[oid].cl);}}}
+  }
+  let bwOid='',bw=0,blOid='',bl=0;
+  for(const oid in str){if(str[oid].bw>bw){bw=str[oid].bw;bwOid=oid;}if(str[oid].bl>bl){bl=str[oid].bl;blOid=oid;}}
+  const fwi=fm[bwOid]||{},fli=fm[blOid]||{};
+  rec.longest_win_streak={count:bw,team:fwi.team_name||fwi.username||'?',owner_id:bwOid};
+  rec.longest_losing_streak={count:bl,team:fli.team_name||fli.username||'?',owner_id:blOid};
+  // 6. Franchise stats
+  const fs={};
+  for(const oid in fm){
+    const info=fm[oid];
+    const s={owner_id:oid,username:info.username,team_name:info.team_name||'',
+      seasons_played:Object.keys(info.seasons).length,
+      all_time:{wins:0,losses:0,ties:0,pf:0,pa:0},
+      playoff_appearances:0,championships:0,finals:0,season_results:[],
+      current_elo:Math.round((elo[oid]||1500)*10)/10,
+      peak_elo:eH[oid]&&eH[oid].length?Math.max(...eH[oid].map(e=>e.elo)):1500,
+      best_win_streak:(str[oid]||{}).bw||0};
+    for(const yr of seasons){
+      const rid=info.seasons[yr];if(rid===undefined)continue;
+      const r=raw[yr].rosterMap[rid];if(!r)continue;
+      const rc=r.final_record;
+      s.all_time.wins+=rc.wins;s.all_time.losses+=rc.losses;s.all_time.ties+=rc.ties;
+      s.all_time.pf+=rc.fpts;s.all_time.pa+=rc.fpts_against;
+      s.season_results.push({season:yr,wins:rc.wins,losses:rc.losses,ties:rc.ties,pf:Math.round(rc.fpts*10)/10,pa:Math.round(rc.fpts_against*10)/10});
+    }
+    s.all_time.pf=Math.round(s.all_time.pf*10)/10;s.all_time.pa=Math.round(s.all_time.pa*10)/10;
+    fs[oid]=s;
+  }
+  // Championships from brackets
+  for(const s of seasons){
+    const bkt=raw[s].bracket;if(!bkt||!bkt.length)continue;
+    const maxR=Math.max(...bkt.map(g=>g.r||0));
+    const r2o={};for(const rid in raw[s].rosterMap)r2o[parseInt(rid)]=raw[s].rosterMap[rid].owner_id;
+    for(const game of bkt){
+      if(game.r===maxR){
+        for(const rid of [game.t1,game.t2]){const oid=r2o[rid]||'';if(oid in fs)fs[oid].finals++;}
+        const co=r2o[game.w]||'';if(co in fs)fs[co].championships++;
+      }
+    }
+  }
+  return {
+    generated_at:new Date().toISOString().replace('T',' ').slice(0,19),
+    seasons,total_games:games.length,
+    franchise_map:Object.fromEntries(Object.entries(fm).map(([oid,f])=>[oid,{username:f.username,team_name:f.team_name||''}])),
+    records:rec,
+    elo_current:Object.fromEntries(Object.entries(elo).map(([oid,e])=>[oid,Math.round(e*10)/10])),
+    elo_history:eH,h2h,franchise_stats:fs,
+  };
 }
 
 async function boot(){
