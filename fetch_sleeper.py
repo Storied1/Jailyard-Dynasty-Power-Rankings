@@ -166,17 +166,46 @@ def fetch_season(season, league_id):
     )
     print(f"  {trades} trades, {waivers} waiver/FA moves")
 
+    # 7. Player projections (for projected matchup scores)
+    print(f"\n[7/8] Projections (weeks 1-{len(all_matchups)})...")
+    all_projections = {}
+    for week in range(1, len(all_matchups) + 1):
+        season_type = "regular"
+        if week >= playoff_week_start:
+            season_type = "post"
+        proj_url = f"https://api.sleeper.app/projections/nfl/{season}/{week}?season_type={season_type}"
+        try:
+            req = urllib.request.Request(proj_url, headers={"User-Agent": "JailyardDynasty/1.0"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                proj_data = json.loads(resp.read().decode())
+                if proj_data:
+                    all_projections[str(week)] = proj_data
+                    print(f"  Week {week}: {len(proj_data)} player projections")
+                else:
+                    print(f"  Week {week}: no projections available")
+        except Exception as e:
+            print(f"  Week {week}: projections unavailable ({e})")
+        time.sleep(0.1)
+    if all_projections:
+        with open(season_dir / "projections.json", "w") as f:
+            json.dump(all_projections, f)
+        print(f"  Saved projections for {len(all_projections)} weeks")
+    else:
+        print("  No projections data available (may be an older season)")
+
     # Build the combined data file for season.html
     print("\nBuilding combined season data...")
-    build_season_data(season, season_dir, league, users, rosters, all_matchups)
+    build_season_data(season, season_dir, league, users, rosters, all_matchups,
+                      brackets=brackets, projections=all_projections)
 
     print(f"\nDone! Data saved to {season_dir}/")
 
 
-def build_season_data(season, season_dir, league, users, rosters, all_matchups):
+def build_season_data(season, season_dir, league, users, rosters, all_matchups,
+                      brackets=None, projections=None):
     """
     Build a single combined JSON file with everything the season.html page needs,
-    including computed power rankings for each week.
+    including computed power rankings for each week, projected scores, and bracket data.
     """
     # Load players for name resolution
     players_db = fetch_players()
@@ -250,6 +279,16 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups):
                 continue
             matchup_groups.setdefault(mid, []).append(m)
 
+        # Get projections for this week (if available)
+        week_proj = {}
+        if projections and str(week) in projections:
+            for pid, pdata in projections[str(week)].items():
+                if isinstance(pdata, dict):
+                    # Sleeper projections use pts_ppr or pts_half_ppr or a generic pts field
+                    proj_pts = pdata.get("pts_ppr", pdata.get("pts_half_ppr", pdata.get("pts_std", 0)))
+                    if proj_pts:
+                        week_proj[pid] = proj_pts
+
         # Build matchup results
         matchup_results = []
         week_scores = {}
@@ -281,20 +320,28 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups):
                 for i, pid in enumerate(starters):
                     pts = starter_pts[i] if i < len(starter_pts) else 0
                     info = player_info(pid)
-                    result.append({"pid": pid, **info, "points": pts})
+                    proj = week_proj.get(pid, 0)
+                    result.append({"pid": pid, **info, "points": pts, "projected": round(proj, 2)})
                 result.sort(key=lambda x: x["points"], reverse=True)
                 return result
+
+            # Compute projected totals from starters
+            def proj_total(team_entry):
+                starters = team_entry.get("starters", [])
+                return round(sum(week_proj.get(pid, 0) for pid in starters), 2)
 
             matchup_results.append({
                 "matchup_id": mid,
                 "team1": {
                     "roster_id": r1,
                     "points": p1,
+                    "projected": proj_total(t1),
                     "top_starters": top_starters(t1)[:5],
                 },
                 "team2": {
                     "roster_id": r2,
                     "points": p2,
+                    "projected": proj_total(t2),
                     "top_starters": top_starters(t2)[:5],
                 },
                 "winner": winner,
@@ -415,6 +462,11 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups):
         "playoff_week_start": playoff_week_start,
         "roster_map": {str(k): v for k, v in roster_map.items()},
         "weeks": weekly_data,
+        "brackets": {
+            "winners": brackets.get("winners") if brackets else None,
+            "losers": brackets.get("losers") if brackets else None,
+        },
+        "has_projections": bool(projections),
     }
 
     out_path = season_dir / "season_combined.json"
