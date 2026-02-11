@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Jailyard 2025 Week 1 Preview & Power Rankings</title>
+<title>The Jailyard 2025 Week 1 Preview & Power Rankings</title>
 <meta name="description" content="The Jailyard 2025 Week 1 preview column. Opening essay, reader mailbag, game picks and matchup predictions from before the season." />
 
 <!--
-  This file builds upon the preseason power rankings site and adds a Week 1 preview in the style of a
+  This file builds upon the preseason power rankings site and adds a Week 1 preview in the style of a
   long‑form weekly column.  It uses modern CSS for parallax backgrounds, morphing shapes, sticky
   sidebars and subtle animations.  Weekly matchups, predictions and narrative are driven by
   JavaScript objects at the end of the file.
@@ -15,9 +15,9 @@
 
 <style>
   :root{
-    --bg: #0e1013;
+    --bg: #0b0d10;
     --fg: #e8ecf0;
-    --muted: #8f96a3;
+    --muted: #7a8194;
     --accent: #8b5cf6;
     --accent-2: #ec4899;
     --card: rgba(255,255,255,0.04);
@@ -65,7 +65,7 @@
   .hero__cta{ display: inline-flex; gap:.6rem; align-items: center; padding: .75rem 1.4rem; background: var(--accent); color:#fff; border-radius:999px; font-weight:600; transition: transform .2s ease; }
   .hero__cta:hover{ transform: translateY(-3px); }
   /* Navigation */
-  #nav{ position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); background: rgba(14,16,19,.7); border-bottom:1px solid var(--border); }
+  #nav{ position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); background: rgba(11,13,16,.7); border-bottom:1px solid var(--border); }
   #nav .inner{ max-width:1200px; margin:0 auto; padding:.7rem 1rem; display:flex; justify-content: space-between; align-items:center; }
   #nav .brand{ font-weight:700; letter-spacing:.05em; }
   #nav nav{ display:flex; gap:.8rem; flex-wrap: wrap; }
@@ -165,7 +165,7 @@
   .special-pick .sp-value{ font-weight:700; font-size:.95rem; }
 
   /* --- Back to top --- */
-  .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(14,16,19,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
+  .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(11,13,16,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
   .back-to-top.show{opacity:1;transform:none;pointer-events:auto;}
   .back-to-top:hover{background:var(--accent);}
   .back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
@@ -182,18 +182,19 @@
   <div class="hero__layer layer-stars" data-speed="0.2"></div>
   <div class="hero__layer layer-grid" data-speed="0.05"></div>
   <div class="hero__content">
-    <h1 class="hero__title">The Jailyard 2025 Season Hub</h1>
-    <p class="hero__subtitle">Welcome to your one‑stop shop for preseason rankings, weekly previews and game picks. It’s part stats, part fan pain and 100% dedicated to our dynasty league.</p>
-    <a href="#week1" class="hero__cta">Jump to Week 1 ↓</a>
+    <h1 class="hero__title">The Jailyard Week 1 Preview</h1>
+    <p class="hero__subtitle">The 2025 season opener. Opening essay, reader mailbag, bold predictions and every matchup breakdown for the first week of the dynasty campaign.</p>
+    <a href="#week1" class="hero__cta">Jump to Picks ↓</a>
   </div>
 </header>
 <div id="nav">
   <div class="inner">
-    <div class="brand">The Jailyard</div>
+    <div class="brand"><a href="index.html" style="color:inherit;text-decoration:none;">The Jailyard</a></div>
     <nav>
       <a href="history.html">League Bible</a>
-      <a href="#preseason">Preseason Rankings</a>
-      <a href="#week1">Week 1 Preview</a>
+      <a href="season.html">Season Hub</a>
+      <a href="preseason.html">Rankings</a>
+      <a href="#week1">Week 1 Preview</a>
     </nav>
     <div class="right">
       <button class="theme-toggle" id="toggleTheme">Toggle Theme</button>
@@ -202,24 +203,9 @@
 </div>
 
 <main>
-  <!-- Preseason rankings include the power rankings and playoff history from the previous file -->
-  <section class="container" id="preseason">
-    <h2 class="section-title">2025 Preseason Power Rankings</h2>
-    <p class="section-sub">Below you’ll find updated power rankings, historical notes and our projected outlooks. Click any team to expand their roster, values and draft picks. Use the links on the right to jump to this week’s column.</p>
-    <!-- We embed the preseason rankings via an iframe. When deploying, make sure preseason.html is in the root directory. -->
-    <iframe src="preseason.html" style="width:100%; border:0; height:1800px;" title="Preseason rankings"></iframe>
-  </section>
-  
-  <!-- Separator with morphing SVG -->
-  <div class="separator">
-    <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-      <path d="M0,0 V80 Q600,140 1200,80 V0z" fill="var(--bg)"></path>
-    </svg>
-  </div>
-
   <!-- Week 1 preview section -->
   <section class="container week-section" id="week1">
-    <h2 class="week-header">Week 1 Preview & Picks</h2>
+    <h2 class="week-header">Week 1 Preview & Picks</h2>
     <div class="section-sub">A long‑form essay, reader mailbag, bits and our picks for each matchup. Records start fresh: 0–0 overall, 0–0 underdog locks.</div>
     <div style="display:flex; flex-wrap:wrap; gap:2rem;">
       <div style="flex:2 1 650px; min-width:300px;">
@@ -229,7 +215,7 @@
         <article class="card" id="week1-picks"></article>
       </div>
       <div class="sidebar" id="week1-sidebar">
-        <h4>Week 1 Ledger</h4>
+        <h4>Week 1 Ledger</h4>
         <p>Overall record: 0–0</p>
         <p>Underdog Locks: 0–0</p>
         <p>Stay‑Away: 0–0</p>
@@ -247,7 +233,8 @@
 </button>
 
 <footer>
-  Built with love for The Jailyard. 2025 season archive.
+  <div style="font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:.4rem;">The Jailyard</div>
+  &copy; 2022&ndash;2026 The Jailyard Dynasty League. Built with love.
 </footer>
 
 <script>
@@ -266,7 +253,7 @@ window.addEventListener('scroll', ()=>{
 });
 
 // Data for week 1 article and picks
-const week1Essay = `The long offseason is finally over.  Training‑camp hype videos have given way to roster cuts, depth chart debates and half‑cooked preseason takes.  Now the dynasty season begins in earnest.  Our league spent the summer debating whether Barkley’s knee can hold up, what a second‑year leap for Caleb Williams might look like and which team is quietly plotting a rebuild.  This year opens with more questions than answers.  Will General Ken‑obi reclaim his throne after a shocking early exit last fall?  Can Kittler on the Roof defend his title with a roster held together by duct tape and magic?  Will MHJTIME’s arsenal of wide receivers overwhelm opponents, or will his running backs derail another promising run?  In the NFL proper, the biggest storylines include second‑year quarterbacks trying to avoid the sophomore slump, a wave of electric young wideouts and the usual quarterback controversies.  We’ll be watching it all through the lens of The Jailyard.  Buckle up: this column aims to blend hard truths with humour, just like your favourite sports writer did back in the day.`;
+const week1Essay = `The long offseason is finally over.  Training‑camp hype videos have given way to roster cuts, depth chart debates and half‑cooked preseason takes.  Now the dynasty season begins in earnest.  Our league spent the summer debating whether Barkley’s knee can hold up, what a second‑year leap for Caleb Williams might look like and which team is quietly plotting a rebuild.  This year opens with more questions than answers.  Will General Ken‑obi reclaim his throne after a shocking early exit last fall?  Can Kittler on the Roof defend his title with a roster held together by duct tape and magic?  Will MHJTIME’s arsenal of wide receivers overwhelm opponents, or will his running backs derail another promising run?  In the NFL proper, the biggest storylines include second‑year quarterbacks trying to avoid the sophomore slump, a wave of electric young wideouts and the usual quarterback controversies.  We’ll be watching it all through the lens of The Jailyard.  Buckle up: this column aims to blend hard truths with humour, just like your favourite sports writer did back in the day.`;
 
 const week1Mailbag = [
   {
