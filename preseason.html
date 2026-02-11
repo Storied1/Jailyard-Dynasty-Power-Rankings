@@ -10,11 +10,11 @@
 <meta property="og:type" content="website" />
 <style>
 :root{
-  --bg:#0f1115;
-  --fg:#e8ebf0;
-  --muted:#8f96a1;
-  --accent:#6c47ff;
-  --accent-2:#ff4d8d;
+  --bg:#0b0d10;
+  --fg:#e8ecf0;
+  --muted:#7a8194;
+  --accent:#8b5cf6;
+  --accent-2:#ec4899;
   --card:rgba(255,255,255,0.04);
   --glass:rgba(255,255,255,0.06);
   --border:rgba(255,255,255,0.08);
@@ -42,7 +42,7 @@ header.hero{position:relative;min-height:100vh;display:grid;place-items:center;o
     radial-gradient(circle at 15% 20%,rgba(255,77,141,0.06) 0%,transparent 60%),
     radial-gradient(circle at 80% 40%,rgba(108,71,255,0.08) 0%,transparent 65%),
     radial-gradient(circle at 40% 80%,rgba(0,208,132,0.06) 0%,transparent 60%),
-    #0d0f12;transform:translateZ(-200px) scale(1.3);}
+    #0b0d10;transform:translateZ(-200px) scale(1.3);}
 .hero__grid{position:absolute;inset:0;background-image:
     linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),
     linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
@@ -52,7 +52,7 @@ header.hero{position:relative;min-height:100vh;display:grid;place-items:center;o
 .hero__subtitle{margin:1rem auto 2.5rem;color:var(--muted);max-width:720px;}
 .hero__cta{display:inline-flex;align-items:center;column-gap:.6rem;background:var(--accent);color:white;padding:.9rem 1.3rem;border-radius:999px;font-weight:600;transition:transform .15s ease;}
 .hero__cta:hover{transform:translateY(-2px);}
-#nav{position:sticky;top:0;backdrop-filter:blur(8px);background:rgba(15,17,21,0.65);border-bottom:1px solid var(--border);z-index:999;}
+#nav{position:sticky;top:0;backdrop-filter:blur(8px);background:rgba(11,13,16,0.65);border-bottom:1px solid var(--border);z-index:999;}
 #nav .inner{max-width:var(--maxw);margin:0 auto;padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;}
 #nav .brand{font-weight:700;letter-spacing:.03em;}
 #nav nav{display:flex;gap:.9rem;flex-wrap:wrap;}
@@ -100,7 +100,7 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.3rem;color:var(--fg);}
 .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
 @media(max-width:600px){
-  #nav nav{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(15,17,21,0.95);backdrop-filter:blur(12px);flex-direction:column;padding:1rem;border-bottom:1px solid var(--border);gap:.4rem;}
+  #nav nav{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(11,13,16,0.95);backdrop-filter:blur(12px);flex-direction:column;padding:1rem;border-bottom:1px solid var(--border);gap:.4rem;}
   #nav nav.open{display:flex;}
   .hamburger{display:block;}
 }
@@ -124,7 +124,7 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 .tier-divider .tier-line{flex:1;height:1px;background:var(--border);}
 
 /* --- Compare drawer --- */
-.compare-bar{position:fixed;bottom:-80px;left:50%;transform:translateX(-50%);z-index:998;display:flex;align-items:center;gap:1rem;padding:.7rem 1.2rem;border-radius:16px;background:rgba(15,17,21,0.92);backdrop-filter:blur(12px);border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,0.4);transition:bottom .35s cubic-bezier(.17,.67,.24,1);max-width:95vw;}
+.compare-bar{position:fixed;bottom:-80px;left:50%;transform:translateX(-50%);z-index:998;display:flex;align-items:center;gap:1rem;padding:.7rem 1.2rem;border-radius:16px;background:rgba(11,13,16,0.92);backdrop-filter:blur(12px);border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,0.4);transition:bottom .35s cubic-bezier(.17,.67,.24,1);max-width:95vw;}
 .compare-bar.show{bottom:1.5rem;}
 .compare-bar .compare-teams{display:flex;gap:.5rem;align-items:center;font-size:.9rem;}
 .compare-bar .compare-teams .vs{color:var(--accent-2);font-weight:700;}
@@ -159,13 +159,13 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 @media(max-width:600px){.compare-grid{grid-template-columns:1fr;}.compare-row{grid-template-columns:1fr;gap:.2rem;text-align:center;}.compare-row .val.left,.compare-row .val.right{text-align:center;}}
 
 /* --- Back-to-top button --- */
-.back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(15,17,21,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
+.back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(11,13,16,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
 .back-to-top.show{opacity:1;transform:none;pointer-events:auto;}
 .back-to-top:hover{background:var(--accent);}
 .back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
 
 /* --- Chart tooltip --- */
-.chart-tooltip{position:absolute;z-index:50;padding:.4rem .7rem;border-radius:8px;background:rgba(15,17,21,0.92);border:1px solid var(--border);font-size:.8rem;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .15s;backdrop-filter:blur(6px);}
+.chart-tooltip{position:absolute;z-index:50;padding:.4rem .7rem;border-radius:8px;background:rgba(11,13,16,0.92);border:1px solid var(--border);font-size:.8rem;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .15s;backdrop-filter:blur(6px);}
 .chart-tooltip.show{opacity:1;}
 
 /* --- Row hover in master table --- */
@@ -187,9 +187,12 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 
 <div id="nav">
   <div class="inner">
-    <div class="brand">The Jailyard</div>
-    <a href="history.html" style="color:var(--muted);font-size:.88rem;padding:.3rem .6rem;border-radius:999px;white-space:nowrap;">League Bible</a>
-    <nav id="toc"></nav>
+    <div class="brand"><a href="index.html" style="color:var(--fg);text-decoration:none;">The Jailyard</a></div>
+    <nav id="toc">
+      <a href="history.html">League Bible</a>
+      <a href="season.html">Season Hub</a>
+      <a href="week1.html">Week 1</a>
+    </nav>
     <div style="display:flex;align-items:center;gap:.5rem;">
       <button class="toggle-dark" id="toggleDark">Toggle theme</button>
       <button class="hamburger" id="hamburger" aria-label="Menu">
@@ -321,7 +324,8 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 </button>
 
 <footer>
-  Built for The Jailyard. If you don't like your placement, the trade button is right there.
+  <div style="font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:.4rem;">The Jailyard</div>
+  &copy; 2022&ndash;2026 The Jailyard Dynasty League. If you don't like your placement, the trade button is right there.
 </footer>
 
 <script>
@@ -798,9 +802,10 @@ buildTable();
 // Charts: plain canvas scatter and stacked bar
 function drawScatter(canvas, teams){
   const ctx = canvas.getContext('2d');
-  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
-  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
-  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const dpr = devicePixelRatio || 1;
+  const W = canvas.width = canvas.clientWidth * dpr;
+  const H = canvas.height = canvas.clientHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const pad = 40;
   const w = canvas.clientWidth - pad*2;
   const h = canvas.clientHeight - pad*2;
@@ -833,21 +838,22 @@ function drawScatter(canvas, teams){
     const y = yScale(t.overallValue);
     ctx.beginPath();
     ctx.arc(x,y,4.5,0,Math.PI*2);
-    ctx.fillStyle = t.rank === 1 ? '#6c47ff' : 'rgba(255,255,255,0.7)';
+    ctx.fillStyle = t.rank === 1 ? '#8b5cf6' : 'rgba(255,255,255,0.7)';
     ctx.fill();
   });
 }
 function drawStacked(canvas, teams){
   const ctx = canvas.getContext('2d');
-  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
-  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
-  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const dpr = devicePixelRatio || 1;
+  const W = canvas.width = canvas.clientWidth * dpr;
+  const H = canvas.height = canvas.clientHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const pad = 40;
   const w = canvas.clientWidth - pad*2;
   const h = canvas.clientHeight - pad*2;
   ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
   const parts = ['qb','rb','wr','te'];
-  const colors = ['#6c47ff','#ff4d8d','#00d084','#ffaa00'];
+  const colors = ['#8b5cf6','#ec4899','#00d084','#ffaa00'];
   const data = parts.map(p => teams.map(t => sum(t[p])));
   const totals = teams.map((_,i) => parts.reduce((a,p,pi) => a + data[pi][i], 0));
   const yMax = Math.max(...totals)*1.1;
@@ -932,9 +938,9 @@ function drawPtsSched(canvas, infoMap){
   // point colors by tier
   const tierColor = tier => {
     if(tier === 'Contender') return '#00d084';
-    if(tier === 'Frisky') return '#6c47ff';
+    if(tier === 'Frisky') return '#8b5cf6';
     if(tier === 'Trust the Process') return '#ffb703';
-    return '#ff4d8d';
+    return '#ec4899';
   };
   points.forEach(p => {
     const x = xScale(p.x);
@@ -986,7 +992,7 @@ function drawTitles(canvas){
     const val = values[idx];
     const x = pad + idx * (plotW / values.length) + (plotW/values.length - barW)/2;
     const y = pad + plotH - (val/maxVal) * plotH;
-    ctx.fillStyle = val > 0 ? '#ff4d8d' : '#444';
+    ctx.fillStyle = val > 0 ? '#ec4899' : '#444';
     ctx.fillRect(x, y, barW, (val/maxVal) * plotH);
     // label
     ctx.save();
