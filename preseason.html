@@ -4,9 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Jailyard 2025 Power Rankings</title>
-<meta name="description" content="Preseason dynasty power rankings for The Jailyard 2025. Sortable tables, data charts, rosters and analysis for all twelve franchises." />
+<meta name="description" content="2025 preseason dynasty power rankings for The Jailyard. How we saw the league before the season kicked off. Sortable tables, data charts, rosters and analysis." />
 <meta property="og:title" content="The Jailyard 2025 Power Rankings" />
-<meta property="og:description" content="Dynasty power rankings for 12 teams. Charts, rosters and bold predictions." />
+<meta property="og:description" content="2025 preseason power rankings for 12 teams. Charts, rosters and bold predictions before the season." />
 <meta property="og:type" content="website" />
 <style>
 :root{
@@ -180,7 +180,7 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
   <div class="hero__grid parallax" style="--speed:.05"></div>
   <div class="hero__content">
     <h1 class="hero__title">Jailyard Dynasty Power Rankings – 2025</h1>
-    <p class="hero__subtitle">Numbers, nuance and a little history: how we see the league heading into the 2025 season.</p>
+    <p class="hero__subtitle">Numbers, nuance and a little history: how we saw the league heading into the 2025 season.</p>
     <a href="#rankings" class="hero__cta">Jump to rankings ↓</a>
   </div>
 </header>
@@ -253,7 +253,7 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
   <!-- Extra insights section: projections and titles -->
   <section class="container" id="extras">
     <h2 class="section-title">More insights</h2>
-    <p class="section-sub">Two new visuals to settle arguments: how your projected points stack up against schedule difficulty and who has actually been hoisting trophies.</p>
+    <p class="section-sub">Two visuals to settle arguments: how preseason point projections stacked up against schedule difficulty and who has been hoisting trophies.</p>
     <div class="grid fade-up">
       <div class="card">
         <h3>Projected points vs schedule</h3>
@@ -1067,7 +1067,7 @@ league.teams.forEach(team => {
   const roast = card.querySelector('.roast');
   if(roast && info.essay){
     const det = document.createElement('details');
-    det.innerHTML = `<summary>Preseason preview</summary><p style="margin:0 0 1rem;line-height:1.5">${info.essay}</p>`;
+    det.innerHTML = `<summary>Team analysis</summary><p style="margin:0 0 1rem;line-height:1.5">${info.essay}</p>`;
     roast.parentNode.insertBefore(det, roast.nextSibling);
   }
 });
