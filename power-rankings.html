@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Power Rankings | The Jailyard</title>
+<meta name="view-transition" content="same-origin" />
+<meta name="description" content="Bill Simmons-style weekly power rankings for The Jailyard dynasty league. Recaps, tiered rankings, awards, and The Confessional." />
+<style>
+:root{
+  --bg:#0b0d10;--fg:#e8ecf0;--muted:#7a8194;
+  --accent:#8b5cf6;--accent2:#ec4899;
+  --good:#16a34a;--bad:#dc2626;--warn:#ca8a04;
+  --card:rgba(255,255,255,0.03);--glass:rgba(255,255,255,0.05);
+  --border:rgba(255,255,255,0.07);
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --maxw:860px;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);overflow-x:hidden;line-height:1.6;}
+a{color:var(--accent2);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(0,0,0,0.03);--glass:rgba(0,0,0,0.04);--border:rgba(0,0,0,0.08);color-scheme:light;}
+@view-transition{navigation:auto;}
+::view-transition-old(root){animation:vt-out .2s ease-in;}
+::view-transition-new(root){animation:vt-in .3s ease-out;}
+@keyframes vt-out{to{opacity:0;filter:blur(2px);}}
+@keyframes vt-in{from{opacity:0;filter:blur(2px);}}
+
+/* --- Scroll progress --- */
+.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+
+/* --- Nav --- */
+.topnav{position:sticky;top:0;z-index:100;padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(11,13,16,0.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.topnav .brand{font-weight:700;letter-spacing:.04em;font-size:1rem;}
+.topnav .brand a{color:var(--fg);text-decoration:none;}
+.topnav .right{display:flex;align-items:center;gap:.5rem;}
+.topnav a.nav-link{color:var(--muted);font-size:.85rem;padding:.3rem .6rem;border-radius:999px;transition:color .2s,background .2s;text-decoration:none;}
+.topnav a.nav-link:hover,.topnav a.nav-link.active{color:var(--fg);background:rgba(255,255,255,0.05);}
+.theme-btn{cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:999px;padding:.3rem .65rem;font-size:.82rem;color:var(--muted);font-family:inherit;transition:color .2s,background .2s;}
+.theme-btn:hover{color:var(--fg);background:rgba(255,255,255,0.08);}
+.topnav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
+.topnav .hamburger:hover,.topnav .hamburger:focus-visible{color:var(--fg);}
+.topnav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
+
+/* --- Hero --- */
+.hero{position:relative;padding:5rem 1.5rem 3rem;text-align:center;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(139,92,246,0.12),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(236,72,153,0.1),transparent 60%);pointer-events:none;}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;background:linear-gradient(135deg,#fff 20%,#c4b5fd 50%,#f9a8d4 80%);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;line-height:1.1;position:relative;}
+.hero .sub{color:var(--muted);font-size:1rem;margin-top:.6rem;max-width:600px;margin-left:auto;margin-right:auto;position:relative;}
+
+/* --- Week bar --- */
+.week-bar{padding:.7rem 1.5rem;background:rgba(255,255,255,0.015);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.week-bar::-webkit-scrollbar{display:none;}
+.week-bar .inner{max-width:var(--maxw);margin:0 auto;display:flex;gap:.3rem;align-items:center;flex-wrap:nowrap;}
+.week-btn{cursor:pointer;padding:.35rem .7rem;border-radius:999px;border:1px solid transparent;background:none;color:var(--muted);font-size:.82rem;font-family:inherit;font-weight:500;transition:all .2s;white-space:nowrap;}
+.week-btn:hover{color:var(--fg);background:rgba(255,255,255,0.05);}
+.week-btn.active{color:#fff;background:var(--accent);border-color:var(--accent);box-shadow:0 2px 12px rgba(139,92,246,0.3);}
+.week-btn.playoff{border-color:rgba(236,72,153,0.25);}
+.week-btn.playoff.active{background:var(--accent2);border-color:var(--accent2);box-shadow:0 2px 12px rgba(236,72,153,0.3);}
+
+/* --- Container --- */
+.container{max-width:var(--maxw);margin:0 auto;padding:2.5rem 1.5rem;}
+
+/* --- Loading --- */
+.loading{text-align:center;padding:6rem 1rem;color:var(--muted);}
+.loading .spinner{display:inline-block;width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:1rem;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* --- Cold Open --- */
+.cold-open{margin-bottom:3rem;font-size:1.05rem;line-height:1.75;color:var(--fg);}
+.cold-open .drop-cap::first-letter{float:left;font-size:3.4em;line-height:.85;font-weight:800;margin-right:.12em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.cold-open p{margin-bottom:1.2rem;}
+.cold-open .week-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;margin-bottom:.6rem;}
+
+/* --- Section headers --- */
+.section-hdr{display:flex;align-items:center;gap:.6rem;margin:2.5rem 0 1.2rem;font-size:1.15rem;font-weight:700;letter-spacing:-.01em;}
+.section-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-hdr .icon{font-size:1.2rem;}
+
+/* --- Damage Report (matchup results) --- */
+.damage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:.8rem;margin-bottom:1rem;}
+.dmg-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem;transition:transform .2s,box-shadow .2s;}
+.dmg-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15);}
+.dmg-card.gotw{border-color:rgba(139,92,246,0.3);background:linear-gradient(135deg,rgba(139,92,246,0.05),rgba(236,72,153,0.03));}
+.dmg-teams{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.5rem;}
+.dmg-team{flex:1;display:flex;flex-direction:column;gap:.1rem;}
+.dmg-team.right{text-align:right;align-items:flex-end;}
+.dmg-team .name{font-weight:700;font-size:.88rem;line-height:1.2;}
+.dmg-team .score{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;}
+.dmg-team .score.w{color:var(--good);}
+.dmg-team .score.l{color:var(--muted);}
+.dmg-vs{font-size:.6rem;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;}
+.score-bar{height:5px;border-radius:999px;overflow:hidden;display:flex;background:rgba(255,255,255,0.04);margin-bottom:.5rem;}
+.score-bar .t1{background:linear-gradient(90deg,var(--accent),#a78bfa);border-radius:999px 0 0 999px;}
+.score-bar .t2{background:linear-gradient(90deg,var(--accent2),#f472b6);border-radius:0 999px 999px 0;}
+.dmg-tag{display:inline-flex;align-items:center;gap:.2rem;padding:.12rem .45rem;border-radius:6px;font-size:.68rem;font-weight:600;margin-right:.3rem;}
+.dmg-tag.upset{background:rgba(236,72,153,0.12);color:var(--accent2);}
+.dmg-tag.close{background:rgba(139,92,246,0.12);color:var(--accent);}
+.dmg-tag.blowout{background:rgba(220,38,38,0.12);color:var(--bad);}
+.dmg-tag.gotw-tag{background:rgba(234,179,8,0.12);color:var(--warn);}
+.dmg-summary{font-size:.8rem;color:var(--muted);margin-top:.4rem;line-height:1.4;}
+
+/* --- Tier Headers --- */
+.tier-block{margin-bottom:.5rem;}
+.tier-hdr{display:flex;align-items:center;gap:.7rem;padding:.7rem 0;margin-top:1.5rem;margin-bottom:.3rem;border-bottom:2px solid transparent;}
+.tier-hdr.t1{border-image:linear-gradient(90deg,var(--accent),var(--accent2)) 1;}
+.tier-hdr.t2{border-image:linear-gradient(90deg,#8b5cf6,#6d28d9) 1;}
+.tier-hdr.t3{border-image:linear-gradient(90deg,#6b7280,#9ca3af) 1;}
+.tier-hdr.t4{border-image:linear-gradient(90deg,#ca8a04,#a16207) 1;}
+.tier-hdr.t5{border-image:linear-gradient(90deg,#dc2626,#991b1b) 1;}
+.tier-name{font-weight:800;font-size:1rem;letter-spacing:-.01em;}
+.tier-range{font-size:.72rem;color:var(--muted);font-weight:500;}
+
+/* --- Rank Entry --- */
+.rank-entry{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:.7rem;transition:transform .2s,box-shadow .2s;}
+.rank-entry:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15);}
+.rank-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem;flex-wrap:wrap;}
+.rank-num{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.95rem;flex-shrink:0;}
+.rank-num.top{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.rank-num.mid{background:rgba(255,255,255,0.06);color:var(--fg);}
+.rank-num.bot{background:rgba(220,38,38,0.12);color:var(--bad);}
+.rank-team{font-weight:700;font-size:1.05rem;flex:1;min-width:0;}
+.rank-record{font-size:.82rem;color:var(--muted);font-weight:500;}
+.rank-move{font-size:.78rem;font-weight:700;padding:.15rem .45rem;border-radius:6px;white-space:nowrap;}
+.rank-move.up{color:var(--good);background:rgba(22,163,74,0.1);}
+.rank-move.down{color:var(--bad);background:rgba(220,38,38,0.1);}
+.rank-move.same{color:var(--muted);background:rgba(255,255,255,0.03);}
+.rank-move.new{color:var(--warn);background:rgba(234,179,8,0.1);}
+.rank-narrative{font-size:.92rem;line-height:1.65;color:var(--fg);margin-bottom:.5rem;}
+.rank-stats{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.75rem;color:var(--muted);margin-bottom:.5rem;}
+.rank-stats span{display:inline-flex;align-items:center;gap:.2rem;}
+
+/* --- The Confessional --- */
+.confessional{position:relative;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:.9rem 1.1rem .9rem 1.1rem;margin-top:.6rem;font-style:italic;font-size:.85rem;color:var(--muted);line-height:1.55;overflow:hidden;}
+.light .confessional{background:rgba(0,0,0,0.04);}
+.confessional::before{content:'THE CONFESSIONAL';display:block;font-style:normal;font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);margin-bottom:.4rem;font-weight:700;}
+.confessional .rec{position:absolute;top:.7rem;right:.8rem;display:flex;align-items:center;gap:.3rem;font-size:.55rem;color:#dc2626;font-weight:700;letter-spacing:.05em;font-style:normal;}
+.confessional .rec::before{content:'';width:6px;height:6px;border-radius:50%;background:#dc2626;animation:rec-blink 1.5s ease-in-out infinite;}
+@keyframes rec-blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.confessional .cam-corners{position:absolute;inset:5px;border:1px solid rgba(255,255,255,0.04);border-radius:4px;pointer-events:none;}
+.light .confessional .cam-corners{border-color:rgba(0,0,0,0.04);}
+
+/* --- Awards Strip --- */
+.awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.7rem;margin-bottom:1.5rem;}
+.award-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.9rem 1rem;text-align:center;transition:transform .2s,border-color .2s;}
+.award-card:hover{transform:translateY(-2px);border-color:rgba(139,92,246,0.2);}
+.award-icon{font-size:1.4rem;margin-bottom:.3rem;}
+.award-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;margin-bottom:.2rem;}
+.award-value{font-size:.95rem;font-weight:800;line-height:1.2;}
+.award-meta{font-size:.72rem;color:var(--muted);margin-top:.2rem;}
+
+/* --- Preview Cards --- */
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:.8rem;}
+.preview-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem;transition:transform .2s;}
+.preview-card:hover{transform:translateY(-2px);}
+.preview-card .matchup-line{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.5rem;}
+.preview-card .team{font-weight:700;font-size:.9rem;flex:1;}
+.preview-card .team.right{text-align:right;}
+.preview-card .vs{font-size:.6rem;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.preview-card .pick-line{font-size:.8rem;color:var(--good);font-weight:600;margin-top:.4rem;}
+.preview-card .blurb{font-size:.8rem;color:var(--muted);line-height:1.4;margin-top:.3rem;}
+
+/* --- Shame Tally / Running Record --- */
+.tally-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;margin-top:2rem;text-align:center;}
+.tally-box .record{font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.tally-box .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-top:.2rem;}
+
+/* --- Footnotes --- */
+.footnote{font-size:.78rem;color:var(--muted);border-top:1px solid var(--border);padding-top:1rem;margin-top:2.5rem;font-style:italic;}
+
+/* --- Back to top --- */
+.back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:99;width:42px;height:42px;border-radius:50%;background:rgba(11,13,16,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;}
+.back-to-top.show{opacity:1;transform:none;pointer-events:auto;}
+.back-to-top:hover{background:var(--accent);}
+.back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
+
+/* --- Footer --- */
+footer{padding:3rem 1rem;text-align:center;color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);}
+
+/* --- Animations --- */
+.fade-up{opacity:0;transform:translateY(18px);transition:opacity .5s cubic-bezier(.17,.67,.24,1),transform .5s cubic-bezier(.17,.67,.24,1);}
+.fade-up.vis{opacity:1;transform:none;}
+
+/* --- Responsive --- */
+@media(max-width:768px){
+  .topnav .right{display:none;width:100%;flex-direction:column;gap:0;padding-top:.5rem;}
+  .topnav .right.open{display:flex;}
+  .topnav .hamburger{display:block;}
+  .topnav{flex-wrap:wrap;}
+  .hero{padding:3.5rem 1rem 2rem;}
+  .hero h1{font-size:clamp(1.6rem,7vw,2.4rem);}
+  .damage-grid,.preview-grid{grid-template-columns:1fr;}
+  .rank-head{gap:.4rem;}
+  .awards-grid{grid-template-columns:repeat(2,1fr);}
+  .container{padding:1.5rem 1rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Nav -->
+<nav class="topnav">
+  <div class="brand"><a href="index.html">The Jailyard</a></div>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <div class="right" id="navLinks">
+    <a href="history.html" class="nav-link">League Bible</a>
+    <a href="season.html" class="nav-link">Season Hub</a>
+    <a href="preseason.html" class="nav-link">Preseason</a>
+    <a href="power-rankings.html" class="nav-link active">Power Rankings</a>
+    <a href="week1.html" class="nav-link">Week 1</a>
+    <button class="theme-btn" id="themeToggle">Theme</button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <h1>The Jailyard Power Rankings</h1>
+  <p class="sub">A weekly column. Recaps, tiered rankings, awards, predictions, and The Confessional. No mercy.</p>
+</header>
+
+<!-- Week selector -->
+<div class="week-bar" id="weekBarWrap"><div class="inner" id="weekBar"></div></div>
+
+<!-- Main content -->
+<main class="container" id="content">
+  <div class="loading"><div class="spinner"></div><div>Loading season data&hellip;</div><div id="loadProgress" style="font-size:.8rem;margin-top:.5rem;color:var(--muted)"></div></div>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<footer>
+  <div style="font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:.3rem">The Jailyard</div>
+  &copy; 2022&ndash;2026 The Jailyard Dynasty League. Built with love and bad decisions.
+</footer>
+
+<script>
+// ============================================================
+//  CONSTANTS
+// ============================================================
+const LEAGUE_IDS = {
+  2022:'792314138780090368',
+  2023:'918335334096846848',
+  2024:'1048889097223266304',
+  2025:'1180228858937966592'
+};
+const SLEEPER = 'https://api.sleeper.app/v1';
+const SEASON = 2025;
+
+// ============================================================
+//  STATE
+// ============================================================
+let rosterMap = {};
+let usersMap = {};
+let allMatchups = {};     // {weekNum: [matchup objects]}
+let playoffWeekStart = 15;
+let totalWeeksLoaded = 0;
+let currentWeek = 1;
+let weeklyRankings = {};  // {week: [{rid, name, ...}]}
+let seasonData = null;
+let predictions = {};     // {week: [{home,away,pick}]}
+let predictionRecord = {w:0, l:0};
+
+// ============================================================
+//  SEEDED RANDOM (deterministic per team+week)
+// ============================================================
+function seedHash(str){
+  let h = 0;
+  for(let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+function pick(arr, seed){
+  return arr[seed % arr.length];
+}
+
+// ============================================================
+//  DATA LOADING
+// ============================================================
+async function loadData(){
+  const prog = document.getElementById('loadProgress');
+  const lid = LEAGUE_IDS[SEASON];
+
+  // Try cached data first
+  try {
+    const resp = await fetch('data/'+SEASON+'/season_combined.json');
+    if(resp.ok){
+      seasonData = await resp.json();
+      initFromCache();
+      return;
+    }
+  } catch(e){}
+
+  // Live Sleeper API
+  try {
+    if(prog) prog.textContent = 'Fetching league info...';
+    const [leagueResp, usersResp, rostersResp] = await Promise.all([
+      fetch(SLEEPER+'/league/'+lid),
+      fetch(SLEEPER+'/league/'+lid+'/users'),
+      fetch(SLEEPER+'/league/'+lid+'/rosters'),
+    ]);
+    const leagueInfo = await leagueResp.json();
+    const users = await usersResp.json();
+    const rosters = await rostersResp.json();
+    playoffWeekStart = leagueInfo?.settings?.playoff_week_start || 15;
+
+    users.forEach(u => {
+      usersMap[u.user_id] = {
+        username: u.display_name || 'Unknown',
+        team_name: (u.metadata||{}).team_name || u.display_name || 'Unknown',
+      };
+    });
+    rosters.forEach(r => {
+      const user = usersMap[r.owner_id] || {};
+      rosterMap[r.roster_id] = {
+        roster_id: r.roster_id,
+        owner_id: r.owner_id,
+        name: user.team_name || user.username || 'Team '+r.roster_id,
+        username: user.username || 'Unknown',
+      };
+    });
+
+    const maxWeek = playoffWeekStart + 3;
+    for(let w = 1; w <= maxWeek; w++){
+      if(prog) prog.textContent = 'Fetching week '+w+'...';
+      try {
+        const mResp = await fetch(SLEEPER+'/league/'+lid+'/matchups/'+w);
+        const matchups = await mResp.json();
+        if(!matchups || !matchups.length) break;
+        if(!matchups.some(m => (m.points||0) > 0)) break;
+        allMatchups[w] = matchups;
+        totalWeeksLoaded = w;
+      } catch(e){ break; }
+    }
+
+    if(totalWeeksLoaded === 0){
+      document.getElementById('content').innerHTML = '<div class="loading"><h2 style="color:var(--fg)">No games played yet</h2><p>The 2025 season hasn\'t started, or data isn\'t available. Check back when the season kicks off.</p></div>';
+      return;
+    }
+
+    computeAllRankings();
+    initUI();
+  } catch(e){
+    document.getElementById('content').innerHTML = '<div class="loading"><h2 style="color:var(--fg)">Could not load data</h2><p style="margin-top:.5rem">'+e.message+'</p></div>';
+  }
+}
+
+function initFromCache(){
+  const d = seasonData;
+  playoffWeekStart = d.playoff_week_start || 15;
+  Object.entries(d.roster_map).forEach(([rid, info]) => {
+    rosterMap[parseInt(rid)] = {
+      roster_id: parseInt(rid),
+      owner_id: info.owner_id,
+      name: info.team_name || info.username || 'Team '+rid,
+      username: info.username || 'Unknown',
+    };
+  });
+  // Build matchups from weekly data
+  d.weeks.forEach(w => {
+    allMatchups[w.week] = w.matchups || [];
+    totalWeeksLoaded = Math.max(totalWeeksLoaded, w.week);
+  });
+  if(totalWeeksLoaded === 0){
+    document.getElementById('content').innerHTML = '<div class="loading"><h2 style="color:var(--fg)">No games played yet</h2><p>Check back when the season kicks off.</p></div>';
+    return;
+  }
+  computeAllRankings();
+  initUI();
+}
+
+// ============================================================
+//  ANALYTICS ENGINE
+// ============================================================
+function computeAllRankings(){
+  const cum = {};
+  Object.keys(rosterMap).forEach(rid => {
+    cum[rid] = {wins:0,losses:0,ties:0,pf:0,pa:0,weekScores:[],streak:0,lastResult:''};
+  });
+
+  for(let w = 1; w <= totalWeeksLoaded; w++){
+    const matchups = allMatchups[w];
+    if(!matchups) continue;
+    const groups = {};
+    matchups.forEach(m => {
+      const mid = m.matchup_id;
+      if(!mid) return;
+      if(!groups[mid]) groups[mid] = [];
+      groups[mid].push(m);
+    });
+
+    // Process each matchup
+    const weekResults = {};
+    Object.values(groups).forEach(pair => {
+      if(pair.length !== 2) return;
+      const [a, b] = pair;
+      const aRid = a.roster_id, bRid = b.roster_id;
+      const aPts = a.points || 0, bPts = b.points || 0;
+      weekResults[aRid] = {opp: bRid, pts: aPts, oppPts: bPts, won: aPts > bPts, tied: aPts === bPts};
+      weekResults[bRid] = {opp: aRid, pts: bPts, oppPts: aPts, won: bPts > aPts, tied: aPts === bPts};
+    });
+
+    // Update cumulative
+    Object.entries(weekResults).forEach(([rid, res]) => {
+      if(!cum[rid]) return;
+      cum[rid].pf += res.pts;
+      cum[rid].pa += res.oppPts;
+      cum[rid].weekScores.push(res.pts);
+      if(res.tied){ cum[rid].ties++; cum[rid].streak = 0; cum[rid].lastResult = 'T'; }
+      else if(res.won){ cum[rid].wins++; cum[rid].streak = cum[rid].streak > 0 ? cum[rid].streak + 1 : 1; cum[rid].lastResult = 'W'; }
+      else { cum[rid].losses++; cum[rid].streak = cum[rid].streak < 0 ? cum[rid].streak - 1 : -1; cum[rid].lastResult = 'L'; }
+    });
+
+    // Compute power scores and rank
+    const ranked = Object.keys(cum).map(rid => {
+      const c = cum[rid];
+      const gp = c.wins + c.losses + c.ties;
+      const winPct = gp > 0 ? (c.wins + c.ties * 0.5) / gp : 0;
+      // Recent form (last 3 weeks weighted)
+      const recent = c.weekScores.slice(-3);
+      const recentAvg = recent.length > 0 ? recent.reduce((a,b)=>a+b,0)/recent.length : 0;
+      // Consistency (inverted std dev)
+      const mean = c.weekScores.length > 0 ? c.pf / c.weekScores.length : 0;
+      const variance = c.weekScores.length > 1 ? c.weekScores.reduce((s,v)=>s+(v-mean)**2,0)/(c.weekScores.length-1) : 0;
+      const stdDev = Math.sqrt(variance);
+      // Normalize components to 0-100
+      const allPFs = Object.values(cum).map(x => x.pf);
+      const maxPF = Math.max(...allPFs, 1);
+      const allRecent = Object.values(cum).map(x => { const r = x.weekScores.slice(-3); return r.length > 0 ? r.reduce((a,b)=>a+b,0)/r.length : 0; });
+      const maxRecent = Math.max(...allRecent, 1);
+      const allStdDev = Object.values(cum).map(x => { const m = x.weekScores.length>0?x.pf/x.weekScores.length:0; return x.weekScores.length>1?Math.sqrt(x.weekScores.reduce((s,v)=>s+(v-m)**2,0)/(x.weekScores.length-1)):0; });
+      const maxStdDev = Math.max(...allStdDev, 1);
+
+      const powerScore = (winPct * 35) + ((c.pf / maxPF) * 25) + ((recentAvg / maxRecent) * 25) + ((1 - stdDev / maxStdDev) * 15);
+
+      return {
+        rid: parseInt(rid),
+        name: rosterMap[rid]?.name || 'Team '+rid,
+        username: rosterMap[rid]?.username || '',
+        wins: c.wins, losses: c.losses, ties: c.ties,
+        pf: c.pf, pa: c.pa,
+        weekPts: weekResults[rid]?.pts || 0,
+        weekOppPts: weekResults[rid]?.oppPts || 0,
+        weekOpp: weekResults[rid]?.opp || null,
+        weekWon: weekResults[rid]?.won || false,
+        weekTied: weekResults[rid]?.tied || false,
+        streak: c.streak,
+        recentAvg: recentAvg,
+        stdDev: stdDev,
+        powerScore: powerScore,
+        weekScores: [...c.weekScores],
+      };
+    });
+
+    ranked.sort((a,b) => b.powerScore - a.powerScore);
+    ranked.forEach((t, i) => t.rank = i + 1);
+
+    // Compute movement from previous week
+    if(weeklyRankings[w - 1]){
+      const prev = {};
+      weeklyRankings[w - 1].forEach(t => prev[t.rid] = t.rank);
+      ranked.forEach(t => {
+        t.prevRank = prev[t.rid] || null;
+        t.movement = t.prevRank ? t.prevRank - t.rank : 0;
+      });
+    } else {
+      ranked.forEach(t => { t.prevRank = null; t.movement = 0; });
+    }
+
+    weeklyRankings[w] = ranked;
+  }
+}
+
+function getWeekMatchups(week){
+  const matchups = allMatchups[week];
+  if(!matchups) return [];
+  const groups = {};
+  matchups.forEach(m => {
+    if(!m.matchup_id) return;
+    if(!groups[m.matchup_id]) groups[m.matchup_id] = [];
+    groups[m.matchup_id].push(m);
+  });
+  return Object.values(groups).filter(g => g.length === 2).map(([a, b]) => {
+    const aPts = a.points || 0, bPts = b.points || 0;
+    const winner = aPts > bPts ? a : (bPts > aPts ? b : null);
+    const loser = winner === a ? b : (winner === b ? a : null);
+    const margin = Math.abs(aPts - bPts);
+    const total = aPts + bPts;
+    return {a, b, aPts, bPts, winner, loser, margin, total};
+  });
+}
+
+function computeAwards(week){
+  const matchups = getWeekMatchups(week);
+  const rankings = weeklyRankings[week] || [];
+  if(!matchups.length) return null;
+
+  // Find relevant stats
+  let highScorer = null, highPts = 0;
+  let lowScorer = null, lowPts = Infinity;
+  let biggestUpset = null, closestGame = null, biggestBlowout = null;
+  let closestMargin = Infinity, blowoutMargin = 0;
+
+  rankings.forEach(t => {
+    if(t.weekPts > highPts){ highPts = t.weekPts; highScorer = t; }
+    if(t.weekPts < lowPts && t.weekPts > 0){ lowPts = t.weekPts; lowScorer = t; }
+  });
+
+  const rankMap = {};
+  (weeklyRankings[week - 1] || rankings).forEach(t => rankMap[t.rid] = t.rank);
+
+  matchups.forEach(m => {
+    if(m.margin < closestMargin){ closestMargin = m.margin; closestGame = m; }
+    if(m.margin > blowoutMargin){ blowoutMargin = m.margin; biggestBlowout = m; }
+    if(m.winner){
+      const winRank = rankMap[m.winner.roster_id] || 7;
+      const loseRank = rankMap[m.loser.roster_id] || 7;
+      if(winRank > loseRank + 2){
+        if(!biggestUpset || (winRank - loseRank) > (rankMap[biggestUpset.winner.roster_id]||7) - (rankMap[biggestUpset.loser.roster_id]||7)){
+          biggestUpset = m;
+        }
+      }
+    }
+  });
+
+  // Game of the week: highest total + closest margin blend
+  const gotw = matchups.slice().sort((a,b) => (b.total + (100 - b.margin)) - (a.total + (100 - a.margin)))[0];
+
+  return {highScorer, highPts, lowScorer, lowPts, biggestUpset, closestGame, closestMargin, biggestBlowout, blowoutMargin, gotw};
+}
+
+// ============================================================
+//  NARRATIVE ENGINE — TIER NAMES
+// ============================================================
+const TIER_SETS = [
+  ['The Untouchables','The Contenders','No Man\'s Land','On Life Support','The Morgue'],
+  ['Mount Rushmore','The Penthouse','Purgatory','The Panic Room','Condemned'],
+  ['The Final Boss','Legitimate Threats','The .500 Zone','Prayers Needed','Rock Bottom'],
+  ['Championship DNA','The Hunting Party','Treading Water','SOS Signal','The Rebuild Zone'],
+  ['The Avengers','The Supporting Cast','The Extras','The Understudies','Cut From the Movie'],
+  ['Wagyu & Lobster','Steak Night','Chipotle Budget','Gas Station Sushi','Dumpster Diving'],
+  ['The 1%','Corner Office','Cubicle Life','The Mailroom','Unemployment Line'],
+  ['The Throne Room','The War Room','The Waiting Room','The Emergency Room','The Morgue'],
+];
+
+function getTierNames(week){
+  return TIER_SETS[week % TIER_SETS.length];
+}
+
+function assignTiers(rankings){
+  const tiers = [];
+  const n = rankings.length;
+  const cuts = [2, 5, 8, 10, n]; // tier boundaries
+  let start = 0;
+  cuts.forEach((end, i) => {
+    const teams = rankings.slice(start, end);
+    if(teams.length) tiers.push({tier: i, teams});
+    start = end;
+  });
+  return tiers;
+}
+
+// ============================================================
+//  NARRATIVE ENGINE — COLD OPENS
+// ============================================================
+function generateColdOpen(week, rankings, awards, matchups){
+  const numUpsets = matchups.filter(m => {
+    if(!m.winner) return false;
+    const prev = weeklyRankings[week - 1] || rankings;
+    const prevMap = {}; prev.forEach(t => prevMap[t.rid] = t.rank);
+    return (prevMap[m.winner.roster_id]||7) > (prevMap[m.loser?.roster_id]||7) + 2;
+  }).length;
+
+  const top = rankings[0];
+  const bigMover = rankings.reduce((best, t) => Math.abs(t.movement) > Math.abs(best.movement) ? t : best, rankings[0]);
+  const chaosLevel = numUpsets >= 3 ? 'chaos' : numUpsets >= 1 ? 'mixed' : 'chalk';
+  const isEarly = week <= 3;
+  const isLate = week >= playoffWeekStart - 2 && week < playoffWeekStart;
+  const isPlayoff = week >= playoffWeekStart;
+  const seed = seedHash('cold'+week);
+
+  let para1, para2;
+
+  if(week === 1){
+    para1 = `Another dynasty season. Another round of wildly premature hot takes that will age like milk by Thanksgiving. But that's the beauty of Week 1, isn't it? Nobody's eliminated, everybody's a contender, and the standings still look clean enough to hang on your fridge.`;
+    para2 = `Twelve teams enter. One lifts the trophy. The rest of us pretend we're "building for next year" by Week 9. Let's see who drew first blood.`;
+  } else if(isPlayoff){
+    para1 = pick([
+      `This is it. The weeks that matter. Everything before this was a dress rehearsal, and now we find out who was actually ready for the show.`,
+      `Playoff football. The two most beautiful words in the dynasty lexicon. The rosters are set, the matchups are locked, and somewhere a manager is refreshing their lineup for the fourteenth time today.`,
+      `We've reached the part of the season where every point matters, every bench decision is life-or-death, and the group chat goes from "lol" to dead silence between 1 PM and 4 PM on Sundays.`,
+    ], seed);
+    para2 = `Week ${week} is ${week === playoffWeekStart ? 'the opening round' : week === playoffWeekStart + 1 ? 'the semifinals' : 'championship week'}. Let's break it all down.`;
+  } else if(chaosLevel === 'chaos'){
+    para1 = pick([
+      `Week ${week} was a crime scene. The projected standings? Shredded. The trade values we were so confident about last Tuesday? Meaningless. ${numUpsets} upsets, and at least three managers staring at their phones wondering where it all went wrong.`,
+      `I'm going to need everyone to sit down for this one. Week ${week} didn't just shuffle the deck — it lit the deck on fire, scattered the ashes, and dared us to figure out what happened.`,
+      `Every week I try to bring order to this league. Every week this league laughs in my face. Week ${week} featured ${numUpsets} upsets, a total points explosion, and at least one result I'm still processing 48 hours later.`,
+    ], seed);
+    para2 = `${bigMover.name} ${bigMover.movement > 0 ? 'rocketed up' : 'cratered'} ${Math.abs(bigMover.movement)} spots. ${top.name} sits atop the rankings${top.movement === 0 ? ' — unmoved, unbothered' : ''}. Let's sort through the wreckage.`;
+  } else if(chaosLevel === 'chalk' && !isEarly){
+    para1 = pick([
+      `If you had the favorites in a six-team parlay this week, congratulations — you might be the luckiest person in league history. Week ${week} was chalk city. The rich got richer, the poor got embarrassed, and the middle class continued to exist in the most unremarkable way possible.`,
+      `Week ${week} was boring and I mean that as a compliment to the good teams. When the best rosters do exactly what they're supposed to, there's a certain elegance to it. Like watching a machine work. An expensive, well-oiled, extremely annoying machine.`,
+    ], seed);
+    para2 = `${top.name} holds the top spot for ${top.movement === 0 ? 'another week' : 'the first time'}. Here's where everyone stands.`;
+  } else if(isLate){
+    para1 = pick([
+      `The playoff picture is taking shape and I can already feel the desperation seeping through the group chat. Week ${week}: where bubble teams start making decisions they'll regret in January.`,
+      `We're in the "win and you're in, lose and start googling mock draft tools" portion of the season. Week ${week} separated the real contenders from the teams that were just vibes and a prayer.`,
+    ], seed);
+    para2 = `The race for the final playoff spot is a ${rankings.slice(4,8).map(t => t.name).join(', ')} knife fight. Let's see who's holding the sharper blade.`;
+  } else {
+    para1 = pick([
+      `Week ${week}. We're past the point of small samples and into the territory of actual trends. If your team is good, congratulations — it might actually be good. If your team is bad, well, the data is starting to agree with your nightmares.`,
+      `Another week, another set of results that will be used as ammunition in trade negotiations for the next seven days. Week ${week} gave us a little bit of everything: blowouts, nail-biters, and the usual dose of "how did THAT team beat THAT team?"`,
+      `Here's the thing about Week ${week}: it's the perfect checkpoint. Early enough that nothing is decided. Late enough that we can stop pretending everyone has a chance. Let's get into it.`,
+      `Week ${week} is in the books, and I've spent the last 48 hours doing what I always do — obsessively re-sorting these rankings, second-guessing every placement, and convincing myself that THIS week's order is finally correct. It never is. But here we go.`,
+    ], seed);
+    para2 = `${top.name} ${top.movement > 0 ? 'climbs to' : top.movement < 0 ? 'drops to' : 'holds'} the top spot. ${awards?.highScorer ? awards.highScorer.name + ' dropped ' + awards.highPts.toFixed(1) + ' points to lead all scorers.' : ''} Let's rank them.`;
+  }
+
+  return `<div class="cold-open"><div class="week-label">Week ${week} Column</div><p class="drop-cap">${para1}</p><p>${para2}</p></div>`;
+}
+
+// ============================================================
+//  NARRATIVE ENGINE — TEAM ENTRIES
+// ============================================================
+const HOOKS = {
+  big_up: [
+    'Stop everything. We need to talk about {name}.',
+    'I don\'t want to overreact to one week, but {name} just changed the math on this entire league.',
+    '{name} kicked the door down this week and dared you to do something about it.',
+    'Here\'s my confession: I didn\'t think {name} had this in them. I was wrong. I\'m saying it.',
+    'Where did THIS come from? {name} went from afterthought to the scariest team on the schedule.',
+  ],
+  small_up: [
+    '{name} quietly climbed a spot, and nobody in the group chat noticed. They will soon.',
+    'A subtle rise for {name}, but the underlying numbers tell a louder story.',
+    '{name} nudged their way up. Not flashy. Not loud. Just better.',
+  ],
+  steady_top: [
+    'Still here. Still terrifying. {name} continues to make the rest of us feel inadequate.',
+    '{name} is the league\'s boring homework assignment — you know it\'s good, you just don\'t want to talk about it.',
+    'At some point we have to stop calling {name} "good" and start calling them "inevitable."',
+    'The group chat doesn\'t discuss {name} anymore. There\'s nothing left to say. They just... win.',
+  ],
+  steady_mid: [
+    '{name} is the .500 zone personified. Not bad enough to blow up. Not good enough to dream.',
+    'I\'ve been staring at {name}\'s roster for ten minutes trying to decide if they\'re sneaky good or sneaky bad. Still no answer.',
+    '{name} continues their season-long audition for the role of "team nobody talks about until Week 14."',
+    'The most infuriating thing about {name} is that they are exactly who they were last week. And the week before that.',
+  ],
+  small_down: [
+    'A quiet slide for {name}. Nothing catastrophic, but the direction is concerning.',
+    '{name} slipped a spot and the concerning part is that it felt... deserved.',
+    'Down a notch for {name}. Not panic time. But maybe set an alarm.',
+  ],
+  big_down: [
+    'I\'m going to need a minute before we get into what happened to {name}.',
+    '{name} fell {move} spots. The truly alarming part? It could have been worse.',
+    'We should probably talk about {name}, but I honestly don\'t know where to start.',
+    'The {name} experience this week was the fantasy football equivalent of watching your pizza roll off the table and land face-down.',
+    'I had {name} ranked higher than anyone in the group chat last week. I\'d like my credibility back, please.',
+  ],
+  new_one: [
+    'New number one. {name} has arrived, and the coronation was earned.',
+    'A new era begins. {name} takes the throne, and honestly? It was overdue.',
+  ],
+};
+
+const POP_CULTURE = {
+  dominant: [
+    'This was {name}\'s Heisenberg moment. They looked at the league and said, "I am the one who knocks."',
+    '{name} went full John Wick this week. Ruthless, efficient, and everybody\'s terrified of what comes next.',
+    'Watching {name} this week was like watching prime Steph Curry — you knew every shot was going in and you couldn\'t do anything about it.',
+  ],
+  heartbreak: [
+    '{name} is living the Tony Soprano finale right now. Cut to black. No resolution. Just emptiness.',
+    'Rooting for {name} right now is like watching the last two seasons of Game of Thrones — the raw material is there but the execution is painful.',
+    'This is {name}\'s "We were on a break!" moment. The loss wasn\'t technically their fault but the damage is done.',
+  ],
+  comeback: [
+    '{name} pulled a full Rocky IV this week. Left for dead, came back swinging, and now the whole league heard the bell.',
+    'This is {name}\'s Batman Begins arc. Still bruised. Still climbing. But you can see the cape forming.',
+    '{name} is giving serious Michael Jordan flu game energy. Down, hurting, and still getting it done.',
+  ],
+  rebuild: [
+    '{name} is in their Batman Begins arc. Still in the cave. Still training. The payoff is coming.',
+    'Every great dynasty starts with a losing season. {name} is building something. Or at least that\'s what they tell themselves at 2 AM.',
+  ],
+  streak: [
+    '{name} right now is the John Wick of this league. They keep coming, they don\'t stop, and everybody\'s scrambling.',
+    '{name} has that "I\'m not locked in here with you, you\'re locked in here with me" energy. Terrifying.',
+  ],
+  mediocre: [
+    '{name} is the streaming service show you watch three episodes of, say "it\'s pretty good," and never finish.',
+    '{name} is the exact middle seat on a cross-country flight. Not terrible. Not comfortable. Just... there.',
+  ],
+};
+
+const CLOSERS = {
+  up: [
+    'Keep climbing. The view is about to get really good.',
+    'Next week\'s matchup will tell us if this is real or a mirage. I\'m betting real.',
+    'The arrow is pointing straight up. Don\'t look down.',
+  ],
+  down: [
+    'The schedule gets easier. I think. Let me check. *checks schedule* Okay, it doesn\'t. Good luck.',
+    'This is fixable. Probably. Maybe. Let\'s revisit next week.',
+    'Rock bottom has a basement, and {name} is currently looking for the stairs.',
+  ],
+  steady: [
+    'Same spot, same questions. We\'ll be back here next week asking the same things.',
+    'The definition of insanity is doing the same thing and expecting different results. Anyway, {name} is still here.',
+    'Steady as she goes. For better or worse.',
+  ],
+  top: [
+    'The target is on their back and they don\'t seem to care. That\'s the scariest part.',
+    'Until someone knocks them off, this is {name}\'s league. The rest of us are just playing in it.',
+  ],
+  bottom: [
+    'But hey, the draft picks are looking great.',
+    'This is a long game. Dynasty is a marathon, not a sprint. {name} is currently walking.',
+    'Somewhere, in a parallel universe, {name} made that one trade and everything turned out differently.',
+  ],
+};
+
+function generateTeamNarrative(team, week){
+  const s = seedHash(team.name + week);
+  const move = team.movement;
+  const abs = Math.abs(move);
+  const isTop = team.rank <= 2;
+  const isBot = team.rank >= 11;
+  const isMid = team.rank >= 5 && team.rank <= 8;
+
+  // Pick hook
+  let hookCat;
+  if(move > 0 && team.rank === 1 && team.prevRank !== 1) hookCat = 'new_one';
+  else if(abs >= 3) hookCat = move > 0 ? 'big_up' : 'big_down';
+  else if(abs >= 1) hookCat = move > 0 ? 'small_up' : 'small_down';
+  else if(isTop) hookCat = 'steady_top';
+  else hookCat = 'steady_mid';
+
+  let hook = pick(HOOKS[hookCat], s).replace(/{name}/g, team.name).replace(/{move}/g, abs);
+
+  // Analysis sentence
+  let analysis = '';
+  const rec = `${team.wins}-${team.losses}${team.ties ? '-'+team.ties : ''}`;
+  if(team.weekWon){
+    const margin = (team.weekPts - team.weekOppPts).toFixed(1);
+    const oppName = rosterMap[team.weekOpp]?.name || 'their opponent';
+    if(team.weekPts - team.weekOppPts > 25){
+      analysis = `They demolished ${oppName} by ${margin} points this week — ${team.weekPts.toFixed(1)} to ${team.weekOppPts.toFixed(1)}. At ${rec}, the power score reflects what we\'re all seeing.`;
+    } else if(team.weekPts - team.weekOppPts < 5){
+      analysis = `A nail-biter against ${oppName} — ${team.weekPts.toFixed(1)} to ${team.weekOppPts.toFixed(1)}. They survived by ${margin}, and "survived" is the right word. Record: ${rec}.`;
+    } else {
+      analysis = `A solid ${team.weekPts.toFixed(1)}-${team.weekOppPts.toFixed(1)} win over ${oppName} puts them at ${rec}. ${team.pf.toFixed(0)} total points scored on the season.`;
+    }
+  } else if(team.weekTied){
+    analysis = `A tie. In dynasty fantasy football. ${team.weekPts.toFixed(1)} apiece. I didn\'t know this was possible and I\'m still not sure how to feel about it. Record: ${rec}.`;
+  } else {
+    const margin = (team.weekOppPts - team.weekPts).toFixed(1);
+    const oppName = rosterMap[team.weekOpp]?.name || 'their opponent';
+    if(team.weekOppPts - team.weekPts > 25){
+      analysis = `${oppName} hung ${team.weekOppPts.toFixed(1)} on them while they managed just ${team.weekPts.toFixed(1)}. A ${margin}-point loss. At ${rec}, the trajectory is not great.`;
+    } else if(team.weekOppPts - team.weekPts < 5){
+      analysis = `Lost to ${oppName} by ${margin} — ${team.weekPts.toFixed(1)} to ${team.weekOppPts.toFixed(1)}. The kind of loss that keeps you up at night. Record: ${rec}.`;
+    } else {
+      analysis = `Fell to ${oppName}, ${team.weekOppPts.toFixed(1)}-${team.weekPts.toFixed(1)}. Now ${rec} on the year with ${team.pf.toFixed(0)} total points.`;
+    }
+  }
+
+  // Streak commentary
+  let streakNote = '';
+  if(team.streak >= 3) streakNote = ` That\'s ${team.streak} straight wins now. `;
+  else if(team.streak <= -3) streakNote = ` That\'s ${Math.abs(team.streak)} straight losses. At some point we have to call this what it is. `;
+
+  // Pop culture comparison (occasional, ~40% of entries)
+  let popCulture = '';
+  if(s % 5 < 2){ // 40% chance
+    let pcCat;
+    if(team.weekWon && team.weekPts - team.weekOppPts > 20) pcCat = 'dominant';
+    else if(!team.weekWon && team.weekOppPts - team.weekPts < 5) pcCat = 'heartbreak';
+    else if(team.streak >= 3) pcCat = 'streak';
+    else if(team.movement >= 3) pcCat = 'comeback';
+    else if(isBot) pcCat = 'rebuild';
+    else if(isMid) pcCat = 'mediocre';
+    else pcCat = 'dominant';
+    popCulture = ' ' + pick(POP_CULTURE[pcCat], s + 7).replace(/{name}/g, team.name);
+  }
+
+  // Closer
+  let closerCat;
+  if(isTop) closerCat = 'top';
+  else if(isBot) closerCat = 'bottom';
+  else if(move > 0) closerCat = 'up';
+  else if(move < 0) closerCat = 'down';
+  else closerCat = 'steady';
+  let closer = pick(CLOSERS[closerCat], s + 3).replace(/{name}/g, team.name);
+
+  return hook + ' ' + analysis + streakNote + popCulture + ' ' + closer;
+}
+
+// ============================================================
+//  THE CONFESSIONAL
+// ============================================================
+const CONFESSIONALS = {
+  big_win: [
+    '*leans back* Yeah. That\'s a championship roster. You all see it now.',
+    '*straightens collar* We don\'t get enough respect in this league. That right there? Statement.',
+    '*tries not to smile* I told them in the group chat on Tuesday. Nobody listened. They never listen.',
+    '*arms crossed* I\'m not going to say I\'m surprised. Because I\'m not. We\'re built different.',
+  ],
+  close_win: [
+    '*exhales* A win is a win is a win. Write it down. Move on. Don\'t ask me about the margin.',
+    '*wipes forehead* I blacked out in the fourth quarter. I remember nothing. But we won? Cool.',
+    '*nervous laugh* Was I worried? No. Okay yes. But only a little. We\'re fine.',
+    '*hand on heart* My Apple Watch sent me a heart rate alert during that fourth quarter. I\'m fine.',
+  ],
+  blowout_loss: [
+    '*stares into distance* I don\'t want to talk about it.',
+    '*removes hat* This league is rigged. I\'m not saying how. I\'m just saying what I believe.',
+    '*long pause* I\'m going to go home, delete my fantasy app, and take up pottery.',
+    '*shaking head* We got the "they had families" treatment this week. We had families too.',
+  ],
+  close_loss: [
+    '*jaw clenches* Twelve more points. From ONE starter. That\'s all I needed.',
+    '*laughs nervously* It\'s fine. It\'s FINE. *narrator: It was not fine.*',
+    '*staring at phone* I\'ve been on the what-if calculator for four hours. Every scenario hurts.',
+    '*voice cracking* We were RIGHT THERE. You don\'t understand. We were RIGHT. THERE.',
+  ],
+  upset_win: [
+    '*grinning* They had us as underdogs? Put some respect on this roster.',
+    '*barely containing excitement* I\'m not going to text the group chat. I\'m not — okay I already texted it.',
+    '*leaning forward* They said we couldn\'t win. They were wrong. Write it down. Circle the date.',
+  ],
+  upset_loss: [
+    '*blank stare* How. HOW. We were supposed to — you know what, I can\'t even.',
+    '*rubbing temples* I need everyone to give me 24 hours before asking about this.',
+    '*forced calm* It\'s one week. One. Week. We\'re still the better team. Probably.',
+  ],
+  win_streak: [
+    '*puts on sunglasses indoors* I don\'t want to jinx it, but... we might be unstoppable.',
+    '*trying to be humble* We\'re just taking it one week at a time. *barely suppressed grin*',
+  ],
+  lose_streak: [
+    '*thousand-yard stare* I\'ve started stress-eating during games. I\'m fine.',
+    '*dead eyes* Every week I think "this is the week" and every week the universe disagrees.',
+  ],
+};
+
+function generateConfessional(team, week){
+  const s = seedHash(team.name + 'conf' + week);
+  const margin = team.weekWon ? team.weekPts - team.weekOppPts : team.weekOppPts - team.weekPts;
+  const prevRankings = weeklyRankings[week - 1] || [];
+  const prevRankMap = {};
+  prevRankings.forEach(t => prevRankMap[t.rid] = t.rank);
+  const wasHigherRanked = (prevRankMap[team.rid] || 7) < (prevRankMap[team.weekOpp] || 7);
+  const isUpset = team.weekWon && !wasHigherRanked && Math.abs((prevRankMap[team.rid]||7) - (prevRankMap[team.weekOpp]||7)) > 2;
+  const wasUpset = !team.weekWon && wasHigherRanked && Math.abs((prevRankMap[team.rid]||7) - (prevRankMap[team.weekOpp]||7)) > 2;
+
+  let cat;
+  if(team.streak >= 3) cat = 'win_streak';
+  else if(team.streak <= -3) cat = 'lose_streak';
+  else if(isUpset) cat = 'upset_win';
+  else if(wasUpset) cat = 'upset_loss';
+  else if(team.weekWon && margin > 20) cat = 'big_win';
+  else if(team.weekWon && margin < 5) cat = 'close_win';
+  else if(team.weekWon) cat = 'big_win';
+  else if(!team.weekWon && margin > 20) cat = 'blowout_loss';
+  else if(!team.weekWon && margin < 5) cat = 'close_loss';
+  else cat = 'blowout_loss';
+
+  const quote = pick(CONFESSIONALS[cat], s);
+  return `<div class="confessional"><span class="rec">REC</span><div class="cam-corners"></div>${quote}</div>`;
+}
+
+// ============================================================
+//  PREVIEW / PREDICTIONS
+// ============================================================
+function generatePreview(week){
+  const nextWeek = week + 1;
+  const nextMatchups = allMatchups[nextWeek];
+  if(!nextMatchups) return '';
+
+  const groups = {};
+  nextMatchups.forEach(m => {
+    if(!m.matchup_id) return;
+    if(!groups[m.matchup_id]) groups[m.matchup_id] = [];
+    groups[m.matchup_id].push(m);
+  });
+
+  const rankings = weeklyRankings[week] || [];
+  const rankMap = {};
+  rankings.forEach(t => rankMap[t.rid] = t);
+
+  let html = '';
+  const weekPreds = [];
+  Object.values(groups).filter(g => g.length === 2).forEach(([a, b]) => {
+    const aTeam = rankMap[a.roster_id] || {name: rosterMap[a.roster_id]?.name || '?', rank: 7, recentAvg: 0};
+    const bTeam = rankMap[b.roster_id] || {name: rosterMap[b.roster_id]?.name || '?', rank: 7, recentAvg: 0};
+    const pickTeam = aTeam.powerScore >= bTeam.powerScore ? aTeam : bTeam;
+    const seed = seedHash(aTeam.name + bTeam.name + nextWeek);
+    const blurbs = [
+      `${pickTeam.name} has the edge in power score and recent form. Should be a good one.`,
+      `Lean ${pickTeam.name} here based on the numbers, but this one could go either way.`,
+      `${pickTeam.name} by a comfortable margin if they play to their average. Famous last words.`,
+      `Give me ${pickTeam.name}, but I wouldn't bet the house. Maybe the shed.`,
+    ];
+    weekPreds.push({home: aTeam.name, away: bTeam.name, pick: pickTeam.name});
+    html += `<div class="preview-card"><div class="matchup-line"><span class="team">${aTeam.name} <span style="color:var(--muted);font-weight:400;font-size:.75rem">(${aTeam.wins}-${aTeam.losses})</span></span><span class="vs">VS</span><span class="team right">${bTeam.name} <span style="color:var(--muted);font-weight:400;font-size:.75rem">(${bTeam.wins}-${bTeam.losses})</span></span></div><div class="pick-line">Pick: ${pickTeam.name}</div><div class="blurb">${pick(blurbs, seed)}</div></div>`;
+  });
+
+  predictions[nextWeek] = weekPreds;
+  return html;
+}
+
+function computePredictionRecord(week){
+  let w = 0, l = 0;
+  for(let pw = 2; pw <= week; pw++){
+    const preds = predictions[pw];
+    const results = weeklyRankings[pw];
+    if(!preds || !results) continue;
+    preds.forEach(p => {
+      const winner = results.find(t => t.name === p.pick);
+      if(winner && winner.weekWon) w++;
+      else if(winner) l++;
+    });
+  }
+  predictionRecord = {w, l};
+}
+
+// ============================================================
+//  RENDERING
+// ============================================================
+function renderWeek(week){
+  const rankings = weeklyRankings[week];
+  if(!rankings){ document.getElementById('content').innerHTML = '<div class="loading">No data for this week.</div>'; return; }
+
+  const awards = computeAwards(week);
+  const matchups = getWeekMatchups(week);
+  const tiers = assignTiers(rankings);
+  const tierNames = getTierNames(week);
+
+  // Generate preview first to populate predictions
+  const previewHtml = generatePreview(week);
+  computePredictionRecord(week);
+
+  let html = '';
+
+  // Cold Open
+  html += generateColdOpen(week, rankings, awards, matchups);
+
+  // Damage Report
+  html += `<div class="section-hdr"><span class="icon">💥</span> The Damage Report</div>`;
+  html += '<div class="damage-grid">';
+  matchups.sort((a,b) => b.total - a.total);
+  matchups.forEach(m => {
+    const aName = rosterMap[m.a.roster_id]?.name || 'Team A';
+    const bName = rosterMap[m.b.roster_id]?.name || 'Team B';
+    const aWon = m.winner === m.a;
+    const bWon = m.winner === m.b;
+    const total = m.aPts + m.bPts;
+    const pct1 = total > 0 ? (m.aPts / total * 100).toFixed(0) : 50;
+    const pct2 = total > 0 ? (m.bPts / total * 100).toFixed(0) : 50;
+    const isGOTW = awards?.gotw && awards.gotw.a.roster_id === m.a.roster_id;
+    let tags = '';
+    if(isGOTW) tags += '<span class="dmg-tag gotw-tag">Game of the Week</span>';
+    if(m.margin < 5) tags += '<span class="dmg-tag close">Nail-biter</span>';
+    if(m.margin > 30) tags += '<span class="dmg-tag blowout">Blowout</span>';
+    // Check for upset
+    const prev = weeklyRankings[week - 1] || rankings;
+    const prevMap = {}; prev.forEach(t => prevMap[t.rid] = t.rank);
+    if(m.winner && (prevMap[m.winner.roster_id]||7) > (prevMap[m.loser.roster_id]||7) + 2){
+      tags += '<span class="dmg-tag upset">Upset</span>';
+    }
+    html += `<div class="dmg-card${isGOTW ? ' gotw' : ''}"><div class="dmg-teams"><div class="dmg-team"><div class="name">${aName}</div><div class="score ${aWon?'w':'l'}">${m.aPts.toFixed(1)}</div></div><div class="dmg-vs">VS</div><div class="dmg-team right"><div class="name">${bName}</div><div class="score ${bWon?'w':'l'}">${m.bPts.toFixed(1)}</div></div></div><div class="score-bar"><div class="t1" style="width:${pct1}%"></div><div class="t2" style="width:${pct2}%"></div></div>${tags ? '<div style="margin-top:.4rem">'+tags+'</div>' : ''}</div>`;
+  });
+  html += '</div>';
+
+  // Awards
+  if(awards){
+    html += `<div class="section-hdr"><span class="icon">🏆</span> Weekly Awards</div>`;
+    html += '<div class="awards-grid">';
+    if(awards.highScorer) html += `<div class="award-card"><div class="award-icon">🔥</div><div class="award-label">MVP</div><div class="award-value">${awards.highScorer.name}</div><div class="award-meta">${awards.highPts.toFixed(1)} pts</div></div>`;
+    if(awards.lowScorer) html += `<div class="award-card"><div class="award-icon">🧊</div><div class="award-label">Bust of the Week</div><div class="award-value">${awards.lowScorer.name}</div><div class="award-meta">${awards.lowPts.toFixed(1)} pts</div></div>`;
+    if(awards.closestGame) html += `<div class="award-card"><div class="award-icon">😰</div><div class="award-label">Closest Game</div><div class="award-value">${awards.closestMargin.toFixed(1)} pts</div><div class="award-meta">${rosterMap[awards.closestGame.a.roster_id]?.name} vs ${rosterMap[awards.closestGame.b.roster_id]?.name}</div></div>`;
+    if(awards.biggestBlowout) html += `<div class="award-card"><div class="award-icon">💀</div><div class="award-label">Biggest Blowout</div><div class="award-value">${awards.blowoutMargin.toFixed(1)} pts</div><div class="award-meta">${rosterMap[awards.biggestBlowout.winner?.roster_id]?.name} dominates</div></div>`;
+    if(awards.biggestUpset) html += `<div class="award-card"><div class="award-icon">🚨</div><div class="award-label">Upset of the Week</div><div class="award-value">${rosterMap[awards.biggestUpset.winner?.roster_id]?.name}</div><div class="award-meta">over ${rosterMap[awards.biggestUpset.loser?.roster_id]?.name}</div></div>`;
+    html += '</div>';
+  }
+
+  // Power Rankings
+  html += `<div class="section-hdr"><span class="icon">📊</span> The Power Rankings</div>`;
+  tiers.forEach((tier, ti) => {
+    const tName = tierNames[ti] || 'Tier '+(ti+1);
+    const first = tier.teams[0]?.rank || '?';
+    const last = tier.teams[tier.teams.length-1]?.rank || '?';
+    html += `<div class="tier-block"><div class="tier-hdr t${ti+1}"><span class="tier-name">${tName}</span><span class="tier-range">#${first}${first !== last ? '–#'+last : ''}</span></div>`;
+
+    tier.teams.forEach(team => {
+      const numClass = team.rank <= 3 ? 'top' : team.rank >= 10 ? 'bot' : 'mid';
+      let moveHtml;
+      if(team.prevRank === null) moveHtml = '<span class="rank-move new">NEW</span>';
+      else if(team.movement > 0) moveHtml = `<span class="rank-move up">▲${team.movement}</span>`;
+      else if(team.movement < 0) moveHtml = `<span class="rank-move down">▼${Math.abs(team.movement)}</span>`;
+      else moveHtml = '<span class="rank-move same">◆</span>';
+
+      const narrative = generateTeamNarrative(team, week);
+      const confessional = generateConfessional(team, week);
+      const rec = `${team.wins}-${team.losses}${team.ties ? '-'+team.ties : ''}`;
+
+      html += `<div class="rank-entry"><div class="rank-head"><div class="rank-num ${numClass}">${team.rank}</div><div class="rank-team">${team.name}</div><div class="rank-record">${rec}</div>${moveHtml}</div><div class="rank-stats"><span>PF: ${team.pf.toFixed(0)}</span><span>This week: ${team.weekPts.toFixed(1)}</span><span>Avg: ${(team.pf / (team.wins+team.losses+team.ties || 1)).toFixed(1)}</span>${team.streak >= 2 ? '<span style="color:var(--good)">🔥 W'+team.streak+'</span>' : ''}${team.streak <= -2 ? '<span style="color:var(--bad)">❄️ L'+Math.abs(team.streak)+'</span>' : ''}</div><div class="rank-narrative">${narrative}</div>${confessional}</div>`;
+    });
+    html += '</div>';
+  });
+
+  // Preview
+  if(previewHtml){
+    html += `<div class="section-hdr"><span class="icon">🔮</span> Next Week Preview</div>`;
+    html += '<div class="preview-grid">' + previewHtml + '</div>';
+  }
+
+  // Running Record
+  if(predictionRecord.w + predictionRecord.l > 0){
+    html += `<div class="tally-box"><div class="record">${predictionRecord.w}-${predictionRecord.l}</div><div class="label">Running Prediction Record</div></div>`;
+  }
+
+  // Footnote
+  html += `<div class="footnote">Power Rankings are computed using a composite score: Win% (35%), Points For (25%), Recent Form (25%), and Consistency (15%). Tier names rotate weekly for your entertainment. The Confessional quotes are fictional and for entertainment only — no managers were harmed in the making of this column. Probably.</div>`;
+
+  document.getElementById('content').innerHTML = html;
+
+  // Fade in animations
+  document.querySelectorAll('.rank-entry, .dmg-card, .award-card, .preview-card').forEach((el, i) => {
+    el.classList.add('fade-up');
+    setTimeout(() => el.classList.add('vis'), 40 * i);
+  });
+}
+
+// ============================================================
+//  UI
+// ============================================================
+function buildWeekBar(){
+  const bar = document.getElementById('weekBar');
+  bar.innerHTML = '';
+  for(let w = 1; w <= totalWeeksLoaded; w++){
+    const btn = document.createElement('button');
+    btn.className = 'week-btn' + (w >= playoffWeekStart ? ' playoff' : '');
+    btn.textContent = w >= playoffWeekStart ? (w === playoffWeekStart ? 'QF' : w === playoffWeekStart+1 ? 'SF' : 'Final') : 'Wk '+w;
+    btn.addEventListener('click', () => setActiveWeek(w));
+    bar.appendChild(btn);
+  }
+}
+
+function setActiveWeek(w){
+  currentWeek = w;
+  document.querySelectorAll('.week-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === w));
+  renderWeek(w);
+  window.scrollTo({top: document.querySelector('.week-bar').offsetTop + 60, behavior: 'smooth'});
+}
+
+function initUI(){
+  buildWeekBar();
+  currentWeek = totalWeeksLoaded;
+  setActiveWeek(currentWeek);
+}
+
+// ============================================================
+//  EVENT HANDLERS
+// ============================================================
+// Theme toggle
+document.getElementById('themeToggle').addEventListener('click', () => {
+  document.documentElement.classList.toggle('light');
+});
+
+// Hamburger
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+// Scroll progress
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('scrollProgress').style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+}, {passive: true});
+
+// Back to top
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('show', window.scrollY > 500);
+}, {passive: true});
+btt.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
+
+// ============================================================
+//  INIT
+// ============================================================
+loadData();
+</script>
+</body>
+</html>
