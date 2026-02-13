@@ -314,7 +314,7 @@
 </div>
 
 <nav class="topnav" id="topnav">
-  <a href="index.html" class="brand" style="text-decoration:none">The Jailyard</a>
+  <a href="index.html" class="brand" style="text-decoration:none" data-league-name>The Jailyard</a>
   <div class="links" id="navLinks">
     <a href="history.html">League Bible</a>
     <a href="season.html">Season Hub</a>
@@ -470,6 +470,7 @@
   &copy; 2022&ndash;2026 The Jailyard Dynasty League. All rights reserved.
 </footer>
 
+<script src="config.js"></script>
 <script>
 // --- Starfield canvas ---
 (function(){
@@ -679,6 +680,8 @@ document.querySelectorAll('#navLinks a').forEach(a => {
   });
   overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('show'); });
 })();
+
+applyConfig();
 </script>
 </body>
 </html>

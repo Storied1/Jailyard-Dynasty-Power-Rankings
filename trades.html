@@ -145,7 +145,7 @@
 <div class="scroll-progress" id="scrollProgress"></div>
 
 <nav class="topnav" id="topnav">
-  <a href="index.html" class="brand">The Jailyard</a>
+  <a href="index.html" class="brand" data-league-name>The Jailyard</a>
   <div class="links" id="navLinks">
     <a href="history.html">League Bible</a>
     <a href="season.html">Season Hub</a>
@@ -221,6 +221,7 @@
   &copy; 2022&ndash;2026 The Jailyard Dynasty League. All rights reserved.
 </footer>
 
+<script src="config.js"></script>
 <script>
 const allTrades = [
   // --- 2022 ---
@@ -572,6 +573,8 @@ document.querySelectorAll('#navLinks a').forEach(a => {
 const btt = document.getElementById('backToTop');
 window.addEventListener('scroll', () => { btt.classList.toggle('show', window.scrollY > 500); }, {passive:true});
 btt.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+
+applyConfig();
 </script>
 </body>
 </html>

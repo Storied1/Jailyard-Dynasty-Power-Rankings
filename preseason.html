@@ -191,7 +191,7 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 
 <div id="nav">
   <div class="inner">
-    <div class="brand"><a href="index.html" style="color:var(--fg);text-decoration:none;">The Jailyard</a></div>
+    <div class="brand"><a href="index.html" style="color:var(--fg);text-decoration:none;" data-league-name>The Jailyard</a></div>
     <nav id="toc">
       <a href="history.html">League Bible</a>
       <a href="season.html">Season Hub</a>
@@ -343,6 +343,7 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
   &copy; 2022&ndash;2026 The Jailyard Dynasty League. If you don't like your placement, the trade button is right there.
 </footer>
 
+<script src="config.js"></script>
 <script>
 // Updated league data reflecting trade/contender rankings and playoff history
 const league = {
@@ -1315,6 +1316,8 @@ document.querySelectorAll('.tier-divider').forEach(el => observer.observe(el));
     bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
   }, {passive:true});
 })();
+
+applyConfig();
 </script>
 </body>
 </html>

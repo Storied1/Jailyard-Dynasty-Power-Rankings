@@ -209,7 +209,7 @@
 </header>
 <div id="nav">
   <div class="inner">
-    <div class="brand"><a href="index.html" style="color:inherit;text-decoration:none;">The Jailyard</a></div>
+    <div class="brand"><a href="index.html" style="color:inherit;text-decoration:none;" data-league-name>The Jailyard</a></div>
     <nav>
       <a href="history.html">League Bible</a>
       <a href="season.html">Season Hub</a>
@@ -271,6 +271,7 @@
   &copy; 2022&ndash;2026 The Jailyard Dynasty League. Built with love.
 </footer>
 
+<script src="config.js"></script>
 <script>
 // Theme toggle
 document.getElementById('toggleTheme').addEventListener('click', ()=>{
@@ -481,6 +482,8 @@ document.querySelectorAll('#nav nav a').forEach(a => {
     bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
   }, {passive:true});
 })();
+
+applyConfig();
 </script>
 </body>
 </html>

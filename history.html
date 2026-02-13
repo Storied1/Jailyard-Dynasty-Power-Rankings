@@ -191,7 +191,7 @@ a{color:inherit;text-decoration:none;}
 <div class="scroll-progress" id="scrollProgress"></div>
 
 <nav class="topnav" id="topnav">
-  <div class="brand"><a href="index.html">The Jailyard</a></div>
+  <div class="brand"><a href="index.html" data-league-name>The Jailyard</a></div>
   <div class="links" id="navLinks">
     <a href="season.html">Season Hub</a>
     <a href="preseason.html">Rankings</a>
@@ -261,6 +261,7 @@ a{color:inherit;text-decoration:none;}
 <div class="tt" id="tooltip"></div>
 <button class="btt" id="btt" onclick="window.scrollTo({top:0})">&#8593;</button>
 
+<script src="config.js"></script>
 <script>
 /* ==============================
    CONSTANTS & GLOBALS
@@ -389,7 +390,7 @@ function animateNum(el,target,dur){
 /* ==============================
    DATA LOADING + LIVE API FALLBACK
    ============================== */
-const LEAGUE_IDS={2022:'792314138780090368',2023:'918335334096846848',2024:'1048889097223266304',2025:'1180228858937966592'};
+const LEAGUE_IDS=LEAGUE_CONFIG.sleeperLeagueIds;
 const SLEEPER='https://api.sleeper.app/v1';
 
 async function sleeper(ep){try{const r=await fetch(SLEEPER+ep);return r.ok?await r.json():null;}catch(e){return null;}}
@@ -970,6 +971,8 @@ window.addEventListener('scroll', () => {
     bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
   }, {passive:true});
 })();
+
+applyConfig();
 </script>
 </body>
 </html>

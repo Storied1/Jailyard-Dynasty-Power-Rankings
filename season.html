@@ -233,7 +233,7 @@ footer a{color:var(--accent);}
 <div class="scroll-progress" id="scrollProgress"></div>
 
 <nav class="topnav">
-  <div class="brand"><a href="index.html">The Jailyard</a></div>
+  <div class="brand"><a href="index.html" data-league-name>The Jailyard</a></div>
   <div class="right">
     <a href="history.html" class="nav-link">League Bible</a>
     <a href="preseason.html" class="nav-link">Preseason</a>
@@ -279,18 +279,14 @@ footer a{color:var(--accent);}
   &copy; 2022&ndash;2026 The Jailyard Dynasty League. Data from the <a href="https://docs.sleeper.com/">Sleeper API</a>.
 </footer>
 
+<script src="config.js"></script>
 <script>
 // ========================
 // CONFIG
 // ========================
-const LEAGUE_IDS = {
-  2022:'792314138780090368',
-  2023:'918335334096846848',
-  2024:'1048889097223266304',
-  2025:'1180228858937966592'
-};
-const AVAILABLE_SEASONS = [2022, 2023, 2024, 2025];
-let currentSeason = 2025;
+const LEAGUE_IDS = LEAGUE_CONFIG.sleeperLeagueIds;
+const AVAILABLE_SEASONS = LEAGUE_CONFIG.availableSeasons;
+let currentSeason = LEAGUE_CONFIG.currentSeason;
 const SLEEPER = 'https://api.sleeper.app/v1';
 
 // ========================
@@ -1466,6 +1462,8 @@ document.getElementById('hamburger').addEventListener('click', () => {
     bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
   }, {passive:true});
 })();
+
+applyConfig();
 </script>
 </body>
 </html>

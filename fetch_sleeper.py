@@ -3,9 +3,13 @@
 Fetch all Sleeper fantasy football data for The Jailyard dynasty league.
 
 Usage:
-    python3 fetch_sleeper.py                    # Fetch 2025 season (default)
+    python3 fetch_sleeper.py                    # Fetch current season only
     python3 fetch_sleeper.py --season 2024      # Fetch a specific season
-    python3 fetch_sleeper.py --all              # Fetch all seasons (2022-2025)
+    python3 fetch_sleeper.py --all              # Fetch all seasons (skips cached)
+    python3 fetch_sleeper.py --all --force      # Re-fetch everything, ignore cache
+
+Past seasons are immutable — once cached, they are skipped automatically.
+Use --force to override this and re-fetch from the API.
 
 Data is saved to ./data/ as JSON files that the season.html page can consume.
 No dependencies beyond the Python 3 standard library.
@@ -475,13 +479,24 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
     print(f"  Combined data saved to {out_path} ({os.path.getsize(out_path) / 1024:.0f} KB)")
 
 
+def is_season_cached(season):
+    """Check if a season already has a complete cached dataset."""
+    combined = DATA_DIR / str(season) / "season_combined.json"
+    return combined.exists() and combined.stat().st_size > 100
+
+
 def main():
     DATA_DIR.mkdir(exist_ok=True)
 
     args = sys.argv[1:]
+    force = "--force" in args
+
+    # Determine which season(s) are the current/active ones
+    # (these always get re-fetched because data may have changed)
+    current_year = max(LEAGUE_IDS.keys())
 
     if "--all" in args:
-        seasons = sorted(LEAGUE_IDS.keys())
+        requested = sorted(LEAGUE_IDS.keys())
     elif "--season" in args:
         idx = args.index("--season")
         if idx + 1 < len(args):
@@ -489,12 +504,29 @@ def main():
             if s not in LEAGUE_IDS:
                 print(f"Unknown season {s}. Available: {list(LEAGUE_IDS.keys())}")
                 sys.exit(1)
-            seasons = [s]
+            requested = [s]
         else:
             print("--season requires a year argument")
             sys.exit(1)
     else:
-        seasons = [2025]
+        requested = [current_year]
+
+    # Filter out already-cached past seasons (unless --force)
+    seasons = []
+    for s in requested:
+        if not force and s < current_year and is_season_cached(s):
+            print(f"  Skipping {s} — already cached (use --force to re-fetch)")
+        else:
+            seasons.append(s)
+
+    if not seasons:
+        print("All requested seasons are already cached. Nothing to fetch.")
+        print("Use --force to re-fetch from the API.")
+        # Still rebuild history if we have multiple seasons of cached data
+        if len(requested) > 1:
+            print("\nRebuilding cross-season league history from cache...")
+            build_league_history(requested)
+        return
 
     # Fetch players database first (shared across seasons)
     print("Fetching player database...")
@@ -509,9 +541,10 @@ def main():
     print(f"{'='*60}")
 
     # If fetching all seasons, also build the cross-season history
-    if len(seasons) > 1:
+    # Use the full requested list so cached seasons are included
+    if len(requested) > 1:
         print("\nBuilding cross-season league history...")
-        build_league_history(seasons)
+        build_league_history(requested)
 
 
 def build_league_history(seasons):
