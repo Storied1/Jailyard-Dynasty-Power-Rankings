@@ -17,6 +17,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
+from datetime import datetime
 from pathlib import Path
 
 BASE_URL = "https://api.sleeper.app/v1"
@@ -121,12 +122,12 @@ def fetch_season(season, league_id):
     for week in range(1, total_weeks + 1):
         matchups = fetch_json(f"/league/{league_id}/matchups/{week}")
         if matchups:
-            all_matchups[str(week)] = matchups
-            # Check if this week has data (points > 0 for at least one team)
+            # Check if this week has real data (points > 0 for at least one team)
             has_data = any(m.get("points", 0) > 0 for m in matchups)
             if not has_data:
                 print(f"  Week {week}: no scores (season may not have reached this week)")
                 break
+            all_matchups[str(week)] = matchups
             total_pts = sum(m.get("points", 0) for m in matchups)
             print(f"  Week {week}: {len(matchups)} entries, {total_pts:.1f} total points")
         else:
@@ -167,7 +168,7 @@ def fetch_season(season, league_id):
     print(f"  {trades} trades, {waivers} waiver/FA moves")
 
     # 7. Player projections (for projected matchup scores)
-    print(f"\n[7/8] Projections (weeks 1-{len(all_matchups)})...")
+    print(f"\n[7/7] Projections (weeks 1-{len(all_matchups)})...")
     all_projections = {}
     for week in range(1, len(all_matchups) + 1):
         season_type = "regular"
@@ -481,7 +482,11 @@ def main():
     args = sys.argv[1:]
 
     if "--all" in args:
-        seasons = sorted(LEAGUE_IDS.keys())
+        # NFL season S runs Sep(S) to Feb(S+1); only include seasons that have started
+        now = datetime.now()
+        cutoff = now.year if now.month >= 9 else now.year - 1
+        seasons = sorted(s for s in LEAGUE_IDS if s <= cutoff)
+        print(f"Auto-detected active seasons through {cutoff}: {seasons}")
     elif "--season" in args:
         idx = args.index("--season")
         if idx + 1 < len(args):
@@ -500,18 +505,32 @@ def main():
     print("Fetching player database...")
     fetch_players()
 
+    failed_seasons = []
     for season in seasons:
-        fetch_season(season, LEAGUE_IDS[season])
+        try:
+            fetch_season(season, LEAGUE_IDS[season])
+        except Exception as e:
+            print(f"\nERROR processing {season} season: {e}")
+            import traceback
+            traceback.print_exc()
+            failed_seasons.append(season)
+            print("Continuing with remaining seasons...")
+
+    successful = [s for s in seasons if s not in failed_seasons]
 
     print(f"\n{'='*60}")
-    print("All done! Data is ready in ./data/")
+    if failed_seasons:
+        print(f"Completed with errors. Failed seasons: {failed_seasons}")
+        print(f"Successful seasons: {successful}")
+    else:
+        print("All done! Data is ready in ./data/")
     print("Open season.html in a browser to view the results.")
     print(f"{'='*60}")
 
-    # If fetching all seasons, also build the cross-season history
-    if len(seasons) > 1:
+    # If multiple seasons succeeded, build the cross-season history
+    if len(successful) > 1:
         print("\nBuilding cross-season league history...")
-        build_league_history(seasons)
+        build_league_history(successful)
 
 
 def build_league_history(seasons):
