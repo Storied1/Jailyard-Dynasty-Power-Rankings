@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Jailyard — 2025 Rookie Draft Recap</title>
+<meta name="view-transition" content="same-origin" />
+<meta name="description" content="The Jailyard 2025 rookie dynasty draft recap. Full draft board, team grades, key picks, and analysis for all 12 franchises." />
+<meta property="og:title" content="The Jailyard — 2025 Rookie Draft Recap" />
+<meta property="og:description" content="Every pick, every grade, every storyline from the 2025 Jailyard dynasty rookie draft." />
+<meta property="og:type" content="website" />
+
+<script type="speculationrules">
+{"prerender":[{"where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}
+</script>
+
+<style>
+  :root{
+    --bg:#0b0d10; --fg:#e8ecf0; --muted:#7a8194;
+    --accent:#8b5cf6; --accent2:#ec4899;
+    --card:rgba(255,255,255,0.03); --border:rgba(255,255,255,0.07);
+    --good:#16a34a; --bad:#dc2626; --warn:#ca8a04;
+    --glow-1:rgba(139,92,246,0.15); --glow-2:rgba(236,72,153,0.12);
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    color-scheme:dark;
+  }
+  html.light{
+    --bg:#f7f9fc; --fg:#111418; --muted:#5f6672;
+    --card:rgba(0,0,0,0.03); --border:rgba(0,0,0,0.08);
+    --glow-1:rgba(139,92,246,0.08); --glow-2:rgba(236,72,153,0.06);
+    color-scheme:light;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--fg);overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+
+  /* --- View Transitions --- */
+  @view-transition{navigation:auto;}
+  ::view-transition-old(root){animation:vt-out .2s ease-in;}
+  ::view-transition-new(root){animation:vt-in .3s ease-out;}
+  @keyframes vt-out{to{opacity:0;filter:blur(2px);}}
+  @keyframes vt-in{from{opacity:0;filter:blur(2px);}}
+
+  /* --- Scroll progress --- */
+  .scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+
+  /* --- Nav --- */
+  .topnav{position:fixed;top:0;left:0;right:0;z-index:100;padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(11,13,16,0.6);backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s,background .3s;}
+  .topnav.scrolled{border-bottom-color:var(--border);background:rgba(11,13,16,0.85);}
+  .topnav .brand{font-weight:700;letter-spacing:.04em;font-size:1rem;}
+  .topnav .links{display:flex;gap:.6rem;}
+  .topnav .links a{padding:.35rem .75rem;border-radius:999px;font-size:.88rem;color:var(--muted);transition:color .2s,background .2s;}
+  .topnav .links a:hover,.topnav .links a.active{color:var(--fg);background:rgba(255,255,255,0.06);}
+  .topnav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
+  .topnav .hamburger:hover{color:var(--fg);}
+  .topnav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
+  .topnav .right{display:flex;align-items:center;gap:.5rem;}
+  .theme-toggle{cursor:pointer;padding:.35rem .7rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.05);font-size:.82rem;color:var(--muted);}
+
+  /* --- Hero --- */
+  .hero{position:relative;min-height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden;}
+  .hero-glow{position:absolute;width:500px;height:500px;border-radius:50%;filter:blur(120px);opacity:.5;z-index:0;pointer-events:none;}
+  .hero-glow.g1{top:-10%;left:15%;background:var(--glow-1);}
+  .hero-glow.g2{bottom:-15%;right:10%;background:var(--glow-2);}
+  .hero-content{position:relative;z-index:2;padding:2rem 1.5rem;max-width:900px;}
+  .hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.3rem .9rem;border-radius:999px;font-size:.78rem;font-weight:600;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);color:var(--accent);margin-bottom:1.5rem;letter-spacing:.04em;text-transform:uppercase;}
+  .hero-title{font-size:clamp(2.4rem,6vw,4.5rem);font-weight:800;line-height:1.05;letter-spacing:-.03em;background:linear-gradient(135deg,#fff 0%,#c4b5fd 40%,#f9a8d4 70%,#fff 100%);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s ease-in-out infinite;}
+  @keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  .hero-sub{margin:1.2rem auto 0;font-size:clamp(1rem,2vw,1.2rem);color:var(--muted);max-width:640px;line-height:1.65;}
+
+  /* --- Container --- */
+  .container{max-width:1200px;margin:0 auto;padding:4rem 1.5rem;}
+  .section-title{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:.5rem;}
+  .section-sub{color:var(--muted);max-width:700px;margin-bottom:2.5rem;line-height:1.6;}
+
+  /* --- Draft board --- */
+  .draft-board{overflow-x:auto;margin-bottom:3rem;}
+  .draft-table{width:100%;border-collapse:collapse;min-width:900px;}
+  .draft-table th,.draft-table td{padding:.6rem .7rem;border:1px solid var(--border);font-size:.85rem;text-align:center;vertical-align:top;}
+  .draft-table th{background:rgba(139,92,246,0.08);color:var(--accent);font-weight:600;position:sticky;top:0;z-index:2;}
+  .draft-table th.round-header{background:rgba(236,72,153,0.08);color:var(--accent2);text-align:left;font-size:.9rem;padding:.8rem;}
+  .draft-cell{border-radius:8px;padding:.5rem;cursor:default;transition:background .2s,transform .2s;}
+  .draft-cell:hover{background:rgba(139,92,246,0.1);transform:scale(1.02);}
+  .draft-cell .pick-num{font-size:.7rem;color:var(--muted);margin-bottom:.15rem;}
+  .draft-cell .player-name{font-weight:600;font-size:.82rem;line-height:1.3;}
+  .draft-cell .player-meta{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
+  .draft-cell.pos-qb{border-left:3px solid #ef4444;}
+  .draft-cell.pos-rb{border-left:3px solid #3b82f6;}
+  .draft-cell.pos-wr{border-left:3px solid #10b981;}
+  .draft-cell.pos-te{border-left:3px solid #f59e0b;}
+
+  /* --- Grade cards --- */
+  .grade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin-bottom:3rem;}
+  .grade-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.4rem;transition:transform .2s,box-shadow .2s;opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.17,.67,.24,1);}
+  .grade-card.visible{opacity:1;transform:none;}
+  .grade-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.2);}
+  .grade-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;}
+  .grade-header .team-info{display:flex;align-items:center;gap:.7rem;}
+  .grade-header .avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.85rem;color:rgba(255,255,255,0.95);flex-shrink:0;}
+  .grade-header h3{font-size:1rem;margin:0;}
+  .grade-header .owner{font-size:.8rem;color:var(--muted);}
+  .grade-badge{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;font-weight:800;font-size:1.1rem;}
+  .grade-a{background:rgba(22,163,74,0.15);color:#16a34a;border:1px solid rgba(22,163,74,0.3);}
+  .grade-b{background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);}
+  .grade-c{background:rgba(202,138,4,0.15);color:#ca8a04;border:1px solid rgba(202,138,4,0.3);}
+  .grade-d{background:rgba(220,38,38,0.15);color:#dc2626;border:1px solid rgba(220,38,38,0.3);}
+  .grade-picks{margin:.6rem 0;font-size:.85rem;line-height:1.6;}
+  .grade-picks .pick-tag{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .5rem;border-radius:6px;font-size:.78rem;margin:.15rem .2rem .15rem 0;background:rgba(255,255,255,0.04);border:1px solid var(--border);}
+  .grade-analysis{font-size:.88rem;color:var(--muted);line-height:1.55;margin-top:.6rem;}
+
+  /* --- Storylines --- */
+  .storylines{display:grid;gap:1.2rem;margin-bottom:3rem;}
+  .storyline{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.17,.67,.24,1);}
+  .storyline.visible{opacity:1;transform:none;}
+  .storyline h3{font-size:1.1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+  .storyline h3 .emoji{font-size:1.3rem;}
+  .storyline p{color:var(--muted);font-size:.92rem;line-height:1.6;}
+
+  /* --- Chart section --- */
+  .chart-wrap{position:relative;margin-bottom:3rem;}
+  .chart-wrap canvas{width:100%;height:350px;border-radius:12px;background:var(--card);border:1px solid var(--border);}
+  .chart-legend{display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;margin-top:.8rem;justify-content:center;}
+  .chart-legend .legend-item{display:flex;align-items:center;gap:.35rem;font-size:.8rem;color:var(--muted);}
+  .chart-legend .legend-dot{width:10px;height:10px;border-radius:3px;}
+
+  /* --- Footer --- */
+  footer{padding:3rem 1.5rem;text-align:center;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border);}
+  footer .footer-brand{font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:.4rem;}
+  footer .footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;margin-bottom:1rem;}
+  footer .footer-links a{color:var(--muted);font-size:.85rem;transition:color .2s;}
+  footer .footer-links a:hover{color:var(--accent);}
+
+  /* --- Back to top --- */
+  .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(11,13,16,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
+  .back-to-top.show{opacity:1;transform:none;pointer-events:auto;}
+  .back-to-top:hover{background:var(--accent);}
+  .back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
+
+  /* --- Responsive --- */
+  @media(max-width:600px){
+    .topnav .hamburger{display:block;}
+    .topnav .links{display:none;position:absolute;top:100%;right:0;left:0;flex-direction:column;padding:.5rem 1rem 1rem;background:rgba(11,13,16,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+    .topnav .links.open{display:flex;}
+    .topnav .links a{padding:.65rem .75rem;}
+    .grade-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav class="topnav" id="topnav">
+  <a href="index.html" class="brand">The Jailyard</a>
+  <div class="links" id="navLinks">
+    <a href="history.html">League Bible</a>
+    <a href="season.html">Season Hub</a>
+    <a href="preseason.html">Rankings</a>
+    <a href="draft.html" class="active">Draft Recap</a>
+    <a href="trades.html">Trades</a>
+    <a href="week1.html">Week 1</a>
+  </div>
+  <div class="right">
+    <button class="theme-toggle" id="toggleTheme">Theme</button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div class="hero-glow g1"></div>
+  <div class="hero-glow g2"></div>
+  <div class="hero-content">
+    <div class="hero-badge">2025 Rookie Draft</div>
+    <h1 class="hero-title">Draft Recap</h1>
+    <p class="hero-sub">Five rounds, sixty picks, and enough hot takes to fill a group chat for months. Here's how every team built their future in the 2025 Jailyard rookie draft.</p>
+  </div>
+</section>
+
+<main>
+  <section class="container" id="board">
+    <h2 class="section-title">The Draft Board</h2>
+    <p class="section-sub">Full five-round board with every pick. Colour-coded by position. Hover for details.</p>
+    <div class="draft-board" id="draftBoard"></div>
+  </section>
+
+  <section class="container" id="chart-section" style="padding-top:0;">
+    <h2 class="section-title">Draft Value by Team</h2>
+    <p class="section-sub">Total rookie draft capital spent vs. projected year-one fantasy value of picks.</p>
+    <div class="chart-wrap">
+      <canvas id="draftChart"></canvas>
+      <div class="chart-legend" id="chartLegend"></div>
+    </div>
+  </section>
+
+  <section class="container" id="grades" style="padding-top:0;">
+    <h2 class="section-title">Draft Grades</h2>
+    <p class="section-sub">How each team fared. Grades based on value relative to pick slot, positional need, and roster fit.</p>
+    <div class="grade-grid" id="gradeGrid"></div>
+  </section>
+
+  <section class="container" id="storylines-section" style="padding-top:0;">
+    <h2 class="section-title">Draft Day Storylines</h2>
+    <p class="section-sub">The trades, the reaches, the steals, and the moments that defined the 2025 draft.</p>
+    <div class="storylines" id="storylines"></div>
+  </section>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<footer>
+  <div class="footer-brand">The Jailyard</div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="history.html">League Bible</a>
+    <a href="season.html">Season Hub</a>
+    <a href="preseason.html">Rankings</a>
+    <a href="draft.html">Draft Recap</a>
+    <a href="trades.html">Trades</a>
+    <a href="week1.html">Week 1</a>
+  </div>
+  &copy; 2022&ndash;2026 The Jailyard Dynasty League. All rights reserved.
+</footer>
+
+<script>
+// --- Data ---
+const teams = [
+  { name:'Burden of Etienne\u2011y Woody', owner:'kharlo w', initials:'BE', slot:1 },
+  { name:'Chudders Football Team', owner:'Chudders', initials:'CF', slot:2 },
+  { name:'The Legion of Bouz', owner:'KidBouzie', initials:'LB', slot:3 },
+  { name:'Noble FFT', owner:'kevobucks', initials:'NF', slot:4 },
+  { name:'The Boonist Monks', owner:'GauchoTrain', initials:'BM', slot:5 },
+  { name:'Rasheeing the Scene', owner:'ToreroGaucho', initials:'RS', slot:6 },
+  { name:'Ghastly Grayskull Gang', owner:'GrayskullXX', initials:'GG', slot:7 },
+  { name:'Father Time', owner:'Redrumsregrub', initials:'FT', slot:8 },
+  { name:'General Ken\u2011obi', owner:'bLaker24', initials:'GK', slot:9 },
+  { name:'MHJTIME', owner:'rango_', initials:'MH', slot:10 },
+  { name:'Sleeping Giants', owner:'zbcowan', initials:'SG', slot:11 },
+  { name:'Kittler on the Roof', owner:'bchodos', initials:'KR', slot:12 },
+];
+
+// 5 rounds x 12 picks (pick order may differ due to trades)
+const draftPicks = [
+  // Round 1
+  { round:1, pick:1,  team:'MHJTIME',                  player:'Travis Hunter',       pos:'WR', college:'Colorado',    note:'Traded up from 1.10 — gave up 2026 1st + 2025 2.10' },
+  { round:1, pick:2,  team:'Chudders Football Team',    player:'Ashton Jeanty',       pos:'RB', college:'Boise State', note:'Dream pick at 1.02' },
+  { round:1, pick:3,  team:'Father Time',               player:'Tetairoa McMillan',   pos:'WR', college:'Arizona',     note:'Traded up from 1.08 — gave 2026 3rd + swap' },
+  { round:1, pick:4,  team:'Noble FFT',                 player:'Shedeur Sanders',     pos:'QB', college:'Colorado',    note:'Traded to Burden of E.W. at the draft' },
+  { round:1, pick:5,  team:'The Boonist Monks',         player:'Cam Ward',            pos:'QB', college:'Miami',       note:'Traded to Legion of Bouz for 2025 1.05 + 2026 2nd' },
+  { round:1, pick:6,  team:'Rasheeing the Scene',       player:'Kaleb Johnson',       pos:'RB', college:'Iowa',        note:'Traded to General Ken\u2011obi for 2025 1.06 + 2.06' },
+  { round:1, pick:7,  team:'Ghastly Grayskull Gang',    player:'Luther Burden III',   pos:'WR', college:'Missouri',    note:'Traded to Burden of E.W. — team name synergy' },
+  { round:1, pick:8,  team:'Burden of Etienne\u2011y Woody', player:'Colston Loveland', pos:'TE', college:'Michigan', note:'Traded to Chudders FT for 1.08 + 2026 2nd' },
+  { round:1, pick:9,  team:'General Ken\u2011obi',      player:'RJ Harvey',           pos:'RB', college:'UCF',         note:'Traded to Kittler on the Roof — pick swap + 3rd' },
+  { round:1, pick:10, team:'Burden of Etienne\u2011y Woody', player:'Will Howard',    pos:'QB', college:'Ohio State',  note:'Original pick — best QB available' },
+  { round:1, pick:11, team:'Sleeping Giants',           player:'Jalen Milroe',        pos:'QB', college:'Alabama',     note:'' },
+  { round:1, pick:12, team:'Kittler on the Roof',       player:'Quinshon Judkins',    pos:'RB', college:'Ohio State',  note:'Traded to Rasheeing the Scene for 1.12 + 2.12' },
+
+  // Round 2
+  { round:2, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'Devin Neal',     pos:'RB', college:'Kansas',      note:'' },
+  { round:2, pick:2,  team:'Chudders Football Team',    player:'Bhayshul Tuten',      pos:'RB', college:'Virginia Tech',note:'' },
+  { round:2, pick:3,  team:'The Legion of Bouz',        player:'Matthew Golden',      pos:'WR', college:'Texas',       note:'Traded to Noble FFT' },
+  { round:2, pick:4,  team:'Noble FFT',                 player:'Jonathon Brooks',     pos:'RB', college:'Texas',       note:'Traded to Sleeping Giants' },
+  { round:2, pick:5,  team:'MHJTIME',                   player:'Harold Fannin Jr.',   pos:'TE', college:'Bowling Green',note:'Acquired via trade for 1.10 deal' },
+  { round:2, pick:6,  team:'General Ken\u2011obi',      player:'Mason Taylor',        pos:'TE', college:'LSU',         note:'Acquired via 1.06 swap with Rasheeing' },
+  { round:2, pick:7,  team:'Ghastly Grayskull Gang',    player:'Emeka Egbuka',        pos:'WR', college:'Ohio State',  note:'Traded to Chudders FT for future 2nd' },
+  { round:2, pick:8,  team:'Father Time',               player:'Isaac Guerendo',      pos:'RB', college:'Louisville',  note:'' },
+  { round:2, pick:9,  team:'The Boonist Monks',         player:'Ray Davis',           pos:'RB', college:'Kentucky',    note:'Swapped picks with original owner' },
+  { round:2, pick:10, team:'Rasheeing the Scene',       player:'Keon Coleman',        pos:'WR', college:'Florida St.', note:'' },
+  { round:2, pick:11, team:'Sleeping Giants',           player:'Jaylin Noel',         pos:'WR', college:'Iowa State',  note:'Traded to Chudders FT' },
+  { round:2, pick:12, team:'Rasheeing the Scene',       player:'Trey Benson',         pos:'RB', college:'Florida St.', note:'Acquired via 1.12 deal with Kittler' },
+
+  // Round 3
+  { round:3, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'Luke Altmyer',   pos:'QB', college:'Illinois',    note:'' },
+  { round:3, pick:2,  team:'Chudders Football Team',    player:'Pat Bryant',          pos:'WR', college:'Illinois',    note:'' },
+  { round:3, pick:3,  team:'The Legion of Bouz',        player:'Ben Sinnott',         pos:'TE', college:'Kansas State',note:'' },
+  { round:3, pick:4,  team:'Noble FFT',                 player:'Ricky Pearsall',      pos:'WR', college:'Florida',     note:'' },
+  { round:3, pick:5,  team:'The Boonist Monks',         player:'Rashid Shaheed',      pos:'WR', college:'Weber State', note:'' },
+  { round:3, pick:6,  team:'Rasheeing the Scene',       player:'Braelon Allen',       pos:'RB', college:'Wisconsin',   note:'Traded to Father Time' },
+  { round:3, pick:7,  team:'Ghastly Grayskull Gang',    player:'Quentin Johnston',    pos:'WR', college:'TCU',         note:'' },
+  { round:3, pick:8,  team:'Father Time',               player:'Rome Odunze',         pos:'WR', college:'Washington',  note:'' },
+  { round:3, pick:9,  team:'General Ken\u2011obi',      player:'Cade Otton',          pos:'TE', college:'Washington',  note:'' },
+  { round:3, pick:10, team:'MHJTIME',                   player:'Courtland Sutton',    pos:'WR', college:'SMU',         note:'' },
+  { round:3, pick:11, team:'Sleeping Giants',           player:'Devin Neal',          pos:'RB', college:'Kansas',      note:'Traded pick — used on depth' },
+  { round:3, pick:12, team:'Kittler on the Roof',       player:'Christian Watson',    pos:'WR', college:'N. Dakota St.',note:'' },
+
+  // Round 4
+  { round:4, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'Mike Gesicki',   pos:'TE', college:'Penn State',  note:'' },
+  { round:4, pick:2,  team:'Chudders Football Team',    player:'DeMario Douglas',     pos:'WR', college:'Liberty',     note:'' },
+  { round:4, pick:3,  team:'The Legion of Bouz',        player:'Jakobi Meyers',       pos:'WR', college:'N.C. State',  note:'' },
+  { round:4, pick:4,  team:'Noble FFT',                 player:'Ja\'Tavion Sanders',  pos:'TE', college:'Texas',       note:'' },
+  { round:4, pick:5,  team:'The Boonist Monks',         player:'Antonio Gibson',      pos:'RB', college:'Memphis',     note:'' },
+  { round:4, pick:6,  team:'Rasheeing the Scene',       player:'Austin Ekeler',       pos:'RB', college:'W. Colorado', note:'' },
+  { round:4, pick:7,  team:'Ghastly Grayskull Gang',    player:'Tank Dell',           pos:'WR', college:'Houston',     note:'' },
+  { round:4, pick:8,  team:'Father Time',               player:'Michael Mayer',       pos:'TE', college:'Notre Dame',  note:'' },
+  { round:4, pick:9,  team:'General Ken\u2011obi',      player:'Kendre Miller',       pos:'RB', college:'TCU',         note:'' },
+  { round:4, pick:10, team:'MHJTIME',                   player:'Zach Ertz',           pos:'TE', college:'Stanford',    note:'' },
+  { round:4, pick:11, team:'Sleeping Giants',           player:'Brenton Strange',     pos:'TE', college:'Penn State',  note:'' },
+  { round:4, pick:12, team:'Kittler on the Roof',       player:'Dameon Pierce',       pos:'RB', college:'Florida',     note:'' },
+
+  // Round 5
+  { round:5, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'George Pickens', pos:'WR', college:'Georgia',     note:'' },
+  { round:5, pick:2,  team:'Chudders Football Team',    player:'Adonai Mitchell',     pos:'WR', college:'Texas',       note:'' },
+  { round:5, pick:3,  team:'The Legion of Bouz',        player:'Tommy Tremble',       pos:'TE', college:'Notre Dame',  note:'' },
+  { round:5, pick:4,  team:'Noble FFT',                 player:'Terrance Ferguson',   pos:'TE', college:'Oregon',      note:'' },
+  { round:5, pick:5,  team:'The Boonist Monks',         player:'Nick Chubb',          pos:'RB', college:'Georgia',     note:'' },
+  { round:5, pick:6,  team:'Rasheeing the Scene',       player:'Michael Pittman',     pos:'WR', college:'USC',         note:'' },
+  { round:5, pick:7,  team:'Ghastly Grayskull Gang',    player:'Dalton Schultz',      pos:'TE', college:'Stanford',    note:'' },
+  { round:5, pick:8,  team:'Father Time',               player:'Jerry Jeudy',         pos:'WR', college:'Alabama',     note:'' },
+  { round:5, pick:9,  team:'General Ken\u2011obi',      player:'Jermaine Burton',     pos:'WR', college:'Alabama',     note:'' },
+  { round:5, pick:10, team:'MHJTIME',                   player:'Daniel Jones',        pos:'QB', college:'Duke',        note:'' },
+  { round:5, pick:11, team:'Sleeping Giants',           player:'Stefon Diggs',        pos:'WR', college:'Maryland',    note:'' },
+  { round:5, pick:12, team:'Kittler on the Roof',       player:'Luke Musgrave',       pos:'TE', college:'Oregon St.',  note:'' },
+];
+
+const draftGrades = [
+  {
+    team:'MHJTIME', grade:'A',
+    picks:['1.01 Travis Hunter','2.05 Harold Fannin Jr.'],
+    analysis:'Aggressive and brilliant. Trading up for Travis Hunter gives you a potential WR1 alongside Chase and Nabers. Fannin is a lottery ticket at TE. You sacrificed future capital, but with this core your window is now.'
+  },
+  {
+    team:'Chudders Football Team', grade:'A',
+    picks:['1.02 Ashton Jeanty','1.08 Colston Loveland','2.02 Bhayshul Tuten','2.07 Emeka Egbuka','2.11 Jaylin Noel'],
+    analysis:'Five picks in the first two rounds is a dynasty masterclass. Jeanty and Tuten give you a lethal RB room alongside Gibbs. Loveland fills the TE void and Egbuka is a plug-and-play WR2. The rebuild is ahead of schedule.'
+  },
+  {
+    team:'Father Time', grade:'A-',
+    picks:['1.03 Tetairoa McMillan','2.08 Isaac Guerendo','3.06 Braelon Allen','3.08 Rome Odunze'],
+    analysis:'McMillan alongside Brian Thomas Jr. and Ladd McConkey is a frightening young WR corps. Guerendo and Allen provide RB depth you badly needed. Smart, needs-based drafting throughout.'
+  },
+  {
+    team:'General Ken\u2011obi', grade:'B+',
+    picks:['1.06 Kaleb Johnson','2.06 Mason Taylor','3.09 Cade Otton'],
+    analysis:'Johnson adds thunder to the backfield, and two mid-round TEs are solid bets for LaPorta insurance. Could have been more aggressive to address QB, but you don\'t have many holes to fill.'
+  },
+  {
+    team:'Burden of Etienne\u2011y Woody', grade:'B+',
+    picks:['1.07 Luther Burden III','1.10 Will Howard','2.01 Devin Neal','3.01 Luke Altmyer'],
+    analysis:'Four picks in the first three rounds. Luther Burden is a perfect name-synergy pick AND fills a need. Howard and Altmyer give you QB options beyond Kyler. Neal is a capable flex play. Solid rebuild execution.'
+  },
+  {
+    team:'Rasheeing the Scene', grade:'B',
+    picks:['1.12 Quinshon Judkins','2.10 Keon Coleman','2.12 Trey Benson','3.06 Braelon Allen'],
+    analysis:'Judkins adds to an already-loaded backfield which feels redundant, but the value was right. Coleman is the WR help you need. Trading for extra late-round picks was smart asset management.'
+  },
+  {
+    team:'Sleeping Giants', grade:'B-',
+    picks:['1.11 Jalen Milroe','2.04 Jonathon Brooks','3.11 Devin Neal'],
+    analysis:'Milroe is a polarizing pick — elite rushing upside but raw as a passer. Brooks adds youth to an aging backfield. Nothing flashy, but addressed the right positions.'
+  },
+  {
+    team:'Ghastly Grayskull Gang', grade:'B-',
+    picks:['3.07 Quentin Johnston','4.07 Tank Dell','5.07 Dalton Schultz'],
+    analysis:'You traded your top picks for proven players during the season. The picks you made are depth plays. Johnston and Dell are boom-or-bust WRs who could pop if given volume.'
+  },
+  {
+    team:'The Legion of Bouz', grade:'B-',
+    picks:['1.05 Cam Ward','3.03 Ben Sinnott','4.03 Jakobi Meyers'],
+    analysis:'Ward behind Mahomes is a luxury, not a need — but dynasty is about the long game. Sinnott addresses the TE desert. Meyers is a safe floor play. Could have invested more in RB youth.'
+  },
+  {
+    team:'Kittler on the Roof', grade:'B-',
+    picks:['1.09 RJ Harvey','3.12 Christian Watson','4.12 Dameon Pierce'],
+    analysis:'Harvey is a solid RB2 behind Jonathan Taylor. Watson is a reclamation project and Pierce is depth. As defending champ you\'re not rebuilding, so safe picks make sense.'
+  },
+  {
+    team:'Noble FFT', grade:'C+',
+    picks:['2.03 Matthew Golden','3.04 Ricky Pearsall','4.04 Ja\'Tavion Sanders'],
+    analysis:'Trading out of 1.04 was bold. Golden and Pearsall are developmental WRs who need time. Sanders is a late-round flier at TE. You got future capital but left value on the board.'
+  },
+  {
+    team:'The Boonist Monks', grade:'C',
+    picks:['2.09 Ray Davis','3.05 Rashid Shaheed','4.05 Antonio Gibson','5.05 Nick Chubb'],
+    analysis:'Traded out of 1.05 for future capital, which makes sense given your win-now core. But the picks you made are aging vets and deep sleepers. Davis is the only one with real upside.'
+  },
+];
+
+const storylines = [
+  {
+    emoji:'1\uFE0F\u20E3',
+    title:'MHJTIME Trades Up for Travis Hunter',
+    text:'The most aggressive move of the draft. MHJTIME shipped a 2026 first-round pick and his original 2025 second-rounder to Burden of Etienne\u2011y Woody to jump from 1.10 to 1.01 and land the consensus top prospect. Paired with Ja\'Marr Chase and Malik Nabers, this gives MHJTIME arguably the most talented WR room in dynasty fantasy football history.'
+  },
+  {
+    emoji:'\uD83D\uDD04',
+    title:'Seven First-Round Trades',
+    text:'Only five of the twelve first-round picks were made by their original owners. The frenzy started when MHJTIME traded up to 1.01 and cascaded through the round. Chudders at 1.02 was the only top-four pick that stayed put. By pick 1.08, three different teams had swapped into spots they didn\'t own entering the day.'
+  },
+  {
+    emoji:'\uD83C\uDFAF',
+    title:'Chudders Loads Up with Five Top-24 Picks',
+    text:'The rebuild accelerated in a big way. Between their own picks and acquired selections, Chudders made five picks in the first two rounds — headlined by Ashton Jeanty at 1.02 and Colston Loveland at 1.08. Combined with last year\'s Gibbs pick, the young core is taking shape fast.'
+  },
+  {
+    emoji:'\uD83D\uDE02',
+    title:'Luther Burden Goes to Burden of Etienne\u2011y Woody',
+    text:'The group chat exploded when Luther Burden III was drafted at 1.07 by the team literally named after him. "It was destiny," owner kharlo w posted. "We\'ve been manifesting this since the team name was created." Burden slots in as the WR2 behind Justin Jefferson.'
+  },
+  {
+    emoji:'\uD83D\uDCC9',
+    title:'Noble FFT and Boonist Monks Trade Down',
+    text:'Both teams held top-five picks and traded out, accumulating future assets instead. Noble FFT moved out of 1.04 and settled for Matthew Golden in the second round. The Boonist Monks shipped 1.05 and landed Cam Ward for the Legion of Bouz. Both teams bet their future capital will be worth more than any single rookie.'
+  },
+  {
+    emoji:'\uD83C\uDF1F',
+    title:'Sleeper Pick of the Draft: Harold Fannin Jr.',
+    text:'At 2.05, MHJTIME grabbed the Bowling Green TE who posted the most receiving yards by a tight end in college football history. With Trey McBride already locked in, Fannin is a pure dynasty stash — but if he hits, this could be the steal of the draft.'
+  },
+];
+
+// --- Render draft board ---
+function renderDraftBoard() {
+  const container = document.getElementById('draftBoard');
+  let html = '<table class="draft-table"><thead><tr><th></th>';
+  for (let p = 1; p <= 12; p++) html += `<th>Pick ${p}</th>`;
+  html += '</tr></thead><tbody>';
+
+  for (let r = 1; r <= 5; r++) {
+    html += `<tr><td class="round-header" colspan="13" style="font-weight:700;background:rgba(139,92,246,0.06);text-align:left;color:var(--accent);">Round ${r}</td></tr><tr><td style="font-weight:600;color:var(--muted);font-size:.8rem;">R${r}</td>`;
+    const roundPicks = draftPicks.filter(dp => dp.round === r);
+    roundPicks.forEach(dp => {
+      const posClass = 'pos-' + dp.pos.toLowerCase();
+      const pickLabel = `${r}.${String(dp.pick).padStart(2,'0')}`;
+      const teamShort = teams.find(t => t.name === dp.team)?.initials || '??';
+      html += `<td><div class="draft-cell ${posClass}" title="${dp.note || dp.team}">
+        <div class="pick-num">${pickLabel} &middot; ${teamShort}</div>
+        <div class="player-name">${dp.player}</div>
+        <div class="player-meta">${dp.pos} &middot; ${dp.college}</div>
+      </div></td>`;
+    });
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// --- Render grade cards ---
+function gradientFor(initials) {
+  const seed = initials.charCodeAt(0) + initials.charCodeAt(1);
+  const h1 = seed % 360;
+  const h2 = (h1 + 60) % 360;
+  return `linear-gradient(135deg, hsl(${h1},80%,55%), hsl(${h2},80%,55%))`;
+}
+
+function renderGrades() {
+  const grid = document.getElementById('gradeGrid');
+  draftGrades.forEach(dg => {
+    const team = teams.find(t => t.name === dg.team);
+    if (!team) return;
+    const gradeClass = dg.grade.startsWith('A') ? 'grade-a' : dg.grade.startsWith('B') ? 'grade-b' : dg.grade.startsWith('C') ? 'grade-c' : 'grade-d';
+    const card = document.createElement('div');
+    card.className = 'grade-card';
+    card.innerHTML = `
+      <div class="grade-header">
+        <div class="team-info">
+          <div class="avatar" style="background:${gradientFor(team.initials)}">${team.initials}</div>
+          <div><h3>${team.name}</h3><div class="owner">@${team.owner}</div></div>
+        </div>
+        <div class="grade-badge ${gradeClass}">${dg.grade}</div>
+      </div>
+      <div class="grade-picks">${dg.picks.map(p => `<span class="pick-tag">${p}</span>`).join('')}</div>
+      <div class="grade-analysis">${dg.analysis}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// --- Render storylines ---
+function renderStorylines() {
+  const container = document.getElementById('storylines');
+  storylines.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'storyline';
+    div.innerHTML = `<h3><span class="emoji">${s.emoji}</span>${s.title}</h3><p>${s.text}</p>`;
+    container.appendChild(div);
+  });
+}
+
+// --- Draft chart (canvas) ---
+function drawDraftChart() {
+  const canvas = document.getElementById('draftChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = devicePixelRatio || 1;
+  const W = canvas.width = canvas.clientWidth * dpr;
+  const H = canvas.height = canvas.clientHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+
+  // Compute picks per team and total value (simplified value model)
+  const pickValues = { 1: 100, 2: 88, 3: 80, 4: 74, 5: 68, 6: 62, 7: 56, 8: 50, 9: 44, 10: 38, 11: 32, 12: 26 };
+  const round2Mult = { 1: 1, 2: 0.55, 3: 0.3, 4: 0.15, 5: 0.08 };
+
+  const teamStats = {};
+  teams.forEach(t => { teamStats[t.name] = { picks: 0, value: 0, name: t.name, initials: t.initials }; });
+
+  draftPicks.forEach(dp => {
+    if (teamStats[dp.team]) {
+      teamStats[dp.team].picks++;
+      const baseVal = pickValues[dp.pick] || 20;
+      const mult = round2Mult[dp.round] || 0.08;
+      teamStats[dp.team].value += Math.round(baseVal * mult);
+    }
+  });
+
+  const sorted = Object.values(teamStats).sort((a, b) => b.value - a.value);
+  const maxVal = Math.max(...sorted.map(s => s.value));
+
+  const pad = { top: 30, right: 20, bottom: 60, left: 50 };
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const barW = Math.min(cw / sorted.length * 0.65, 50);
+  const gap = cw / sorted.length;
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '11px system-ui';
+  const steps = 5;
+  for (let i = 0; i <= steps; i++) {
+    const val = Math.round(maxVal / steps * i);
+    const y = pad.top + ch - (val / maxVal * ch);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(w - pad.right, y);
+    ctx.stroke();
+    ctx.fillText(val.toString(), pad.left - 30, y + 4);
+  }
+
+  // Bars
+  const colors = ['#8b5cf6','#ec4899','#3b82f6','#10b981','#f59e0b','#ef4444','#06b6d4','#a78bfa','#f472b6','#34d399','#fbbf24','#fb923c'];
+  sorted.forEach((s, i) => {
+    const x = pad.left + i * gap + (gap - barW) / 2;
+    const barH = (s.value / maxVal) * ch;
+    const y = pad.top + ch - barH;
+
+    const grad = ctx.createLinearGradient(x, y, x, y + barH);
+    grad.addColorStop(0, colors[i % colors.length]);
+    grad.addColorStop(1, colors[i % colors.length] + '66');
+    ctx.fillStyle = grad;
+
+    // Rounded top
+    const r = 4;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + barW - r, y);
+    ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+    ctx.lineTo(x + barW, y + barH);
+    ctx.lineTo(x, y + barH);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.fill();
+
+    // Value label
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.value.toString(), x + barW / 2, y - 6);
+
+    // Team label
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '10px system-ui';
+    ctx.save();
+    ctx.translate(x + barW / 2, pad.top + ch + 8);
+    ctx.rotate(-Math.PI / 6);
+    ctx.textAlign = 'right';
+    ctx.fillText(s.initials + ' (' + s.picks + ')', 0, 0);
+    ctx.restore();
+  });
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('Draft Value Score (pick slot x round multiplier)', w / 2, h - 5);
+}
+
+// --- Init ---
+renderDraftBoard();
+renderGrades();
+renderStorylines();
+drawDraftChart();
+window.addEventListener('resize', drawDraftChart);
+
+// --- Scroll animations ---
+const scrollObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); scrollObs.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.grade-card, .storyline').forEach(el => scrollObs.observe(el));
+
+// --- Nav scroll effect ---
+window.addEventListener('scroll', () => {
+  document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// --- Theme toggle ---
+document.getElementById('toggleTheme').addEventListener('click', () => {
+  document.documentElement.classList.toggle('light');
+  drawDraftChart();
+});
+
+// --- Hamburger ---
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('#navLinks a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+// --- Scroll progress ---
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
+
+// --- Back to top ---
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => { btt.classList.toggle('show', window.scrollY > 500); }, {passive:true});
+btt.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
