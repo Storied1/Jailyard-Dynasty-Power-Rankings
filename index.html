@@ -12,6 +12,7 @@
 <meta property="og:description" content="Four seasons. Twelve managers. One dynasty league to rule them all. Explore the complete history of The Jailyard." />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
 
 <!-- Speculation Rules: prerender linked pages for instant navigation -->
 <script type="speculationrules">
@@ -290,6 +291,13 @@
     .page-cards{ grid-template-columns:1fr; }
     .stats-grid{ grid-template-columns:repeat(2,1fr); }
   }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -632,10 +640,10 @@ document.querySelectorAll('#navLinks a').forEach(a => {
 
 // --- Konami code easter egg ---
 (function(){
-  const code = [38,38,40,40,37,39,37,39,66,65]; // up up down down left right left right B A
+  const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
   let idx = 0;
   document.addEventListener('keydown', e => {
-    if(e.keyCode === code[idx]){ idx++; } else { idx = 0; }
+    if(e.key === code[idx]){ idx++; } else { idx = 0; }
     if(idx === code.length){
       idx = 0;
       const colors = ['#8b5cf6','#ec4899','#10b981','#f59e0b','#3b82f6','#ef4444','#06b6d4'];

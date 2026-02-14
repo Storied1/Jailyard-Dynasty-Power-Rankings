@@ -9,6 +9,7 @@
 <meta property="og:title" content="The Jailyard 2025 — Season Recap" />
 <meta property="og:description" content="Weekly recaps, awards, power rankings, transactions, and fun statistics from the 2025 Jailyard dynasty season." />
 <meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
 <style>
 :root{
   --bg:#0b0d10;--fg:#e8ecf0;--muted:#7a8194;
@@ -227,6 +228,13 @@ footer a{color:var(--accent);}
   .g4{grid-template-columns:1fr 1fr;}
 }
 .scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -336,7 +344,7 @@ async function loadData(season) {
       initFromOfflineData();
       return;
     }
-  } catch(e) {}
+  } catch(e) { console.error('Jailyard data error:', e); }
 
   // Live API
   try {
@@ -404,12 +412,12 @@ async function loadData(season) {
     try {
       const pResp = await fetch('data/players.json');
       if (pResp.ok) playersDb = await pResp.json();
-    } catch(e) {}
+    } catch(e) { console.error('Jailyard data error:', e); }
     if (!playersDb) {
       try {
         const pResp = await fetch(SLEEPER+'/players/nfl');
         if (pResp.ok) playersDb = await pResp.json();
-      } catch(e) {}
+      } catch(e) { console.error('Jailyard data error:', e); }
     }
 
     computeAllStandings();

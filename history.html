@@ -6,6 +6,7 @@
 <title>The Jailyard — League Bible</title>
 <meta name="view-transition" content="same-origin" />
 <meta name="description" content="The complete history of The Jailyard dynasty league. Every record, rivalry, and Elo rating from inception to today." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
 <style>
 :root{
   --bg:#0b0d10;--fg:#e8ecf0;--muted:#7a8194;
@@ -185,6 +186,13 @@ a{color:inherit;text-decoration:none;}
   .fran-stats{grid-template-columns:1fr;}
 }
 .scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -401,7 +409,7 @@ async function loadData(){
   try{
     const r=await fetch('data/league_history.json');
     if(r.ok)return await r.json();
-  }catch(e){}
+  }catch(e){ console.error('Jailyard data error:', e); }
   // Fallback: fetch live from Sleeper API and compute client-side
   const prog=document.querySelector('#loading p');
   try{return await fetchLiveHistory(msg=>{if(prog)prog.textContent=msg;});}

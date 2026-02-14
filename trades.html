@@ -9,6 +9,7 @@
 <meta property="og:title" content="The Jailyard — Trade Tracker" />
 <meta property="og:description" content="The complete trade history of The Jailyard dynasty league. See who won and who got fleeced." />
 <meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
 
 <script type="speculationrules">
 {"prerender":[{"where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}
@@ -138,6 +139,13 @@
     .timeline{padding-left:2rem;}
     .trade-dot{left:-1.6rem;}
   }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>

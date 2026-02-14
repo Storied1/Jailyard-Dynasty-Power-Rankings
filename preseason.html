@@ -9,13 +9,14 @@
 <meta property="og:title" content="The Jailyard 2025 Power Rankings" />
 <meta property="og:description" content="2025 preseason power rankings for 12 teams. Charts, rosters and bold predictions before the season." />
 <meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
 <style>
 :root{
   --bg:#0b0d10;
   --fg:#e8ecf0;
   --muted:#7a8194;
   --accent:#8b5cf6;
-  --accent-2:#ec4899;
+  --accent2:#ec4899;
   --card:rgba(255,255,255,0.04);
   --glass:rgba(255,255,255,0.06);
   --border:rgba(255,255,255,0.08);
@@ -36,7 +37,7 @@ html,body{
   overscroll-behavior-y:none;
 }
 *{box-sizing:border-box;}
-a{color:var(--accent-2);text-decoration:none;}
+a{color:var(--accent2);text-decoration:none;}
 a:hover{text-decoration:underline;}
 header.hero{position:relative;min-height:100vh;display:grid;place-items:center;overflow:hidden;perspective:1000px;}
 .hero__bg{position:absolute;inset:-20vh -10vw -20vh -10vw;background:
@@ -69,7 +70,7 @@ header.hero{position:relative;min-height:100vh;display:grid;place-items:center;o
 .badge{display:inline-flex;align-items:center;gap:.35rem;padding:.15rem .5rem;border-radius:999px;font-size:.8rem;line-height:1.7;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);}
 .badge.good{color:var(--good);border-color:rgba(0,208,132,.25);} .badge.bad{color:var(--bad);border-color:rgba(255,77,79,.25);} .badge.warn{color:var(--warning);border-color:rgba(255,183,3,.25);}  
 .rank-line{margin-top:.8rem;width:100%;height:8px;background:rgba(255,255,255,0.06);border-radius:999px;position:relative;overflow:hidden;}
-.rank-line .bar{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .8s cubic-bezier(.2,.8,.2,1);}  
+.rank-line .bar{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .8s cubic-bezier(.2,.8,.2,1);}  
 .rank-pill{position:absolute;top:.9rem;right:1rem;font-size:.85rem;padding:.12rem .45rem;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);color:var(--muted);}  
 .team-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}  
 .team-meta{display:flex;flex-wrap:wrap;gap:.4rem .6rem;margin:.6rem 0 1rem;}  
@@ -80,9 +81,9 @@ ul.players{list-style:none;margin:.4rem 0 0;padding:0;display:grid;grid-template
 ul.players li{font-size:.88rem;color:#cfd4db;}  
 ul.players li span.val{color:var(--muted);font-size:.8rem;}  
 details summary{cursor:pointer;user-select:none;font-weight:600;margin:.9rem 0;}  
-details[open] summary{color:var(--accent-2);}  
+details[open] summary{color:var(--accent2);}  
 .section-awards .award{display:grid;grid-template-columns:90px 1fr;gap:1rem;padding:1rem;border:1px dashed rgba(255,255,255,0.08);border-radius:12px;margin-bottom:1rem;}  
-.award .tag{display:inline-block;font-weight:700;font-size:2.2rem;text-align:center;padding:.8rem .2rem;background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;color:transparent;}  
+.award .tag{display:inline-block;font-weight:700;font-size:2.2rem;text-align:center;padding:.8rem .2rem;background:linear-gradient(120deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent;}  
 .toggle-dark{cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:999px;padding:.35rem .7rem;font-size:.9rem;}  
 .light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(255,255,255,0.9);--glass:rgba(255,255,255,0.85);--border:rgba(0,0,0,0.06);color-scheme:light;}
 @view-transition{navigation:auto;}::view-transition-old(root){animation:vt-out .2s ease-in;}::view-transition-new(root){animation:vt-in .3s ease-out;}@keyframes vt-out{to{opacity:0;filter:blur(2px);}}@keyframes vt-in{from{opacity:0;filter:blur(2px);}}
@@ -96,8 +97,8 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 .master-table{width:100%;border-collapse:collapse;font-size:.92rem;min-width:900px;}  
 .master-table th,.master-table td{padding:.55rem .7rem;border-bottom:1px solid rgba(255,255,255,0.05);}  
 .master-table th{text-align:left;color:var(--muted);font-weight:600;cursor:pointer;position:sticky;top:0;background:rgba(0,0,0,0.05);}  
-.master-table th.sort-asc::after{content:' ▲';color:var(--accent-2);}  
-.master-table th.sort-desc::after{content:' ▼';color:var(--accent-2);}  
+.master-table th.sort-asc::after{content:' ▲';color:var(--accent2);}  
+.master-table th.sort-desc::after{content:' ▼';color:var(--accent2);}  
 /* --- Hamburger menu (mobile) --- */
 .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.3rem;color:var(--fg);}
 .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
@@ -129,10 +130,10 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 .compare-bar{position:fixed;bottom:-80px;left:50%;transform:translateX(-50%);z-index:998;display:flex;align-items:center;gap:1rem;padding:.7rem 1.2rem;border-radius:16px;background:rgba(11,13,16,0.92);backdrop-filter:blur(12px);border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,0.4);transition:bottom .35s cubic-bezier(.17,.67,.24,1);max-width:95vw;}
 .compare-bar.show{bottom:1.5rem;}
 .compare-bar .compare-teams{display:flex;gap:.5rem;align-items:center;font-size:.9rem;}
-.compare-bar .compare-teams .vs{color:var(--accent-2);font-weight:700;}
+.compare-bar .compare-teams .vs{color:var(--accent2);font-weight:700;}
 .compare-bar .cmp-name{padding:.2rem .6rem;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);}
 .compare-bar button{cursor:pointer;font-family:inherit;font-weight:600;border:none;border-radius:999px;padding:.45rem 1rem;font-size:.85rem;transition:background .2s,transform .15s;}
-.compare-bar .btn-go{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;}
+.compare-bar .btn-go{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
 .compare-bar .btn-go:hover{transform:scale(1.04);}
 .compare-bar .btn-clear{background:rgba(255,255,255,0.06);color:var(--muted);border:1px solid var(--border);}
 .card .compare-check{position:absolute;top:.9rem;left:1rem;width:20px;height:20px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.04);cursor:pointer;display:grid;place-items:center;transition:background .2s,border-color .2s;z-index:2;}
@@ -173,7 +174,14 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 /* --- Row hover in master table --- */
 .master-table tbody tr{cursor:pointer;transition:background .15s;}
 .master-table tbody tr:hover{background:rgba(108,71,255,0.06);}
-.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .1s linear;pointer-events:none;}
+.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>
