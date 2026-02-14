@@ -52,6 +52,7 @@ const LEAGUE_CONFIG = {
     { label: 'League Bible',  href: 'history.html'   },
     { label: 'Season Hub',    href: 'season.html'     },
     { label: 'Rankings',      href: 'preseason.html'  },
+    { label: 'Power Rankings', href: 'power-rankings.html' },
     { label: 'Draft',         href: 'draft.html'      },
     { label: 'Trades',        href: 'trades.html'     },
     { label: 'Week 1',        href: 'week1.html'      },

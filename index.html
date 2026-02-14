@@ -238,6 +238,128 @@
   .fun-ticker-item .emoji{ font-size:1.1rem; }
   @keyframes ticker{ 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
+  /* --- Championship Vault --- */
+  .champions-trigger .stat-number{
+    cursor:pointer; transition:text-shadow .3s, transform .2s;
+    position:relative;
+  }
+  .champions-trigger .stat-number:hover{
+    text-shadow:0 0 30px rgba(251,191,36,0.5);
+    transform:scale(1.08);
+  }
+  .champions-trigger .stat-label::after{
+    content:' \2022 tap to explore'; font-size:.72rem; color:rgba(251,191,36,0.5);
+    opacity:0; transition:opacity .3s;
+  }
+  .champions-trigger:hover .stat-label::after{ opacity:1; }
+
+  .vault-overlay{
+    position:fixed; inset:0; z-index:8000;
+    display:none; justify-content:center; align-items:center;
+    flex-direction:column; background:rgba(0,0,0,0);
+    transition:background .6s;
+  }
+  .vault-overlay.active{ background:rgba(0,0,0,0.96); }
+
+  .vault-letterbox{
+    position:fixed; left:0; right:0; height:0; background:#000; z-index:8001;
+    transition:height .5s cubic-bezier(.4,0,.2,1);
+  }
+  .vault-letterbox.top{ top:0; }
+  .vault-letterbox.bot{ bottom:0; }
+  .vault-overlay.active .vault-letterbox{ height:7vh; }
+
+  .vault-close{
+    position:absolute; top:max(8vh,50px); right:1.5rem; z-index:8002;
+    background:none; border:none; color:var(--muted); cursor:pointer;
+    font-size:2rem; line-height:1; transition:color .2s, transform .2s;
+  }
+  .vault-close:hover{ color:#fbbf24; transform:rotate(90deg); }
+
+  .vault-title{
+    font-size:clamp(1.2rem,3.5vw,2rem); font-weight:800; letter-spacing:.1em;
+    text-transform:uppercase; text-align:center; margin-bottom:2.5rem;
+    background:linear-gradient(135deg,#fde68a,#fbbf24,#d97706,#fbbf24,#fde68a);
+    background-size:200% 200%; animation:shimmer 4s ease-in-out infinite;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    opacity:0; transform:translateY(20px);
+  }
+  .vault-overlay.active .vault-title{
+    animation:vault-in .7s .4s ease-out forwards, shimmer 4s ease-in-out infinite;
+  }
+  @keyframes vault-in{ to{opacity:1;transform:translateY(0)} }
+
+  .vault-rings{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:2.5rem;
+    max-width:960px; width:90%; position:relative; z-index:1;
+  }
+  .vault-ring{
+    width:240px; text-align:center;
+    opacity:0; transform:scale(.7) translateY(30px);
+  }
+  .vault-ring.reveal{
+    animation:ring-pop .8s cubic-bezier(.17,.67,.24,1) forwards;
+  }
+  @keyframes ring-pop{
+    0%{opacity:0;transform:scale(.7) translateY(30px)}
+    60%{transform:scale(1.06) translateY(-5px)}
+    100%{opacity:1;transform:scale(1) translateY(0)}
+  }
+
+  .ring-circle{
+    width:140px; height:140px; margin:0 auto 1.2rem; position:relative; border-radius:50%;
+    background:conic-gradient(from 0deg,#fde68a,#fbbf24,#d97706,#b45309,#d97706,#fbbf24,#fde68a);
+    box-shadow:0 0 40px rgba(251,191,36,0.35);
+    animation:ring-glow 3s ease-in-out infinite alternate;
+  }
+  .ring-circle::before{
+    content:''; position:absolute; inset:20px; border-radius:50%;
+    background:radial-gradient(circle at 40% 40%,#1a1a2e,#0a0a18);
+  }
+  .ring-circle::after{
+    content:attr(data-year); position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem; font-weight:800; color:#fbbf24;
+    text-shadow:0 0 15px rgba(251,191,36,0.5);
+  }
+  @keyframes ring-glow{
+    from{box-shadow:0 0 30px rgba(251,191,36,0.25)}
+    to{box-shadow:0 0 55px rgba(251,191,36,0.55),0 0 100px rgba(251,191,36,0.12)}
+  }
+  .ring-gem{
+    position:absolute; width:14px; height:14px; border-radius:3px;
+    transform:rotate(45deg);
+  }
+  .ring-champ{
+    font-size:1.1rem; font-weight:700; color:#fde68a; margin-bottom:.25rem;
+  }
+  .ring-vs{ font-size:.82rem; color:var(--muted); margin-bottom:.4rem; }
+  .ring-tag{
+    display:inline-block; padding:.2rem .6rem; border-radius:999px; font-size:.75rem;
+    background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2);
+    color:#fbbf24; margin:.12rem .08rem;
+  }
+  .vault-footer{
+    margin-top:2rem; text-align:center; opacity:0;
+  }
+  .vault-overlay.active .vault-footer{
+    animation:vault-in .7s 2s ease-out forwards;
+  }
+  .vault-footer span{
+    font-size:.85rem; color:var(--muted); letter-spacing:.1em; text-transform:uppercase;
+  }
+  .vault-particles{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+  }
+  @media(max-width:600px){
+    .vault-rings{ gap:1.5rem; }
+    .vault-ring{ width:200px; }
+    .ring-circle{ width:110px; height:110px; }
+    .ring-circle::before{ inset:16px; }
+    .ring-circle::after{ font-size:1.2rem; }
+    .champions-trigger .stat-label::after{ content:' \2022 tap'; }
+  }
+
   /* --- Easter egg confetti --- */
   .confetti-piece{
     position:fixed; width:10px; height:10px; z-index:9999; pointer-events:none;
@@ -312,9 +434,10 @@
     <div class="kbd-row"><span>Go to League Bible</span><kbd>1</kbd></div>
     <div class="kbd-row"><span>Go to Season Hub</span><kbd>2</kbd></div>
     <div class="kbd-row"><span>Go to Rankings</span><kbd>3</kbd></div>
-    <div class="kbd-row"><span>Go to Draft Recap</span><kbd>4</kbd></div>
-    <div class="kbd-row"><span>Go to Trades</span><kbd>5</kbd></div>
-    <div class="kbd-row"><span>Go to Week 1</span><kbd>6</kbd></div>
+    <div class="kbd-row"><span>Go to Power Rankings</span><kbd>4</kbd></div>
+    <div class="kbd-row"><span>Go to Draft Recap</span><kbd>5</kbd></div>
+    <div class="kbd-row"><span>Go to Trades</span><kbd>6</kbd></div>
+    <div class="kbd-row"><span>Go to Week 1</span><kbd>7</kbd></div>
     <div class="kbd-row"><span>Toggle theme</span><kbd>T</kbd></div>
     <div class="kbd-row"><span>Back to top</span><kbd>Home</kbd></div>
     <div class="kbd-row"><span>Close overlay</span><kbd>Esc</kbd></div>
@@ -327,6 +450,7 @@
     <a href="history.html">League Bible</a>
     <a href="season.html">Season Hub</a>
     <a href="preseason.html">Rankings</a>
+    <a href="power-rankings.html">Power Rankings</a>
     <a href="draft.html">Draft</a>
     <a href="trades.html">Trades</a>
     <a href="week1.html">Week 1</a>
@@ -458,11 +582,32 @@
         <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
     </div>
+    <div class="page-card">
+      <div class="icon-wrap" style="background:rgba(251,191,36,0.1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <h3>Power Rankings</h3>
+      <p>Bill Simmons-style weekly power rankings with tiered analysis, recap, preview, and The Confessional.</p>
+      <a href="power-rankings.html" class="card-link">
+        Read Rankings
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
   </div>
 </section>
 
 <div class="fun-ticker" aria-hidden="true">
   <div class="fun-ticker-inner" id="ticker"></div>
+</div>
+
+<div class="vault-overlay" id="dynastyVault">
+  <div class="vault-letterbox top"></div>
+  <div class="vault-letterbox bot"></div>
+  <button class="vault-close" aria-label="Close vault">&times;</button>
+  <canvas class="vault-particles" id="vaultParticles" aria-hidden="true"></canvas>
+  <h2 class="vault-title">The Championship Vault</h2>
+  <div class="vault-rings" id="vaultRings"></div>
+  <div class="vault-footer"><span>The Dynasty Continues&hellip;</span></div>
 </div>
 
 <footer>
@@ -621,17 +766,17 @@ document.querySelectorAll('#navLinks a').forEach(a => {
 (function(){
   const facts = [
     {e:'🏈', t:'4 seasons and counting since 2022'},
-    {e:'🏆', t:'3 different champions in 4 years'},
+    {e:'🏆', t:'3 different champions in 4 years \u2014 Legion of Bouz, General Ken\u2011obi, Kittler on the Roof'},
     {e:'📊', t:'500+ players rostered across all teams'},
-    {e:'🔥', t:'The longest win streak in league history spans multiple seasons'},
-    {e:'💥', t:'The biggest blowout was over 80 points'},
-    {e:'🎯', t:'Head-to-head rivalries tracked across every matchup'},
+    {e:'🔥', t:'Kittler on the Roof made three straight championship appearances (2022\u20132024)'},
+    {e:'💥', t:'Every matchup tracked for head-to-head rivalry stats'},
+    {e:'🎯', t:'Power rankings computed from win rate, scoring, recent form, and consistency'},
     {e:'📈', t:'Elo ratings update after every game with margin weighting'},
     {e:'🧠', t:'12 GMs battling for dynasty supremacy'},
     {e:'📋', t:'60 picks made in the 2025 rookie draft across 5 rounds'},
     {e:'🤝', t:'Seven first-round picks were traded on draft day alone'},
     {e:'⚡', t:'All data pulled live from the Sleeper API'},
-    {e:'🎲', t:'Luck index measures who overperformed their expected wins'},
+    {e:'🎲', t:'MHJTIME went from last place in 2023 to top 3 in 2025 \u2014 the ultimate rebuild'},
   ];
   const ticker = document.getElementById('ticker');
   const html = facts.map(f => `<span class="fun-ticker-item"><span class="emoji">${f.e}</span>${f.t}</span>`).join('');
@@ -674,10 +819,130 @@ document.querySelectorAll('#navLinks a').forEach(a => {
   }, {passive:true});
 })();
 
+// --- Championship Vault ---
+(function(){
+  const CHAMPS = [
+    { year:'2022', name:'The Legion of Bouz', runner:'Kittler on the Roof',
+      gem:'#8b5cf6', tag:'Inaugural Champion' },
+    { year:'2023', name:'General Ken\u2011obi', runner:'Kittler on the Roof',
+      gem:'#ec4899', tag:'The Kenaissance' },
+    { year:'2024', name:'Kittler on the Roof', runner:'Sleeping Giants',
+      gem:'#10b981', tag:'Third Time\u2019s the Charm' },
+  ];
+
+  // Find the Champions stat and make it clickable
+  const statItems = document.querySelectorAll('.stat-item');
+  let champItem = null;
+  statItems.forEach(item => {
+    if(item.querySelector('.stat-label')?.textContent === 'Champions'){
+      item.classList.add('champions-trigger');
+      champItem = item;
+    }
+  });
+
+  const vault = document.getElementById('dynastyVault');
+  const ringsEl = document.getElementById('vaultRings');
+  const pCanvas = document.getElementById('vaultParticles');
+  const pCtx = pCanvas.getContext('2d');
+  let particles = [], animId = null;
+
+  function openVault(){
+    ringsEl.innerHTML = '';
+    CHAMPS.forEach((c, i) => {
+      const ring = document.createElement('div');
+      ring.className = 'vault-ring';
+
+      // Four gems at compass points of the ring
+      const positions = [
+        'top:-3px;left:50%;margin-left:-7px',
+        'bottom:-3px;left:50%;margin-left:-7px',
+        'top:50%;left:-3px;margin-top:-7px',
+        'top:50%;right:-3px;margin-top:-7px'
+      ];
+      const gems = positions.map(pos =>
+        `<span class="ring-gem" style="${pos};background:${c.gem};box-shadow:0 0 12px ${c.gem}"></span>`
+      ).join('');
+
+      ring.innerHTML = `
+        <div class="ring-circle" data-year="${c.year}">${gems}</div>
+        <div class="ring-champ">${c.name}</div>
+        <div class="ring-vs">defeated ${c.runner}</div>
+        <span class="ring-tag">${c.tag}</span>
+      `;
+      ringsEl.appendChild(ring);
+      setTimeout(() => ring.classList.add('reveal'), 700 + i * 450);
+    });
+
+    vault.style.display = 'flex';
+    requestAnimationFrame(() => vault.classList.add('active'));
+    startParticles();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeVault(){
+    vault.classList.remove('active');
+    setTimeout(() => {
+      vault.style.display = 'none';
+      document.body.style.overflow = '';
+      if(animId) cancelAnimationFrame(animId);
+      animId = null;
+    }, 600);
+  }
+
+  function startParticles(){
+    const dpr = devicePixelRatio || 1;
+    const w = window.innerWidth, h = window.innerHeight;
+    pCanvas.width = w * dpr;
+    pCanvas.height = h * dpr;
+    pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    particles = [];
+    for(let i = 0; i < 50; i++){
+      particles.push({
+        x: Math.random() * w, y: Math.random() * h,
+        r: Math.random() * 2 + 0.5,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: -Math.random() * 0.7 - 0.15,
+        alpha: Math.random() * 0.6 + 0.3,
+        color: ['#fbbf24','#fde68a','#d97706'][Math.floor(Math.random()*3)],
+        life: Math.random() * 250 + 80
+      });
+    }
+    drawParticles();
+  }
+
+  function drawParticles(){
+    const w = window.innerWidth, h = window.innerHeight;
+    pCtx.clearRect(0, 0, w, h);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.life--;
+      if(p.life <= 0 || p.y < -10){
+        p.x = Math.random() * w; p.y = h + 10;
+        p.life = Math.random() * 250 + 80;
+      }
+      pCtx.beginPath();
+      pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      pCtx.globalAlpha = p.alpha * Math.min(p.life / 30, 1);
+      pCtx.fillStyle = p.color;
+      pCtx.fill();
+    });
+    pCtx.globalAlpha = 1;
+    animId = requestAnimationFrame(drawParticles);
+  }
+
+  if(champItem){
+    champItem.querySelector('.stat-number').addEventListener('click', openVault);
+  }
+  vault.querySelector('.vault-close').addEventListener('click', closeVault);
+  vault.addEventListener('click', e => { if(e.target === vault) closeVault(); });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && vault.classList.contains('active')) closeVault();
+  });
+})();
+
 // --- Keyboard shortcuts ---
 (function(){
   const overlay = document.getElementById('kbdOverlay');
-  const pages = {1:'history.html',2:'season.html',3:'preseason.html',4:'draft.html',5:'trades.html',6:'week1.html'};
+  const pages = {1:'history.html',2:'season.html',3:'preseason.html',4:'power-rankings.html',5:'draft.html',6:'trades.html',7:'week1.html'};
   document.addEventListener('keydown', e => {
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
     if(e.key==='?'){ overlay.classList.toggle('show'); return; }
