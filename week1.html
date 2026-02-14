@@ -6,6 +6,7 @@
 <title>The Jailyard 2025 Week 1 Preview & Power Rankings</title>
 <meta name="view-transition" content="same-origin" />
 <meta name="description" content="The Jailyard 2025 Week 1 preview column. Opening essay, reader mailbag, game picks and matchup predictions from before the season." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
 
 <!--
   This file builds upon the preseason power rankings site and adds a Week 1 preview in the style of a
@@ -20,7 +21,7 @@
     --fg: #e8ecf0;
     --muted: #7a8194;
     --accent: #8b5cf6;
-    --accent-2: #ec4899;
+    --accent2: #ec4899;
     --card: rgba(255,255,255,0.04);
     --glass: rgba(255,255,255,0.06);
     --border: rgba(255,255,255,0.08);
@@ -51,7 +52,7 @@
     font-family: var(--font-main);
   }
   *, *::before, *::after{ box-sizing: border-box; }
-  a{ color: var(--accent-2); text-decoration: none; }
+  a{ color: var(--accent2); text-decoration: none; }
   a:hover{ text-decoration: underline; }
   header.hero{
     position: relative;
@@ -153,7 +154,7 @@
     background:rgba(255,255,255,0.06);
   }
   .win-prob-bar .home-bar{ background:linear-gradient(90deg,var(--accent),#a78bfa); transition:width 1s cubic-bezier(.2,.8,.2,1); }
-  .win-prob-bar .away-bar{ background:linear-gradient(90deg,var(--accent-2),#f472b6); transition:width 1s cubic-bezier(.2,.8,.2,1); }
+  .win-prob-bar .away-bar{ background:linear-gradient(90deg,var(--accent2),#f472b6); transition:width 1s cubic-bezier(.2,.8,.2,1); }
   .prob-labels{
     display:flex; justify-content:space-between; font-size:.78rem; color:var(--muted); margin-bottom:.6rem;
   }
@@ -193,7 +194,14 @@
     #nav nav.open{display:flex;flex-direction:column;gap:0;}
     #nav .inner{flex-wrap:wrap;}
   }
-.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .1s linear;pointer-events:none;}
+.scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -209,12 +217,14 @@
 </header>
 <div id="nav">
   <div class="inner">
-    <div class="brand"><a href="index.html" style="color:inherit;text-decoration:none;">The Jailyard</a></div>
+    <div class="brand"><a href="index.html" style="color:inherit;text-decoration:none;" data-league-name>The Jailyard</a></div>
     <nav>
       <a href="history.html">League Bible</a>
       <a href="season.html">Season Hub</a>
       <a href="preseason.html">Rankings</a>
       <a href="power-rankings.html">Power Rankings</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
       <a href="#week1">Week 1 Preview</a>
     </nav>
     <div class="right">
@@ -258,9 +268,19 @@
 
 <footer>
   <div style="font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:.4rem;">The Jailyard</div>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;margin-bottom:1rem;">
+    <a href="index.html" style="color:var(--muted);font-size:.85rem;">Home</a>
+    <a href="history.html" style="color:var(--muted);font-size:.85rem;">League Bible</a>
+    <a href="season.html" style="color:var(--muted);font-size:.85rem;">Season Hub</a>
+    <a href="preseason.html" style="color:var(--muted);font-size:.85rem;">Rankings</a>
+    <a href="draft.html" style="color:var(--muted);font-size:.85rem;">Draft Recap</a>
+    <a href="trades.html" style="color:var(--muted);font-size:.85rem;">Trades</a>
+    <a href="week1.html" style="color:var(--muted);font-size:.85rem;">Week 1</a>
+  </div>
   &copy; 2022&ndash;2026 The Jailyard Dynasty League. Built with love.
 </footer>
 
+<script src="config.js"></script>
 <script>
 // Theme toggle
 document.getElementById('toggleTheme').addEventListener('click', ()=>{
@@ -471,6 +491,8 @@ document.querySelectorAll('#nav nav a').forEach(a => {
     bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
   }, {passive:true});
 })();
+
+applyConfig();
 </script>
 </body>
 </html>

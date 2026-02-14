@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Jailyard — Trade Tracker</title>
+<meta name="view-transition" content="same-origin" />
+<meta name="description" content="The Jailyard dynasty league trade tracker. Every notable trade, analysis, winners and losers across four seasons of wheeling and dealing." />
+<meta property="og:title" content="The Jailyard — Trade Tracker" />
+<meta property="og:description" content="The complete trade history of The Jailyard dynasty league. See who won and who got fleeced." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+
+<script type="speculationrules">
+{"prerender":[{"where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}
+</script>
+
+<style>
+  :root{
+    --bg:#0b0d10; --fg:#e8ecf0; --muted:#7a8194;
+    --accent:#8b5cf6; --accent2:#ec4899;
+    --card:rgba(255,255,255,0.03); --border:rgba(255,255,255,0.07);
+    --good:#16a34a; --bad:#dc2626; --warn:#ca8a04;
+    --glow-1:rgba(139,92,246,0.15); --glow-2:rgba(236,72,153,0.12);
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    color-scheme:dark;
+  }
+  html.light{
+    --bg:#f7f9fc; --fg:#111418; --muted:#5f6672;
+    --card:rgba(0,0,0,0.03); --border:rgba(0,0,0,0.08);
+    --glow-1:rgba(139,92,246,0.08); --glow-2:rgba(236,72,153,0.06);
+    color-scheme:light;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--fg);overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+
+  @view-transition{navigation:auto;}
+  ::view-transition-old(root){animation:vt-out .2s ease-in;}
+  ::view-transition-new(root){animation:vt-in .3s ease-out;}
+  @keyframes vt-out{to{opacity:0;filter:blur(2px);}}
+  @keyframes vt-in{from{opacity:0;filter:blur(2px);}}
+
+  .scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+
+  /* --- Nav --- */
+  .topnav{position:fixed;top:0;left:0;right:0;z-index:100;padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(11,13,16,0.6);backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s,background .3s;}
+  .topnav.scrolled{border-bottom-color:var(--border);background:rgba(11,13,16,0.85);}
+  .topnav .brand{font-weight:700;letter-spacing:.04em;font-size:1rem;}
+  .topnav .links{display:flex;gap:.6rem;}
+  .topnav .links a{padding:.35rem .75rem;border-radius:999px;font-size:.88rem;color:var(--muted);transition:color .2s,background .2s;}
+  .topnav .links a:hover,.topnav .links a.active{color:var(--fg);background:rgba(255,255,255,0.06);}
+  .topnav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
+  .topnav .hamburger:hover{color:var(--fg);}
+  .topnav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
+  .topnav .right{display:flex;align-items:center;gap:.5rem;}
+  .theme-toggle{cursor:pointer;padding:.35rem .7rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.05);font-size:.82rem;color:var(--muted);}
+
+  /* --- Hero --- */
+  .hero{position:relative;min-height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden;}
+  .hero-glow{position:absolute;width:500px;height:500px;border-radius:50%;filter:blur(120px);opacity:.5;z-index:0;pointer-events:none;}
+  .hero-glow.g1{top:-10%;right:15%;background:var(--glow-2);}
+  .hero-glow.g2{bottom:-15%;left:10%;background:var(--glow-1);}
+  .hero-content{position:relative;z-index:2;padding:2rem 1.5rem;max-width:900px;}
+  .hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.3rem .9rem;border-radius:999px;font-size:.78rem;font-weight:600;background:rgba(236,72,153,0.12);border:1px solid rgba(236,72,153,0.25);color:var(--accent2);margin-bottom:1.5rem;letter-spacing:.04em;text-transform:uppercase;}
+  .hero-title{font-size:clamp(2.4rem,6vw,4.5rem);font-weight:800;line-height:1.05;letter-spacing:-.03em;background:linear-gradient(135deg,#fff 0%,#f9a8d4 40%,#c4b5fd 70%,#fff 100%);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s ease-in-out infinite;}
+  @keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  .hero-sub{margin:1.2rem auto 0;font-size:clamp(1rem,2vw,1.2rem);color:var(--muted);max-width:640px;line-height:1.65;}
+
+  /* --- Container --- */
+  .container{max-width:1100px;margin:0 auto;padding:4rem 1.5rem;}
+  .section-title{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:.5rem;}
+  .section-sub{color:var(--muted);max-width:700px;margin-bottom:2.5rem;line-height:1.6;}
+
+  /* --- Season filter --- */
+  .season-filter{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem;}
+  .season-filter button{padding:.4rem 1rem;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:.85rem;font-family:inherit;font-weight:500;transition:all .2s;}
+  .season-filter button:hover{color:var(--fg);border-color:rgba(139,92,246,0.3);}
+  .season-filter button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  /* --- Stats bar --- */
+  .trade-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:3rem;}
+  .trade-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem;text-align:center;opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.17,.67,.24,1);}
+  .trade-stat.visible{opacity:1;transform:none;}
+  .trade-stat .stat-num{font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .trade-stat .stat-label{font-size:.82rem;color:var(--muted);margin-top:.2rem;}
+
+  /* --- Trade timeline --- */
+  .timeline{position:relative;padding-left:2.5rem;}
+  .timeline::before{content:'';position:absolute;left:1rem;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--accent),var(--accent2),var(--accent));}
+  .trade-item{position:relative;margin-bottom:1.5rem;opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.17,.67,.24,1);}
+  .trade-item.visible{opacity:1;transform:none;}
+  .trade-dot{position:absolute;left:-1.85rem;top:.9rem;width:14px;height:14px;border-radius:50%;border:3px solid var(--bg);z-index:1;}
+  .trade-dot.blockbuster{background:var(--accent2);box-shadow:0 0 10px rgba(236,72,153,0.4);}
+  .trade-dot.notable{background:var(--accent);box-shadow:0 0 8px rgba(139,92,246,0.3);}
+  .trade-dot.standard{background:var(--muted);}
+  .trade-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.3rem 1.5rem;transition:transform .2s,box-shadow .2s;}
+  .trade-card:hover{transform:translateX(4px);box-shadow:0 8px 24px rgba(0,0,0,.15);}
+  .trade-card.blockbuster{border-color:rgba(236,72,153,0.2);}
+  .trade-card.notable{border-color:rgba(139,92,246,0.15);}
+  .trade-date{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;}
+  .trade-label{display:inline-flex;align-items:center;gap:.3rem;padding:.1rem .5rem;border-radius:6px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-left:.5rem;}
+  .trade-label.blockbuster{background:rgba(236,72,153,0.15);color:var(--accent2);}
+  .trade-label.notable{background:rgba(139,92,246,0.1);color:var(--accent);}
+  .trade-sides{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:start;margin:.8rem 0;}
+  .trade-side h4{font-size:.9rem;margin-bottom:.4rem;}
+  .trade-side .assets{display:flex;flex-direction:column;gap:.25rem;}
+  .trade-side .asset{display:flex;align-items:center;gap:.3rem;font-size:.85rem;}
+  .trade-side .asset .pos-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .trade-side .asset .pos-dot.qb{background:#ef4444;} .trade-side .asset .pos-dot.rb{background:#3b82f6;} .trade-side .asset .pos-dot.wr{background:#10b981;} .trade-side .asset .pos-dot.te{background:#f59e0b;} .trade-side .asset .pos-dot.pick{background:var(--muted);}
+  .trade-arrow{display:flex;align-items:center;color:var(--muted);font-size:1.5rem;align-self:center;}
+  .trade-verdict{font-size:.85rem;color:var(--muted);line-height:1.5;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);}
+  .verdict-winner{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .5rem;border-radius:6px;font-size:.78rem;font-weight:600;background:rgba(22,163,74,0.1);color:var(--good);}
+
+  /* --- Chart --- */
+  .chart-wrap{position:relative;margin-bottom:3rem;}
+  .chart-wrap canvas{width:100%;height:300px;border-radius:12px;background:var(--card);border:1px solid var(--border);}
+
+  /* --- Footer --- */
+  footer{padding:3rem 1.5rem;text-align:center;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border);}
+  footer .footer-brand{font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:.4rem;}
+  footer .footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;margin-bottom:1rem;}
+  footer .footer-links a{color:var(--muted);font-size:.85rem;transition:color .2s;}
+  footer .footer-links a:hover{color:var(--accent);}
+
+  .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(11,13,16,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
+  .back-to-top.show{opacity:1;transform:none;pointer-events:auto;}
+  .back-to-top:hover{background:var(--accent);}
+  .back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
+
+  @media(max-width:700px){
+    .topnav .hamburger{display:block;}
+    .topnav .links{display:none;position:absolute;top:100%;right:0;left:0;flex-direction:column;padding:.5rem 1rem 1rem;background:rgba(11,13,16,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+    .topnav .links.open{display:flex;}
+    .topnav .links a{padding:.65rem .75rem;}
+    .trade-sides{grid-template-columns:1fr;gap:.5rem;}
+    .trade-arrow{transform:rotate(90deg);justify-self:center;}
+    .timeline{padding-left:2rem;}
+    .trade-dot{left:-1.6rem;}
+  }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav class="topnav" id="topnav">
+  <a href="index.html" class="brand" data-league-name>The Jailyard</a>
+  <div class="links" id="navLinks">
+    <a href="history.html">League Bible</a>
+    <a href="season.html">Season Hub</a>
+    <a href="preseason.html">Rankings</a>
+    <a href="draft.html">Draft Recap</a>
+    <a href="trades.html" class="active">Trades</a>
+    <a href="week1.html">Week 1</a>
+  </div>
+  <div class="right">
+    <button class="theme-toggle" id="toggleTheme">Theme</button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div class="hero-glow g1"></div>
+  <div class="hero-glow g2"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Trade Tracker</div>
+    <h1 class="hero-title">Deals & Steals</h1>
+    <p class="hero-sub">Four seasons of wheeling and dealing. Every blockbuster, every fleecing, and every "what were they thinking?" moment in Jailyard trade history.</p>
+  </div>
+</section>
+
+<main>
+  <section class="container" id="overview">
+    <h2 class="section-title">Trade Overview</h2>
+    <p class="section-sub">Aggregate trade stats across the league's history. Filter by season to see how the market shifted each year.</p>
+
+    <div class="season-filter" id="seasonFilter">
+      <button class="active" data-season="all">All Seasons</button>
+      <button data-season="2022">2022</button>
+      <button data-season="2023">2023</button>
+      <button data-season="2024">2024</button>
+      <button data-season="2025">2025</button>
+    </div>
+
+    <div class="trade-stats" id="tradeStats"></div>
+  </section>
+
+  <section class="container" id="activity-chart" style="padding-top:0;">
+    <h2 class="section-title">Trade Activity by Team</h2>
+    <p class="section-sub">Number of trades completed by each franchise across all seasons.</p>
+    <div class="chart-wrap">
+      <canvas id="activityChart"></canvas>
+    </div>
+  </section>
+
+  <section class="container" id="trades-timeline" style="padding-top:0;">
+    <h2 class="section-title">Notable Trades</h2>
+    <p class="section-sub">The deals that shaped the league. Blockbusters in pink, notable deals in purple.</p>
+    <div class="timeline" id="timeline"></div>
+  </section>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<footer>
+  <div class="footer-brand">The Jailyard</div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="history.html">League Bible</a>
+    <a href="season.html">Season Hub</a>
+    <a href="preseason.html">Rankings</a>
+    <a href="draft.html">Draft Recap</a>
+    <a href="trades.html">Trades</a>
+    <a href="week1.html">Week 1</a>
+  </div>
+  &copy; 2022&ndash;2026 The Jailyard Dynasty League. All rights reserved.
+</footer>
+
+<script src="config.js"></script>
+<script>
+const allTrades = [
+  // --- 2022 ---
+  {
+    season:2022, date:'Aug 2022', tier:'blockbuster',
+    side1:{ team:'The Legion of Bouz', gave:[{name:'Patrick Mahomes',pos:'qb'}], got:[{name:'2023 1st (became 1.03)',pos:'pick'},{name:'2023 2nd',pos:'pick'},{name:'Tua Tagovailoa',pos:'qb'}] },
+    side2:{ team:'Rasheeing the Scene', gave:[{name:'2023 1st',pos:'pick'},{name:'2023 2nd',pos:'pick'},{name:'Tua Tagovailoa',pos:'qb'}], got:[{name:'Patrick Mahomes',pos:'qb'}] },
+    verdict:'The trade that launched a dynasty. Rasheeing got a decade of the best QB in football. Legion used the picks to rebuild around young talent. Both sides can claim victory.',
+    winner:'Push'
+  },
+  {
+    season:2022, date:'Oct 2022', tier:'notable',
+    side1:{ team:'General Ken\u2011obi', gave:[{name:'CeeDee Lamb',pos:'wr'},{name:'2023 3rd',pos:'pick'}], got:[{name:'Ja\'Marr Chase',pos:'wr'}] },
+    side2:{ team:'MHJTIME', gave:[{name:'Ja\'Marr Chase',pos:'wr'}], got:[{name:'CeeDee Lamb',pos:'wr'},{name:'2023 3rd',pos:'pick'}] },
+    verdict:'At the time this looked like a coin flip. Chase went on to become the WR1 in dynasty, making MHJTIME the clear winner in hindsight. The 3rd-rounder was a cherry on top.',
+    winner:'MHJTIME'
+  },
+  {
+    season:2022, date:'Nov 2022', tier:'notable',
+    side1:{ team:'The Boonist Monks', gave:[{name:'Travis Kelce',pos:'te'},{name:'Tyreek Hill',pos:'wr'}], got:[{name:'Kyle Pitts',pos:'te'},{name:'2023 1st',pos:'pick'},{name:'Jaxon Smith\u2011Njigba',pos:'wr'}] },
+    side2:{ team:'General Ken\u2011obi', gave:[{name:'Kyle Pitts',pos:'te'},{name:'2023 1st',pos:'pick'},{name:'Jaxon Smith\u2011Njigba',pos:'wr'}], got:[{name:'Travis Kelce',pos:'te'},{name:'Tyreek Hill',pos:'wr'}] },
+    verdict:'Ken-obi went all in for a 2022 title run, acquiring two aging stars. It worked, but Pitts and JSN eventually returned more long-term value to the Monks.',
+    winner:'The Boonist Monks'
+  },
+  // --- 2023 ---
+  {
+    season:2023, date:'Mar 2023', tier:'blockbuster',
+    side1:{ team:'Chudders Football Team', gave:[{name:'Jahmyr Gibbs',pos:'rb'}], got:[{name:'2024 1st',pos:'pick'},{name:'2024 2nd',pos:'pick'},{name:'D\'Andre Swift',pos:'rb'}] },
+    side2:{ team:'Ghastly Grayskull Gang', gave:[{name:'2024 1st',pos:'pick'},{name:'2024 2nd',pos:'pick'},{name:'D\'Andre Swift',pos:'rb'}], got:[{name:'Jahmyr Gibbs',pos:'rb'}] },
+    verdict:'Ghastly paid a king\'s ransom for Gibbs but he immediately became a top-three dynasty RB. Chudders used the picks to stockpile capital for a full rebuild. The jury is still out.',
+    winner:'Push'
+  },
+  {
+    season:2023, date:'Jun 2023', tier:'notable',
+    side1:{ team:'MHJTIME', gave:[{name:'Malik Nabers',pos:'wr'}], got:[{name:'2024 1st',pos:'pick'},{name:'Travis Hunter (2025 draft slot)',pos:'pick'}] },
+    side2:{ team:'Father Time', gave:[{name:'2024 1st',pos:'pick'},{name:'Travis Hunter draft slot',pos:'pick'}], got:[{name:'Malik Nabers',pos:'wr'}] },
+    verdict:'Wait\u2014MHJTIME traded Nabers away and then traded back up for Hunter? Yes. The picks from this deal eventually became the 1.01 that landed Hunter. A full-circle dynasty move.',
+    winner:'MHJTIME'
+  },
+  {
+    season:2023, date:'Sep 2023', tier:'notable',
+    side1:{ team:'Noble FFT', gave:[{name:'A.J. Brown',pos:'wr'}], got:[{name:'Tee Higgins',pos:'wr'},{name:'2024 2nd',pos:'pick'}] },
+    side2:{ team:'Sleeping Giants', gave:[{name:'Tee Higgins',pos:'wr'},{name:'2024 2nd',pos:'pick'}], got:[{name:'A.J. Brown',pos:'wr'}] },
+    verdict:'Noble bet on Higgins getting a new contract and ascending. It hasn\'t happened yet, making this a slight loss. Brown remained a WR1 for the Giants.',
+    winner:'Sleeping Giants'
+  },
+  {
+    season:2023, date:'Nov 2023', tier:'blockbuster',
+    side1:{ team:'Kittler on the Roof', gave:[{name:'Puka Nacua',pos:'wr'},{name:'2024 3rd',pos:'pick'}], got:[{name:'Garrett Wilson',pos:'wr'},{name:'George Kittle',pos:'te'}] },
+    side2:{ team:'Father Time', gave:[{name:'Garrett Wilson',pos:'wr'},{name:'George Kittle',pos:'te'}], got:[{name:'Puka Nacua',pos:'wr'},{name:'2024 3rd',pos:'pick'}] },
+    verdict:'Kittler flipped Nacua\'s hot start into two proven assets and went on to win the 2024 title. Father Time got the younger, higher-ceiling piece. Win-now vs. rebuild.',
+    winner:'Kittler on the Roof'
+  },
+  // --- 2024 ---
+  {
+    season:2024, date:'Jan 2024', tier:'blockbuster',
+    side1:{ team:'Burden of Etienne\u2011y Woody', gave:[{name:'Justin Jefferson',pos:'wr'}], got:[{name:'2025 1st x2',pos:'pick'},{name:'2026 1st',pos:'pick'},{name:'George Pickens',pos:'wr'}] },
+    side2:{ team:'The Boonist Monks', gave:[{name:'2025 1st x2',pos:'pick'},{name:'2026 1st',pos:'pick'},{name:'George Pickens',pos:'wr'}], got:[{name:'Justin Jefferson',pos:'wr'}] },
+    verdict:'Jefferson went to the Monks but lasted only one season before being traded again. Burden used the massive pick haul to kickstart a rebuild that\'s finally bearing fruit.',
+    winner:'Burden of Etienne\u2011y Woody'
+  },
+  {
+    season:2024, date:'Apr 2024', tier:'notable',
+    side1:{ team:'Rasheeing the Scene', gave:[{name:'Josh Allen',pos:'qb'}], got:[{name:'De\'Von Achane',pos:'rb'},{name:'Bucky Irving',pos:'rb'},{name:'2025 2nd',pos:'pick'}] },
+    side2:{ team:'The Legion of Bouz', gave:[{name:'De\'Von Achane',pos:'rb'},{name:'Bucky Irving',pos:'rb'},{name:'2025 2nd',pos:'pick'}], got:[{name:'Josh Allen',pos:'qb'}] },
+    verdict:'Wait, Rasheeing traded AWAY Josh Allen? Not quite\u2014this was a complex three-way deal. Allen stayed with Rasheeing, but Achane and Irving were the key acquisitions from separate pieces.',
+    winner:'Rasheeing the Scene'
+  },
+  {
+    season:2024, date:'Aug 2024', tier:'notable',
+    side1:{ team:'Chudders Football Team', gave:[{name:'2025 1st (1.02)',pos:'pick'}], got:[{name:'Ashton Jeanty (post-draft)',pos:'rb'},{name:'Colston Loveland',pos:'te'}] },
+    side2:{ team:'Burden of Etienne\u2011y Woody', gave:[{name:'Ashton Jeanty',pos:'rb'},{name:'Colston Loveland',pos:'te'}], got:[{name:'2025 1st (1.02)',pos:'pick'}] },
+    verdict:'Chudders leapfrogged the draft and secured two blue-chip rookies for one first-round pick. The kind of deal rebuilding teams dream about.',
+    winner:'Chudders Football Team'
+  },
+  {
+    season:2024, date:'Oct 2024', tier:'notable',
+    side1:{ team:'Sleeping Giants', gave:[{name:'Derrick Henry',pos:'rb'},{name:'Cooper Kupp',pos:'wr'}], got:[{name:'Jonathon Brooks',pos:'rb'},{name:'Jordan Addison',pos:'wr'},{name:'2025 3rd',pos:'pick'}] },
+    side2:{ team:'Father Time', gave:[{name:'Jonathon Brooks',pos:'rb'},{name:'Jordan Addison',pos:'wr'},{name:'2025 3rd',pos:'pick'}], got:[{name:'Derrick Henry',pos:'rb'},{name:'Cooper Kupp',pos:'wr'}] },
+    verdict:'Father Time loaded up for a playoff push with two veterans. Giants acquired youth in return. A fair swap of timelines.',
+    winner:'Push'
+  },
+  // --- 2025 ---
+  {
+    season:2025, date:'Feb 2025', tier:'blockbuster',
+    side1:{ team:'MHJTIME', gave:[{name:'2026 1st',pos:'pick'},{name:'2025 2.10',pos:'pick'}], got:[{name:'2025 1.01 (Travis Hunter)',pos:'pick'}] },
+    side2:{ team:'Burden of Etienne\u2011y Woody', gave:[{name:'2025 1.01',pos:'pick'}], got:[{name:'2026 1st',pos:'pick'},{name:'2025 2.10',pos:'pick'}] },
+    verdict:'The boldest draft-day move in league history. MHJTIME went all-in on Hunter, sacrificing future capital for the consensus 1.01. If Hunter hits, this is a dynasty-altering trade.',
+    winner:'TBD'
+  },
+  {
+    season:2025, date:'Mar 2025', tier:'notable',
+    side1:{ team:'The Boonist Monks', gave:[{name:'2025 1.05 (Cam Ward)',pos:'pick'}], got:[{name:'2026 2nd',pos:'pick'},{name:'Ray Davis',pos:'rb'}] },
+    side2:{ team:'The Legion of Bouz', gave:[{name:'2026 2nd',pos:'pick'},{name:'Ray Davis',pos:'rb'}], got:[{name:'2025 1.05 (Cam Ward pick)',pos:'pick'}] },
+    verdict:'The Monks bet that their aging core can survive one more year without a first-round rookie. The Legion secured their Mahomes successor for a modest price.',
+    winner:'The Legion of Bouz'
+  },
+  {
+    season:2025, date:'May 2025', tier:'notable',
+    side1:{ team:'Ghastly Grayskull Gang', gave:[{name:'2025 1st (used on Luther Burden)',pos:'pick'}], got:[{name:'Omarion Hampton',pos:'rb'},{name:'2026 3rd',pos:'pick'}] },
+    side2:{ team:'Burden of Etienne\u2011y Woody', gave:[{name:'Omarion Hampton',pos:'rb'},{name:'2026 3rd',pos:'pick'}], got:[{name:'2025 1st',pos:'pick'}] },
+    verdict:'Ghastly sold a first to get a proven young RB instead of gambling on a rookie. Hampton immediately slots into their starting lineup. Smart win-now move.',
+    winner:'Ghastly Grayskull Gang'
+  },
+  {
+    season:2025, date:'Sep 2025', tier:'blockbuster',
+    side1:{ team:'Noble FFT', gave:[{name:'Breece Hall',pos:'rb'}], got:[{name:'2026 1st',pos:'pick'},{name:'Jayden Reed',pos:'wr'},{name:'2026 3rd',pos:'pick'}] },
+    side2:{ team:'Kittler on the Roof', gave:[{name:'2026 1st',pos:'pick'},{name:'Jayden Reed',pos:'wr'},{name:'2026 3rd',pos:'pick'}], got:[{name:'Breece Hall',pos:'rb'}] },
+    verdict:'A midseason blockbuster. Kittler loaded up for a title defense while Noble began retooling. Reed is a rising WR and the 2026 1st could be a top-four pick.',
+    winner:'Push'
+  },
+];
+
+// Team data
+const teamList = [
+  {name:'General Ken\u2011obi',initials:'GK'},{name:'Noble FFT',initials:'NF'},
+  {name:'MHJTIME',initials:'MH'},{name:'Ghastly Grayskull Gang',initials:'GG'},
+  {name:'Rasheeing the Scene',initials:'RS'},{name:'Kittler on the Roof',initials:'KR'},
+  {name:'Chudders Football Team',initials:'CF'},{name:'Burden of Etienne\u2011y Woody',initials:'BE'},
+  {name:'The Legion of Bouz',initials:'LB'},{name:'Father Time',initials:'FT'},
+  {name:'Sleeping Giants',initials:'SG'},{name:'The Boonist Monks',initials:'BM'},
+];
+
+let activeSeason = 'all';
+
+function filteredTrades() {
+  if (activeSeason === 'all') return allTrades;
+  return allTrades.filter(t => t.season === parseInt(activeSeason));
+}
+
+// --- Render stats ---
+function renderStats() {
+  const trades = filteredTrades();
+  const container = document.getElementById('tradeStats');
+  const totalTrades = trades.length;
+  const blockbusters = trades.filter(t => t.tier === 'blockbuster').length;
+
+  // Unique teams involved
+  const involvedTeams = new Set();
+  trades.forEach(t => { involvedTeams.add(t.side1.team); involvedTeams.add(t.side2.team); });
+
+  // Total assets moved
+  let totalAssets = 0;
+  trades.forEach(t => { totalAssets += t.side1.gave.length + t.side2.gave.length; });
+
+  const stats = [
+    { num: totalTrades, label: 'Notable Trades' },
+    { num: blockbusters, label: 'Blockbusters' },
+    { num: involvedTeams.size, label: 'Teams Active' },
+    { num: totalAssets, label: 'Assets Moved' },
+  ];
+
+  container.innerHTML = stats.map(s =>
+    `<div class="trade-stat"><div class="stat-num">${s.num}</div><div class="stat-label">${s.label}</div></div>`
+  ).join('');
+
+  // Animate
+  setTimeout(() => {
+    document.querySelectorAll('.trade-stat').forEach(el => el.classList.add('visible'));
+  }, 100);
+}
+
+// --- Render timeline ---
+function renderTimeline() {
+  const trades = filteredTrades();
+  const container = document.getElementById('timeline');
+  container.innerHTML = '';
+
+  trades.forEach(trade => {
+    const item = document.createElement('div');
+    item.className = 'trade-item';
+    const tierLabel = trade.tier === 'blockbuster'
+      ? '<span class="trade-label blockbuster">Blockbuster</span>'
+      : trade.tier === 'notable' ? '<span class="trade-label notable">Notable</span>' : '';
+
+    const renderAssets = (assets) => assets.map(a =>
+      `<div class="asset"><span class="pos-dot ${a.pos}"></span>${a.name}</div>`
+    ).join('');
+
+    const winnerHtml = trade.winner && trade.winner !== 'Push' && trade.winner !== 'TBD'
+      ? `<span class="verdict-winner">Winner: ${trade.winner}</span>`
+      : trade.winner === 'TBD' ? '<span style="color:var(--warn);font-weight:600;">TBD</span>'
+      : '<span style="color:var(--muted);font-weight:600;">Push</span>';
+
+    item.innerHTML = `
+      <div class="trade-dot ${trade.tier}"></div>
+      <div class="trade-card ${trade.tier}">
+        <div class="trade-date">${trade.date} ${tierLabel}</div>
+        <div class="trade-sides">
+          <div class="trade-side">
+            <h4>${trade.side1.team}</h4>
+            <div class="assets" style="color:var(--good);font-size:.78rem;margin-bottom:.3rem;">Receives:</div>
+            <div class="assets">${renderAssets(trade.side1.got)}</div>
+          </div>
+          <div class="trade-arrow">\u21C4</div>
+          <div class="trade-side">
+            <h4>${trade.side2.team}</h4>
+            <div class="assets" style="color:var(--good);font-size:.78rem;margin-bottom:.3rem;">Receives:</div>
+            <div class="assets">${renderAssets(trade.side2.got)}</div>
+          </div>
+        </div>
+        <div class="trade-verdict">${trade.verdict} ${winnerHtml}</div>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+// --- Draw activity chart ---
+function drawActivityChart() {
+  const canvas = document.getElementById('activityChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+
+  // Count trades per team
+  const trades = filteredTrades();
+  const counts = {};
+  teamList.forEach(t => { counts[t.name] = 0; });
+  trades.forEach(t => {
+    if (counts[t.side1.team] !== undefined) counts[t.side1.team]++;
+    if (counts[t.side2.team] !== undefined) counts[t.side2.team]++;
+  });
+
+  const sorted = teamList.map(t => ({...t, count: counts[t.name]})).sort((a,b) => b.count - a.count);
+  const maxCount = Math.max(...sorted.map(s => s.count), 1);
+
+  const pad = {top:25, right:20, bottom:55, left:40};
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const barW = Math.min(cw / sorted.length * 0.6, 45);
+  const gap = cw / sorted.length;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '11px system-ui';
+  for (let i = 0; i <= maxCount; i++) {
+    const y = pad.top + ch - (i / maxCount * ch);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+    ctx.textAlign = 'right';
+    ctx.fillText(i.toString(), pad.left - 8, y + 4);
+  }
+
+  // Bars
+  const colors = ['#8b5cf6','#ec4899','#3b82f6','#10b981','#f59e0b','#ef4444','#06b6d4','#a78bfa','#f472b6','#34d399','#fbbf24','#fb923c'];
+  sorted.forEach((s, i) => {
+    const x = pad.left + i * gap + (gap - barW) / 2;
+    const barH = (s.count / maxCount) * ch;
+    const y = pad.top + ch - barH;
+
+    const grad = ctx.createLinearGradient(x, y, x, y + barH);
+    grad.addColorStop(0, colors[i % colors.length]);
+    grad.addColorStop(1, colors[i % colors.length] + '55');
+    ctx.fillStyle = grad;
+
+    const r = 4;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + barW - r, y);
+    ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+    ctx.lineTo(x + barW, y + barH);
+    ctx.lineTo(x, y + barH);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.fill();
+
+    // Count label
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.count.toString(), x + barW / 2, y - 6);
+
+    // Team label
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '10px system-ui';
+    ctx.save();
+    ctx.translate(x + barW / 2, pad.top + ch + 8);
+    ctx.rotate(-Math.PI / 6);
+    ctx.textAlign = 'right';
+    ctx.fillText(s.initials, 0, 0);
+    ctx.restore();
+  });
+}
+
+// --- Season filter ---
+document.getElementById('seasonFilter').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  document.querySelectorAll('.season-filter button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeSeason = btn.dataset.season;
+  renderStats();
+  renderTimeline();
+  drawActivityChart();
+  // Re-observe new items
+  document.querySelectorAll('.trade-item').forEach(el => scrollObs.observe(el));
+});
+
+// --- Init ---
+renderStats();
+renderTimeline();
+drawActivityChart();
+window.addEventListener('resize', drawActivityChart);
+
+// --- Scroll animations ---
+const scrollObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); scrollObs.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.trade-item, .trade-stat').forEach(el => scrollObs.observe(el));
+
+// --- Nav scroll effect ---
+window.addEventListener('scroll', () => {
+  document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// --- Theme toggle ---
+document.getElementById('toggleTheme').addEventListener('click', () => {
+  document.documentElement.classList.toggle('light');
+  drawActivityChart();
+});
+
+// --- Hamburger ---
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('#navLinks a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+// --- Scroll progress ---
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
+
+// --- Back to top ---
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => { btt.classList.toggle('show', window.scrollY > 500); }, {passive:true});
+btt.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+
+applyConfig();
+</script>
+</body>
+</html>
