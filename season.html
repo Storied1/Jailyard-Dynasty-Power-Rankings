@@ -966,9 +966,11 @@ function renderMatchups(week, area) {
   }
   matchups.forEach(m => { h += '<div class="reveal">' + renderMatchupCard(m, true, isP, isChamp) + '</div>'; });
 
-  // Championship winner celebration
+  // Championship winner celebration — find the actual final (matchup_id 1 in Sleeper brackets)
   if (isChamp && matchups.length) {
-    const finalGame = matchups[0]; // First matchup is usually the championship
+    // Try bracket data first, then fall back to matchup_id 1, then highest-scoring game
+    let finalGame = matchups.find(m => m.matchup_id === 1)
+                 || matchups.reduce((best, m) => (m.team1.points + m.team2.points) > (best.team1.points + best.team2.points) ? m : best, matchups[0]);
     const winnerId = finalGame.winner;
     if (winnerId) {
       const champ = teamDisplay(winnerId);
