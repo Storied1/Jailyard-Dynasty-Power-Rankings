@@ -261,10 +261,14 @@ __pycache__/         # Python bytecode excluded
 
 ### Buttons — MOSTLY ACCESSIBLE
 - All hamburger buttons have `aria-label` ✅
-- Back-to-top buttons have `aria-label` ✅
+- Most back-to-top buttons have `aria-label` ✅
 - Tab/filter buttons have visible text content ✅
 - Theme toggle buttons have visible text ✅
 - `preseason.html` compare close button uses SVG icon — has no `aria-label` ⚠️
+- `history.html:271` back-to-top button uses `&#8593;` with no `aria-label` ⚠️
+
+### Form Inputs — MISSING LABEL
+- `preseason.html:292` search input has `placeholder` but no `<label>` or `aria-label` ⚠️
 
 ### Hamburger Menus — MISSING `aria-expanded`
 - **No page uses `aria-expanded`** on the hamburger button. This is a screen reader gap — users can't tell if the menu is open or closed.
@@ -293,15 +297,25 @@ Present on 7 of 8 pages ✅
 No skip navigation links on any page.
 
 ### Heading Hierarchy
-Not fully audited, but pages generally follow `h1` > `h2` > `h3` patterns based on section structure.
+- `trades.html`: Skips from `h2` to `h4` (no `h3`) inside trade cards — heading level gap
+- `season.html`: No static `h1` element — relies entirely on JavaScript to render headings
+- All other pages follow `h1` > `h2` > `h3` correctly
+
+### Color Contrast Notes
+- `--muted: #7a8194` on `--bg: #0b0d10` gives ~4.2:1 contrast — borderline for WCAG AA at small sizes (`.68rem`, `.72rem`)
+- Gradient text via `background-clip: text` may be unreadable in Windows High Contrast Mode
 
 ### Issues Found
 - **HIGH:** No `aria-expanded` on any hamburger menu (8 pages)
 - **MEDIUM:** 7 data canvas charts lack text alternatives (preseason: 4, season: 1, trades: 1, history: 1, draft: 1)
 - **MEDIUM:** `history.html` decorative constellation canvas missing `aria-hidden="true"`
+- **MEDIUM:** `preseason.html:292` search input missing `<label>` or `aria-label`
 - **LOW:** No skip-to-content links (all 8 pages)
 - **LOW:** `power-rankings.html` missing `prefers-reduced-motion` media query
-- **LOW:** `preseason.html` compare close button missing `aria-label`
+- **LOW:** `preseason.html:330` compare close button missing `aria-label`
+- **LOW:** `history.html:271` back-to-top button missing `aria-label`
+- **LOW:** `trades.html` heading hierarchy skips h3
+- **LOW:** Touch targets on nav links (~37px) below recommended 44px minimum
 
 ---
 
@@ -352,10 +366,21 @@ All 8 pages have a hamburger button with open/close JavaScript logic.
 ### Viewport Meta Tag — ALL PAGES ✅
 All 8 pages have `<meta name="viewport" content="width=device-width, initial-scale=1">` ✅
 
+### Breakpoint Consistency
+Breakpoint values vary across files: `600px`, `700px`, `768px`, `800px`. This means some pages switch to mobile layout at different widths — a tablet-sized screen may see mobile on one page and desktop on another.
+
+### Touch Targets
+- Nav links: padding `.35rem .75rem` (~37px tall) — below 44px recommended minimum
+- Hamburger buttons: ~37px total with SVG — slightly under 44px
+- Back-to-top buttons: `44x44px` ✅
+- `preseason.html` compare checkboxes: `20x20px` — well below 44px
+
 ### Issues Found
 - **MEDIUM:** `preseason.html` missing `overflow-x: hidden` on body — may cause horizontal scroll on mobile
 - **MEDIUM:** `week1.html` missing `overflow-x: hidden` on body
 - **LOW:** `power-rankings.html` has minimal responsive breakpoints (only 1 `@media` query)
+- **LOW:** Inconsistent breakpoints across files (600–800px range)
+- **LOW:** Nav link and hamburger touch targets below 44px minimum
 
 ---
 
@@ -439,9 +464,11 @@ All 8 pages have `<meta name="viewport" content="width=device-width, initial-sca
 | 12 | Remove empty catch block | `power-rankings.html:297` | Silent error swallowing |
 | 13 | Remove console.log | `season.html` | Debug artifact |
 | 14 | Add skip-to-content links | All 8 pages | Keyboard navigation |
-| 15 | Add `aria-label` to compare close button | `preseason.html:330` | Screen reader label |
-| 16 | Remove/sync dead `funFacts` array in `config.js` | `config.js:62-75` | Dead code — `index.html` ignores it |
-| 17 | Add 2026 to inline `LEAGUE_IDS` | `power-rankings.html:247-252` | Missing entry vs. config.js/fetch_sleeper.py |
+| 15 | Add `aria-label` to compare close button and history back-to-top | `preseason.html:330`, `history.html:271` | Screen reader labels |
+| 16 | Add `<label>` or `aria-label` to search input | `preseason.html:292` | Inaccessible form input |
+| 17 | Remove/sync dead `funFacts` array in `config.js` | `config.js:62-75` | Dead code — `index.html` ignores it |
+| 18 | Add 2026 to inline `LEAGUE_IDS` | `power-rankings.html:247-252` | Missing entry vs. config.js/fetch_sleeper.py |
+| 19 | Fix heading hierarchy skip (h2 → h4) | `trades.html` | Accessibility — heading level gap |
 
 ---
 
