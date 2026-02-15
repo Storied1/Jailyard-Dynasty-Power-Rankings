@@ -12,11 +12,12 @@
 
 The site is in strong shape for publishing. Content accuracy is solid, all internal links resolve, and the security posture is clean. Three areas need attention before going fully public:
 
-1. **Accessibility gaps** — No `aria-expanded` on any hamburger menu; most canvas data charts lack text alternatives; no skip-to-content links
-2. **Missing `overflow-x: hidden`** on `preseason.html` and `week1.html` — risk of horizontal scroll on mobile
-3. **History page has no theme toggle button** — users have no way to switch themes on that page
+1. **`power-rankings.html` doesn't load `config.js`** — the only page that doesn't; duplicates LEAGUE_IDS inline, misses `applyConfig()`, nav is missing Draft/Trades links, footer has no nav
+2. **Accessibility gaps** — No `aria-expanded` on any hamburger menu; most canvas data charts lack text alternatives; no skip-to-content links
+3. **Missing `overflow-x: hidden`** on `preseason.html` and `week1.html` — risk of horizontal scroll on mobile
+4. **History page has no theme toggle button** — users have no way to switch themes on that page
 
-None of these are blockers, but items 1 and 2 should be addressed before sharing widely.
+None of these are blockers, but items 1-3 should be addressed before sharing widely.
 
 ---
 
@@ -66,8 +67,12 @@ All 12 teams are present and consistently named across every page:
 ```
 Matches `config.js:24-30` exactly ✅
 
+### config.js `funFacts` — DEAD CODE
+`config.js:62-75` defines a `funFacts` array (12 entries), but `index.html` builds its ticker from its own hardcoded inline array at lines 767-783 and **never reads** `LEAGUE_CONFIG.funFacts`. The two arrays contain different facts. This is dead code — editing `config.js` fun facts has no effect.
+
 ### Issues Found
-- **None** — all content is accurate and consistent.
+- **LOW:** `config.js` `funFacts` array is unused dead code — `index.html` defines its own inline ticker facts
+- **LOW:** `power-rankings.html` inline `LEAGUE_IDS` is missing the 2026 entry (present in `config.js` and `fetch_sleeper.py`)
 
 ---
 
@@ -96,8 +101,18 @@ Every `href="*.html"` across all 8 pages resolves to an existing file:
 ### Navigation Consistency
 - **Minor inconsistency:** `power-rankings.html` nav is missing links to `draft.html` and `trades.html` in the main nav (only has League Bible, Season Hub, Preseason, Power Rankings, Week 1). Footer nav is also slimmer. Not a broken link but a navigation gap.
 
+### `power-rankings.html` — NOT LOADING `config.js`
+This is the only page that does **not** include `<script src="config.js"></script>`. As a result:
+- The brand name "The Jailyard" is hardcoded (no `data-league-name` attribute)
+- The footer is hardcoded with no navigation links (lines 238-241)
+- `LEAGUE_IDS` are duplicated inline (lines 247-252) instead of using `LEAGUE_CONFIG.sleeperLeagueIds`
+- `applyConfig()` is never called
+- If someone forks the repo and edits `config.js` to rebrand, this page won't pick up the changes
+
 ### Issues Found
-- **LOW:** `power-rankings.html` main nav omits Draft and Trades links (lines 211-215)
+- **MEDIUM:** `power-rankings.html` does not load `config.js` — the only page that doesn't
+- **MEDIUM:** `power-rankings.html` main nav omits Draft and Trades links (lines 211-215)
+- **MEDIUM:** `power-rankings.html` footer has no navigation links (all other pages include them)
 
 ---
 
@@ -402,28 +417,31 @@ All 8 pages have `<meta name="viewport" content="width=device-width, initial-sca
 ### HIGH Priority
 | # | Issue | Location | Impact |
 |---|-------|----------|--------|
-| 1 | Add `aria-expanded` to all hamburger buttons | All 8 pages | Screen readers can't determine menu state |
+| 1 | Load `config.js` and call `applyConfig()` | `power-rankings.html` | Only page not using config; nav incomplete, footer empty, brand hardcoded |
+| 2 | Add `aria-expanded` to all hamburger buttons | All 8 pages | Screen readers can't determine menu state |
 
 ### MEDIUM Priority
 | # | Issue | Location | Impact |
 |---|-------|----------|--------|
-| 2 | Add `overflow-x: hidden` to body | `preseason.html`, `week1.html` | Horizontal scroll on mobile |
-| 3 | Add text alternatives for data canvas charts | preseason (4), season (1), trades (1), history (1), draft (1) | Data inaccessible to screen readers |
-| 4 | Add `aria-hidden="true"` to decorative constellation canvas | `history.html:217` | Screen reader noise |
-| 5 | Rename `--warning` to `--warn` | `preseason.html:23` | CSS variable naming drift |
-| 6 | Add theme toggle button | `history.html` | Users can't switch themes |
+| 3 | Add `overflow-x: hidden` to body | `preseason.html`, `week1.html` | Horizontal scroll on mobile |
+| 4 | Add missing nav links (Draft, Trades) + footer nav | `power-rankings.html` | Navigation gap vs. all other pages |
+| 5 | Add text alternatives for data canvas charts | preseason (4), season (1), trades (1), history (1), draft (1) | Data inaccessible to screen readers |
+| 6 | Add `aria-hidden="true"` to decorative constellation canvas | `history.html:217` | Screen reader noise |
+| 7 | Rename `--warning` to `--warn` | `preseason.html:23` | CSS variable naming drift |
+| 8 | Add theme toggle button | `history.html` | Users can't switch themes |
 
 ### LOW Priority
 | # | Issue | Location | Impact |
 |---|-------|----------|--------|
-| 7 | Add `prefers-reduced-motion` | `power-rankings.html` | Motion sensitivity |
-| 8 | Add `{passive: true}` to remaining scroll listeners | ~7 across multiple pages | Minor scroll perf |
-| 9 | Add missing nav links (Draft, Trades) | `power-rankings.html` nav | Navigation gap |
-| 10 | Add visible theme toggle to index.html | `index.html` | Discoverability (currently keyboard-only) |
-| 11 | Remove empty catch block | `power-rankings.html:297` | Silent error swallowing |
-| 12 | Remove console.log | `season.html` | Debug artifact |
-| 13 | Add skip-to-content links | All 8 pages | Keyboard navigation |
-| 14 | Add `aria-label` to compare close button | `preseason.html:330` | Screen reader label |
+| 9 | Add `prefers-reduced-motion` | `power-rankings.html` | Motion sensitivity |
+| 10 | Add `{passive: true}` to remaining scroll listeners | ~7 across multiple pages | Minor scroll perf |
+| 11 | Add visible theme toggle to index.html | `index.html` | Discoverability (currently keyboard-only) |
+| 12 | Remove empty catch block | `power-rankings.html:297` | Silent error swallowing |
+| 13 | Remove console.log | `season.html` | Debug artifact |
+| 14 | Add skip-to-content links | All 8 pages | Keyboard navigation |
+| 15 | Add `aria-label` to compare close button | `preseason.html:330` | Screen reader label |
+| 16 | Remove/sync dead `funFacts` array in `config.js` | `config.js:62-75` | Dead code — `index.html` ignores it |
+| 17 | Add 2026 to inline `LEAGUE_IDS` | `power-rankings.html:247-252` | Missing entry vs. config.js/fetch_sleeper.py |
 
 ---
 
