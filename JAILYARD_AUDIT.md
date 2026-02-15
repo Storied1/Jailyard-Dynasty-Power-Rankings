@@ -99,7 +99,12 @@ Every `href="*.html"` across all 8 pages resolves to an existing file:
 - No broken `#section` anchors detected.
 
 ### Navigation Consistency
-- **Minor inconsistency:** `power-rankings.html` nav is missing links to `draft.html` and `trades.html` in the main nav (only has League Bible, Season Hub, Preseason, Power Rankings, Week 1). Footer nav is also slimmer. Not a broken link but a navigation gap.
+Nav bar gaps (missing `power-rankings.html` link):
+- `draft.html` nav (lines 164-170) — missing `power-rankings.html`
+- `trades.html` nav (lines 157-163) — missing `power-rankings.html`
+- `power-rankings.html` nav (lines 210-215) — missing `draft.html` and `trades.html`
+
+Footer gaps — most pages have hardcoded footers missing `power-rankings.html` in the HTML source, but since those 7 pages load `config.js`, the `renderConfigFooter()` function overwrites the static footer at runtime and injects the correct links including Power Rankings. So this is a **source-code-only** issue, not user-facing, for all pages except `power-rankings.html` (which doesn't load `config.js` and has no footer nav at all).
 
 ### `power-rankings.html` — NOT LOADING `config.js`
 This is the only page that does **not** include `<script src="config.js"></script>`. As a result:
@@ -145,10 +150,10 @@ No active HTML files use `--accent-2`. Only the archived `dontuse`, `dontuse2`, 
 | `index.html` | `--glow-1`, `--glow-2` | Used for hero glow effects |
 | `draft.html` | `--glow-1`, `--glow-2` | Same pattern as index |
 | `trades.html` | `--glow-1`, `--glow-2` | Same pattern as index |
-| `preseason.html` | `--warning`, `--h1`, `--h2`, `--maxw`, `--font-main` | `--warning` deviates from `--warn` |
-| `week1.html` | `--h1`, `--h2`, `--h3`, `--font-main` | Typography scale variables |
-| `season.html` | `--font`, `--maxw` | Layout variables |
-| `power-rankings.html` | `--font`, `--maxw` | Layout variables |
+| `preseason.html` | `--warning`, `--h1`, `--h2`, `--maxw`, `--font-main` | `--warning` deviates from `--warn`; `--font-main` vs `--font` |
+| `week1.html` | `--h1`, `--h2`, `--h3`, `--font-main` | Uses `--font-main` (matches preseason) |
+| `season.html` | `--font`, `--maxw` | Uses `--font` (differs from `--font-main`) |
+| `power-rankings.html` | `--font`, `--maxw` | Uses `--font` (differs from `--font-main`) |
 | `history.html` | `--maxw` | Layout variable |
 
 ### Theme Toggle
@@ -164,7 +169,7 @@ No active HTML files use `--accent-2`. Only the archived `dontuse`, `dontuse2`, 
 | `power-rankings.html` | ✅ | `#themeToggle` button |
 
 ### Issues Found
-- **MEDIUM:** `preseason.html` uses `--warning` instead of `--warn` (line 23) — naming drift
+- **MEDIUM:** `preseason.html` uses `--warning:#ffb703` instead of `--warn:#ca8a04` (line 23) — both naming drift AND different color value
 - **LOW:** `history.html` has no theme toggle button
 - **LOW:** `index.html` theme toggle is keyboard-only (press T) — no visible button
 
@@ -449,7 +454,7 @@ Breakpoint values vary across files: `600px`, `700px`, `768px`, `800px`. This me
 | # | Issue | Location | Impact |
 |---|-------|----------|--------|
 | 3 | Add `overflow-x: hidden` to body | `preseason.html`, `week1.html` | Horizontal scroll on mobile |
-| 4 | Add missing nav links (Draft, Trades) + footer nav | `power-rankings.html` | Navigation gap vs. all other pages |
+| 4 | Add missing nav links: Draft/Trades on `power-rankings.html`; Power Rankings on `draft.html`/`trades.html` | 3 pages | Navigation gaps in static nav bars |
 | 5 | Add text alternatives for data canvas charts | preseason (4), season (1), trades (1), history (1), draft (1) | Data inaccessible to screen readers |
 | 6 | Add `aria-hidden="true"` to decorative constellation canvas | `history.html:217` | Screen reader noise |
 | 7 | Rename `--warning` to `--warn` | `preseason.html:23` | CSS variable naming drift |
