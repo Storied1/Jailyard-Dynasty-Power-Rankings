@@ -55,7 +55,7 @@ All 12 teams are present and consistently named across every page:
 
 ### Fun Facts Ticker — ACCURATE
 - `index.html:767-784`: 12 facts, all verifiable. "4 seasons and counting since 2022" ✅, "3 different champions" ✅, "60 picks in 2025 rookie draft" ✅, "MHJTIME went from last place in 2023 to top 3 in 2025" matches preseason data ✅
-- `config.js:62-75`: Separate fun facts list (12 entries), consistent with index.html facts ✅
+- `config.js:62-75`: Separate fun facts list (12 entries) with **different content** — see "Dead Code" note below
 
 ### fetch_sleeper.py LEAGUE_IDS — CORRECT
 ```python
