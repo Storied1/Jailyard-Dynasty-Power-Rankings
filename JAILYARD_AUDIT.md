@@ -409,52 +409,62 @@ Breakpoint values vary across files: `600px`, `700px`, `768px`, `800px`. This me
 
 ### Lines of Code Per File
 
-| File | Total Lines | Est. JS Lines | Status |
-|------|:-----------:|:-------------:|--------|
-| `season.html` | 1,480 | ~1,200 | ⚠️ >1000 JS |
-| `preseason.html` | 1,331 | ~1,000 | ⚠️ Borderline |
-| `power-rankings.html` | 1,107 | ~900 | ✅ |
-| `history.html` | 987 | ~750 | ✅ |
-| `index.html` | 960 | ~500 | ✅ |
-| `fetch_sleeper.py` | 928 | N/A (Python) | ✅ |
-| `draft.html` | 642 | ~400 | ✅ |
-| `trades.html` | 588 | ~350 | ✅ |
-| `week1.html` | 497 | ~200 | ✅ |
+| File | Total Lines | JS Lines | Status |
+|------|:-----------:|:--------:|--------|
+| `season.html` | 1,480 | 1,058 | ⚠️ **>1000 JS** (33 functions) |
+| `preseason.html` | 1,331 | 938 | ✅ |
+| `power-rankings.html` | 1,107 | 780 | ✅ |
+| `history.html` | 987 | 682 | ✅ |
+| `index.html` | 960 | 308 | ✅ |
+| `fetch_sleeper.py` | 928 | N/A | ✅ |
+| `draft.html` | 642 | 369 | ✅ |
+| `trades.html` | 588 | 319 | ✅ |
+| `week1.html` | 497 | 193 | ✅ |
 | `config.js` | 153 | 153 | ✅ |
 
-### Empty Catch Blocks — 1
+### Empty/Silent Catch Blocks — 4
 - `power-rankings.html:297` → `catch(e){}` — silently swallows errors
+- `power-rankings.html:338` → `catch(e){ break; }` — breaks without logging
+- `season.html:408` → `catch(e) { break; }` — breaks without logging
+- `history.html:405` → `catch(e){ return null; }` — returns null silently
 
-### Console.log Statements — 1
-- `season.html` — 1 occurrence (likely debug leftover)
+### Console Statements — 7
+- `console.log`: 1 (`season.html:344` — debug leftover: `'Loaded offline data for'`)
+- `console.error`: 6 (`season.html:327,348,416,421`; `history.html:413,417`) — these are appropriate error logging
 
 ### TODO / FIXME / HACK Comments — NONE ✅
 
 ### Duplicated Code Blocks
 
-| Pattern | Occurrences | Files |
+| Pattern | Occurrences | Notes |
 |---------|:-----------:|-------|
-| Navigation HTML (hamburger + links) | 8 | All pages — each has its own nav HTML |
-| CSS `:root` variable block | 8 | All pages — each defines its own theme vars |
-| Light theme overrides | 7 | All except history (inline) |
-| Footer HTML | 8 | All pages (partially centralized via `config.js:buildFooterNav()`) |
-| Intersection Observer reveal pattern | 6 | preseason, season, history, draft, trades, week1 |
-| Back-to-top button + logic | 6 | preseason, power-rankings, draft, trades, week1, history |
-| Theme toggle logic | 7 | All except history |
+| CSS `:root` variable block | 8 | Each page defines its own theme vars (inconsistent sets) |
+| Light theme `.light{}` overrides | 8 | Repeated in every file |
+| View Transitions CSS + keyframes | 8 | index.html uses different keyframe names (`fade-out`/`fade-in` vs `vt-out`/`vt-in`) |
+| Navigation HTML (hamburger + links) | 8 | Hardcoded in each file; `config.js` only handles footer |
+| Scroll progress bar (CSS + HTML + JS) | 8 | Identical pattern in every file |
+| IntersectionObserver for `.reveal` | 7 | Slightly different configs per file |
+| Back-to-top button (CSS + HTML + JS) | 7 | Inconsistent: class `.back-to-top` vs `.btt`, thresholds 400/500/600 |
+| Theme toggle logic | 7 | 4 different ID conventions: `toggleDark`, `toggleTheme`, `themeToggle`, inline onclick |
+| `gradientFor()` helper function | 2 | Identical in `preseason.html:684` and `draft.html:451` |
 
-**Note:** The `config.js` file provides `applyConfig()`, `buildFooterNav()`, and `applyLeagueName()` to centralize some patterns. Nav HTML remains duplicated because each page has slightly different active states and link sets.
+**Note:** The `config.js` file centralizes `applyConfig()`, `buildFooterNav()`, and `applyLeagueName()`. Main nav HTML remains duplicated because each page has different active states.
 
 ### Hardcoded Values
-- Team names, owners, and roster data are hardcoded in `preseason.html` (lines 360-600) — by design for a static site
-- Sleeper league IDs duplicated in both `config.js:24-30` and `fetch_sleeper.py:31-37` — intentional (Python can't import JS)
-- Trade data hardcoded in `trades.html` — by design
+- Team names, owners, and roster data in `preseason.html` (lines 360-600) — by design
+- Sleeper league IDs in 3 places: `config.js:24-30`, `power-rankings.html:247-252`, `fetch_sleeper.py:31-37`
+- Sleeper API base URL hardcoded in 3 HTML files + Python (`SLEEPER = 'https://api.sleeper.app/v1'`)
+- 27 occurrences of `rgba(11,13,16,...)` (the `--bg` color) hardcoded in CSS across all files — should reference a variable
+- `config.js:62-75` `funFacts` and `config.js:78-84` `heroStats` are defined but `index.html` uses its own hardcoded versions
+- Speculation rules (`<script type="speculationrules">`) only in 3 of 8 pages (index, draft, trades)
 
 ### Issues Found
-- **LOW:** `season.html` has ~1,200 lines of JS (largest page)
-- **LOW:** 1 empty catch block in `power-rankings.html:297`
-- **LOW:** 1 console.log statement in `season.html`
-- **INFO:** Nav HTML duplicated across all 8 pages (architectural choice, not a bug)
-- **INFO:** CSS variable blocks duplicated across all 8 pages (inline-everything design)
+- **LOW:** `season.html` has 1,058 lines of inline JS (only page over 1,000)
+- **LOW:** 4 silent catch blocks across 3 files
+- **LOW:** 1 debug `console.log` in `season.html:344`
+- **INFO:** Nav HTML duplicated across all 8 pages (architectural choice)
+- **INFO:** CSS variable blocks duplicated 8 times with inconsistent variable sets
+- **INFO:** Speculation rules missing from 5 pages (won't break anything, just missed optimization)
 
 ---
 
