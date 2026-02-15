@@ -209,11 +209,15 @@ All canvas animations use `requestAnimationFrame`:
 **No `setInterval` used for animations** ✅
 
 ### Scroll Listeners — MOSTLY PASSIVE
-- 13 out of ~20 scroll listeners use `{passive: true}` ✅
-- Remaining ~7 scroll listeners lack `{passive: true}` — these are primarily for reveal/intersection-style effects. Since they don't call `preventDefault()`, the browser can optimize them, but explicitly marking them passive is better practice.
+- 13 of 22 scroll listeners use `{passive: true}` ✅
+- **11 scroll listeners lack `{passive: true}`** — primarily nav-scrolled-class toggles and parallax effects. None call `preventDefault()`, so all can safely be made passive.
+  - `index.html:683`, `preseason.html:1070`, `history.html:335,971`, `trades.html:553`, `draft.html:607`, `week1.html:291`
+
+### Canvas `devicePixelRatio` — GOOD
+All 11 canvas implementations properly handle `devicePixelRatio` for Retina displays ✅
 
 ### Issues Found
-- **LOW:** ~7 scroll event listeners across files don't specify `{passive: true}` (e.g., `index.html:683`, `preseason.html:1070`, `history.html:335`, `week1.html:291`)
+- **LOW:** 11 scroll event listeners missing `{passive: true}`
 
 ---
 
@@ -240,10 +244,22 @@ __pycache__/         # Python bytecode excluded
 
 ### fetch_sleeper.py — POLITE
 - User-Agent header set: `"JailyardDynasty/1.0"` (lines 50, 183) ✅
+- Rate limiting: `time.sleep(0.1)` between API calls (lines 140, 161) ✅
 - No API keys or auth tokens used ✅
 
+### innerHTML with External API Data — LOW RISK
+Multiple pages fetch data from the Sleeper API and inject it via `innerHTML` without sanitization:
+- `season.html` (lines 829, 957, 995)
+- `power-rankings.html` (line 1038)
+- `trades.html` (lines 385, 417)
+- `index.html` (lines 783, 866)
+
+The Sleeper API is a trusted source returning JSON, so the real-world risk is low. No `eval()` or `new Function()` is used anywhere.
+
 ### Issues Found
-- **None** — security posture is clean.
+- **LOW:** `innerHTML` used with external API data in 6+ locations — low risk given Sleeper is trusted, but `textContent` would be safer for user-supplied strings
+- **INFO:** `.gitignore` could add defensive entries (`.env`, `*.key`, `.DS_Store`) to prevent accidental future commits
+- **INFO:** No Content Security Policy `<meta>` tag — defense-in-depth measure for static sites
 
 ---
 
@@ -464,7 +480,7 @@ Breakpoint values vary across files: `600px`, `700px`, `768px`, `800px`. This me
 | # | Issue | Location | Impact |
 |---|-------|----------|--------|
 | 9 | Add `prefers-reduced-motion` | `power-rankings.html` | Motion sensitivity |
-| 10 | Add `{passive: true}` to remaining scroll listeners | ~7 across multiple pages | Minor scroll perf |
+| 10 | Add `{passive: true}` to remaining scroll listeners | 11 across 6 pages | Minor scroll perf |
 | 11 | Add visible theme toggle to index.html | `index.html` | Discoverability (currently keyboard-only) |
 | 12 | Remove empty catch block | `power-rankings.html:297` | Silent error swallowing |
 | 13 | Remove console.log | `season.html` | Debug artifact |
