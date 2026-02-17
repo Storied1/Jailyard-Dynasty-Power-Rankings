@@ -287,7 +287,15 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
         # Get projections for this week (if available)
         week_proj = {}
         if projections and str(week) in projections:
-            for pid, pdata in projections[str(week)].items():
+            week_proj_data = projections[str(week)]
+            # Handle both dict and list formats from Sleeper API
+            if isinstance(week_proj_data, dict):
+                proj_iter = week_proj_data.items()
+            elif isinstance(week_proj_data, list):
+                proj_iter = ((item.get("player_id", ""), item) for item in week_proj_data if isinstance(item, dict))
+            else:
+                proj_iter = []
+            for pid, pdata in proj_iter:
                 if isinstance(pdata, dict):
                     # Sleeper projections use pts_ppr or pts_half_ppr or a generic pts field
                     proj_pts = pdata.get("pts_ppr", pdata.get("pts_half_ppr", pdata.get("pts_std", 0)))

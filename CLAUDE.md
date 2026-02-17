@@ -54,14 +54,73 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - Commits: descriptive, informal
 - Variable naming: `:root` block defines `--bg`, `--fg`, `--muted`, `--accent`, `--accent2`, `--card`, `--border`, `--glass`, `--good`, `--bad`, `--warn`
 
+## AI Writing Staff (Content Pipeline)
+
+### Architecture
+Bill Simmons-style AI writers generate weekly columns from Sleeper data. Three slash commands form the pipeline:
+
+1. **`/write-week N`** — Writer agent: generates essay, 12 power ranking blurbs, confessionals, mailbag, bits, matchup picks
+2. **`/edit-week N`** — Editor-in-Chief: quality gate (data accuracy, voice score, variety, continuity, tone)
+3. **`/render-week N`** — Renderer: produces self-contained HTML page matching `week1.html` template
+
+### Content Files
+| Path | Purpose |
+|------|---------|
+| `content/voice-bible.md` | Master style guide — 12 Simmons DNA patterns, Jailyard lexicon, templates, anti-patterns |
+| `content/team-profiles.json` | All 12 teams: preseason rank, tier, roast, key players, full preseason essay text |
+| `content/weeks/weekN_data.json` | AI-ready data per week (matchups, standings, awards, context) — 18 files |
+| `content/weeks/weekN_content.json` | Generated content per week (essay, rankings, mailbag, bits, picks) |
+| `scripts/extract_week_data.py` | Transforms `season_combined.json` → per-week AI-ready JSON |
+
+### Workflow
+```bash
+# 1. Fetch data (already done for 2025, all 18 weeks)
+python fetch_sleeper.py --season 2025
+
+# 2. Extract week data (already done for all 18 weeks)
+python scripts/extract_week_data.py --week N --pretty
+python scripts/extract_week_data.py --all
+
+# 3. Generate content
+/write-week N     # → content/weeks/weekN_content.json
+
+# 4. Review
+/edit-week N      # → APPROVE / REVISE / REJECT
+
+# 5. Render to HTML
+/render-week N    # → weekN.html + config.js nav update
+```
+
+### Voice Bible Key Rules
+- Write in **second person** ("you") for team blurbs — always TO the owner, never about them
+- **Group chat is a character** — reference it at least 3x per column
+- **Data as punctuation** — stats embedded in narrative, never standalone
+- **Every section ends with a kicker line** — memorable closer
+- **Never hallucinate stats** — every number must come from week data JSON
+- **Playful roasts only** — make owners laugh, never wince
+- See `content/voice-bible.md` for full 12-pattern guide
+
+### Current Status
+- 2025 data: ALL 18 weeks fetched and extracted (data/ and content/weeks/)
+- League history: 2022-2026, 392 matchups, Elo ratings computed
+- Week 1 content: DRAFT generated (`content/weeks/week1_content.json`) — needs voice calibration
+- Remaining: Compare Week 1 draft to existing `week1.html`, calibrate voice, then generate Weeks 2-18
+
+### Python Note (Windows)
+Use `python` not `python3` on this machine. Python is at:
+`C:\Users\blake\AppData\Local\Programs\Python\Python312\python`
+
 ## Common Tasks
-- **New weekly column:** Copy `week1.html` → `week2.html`, update content + nav links
+- **Generate weekly column:** `/write-week N` → `/edit-week N` → `/render-week N`
+- **New weekly column (manual):** Copy `week1.html` → `week2.html`, update content + nav links
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
-- **Refresh data:** `python3 fetch_sleeper.py --all` then commit `data/`
+- **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
+- **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
 - **Add chart:** Canvas 2D pattern from `preseason.html`, always handle `devicePixelRatio`
 - **Test changes:** Open in browser, check responsive, verify Canvas renders, test theme toggle
 
 ## Environment
 - No env vars, no secrets, no build commands
-- Local dev: `python3 -m http.server 8000` or open HTML directly
+- Local dev: `python -m http.server 8000` or open HTML directly
+- Python: use `python` not `python3` (Windows)
 - GitHub Actions runs `fetch_sleeper.py` automatically on NFL Sundays

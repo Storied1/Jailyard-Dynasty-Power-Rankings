@@ -1,5 +1,11 @@
 # Large temporary files (players.json is ~5MB, only needed during fetch)
 data/players.json
 
+# Projection files are huge (~100MB each) and can be re-fetched
+data/*/projections.json
+
 # Python bytecode cache
 __pycache__/
+
+# Duplicate zip extraction artifacts
+Jailyard-Dynasty-Power-Rankings-main/
