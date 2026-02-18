@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "season": 2026,
+    "type": "preseason",
+    "generated_by": "write-preseason agent"
+  },
+  "essay": "The 2026 offseason hit The Jailyard like a freight train nobody ordered.\n\n{{media:preseason-2026-essay-opener}}\n\nThree blockbuster trades, two retirements, and a rookie draft class that has the group chat divided into warring factions. Welcome to the most chaotic preseason in Jailyard history.\n\n{{media:preseason-2026-mid-essay}}\n\nIf last season taught us anything, it's that preseason rankings are suggestions written in pencil. The football gods use a Sharpie.",
+  "media_slots": [
+    {
+      "slot_id": "preseason-2026-essay-opener",
+      "intent": "The offseason was pure chaos — blockbuster trades and retirements nobody saw coming",
+      "source": {
+        "type": "giphy",
+        "search_query": "this is fine everything chaos",
+        "fallback_query": "dumpster fire"
+      },
+      "alt_text": "This is fine meme - the 2026 offseason in one GIF"
+    },
+    {
+      "slot_id": "preseason-2026-mid-essay",
+      "intent": "Group chat is in absolute shambles debating the rookie class",
+      "source": {
+        "type": "giphy",
+        "search_query": "group chat chaos arguing",
+        "fallback_query": "heated debate arguing"
+      },
+      "alt_text": "Group chat arguing reaction"
+    },
+    {
+      "slot_id": "preseason-2026-hero",
+      "intent": "Cinematic league intro — custom Veo3 clip",
+      "source": {
+        "type": "custom",
+        "local_path": "media/custom/preseason-2026-hero.mp4"
+      },
+      "alt_text": "The Jailyard 2026 — A new dynasty begins"
+    }
+  ],
+  "rankings": []
+}
