@@ -952,7 +952,7 @@ function renderRecap(week, area) {
   h += '</div>';
 
   // Trend chart
-  h += '<div class="reveal" style="margin-top:2rem"><div class="card chart-card"><h3>Points Trend</h3><canvas id="trendChart"></canvas></div></div>';
+  h += '<div class="reveal" style="margin-top:2rem"><div class="card chart-card"><h3>Points Trend</h3><canvas id="trendChart" role="img" aria-label="Line chart showing points scored trend across the season"></canvas></div></div>';
 
   area.innerHTML = h;
   drawTrendChart(week);
@@ -1342,7 +1342,7 @@ function renderSeasonOverview() {
   h += '</tbody></table></div></div>';
 
   // Season points trend chart
-  h += '<div class="reveal" style="margin-top:2rem"><div class="card chart-card"><h3>Season Points Trend</h3><canvas id="trendChart"></canvas></div></div>';
+  h += '<div class="reveal" style="margin-top:2rem"><div class="card chart-card"><h3>Season Points Trend</h3><canvas id="trendChart" role="img" aria-label="Line chart showing points scored trend across the season"></canvas></div></div>';
 
   // Weekly high scorer history
   h += '<div class="reveal" style="margin-top:1.5rem"><div class="card"><h3>Weekly High Scorers</h3>';
