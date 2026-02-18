@@ -606,7 +606,7 @@ document.querySelectorAll('.grade-card, .storyline').forEach(el => scrollObs.obs
 // --- Nav scroll effect ---
 window.addEventListener('scroll', () => {
   document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
-});
+}, {passive: true});
 
 // --- Theme toggle ---
 document.getElementById('toggleTheme').addEventListener('click', () => {

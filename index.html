@@ -682,7 +682,7 @@
 // --- Nav scroll effect ---
 window.addEventListener('scroll', () => {
   document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
-});
+}, {passive: true});
 
 // --- Typewriter effect ---
 (function(){

@@ -552,7 +552,7 @@ document.querySelectorAll('.trade-item, .trade-stat').forEach(el => scrollObs.ob
 // --- Nav scroll effect ---
 window.addEventListener('scroll', () => {
   document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
-});
+}, {passive: true});
 
 // --- Theme toggle ---
 document.getElementById('toggleTheme').addEventListener('click', () => {
