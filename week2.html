@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Jailyard 2025 Week 2 Column</title>
+<meta name="view-transition" content="same-origin" />
+<meta name="description" content="The Jailyard 2025 Week 2 column. Full recap essay, power rankings, confessionals, reader mailbag, bits and Week 3 matchup picks." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+
+<style>
+  :root{
+    --bg: #0b0d10;
+    --fg: #e8ecf0;
+    --muted: #7a8194;
+    --accent: #8b5cf6;
+    --accent2: #ec4899;
+    --card: rgba(255,255,255,0.03);
+    --glass: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.08);
+    --good: #16a34a;
+    --bad: #dc2626;
+    --warn: #ca8a04;
+    --font-main: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --h1: clamp(2.4rem, 5vw, 4rem);
+    --h2: clamp(1.8rem, 4vw, 3rem);
+    --h3: clamp(1.3rem, 3vw, 2rem);
+    color-scheme: dark;
+  }
+  html.light{
+    --bg:#f7f9fc; --fg:#111418; --muted:#5f6672;
+    --card:rgba(0,0,0,0.03); --glass:rgba(0,0,0,0.04); --border:rgba(0,0,0,0.08);
+    color-scheme:light;
+  }
+  @view-transition{ navigation:auto; }
+  ::view-transition-old(root){ animation:vt-out .2s ease-in; }
+  ::view-transition-new(root){ animation:vt-in .3s ease-out; }
+  @keyframes vt-out{ to{opacity:0;filter:blur(2px);} }
+  @keyframes vt-in{ from{opacity:0;filter:blur(2px);} }
+  html, body{
+    scroll-behavior: smooth;
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-main);
+  }
+  *, *::before, *::after{ box-sizing: border-box; }
+  a{ color: var(--accent2); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+  header.hero{
+    position: relative;
+    min-height: 90vh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .hero__layer{
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    background-size: cover;
+    background-position: center;
+  }
+  .layer-stars{ background-image: radial-gradient(circle at 30% 30%, rgba(140,115,255,0.3) 0%, transparent 60%), radial-gradient(circle at 70% 70%, rgba(236,72,153,0.3) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(22,163,74,0.25) 0%, transparent 60%), linear-gradient(#101317, #0e1013); }
+  .layer-grid{ background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 80px 80px; opacity:.5; }
+  .hero__content{ position: relative; z-index: 2; text-align: center; padding: 3rem 1rem; max-width: 900px; }
+  .hero__title{ font-size: var(--h1); line-height: 1.1; margin:0; font-weight: 700; background: linear-gradient(96deg,#fff,#e2d9ff 45%,#fda4af 80%); -webkit-background-clip: text; color: transparent; }
+  .hero__subtitle{ font-size: 1.1rem; color: var(--muted); max-width: 700px; margin: 1rem auto 2rem; line-height: 1.5; }
+  .hero__cta{ display: inline-flex; gap:.6rem; align-items: center; padding: .75rem 1.4rem; background: var(--accent); color:#fff; border-radius:999px; font-weight:600; transition: transform .2s ease; }
+  .hero__cta:hover{ transform: translateY(-3px); }
+  #nav{ position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); background: rgba(11,13,16,.7); border-bottom:1px solid var(--border); }
+  #nav .inner{ max-width:1200px; margin:0 auto; padding:.7rem 1rem; display:flex; justify-content: space-between; align-items:center; }
+  #nav .brand{ font-weight:700; letter-spacing:.05em; }
+  #nav nav{ display:flex; gap:.8rem; flex-wrap: wrap; }
+  #nav nav a{ padding:.35rem .6rem; border-radius:6px; font-size:.9rem; color: var(--muted); }
+  #nav nav a.active{ background:rgba(255,255,255,0.05); color: var(--fg); }
+  #nav .right{ display:flex; gap:.8rem; align-items:center; }
+  .theme-toggle{ cursor:pointer; padding:.4rem .8rem; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,0.05); font-size:.9rem; color:var(--muted); }
+  #nav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
+  #nav .hamburger:hover,#nav .hamburger:focus-visible{color:var(--fg);}
+  #nav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
+  .container{ max-width: 1200px; margin:0 auto; padding:4rem 1rem; position:relative; }
+  .section-title{ font-size: var(--h2); margin-bottom:.7rem; }
+  .section-sub{ color: var(--muted); font-size:1rem; margin-bottom:2.5rem; max-width:700px; line-height:1.6; }
+  .card{ background: var(--card); border:1px solid var(--border); border-radius:16px; padding:1.3rem 1.5rem; margin-bottom:1.2rem; box-shadow:0 6px 18px rgba(0,0,0,.18); transition: transform .2s ease, box-shadow .2s ease; }
+  .card:hover{ transform: translateY(-4px); box-shadow:0 10px 30px rgba(0,0,0,.22); }
+  .week-section{ margin-top:3rem; }
+  .week-header{ font-size:var(--h2); margin-bottom:1rem; }
+  .essay{ font-size:1rem; line-height:1.6; margin-bottom:2rem; }
+  .essay p{ margin:0 0 1rem; }
+  .essay p:last-child{ margin-bottom:0; }
+  .mailbag-item{ margin-bottom:1.5rem; }
+  .mailbag-item:last-child{ margin-bottom:0; }
+  .mailbag-item h4{ margin:.2rem 0; font-size:1.1rem; color: var(--accent); }
+  .mailbag-item p{ margin:.4rem 0 0; color: var(--muted); }
+  .tag-badge{ display:inline-block; padding:.1rem .45rem; margin-left:.4rem; border-radius:6px; font-size:.8rem; font-weight:500; }
+  .tag-upset{ background:rgba(236,72,153,0.2); color:#ec4899; }
+  .tag-stay{ background:rgba(234,179,8,0.2); color:#eab308; }
+  .tag-teaser{ background:rgba(139,92,246,0.2); color:#8b5cf6; }
+  .tag-lock{ background:rgba(22,163,74,0.2); color:#16a34a; }
+  .sidebar{ position:sticky; top:5rem; padding:1.5rem; border:1px solid var(--border); border-radius:12px; background:var(--glass); max-width:260px; }
+  .sidebar h4{ margin-top:0; margin-bottom:.6rem; font-size:1.1rem; }
+  .sidebar p{ margin:.3rem 0; font-size:.9rem; color:var(--muted); }
+  footer{ padding:3rem 1rem; text-align:center; color:var(--muted); font-size:.9rem; border-top:1px solid var(--border); }
+  .matchup-grid{ display:grid; gap:1rem; margin-top:1.5rem; }
+  .matchup-card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:1.2rem 1.4rem; transition:transform .2s,box-shadow .2s;
+    opacity:0; transform:translateY(15px); transition:all .5s cubic-bezier(.17,.67,.24,1);
+  }
+  .matchup-card.visible{ opacity:1; transform:none; }
+  .matchup-card:hover{ transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.2); }
+  .matchup-header{
+    display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin-bottom:.8rem; flex-wrap:wrap;
+  }
+  .matchup-header .team-name{ font-weight:700; font-size:1rem; flex:1; min-width:100px; }
+  .matchup-header .team-name.home{ text-align:right; }
+  .matchup-header .vs-pill{
+    padding:.15rem .6rem; border-radius:999px; font-size:.75rem; font-weight:700; letter-spacing:.04em;
+    background:rgba(139,92,246,0.12); color:var(--accent); flex-shrink:0;
+  }
+  .win-prob-bar{
+    height:8px; border-radius:999px; overflow:hidden; display:flex; margin-bottom:.6rem;
+    background:rgba(255,255,255,0.06);
+  }
+  .win-prob-bar .home-bar{ background:linear-gradient(90deg,var(--accent),#a78bfa); transition:width 1s cubic-bezier(.2,.8,.2,1); }
+  .win-prob-bar .away-bar{ background:linear-gradient(90deg,var(--accent2),#f472b6); transition:width 1s cubic-bezier(.2,.8,.2,1); }
+  .prob-labels{
+    display:flex; justify-content:space-between; font-size:.78rem; color:var(--muted); margin-bottom:.6rem;
+  }
+  .matchup-blurb{ font-size:.9rem; color:var(--muted); line-height:1.5; }
+  .matchup-pick{
+    display:inline-flex; align-items:center; gap:.3rem; margin-top:.6rem;
+    font-size:.82rem; font-weight:600; color:var(--good);
+  }
+  .matchup-pick svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+  .fade-in{ opacity:0; transform:translateY(20px); transition:all .6s cubic-bezier(.17,.67,.24,1); }
+  .fade-in.visible{ opacity:1; transform:none; }
+  .special-picks{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-top:2rem;
+  }
+  .special-pick{
+    padding:1rem; border-radius:12px; border:1px solid var(--border); background:var(--card); text-align:center;
+  }
+  .special-pick .sp-label{ font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:.4rem; font-weight:600; }
+  .special-pick .sp-value{ font-weight:700; font-size:.95rem; }
+  .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(11,13,16,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
+  .back-to-top.show{opacity:1;transform:none;pointer-events:auto;}
+  .back-to-top:hover{background:var(--accent);}
+  .back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
+
+  /* Power Rankings */
+  .ranking-entry{
+    display:flex; gap:1rem; align-items:flex-start; padding:1rem 0;
+    border-bottom:1px solid var(--border);
+  }
+  .ranking-entry:last-child{ border-bottom:none; }
+  .rank-badge{
+    background:var(--accent); color:#fff; width:36px; height:36px; border-radius:50%;
+    display:grid; place-items:center; font-weight:700; font-size:.85rem; flex-shrink:0;
+  }
+  .rank-movement{
+    font-size:.8rem; font-weight:600; min-width:30px; text-align:center; flex-shrink:0;
+    padding-top:.5rem;
+  }
+  .rank-movement.up{ color:var(--good); }
+  .rank-movement.down{ color:var(--bad); }
+  .rank-movement.steady{ color:var(--muted); }
+  .rank-record{ color:var(--muted); font-weight:400; font-size:.9rem; }
+  .ranking-entry h4{ margin:0 0 .3rem; font-size:1rem; }
+  .ranking-entry p{ margin:0; color:var(--muted); font-size:.9rem; line-height:1.5; }
+
+  /* Confessionals */
+  .confessional{
+    background:rgba(139,92,246,0.06); border-left:3px solid var(--accent);
+    padding:.8rem 1.2rem; margin-bottom:1rem; border-radius:0 8px 8px 0;
+  }
+  .confessional:last-child{ margin-bottom:0; }
+  .confessional h4{ margin:0 0 .4rem; font-size:.95rem; }
+  .confessional p{ margin:0; color:var(--muted); font-style:italic; line-height:1.5; }
+
+  /* Bits */
+  .bit-item{ margin-bottom:1rem; line-height:1.6; }
+  .bit-item:last-child{ margin-bottom:0; }
+
+  @media (max-width:768px){
+    .sidebar{ position:static; max-width:none; margin-bottom:2rem; }
+    .matchup-header .team-name{ font-size:.9rem; }
+    #nav .hamburger{display:block;}
+    #nav nav{display:none;width:100%;}
+    #nav nav.open{display:flex;flex-direction:column;gap:0;}
+    #nav .inner{flex-wrap:wrap;}
+    .ranking-entry{ flex-wrap:wrap; }
+  }
+  .scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="scroll-progress" id="scrollProgress"></div>
+<header class="hero">
+  <div class="hero__layer layer-stars" data-speed="0.2"></div>
+  <div class="hero__layer layer-grid" data-speed="0.05"></div>
+  <div class="hero__content">
+    <h1 class="hero__title">The Jailyard Week 2 Column</h1>
+    <p class="hero__subtitle">The Boonist Monks won by 69.9, MHJTIME dropped 182.8 and is still only 1-1, and the Sleeping Giants fell from first to seventh. The full Week 2 recap: essay, power rankings, confessionals, mailbag, and Week 3 picks.</p>
+    <a href="#week2" class="hero__cta">Read the Column &#8595;</a>
+  </div>
+</header>
+<div id="nav">
+  <div class="inner">
+    <div class="brand"><a href="index.html" style="color:inherit;text-decoration:none;" data-league-name>The Jailyard</a></div>
+    <nav>
+      <a href="history.html">League Bible</a>
+      <a href="season.html">Season Hub</a>
+      <a href="preseason.html">Rankings</a>
+      <a href="power-rankings.html">Power Rankings</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
+      <a href="week1.html">Week 1</a>
+      <a href="#week2" class="active">Week 2</a>
+    </nav>
+    <div class="right">
+      <button class="theme-toggle" id="toggleTheme">Toggle Theme</button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
+<main>
+  <section class="container week-section" id="week2">
+    <h2 class="week-header">Week 2 Column &amp; Power Rankings</h2>
+    <div class="section-sub">The full Week 2 recap. Cold open essay, power rankings with movement from Week 1, confessionals, reader mailbag, bits &amp; segments, and our Week 3 matchup picks. Week 1 picks record: 5&ndash;1.</div>
+    <div style="display:flex; flex-wrap:wrap; gap:2rem;">
+      <div style="flex:2 1 650px; min-width:300px;">
+        <article class="card essay" id="week2-essay"></article>
+        <article class="card" id="week2-rankings"></article>
+        <article class="card" id="week2-confessionals"></article>
+        <article class="card" id="week2-mailbag"></article>
+        <article class="card" id="week2-bits"></article>
+        <article class="card" id="week2-picks"></article>
+      </div>
+      <div class="sidebar" id="week2-sidebar">
+        <h4>Picks Ledger</h4>
+        <p><strong>Week 1:</strong> 5&ndash;1</p>
+        <p>Overall: 5&ndash;1</p>
+        <p>Locks: 1&ndash;0</p>
+        <p>Upset Watch: 0&ndash;1</p>
+        <p>Stay&ndash;Away: 1&ndash;0</p>
+        <p class="small" style="margin-top:1rem;font-size:.8rem;">Our picks are for entertainment. Don&#39;t bet your rent money.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<footer>
+  <div style="font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:.4rem;">The Jailyard</div>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;margin-bottom:1rem;">
+    <a href="index.html" style="color:var(--muted);font-size:.85rem;">Home</a>
+    <a href="history.html" style="color:var(--muted);font-size:.85rem;">League Bible</a>
+    <a href="season.html" style="color:var(--muted);font-size:.85rem;">Season Hub</a>
+    <a href="preseason.html" style="color:var(--muted);font-size:.85rem;">Rankings</a>
+    <a href="draft.html" style="color:var(--muted);font-size:.85rem;">Draft Recap</a>
+    <a href="trades.html" style="color:var(--muted);font-size:.85rem;">Trades</a>
+    <a href="week1.html" style="color:var(--muted);font-size:.85rem;">Week 1</a>
+    <a href="week2.html" style="color:var(--muted);font-size:.85rem;">Week 2</a>
+  </div>
+  &copy; 2022&ndash;2026 The Jailyard Dynasty League. Built with love.
+</footer>
+
+<script src="config.js"></script>
+<script>
+// Theme toggle
+document.getElementById('toggleTheme').addEventListener('click', ()=>{
+  document.documentElement.classList.toggle('light');
+});
+
+// Parallax scrolling effect for hero layers
+window.addEventListener('scroll', ()=>{
+  const sc = window.scrollY;
+  document.querySelectorAll('.hero__layer').forEach(layer => {
+    const speed = parseFloat(layer.getAttribute('data-speed') || 0);
+    layer.style.transform = `translateY(${sc * speed}px)`;
+  });
+}, {passive:true});
+
+// ═══════════════════════════════════════════════════════════
+// WEEK 2 DATA
+// ═══════════════════════════════════════════════════════════
+
+const week2Essay = `Sixty-nine point nine. That\u2019s not a margin of victory \u2014 that\u2019s the kind of number that makes the group chat go silent for three full minutes before someone types \u201cbro\u201d in all lowercase. The Boonist Monks \u2014 preseason dead last, the franchise we described as \u201ccould win it all or retire it all\u201d \u2014 just obliterated Burden of Etienne-y Woody 168.7 to 98.8, and somehow that wasn\u2019t even the most interesting thing that happened in Week 2.
+
+Because while @GauchoTrain was busy conducting a one-sided demolition derby, MHJTIME quietly put up 182.8 points \u2014 the highest single-week score of the young season \u2014 and the group chat barely flinched. Malik Nabers exploded for 34.2. Ja\u2019Marr Chase added 30.5. Jayden Daniels pitched in 19.7. We called that WR trio \u201chistoric\u201d in the preseason, and two weeks in, the word feels undersized. The problem? After losing Week 1 with 142.62 despite doing everything right, MHJTIME is only 1-1 \u2014 and leads the league in total points at 325.4. That\u2019s the dynasty equivalent of batting .400 and your team being .500.
+
+The symmetry of suffering is almost poetic this week. Remember how MHJTIME scored 142 in Week 1 and lost to the one opponent who went off? Father Time just lived the exact same nightmare \u2014 dropped 165.06 behind Jared Goff\u2019s 33.96 and Roquan Smith\u2019s 26.5, and still lost because MHJTIME\u2019s ceiling is apparently located in outer space. The preseason essay warned that the chat would love Father Time\u2019s random 180-point weeks and ignore the rest. At 0-2 with 165.06 this week, the rest is all there is.
+
+Then there\u2019s the free fall. One week ago, the Sleeping Giants sat atop these power rankings \u2014 the feel-good story, the aging roster that refused to age, Derrick Henry\u2019s 28.7-point proclamation that the clock hadn\u2019t struck midnight yet. Seven days later? A 32.66-point loss to General Ken-obi, a kicker (Brandon Aubrey at 24.5) leading the scoring column, and a six-spot tumble to seventh. We said they were playing on borrowed time. Turns out the loan shark came early.
+
+The real story of Week 2 might be what\u2019s crystallizing at the top. Five teams sit at 2-0 \u2014 the Boonist Monks, Kittler on the Roof, General Ken-obi, the Legion of Bouz, and Rasheeing the Scene. Five more are winless. Only MHJTIME and the Sleeping Giants occupy the messy middle at 1-1, and one of them has more points than anyone. The league has split cleanly into haves and have-nots after fourteen days, and the group chat\u2019s power rankings discourse has already reached \u201cwell actually\u201d levels of intensity.
+
+General Ken-obi \u2014 your preseason number one, the team everyone measured themselves against \u2014 is quietly doing exactly what preseason favorites are supposed to do. Drake Maye\u2019s 26.3, Kenneth Walker\u2019s 18.3, CeeDee Lamb\u2019s 16.7. No drama. No fireworks. Just wins. Two of them.
+
+Two weeks down, twelve to go. The preseason bottom-dweller is the new number one. The preseason darling is licking its wounds at seventh. The league\u2019s best scorer can\u2019t buy a second win. And somewhere in the group chat, someone is already typing a four-paragraph essay about why their 0-2 team is \u201cactually fine.\u201d
+
+Dynasty is chaos theory with a waiver wire. Act accordingly.`;
+
+const week2Rankings = [
+  {
+    rank: 1, prevRank: 4, teamName: 'The Boonist Monks', owner: 'GauchoTrain', record: '2-0',
+    blurb: 'Two weeks ago you were dead last in the preseason rankings. Now you\u2019re sitting at number one with a 2-0 record and the second-highest point total in the league at 313.1. The Week 2 performance wasn\u2019t subtle: Lamar Jackson dropped 26.3, James Cook erupted for 25.0, and linebacker Daiyan Henley contributed a startling 23.5 from the IDP slot. The result? A 69.9-point blowout of Burden \u2014 the largest margin of victory this season by a country mile. We said your team could win it all or retire it all. Through two weeks, the retirement party has been indefinitely postponed. Jaxon Smith-Njigba (14.3) and Tyreek Hill (13.9) added supporting roles, and at 27.2 years average age, every week feels like playing with house money. @GauchoTrain\u2019s side bets in the group chat are getting louder, the receipts are piling up, and the league\u2019s most prolific instigator is becoming the protagonist. Enjoy it \u2014 the schedule gets real in Week 3.'
+  },
+  {
+    rank: 2, prevRank: 3, teamName: 'Kittler on the Roof', owner: 'bchodos', record: '2-0',
+    blurb: 'The defending champion just keeps doing defending-champion things. Jonathan Taylor\u2019s 28.5 was the kind of quiet monster game that doesn\u2019t trend in the group chat but wins you weeks \u2014 and weeks are what matter. Puka Nacua added 23.6, Tucker Kraft chipped in 21.4, and suddenly the roster we said had a drywall ceiling is outperforming teams with marble ones. You beat Noble FFT 146.14 to 129.38 \u2014 the closest game of the week, which tells you exactly how dominant the top of this league was. Runner-up in 2022, runner-up in 2023, champion in 2024, and now a quiet 2-0 start in 2025. The pattern is undeniable: you show up, you grind, and you let flashier rosters implode around you. Tony Pollard managed 9.2 from the flex \u2014 still not spectacular, still not hurting you. The chat will keep making Pollard jokes. You\u2019ll keep winning.'
+  },
+  {
+    rank: 3, prevRank: 5, teamName: 'General Ken-obi', owner: 'bLaker24', record: '2-0',
+    blurb: 'Remember when you dropped from first to fifth in Week 1 despite winning? The preseason favorite continues to do preseason-favorite things \u2014 beating the teams you\u2019re supposed to beat and doing it convincingly. Drake Maye\u2019s 26.3 was a legitimate statement game at quarterback, Kenneth Walker added 18.3, and the supporting cast of CeeDee Lamb (16.7), Saquon Barkley (16.4), and Fred Warner (16.0) provided the kind of depth that makes other managers jealous. The 32.66-point demolition of the Sleeping Giants was no schedule gift \u2014 you took the Week 1 number-one team and made them look ordinary. You\u2019re 2-0 with 287.3 total points, and the roster that could headline Coachella is finally sounding like a headliner. The taxi squad debates have been replaced by a much simpler narrative: the franchise everyone measures themselves against is measuring up just fine.'
+  },
+  {
+    rank: 4, prevRank: 6, teamName: 'The Legion of Bouz', owner: 'KidBouzie', record: '2-0',
+    blurb: 'Amon-Ra St. Brown scored 34.7 points this week. Thirty-four point seven. That\u2019s the highest individual performance in the entire league \u2014 the kind of number that silences the group chat for a beat before the fire emojis start flying. Dak Prescott added 22.14 from the quarterback spot, Christian McCaffrey chipped in 19.7, and you dispatched Ghastly Grayskull by 46.46 points. Since winning the inaugural title in 2022, you\u2019ve been stuck in the middle \u2014 that was the preseason narrative, anyway. Two-and-oh doesn\u2019t feel like the middle. We kept saying your Voltron receivers needed a tight end with a pulse to compete, but when ARSB is single-handedly outscoring entire rosters, maybe the pulse is optional. The 2022 champion looks like a championship contender again, and the rest of the league is starting to notice.'
+  },
+  {
+    rank: 5, prevRank: 2, teamName: 'Rasheeing the Scene', owner: 'ToreroGaucho', record: '2-0',
+    blurb: 'Don\u2019t let the three-spot drop fool you \u2014 a win is a win, and you\u2019ve got two of them. The 135.32-point outing against Chudders wasn\u2019t your flashiest work, but De\u2019Von Achane\u2019s 22.2, Travis Etienne\u2019s 15.9, and Bucky Irving\u2019s 15.1 proved your RB room is a legitimate three-headed monster. The interesting wrinkle: Josh Allen \u2014 the QB1 who torched Noble for 38.76 last week \u2014 didn\u2019t crack your top five scorers this week, and you still won comfortably. That\u2019s the kind of roster depth that makes the \u2018weekly thrill ride\u2019 label from the preseason actually feel like a compliment. You\u2019re 2-0 with 279.4 points, which is fifth but close enough to first to keep the chat buzzing. The WR room is still a meme waiting to happen, but when your running backs are dropping 53 combined points, who needs elite receivers?'
+  },
+  {
+    rank: 6, prevRank: 7, teamName: 'MHJTIME', owner: 'rango_', record: '1-1',
+    blurb: 'Here\u2019s the number that should terrify the rest of this league: 325.4. That\u2019s your total points through two weeks \u2014 more than any other team, including all five of the 2-0 squads. Malik Nabers went nuclear with 34.2, Ja\u2019Marr Chase added a casual 30.5, and Jayden Daniels contributed 19.7. We called that WR trio \u2018historic\u2019 in the preseason. After back-to-back performances of 142.62 and 182.8, the adjective feels conservative. The 182.8 this week was the highest single-game score of the season \u2014 and it barely felt like news because the rest of your roster is so loaded. Chuba Hubbard added 16.2, proving the RB room isn\u2019t the total disaster we predicted. The only thing standing between you and a 2-0 record is Week 1\u2019s scheduling coin flip. You\u2019re the most dangerous 1-1 team in Jailyard history.'
+  },
+  {
+    rank: 7, prevRank: 1, teamName: 'Sleeping Giants', owner: 'zbcowan', record: '1-1',
+    blurb: 'From the top of the mountain to the gift shop at base camp. One week ago you were the feel-good story \u2014 Derrick Henry\u2019s 28.7-point explosion carrying you to a first-place ranking that made the group chat reconsider every preseason take. Then Week 2 happened. Henry didn\u2019t even crack your top five scorers this week. Your leading scorer was kicker Brandon Aubrey at 24.5 \u2014 and when your kicker is your best player, the \u2018borrowed time\u2019 narrative from the preseason starts sounding less like a hot take and more like a prophecy. Jalen Hurts managed just 10.54, Keenan Allen added 14.6, and the 32.66-point loss to General Ken-obi was the kind of defeat that resets expectations entirely. You\u2019re 1-1 with 270.2 total points \u2014 respectable, not dominant. The Island of Misfit WR1s didn\u2019t sink, but the tide just came in.'
+  },
+  {
+    rank: 8, prevRank: 10, teamName: 'Father Time', owner: 'Redrumsregrub', record: '0-2',
+    blurb: 'We need to talk about the cruelest stat in the Jailyard right now: you\u2019ve scored 285.7 points through two weeks and you\u2019re 0-2. For context, that\u2019s more total points than Rasheeing the Scene, who is sitting pretty at 2-0. Jared Goff went off for 33.96 this week, Roquan Smith dominated with 26.5 from the linebacker slot, and Davante Adams pitched in 19.6. You scored 165.06 and lost because MHJTIME decided to put up 182.8. Sound familiar? It should \u2014 MHJTIME lived this exact nightmare in Week 1, scoring 142.62 and losing to the one team that outscored them. The preseason essay said the chat would love your random 180-point weeks and ignore the rest. At 0-2, the rest keeps piling up. But 285.7 total points don\u2019t lie \u2014 this record isn\u2019t a reflection of your roster. It\u2019s a scheduling vendetta.'
+  },
+  {
+    rank: 9, prevRank: 9, teamName: 'Noble FFT', owner: 'kevobucks', record: '0-2',
+    blurb: 'Stuck at ninth for two straight weeks, and the preseason number two has to be asking: what happened? Jordan Love threw for 20.88, Bijan Robinson put up 18.3, and even IDP stud Brian Branch contributed 18.0 from the defensive backfield. You scored 129.38 \u2014 a perfectly respectable total that happened to run into the defending champion\u2019s best game of the young season. Jonathan Taylor\u2019s 28.5 and Puka Nacua\u2019s 23.6 simply outclassed your supporting cast. The scariest backfield in the league isn\u2019t scary enough when the rest of the roster can\u2019t keep pace. We said Bijan and Breece were gods but gods need a supporting cast. Two weeks into 2025, the audition for that supporting cast is not going well.'
+  },
+  {
+    rank: 10, prevRank: 8, teamName: 'Chudders Football Team', owner: 'Chudders', record: '0-2',
+    blurb: 'The rebuild was never supposed to be pretty, and through two weeks, it\u2019s living down to that billing. Jahmyr Gibbs led the way with 17.9 and Justin Herbert added 17.78, but neither number is the kind of week-winner that turns 0-2 into 1-1. The loss to Rasheeing by 22.54 wasn\u2019t embarrassing \u2014 112.78 points from a roster this young is honestly defensible \u2014 but the war chest of draft picks isn\u2019t scoring points yet. Emeka Egbuka, the Week 1 hero who debuted with 21.6, came back to earth with 10.9 this week. One week it looked like the rebuild was six months ahead of schedule; the next week it looked like the original timeline. Keep icing those trade offers \u2014 the window between patience and irrelevance is narrowing, but two firsts in the next two drafts still make this the most interesting rebuilding project in the league.'
+  },
+  {
+    rank: 11, prevRank: 12, teamName: 'Ghastly Grayskull Gang', owner: 'GrayskullXX', record: '0-2',
+    blurb: 'Moving up one spot while going 0-2 is the dynasty equivalent of getting a participation trophy \u2014 technically progress, practically meaningless. J.K. Dobbins led your scorers with 15.0, Quentin Johnston added 14.4, and your 109.78 total was third-worst in the league this week. The 46.46-point loss to the Legion of Bouz wasn\u2019t even competitive after the first quarter \u2014 Amon-Ra St. Brown alone (34.7) nearly matched your top three scorers combined (43.3). We said your pick stash was bigger than your WR room. The WR room just put up Quentin Johnston and Deebo Samuel (13.9) as its headliners, so the math still checks out. After the 9.72-point C.J. Stroud dud in Week 1, another week where your quarterback didn\u2019t crack the top five is becoming a pattern the chat won\u2019t let you forget.'
+  },
+  {
+    rank: 12, prevRank: 11, teamName: 'Burden of Etienne-y Woody', owner: 'kharlow', record: '0-2',
+    blurb: 'Ninety-eight point eight. That\u2019s the lowest score in the Jailyard this week, the lowest score of the entire season so far, and the kind of number that makes the group chat wince instead of roast. Justin Jefferson \u2014 your top-three overall dynasty asset, the franchise cornerstone, the player we said could only carry you so far \u2014 scored 9.6 points. For the second straight week, Jefferson wasn\u2019t your leading scorer. George Pickens led with 15.3, followed by Kyler Murray at 15.0. When a trade acquisition outscores your franchise player two weeks running, the alarm bells aren\u2019t just ringing \u2014 they\u2019re playing a full symphony. The 69.9-point loss to the Boonist Monks was the worst beatdown of the season. We flagged the QB roulette and the RB triage unit in the preseason. At 0-2 with 219.1 total points, the Jefferson trade rumors aren\u2019t rumors anymore \u2014 they\u2019re a business plan.'
+  }
+];
+
+const week2Confessionals = [
+  {
+    teamName: 'The Boonist Monks',
+    text: 'Preseason twelfth. Dead last. \u2018Could win it all or retire it all,\u2019 they said. I just won by 69.9 points. Lamar went off. Cook went off. Even the linebacker nobody\u2019s heard of went off. I\u2019m sitting at number one in the power rankings and the group chat still thinks this is a fluke. Let them. I\u2019ve been posting receipts for two weeks straight and I\u2019m not running out of ink.'
+  },
+  {
+    teamName: 'Father Time',
+    text: 'I scored 165 points. One hundred and sixty-five. Goff had 34. Roquan had 26. Davante had 20. In any other matchup, in any other week, I\u2019m celebrating. But I drew MHJTIME \u2014 the same MHJTIME who complained about bad luck in Week 1. Now I understand. I deeply, profoundly understand. I\u2019m starting a support group. Meetings are Mondays.'
+  },
+  {
+    teamName: 'MHJTIME',
+    text: 'I have the most points in the entire league. Three hundred and twenty-five. Malik Nabers just scored 34.2. Chase had 30.5. I put up 182 this week. And I\u2019m 1-1. Somebody explain to me how the team that scores the most points in the Jailyard is sitting at .500. Actually, don\u2019t explain it. I lived it in Week 1. The schedule gods are using me as a cautionary tale.'
+  },
+  {
+    teamName: 'Sleeping Giants',
+    text: 'One week. That\u2019s how long I got to be number one. Seven days of glory. Then General Ken-obi walked in, my kicker outscored Jalen Hurts, and Derrick Henry apparently took the week off. Last week I was reading my preseason essay out loud to Henry through my phone. This week I\u2019m just staring at it. Maybe he can\u2019t hear me after all.'
+  }
+];
+
+const week2Mailbag = [
+  {
+    q: 'Dear Commish: The Boonist Monks were ranked twelfth in the preseason and are now number one. Should we fire the preseason rankings committee?',
+    a: 'The committee stands by its process \u2014 40% win percentage, 30% points for, 20% recent form, 10% strength of schedule. The committee also acknowledges that Lamar Jackson, James Cook, and a random linebacker combining for 74.8 points was not in any model. The committee is reconvening.'
+  },
+  {
+    q: 'From the group chat: Father Time scored 165 and lost. MHJTIME scored 142 in Week 1 and lost. Is the Jailyard cursed?',
+    a: 'It\u2019s not cursed \u2014 it\u2019s deeply, statistically cruel. Two teams have now scored 140-plus and lost in consecutive weeks. The chat should stop asking \u2018what are the chances\u2019 and start asking \u2018who\u2019s next.\u2019'
+  },
+  {
+    q: '@zbcowan asks: I was number one for exactly seven days. Is that a league record for shortest reign?',
+    a: 'Unclear, but six spots in one week is a tumble that the chat will screenshot and resurface every August during preseason debates. One week you\u2019re reading your essay out loud to Derrick Henry. The next, your kicker outscored your quarterback. The Giants didn\u2019t just fall asleep \u2014 they hit snooze.'
+  },
+  {
+    q: 'Dear Commish: The picks column went 5-1 in Week 1. Should we just let the algorithm play our matchups?',
+    a: 'A 5-1 debut is what we in the business call \u2018unsustainable.\u2019 The Noble FFT upset pick was the only miss, and Kittler made sure that one didn\u2019t age well. We\u2019ll ride the hot hand until reality catches up \u2014 which, given how Week 2 went, could be any minute.'
+  },
+  {
+    q: 'From the group chat: Five teams are 2-0 and five teams are 0-2. Is this actually just two separate leagues?',
+    a: 'It\u2019s the Jailyard\u2019s clean split: the haves, the have-nots, and MHJTIME plus the Sleeping Giants sitting in the middle wondering how they ended up at 1-1 with completely different emotions about it. Give it two more weeks. The standings always get weird in October.'
+  }
+];
+
+const week2Bits = [
+  {
+    title: 'Great Call of the Week',
+    text: 'Starting Daiyan Henley in IDP for the Boonist Monks. The linebacker put up 23.5 points \u2014 the third-highest scorer on a team that won by 69.9. Nobody in the group chat had Henley on their radar. @GauchoTrain did. That\u2019s the difference between 2-0 and posting memes about \u2018next year.\u2019'
+  },
+  {
+    title: 'Parent Corner',
+    text: 'Somewhere a Sleeping Giants manager is explaining to their significant other why they\u2019re upset about a fantasy football ranking dropping six spots. \u2018But I was NUMBER ONE.\u2019 \u2018You\u2019re number seven now?\u2019 \u2018My kicker outscored my quarterback.\u2019 \u2018...Is this going to affect dinner plans?\u2019'
+  },
+  {
+    title: 'Is MHJTIME the New 2024 Sleeping Giants?',
+    text: 'Bear with me: loaded roster, league-leading point totals, a record that doesn\u2019t match the production. The Sleeping Giants rode an aging core to the championship game last year despite the numbers not always cooperating. MHJTIME has the best two-week point total (325.4) and a .500 record. History says the points will start converting. Eventually.'
+  },
+  {
+    title: 'Overheard in the Chat',
+    text: '\u201869.9-point margin should be illegal\u2019 \u2014 @kharlow, who may have a point. \u2018Henry scored 28.7 last week and didn\u2019t crack the top five this week. The Giants are cooked.\u2019 \u2014 anonymous, which in a twelve-person chat means everyone already knows who said it.'
+  },
+  {
+    title: 'Things I Believe But Can\u2019t Prove',
+    text: 'Father Time is going to win four straight starting in Week 3. The roster is too talented and 285.7 total points at 0-2 is the kind of statistical anomaly that corrects violently. Book it \u2014 and then don\u2019t blame me when it doesn\u2019t happen.'
+  }
+];
+
+const week2Matches = [
+  {
+    home: 'The Boonist Monks', away: 'The Legion of Bouz', spread: -3.0,
+    pick: 'The Boonist Monks',
+    blurb: 'The first 2-0 vs. 2-0 showdown of the season, and it\u2019s a beauty. The Monks have 313.1 total points and a 69.9-point blowout still fresh on the highlight reel. The Legion counters with Amon-Ra St. Brown\u2019s 34.7-point eruption and McCaffrey\u2019s steady floor. Lamar vs. the Voltron receivers. Monks by a nose \u2014 momentum is a real thing until it isn\u2019t.'
+  },
+  {
+    home: 'Kittler on the Roof', away: 'Rasheeing the Scene', spread: -2.5,
+    pick: 'Kittler on the Roof',
+    blurb: 'The defending champ\u2019s consistency versus Rasheeing\u2019s boom-or-bust RB cavalry. Jonathan Taylor\u2019s 28.5 and Nacua\u2019s 23.6 are repeatable ceilings; Allen being absent from the top five this week introduces a question mark for Rasheeing. Give the edge to the roster with fewer moving parts. Kittler grinds it out.',
+    tag: 'Lock'
+  },
+  {
+    home: 'Burden of Etienne-y Woody', away: 'Ghastly Grayskull Gang', spread: -0.5,
+    pick: 'Ghastly Grayskull Gang',
+    blurb: 'The 0-2 Bowl \u2014 someone has to win, and neither team is making a convincing case for why it should be them. Burden put up 98.8 last week; Ghastly managed 109.78. This is less a prediction and more a coin flip with extra steps. Give the slight edge to Ghastly\u2019s younger core and hope C.J. Stroud remembers how to play quarterback.',
+    tag: 'Stay Away'
+  },
+  {
+    home: 'Noble FFT', away: 'Chudders Football Team', spread: -5.0,
+    pick: 'Noble FFT',
+    blurb: 'Noble\u2019s talent is too deep to stay at 0-2 for long, and Chudders\u2019 rebuilding roster shouldn\u2019t be the team that extends the drought. Bijan Robinson\u2019s 18.3 and Jordan Love\u2019s 20.88 represent a floor that Chudders can\u2019t match yet. The preseason number two gets its first W here, and the group chat collectively exhales.'
+  },
+  {
+    home: 'MHJTIME', away: 'General Ken-obi', spread: 1.5,
+    pick: 'MHJTIME',
+    blurb: 'The marquee matchup of Week 3. MHJTIME has 325.4 total points \u2014 more than anyone \u2014 but a 1-1 record. General Ken-obi is 2-0 and ranked third. On paper, Ken-obi is the safer pick. But Nabers (34.2), Chase (30.5), and the highest-scoring week in the league\u2019s young season don\u2019t care about paper. Taking the upset. MHJTIME\u2019s firepower is too hot to fade.',
+    tag: 'Upset Watch'
+  },
+  {
+    home: 'Father Time', away: 'Sleeping Giants', spread: -2.0,
+    pick: 'Father Time',
+    blurb: 'Two desperate teams with more talent than their records suggest. Father Time has 285.7 points at 0-2 \u2014 more than the 2-0 Rasheeing the Scene. The Sleeping Giants just lost their franchise player (Henry) from the top-five-scorers list and watched Jalen Hurts put up 10.54. The statistical correction starts here. Father Time gets the first win and silences approximately nobody in the chat.'
+  }
+];
+
+const underdogLock = 'MHJTIME +1.5';
+const stayAway = 'Burden vs Ghastly (the 0-2 Bowl)';
+const teaser = 'Boonist Monks +1.0 / Noble FFT -1.0 \u2014 the league\u2019s hottest team and the most overdue bounce-back candidate, teased into near-gimmes';
+
+// ═══════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════
+
+function spreadToProb(spread){
+  return 1 / (1 + Math.pow(10, -spread / 7));
+}
+
+function renderWeek2(){
+  // --- Essay ---
+  const paragraphs = week2Essay.split('\n\n');
+  let essayHtml = '<h3>The Column</h3>';
+  paragraphs.forEach(p => { essayHtml += `<p>${p}</p>`; });
+  document.getElementById('week2-essay').innerHTML = essayHtml;
+  document.getElementById('week2-essay').classList.add('fade-in');
+
+  // --- Power Rankings ---
+  let rankHtml = '<h3>Power Rankings</h3>';
+  week2Rankings.forEach(r => {
+    const diff = r.prevRank - r.rank;
+    let moveClass, moveText;
+    if(diff > 0){ moveClass = 'up'; moveText = '\u2191' + diff; }
+    else if(diff < 0){ moveClass = 'down'; moveText = '\u2193' + Math.abs(diff); }
+    else{ moveClass = 'steady'; moveText = '\u2014'; }
+    rankHtml += `<div class="ranking-entry">
+      <div class="rank-badge">#${r.rank}</div>
+      <div class="rank-movement ${moveClass}">${moveText}</div>
+      <div>
+        <h4>${r.teamName} <span class="rank-record">(${r.record})</span></h4>
+        <p>${r.blurb}</p>
+      </div>
+    </div>`;
+  });
+  document.getElementById('week2-rankings').innerHTML = rankHtml;
+  document.getElementById('week2-rankings').classList.add('fade-in');
+
+  // --- Confessionals ---
+  let confHtml = '<h3>Confessionals</h3>';
+  week2Confessionals.forEach(c => {
+    confHtml += `<div class="confessional">
+      <h4>${c.teamName}</h4>
+      <p>\u201C${c.text}\u201D</p>
+    </div>`;
+  });
+  document.getElementById('week2-confessionals').innerHTML = confHtml;
+  document.getElementById('week2-confessionals').classList.add('fade-in');
+
+  // --- Mailbag ---
+  let mbHtml = '<h3>Mailbag</h3>';
+  week2Mailbag.forEach(item => {
+    mbHtml += `<div class="mailbag-item"><h4>${item.q}</h4><p>${item.a}</p></div>`;
+  });
+  document.getElementById('week2-mailbag').innerHTML = mbHtml;
+  document.getElementById('week2-mailbag').classList.add('fade-in');
+
+  // --- Bits & Segments ---
+  let bitsHtml = '<h3>Bits &amp; Segments</h3>';
+  week2Bits.forEach(b => {
+    bitsHtml += `<div class="bit-item"><strong>${b.title}:</strong> ${b.text}</div>`;
+  });
+  document.getElementById('week2-bits').innerHTML = bitsHtml;
+  document.getElementById('week2-bits').classList.add('fade-in');
+
+  // --- Week 3 Matchup Picks ---
+  let picksHtml = '<h3>Week 3 Picks</h3><div class="matchup-grid">';
+  week2Matches.forEach(match => {
+    const homeProb = spreadToProb(match.spread);
+    const awayProb = 1 - homeProb;
+    const homePct = (homeProb * 100).toFixed(0);
+    const awayPct = (awayProb * 100).toFixed(0);
+    const tag = match.tag || '';
+    let tagHtml = '';
+    if(tag){
+      const t = tag.toLowerCase();
+      if(t.includes('lock')) tagHtml = ' <span class="tag-badge tag-lock">Lock</span>';
+      else if(t.includes('upset')) tagHtml = ' <span class="tag-badge tag-upset">Upset Watch</span>';
+      else if(t.includes('stay')) tagHtml = ' <span class="tag-badge tag-stay">Stay Away</span>';
+    }
+    picksHtml += `
+      <div class="matchup-card" data-home-pct="${homePct}" data-away-pct="${awayPct}">
+        <div class="matchup-header">
+          <span class="team-name home">${match.home}</span>
+          <span class="vs-pill">${match.spread > 0 ? '+' : ''}${match.spread}</span>
+          <span class="team-name">${match.away}</span>
+        </div>
+        <div class="win-prob-bar">
+          <div class="home-bar" style="width:0%"></div>
+          <div class="away-bar" style="width:0%"></div>
+        </div>
+        <div class="prob-labels">
+          <span>${homePct}%</span>
+          <span>Win probability</span>
+          <span>${awayPct}%</span>
+        </div>
+        <p class="matchup-blurb">${match.blurb}</p>
+        <div class="matchup-pick">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Pick: ${match.pick}${tagHtml}
+        </div>
+      </div>`;
+  });
+  picksHtml += '</div>';
+
+  // Special picks strip
+  picksHtml += `
+    <div class="special-picks">
+      <div class="special-pick">
+        <div class="sp-label" style="color:var(--good)">Underdog Lock</div>
+        <div class="sp-value">${underdogLock}</div>
+      </div>
+      <div class="special-pick">
+        <div class="sp-label" style="color:var(--warn)">Stay Away</div>
+        <div class="sp-value">${stayAway}</div>
+      </div>
+      <div class="special-pick">
+        <div class="sp-label" style="color:var(--accent)">Teaser of the Week</div>
+        <div class="sp-value">${teaser}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('week2-picks').innerHTML = picksHtml;
+  document.getElementById('week2-picks').classList.add('fade-in');
+}
+
+renderWeek2();
+
+// ═══════════════════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════════════════
+
+// Scroll animations
+const scrollObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      const homeBar = e.target.querySelector('.home-bar');
+      const awayBar = e.target.querySelector('.away-bar');
+      if(homeBar && awayBar){
+        requestAnimationFrame(() => {
+          homeBar.style.width = e.target.dataset.homePct + '%';
+          awayBar.style.width = e.target.dataset.awayPct + '%';
+        });
+      }
+      scrollObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in, .matchup-card').forEach(el => scrollObserver.observe(el));
+
+// Active nav link highlighting
+const navAnchors = document.querySelectorAll('#nav nav a');
+const navSpy = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting && e.target.id){
+      navAnchors.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+document.querySelectorAll('section[id]').forEach(el => navSpy.observe(el));
+
+// Back to top
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('show', window.scrollY > 500);
+}, { passive: true });
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// Mobile hamburger menu
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.querySelector('#nav nav').classList.toggle('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded', document.querySelector('#nav nav').classList.contains('open'));
+});
+document.querySelectorAll('#nav nav a').forEach(a => {
+  a.addEventListener('click', () => document.querySelector('#nav nav').classList.remove('open'));
+});
+
+// Scroll progress bar
+(function(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
+
+applyConfig();
+</script>
+</body>
+</html>

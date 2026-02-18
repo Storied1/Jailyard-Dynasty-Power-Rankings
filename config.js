@@ -56,6 +56,7 @@ const LEAGUE_CONFIG = {
     { label: 'Draft',         href: 'draft.html'      },
     { label: 'Trades',        href: 'trades.html'     },
     { label: 'Week 1',        href: 'week1.html'      },
+    { label: 'Week 2',        href: 'week2.html'      },
   ],
 
   // ─── Fun facts (scrolling ticker on index.html) ────────────
