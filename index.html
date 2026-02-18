@@ -455,7 +455,7 @@
     <a href="trades.html">Trades</a>
     <a href="week1.html">Week 1</a>
   </div>
-  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
     <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
 </nav>
@@ -757,6 +757,7 @@ window.addEventListener('scroll', () => {
 // --- Mobile hamburger menu ---
 document.getElementById('hamburger').addEventListener('click', () => {
   document.getElementById('navLinks').classList.toggle('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded', document.getElementById('navLinks').classList.contains('open'));
 });
 document.querySelectorAll('#navLinks a').forEach(a => {
   a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));

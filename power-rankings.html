@@ -206,7 +206,7 @@ footer{padding:3rem 1rem;text-align:center;color:var(--muted);font-size:.85rem;b
 <!-- Nav -->
 <nav class="topnav">
   <div class="brand"><a href="index.html">The Jailyard</a></div>
-  <button class="hamburger" id="hamburger" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   <div class="right" id="navLinks">
     <a href="history.html" class="nav-link">League Bible</a>
     <a href="season.html" class="nav-link">Season Hub</a>
@@ -1083,6 +1083,7 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 // Hamburger
 document.getElementById('hamburger').addEventListener('click', () => {
   document.getElementById('navLinks').classList.toggle('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded', document.getElementById('navLinks').classList.contains('open'));
 });
 
 // Scroll progress

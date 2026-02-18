@@ -228,7 +228,7 @@
     <div class="right">
       <button class="theme-toggle" id="toggleTheme">Toggle Theme</button>
     </div>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
       <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
   </div>
@@ -639,6 +639,7 @@ btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth'
 // Mobile hamburger menu
 document.getElementById('hamburger').addEventListener('click', () => {
   document.querySelector('#nav nav').classList.toggle('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded', document.querySelector('#nav nav').classList.contains('open'));
 });
 document.querySelectorAll('#nav nav a').forEach(a => {
   a.addEventListener('click', () => document.querySelector('#nav nav').classList.remove('open'));

@@ -210,7 +210,7 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
     </nav>
     <div style="display:flex;align-items:center;gap:.5rem;">
       <button class="toggle-dark" id="toggleDark">Toggle theme</button>
-      <button class="hamburger" id="hamburger" aria-label="Menu">
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
         <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
     </div>
@@ -1106,6 +1106,7 @@ league.teams.forEach(team => {
 // --- Hamburger menu toggle ---
 document.getElementById('hamburger').addEventListener('click', () => {
   document.getElementById('toc').classList.toggle('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded', document.getElementById('toc').classList.contains('open'));
 });
 document.querySelectorAll('#toc a').forEach(link => {
   link.addEventListener('click', () => document.getElementById('toc').classList.remove('open'));

@@ -251,7 +251,7 @@ footer a{color:var(--accent);}
     <a href="week1.html" class="nav-link">Week 1</a>
     <button class="theme-btn" onclick="document.documentElement.classList.toggle('light')">Theme</button>
   </div>
-  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
     <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
 </nav>
@@ -1463,6 +1463,7 @@ loadData();
 // --- Mobile hamburger menu ---
 document.getElementById('hamburger').addEventListener('click', () => {
   document.querySelector('.topnav .right').classList.toggle('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded', document.querySelector('.topnav .right').classList.contains('open'));
 });
 
 // --- Scroll progress bar ---
