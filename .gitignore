@@ -18,3 +18,13 @@ Jailyard-Dynasty-Power-Rankings-main/
 **/media_picks.json
 **/preview.html
 **/.resolve_state.json
+
+# OS system files
+.DS_Store
+Thumbs.db
+
+# Security — never commit
+*.key
+*.pem
+*.ppk
+*.env.local
