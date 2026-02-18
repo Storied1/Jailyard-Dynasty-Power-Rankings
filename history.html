@@ -230,11 +230,11 @@ a{color:inherit;text-decoration:none;}
 </section>
 
 <div class="tab-bar" id="tabBar">
-  <div class="tab-inner" id="tabInner">
-    <button class="tab active" data-tab="records">Records Book</button>
-    <button class="tab" data-tab="franchises">Franchises</button>
-    <button class="tab" data-tab="h2h">Head to Head</button>
-    <button class="tab" data-tab="elo">Elo Ratings</button>
+  <div class="tab-inner" id="tabInner" role="tablist">
+    <button class="tab active" data-tab="records" role="tab" aria-selected="true" aria-controls="p-records">Records Book</button>
+    <button class="tab" data-tab="franchises" role="tab" aria-selected="false" aria-controls="p-franchises">Franchises</button>
+    <button class="tab" data-tab="h2h" role="tab" aria-selected="false" aria-controls="p-h2h">Head to Head</button>
+    <button class="tab" data-tab="elo" role="tab" aria-selected="false" aria-controls="p-elo">Elo Ratings</button>
     <div class="tab-indicator" id="tabInd"></div>
   </div>
 </div>
@@ -247,10 +247,10 @@ a{color:inherit;text-decoration:none;}
     <code>python3 fetch_sleeper.py --all</code>
     <p style="margin-top:.6rem">This fetches all seasons and computes cross-season analytics.</p>
   </div>
-  <section id="p-records" class="panel" hidden></section>
-  <section id="p-franchises" class="panel" hidden></section>
-  <section id="p-h2h" class="panel" hidden></section>
-  <section id="p-elo" class="panel" hidden></section>
+  <section id="p-records" class="panel" role="tabpanel" hidden></section>
+  <section id="p-franchises" class="panel" role="tabpanel" hidden></section>
+  <section id="p-h2h" class="panel" role="tabpanel" hidden></section>
+  <section id="p-elo" class="panel" role="tabpanel" hidden></section>
 </main>
 
 <footer style="padding:3rem 1.5rem;text-align:center;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border);">
@@ -363,8 +363,11 @@ function moveIndicator(){
 document.querySelectorAll('.tab').forEach(btn=>{
   btn.addEventListener('click',()=>{
     if(btn.dataset.tab===activeTab)return;
-    document.querySelector('.tab.active').classList.remove('active');
+    const prev=document.querySelector('.tab.active');
+    prev.classList.remove('active');
+    prev.setAttribute('aria-selected','false');
     btn.classList.add('active');
+    btn.setAttribute('aria-selected','true');
     activeTab=btn.dataset.tab;
     moveIndicator();
     showPanel(activeTab);

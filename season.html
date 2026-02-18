@@ -815,15 +815,15 @@ function renderWeek(week) {
     <h2 class="section-title">${seasonLabel}</h2>
     <p class="section-sub">${isChamp ? 'The championship round. One game to decide it all.' : isP ? 'Playoff round — win or go home.' : 'Weekly recap, awards, power rankings, and top performers.'}</p>
 
-    <div class="view-tabs" id="viewTabs">
-      <button class="vtab active" data-v="recap">Recap</button>
-      <button class="vtab" data-v="matchups">Matchups</button>
-      <button class="vtab" data-v="standings">Standings</button>
-      <button class="vtab" data-v="stats">Fun Stats</button>
-      ${txns.length ? '<button class="vtab" data-v="transactions">Transactions</button>' : ''}
+    <div class="view-tabs" id="viewTabs" role="tablist">
+      <button class="vtab active" data-v="recap" role="tab" aria-selected="true">Recap</button>
+      <button class="vtab" data-v="matchups" role="tab" aria-selected="false">Matchups</button>
+      <button class="vtab" data-v="standings" role="tab" aria-selected="false">Standings</button>
+      <button class="vtab" data-v="stats" role="tab" aria-selected="false">Fun Stats</button>
+      ${txns.length ? '<button class="vtab" data-v="transactions" role="tab" aria-selected="false">Transactions</button>' : ''}
     </div>
 
-    <div id="viewContent"></div>
+    <div id="viewContent" role="tabpanel"></div>
   `;
 
   document.getElementById('content').innerHTML = html;
@@ -831,8 +831,11 @@ function renderWeek(week) {
   // Tab switching
   document.querySelectorAll('.vtab').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelector('.vtab.active').classList.remove('active');
+      const prev=document.querySelector('.vtab.active');
+      prev.classList.remove('active');
+      prev.setAttribute('aria-selected','false');
       btn.classList.add('active');
+      btn.setAttribute('aria-selected','true');
       currentView = btn.dataset.v;
       renderView(week, currentView);
     });
