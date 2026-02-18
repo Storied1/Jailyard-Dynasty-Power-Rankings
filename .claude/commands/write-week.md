@@ -123,12 +123,36 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
 - Compute spreads based on power rankings and recent performance
 - Include at least one "Upset Watch" tag
 
+### 7. Media Slots (optional)
+```json
+{
+  "media_slots": [
+    {
+      "slot_id": "week3-essay-opener",
+      "intent": "The chaos of this week's upsets",
+      "source": {
+        "type": "giphy",
+        "search_query": "everything is chaos",
+        "fallback_query": "shocked reaction"
+      },
+      "alt_text": "Shocked reaction to this week's upsets"
+    }
+  ]
+}
+```
+- Include `{{media:slot_id}}` anchor tokens in the essay or blurb text where the media should appear
+- The renderer will replace these tokens with embedded GIF/video elements
+- Each slot needs a unique `slot_id`, a natural-language `intent`, and a `source` with Giphy search terms
+- Keep to 2-4 media slots max per column — they should punctuate, not overwhelm
+- Great placement: after a dramatic paragraph, after the essay opener hook, between ranking tiers
+
 ## Critical Rules
 1. **NEVER hallucinate stats.** Every score, record, ranking, and player performance must come from the week data JSON.
 2. **NEVER confuse team names or owners.** Cross-reference team-profiles.json.
 3. **ALWAYS write in second person** ("you") when addressing teams in blurbs.
 4. **ALWAYS end sections with kicker lines.**
 5. Check your output against the Voice Bible's Anti-Patterns list before saving.
+6. **Media tokens** — if you include `media_slots`, ensure every `{{media:*}}` token in text has a matching slot in the array.
 
 ## Output Format
 
