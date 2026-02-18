@@ -335,7 +335,7 @@ function displayName(f){return(f&&(f.team_name||f.username))||'Unknown';}
 window.addEventListener('scroll',()=>{
   document.getElementById('topnav').classList.toggle('scrolled',scrollY>60);
   document.getElementById('btt').classList.toggle('show',scrollY>400);
-});
+},{passive:true});
 
 /* ==============================
    TOOLTIP HELPERS
@@ -965,11 +965,6 @@ document.getElementById('hamburger').addEventListener('click', () => {
 });
 document.querySelectorAll('#navLinks a').forEach(a => {
   a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
-});
-
-// --- Nav scroll effect ---
-window.addEventListener('scroll', () => {
-  document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
 });
 
 // --- Scroll progress bar ---
