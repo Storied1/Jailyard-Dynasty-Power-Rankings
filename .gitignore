@@ -9,3 +9,11 @@ __pycache__/
 
 # Duplicate zip extraction artifacts
 Jailyard-Dynasty-Power-Rankings-main/
+
+# API keys — never commit
+.env
+
+# Generated media pipeline artifacts
+**/media_cache.json
+**/media_picks.json
+**/preview.html
