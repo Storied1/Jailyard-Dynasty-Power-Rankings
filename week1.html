@@ -21,7 +21,8 @@
     --good: #16a34a;
     --bad: #dc2626;
     --warn: #ca8a04;
-    --font-main: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --maxw: 900px;
     --h1: clamp(2.4rem, 5vw, 4rem);
     --h2: clamp(1.8rem, 4vw, 3rem);
     --h3: clamp(1.3rem, 3vw, 2rem);
@@ -42,7 +43,7 @@
     margin: 0;
     background: var(--bg);
     color: var(--fg);
-    font-family: var(--font-main);
+    font-family: var(--font);
   }
   *, *::before, *::after{ box-sizing: border-box; }
   a{ color: var(--accent2); text-decoration: none; }

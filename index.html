@@ -28,17 +28,20 @@
     --accent2: #ec4899;
     --card: rgba(255,255,255,0.03);
     --border: rgba(255,255,255,0.07);
+    --glass: rgba(255,255,255,0.05);
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --maxw: 1200px;
     --good: #16a34a;
     --bad: #dc2626;
     --warn: #ca8a04;
     --glow-1: rgba(139,92,246,0.15);
     --glow-2: rgba(236,72,153,0.12);
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font);
     color-scheme: dark;
   }
   html.light{
     --bg:#f7f9fc; --fg:#111418; --muted:#5f6672;
-    --card:rgba(0,0,0,0.03); --glow-1:rgba(139,92,246,0.08); --glow-2:rgba(236,72,153,0.06);
+    --card:rgba(0,0,0,0.03); --glass:rgba(0,0,0,0.04); --glow-1:rgba(139,92,246,0.08); --glow-2:rgba(236,72,153,0.06);
     --border:rgba(0,0,0,0.08); color-scheme:light;
   }
   *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
