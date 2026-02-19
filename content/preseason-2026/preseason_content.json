@@ -4,11 +4,11 @@
     "type": "preseason",
     "generated_by": "write-preseason agent"
   },
-  "essay": "The 2026 offseason hit The Jailyard like a freight train nobody ordered.\n\n{{media:preseason-2026-essay-opener}}\n\nThree blockbuster trades, two retirements, and a rookie draft class that has the group chat divided into warring factions. Welcome to the most chaotic preseason in Jailyard history.\n\n{{media:preseason-2026-mid-essay}}\n\nIf last season taught us anything, it's that preseason rankings are suggestions written in pencil. The football gods use a Sharpie.",
+  "essay": "The 2026 offseason hit The Jailyard like a freight train nobody ordered.\n\n{{media:preseason-2026-essay-opener}}\n\nThree blockbuster trades, two retirements, and a rookie draft class that has the group chat divided into warring factions. Welcome to the most chaotic preseason in Jailyard history.\n\nKittler on the Roof defends a title won on the backs of Joe Burrow and Puka Nacua, but the rest of the league isn\u2019t sitting still. General Ken\u2011obi reloaded at quarterback. MHJTIME finally addressed the running back problem that\u2019s haunted them for two years. The Boonist Monks went full scorched earth, trading Tyreek Hill for a haul of picks that had the group chat typing in all caps for forty-five minutes straight.\n\n{{media:preseason-2026-mid-essay}}\n\nChudders Football Team is the story nobody saw coming: two years of tanking, a mountain of draft capital, and suddenly a roster that looks like it was assembled by a kid with unlimited Madden trade override. Ghastly Grayskull Gang finally found a receiver room that doesn\u2019t make you squint. And somewhere in the middle, Rasheeing the Scene is still doing Rasheeing the Scene things \u2014 scoring 180 one week, 90 the next, and blaming the schedule both times.\n\nIf last season taught us anything, it\u2019s that preseason rankings are suggestions written in pencil. The football gods use a Sharpie.",
   "media_slots": [
     {
       "slot_id": "preseason-2026-essay-opener",
-      "intent": "The offseason was pure chaos — blockbuster trades and retirements nobody saw coming",
+      "intent": "The offseason was pure chaos \u2014 blockbuster trades and retirements nobody saw coming",
       "source": {
         "type": "giphy",
         "search_query": "this is fine everything chaos",
@@ -28,13 +28,98 @@
     },
     {
       "slot_id": "preseason-2026-hero",
-      "intent": "Cinematic league intro — custom Veo3 clip",
+      "intent": "Cinematic league intro \u2014 custom Veo3 clip",
       "source": {
         "type": "custom",
         "local_path": "media/custom/preseason-2026-hero.mp4"
       },
-      "alt_text": "The Jailyard 2026 — A new dynasty begins"
+      "alt_text": "The Jailyard 2026 \u2014 A new dynasty begins"
     }
   ],
-  "rankings": []
+  "rankings": [
+    {
+      "rank": 1,
+      "team_name": "General Ken\u2011obi",
+      "owner": "bLaker24",
+      "tier": "Contender",
+      "blurb": "You won it all in 2023, made the semis in 2024, and your roster still reads like the All-Pro team. Four startable QBs, a three-headed RB monster, and a WR corps that could headline Coachella. We\u2019re all just hoping you oversleep on waiver day."
+    },
+    {
+      "rank": 2,
+      "team_name": "Noble FFT",
+      "owner": "kevobucks",
+      "tier": "Frisky",
+      "blurb": "Bijan and Breece at running back make you the consensus No. 2. Caleb Williams arrives with more hype than any prospect in a decade. Fix tight end and you could be lifting the trophy. A disappointing 7th-place finish last year masks how loaded you are."
+    },
+    {
+      "rank": 3,
+      "team_name": "MHJTIME",
+      "owner": "rango_",
+      "tier": "Contender",
+      "blurb": "Last in 2023, semifinalist in 2024, top three in 2025. The best WR trio on the planet \u2014 Chase, Nabers, and MHJ \u2014 plus a top-five tight end make you lethal. The only thing between you and a title is your RB room, and the group chat won\u2019t let you forget it."
+    },
+    {
+      "rank": 4,
+      "team_name": "Ghastly Grayskull Gang",
+      "owner": "GrayskullXX",
+      "tier": "Frisky",
+      "blurb": "From the consolation bracket to a top-four power rank in two years. Stroud and Bowers form a terrifying core. Your mountain of picks finally turned into real players \u2014 use what\u2019s left to buy a proper WR1 and crash the finals."
+    },
+    {
+      "rank": 5,
+      "team_name": "Rasheeing the Scene",
+      "owner": "ToreroGaucho",
+      "tier": "Frisky",
+      "blurb": "Fifth and fifth the last two years. Josh Allen is an MVP, your RB room is a Ferrari, and your WRs are barely road legal. Without a true WR1 you\u2019re stuck in the frisky middle, scoring 180 one week and 90 the next."
+    },
+    {
+      "rank": 6,
+      "team_name": "Kittler on the Roof",
+      "owner": "bchodos",
+      "tier": "Contender",
+      "blurb": "Back-to-back finals appearances capped with a 2024 title. The core is aging and thin behind the starters, so the models drop you to sixth. Your consistency will keep you in the hunt, but the crown sits heavier every year."
+    },
+    {
+      "rank": 7,
+      "team_name": "Chudders Football Team",
+      "owner": "Chudders",
+      "tier": "Trust the Process",
+      "blurb": "Two years of tanking and a league-high haul of first-round picks. Build around Gibbs and Herbert, and next year\u2019s ranking could look very different. The WR room is barren, but the war chest is unmatched."
+    },
+    {
+      "rank": 8,
+      "team_name": "Burden of Etienne\u2011y Woody",
+      "owner": "kharlo w",
+      "tier": "Fraud",
+      "blurb": "Justin Jefferson can only carry you so far. Solidly in the middle of the pack the last two years. QB and RB roulette drag you down. Use those extra firsts to find a real quarterback before Jefferson starts asking for a trade."
+    },
+    {
+      "rank": 9,
+      "team_name": "The Legion of Bouz",
+      "owner": "KidBouzie",
+      "tier": "Frisky",
+      "blurb": "You took home the 2022 trophy but have slid since. Mahomes and your WR trio still scare everyone, but your RBs and TEs are aging fast. A rebuild may be closer than you think \u2014 the chat already has a countdown."
+    },
+    {
+      "rank": 10,
+      "team_name": "Father Time",
+      "owner": "Redrumsregrub",
+      "tier": "Frisky",
+      "blurb": "Semi-finalist in 2024 but the slide is real. Your rookie WR room props up the value \u2014 Brian Thomas and Ladd McConkey are studs \u2014 but the backfield and tight ends put a hard cap on your upside."
+    },
+    {
+      "rank": 11,
+      "team_name": "Sleeping Giants",
+      "owner": "zbcowan",
+      "tier": "Frisky",
+      "blurb": "You rode Hurts and a deep backfield to the 2024 final but fell short. Time is catching up to your receivers \u2014 Kupp, Allen, and Evans aren\u2019t getting younger. Sell a vet and pivot before the window slams shut."
+    },
+    {
+      "rank": 12,
+      "team_name": "The Boonist Monks",
+      "owner": "GauchoTrain",
+      "tier": "Frisky",
+      "blurb": "Third place in 2023, eighth in 2024, and now you sit at the bottom. Lamar, Tyreek, and Kelce can still win you weeks, but all three are approaching age cliffs. Your lack of picks makes retooling tricky. One last run or full teardown \u2014 the clock is ticking."
+    }
+  ]
 }
