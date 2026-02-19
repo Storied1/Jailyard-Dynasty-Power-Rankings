@@ -284,9 +284,30 @@ var preseasonRankings = [
   { rank:12, teamName:"The Boonist Monks", owner:"GauchoTrain", tier:"Frisky", blurb:"Third place in 2023, eighth in 2024, and now you sit at the bottom. Lamar, Tyreek, and Kelce can still win you weeks, but all three are approaching age cliffs. Your lack of picks makes retooling tricky. One last run or full teardown \u2014 the clock is ticking." }
 ];
 
-// Media cache: will be populated by resolve_media.py
-// For now, tokens are silently dropped if no cache exists
-var mediaCache = {};
+// Media cache: populated by resolve_media.py --resolve
+var mediaCache = {
+  "preseason-2026-essay-opener": {
+    "giphy_id": "NTur7XlVDUdqM",
+    "mp4_url": "https://media1.giphy.com/media/v1.Y2lkPWNiODYxNzZlNTV3ZjhkaGN4NjJwN3ExaWJ1M3MzcDc4YnZmdmUwY2Y1NzB0NWswaSZlcD12MV9naWZzX2dpZklkJmN0PWc/NTur7XlVDUdqM/giphy.mp4",
+    "poster_url": "https://media1.giphy.com/media/v1.Y2lkPWNiODYxNzZlNTV3ZjhkaGN4NjJwN3ExaWJ1M3MzcDc4YnZmdmUwY2Y1NzB0NWswaSZlcD12MV9naWZzX2dpZklkJmN0PWc/NTur7XlVDUdqM/giphy_s.gif",
+    "width": 480,
+    "height": 270,
+    "alt_text": "This is fine meme - the 2026 offseason in one GIF"
+  },
+  "preseason-2026-mid-essay": {
+    "giphy_id": "L6v2D2KlfO43qU87dY",
+    "mp4_url": "https://media4.giphy.com/media/v1.Y2lkPWNiODYxNzZldmY4N2d4Nm5qOGNtY3JhbDNpZ3J4dHRtdzllcDY5dWk0Ym93ang3bCZlcD12MV9naWZzX2dpZklkJmN0PWc/L6v2D2KlfO43qU87dY/giphy.mp4",
+    "poster_url": "https://media4.giphy.com/media/v1.Y2lkPWNiODYxNzZldmY4N2d4Nm5qOGNtY3JhbDNpZ3J4dHRtdzllcDY5dWk0Ym93ang3bCZlcD12MV9naWZzX2dpZklkJmN0PWc/L6v2D2KlfO43qU87dY/giphy_s.gif",
+    "width": 600,
+    "height": 600,
+    "alt_text": "Group chat arguing reaction"
+  },
+  "preseason-2026-hero": {
+    "type": "custom",
+    "local_path": "media/custom/preseason-2026-hero.mp4",
+    "alt_text": "The Jailyard 2026 — A new dynasty begins"
+  }
+};
 
 // ═══════════════════════════════════════════════════════════
 // RENDER
