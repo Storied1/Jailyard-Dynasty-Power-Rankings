@@ -21,6 +21,10 @@ Read these files in order:
 - [ ] Team names and owner handles are correct (cross-ref team-profiles.json)
 - [ ] No invented/hallucinated statistics or game results
 - [ ] Next week's matchup picks reference correct matchups from the data
+- [ ] H2H records cited in content match `matchups[].h2h` in week data (if present)
+- [ ] Elo ratings cited match `standings[].current_elo` in week data (if present)
+- [ ] All-time records cited match `historical_context` in week data (if present)
+- [ ] Franchise stats (championships, all-time record) are accurate to week data (if present)
 
 ### 2. Voice Consistency (Score 1-10, target: 7+)
 Count how many of the 12 Voice Bible patterns appear:
@@ -52,6 +56,7 @@ Score: [patterns found] / 12
 - [ ] Callbacks to preseason predictions reference actual preseason essay text
 - [ ] Running narratives are consistent (a team described as "rising" shouldn't suddenly be "collapsing" without data to support it)
 - [ ] The picks ledger (if applicable) reflects actual previous results
+- [ ] Elo narrative direction matches actual elo_change sign (don't say "rising" if Elo dropped)
 
 ### 5. Tone
 - [ ] Roasts are playful, never cruel or personal

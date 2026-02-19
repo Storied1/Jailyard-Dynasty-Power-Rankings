@@ -40,6 +40,15 @@ def load_team_profiles():
     return None
 
 
+def load_history_data():
+    """Load league history for H2H, Elo, and franchise stats."""
+    path = DATA_DIR / "league_history.json"
+    if path.exists():
+        with open(path) as f:
+            return json.load(f)
+    return None
+
+
 def build_roster_lookup(data):
     """Build roster_id -> team info lookup from roster_map."""
     lookup = {}
@@ -55,7 +64,7 @@ def build_roster_lookup(data):
     return lookup
 
 
-def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=None):
+def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=None, history_data=None):
     """
     Extract all AI-ready data for a single week.
 
@@ -91,6 +100,15 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
 
     # Next week data (for upcoming matchup preview)
     next_week_data = weeks[week_idx + 1] if week_idx + 1 < len(weeks) else None
+
+    # Build owner_id lookup for history cross-referencing
+    owner_id_map = {}  # owner_id -> roster_id
+    rid_to_owner = {}  # roster_id -> owner_id
+    for rid, info in roster_lookup.items():
+        oid = info.get("owner_id", "")
+        if oid:
+            owner_id_map[oid] = rid
+            rid_to_owner[rid] = oid
 
     # --- Matchups ---
     matchups = []
@@ -140,6 +158,27 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
                 )
             ),
         }
+
+        # Inject H2H history if available
+        if history_data:
+            oid1 = rid_to_owner.get(t1["roster_id"], "")
+            oid2 = rid_to_owner.get(t2["roster_id"], "")
+            h2h = history_data.get("h2h", {})
+            h2h_key = f"{oid1}|{oid2}"
+            h2h_entry = h2h.get(h2h_key)
+            if h2h_entry:
+                last_game = h2h_entry["games"][-1] if h2h_entry["games"] else None
+                matchup_entry["h2h"] = {
+                    "team1_wins": h2h_entry["wins"],
+                    "team2_wins": h2h_entry["losses"],
+                    "total_games": h2h_entry["wins"] + h2h_entry["losses"],
+                    "last_meeting": {
+                        "season": last_game["season"],
+                        "week": last_game["week"],
+                        "score": f"{last_game['pts']}-{last_game['opp_pts']}",
+                    } if last_game else None,
+                }
+
         matchups.append(matchup_entry)
 
     # Sort matchups by closest margin first (for narrative interest)
@@ -161,7 +200,7 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
         # Compute streak from previous weeks
         streak = compute_streak(data, week_num, rid, roster_lookup)
 
-        standings.append({
+        standing_entry = {
             "rank": current_rank,
             "prev_rank": prev_rank,
             "movement": movement,
@@ -175,7 +214,37 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
             "power_score": s["power_score"],
             "week_points": s["week_points"],
             "streak": streak,
-        })
+        }
+
+        # Inject Elo + franchise stats if history data available
+        if history_data:
+            oid = rid_to_owner.get(rid, "")
+            elo_current = history_data.get("elo_current", {})
+            franchise_stats = history_data.get("franchise_stats", {})
+            elo_history = history_data.get("elo_history", {})
+
+            if oid in elo_current:
+                standing_entry["current_elo"] = elo_current[oid]
+
+            fstats = franchise_stats.get(oid)
+            if fstats:
+                standing_entry["peak_elo"] = fstats.get("peak_elo")
+                at = fstats.get("all_time", {})
+                standing_entry["all_time_record"] = f"{at.get('wins', 0)}-{at.get('losses', 0)}"
+                standing_entry["championships"] = fstats.get("championships", 0)
+                standing_entry["best_win_streak"] = fstats.get("best_win_streak", 0)
+
+            # Compute elo_change for this week
+            elo_change = None
+            if oid in elo_history:
+                entries = [e for e in elo_history[oid] if e["season"] == data["season"]]
+                this_elo = next((e["elo"] for e in entries if e["week"] == week_num), None)
+                prev_elo = next((e["elo"] for e in entries if e["week"] == week_num - 1), None)
+                if this_elo is not None and prev_elo is not None:
+                    elo_change = round(this_elo - prev_elo, 1)
+            standing_entry["elo_change"] = elo_change
+
+        standings.append(standing_entry)
 
     standings.sort(key=lambda x: x["rank"])
 
@@ -288,7 +357,8 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
                 "roast": team["roast"],
                 "needs": team["needs"],
                 "weeklyPoints_projected": team["weeklyPoints"],
-                "essay_snippet": team["preseasonEssay"][:200] + "...",
+                "essay_snippet": team["preseasonEssay"][:500] + "...",
+                "ranks": team.get("ranks", {}),
             }
 
     # --- Previous Weeks Summary (for callbacks) ---
@@ -319,6 +389,10 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
         "previous_weeks_summary": prev_summaries,
         "team_profiles_summary": profiles_summary,
     }
+
+    # Inject historical context (all-time records) if available
+    if history_data:
+        result["historical_context"] = history_data.get("records")
 
     return result
 
@@ -374,6 +448,7 @@ def main():
     data = load_season_data(season)
     roster_lookup = build_roster_lookup(data)
     team_profiles = load_team_profiles()
+    history_data = load_history_data()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -394,7 +469,7 @@ def main():
     prev_weeks = []
     for week_num in sorted(weeks_to_extract):
         print(f"Extracting Week {week_num}...")
-        result = extract_week(data, week_num, roster_lookup, team_profiles, prev_weeks)
+        result = extract_week(data, week_num, roster_lookup, team_profiles, prev_weeks, history_data)
         if result is None:
             continue
 

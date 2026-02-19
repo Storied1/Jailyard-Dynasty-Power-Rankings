@@ -10,6 +10,15 @@ Before writing, you MUST read these files:
 3. `content/weeks/week${WEEK}_data.json` — this week's data (matchups, standings, awards)
 4. Previous week content summaries (from the week data's `previous_weeks_summary`)
 
+### Enriched Fields in Week Data
+
+The `week_data.json` now includes enriched historical fields (when `data/league_history.json` is present):
+- `matchups[].h2h` — head-to-head history between the two teams (`team1_wins`, `team2_wins`, `total_games`, `last_meeting`)
+- `standings[].current_elo`, `peak_elo`, `elo_change` — Elo ratings and weekly movement
+- `standings[].all_time_record`, `championships`, `best_win_streak` — franchise history
+- `historical_context` — league all-time records (highest score, biggest blowout, longest streaks, etc.)
+- `team_profiles_summary[].ranks` — positional rankings (QB, RB, WR, TE, etc.)
+
 If `content/weeks/week${WEEK}_data.json` doesn't exist yet, run:
 ```bash
 python scripts/extract_week_data.py --week ${WEEK} --pretty
@@ -53,6 +62,10 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
 - Include one callback to preseason essay or previous week per blurb
 - Vary the tone: some celebratory, some eulogies, some roasts
 - NO two consecutive blurbs should start with the same word or structure
+- When a matchup has `h2h` data, consider citing the series record ("you're 5-2 all-time against them")
+- For teams with `elo_change > 20` or `< -20`, consider noting the Elo movement ("your Elo jumped 25 points this week")
+- When a team approaches or breaks a record from `historical_context`, reference it
+- **Hard rule**: Only cite H2H/Elo/records if the numeric fields exist in week_data.json. If a field is missing or null, do not invent it.
 
 ### 3. Confessionals (3-4 teams)
 ```json
@@ -96,7 +109,7 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
   ]
 }
 ```
-- Rotate from: Great Call, Parent Corner, Nobody Believes in Us, Overheard in the Chat, Ewing Theory Alert, Is X the New Y?, Things I Believe But Can't Prove
+- Rotate from: Great Call, Parent Corner, Nobody Believes in Us, Overheard in the Chat, Ewing Theory Alert, Is X the New Y?, Things I Believe But Can't Prove, IDP Monster of the Week, Preseason Prediction Tracker, Luck Index
 - 1-3 sentences each
 
 ### 6. Matchup Picks (6 games for NEXT week)
@@ -122,6 +135,7 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
 - Use next week's matchups from the data
 - Compute spreads based on power rankings and recent performance
 - Include at least one "Upset Watch" tag
+- If next week's matchup teams have prior H2H history in the data, cite the series record in pick blurbs
 
 ### 7. Media Slots (optional)
 ```json
