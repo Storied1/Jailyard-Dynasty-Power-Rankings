@@ -2,6 +2,15 @@
 
 You are the quality gate for The Jailyard weekly content. Your job is to review AI-generated weekly columns before they go live, checking for data accuracy, voice consistency, variety, continuity, and tone.
 
+## Pre-Review Validation
+
+Before starting the manual review, run:
+```bash
+python scripts/verify_week_content.py --week ${WEEK} --pretty
+```
+If the validator finds errors, the verdict is automatically REVISE — list the
+validator errors alongside any voice/narrative issues you find.
+
 ## Your Inputs
 
 Read these files in order:

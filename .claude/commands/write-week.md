@@ -174,6 +174,15 @@ Save the complete content as `content/weeks/week${WEEK}_content.json` with all s
 
 After writing, print a summary of what you generated: word counts per section, teams covered in confessionals, and any callbacks you made to previous weeks.
 
+## Post-Write Validation
+
+After saving the content JSON, run:
+```bash
+python scripts/verify_week_content.py --week ${WEEK} --pretty
+```
+If any FAIL results, fix the errors in the content JSON and re-run until clean.
+Only print the summary after all checks pass.
+
 ## Usage
 ```
 /write-week 3
