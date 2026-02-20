@@ -255,6 +255,44 @@ def cmd_more(content_path: Path, slot_id: str) -> None:
     print("\nRe-run --preview to update preview.html with these new candidates.")
 
 
+def cmd_candidates_json(content_path: Path, slot_id: str) -> None:
+    """Return JSON candidates for a slot to stdout. For agent/script use."""
+    api_key = get_api_key()
+    slots = load_content_slots(content_path)
+
+    slot = next((s for s in slots if s["slot_id"] == slot_id), None)
+    if not slot:
+        print(json.dumps({"error": f"Slot '{slot_id}' not found"}))
+        sys.exit(1)
+
+    if slot.get("source", {}).get("type") == "custom":
+        print(json.dumps({"error": f"Slot '{slot_id}' is custom, no Giphy candidates"}))
+        sys.exit(1)
+
+    source = slot["source"]
+    primary_query = source.get("search_query", "")
+    fallback_query = source.get("fallback_query", "")
+
+    results = search_giphy(primary_query, api_key, limit=CANDIDATES_PER_SLOT)
+    if len(results) < CANDIDATES_PER_SLOT and fallback_query:
+        seen = {r["giphy_id"] for r in results}
+        extra = search_giphy(fallback_query, api_key, limit=CANDIDATES_PER_SLOT)
+        for r in extra:
+            if r["giphy_id"] not in seen:
+                results.append(r)
+                seen.add(r["giphy_id"])
+
+    output = {
+        "slot_id": slot_id,
+        "intent": slot.get("intent", ""),
+        "alt_text": slot.get("alt_text", ""),
+        "primary_query": primary_query,
+        "fallback_query": fallback_query,
+        "candidates": results[:CANDIDATES_PER_SLOT],
+    }
+    print(json.dumps(output, indent=2))
+
+
 def cmd_pick(content_path: Path, slot_id: str, giphy_id: str) -> None:
     """Write a pick to media_picks.json. Never touches content JSON."""
     slots = load_content_slots(content_path)
@@ -480,6 +518,10 @@ def main():
     group.add_argument("--more", metavar="SLOT_ID", help="Fetch next 3 candidates for a specific slot")
     group.add_argument("--pick", nargs=2, metavar=("SLOT_ID", "GIPHY_ID"), help="Set a Giphy pick for a slot")
     group.add_argument("--resolve", action="store_true", help="Produce final media_cache.json")
+    group.add_argument(
+        "--candidates-json", metavar="SLOT_ID",
+        help="Return JSON candidates for a slot to stdout (for agent use)"
+    )
 
     args = parser.parse_args()
 
@@ -495,6 +537,8 @@ def main():
         cmd_pick(args.content, args.pick[0], args.pick[1])
     elif args.resolve:
         cmd_resolve(args.content)
+    elif args.candidates_json:
+        cmd_candidates_json(args.content, args.candidates_json)
 
 
 if __name__ == "__main__":
