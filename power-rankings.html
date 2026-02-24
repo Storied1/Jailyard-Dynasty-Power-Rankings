@@ -32,19 +32,6 @@ a:hover{text-decoration:underline;}
 /* --- Scroll progress --- */
 .scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
 
-/* --- Nav --- */
-.topnav{position:sticky;top:0;z-index:100;padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(11,13,16,0.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
-.topnav .brand{font-weight:700;letter-spacing:.04em;font-size:1rem;}
-.topnav .brand a{color:var(--fg);text-decoration:none;}
-.topnav .right{display:flex;align-items:center;gap:.5rem;}
-.topnav a.nav-link{color:var(--muted);font-size:.85rem;padding:.3rem .6rem;border-radius:999px;transition:color .2s,background .2s;text-decoration:none;}
-.topnav a.nav-link:hover,.topnav a.nav-link.active{color:var(--fg);background:rgba(255,255,255,0.05);}
-.theme-btn{cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:999px;padding:.3rem .65rem;font-size:.82rem;color:var(--muted);font-family:inherit;transition:color .2s,background .2s;}
-.theme-btn:hover{color:var(--fg);background:rgba(255,255,255,0.08);}
-.topnav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
-.topnav .hamburger:hover,.topnav .hamburger:focus-visible{color:var(--fg);}
-.topnav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
-
 /* --- Hero --- */
 .hero{position:relative;padding:5rem 1.5rem 3rem;text-align:center;overflow:hidden;}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(139,92,246,0.12),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(236,72,153,0.1),transparent 60%);pointer-events:none;}
@@ -186,10 +173,6 @@ footer{padding:3rem 1rem;text-align:center;color:var(--muted);font-size:.85rem;b
 
 /* --- Responsive --- */
 @media(max-width:768px){
-  .topnav .right{display:none;width:100%;flex-direction:column;gap:0;padding-top:.5rem;}
-  .topnav .right.open{display:flex;}
-  .topnav .hamburger{display:block;}
-  .topnav{flex-wrap:wrap;}
   .hero{padding:3.5rem 1rem 2rem;}
   .hero h1{font-size:clamp(1.6rem,7vw,2.4rem);}
   .damage-grid,.preview-grid{grid-template-columns:1fr;}
@@ -204,18 +187,7 @@ footer{padding:3rem 1rem;text-align:center;color:var(--muted);font-size:.85rem;b
 <div class="scroll-progress" id="scrollProgress"></div>
 
 <!-- Nav -->
-<nav class="topnav">
-  <div class="brand"><a href="index.html">The Jailyard</a></div>
-  <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-  <div class="right" id="navLinks">
-    <a href="history.html" class="nav-link">League Bible</a>
-    <a href="season.html" class="nav-link">Season Hub</a>
-    <a href="preseason.html" class="nav-link">Preseason</a>
-    <a href="power-rankings.html" class="nav-link active">Power Rankings</a>
-    <a href="week1.html" class="nav-link">Week 1</a>
-    <button class="theme-btn" id="themeToggle">Theme</button>
-  </div>
-</nav>
+<div id="site-nav"></div>
 
 <!-- Hero -->
 <header class="hero">
@@ -240,6 +212,7 @@ footer{padding:3rem 1rem;text-align:center;color:var(--muted);font-size:.85rem;b
   &copy; 2022&ndash;2026 The Jailyard Dynasty League. Built with love and bad decisions.
 </footer>
 
+<script src="config.js"></script>
 <script>
 // ============================================================
 //  CONSTANTS
@@ -1075,17 +1048,6 @@ function initUI(){
 // ============================================================
 //  EVENT HANDLERS
 // ============================================================
-// Theme toggle
-document.getElementById('themeToggle').addEventListener('click', () => {
-  document.documentElement.classList.toggle('light');
-});
-
-// Hamburger
-document.getElementById('hamburger').addEventListener('click', () => {
-  document.getElementById('navLinks').classList.toggle('open');
-  document.getElementById('hamburger').setAttribute('aria-expanded', document.getElementById('navLinks').classList.contains('open'));
-});
-
 // Scroll progress
 window.addEventListener('scroll', () => {
   const h = document.documentElement.scrollHeight - window.innerHeight;
@@ -1103,6 +1065,7 @@ btt.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}
 //  INIT
 // ============================================================
 loadData();
+applyConfig();
 </script>
 </body>
 </html>

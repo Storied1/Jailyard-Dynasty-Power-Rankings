@@ -45,18 +45,6 @@
 
   .scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
 
-  /* --- Nav --- */
-  .topnav{position:fixed;top:0;left:0;right:0;z-index:100;padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(11,13,16,0.6);backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s,background .3s;}
-  .topnav.scrolled{border-bottom-color:var(--border);background:rgba(11,13,16,0.85);}
-  .topnav .brand{font-weight:700;letter-spacing:.04em;font-size:1rem;}
-  .topnav .links{display:flex;gap:.6rem;}
-  .topnav .links a{padding:.35rem .75rem;border-radius:999px;font-size:.88rem;color:var(--muted);transition:color .2s,background .2s;}
-  .topnav .links a:hover,.topnav .links a.active{color:var(--fg);background:rgba(255,255,255,0.06);}
-  .topnav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
-  .topnav .hamburger:hover{color:var(--fg);}
-  .topnav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
-  .topnav .right{display:flex;align-items:center;gap:.5rem;}
-  .theme-toggle{cursor:pointer;padding:.35rem .7rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.05);font-size:.82rem;color:var(--muted);}
 
   /* --- Hero --- */
   .hero{position:relative;min-height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden;}
@@ -131,10 +119,6 @@
   .back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
 
   @media(max-width:700px){
-    .topnav .hamburger{display:block;}
-    .topnav .links{display:none;position:absolute;top:100%;right:0;left:0;flex-direction:column;padding:.5rem 1rem 1rem;background:rgba(11,13,16,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
-    .topnav .links.open{display:flex;}
-    .topnav .links a{padding:.65rem .75rem;}
     .trade-sides{grid-template-columns:1fr;gap:.5rem;}
     .trade-arrow{transform:rotate(90deg);justify-self:center;}
     .timeline{padding-left:2rem;}
@@ -153,23 +137,7 @@
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
-<nav class="topnav" id="topnav">
-  <a href="index.html" class="brand" data-league-name>The Jailyard</a>
-  <div class="links" id="navLinks">
-    <a href="history.html">League Bible</a>
-    <a href="season.html">Season Hub</a>
-    <a href="preseason.html">Rankings</a>
-    <a href="draft.html">Draft Recap</a>
-    <a href="trades.html" class="active">Trades</a>
-    <a href="week1.html">Week 1</a>
-  </div>
-  <div class="right">
-    <button class="theme-toggle" id="toggleTheme">Theme</button>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
-  </div>
-</nav>
+<div id="site-nav"></div>
 
 <section class="hero" id="top">
   <div class="hero-glow g1"></div>
@@ -542,6 +510,7 @@ renderStats();
 renderTimeline();
 drawActivityChart();
 window.addEventListener('resize', drawActivityChart);
+window.addEventListener('themechange', drawActivityChart);
 
 // --- Scroll animations ---
 const scrollObs = new IntersectionObserver(entries => {
@@ -551,25 +520,6 @@ const scrollObs = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.trade-item, .trade-stat').forEach(el => scrollObs.observe(el));
 
-// --- Nav scroll effect ---
-window.addEventListener('scroll', () => {
-  document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
-}, {passive: true});
-
-// --- Theme toggle ---
-document.getElementById('toggleTheme').addEventListener('click', () => {
-  document.documentElement.classList.toggle('light');
-  drawActivityChart();
-});
-
-// --- Hamburger ---
-document.getElementById('hamburger').addEventListener('click', () => {
-  document.getElementById('navLinks').classList.toggle('open');
-  document.getElementById('hamburger').setAttribute('aria-expanded', document.getElementById('navLinks').classList.contains('open'));
-});
-document.querySelectorAll('#navLinks a').forEach(a => {
-  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
-});
 
 // --- Scroll progress ---
 (function(){

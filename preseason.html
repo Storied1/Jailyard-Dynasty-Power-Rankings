@@ -54,12 +54,6 @@ header.hero{position:relative;min-height:100vh;display:grid;place-items:center;o
 .hero__subtitle{margin:1rem auto 2.5rem;color:var(--muted);max-width:720px;}
 .hero__cta{display:inline-flex;align-items:center;column-gap:.6rem;background:var(--accent);color:white;padding:.9rem 1.3rem;border-radius:999px;font-weight:600;transition:transform .15s ease;}
 .hero__cta:hover{transform:translateY(-2px);}
-#nav{position:sticky;top:0;backdrop-filter:blur(8px);background:rgba(11,13,16,0.65);border-bottom:1px solid var(--border);z-index:999;}
-#nav .inner{max-width:var(--maxw);margin:0 auto;padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;}
-#nav .brand{font-weight:700;letter-spacing:.03em;}
-#nav nav{display:flex;gap:.9rem;flex-wrap:wrap;}
-#nav a{color:var(--muted);font-size:.95rem;padding:.3rem .55rem;border-radius:6px;}
-#nav a.active{color:var(--fg);background:rgba(255,255,255,0.05);}
 .container{max-width:var(--maxw);width:100%;margin:0 auto;padding:4rem 1rem;}
 .section-title{font-size:var(--h2);margin-bottom:.6rem;}
 .section-sub{color:var(--muted);max-width:760px;margin-bottom:3rem;}
@@ -84,7 +78,6 @@ details summary{cursor:pointer;user-select:none;font-weight:600;margin:.9rem 0;}
 details[open] summary{color:var(--accent2);}  
 .section-awards .award{display:grid;grid-template-columns:90px 1fr;gap:1rem;padding:1rem;border:1px dashed rgba(255,255,255,0.08);border-radius:12px;margin-bottom:1rem;}  
 .award .tag{display:inline-block;font-weight:700;font-size:2.2rem;text-align:center;padding:.8rem .2rem;background:linear-gradient(120deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent;}  
-.toggle-dark{cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:999px;padding:.35rem .7rem;font-size:.9rem;}  
 .light{--bg:#f7f9fc;--fg:#111418;--muted:#5f6672;--card:rgba(255,255,255,0.9);--glass:rgba(255,255,255,0.85);--border:rgba(0,0,0,0.06);color-scheme:light;}
 @view-transition{navigation:auto;}::view-transition-old(root){animation:vt-out .2s ease-in;}::view-transition-new(root){animation:vt-in .3s ease-out;}@keyframes vt-out{to{opacity:0;filter:blur(2px);}}@keyframes vt-in{from{opacity:0;filter:blur(2px);}}
 .fade-up{opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.17,.67,.24,1);}  
@@ -99,14 +92,6 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
 .master-table th{text-align:left;color:var(--muted);font-weight:600;cursor:pointer;position:sticky;top:0;background:rgba(0,0,0,0.05);}  
 .master-table th.sort-asc::after{content:' ▲';color:var(--accent2);}  
 .master-table th.sort-desc::after{content:' ▼';color:var(--accent2);}  
-/* --- Hamburger menu (mobile) --- */
-.hamburger{display:none;background:none;border:none;cursor:pointer;padding:.3rem;color:var(--fg);}
-.hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
-@media(max-width:600px){
-  #nav nav{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(11,13,16,0.95);backdrop-filter:blur(12px);flex-direction:column;padding:1rem;border-bottom:1px solid var(--border);gap:.4rem;}
-  #nav nav.open{display:flex;}
-  .hamburger{display:block;}
-}
 
 /* --- Search bar --- */
 .search-wrap{position:relative;max-width:460px;margin-bottom:2rem;}
@@ -197,25 +182,7 @@ footer{margin-top:6rem;padding:3rem 1rem;text-align:center;color:var(--muted);}
   </div>
 </header>
 
-<div id="nav">
-  <div class="inner">
-    <div class="brand"><a href="index.html" style="color:var(--fg);text-decoration:none;" data-league-name>The Jailyard</a></div>
-    <nav id="toc">
-      <a href="history.html">League Bible</a>
-      <a href="season.html">Season Hub</a>
-      <a href="power-rankings.html">Power Rankings</a>
-      <a href="draft.html">Draft</a>
-      <a href="trades.html">Trades</a>
-      <a href="week1.html">Week 1</a>
-    </nav>
-    <div style="display:flex;align-items:center;gap:.5rem;">
-      <button class="toggle-dark" id="toggleDark">Toggle theme</button>
-      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
+<div id="site-nav"></div>
 
 <main>
   <section class="container" id="methodology">
@@ -1037,10 +1004,8 @@ function buildCharts(){
   drawTitles(document.getElementById('titlesChart'));
 }
 window.addEventListener('resize', buildCharts);
+window.addEventListener('themechange', buildCharts);
 buildCharts();
-
-// Theme toggle
-document.getElementById('toggleDark').addEventListener('click', () => document.documentElement.classList.toggle('light'));
 
 // Scroll animations
 const observer = new IntersectionObserver(entries => {
@@ -1104,13 +1069,6 @@ league.teams.forEach(team => {
 });
 
 // --- Hamburger menu toggle ---
-document.getElementById('hamburger').addEventListener('click', () => {
-  document.getElementById('toc').classList.toggle('open');
-  document.getElementById('hamburger').setAttribute('aria-expanded', document.getElementById('toc').classList.contains('open'));
-});
-document.querySelectorAll('#toc a').forEach(link => {
-  link.addEventListener('click', () => document.getElementById('toc').classList.remove('open'));
-});
 
 // --- Back-to-top button ---
 const btt = document.getElementById('backToTop');

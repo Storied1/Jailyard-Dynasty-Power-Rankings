@@ -69,17 +69,6 @@
   .hero__subtitle{ font-size: 1.1rem; color: var(--muted); max-width: 700px; margin: 1rem auto 2rem; line-height: 1.5; }
   .hero__cta{ display: inline-flex; gap:.6rem; align-items: center; padding: .75rem 1.4rem; background: var(--accent); color:#fff; border-radius:999px; font-weight:600; transition: transform .2s ease; text-decoration:none; }
   .hero__cta:hover{ transform: translateY(-3px); text-decoration:none; }
-  #nav{ position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); background: rgba(11,13,16,.7); border-bottom:1px solid var(--border); }
-  #nav .inner{ max-width:1200px; margin:0 auto; padding:.7rem 1rem; display:flex; justify-content: space-between; align-items:center; }
-  #nav .brand{ font-weight:700; letter-spacing:.05em; }
-  #nav nav{ display:flex; gap:.8rem; flex-wrap: wrap; }
-  #nav nav a{ padding:.35rem .6rem; border-radius:6px; font-size:.9rem; color: var(--muted); }
-  #nav nav a.active{ background:rgba(255,255,255,0.05); color: var(--fg); }
-  #nav .right{ display:flex; gap:.8rem; align-items:center; }
-  .theme-toggle{ cursor:pointer; padding:.4rem .8rem; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,0.05); font-size:.9rem; color:var(--muted); }
-  #nav .hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;color:var(--muted);transition:color .2s;}
-  #nav .hamburger:hover,#nav .hamburger:focus-visible{color:var(--fg);}
-  #nav .hamburger svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;}
   .container{ max-width: 900px; margin:0 auto; padding:4rem 1rem; position:relative; }
   .section-title{ font-size: var(--h2); margin-bottom:.7rem; }
   .section-sub{ color: var(--muted); font-size:1rem; margin-bottom:2.5rem; max-width:700px; line-height:1.6; }
@@ -166,10 +155,6 @@
   }
 
   @media (max-width:768px){
-    #nav .hamburger{display:block;}
-    #nav nav{display:none;width:100%;}
-    #nav nav.open{display:flex;flex-direction:column;gap:0;}
-    #nav .inner{flex-wrap:wrap;}
     .ranking-entry{ flex-wrap:wrap; }
     .container{ padding:2rem 1rem; }
   }
@@ -197,21 +182,7 @@
   </div>
 </header>
 
-<div id="nav">
-  <div class="inner">
-    <span class="brand">The Jailyard</span>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
-      <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-    </button>
-    <nav>
-      <a href="#essay">Essay</a>
-      <a href="#rankings">Rankings</a>
-    </nav>
-    <div class="right">
-      <button class="theme-toggle" id="toggleTheme">Light</button>
-    </div>
-  </div>
-</div>
+<div id="site-nav"></div>
 
 <main class="container">
 
@@ -250,9 +221,6 @@
 // ═══════════════════════════════════════════════════════════
 // THEME TOGGLE
 // ═══════════════════════════════════════════════════════════
-document.getElementById('toggleTheme').addEventListener('click', function(){
-  document.documentElement.classList.toggle('light');
-});
 
 // ═══════════════════════════════════════════════════════════
 // PARALLAX
@@ -408,18 +376,6 @@ window.addEventListener('scroll', function() {
 }, { passive: true });
 btt.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-// Mobile hamburger menu
-document.getElementById('hamburger').addEventListener('click', function() {
-  document.querySelector('#nav nav').classList.toggle('open');
-  document.getElementById('hamburger').setAttribute('aria-expanded',
-    document.querySelector('#nav nav').classList.contains('open'));
-});
-document.querySelectorAll('#nav nav a').forEach(function(a) {
-  a.addEventListener('click', function() {
-    document.querySelector('#nav nav').classList.remove('open');
-    document.getElementById('hamburger').setAttribute('aria-expanded', 'false');
-  });
-});
 
 // Scroll progress bar
 window.addEventListener('scroll', function() {
