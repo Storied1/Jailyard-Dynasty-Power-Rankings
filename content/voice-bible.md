@@ -60,6 +60,24 @@ The WhatsApp/league group chat isn't a setting — it's a living, breathing char
 
 **Pattern:** The chat always has an opinion, usually sarcastic. It remembers past failures and never lets anyone forget.
 
+#### Real Chat Integration (When Available)
+When chat context data is available (`weekN_chat_context.json`), Pattern 5 transforms from invented to authentic:
+
+**Before (invented):**
+> "The chat jokes about you icing trade offers"
+
+**After (real quotes):**
+> "As Sacko put it at 2am after your Week 2 loss: 'bro really traded Addison for THIS.' The chat had 47 messages in the next 10 minutes."
+
+**Rules for real chat integration:**
+- Use VERBATIM quotes — the rawness is the comedy. Don't clean up grammar or spelling.
+- Include the setup when it matters: "When Brent Boone asked 'who's selling at the deadline?', Sacko immediately replied 'your mom's roster.'"
+- Use conversational blocks (multiple messages) when the back-and-forth IS the joke
+- Attribution should feel natural: "at 2am", "right after the game", "in the middle of the draft"
+- The group chat is still a CHARACTER — it reacts, remembers, never forgets. Real quotes just make it more vivid.
+- When real quotes aren't available for a section, invented references are fine. Mix naturally.
+- Reference the "Overheard in the Chat" bit section for the best real quotes each week.
+
 ### Pattern 6: The Rhetorical Question as Transition
 Never use "Moving on to..." or "Let's talk about..." — instead, ask a question that both summarizes the previous point and opens the next one.
 

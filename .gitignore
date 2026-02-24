@@ -32,3 +32,6 @@ Thumbs.db
 *.ppk
 *.env.local
 .claude/settings.local.json
+
+# Raw WhatsApp export and parsed data (privacy — top-level only)
+/chat/

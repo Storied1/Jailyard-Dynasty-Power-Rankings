@@ -17,6 +17,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WEEKS_DIR = REPO_ROOT / "content" / "weeks"
+CHAT_DIR = REPO_ROOT / "content" / "chat"
 
 
 # ---------------------------------------------------------------------------
@@ -933,10 +934,134 @@ def run_tier2(content: dict, data: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Tier 3: Chat context validation
+# ---------------------------------------------------------------------------
+
+def collect_all_text(content: dict) -> str:
+    """Gather all text from essay, blurbs, bits, mailbag, confessionals."""
+    texts = []
+    texts.append(content.get("essay", ""))
+    for r in content.get("rankings", []):
+        texts.append(r.get("blurb", ""))
+    for c in content.get("confessionals", []):
+        texts.append(c.get("text", ""))
+    for m in content.get("mailbag", []):
+        texts.append(m.get("question", ""))
+        texts.append(m.get("answer", ""))
+    for b in content.get("bits", []):
+        texts.append(b.get("text", ""))
+    for p in content.get("picks", []):
+        texts.append(p.get("blurb", ""))
+    return "\n".join(texts)
+
+
+def check_chat_quote_presence(content: dict, chat_context: dict, errors: list, warnings: list):
+    """If high-relevancy chat quotes exist, at least one should appear verbatim."""
+    high_items = [item for item in chat_context.get("high_relevancy", []) if item.get("score", 0) >= 8]
+    if not high_items:
+        return  # No high-relevancy quotes to check
+
+    all_text = collect_all_text(content)
+
+    found = False
+    for item in high_items:
+        for msg in item.get("block", []):
+            quote = msg.get("text", "")
+            if len(quote) > 10 and quote in all_text:
+                found = True
+                break
+        if found:
+            break
+
+    if not found:
+        warnings.append(
+            f"Chat context has {len(high_items)} high-relevancy items (score>=8) "
+            f"but no verbatim quotes found in content text"
+        )
+
+
+def check_chat_temporal_cutoff(content: dict, chat_context: dict, errors: list, warnings: list):
+    """Verify no message timestamps in content exceed temporal_cutoff_utc."""
+    cutoff = chat_context.get("meta", {}).get("temporal_cutoff_utc", "")
+    if not cutoff:
+        return
+
+    all_text = collect_all_text(content)
+
+    # Look for ISO-style timestamps in content text (unlikely but check)
+    iso_pattern = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+    for m in iso_pattern.finditer(all_text):
+        timestamp = m.group(0)
+        if timestamp > cutoff:
+            errors.append(
+                f"Content references timestamp '{timestamp}' which is "
+                f"after temporal cutoff '{cutoff}'"
+            )
+
+
+def check_chat_name_consistency(content: dict, name_map: dict, errors: list, warnings: list):
+    """WhatsApp names used in content should match name-map.json."""
+    valid_names_lower = set()
+    for wa_name in name_map.keys():
+        valid_names_lower.add(wa_name.lower())
+    for info in name_map.values():
+        for alias in info.get("aliases", []):
+            valid_names_lower.add(alias.lower())
+        valid_names_lower.add(info.get("real_name", "").lower())
+
+    # Scan content for quoted WhatsApp attributions like "As Sacko put it"
+    # or "Brent Boone predicted". Check these names against the valid set.
+    all_text = collect_all_text(content)
+    # Pattern: "As NAME put it" / "NAME predicted" / "NAME said" / "NAME asked"
+    attr_pattern = re.compile(
+        r"(?:As\s+|—\s*|\"?\s*)([A-Z~][A-Za-z~. ]+?)"
+        r"\s+(?:put it|predicted|said|asked|wrote|replied|posted|claimed|argued|insisted)"
+    )
+    for m in attr_pattern.finditer(all_text):
+        name = m.group(1).strip()
+        if name.lower() not in valid_names_lower and len(name.split()) <= 3:
+            warnings.append(
+                f"Chat attribution name '{name}' not found in name-map.json"
+            )
+
+
+def run_tier3(content: dict, week: int) -> dict | None:
+    """Run Tier 3 chat context checks. Returns None if no chat files exist."""
+    chat_context_path = WEEKS_DIR / f"week{week}_chat_context.json"
+    name_map_path = CHAT_DIR / "name-map.json"
+
+    if not chat_context_path.exists():
+        return None  # No chat context — skip tier 3 entirely
+
+    try:
+        chat_context = json.loads(chat_context_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, FileNotFoundError):
+        return None
+
+    errors = []
+    warnings = []
+
+    check_chat_quote_presence(content, chat_context, errors, warnings)
+    check_chat_temporal_cutoff(content, chat_context, errors, warnings)
+
+    if name_map_path.exists():
+        try:
+            name_map = json.loads(name_map_path.read_text(encoding="utf-8"))
+            check_chat_name_consistency(content, name_map, errors, warnings)
+        except (json.JSONDecodeError, FileNotFoundError):
+            pass
+
+    return {
+        "errors": errors,
+        "warnings": warnings,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Output formatting
 # ---------------------------------------------------------------------------
 
-def format_pretty(week: int, tier1: dict, tier2: dict) -> str:
+def format_pretty(week: int, tier1: dict, tier2: dict, tier3: dict | None = None) -> str:
     lines = []
     lines.append(f"WEEK {week} CONTENT VALIDATION")
     lines.append("=" * 40)
@@ -968,13 +1093,33 @@ def format_pretty(week: int, tier1: dict, tier2: dict) -> str:
 
     lines.append("")
 
-    total_errors = len(tier1["errors"]) + t2_errors
+    # Tier 3 (Chat context)
+    t3_errors = 0
+    t3_warnings = 0
+    if tier3 is not None:
+        t3_errors = len(tier3["errors"])
+        t3_warnings = len(tier3["warnings"])
+        if t3_errors == 0 and t3_warnings == 0:
+            lines.append("TIER 3 (Chat Context): ALL CHECKS PASS")
+        else:
+            lines.append("TIER 3 (Chat Context):")
+            for e in tier3["errors"]:
+                lines.append(f"  [FAIL] {e}")
+            for w in tier3["warnings"]:
+                lines.append(f"  [WARN] {w}")
+        lines.append("")
+    else:
+        lines.append("TIER 3 (Chat Context): SKIPPED (no chat context file)")
+        lines.append("")
+
+    total_errors = len(tier1["errors"]) + t2_errors + t3_errors
+    total_warnings = t2_warnings + t3_warnings
     verdict = "PASS" if total_errors == 0 else "FAIL"
     parts = []
     if total_errors:
         parts.append(f"{total_errors} error{'s' if total_errors != 1 else ''}")
-    if t2_warnings:
-        parts.append(f"{t2_warnings} warning{'s' if t2_warnings != 1 else ''}")
+    if total_warnings:
+        parts.append(f"{total_warnings} warning{'s' if total_warnings != 1 else ''}")
     if not parts:
         parts.append("clean")
 
@@ -982,8 +1127,11 @@ def format_pretty(week: int, tier1: dict, tier2: dict) -> str:
     return "\n".join(lines)
 
 
-def format_json(week: int, tier1: dict, tier2: dict) -> str:
-    total_errors = len(tier1["errors"]) + len(tier2["errors"])
+def format_json(week: int, tier1: dict, tier2: dict, tier3: dict | None = None) -> str:
+    t3_errors = len(tier3["errors"]) if tier3 else 0
+    t3_warnings = len(tier3["warnings"]) if tier3 else 0
+    total_errors = len(tier1["errors"]) + len(tier2["errors"]) + t3_errors
+    total_warnings = len(tier2["warnings"]) + t3_warnings
     result = {
         "week": week,
         "verdict": "PASS" if total_errors == 0 else "FAIL",
@@ -993,9 +1141,11 @@ def format_json(week: int, tier1: dict, tier2: dict) -> str:
             f"{tier1['passed']} of {tier1['passed'] + tier1['failed']} "
             f"structural checks passed. "
             f"{len(tier2['errors'])} content errors, "
-            f"{len(tier2['warnings'])} warnings."
+            f"{total_warnings} warnings."
         ),
     }
+    if tier3 is not None:
+        result["tier3"] = tier3
     return json.dumps(result, indent=2)
 
 
@@ -1030,13 +1180,15 @@ def main():
 
     tier1 = run_tier1(content, data)
     tier2 = run_tier2(content, data)
+    tier3 = run_tier3(content, args.week)
 
     if args.pretty:
-        print(format_pretty(args.week, tier1, tier2))
+        print(format_pretty(args.week, tier1, tier2, tier3))
     else:
-        print(format_json(args.week, tier1, tier2))
+        print(format_json(args.week, tier1, tier2, tier3))
 
-    total_errors = len(tier1["errors"]) + len(tier2["errors"])
+    t3_errors = len(tier3["errors"]) if tier3 else 0
+    total_errors = len(tier1["errors"]) + len(tier2["errors"]) + t3_errors
     sys.exit(1 if total_errors > 0 else 0)
 
 

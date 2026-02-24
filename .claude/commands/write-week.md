@@ -9,6 +9,8 @@ Before writing, you MUST read these files:
 2. `content/team-profiles.json` — preseason context, rosters, essays (for callbacks)
 3. `content/weeks/week${WEEK}_data.json` — this week's data (matchups, standings, awards)
 4. Previous week content summaries (from the week data's `previous_weeks_summary`)
+5. `content/weeks/week${WEEK}_chat_context.json` — real chat context (if available)
+6. `content/chat/league-memory.json` — permanent league culture reference (if available)
 
 ### Enriched Fields in Week Data
 
@@ -23,6 +25,26 @@ If `content/weeks/week${WEEK}_data.json` doesn't exist yet, run:
 ```bash
 python scripts/extract_week_data.py --week ${WEEK} --pretty
 ```
+
+### Chat Context (League Memory System)
+
+If `content/weeks/week${WEEK}_chat_context.json` exists, read it alongside the week data. This file contains real quotes from the league's WhatsApp group chat, scored for relevancy to this week.
+
+**How to use chat context:**
+1. **`high_relevancy` items (score 8+):** USE these verbatim. These are gold — real trash talk, predictions that aged badly, bets resolving. Attribute by WhatsApp name (the writer and readers know who everyone is).
+2. **`medium_relevancy` items (score 5-7.5):** Use selectively. Good for color but not essential.
+3. **`active_arcs_this_week`:** Use to frame the essay narrative. These are multi-week storylines happening in real time.
+4. **`resolved_predictions`:** Perfect for "Overheard in the Chat" bits or mailbag references.
+5. **`sentiment_snapshot`:** Use to inform confessional tone (if someone went silent after a loss, that's material).
+6. **`suggested_callbacks`:** Use 1-2 per column for continuity.
+
+**Conversational blocks:** When a quote has a `block` with multiple messages, use the FULL BLOCK when the setup matters for comedy. Only quote the target message alone when it stands on its own.
+
+**Attribution:** Use WhatsApp names naturally: "As Sacko put it at 2am..." or "The group chat erupted when Brent Boone predicted..." — never use formal attribution like "said [Name]".
+
+**Temporal rule:** NEVER reference events or messages that occurred after `meta.temporal_cutoff_utc`. The column is written from the perspective of someone who has only seen events up to that point.
+
+**If no chat context file exists:** Fall back to invented group chat references as before. The column should work with or without real chat data.
 
 ## What You Produce
 
@@ -167,6 +189,8 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
 4. **ALWAYS end sections with kicker lines.**
 5. Check your output against the Voice Bible's Anti-Patterns list before saving.
 6. **Media tokens** — if you include `media_slots`, ensure every `{{media:*}}` token in text has a matching slot in the array.
+7. **Chat quotes are VERBATIM.** When using quotes from chat context, reproduce them exactly as written. Do not paraphrase or clean up grammar/spelling — the rawness is part of the authenticity.
+8. **Respect temporal cutoff.** Never reference chat messages or events past the `temporal_cutoff_utc` in the chat context file.
 
 ## Output Format
 
