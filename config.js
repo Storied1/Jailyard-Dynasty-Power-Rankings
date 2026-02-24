@@ -59,6 +59,7 @@ const LEAGUE_CONFIG = {
     { label: 'Week 2',        href: 'week2.html'      },
     { label: 'Week 3',        href: 'week3.html'      },
     { label: 'Week 4',        href: 'week4.html'      },
+    { label: 'Week 5',        href: 'week5.html'      },
     { label: '2026 Preview',  href: 'preseason-2026.html' },
   ],
 
