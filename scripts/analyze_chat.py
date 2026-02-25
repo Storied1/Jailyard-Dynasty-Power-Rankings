@@ -45,10 +45,13 @@ except ImportError:
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CHAT_DIR = REPO_ROOT / "content" / "chat"
-PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"
+PARSED_MESSAGES = REPO_ROOT / "chat" / "parsed_messages.json"  # lives in chat/, not content/chat/
 NAME_MAP_PATH = CHAT_DIR / "name-map.json"
 MAP_CACHE_DIR = CHAT_DIR / ".map_cache"
 PERSONAS_DIR = CHAT_DIR / "personas"
+
+FINGERPRINTS_PATH = CHAT_DIR / "fingerprints.json"
+MEDIA_CATALOG_PATH = CHAT_DIR / "media-catalog.json"
 
 # Output files
 OUT_LEAGUE_MEMORY = CHAT_DIR / "league-memory.json"
@@ -135,19 +138,44 @@ def build_identity_context(name_map: dict) -> str:
     return "\n".join(lines)
 
 
-def format_messages_for_prompt(messages: list[dict], limit: int = 0) -> str:
-    """Format messages as a readable chat log for AI consumption."""
+def load_media_catalog() -> dict:
+    """Load media catalog if available. Returns {message_id: item} lookup."""
+    if not MEDIA_CATALOG_PATH.exists():
+        return {}
+    catalog = load_json(MEDIA_CATALOG_PATH)
+    items = catalog.get("items", [])
+    return {item["message_id"]: item for item in items if "message_id" in item}
+
+
+def format_messages_for_prompt(messages: list[dict], limit: int = 0,
+                                media_lookup: dict | None = None) -> str:
+    """Format messages as a readable chat log for AI consumption.
+
+    When media_lookup is provided, inline media descriptions from the catalog
+    instead of raw filenames.
+    """
     lines = []
     for msg in (messages[:limit] if limit else messages):
-        ts = msg.get("timestamp_utc", "????-??-??")
+        ts = msg.get("timestamp_utc", "????-??-??")[:10]  # date only for readability
         sender = msg.get("sender", "Unknown")
         text = msg.get("text", "")
         media = msg.get("media", "")
+        msg_id = msg.get("id")
 
-        if media and not text:
-            text = f"[{media}]"
-        elif media:
-            text = f"{text} [{media}]"
+        if media:
+            # Try to get rich description from catalog
+            catalog_entry = media_lookup.get(msg_id) if media_lookup and msg_id else None
+            if catalog_entry:
+                desc = catalog_entry.get("description", media)
+                media_type = catalog_entry.get("type", "media").upper()
+                media_label = f"[{media_type}: {desc}]"
+            else:
+                media_label = f"[{media}]"
+
+            if not text:
+                text = media_label
+            else:
+                text = f"{text} {media_label}"
 
         lines.append(f"[{ts}] {sender}: {text}")
     return "\n".join(lines)
@@ -354,6 +382,11 @@ def run_map_phase(
     identity_context = build_identity_context(name_map)
     system = MAP_SYSTEM_PROMPT.format(identity_context=identity_context)
 
+    # Load media catalog for rich inline descriptions
+    media_lookup = load_media_catalog()
+    if media_lookup:
+        print(f"  Media catalog loaded: {len(media_lookup)} entries")
+
     months_to_process = (
         {single_month: monthly_chunks[single_month]}
         if single_month
@@ -372,7 +405,7 @@ def run_map_phase(
             continue
 
         print(f"  [{i}/{total}] {month} — processing {len(messages)} messages...")
-        chat_log = format_messages_for_prompt(messages)
+        chat_log = format_messages_for_prompt(messages, media_lookup=media_lookup)
         user_prompt = MAP_USER_TEMPLATE.format(
             month_label=month,
             msg_count=len(messages),
@@ -843,7 +876,7 @@ def reduce_consensus(
 
 # ── REDUCE: Personas ─────────────────────────────────────────────────
 
-REDUCE_PERSONA_SYSTEM = """You are writing the definitive character profile for a member of The Jailyard Dynasty fantasy football league, based on their WhatsApp group chat behavior over 2+ years.
+REDUCE_PERSONA_SYSTEM = """You are writing the definitive deep-dive character profile for a member of The Jailyard Dynasty fantasy football league, based on 2+ years of WhatsApp group chat behavior, quantitative fingerprinting, and media analysis.
 
 {identity_context}
 
@@ -851,53 +884,78 @@ Target member: {target_member}
 {member_identity}
 
 RULES:
-- Write in engaging, specific prose — not generic filler
+- Write in engaging, specific, DEEP prose — not generic filler. This is a psychological profile, not a Wikipedia entry.
 - Every quote and catchphrase must be VERBATIM from source data with timestamps
-- Posting stats should be aggregated from all months
-- Include specific rivalries, alliances, and signature interactions
-- Greatest hits and worst misses need full conversational blocks
+- Reference quantitative fingerprint data naturally (don't just list stats — weave them into observations)
+- Use media/GIF descriptions to characterize humor style and meme taste
+- Include specific rivalries, alliances, and signature interactions with FULL conversational blocks
+- Greatest hits and worst misses need full conversational blocks showing the setup and payoff
 - Be honest but playful — this is a roast, not a resume
+- When citing fingerprint stats, make them vivid: "Posts 0.24 emojis per message — nearly one in four messages gets the treatment" rather than just listing numbers
 
 Respond with ONLY the markdown content (no code fences wrapping it)."""
 
-REDUCE_PERSONA_USER = """Build the definitive profile for {target_member} from these monthly observations.
+REDUCE_PERSONA_USER = """Build the definitive V2 deep-dive profile for {target_member} from these monthly observations.
 
 {persona_data}
 
-Additional context — their key relationships:
+=== QUANTITATIVE FINGERPRINT ===
+{fingerprint_data}
+
+=== MEDIA/GIF ANALYSIS ===
+{media_data}
+
+=== KEY RELATIONSHIPS ===
 {relationship_data}
 
-Additional context — their predictions track record:
+=== PREDICTIONS TRACK RECORD ===
 {prediction_data}
 
-Write the profile as markdown matching this structure:
+Write the profile as markdown matching this V2 structure:
 
 # {display_name} ({real_name})
 **Team:** {team_name} | **Handle:** @{handle}
 
-## Communication Style
-- Posting frequency, peak hours, message length trends
-- Emoji/GIF habits
-- Response patterns (quick responder? lurker? essay writer?)
+## 1. Identity
+- Display name, team, role in the league, tenure
+- One-sentence character summary (the "elevator pitch" for this person's league persona)
 
-## Personality Profile
-- Hot take tendencies (bold/cautious/contrarian)
-- Win behavior vs. loss behavior
-- Trash talk style and effectiveness
+## 2. Communication DNA
+- Writing style (essay writer? One-liner? GIF-first?)
+- Vocabulary fingerprint: distinctive words from fingerprint data, what they reveal
+- Emoji/GIF language: top emojis, what types of GIFs they send, media taste
+- Timing patterns: peak hours, late-night percentage, day-of-week tendencies
+- Message volume trends over time
 
-## Catchphrases & Verbal Tics
-- [verbatim examples with timestamps]
+## 3. Psychological Profile
+- Confidence calibration: How often are they right vs. how confident they sound?
+- Win/loss behavioral signatures: How does posting behavior change after wins vs. losses?
+- Under-pressure tells: What happens when their team is struggling?
+- Personality archetype in group context: The Troll? The Analyst? The Lurker? The Instigator?
 
-## Key Rivalries
-- vs. [opponent]: [nature, key moments with full quote blocks]
+## 4. Fantasy Brain
+- Draft philosophy (from chat evidence)
+- Trade approach: aggressive? passive? shark? marks?
+- Hot take accuracy (cite predictions track record)
+- Strategic strengths and blind spots
 
-## Greatest Hits
-1. [best moment with full conversational block]
-2. ...
+## 5. Social Position
+- Key rivalries with VERBATIM quote evidence (full conversational blocks)
+- Alliances and who they ride for
+- Role in group dynamics: Who do they reply to most? Who replies to them?
+- Conversation-starter vs. reactor ratio
 
-## Worst Misses
-1. [prediction/take that aged badly with quote block]
-2. ..."""
+## 6. Humor Profile
+- Comedy style: dry wit? absurdist? trash talk king? meme lord?
+- GIF/meme taste (cite specific media descriptions from catalog)
+- Top 5 funniest moments as FULL conversational blocks (setup + payoff)
+- Worst misses: jokes that bombed or takes that aged terribly (with receipts)
+
+## 7. Narrative Hooks
+- Active storylines heading into next season
+- Unresolved tensions or bets
+- Callback opportunities for the column writer
+- "Watch for..." notes for future content"""
 
 
 def reduce_personas(
@@ -907,10 +965,31 @@ def reduce_personas(
     relationships: dict | None = None,
     predictions: dict | None = None,
 ):
-    """REDUCE: Generate persona markdown files from monthly observations."""
-    print("\n  Reducing: persona profiles...")
+    """REDUCE: Generate V2 persona markdown files from monthly observations + fingerprints + media."""
+    print("\n  Reducing: persona profiles (V2)...")
     PERSONAS_DIR.mkdir(parents=True, exist_ok=True)
     identity_context = build_identity_context(name_map)
+
+    # Load fingerprints
+    fingerprints = {}
+    if FINGERPRINTS_PATH.exists():
+        fp_data = load_json(FINGERPRINTS_PATH)
+        fingerprints = fp_data.get("members", {})
+        print(f"    Fingerprints loaded: {len(fingerprints)} members")
+    else:
+        print("    WARNING: fingerprints.json not found — profiles will lack quantitative data")
+
+    # Load media catalog indexed by sender
+    media_by_sender = defaultdict(list)
+    if MEDIA_CATALOG_PATH.exists():
+        catalog = load_json(MEDIA_CATALOG_PATH)
+        for item in catalog.get("items", []):
+            sender = item.get("sender", "")
+            if sender:
+                media_by_sender[sender].append(item)
+        print(f"    Media catalog loaded: {sum(len(v) for v in media_by_sender.values())} items")
+    else:
+        print("    WARNING: media-catalog.json not found — profiles will lack media analysis")
 
     # Collect all persona observations by member
     member_data = defaultdict(list)
@@ -936,20 +1015,37 @@ def reduce_personas(
 
     total = len(member_data)
     for i, (member, observations) in enumerate(sorted(member_data.items()), 1):
-        print(f"    [{i}/{total}] Generating profile: {member}")
+        print(f"    [{i}/{total}] Generating V2 profile: {member}")
 
         # Resolve identity
         identity = name_map.get(member, {})
         real_name = identity.get("real_name", "Unknown")
         team_name = identity.get("team_name", "Unknown")
         handle = identity.get("sleeper_handle", "N/A")
-        display_name = member
+        display_name = identity.get("display_name", member)
 
         member_identity = (
             f"Real name: {real_name}\n"
+            f"Display name (for columns): {display_name}\n"
             f"Team: {team_name}\n"
             f"Sleeper handle: @{handle}"
         )
+
+        # Prepare fingerprint context
+        fp = fingerprints.get(member, {})
+        fp_text = json.dumps(fp, ensure_ascii=False, indent=2) if fp else "No fingerprint data available."
+
+        # Prepare media context — sample top items (limit to 50 to fit in prompt)
+        member_media = media_by_sender.get(member, [])
+        # Filter to items with actual descriptions
+        described_media = [m for m in member_media if m.get("description") and m["description"] != "Unable to read file"]
+        media_sample = described_media[:50]
+        media_summary = {
+            "total_media_sent": len(member_media),
+            "described": len(described_media),
+            "sample_items": media_sample,
+        }
+        media_text = json.dumps(media_summary, ensure_ascii=False, indent=2) if member_media else "No media data available."
 
         system = REDUCE_PERSONA_SYSTEM.format(
             identity_context=identity_context,
@@ -960,6 +1056,8 @@ def reduce_personas(
         user = REDUCE_PERSONA_USER.format(
             target_member=member,
             persona_data=json.dumps(observations, ensure_ascii=False, indent=2),
+            fingerprint_data=fp_text,
+            media_data=media_text,
             relationship_data=json.dumps(
                 rel_by_member.get(member, []), ensure_ascii=False, indent=2
             ),

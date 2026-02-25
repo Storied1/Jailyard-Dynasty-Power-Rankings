@@ -25,6 +25,7 @@ CHAT_DIR = REPO_ROOT / "chat"
 CONTENT_CHAT_DIR = REPO_ROOT / "content" / "chat"
 WEEKS_DIR = REPO_ROOT / "content" / "weeks"
 DATA_DIR = REPO_ROOT / "data"
+MEDIA_CATALOG_PATH = CONTENT_CHAT_DIR / "media-catalog.json"
 
 # Standard NFL 2025: Week 1 games Sept 4-8, cutoff Tue Sept 9 06:59:59 UTC
 WEEK1_CUTOFF_2025 = datetime(2025, 9, 9, 6, 59, 59, tzinfo=timezone.utc)
@@ -333,20 +334,34 @@ RELEVANCY_TYPES = [
 def score_message_relevancy(
     msg, msg_idx, messages, week_data, matchup_pairs,
     name_to_roster, roster_to_team, keywords,
-    high_scorer_rid, low_scorer_rid, relationships, verbose=False
+    high_scorer_rid, low_scorer_rid, relationships,
+    media_catalog=None, verbose=False
 ):
     """
     Score a single message for relevancy to this week.
     Returns (score, relevancy_type, why_relevant, suggested_use) or None.
     """
     text = msg.get("text", "")
-    if not text or len(text) < 10:
+    media = msg.get("media")
+    msg_id = msg.get("id")
+
+    # For media messages, also consider the catalog description as searchable text
+    media_desc = ""
+    if media and media_catalog and msg_id:
+        catalog_entry = media_catalog.get(msg_id)
+        if catalog_entry:
+            media_desc = catalog_entry.get("description", "")
+
+    # Allow media-only messages if they have a catalog description
+    if (not text or len(text) < 10) and not media_desc:
         return None
 
     sender = msg.get("sender", "")
     sender_rid, sender_team = resolve_sender(sender, name_to_roster, roster_to_team)
 
-    kw_matches = message_mentions_keywords(text, keywords)
+    # Search both message text and media description for keywords
+    searchable_text = text + (" " + media_desc if media_desc else "")
+    kw_matches = message_mentions_keywords(searchable_text, keywords)
     if not kw_matches and sender_rid is None:
         return None
 
@@ -439,11 +454,20 @@ def score_message_relevancy(
                 why = f"Rivalry matchup: {sender} vs their rival"
                 break
 
+    # Media relevancy boost: described media mentioning players/teams
+    if media_desc:
+        media_kw_matches = message_mentions_keywords(media_desc, keywords)
+        if media_kw_matches:
+            score += 3.0
+            rel_type = rel_type or "media_relevant"
+            why = why or f"{sender} shared media about {media_kw_matches[0].split(':')[1]}"
+            suggested = suggested or "Visual in Power ranking blurb"
+
     # Penalty: very short or unclear messages
-    if len(text) < 20:
+    if len(text) < 20 and not media_desc:
         score -= 1.0
-    # Penalty: media-only messages
-    if text.startswith("<Media omitted>") or text.startswith("image omitted"):
+    # Penalty: media-only messages without catalog description
+    if (text.startswith("<Media omitted>") or text.startswith("image omitted")) and not media_desc:
         score -= 3.0
 
     if score < 2.0:

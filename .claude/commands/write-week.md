@@ -40,7 +40,7 @@ If `content/weeks/week${WEEK}_chat_context.json` exists, read it alongside the w
 
 **Conversational blocks:** When a quote has a `block` with multiple messages, use the FULL BLOCK when the setup matters for comedy. Only quote the target message alone when it stands on its own.
 
-**Attribution:** Use WhatsApp names naturally: "As Sacko put it at 2am..." or "The group chat erupted when Brent Boone predicted..." — never use formal attribution like "said [Name]".
+**Attribution:** Use `display_name` from `content/chat/name-map.json` for prose references. Never use raw WhatsApp names like "Neo" or "~ Harlow" or "Sacko" directly in column text — use the display names (Blake, Harlow, Nate, etc.). WhatsApp names are fine in quoted chat blocks. For natural attribution: "As Nate put it at 2am..." or "The group chat erupted when Brent predicted..." — never use formal attribution like "said [Name]".
 
 **Temporal rule:** NEVER reference events or messages that occurred after `meta.temporal_cutoff_utc`. The column is written from the perspective of someone who has only seen events up to that point.
 

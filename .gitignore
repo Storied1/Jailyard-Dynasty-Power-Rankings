@@ -35,3 +35,12 @@ Thumbs.db
 
 # Raw WhatsApp export and parsed data (privacy — top-level only)
 /chat/
+
+# WhatsApp raw export folder
+WhatsApp Chat*/
+
+# MAP phase intermediate cache (regenerable from chat/parsed_messages.json)
+content/chat/.map_cache/
+
+# Playwright MCP artifacts
+.playwright-mcp/

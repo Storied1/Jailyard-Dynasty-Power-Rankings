@@ -12,6 +12,7 @@ Usage:
 """
 
 import argparse
+import io
 import json
 import re
 import sys
@@ -19,6 +20,11 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
+
+# Force UTF-8 stdout on Windows (avoids cp1252 UnicodeEncodeError)
+if sys.stdout.encoding != "utf-8":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -54,6 +60,24 @@ PLATFORM_HISTORY = (
     "Migrated from iMessage to WhatsApp on 2023-09-07. "
     "League group chat predates this export."
 )
+
+NAME_MAP_PATH = REPO_ROOT / "content" / "chat" / "name-map.json"
+
+
+def build_alias_map() -> dict[str, str]:
+    """Build alias → canonical WhatsApp name map from name-map.json."""
+    if not NAME_MAP_PATH.exists():
+        return {}
+    name_map = json.loads(NAME_MAP_PATH.read_text(encoding="utf-8"))
+    alias_to_canonical = {}
+    for canonical, info in name_map.items():
+        for alias in info.get("aliases", []):
+            alias_to_canonical[alias] = canonical
+        # Also map real_name if it differs from canonical
+        real = info.get("real_name", "")
+        if real and real != canonical:
+            alias_to_canonical[real] = canonical
+    return alias_to_canonical
 
 
 def parse_timestamp(raw: str) -> tuple[datetime, datetime]:
@@ -108,6 +132,8 @@ def parse_chat(input_path: Path) -> dict:
     raw = input_path.read_text(encoding="utf-8")
     lines = raw.split("\n")
 
+    alias_map = build_alias_map()
+
     messages = []
     current_msg = None
 
@@ -125,8 +151,15 @@ def parse_chat(input_path: Path) -> dict:
             sender_match = SENDER_RE.match(rest)
             if sender_match:
                 sender = sender_match.group(1).strip()
+                # Normalize aliases to canonical WhatsApp name
+                sender = alias_map.get(sender, sender)
                 text = sender_match.group(2)
-                is_system = False
+                # WhatsApp uses the group name as "sender" for auto-messages
+                if sender == GROUP_NAME:
+                    is_system = True
+                    sender = None
+                else:
+                    is_system = False
             else:
                 # System message — no sender
                 sender = None
