@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Jailyard 2025 Week 6 Column</title>
+<meta name="view-transition" content="same-origin" />
+<meta name="description" content="The Jailyard 2025 Week 6 column. Kittler falls from first to fifth in one week. MHJTIME&rsquo;s resurrection tour continues. The group chat becomes a trade bazaar. And Legion vs Ken-obi looms. Full recap, power rankings, confessionals, mailbag, and Week 7 picks." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F3C8;</text></svg>">
+
+<style>
+  :root{
+    --bg: #0b0d10;
+    --fg: #e8ecf0;
+    --muted: #7a8194;
+    --accent: #8b5cf6;
+    --accent2: #ec4899;
+    --card: rgba(255,255,255,0.03);
+    --glass: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.08);
+    --good: #16a34a;
+    --bad: #dc2626;
+    --warn: #ca8a04;
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --maxw: 900px;
+    --h1: clamp(2.4rem, 5vw, 4rem);
+    --h2: clamp(1.8rem, 4vw, 3rem);
+    --h3: clamp(1.3rem, 3vw, 2rem);
+    color-scheme: dark;
+  }
+  html.light{
+    --bg:#f7f9fc; --fg:#111418; --muted:#5f6672;
+    --card:rgba(0,0,0,0.03); --glass:rgba(0,0,0,0.04); --border:rgba(0,0,0,0.08);
+    color-scheme:light;
+  }
+  @view-transition{ navigation:auto; }
+  ::view-transition-old(root){ animation:vt-out .2s ease-in; }
+  ::view-transition-new(root){ animation:vt-in .3s ease-out; }
+  @keyframes vt-out{ to{opacity:0;filter:blur(2px);} }
+  @keyframes vt-in{ from{opacity:0;filter:blur(2px);} }
+  html, body{
+    scroll-behavior: smooth;
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+  }
+  *, *::before, *::after{ box-sizing: border-box; }
+  a{ color: var(--accent2); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+  header.hero{
+    position: relative;
+    min-height: 90vh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .hero__layer{
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    background-size: cover;
+    background-position: center;
+  }
+  .layer-stars{ background-image: radial-gradient(circle at 30% 30%, rgba(140,115,255,0.3) 0%, transparent 60%), radial-gradient(circle at 70% 70%, rgba(236,72,153,0.3) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(22,163,74,0.25) 0%, transparent 60%), linear-gradient(#101317, #0e1013); }
+  .layer-grid{ background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 80px 80px; opacity:.5; }
+  .hero__content{ position: relative; z-index: 2; text-align: center; padding: 3rem 1rem; max-width: 900px; }
+  .hero__title{ font-size: var(--h1); line-height: 1.1; margin:0; font-weight: 700; background: linear-gradient(96deg,#fff,#e2d9ff 45%,#fda4af 80%); -webkit-background-clip: text; color: transparent; }
+  .hero__subtitle{ font-size: 1.1rem; color: var(--muted); max-width: 700px; margin: 1rem auto 2rem; line-height: 1.5; }
+  .hero__cta{ display: inline-flex; gap:.6rem; align-items: center; padding: .75rem 1.4rem; background: var(--accent); color:#fff; border-radius:999px; font-weight:600; transition: transform .2s ease; }
+  .hero__cta:hover{ transform: translateY(-3px); }
+  .container{ max-width: 1200px; margin:0 auto; padding:4rem 1rem; position:relative; }
+  .section-title{ font-size: var(--h2); margin-bottom:.7rem; }
+  .section-sub{ color: var(--muted); font-size:1rem; margin-bottom:2.5rem; max-width:700px; line-height:1.6; }
+  .card{ background: var(--card); border:1px solid var(--border); border-radius:16px; padding:1.3rem 1.5rem; margin-bottom:1.2rem; box-shadow:0 6px 18px rgba(0,0,0,.18); transition: transform .2s ease, box-shadow .2s ease; }
+  .card:hover{ transform: translateY(-4px); box-shadow:0 10px 30px rgba(0,0,0,.22); }
+  .week-section{ margin-top:3rem; }
+  .week-header{ font-size:var(--h2); margin-bottom:1rem; }
+  .essay{ font-size:1rem; line-height:1.6; margin-bottom:2rem; }
+  .essay p{ margin:0 0 1rem; }
+  .essay p:last-child{ margin-bottom:0; }
+  .mailbag-item{ margin-bottom:1.5rem; }
+  .mailbag-item:last-child{ margin-bottom:0; }
+  .mailbag-item h4{ margin:.2rem 0; font-size:1.1rem; color: var(--accent); }
+  .mailbag-item p{ margin:.4rem 0 0; color: var(--muted); }
+  .tag-badge{ display:inline-block; padding:.1rem .45rem; margin-left:.4rem; border-radius:6px; font-size:.8rem; font-weight:500; }
+  .tag-upset{ background:rgba(236,72,153,0.2); color:#ec4899; }
+  .tag-stay{ background:rgba(234,179,8,0.2); color:#eab308; }
+  .tag-teaser{ background:rgba(139,92,246,0.2); color:#8b5cf6; }
+  .tag-lock{ background:rgba(22,163,74,0.2); color:#16a34a; }
+  .sidebar{ position:sticky; top:5rem; padding:1.5rem; border:1px solid var(--border); border-radius:12px; background:var(--glass); max-width:260px; }
+  .sidebar h4{ margin-top:0; margin-bottom:.6rem; font-size:1.1rem; }
+  .sidebar p{ margin:.3rem 0; font-size:.9rem; color:var(--muted); }
+  footer{ padding:3rem 1rem; text-align:center; color:var(--muted); font-size:.9rem; border-top:1px solid var(--border); }
+  .matchup-grid{ display:grid; gap:1rem; margin-top:1.5rem; }
+  .matchup-card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:1.2rem 1.4rem; transition:transform .2s,box-shadow .2s;
+    opacity:0; transform:translateY(15px); transition:all .5s cubic-bezier(.17,.67,.24,1);
+  }
+  .matchup-card.visible{ opacity:1; transform:none; }
+  .matchup-card:hover{ transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.2); }
+  .matchup-header{
+    display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin-bottom:.8rem; flex-wrap:wrap;
+  }
+  .matchup-header .team-name{ font-weight:700; font-size:1rem; flex:1; min-width:100px; }
+  .matchup-header .team-name.home{ text-align:right; }
+  .matchup-header .vs-pill{
+    padding:.15rem .6rem; border-radius:999px; font-size:.75rem; font-weight:700; letter-spacing:.04em;
+    background:rgba(139,92,246,0.12); color:var(--accent); flex-shrink:0;
+  }
+  .win-prob-bar{
+    height:8px; border-radius:999px; overflow:hidden; display:flex; margin-bottom:.6rem;
+    background:rgba(255,255,255,0.06);
+  }
+  .win-prob-bar .home-bar{ background:linear-gradient(90deg,var(--accent),#a78bfa); transition:width 1s cubic-bezier(.2,.8,.2,1); }
+  .win-prob-bar .away-bar{ background:linear-gradient(90deg,var(--accent2),#f472b6); transition:width 1s cubic-bezier(.2,.8,.2,1); }
+  .prob-labels{
+    display:flex; justify-content:space-between; font-size:.78rem; color:var(--muted); margin-bottom:.6rem;
+  }
+  .matchup-blurb{ font-size:.9rem; color:var(--muted); line-height:1.5; }
+  .matchup-pick{
+    display:inline-flex; align-items:center; gap:.3rem; margin-top:.6rem;
+    font-size:.82rem; font-weight:600; color:var(--good);
+  }
+  .matchup-pick svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+  .fade-in{ opacity:0; transform:translateY(20px); transition:all .6s cubic-bezier(.17,.67,.24,1); }
+  .fade-in.visible{ opacity:1; transform:none; }
+  .special-picks{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-top:2rem;
+  }
+  .special-pick{
+    padding:1rem; border-radius:12px; border:1px solid var(--border); background:var(--card); text-align:center;
+  }
+  .special-pick .sp-label{ font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:.4rem; font-weight:600; }
+  .special-pick .sp-value{ font-weight:700; font-size:.95rem; }
+  .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;z-index:997;width:44px;height:44px;border-radius:50%;background:rgba(11,13,16,0.85);backdrop-filter:blur(8px);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s,background .2s;pointer-events:none;}
+  .back-to-top.show{opacity:1;transform:none;pointer-events:auto;}
+  .back-to-top:hover{background:var(--accent);}
+  .back-to-top svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2;}
+
+  /* Power Rankings */
+  .ranking-entry{
+    display:flex; gap:1rem; align-items:flex-start; padding:1rem 0;
+    border-bottom:1px solid var(--border);
+  }
+  .ranking-entry:last-child{ border-bottom:none; }
+  .rank-badge{
+    background:var(--accent); color:#fff; width:36px; height:36px; border-radius:50%;
+    display:grid; place-items:center; font-weight:700; font-size:.85rem; flex-shrink:0;
+  }
+  .rank-movement{
+    font-size:.8rem; font-weight:600; min-width:30px; text-align:center; flex-shrink:0;
+    padding-top:.5rem;
+  }
+  .rank-movement.up{ color:var(--good); }
+  .rank-movement.down{ color:var(--bad); }
+  .rank-movement.steady{ color:var(--muted); }
+  .rank-record{ color:var(--muted); font-weight:400; font-size:.9rem; }
+  .ranking-entry h4{ margin:0 0 .3rem; font-size:1rem; }
+  .ranking-entry p{ margin:0; color:var(--muted); font-size:.9rem; line-height:1.5; }
+
+  /* Confessionals */
+  .confessional{
+    background:rgba(139,92,246,0.06); border-left:3px solid var(--accent);
+    padding:.8rem 1.2rem; margin-bottom:1rem; border-radius:0 8px 8px 0;
+  }
+  .confessional:last-child{ margin-bottom:0; }
+  .confessional h4{ margin:0 0 .4rem; font-size:.95rem; }
+  .confessional p{ margin:0; color:var(--muted); font-style:italic; line-height:1.5; }
+
+  /* Bits */
+  .bit-item{ margin-bottom:1rem; line-height:1.6; }
+  .bit-item:last-child{ margin-bottom:0; }
+
+  /* Media Slots (GIF/video embeds) */
+  .media-slot{
+    margin: 1.5rem auto;
+    max-width: 480px;
+    text-align: center;
+  }
+  .media-slot video{
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: block;
+    background: var(--card);
+  }
+  .media-slot--hero{ max-width: 100%; }
+  .media-slot--hero video{ width: 100%; border-radius: 16px; }
+  .media-slot .play-overlay{
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .media-slot .play-overlay.active{ opacity: 1; }
+  .media-slot .play-overlay svg{
+    width: 48px; height: 48px; fill: #fff;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  }
+  .media-slot figcaption{ font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+
+  @media (max-width:768px){
+    .sidebar{ position:static; max-width:none; margin-bottom:2rem; }
+    .matchup-header .team-name{ font-size:.9rem; }
+    .ranking-entry{ flex-wrap:wrap; }
+  }
+  .scroll-progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s linear;pointer-events:none;}
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="scroll-progress" id="scrollProgress"></div>
+<header class="hero">
+  <div class="hero__layer layer-stars" data-speed="0.2"></div>
+  <div class="hero__layer layer-grid" data-speed="0.05"></div>
+  <div class="hero__content">
+    <h1 class="hero__title">The Jailyard Week 6 Column</h1>
+    <p class="hero__subtitle">Kittler falls from first to fifth in one week. MHJTIME&rsquo;s resurrection tour drops 140.94 on the defending champ. The group chat becomes a trade bazaar. And the biggest matchup of the season looms: Legion vs Ken-obi, 5&ndash;1 vs 5&ndash;1.</p>
+    <a href="#week6" class="hero__cta">Read the Column &#8595;</a>
+  </div>
+</header>
+<div id="site-nav"></div>
+
+<main>
+  <section class="container week-section" id="week6">
+    <h2 class="week-header">Week 6 Column &amp; Power Rankings</h2>
+    <div class="section-sub">The defending champion&rsquo;s one-week reign ends in spectacular fashion. Three teams separate at 5&ndash;1 while two remain winless. The trade market opens in the group chat. Week 5 picks went 4&ndash;2 (cumulative 18&ndash;12). Full recap, power rankings with movement, confessionals, mailbag, and Week 7 picks.</div>
+    <div style="display:flex; flex-wrap:wrap; gap:2rem;">
+      <div style="flex:2 1 650px; min-width:300px;">
+        <article class="card essay" id="week6-essay-section"></article>
+        <article class="card" id="week6-rankings"></article>
+        <article class="card" id="week6-confessionals"></article>
+        <article class="card" id="week6-mailbag"></article>
+        <article class="card" id="week6-bits"></article>
+        <article class="card" id="week6-picks"></article>
+      </div>
+      <div class="sidebar" id="week6-sidebar">
+        <h4>Picks Ledger</h4>
+        <p>Overall: 18&ndash;12</p>
+        <p>Week 5: 4&ndash;2 straight up</p>
+        <p>Lock: Kittler &minus;4.0 over MHJTIME &mdash; LOST</p>
+        <p>Upset Watch: Noble +1.0 &mdash; WON</p>
+        <p style="margin-top:1rem;font-size:.8rem;">Our picks are for entertainment. Don&#39;t bet your rent money.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<footer></footer>
+
+<script src="config.js"></script>
+<script>
+// Parallax
+window.addEventListener('scroll', function(){
+  var sc = window.scrollY;
+  document.querySelectorAll('.hero__layer').forEach(function(layer){
+    var speed = parseFloat(layer.getAttribute('data-speed') || 0);
+    layer.style.transform = 'translateY(' + (sc * speed) + 'px)';
+  });
+}, {passive:true});
+
+// ═══════════════════════════════════════════════════════════
+// WEEK 6 MEDIA CACHE
+// ═══════════════════════════════════════════════════════════
+
+var week6MediaCache = {
+  'week6-essay-opener': {
+    mp4_url: 'https://media4.giphy.com/media/v1.Y2lkPWNiODYxNzZlOWt4bWxxanp2ZHg5OGp6eDVrdmhqOTI1eGlvNnJ4d2U2dzY3NHNzdyZlcD12MV9naWZzX2dpZklkJmN0PWc/92Rpqh9uInaQU/giphy.mp4',
+    poster_url: 'https://media4.giphy.com/media/v1.Y2lkPWNiODYxNzZlOWt4bWxxanp2ZHg5OGp6eDVrdmhqOTI1eGlvNnJ4d2U2dzY3NHNzdyZlcD12MV9naWZzX2dpZklkJmN0PWc/92Rpqh9uInaQU/giphy_s.gif',
+    width: 500, height: 250,
+    alt_text: 'Kittler on the Roof falling from the number one ranking after just one week on the throne'
+  },
+  'week6-trade-bazaar': {
+    mp4_url: 'https://media0.giphy.com/media/v1.Y2lkPWNiODYxNzZlZ2xrbHh3ZXA2cm52bDNncXBxNjMwem51NXJ0NGRibXIxdzhsaTl6dSZlcD12MV9naWZzX2dpZklkJmN0PWc/d2bOZ4zvrpTGM/giphy.mp4',
+    poster_url: 'https://media0.giphy.com/media/v1.Y2lkPWNiODYxNzZlZ2xrbHh3ZXA2cm52bDNncXBxNjMwem51NXJ0NGRibXIxdzhsaTl6dSZlcD12MV9naWZzX2dpZklkJmN0PWc/d2bOZ4zvrpTGM/giphy_s.gif',
+    width: 480, height: 270,
+    alt_text: 'The group chat erupting into a trade bazaar with every owner pitching their players'
+  },
+  'week6-mega-matchup': {
+    mp4_url: 'https://media0.giphy.com/media/v1.Y2lkPWNiODYxNzZlMm5pdmN6NmdsMWJpOWY5czN6Y2dwaW1jM3luaGY0eG82eXMxOXU5NyZlcD12MV9naWZzX2dpZklkJmN0PWc/CKsVjUdVZSQknD7akk/giphy.mp4',
+    poster_url: 'https://media0.giphy.com/media/v1.Y2lkPWNiODYxNzZlMm5pdmN6NmdsMWJpOWY5czN6Y2dwaW1jM3luaGY0eG82eXMxOXU5NyZlcD12MV9naWZzX2dpZklkJmN0PWc/CKsVjUdVZSQknD7akk/giphy_s.gif',
+    width: 500, height: 278,
+    alt_text: 'The Legion of Bouz vs General Ken-obi \u2014 first place vs second place, both 5-1, next week'
+  }
+};
+
+function processMediaTokens(text) {
+  return text.replace(/\{\{media:([^}]+)\}\}/g, function(_, slotId) {
+    var slot = week6MediaCache[slotId];
+    if (!slot) return '';
+    return '<figure class="media-slot" id="media-' + slotId + '">' +
+      '<video loop muted playsinline' +
+      ' width="' + slot.width + '" height="' + slot.height + '"' +
+      ' poster="' + slot.poster_url + '" preload="none"' +
+      ' aria-label="' + slot.alt_text.replace(/"/g, '&quot;') + '">' +
+      '<source data-src="' + slot.mp4_url + '" type="video/mp4">' +
+      '</video></figure>';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// WEEK 6 DATA
+// ═══════════════════════════════════════════════════════════
+
+var week6Essay = "Kittler on the Roof held the number one ranking for exactly seven days.\n\nOne week. That\u2019s how long the defending champion sat on the throne before MHJTIME \u2014 the same 1-3 team getting eulogized a fortnight ago \u2014 walked in and dropped 140.94 on the crown. Rico Dowdle went for 30.9. Ja\u2019Marr Chase added 20.1. Jayden Daniels orchestrated with 22.64. And Kittler\u2019s 107.74 \u2014 a score that would\u2019ve lost to eight of the twelve teams this week \u2014 sent the defending champion tumbling from first to fifth in the most dramatic single-week fall the power rankings have recorded. It was a prestige-TV collapse: the slow build to the top, the one-week reign, the sudden freefall while the credits roll.\n\n{{media:week6-essay-opener}}\n\nLast week, five teams shared a penthouse at 4-1 and we called it unprecedented parity. This week, three of them separated at 5-1, and both of the other two dropped out of the top four entirely. So who filled the vacuum at the top? The Legion of Bouz reclaimed the number one spot with 165.9 \u2014 Mahomes and Cam Skattebo each eclipsed 30 points \u2014 while General Ken-obi stormed from fifth to second behind a 164.94 demolition of Burden that featured the week\u2019s most absurd stat line: the Rams defense scored 27.0 points. A defense. Twenty-seven. Drake London added 26.8, Drake Maye dropped 26.24, and the franchise everyone measures themselves against is suddenly measuring everybody else from the peak of its all-time Elo at 1700.2.\n\nMeanwhile, the group chat turned into a trade bazaar. Brent opened the market with a casual \u201CHit me up if in need of.\u201D Karim countered with \u201C2/3 top QBs come at me.\u201D Harlow pitched \u201C2 of the top 3 RBs on the Chiefs.\u201D Zach offered \u201CBuncha old serviceable WR3/4s here.\u201D And then Ben delivered the line of the week: \u201CIf you want some old serviceable WR3/4s with championship pedigree instead of Zach\u2019s 2nd place also rans, let me know.\u201D Brent\u2019s verdict \u2014 \u201CZach got served by Ben\u201D \u2014 was the only punctuation that moment needed. The trade deadline hasn\u2019t arrived, but the desperation has.\n\n{{media:week6-trade-bazaar}}\n\nThe Sleeping Giants kept sleepwalking to wins \u2014 four straight now, Josh Jacobs\u2019 29.5 doing the heavy lifting against a Chudders squad that managed just 95.26. The Boonist Monks bounced back from their Kittler loss with a 150.46 explosion that saw Pickens and JSN combine for 53.5 points. And at the bottom, Burden and Father Time remain winless at 0-6, staring at each other across the standings like castaways on the same sinking raft \u2014 fitting, because next week they play each other, and somebody finally has to win.\n\nBut forget the bottom of the standings for a second. Circle next week in permanent marker: The Legion of Bouz versus General Ken-obi. First versus second. Both 5-1. Two former champions with two titles apiece. Mahomes versus Maye. The Jailyard doesn\u2019t do regular-season Super Bowls \u2014 until it does.\n\n{{media:week6-mega-matchup}}";
+
+var week6Rankings = [
+  {
+    rank: 1, prevRank: 2, movement: 'up_1',
+    teamName: 'The Legion of Bouz', owner: 'KidBouzie', record: '5-1',
+    blurb: 'Mahomes went for 30.48. Cam Skattebo added 30.0. Two players north of 30, and you didn\u2019t even need ARSB to carry the scoring this time \u2014 McCaffrey chipped in 20.6, Waddle contributed 13.32, and your 165.9 was the week\u2019s highest score for the second time in four weeks. The 58.24-point margin over Father Time was the biggest blowout of Week 6 until Ken-obi went and outdid everyone, but your 935.7 total points for leads the league by a comfortable margin over second place. Remember when the preseason said \u201Csince winning the inaugural title in 2022, you\u2019ve been stuck in the middle\u201D? At 5-1 with the most points in the Jailyard, the middle is a rearview mirror. Skattebo has emerged as a legitimate RB1 alongside McCaffrey, and Karim was in the chat this week pitching \u201C2/3 top QBs come at me\u201D like a man who knows his team is stacked. Next week brings General Ken-obi in a 5-1 versus 5-1 showdown that might determine bragging rights for the rest of the season. The Voltron receivers assembled. Now they need to survive the franchise that everyone measures themselves against.'
+  },
+  {
+    rank: 2, prevRank: 5, movement: 'up_3',
+    teamName: 'General Ken-obi', owner: 'bLaker24', record: '5-1',
+    blurb: 'The Rams defense scored 27.0 points. Let that sink in. Your best player this week was a team defense, and you still hung 164.94 on Burden in a 65.74-point blowout \u2014 the biggest margin of the entire week. Drake London went off for 26.8, Drake Maye added 26.24, and Rachaad White kicked in 16.1 in a performance so dominant that Jameson Williams\u2019 15.6 barely cracked the conversation. The three-spot leap from fifth to second is the kind of correction that happens when you score 164.94 and the teams above you faceplant. Your Elo hit its all-time peak at 1700.2 \u2014 the highest rating in Jailyard history \u2014 and the all-time series against Burden moves to 3-2. The preseason said you were the franchise everyone measures themselves against. After a Week 4 stumble to Rasheeing and a quiet rebound in Week 5, this was the announcement game. Next week\u2019s matchup against the Legion is circled on every calendar in the league. Two 5-1 teams. Two former champions. One week to prove who belongs at the summit.'
+  },
+  {
+    rank: 3, prevRank: 3, movement: 'steady',
+    teamName: 'Sleeping Giants', owner: 'zbcowan', record: '5-1',
+    blurb: 'Four straight wins. Josh Jacobs bulldozed for 29.5, Jalen Hurts added 21.62, and Kyren Williams kept the wheels turning with 15.7 in a 129.82 cruise past Chudders. The all-time series is now 5-0 \u2014 you have never lost to Chudders Football Team, and at this point it\u2019s less of a stat and more of a restraining order. Derrick Henry\u2019s 13.5 kept producing from the RB3 slot, and the franchise with the league\u2019s best all-time record at 39-17 is quietly building a case for a return to the championship game. The preseason ranked you eleventh. You\u2019re third. Zach declared in the chat this week that \u201CBen\u2019s been my playoff kryptonite. Can\u2019t deny it. Comin for blood this year with my zombie wr corps.\u201D At 5-1 with the league\u2019s longest active winning streak, the zombies are alive, the kryptonite is irrelevant, and the Giants are the only team in the Jailyard that hasn\u2019t lost in October.'
+  },
+  {
+    rank: 4, prevRank: 6, movement: 'up_2',
+    teamName: 'The Boonist Monks', owner: 'GauchoTrain', record: '4-2',
+    blurb: 'George Pickens went nuclear \u2014 27.3 points. Jaxon Smith-Njigba added 26.2. That\u2019s 53.5 combined from your top two receivers in a 150.46-point performance that demolished Rasheeing the Scene by 41.36 and vaulted you from sixth to fourth. Joe Flacco \u2014 yes, that Joe Flacco \u2014 contributed 18.76 at quarterback while Maxx Crosby\u2019s 16.0 anchored the IDP slot. Your Elo jumped 25.9 points, the biggest gain of any team this week, and the all-time series against Rasheeing moves to 3-2. The preseason called you \u201Cthe instigator of side bets and polls.\u201D This week you instigated a 41-point beatdown that left Patrick completely silent in the group chat. At 4-2 with the league\u2019s second-highest total points at 912.9, the aging core of Lamar, Tyreek, and Kelce still has a pulse \u2014 and Pickens plus JSN are proving the supporting cast isn\u2019t just wallpaper. The 0-5 career record against Kittler still haunts, but at least you\u2019re not the one dropping from first to fifth.'
+  },
+  {
+    rank: 5, prevRank: 1, movement: 'down_4',
+    teamName: 'Kittler on the Roof', owner: 'bchodos', record: '4-2',
+    blurb: 'From the summit to the middle of the pack in seven days. MHJTIME\u2019s 140.94 steamrolled your 107.74, and the 33.2-point margin felt even worse because it came from a team you\u2019d beaten four times in the all-time series. Jonathan Taylor\u2019s 21.7 and Baker Mayfield\u2019s 18.64 were fine \u2014 not great, fine \u2014 but your WR room combined for fewer points than Rico Dowdle scored by himself. Your Elo cratered 28.7 points, the steepest drop in the league this week, and the 202-point gap between your peak Elo of 1690.4 and your current mark of 1488.2 is starting to look less like a dip and more like a crater. The preseason called your ceiling \u201Cdrywall.\u201D Last week, sitting at number one, we thought you\u2019d smashed through it. This week the drywall smashed back. Runner-up in 2022, runner-up in 2023, champion in 2024, and now the fifth-ranked team in Week 6. Consistency is still the brand \u2014 it\u2019s just being consistently humbled right now.'
+  },
+  {
+    rank: 6, prevRank: 4, movement: 'down_2',
+    teamName: 'Rasheeing the Scene', owner: 'ToreroGaucho', record: '4-2',
+    blurb: 'De\u2019Von Achane dropped 30.0 points and you still lost by 41.36. Read that again. Your best offensive weapon had a monster game, and the Boonist Monks beat you by more than most teams scored all week because Josh Allen \u2014 the consensus QB1 \u2014 managed only 15.4 and nobody else showed up behind Achane\u2019s heroics. Cameron Dicker\u2019s 18.4 from the kicker slot was your second-highest scorer, which tells you everything about how the rest of the roster performed. The silence in the group chat afterward was deafening \u2014 Patrick went from active chatter to completely MIA. The preseason called you \u201Ca weekly thrill ride.\u201D This was the part of the ride where the car derails. Your Elo dropped 25.9, and at 4-2 you\u2019re still in playoff position, but the WR room remains \u201Ca meme waiting to happen\u201D and Allen having a pedestrian game exposed the uncomfortable truth: when Achane is the only one cooking, the kitchen still burns down.'
+  },
+  {
+    rank: 7, prevRank: 7, movement: 'steady',
+    teamName: 'MHJTIME', owner: 'rango_', record: '3-3',
+    blurb: 'Two weeks ago this column was writing your eulogy. Now you\u2019ve won two straight by a combined 64.76 points, and the 140.94 you hung on the then-number-one Kittler might be the most meaningful win of your season so far. Rico Dowdle followed last week\u2019s 31.9 with 30.9 \u2014 the running back nobody had on preseason rosters is suddenly your most reliable weapon. Jayden Daniels added 22.64, Ja\u2019Marr Chase contributed 20.1, and Trey McBride chipped in 17.2 from the TE slot. Your Elo surged 28.6 points, the second-biggest gain this week, and the \u201Cwhat if\u201D franchise that was 1-3 now sits at .500 with a two-game streak. Nate was in the chat offering a $20 bet that Travis Hunter would outscore Kam Curl for the season. Brent\u2019s response \u2014 \u201CContent is content. Production is production\u201D \u2014 might as well be the motto for a team whose production is finally matching the content of its roster. The preseason said contender. The first four weeks said pretender. The last two weeks said: hold my Rico Dowdle.'
+  },
+  {
+    rank: 8, prevRank: 9, movement: 'up_1',
+    teamName: 'Noble FFT', owner: 'kevobucks', record: '3-3',
+    blurb: 'Bijan Robinson. Thirty-two point eight. The week\u2019s top performer finally delivered the kind of game the preseason promised when it ranked you second overall. Caleb Williams added 19.88, Wan\u2019Dale Robinson went for 17.4, and Tyler Warren\u2019s 15.3 gave you balanced production in a 151.88 outing that handled Ghastly by 30.58. The all-time series against Grayskull moves to 4-2, and your 3-3 record finally matches the roster\u2019s potential after an ugly start. Last week we asked \u201CWhere is Bijan Robinson? Where is A.J. Brown?\u201D Bijan answered with a haymaker. Brown remains in the witness protection program. One half of the \u201Cleague\u2019s scariest backfield\u201D showed up \u2014 now you need the other half of the equation, the receivers, and the tight end room to follow suit. The preseason ranked you second. You\u2019re eighth. The real-life GM drafting style produced a real-life result this week, but one 32-point game from Bijan doesn\u2019t erase five weeks of the supporting cast treating production like a suggestion.'
+  },
+  {
+    rank: 9, prevRank: 8, movement: 'down_1',
+    teamName: 'Ghastly Grayskull Gang', owner: 'GrayskullXX', record: '2-4',
+    blurb: 'Back-to-back losses. Last week you fell to a 0-4 Chudders team by 2.02. This week Noble FFT handled you by 30.58. D\u2019Andre Swift\u2019s 24.5 and DK Metcalf\u2019s 17.5 weren\u2019t enough when your scoring ceiling capped at 121.3 \u2014 your second-lowest output of the season. Brian Burns\u2019 17.0 from the DE slot was solid, but when a defensive end is outscoring most of your offensive starters, the blueprint needs revising. Your Elo dropped 16.0, and the two-game skid has you at 2-4 and sinking after the 176.42 explosion in Week 4 felt like a turning point. Oscar was active in the chat this week \u2014 mostly roasting other teams \u2014 but at 2-4, the jokes are starting to land on the wrong side. The preseason said \u201Cpicks don\u2019t score points.\u201D Right now neither do your starters, and the Week 4 performance against Kittler looks more like an outlier than a floor.'
+  },
+  {
+    rank: 10, prevRank: 10, movement: 'steady',
+    teamName: 'Chudders Football Team', owner: 'Chudders', record: '1-5',
+    blurb: 'Matt accidentally dropped Haskins on the Sleeper app this week. \u201CThere\u2019s absolutely no way in my right mind I meant to drop Haskins,\u201D he told the chat, followed by \u201CSwear to god this app glitched.\u201D The league\u2019s reaction? Zach: \u201CMwahahahaha what a great sight that was to wake up to.\u201D Brent immediately put in a waiver bid. It\u2019s been that kind of season. Your 95.26 was the lowest score in the league this week, with Justin Herbert\u2019s 18.76 leading and Jared Verse\u2019s 17.5 from the DL slot as your second-best performer. Ashton Jeanty managed 15.6, Jahmyr Gibbs regressed to 7.0, and the first-win celebration from last week feels like it happened in a different timeline. The rebuild is still the plan, the war chest is still enormous, and 2026 is still the target. But at 1-5 with the second-fewest total points in the league at 727.9, the lumps aren\u2019t just landing \u2014 they\u2019re leaving marks.'
+  },
+  {
+    rank: 11, prevRank: 11, movement: 'steady',
+    teamName: 'Burden of Etienne-y Woody', owner: 'kharlow', record: '0-6',
+    blurb: 'Six weeks. Zero wins. And this time there\u2019s no moral victory to cling to \u2014 Ken-obi\u2019s 164.94 steamrolled your 99.2 by 65.74 in the biggest blowout of the week. Byron Young led your scoring at 21.0 from the LB slot. Your quarterback, Tua Tagovailoa, posted 9.6. When your IDP linebacker outscores your quarterback by more than double, the roster construction isn\u2019t broken \u2014 it\u2019s demolished. Harlow was pitching \u201C2 of the top 3 RBs on the Chiefs\u201D in the trade chat this week, and the desperation is justified. The all-time series against Ken-obi moves to 2-3, your Elo sank another 10.3 to 1323.5, and the preseason called you \u201Ca cautionary tale of stars without support.\u201D Six weeks in, the tale has become a saga. Next week brings Father Time \u2014 also 0-6 \u2014 in a game that absolutely nobody asked for but everyone needs. Someone will get their first win. Do whatever it takes to make sure it\u2019s you.'
+  },
+  {
+    rank: 12, prevRank: 12, movement: 'steady',
+    teamName: 'Father Time', owner: 'Redrumsregrub', record: '0-6',
+    blurb: 'The lowest-scoring team in the league just absorbed a 58.24-point loss to the highest-scoring team. Ladd McConkey\u2019s 19.5 and Tetairoa McMillan\u2019s 16.4 provided flickers \u2014 the wagyu beef WRs at least showed up to the grill \u2014 but Bo Nix\u2019s 13.36 at quarterback and Aidan Hutchinson\u2019s 9.0 from the DL slot weren\u2019t close to enough against a Legion team that had two players above 30. Your Elo dropped 14.8, your total points for sits at 712.7 \u2014 last in the league \u2014 and the preseason\u2019s prediction of \u201Cspoiler potential\u201D has been replaced by a simpler label: punching bag. Next week brings Burden in the 0-6 Bowl, and the matchup might be the most important game neither team wants to acknowledge. Somebody will get win number one. Somebody will go to 0-7. The chat will probably ignore both outcomes entirely \u2014 and honestly, can you blame them?'
+  }
+];
+
+var week6Confessionals = [
+  {
+    teamName: 'Kittler on the Roof',
+    text: 'I was number one for exactly one week. One glorious, deceiving week. Then MHJTIME showed up with Rico Dowdle\u2019s 30.9 and knocked me all the way to fifth. Jonathan Taylor gave me 21.7 and it wasn\u2019t enough. Baker gave me 18.64 and it wasn\u2019t enough. Nothing was enough. I went from defending champion at the top of the mountain to defending champion wondering where the mountain went. The chat hasn\u2019t said a word to me about it. Somehow that\u2019s worse.'
+  },
+  {
+    teamName: 'MHJTIME',
+    text: 'Three weeks ago this column called my season a \u2018what if\u2019 story headed for the toilet bowl. I screenshot\u2019d that paragraph. I printed it out. It\u2019s on my desk right now, next to my two-game winning streak and the scoreboard that says 140.94 against the number one team. Ja\u2019Marr Chase remembered he\u2019s Ja\u2019Marr Chase. Rico Dowdle \u2014 a guy I almost benched \u2014 scored 30.9 for the second straight week. The \u2018what if\u2019 franchise just became the \u2018what now\u2019 franchise.'
+  },
+  {
+    teamName: 'Chudders Football Team',
+    text: 'So the Sleeper app may have glitched and I may have accidentally dropped Haskins. The entire group chat saw it before I could fix it. Zach said it was \u2018a great sight to wake up to.\u2019 Brent immediately put in his waiver bid. And then we scored 95.26, the lowest in the league. Last week I was celebrating our first win with champagne. This week I\u2019m back to pouring it out.'
+  },
+  {
+    teamName: 'General Ken-obi',
+    text: 'I don\u2019t say much in the group chat. I don\u2019t need to. The Rams defense scored 27 for me. Drake London went for 26.8. Drake Maye added 26.24. We put up 164.94 and won by 65.74 \u2014 the biggest blowout of the week. My Elo just hit its all-time peak. And next week I get the Legion of Bouz, first versus second. I haven\u2019t typed a single word in the chat about it. I\u2019m just loading the lineup.'
+  }
+];
+
+var week6Mailbag = [
+  {
+    question: 'Dear Commish: The Lock of the Week has now busted three weeks in a row. Is it cursed?',
+    answer: 'Three straight Lock losses. At this point the Lock isn\u2019t a prediction \u2014 it\u2019s a hex. Kittler was -4.0 at home against a 2-3 MHJTIME team that proceeded to drop 140.94. The cumulative record is 18-12, which is still respectable, but the Lock specifically is 0-3 over the last three weeks. We\u2019re not retiring it \u2014 we\u2019re just warning you: whatever the Lock picks next week, bet the other side.'
+  },
+  {
+    question: 'From the group chat: Legion of Bouz versus General Ken-obi next week. Both 5-1. Who ya got?',
+    answer: 'The matchup has everything: two former champions with matching trophy cases, Mahomes versus Maye, the league\u2019s highest scorer versus the league\u2019s highest Elo. Ken-obi\u2019s 1700.2 Elo is the best in the Jailyard. Legion\u2019s 935.7 total points is the best in the Jailyard. Something\u2019s got to give \u2014 and we\u2019re not dumb enough to make it the Lock.'
+  },
+  {
+    question: '@ToreroGaucho asks: Achane scored 30.0 and I still lost by 41. What am I supposed to do?',
+    answer: 'Score more points from the other positions. When your kicker is your second-highest scorer at 18.4, the problem isn\u2019t Achane \u2014 it\u2019s everyone who isn\u2019t Achane. Josh Allen at 15.4 is the real villain. The preseason QB1 needs to QB1.'
+  },
+  {
+    question: 'Dear Commish: Both Burden and Father Time are 0-6 and play each other next week. What\u2019s the over/under on combined score?',
+    answer: 'Burden averages 122.1 per week. Father Time averages 118.8. Combined that\u2019s about 241, but I\u2019ll set the line at 220.5 because neither team has given us reason to trust their floor. The real question isn\u2019t the over/under \u2014 it\u2019s whether the group chat will even notice the game is happening.'
+  },
+  {
+    question: 'From the group chat: Ben said Zach\u2019s WRs are \u20182nd place also rans\u2019 compared to his \u2018championship pedigree\u2019 receivers. Whose WRs are actually better?',
+    answer: 'Ben\u2019s Kittler just dropped 107.74 with WR production you\u2019d need a microscope to find. Zach\u2019s Giants are 5-1 with a four-game winning streak and Josh Jacobs doing the heavy lifting. Championship pedigree is great for trash talk. Four straight wins is great for the standings. Advantage: zombies.'
+  }
+];
+
+var week6Bits = [
+  {
+    title: 'Preseason Prediction Tracker',
+    text: 'Week 5 picks went 4-2, bringing the cumulative record to 18-12. The Lock of the Week (Kittler -4.0 over MHJTIME) busted for the third consecutive week \u2014 MHJTIME won 140.94 to 107.74. The Upset Watch (Noble FFT +1.0 over Ghastly) hit \u2014 Noble won 151.88-121.3 behind Bijan Robinson\u2019s 32.8. The Lock is now 0-3 over the last three weeks. Still profitable overall, but the signature pick has become a signature jinx.'
+  },
+  {
+    title: 'Overheard in the Chat',
+    text: 'The week\u2019s best exchange: Zach offered \u2018Buncha old serviceable WR3/4s here. Hit me up.\u2019 Ben responded: \u2018If you want some old serviceable WR3/4s with championship pedigree instead of Zach\u2019s 2nd place also rans, let me know.\u2019 Brent narrated: \u2018Zach got served by Ben.\u2019 Ben\u2019s follow-up \u2014 \u2018Too soon?\u2019 \u2014 was the chef\u2019s kiss. Zach\u2019s rebuttal: \u2018Ben\u2019s been my playoff kryptonite. Can\u2019t deny it. Comin for blood this year with my zombie wr corps.\u2019 At 5-1, the zombies are winning the argument.'
+  },
+  {
+    title: 'IDP Monster of the Week',
+    text: 'The Los Angeles Rams defense \u2014 or should we say General Ken-obi\u2019s defense \u2014 scored 27.0 points, outscoring most offensive starters across the league. Byron Young (21.0 for Burden), Jared Verse (17.5 for Chudders), and Brian Burns (17.0 for Ghastly) all had strong IDP weeks, but a team defense hanging 27 in an IDP league is borderline unfair.'
+  },
+  {
+    title: 'Things I Believe But Can\u2019t Prove',
+    text: 'MHJTIME will make the playoffs. The Lock of the Week will hit next week specifically because we\u2019ve acknowledged the curse. Kittler won\u2019t drop below sixth all season. The Burden-Father Time game next week will be the lowest-scoring game of the year. And someone in the group chat already screenshot\u2019d this column\u2019s Lock prediction, ready to roast us when it inevitably busts again.'
+  },
+  {
+    title: 'Is MHJTIME the New 2024 Sleeping Giants?',
+    text: 'Last season, the Sleeping Giants started slow, caught fire mid-season, and rode the momentum all the way to the championship game. MHJTIME was 1-3, looked dead, and has now won two straight by a combined 64.76 points with Rico Dowdle emerging as an unexpected weapon. Different roster, same trajectory. If Week 7 brings a third straight win against Chudders, the parallel becomes undeniable.'
+  }
+];
+
+var week6Matches = [
+  {
+    home: 'The Boonist Monks', away: 'Noble FFT', spread: -2.0,
+    pick: 'The Boonist Monks',
+    blurb: 'The Monks just dropped 150.46 with Pickens and JSN combining for 53.5, and the scoring machine that leads the league\u2019s second-highest total PF at 912.9 should handle a Noble squad that\u2019s been maddeningly inconsistent. Bijan Robinson\u2019s 32.8 was a revelation, but one week doesn\u2019t fix a pattern of underperformance from the supporting cast.',
+    tag: ''
+  },
+  {
+    home: 'Kittler on the Roof', away: 'Sleeping Giants', spread: 2.5,
+    pick: 'Sleeping Giants',
+    blurb: 'Kittler just fell from first to fifth, and the Sleeping Giants are riding the league\u2019s longest winning streak at four games. Josh Jacobs\u2019 29.5 and Jalen Hurts\u2019 21.62 give the Giants a dependable floor, but the defending champion has historically bounced back from adversity. This one\u2019s closer than the records suggest.',
+    tag: 'Upset Watch'
+  },
+  {
+    home: 'Burden of Etienne-y Woody', away: 'Father Time', spread: -0.5,
+    pick: 'Burden of Etienne-y Woody',
+    blurb: 'The 0-6 Bowl. Somebody has to win. Burden has slightly more total points (732.7 vs 712.7) and Byron Young\u2019s 21.0 IDP performance suggests a higher ceiling, but Father Time has McConkey, McMillan, and the occasional Bo Nix eruption. This is genuinely unpredictable, and the group chat will probably not watch.',
+    tag: 'Stay Away'
+  },
+  {
+    home: 'The Legion of Bouz', away: 'General Ken-obi', spread: 1.0,
+    pick: 'General Ken-obi',
+    blurb: 'The game of the season. Legion leads the league in total points at 935.7. Ken-obi leads the league in Elo at 1700.2. Mahomes versus Maye. McCaffrey versus Barkley. Two former champions, two titles each. Ken-obi\u2019s Elo edge and 164.94-point statement this week tilt the needle \u2014 barely. We absolutely refuse to make this the Lock.',
+    tag: ''
+  },
+  {
+    home: 'Rasheeing the Scene', away: 'Ghastly Grayskull Gang', spread: -3.5,
+    pick: 'Rasheeing the Scene',
+    blurb: 'Rasheeing got demolished by the Monks this week, but Josh Allen and Achane at full strength are still one of the most explosive duos in the league. Ghastly has lost two straight and can\u2019t find consistency beyond isolated explosion games. The 4-2 team with the better quarterback handles the 2-4 team searching for answers.',
+    tag: ''
+  },
+  {
+    home: 'Chudders Football Team', away: 'MHJTIME', spread: 5.0,
+    pick: 'MHJTIME',
+    blurb: 'Yes, the Lock has busted three straight weeks. Yes, picking the Lock is essentially hexing the favorite. But MHJTIME just dropped 140.94 on the number one team, Rico Dowdle is averaging 30.9 over the last two weeks, and Chudders just put up the lowest score of the week at 95.26. If this Lock busts, we\u2019re shutting the feature down permanently. We mean it. Probably.',
+    tag: 'Lock'
+  }
+];
+
+var underdogLock6 = 'Kittler on the Roof +2.5 (the defending champion historically bounces back from adversity \u2014 runner-up, runner-up, champion \u2014 and this is the biggest adversity of the season)';
+var stayAway6 = 'Burden vs Father Time (0-6 vs 0-6 is the definition of a coin flip wrapped in disappointment)';
+var teaser6 = 'General Ken-obi +4.0 / Sleeping Giants \u22120.5 \u2014 two 5-1 teams teased into a comfortable parlay for those who want to ride the top of the standings';
+
+// ═══════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════
+
+function spreadToProb(spread){
+  return 1 / (1 + Math.pow(10, -spread / 7));
+}
+
+function parseMovement(movement) {
+  if (movement === 'steady') return { cls: 'steady', text: '\u2014' };
+  var parts = movement.split('_');
+  var dir = parts[0];
+  var n = parts[1] || '1';
+  if (dir === 'up') return { cls: 'up', text: '\u2191' + n };
+  return { cls: 'down', text: '\u2193' + n };
+}
+
+function renderWeek6(){
+  var el;
+  // --- Essay ---
+  var paragraphs = week6Essay.split('\n\n');
+  var essayHtml = '<h3>The Column</h3>';
+  paragraphs.forEach(function(p){
+    var processed = processMediaTokens(p);
+    if (processed.indexOf('<figure') === 0) {
+      essayHtml += processed;
+    } else {
+      essayHtml += '<p>' + processed + '</p>';
+    }
+  });
+  el = document.getElementById('week6-essay-section');
+  el.textContent = '';
+  el.insertAdjacentHTML('afterbegin', essayHtml);
+  el.classList.add('fade-in');
+
+  // --- Power Rankings ---
+  var rankHtml = '<h3>Power Rankings</h3>';
+  week6Rankings.forEach(function(r){
+    var mov = parseMovement(r.movement);
+    rankHtml += '<div class="ranking-entry">' +
+      '<div class="rank-badge">#' + r.rank + '</div>' +
+      '<div class="rank-movement ' + mov.cls + '">' + mov.text + '</div>' +
+      '<div><h4>' + r.teamName + ' <span class="rank-record">(' + r.record + ')</span></h4>' +
+      '<p>' + r.blurb + '</p></div>' +
+    '</div>';
+  });
+  el = document.getElementById('week6-rankings');
+  el.textContent = '';
+  el.insertAdjacentHTML('afterbegin', rankHtml);
+  el.classList.add('fade-in');
+
+  // --- Confessionals ---
+  var confHtml = '<h3>Confessionals</h3>';
+  week6Confessionals.forEach(function(c){
+    confHtml += '<div class="confessional"><h4>' + c.teamName + '</h4>' +
+      '<p>\u201C' + c.text + '\u201D</p></div>';
+  });
+  el = document.getElementById('week6-confessionals');
+  el.textContent = '';
+  el.insertAdjacentHTML('afterbegin', confHtml);
+  el.classList.add('fade-in');
+
+  // --- Mailbag ---
+  var mbHtml = '<h3>Mailbag</h3>';
+  week6Mailbag.forEach(function(item){
+    mbHtml += '<div class="mailbag-item"><h4>' + item.question + '</h4><p>' + item.answer + '</p></div>';
+  });
+  el = document.getElementById('week6-mailbag');
+  el.textContent = '';
+  el.insertAdjacentHTML('afterbegin', mbHtml);
+  el.classList.add('fade-in');
+
+  // --- Bits & Segments ---
+  var bitsHtml = '<h3>Bits &amp; Segments</h3>';
+  week6Bits.forEach(function(b){
+    bitsHtml += '<div class="bit-item"><strong>' + b.title + ':</strong> ' + b.text + '</div>';
+  });
+  el = document.getElementById('week6-bits');
+  el.textContent = '';
+  el.insertAdjacentHTML('afterbegin', bitsHtml);
+  el.classList.add('fade-in');
+
+  // --- Week 7 Matchup Picks ---
+  var picksHtml = '<h3>Week 7 Picks</h3><div class="matchup-grid">';
+  week6Matches.forEach(function(match){
+    var homeProb = spreadToProb(match.spread);
+    var awayProb = 1 - homeProb;
+    var homePct = (homeProb * 100).toFixed(0);
+    var awayPct = (awayProb * 100).toFixed(0);
+    var tag = match.tag || '';
+    var tagHtml = '';
+    if (tag) {
+      var t = tag.toLowerCase();
+      if (t.indexOf('lock') !== -1) tagHtml = ' <span class="tag-badge tag-lock">Lock</span>';
+      else if (t.indexOf('upset') !== -1) tagHtml = ' <span class="tag-badge tag-upset">Upset Watch</span>';
+      else if (t.indexOf('stay') !== -1) tagHtml = ' <span class="tag-badge tag-stay">Stay Away</span>';
+    }
+    picksHtml +=
+      '<div class="matchup-card" data-home-pct="' + homePct + '" data-away-pct="' + awayPct + '">' +
+        '<div class="matchup-header">' +
+          '<span class="team-name home">' + match.home + '</span>' +
+          '<span class="vs-pill">' + (match.spread > 0 ? '+' : '') + match.spread + '</span>' +
+          '<span class="team-name">' + match.away + '</span>' +
+        '</div>' +
+        '<div class="win-prob-bar">' +
+          '<div class="home-bar" style="width:0%"></div>' +
+          '<div class="away-bar" style="width:0%"></div>' +
+        '</div>' +
+        '<div class="prob-labels">' +
+          '<span>' + homePct + '%</span><span>Win probability</span><span>' + awayPct + '%</span>' +
+        '</div>' +
+        '<p class="matchup-blurb">' + match.blurb + '</p>' +
+        '<div class="matchup-pick">' +
+          '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' +
+          'Pick: ' + match.pick + tagHtml +
+        '</div>' +
+      '</div>';
+  });
+  picksHtml += '</div>';
+
+  picksHtml +=
+    '<div class="special-picks">' +
+      '<div class="special-pick">' +
+        '<div class="sp-label" style="color:var(--good)">Underdog Lock</div>' +
+        '<div class="sp-value">' + underdogLock6 + '</div>' +
+      '</div>' +
+      '<div class="special-pick">' +
+        '<div class="sp-label" style="color:var(--warn)">Stay Away</div>' +
+        '<div class="sp-value">' + stayAway6 + '</div>' +
+      '</div>' +
+      '<div class="special-pick">' +
+        '<div class="sp-label" style="color:var(--accent)">Teaser of the Week</div>' +
+        '<div class="sp-value">' + teaser6 + '</div>' +
+      '</div>' +
+    '</div>';
+
+  el = document.getElementById('week6-picks');
+  el.textContent = '';
+  el.insertAdjacentHTML('afterbegin', picksHtml);
+  el.classList.add('fade-in');
+}
+
+renderWeek6();
+
+// ═══════════════════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════════════════
+
+var scrollObserver = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if (e.isIntersecting){
+      e.target.classList.add('visible');
+      var homeBar = e.target.querySelector('.home-bar');
+      var awayBar = e.target.querySelector('.away-bar');
+      if (homeBar && awayBar){
+        requestAnimationFrame(function(){
+          homeBar.style.width = e.target.dataset.homePct + '%';
+          awayBar.style.width = e.target.dataset.awayPct + '%';
+        });
+      }
+      scrollObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in, .matchup-card').forEach(function(el){ scrollObserver.observe(el); });
+
+var navAnchors = document.querySelectorAll('#nav nav a');
+var navSpy = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if (e.isIntersecting && e.target.id){
+      navAnchors.forEach(function(a){
+        a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id);
+      });
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+document.querySelectorAll('section[id]').forEach(function(el){ navSpy.observe(el); });
+
+var btt = document.getElementById('backToTop');
+window.addEventListener('scroll', function(){
+  btt.classList.toggle('show', window.scrollY > 500);
+}, { passive: true });
+btt.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+
+(function(){
+  var bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', function(){
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+  }, {passive:true});
+})();
+
+// ── Media slot lazy loading + reduced-motion ──
+(function(){
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var mediaSlots = document.querySelectorAll('.media-slot');
+  if (!mediaSlots.length) return;
+
+  var playSvg = '<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>';
+
+  function applyMotionPref(video, overlay) {
+    if (prefersReducedMotion.matches) {
+      video.removeAttribute('autoplay');
+      video.pause();
+      video.currentTime = 0;
+      if (overlay) overlay.classList.add('active');
+    } else {
+      if (video.src || video.querySelector('source[src]')) {
+        video.play().catch(function(){});
+      }
+      if (overlay) overlay.classList.remove('active');
+    }
+  }
+
+  var mediaObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (!e.isIntersecting) return;
+      var video = e.target.querySelector('video');
+      if (!video) return;
+      var source = video.querySelector('source[data-src]');
+      if (source && !source.src) {
+        source.src = source.dataset.src;
+        source.removeAttribute('data-src');
+        video.load();
+        video.addEventListener('loadeddata', function() {
+          var overlay = e.target.querySelector('.play-overlay');
+          if (!prefersReducedMotion.matches) {
+            video.play().catch(function(){});
+          } else if (overlay) {
+            overlay.classList.add('active');
+          }
+        }, { once: true });
+      }
+      mediaObserver.unobserve(e.target);
+    });
+  }, { rootMargin: '200px' });
+
+  mediaSlots.forEach(function(slot) {
+    var video = slot.querySelector('video');
+    if (!video) return;
+    var overlay = document.createElement('div');
+    overlay.className = 'play-overlay';
+    overlay.insertAdjacentHTML('afterbegin', playSvg);
+    overlay.addEventListener('click', function() {
+      video.play().catch(function(){});
+      overlay.classList.remove('active');
+    });
+    slot.appendChild(overlay);
+    mediaObserver.observe(slot);
+  });
+
+  prefersReducedMotion.addEventListener('change', function() {
+    mediaSlots.forEach(function(slot) {
+      var video = slot.querySelector('video');
+      var overlay = slot.querySelector('.play-overlay');
+      if (video) applyMotionPref(video, overlay);
+    });
+  });
+})();
+
+applyConfig();
+
+// GIPHY attribution
+(function(){
+  var footer = document.querySelector('footer');
+  if (!footer) return;
+  var giphyDiv = document.createElement('div');
+  giphyDiv.style.cssText = 'font-size:.7rem;color:var(--muted);margin-top:.8rem;';
+  giphyDiv.insertAdjacentHTML('afterbegin', 'GIFs <a href="https://giphy.com" style="color:var(--muted);text-decoration:underline;">Powered by GIPHY</a>');
+  footer.appendChild(giphyDiv);
+})();
+</script>
+</body>
+</html>

@@ -66,6 +66,8 @@ const LEAGUE_CONFIG = {
       subtitle: 'Legion stands alone at 4-0' },
     { label: 'Week 5', href: 'week5.html', group: 'columns',
       subtitle: 'Five-way tie at 4-1 after the Legion falls' },
+    { label: 'Week 6', href: 'week6.html', group: 'columns',
+      subtitle: 'Kittler dethroned, trade bazaar erupts, Legion vs Ken-obi looms' },
     { label: '2026 Preview',   href: 'preseason-2026.html' },
   ],
 
