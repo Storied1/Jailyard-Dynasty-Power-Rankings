@@ -6,7 +6,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 ## Tech Stack
 - HTML5 / CSS3 / Vanilla JS (no frameworks, no npm, no build)
 - Canvas 2D API for charts (scatter, stacked bar, trend, Elo)
-- Python 3 for data pipeline (`fetch_sleeper.py`)
+- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 12 scripts)
 - GitHub Actions for automated weekly data fetches
 - Hosted as static files (GitHub Pages or direct)
 
@@ -15,11 +15,13 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 |------|---------|
 | `index.html` | Landing — starfield canvas, stat counters, nav cards, Championship Vault |
 | `preseason.html` | Preseason rankings — data tables, charts, team cards, rosters |
+| `preseason-2026.html` | 2026 Preview — next-season outlook |
 | `season.html` | Season hub — weekly results, power rankings, trend charts (Sleeper API) |
+| `power-rankings.html` | Standalone power rankings page |
 | `history.html` | League Bible — all-time records, H2H matrix, Elo ratings, franchise profiles |
 | `draft.html` | Draft recap — full draft board, grades, storylines |
 | `trades.html` | Trade tracker — timeline, season filter, activity chart |
-| `week1.html` | Week 1 column — essay, mailbag, matchup picks |
+| `week1-5.html` | Weekly columns — essay, power rankings, mailbag, matchup picks |
 | `config.js` | Central league config — name, Sleeper IDs, colors, nav (edit to rebrand) |
 
 ## Data
@@ -57,11 +59,13 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 ## AI Writing Staff (Content Pipeline)
 
 ### Architecture
-Bill Simmons-style AI writers generate weekly columns from Sleeper data. Three slash commands form the pipeline:
+Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsApp chat context. Five-step pipeline:
 
-1. **`/write-week N`** — Writer agent: generates essay, 12 power ranking blurbs, confessionals, mailbag, bits, matchup picks
+1. **`/write-week N`** — Writer agent: essay, 12 power ranking blurbs, confessionals, mailbag, bits, matchup picks (reads chat context)
 2. **`/edit-week N`** — Editor-in-Chief: quality gate (data accuracy, voice score, variety, continuity, tone)
-3. **`/render-week N`** — Renderer: produces self-contained HTML page matching `week1.html` template
+3. **`/pick-media N`** — Meme Savant: auto-picks GIFs for each media slot (needs GIPHY API key)
+4. **Resolve + render** — Tell Claude "resolve and render week N" → `media_cache.json` + `weekN.html`
+5. **Push** — "push it"
 
 ### Content Files
 | Path | Purpose |
@@ -70,25 +74,39 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data. Three s
 | `content/team-profiles.json` | All 12 teams: preseason rank, tier, roast, key players, full preseason essay text |
 | `content/weeks/weekN_data.json` | AI-ready data per week (matchups, standings, awards, context) — 18 files |
 | `content/weeks/weekN_content.json` | Generated content per week (essay, rankings, mailbag, bits, picks) |
+| `content/weeks/weekN_chat_context.json` | WhatsApp chat quotes relevant to each week — 18 files |
+| `content/chat/` | Chat analytics: `league-memory.json`, `arcs.json`, `predictions.json`, `relationships.json`, `consensus.json`, `personas/*.md` |
+| `content/chat/name-map.json` | Identity chain: WhatsApp display name → real name, team, handle, roster_id |
+
+### Key Scripts
+| Script | Purpose |
+|--------|---------|
+| `fetch_sleeper.py` | Fetch season data from Sleeper API |
 | `scripts/extract_week_data.py` | Transforms `season_combined.json` → per-week AI-ready JSON |
+| `scripts/verify_week_content.py` | Content validator (Tier 1: structural, Tier 2: data, Tier 3: chat) |
+| `scripts/parse_whatsapp.py` | Phase 1: parse raw WhatsApp export → `chat/parsed_messages.json` |
+| `scripts/map_chat_deterministic.py` | Phase 2 MAP: heuristic extraction from monthly chat chunks |
+| `scripts/reduce_chat_deterministic.py` | Phase 2 REDUCE: merge MAP outputs → analytics files |
+| `scripts/build_chat_context.py` | Phase 3: per-week chat relevancy engine (`--no-ai` for deterministic) |
 
 ### Workflow
 ```bash
-# 1. Fetch data (already done for 2025, all 18 weeks)
+# Data pipeline (already done for 2025, all 18 weeks)
 python fetch_sleeper.py --season 2025
-
-# 2. Extract week data (already done for all 18 weeks)
-python scripts/extract_week_data.py --week N --pretty
 python scripts/extract_week_data.py --all
 
-# 3. Generate content
-/write-week N     # → content/weeks/weekN_content.json
+# Chat pipeline (already done — 30 months analyzed, 18 weeks contextualized)
+python scripts/split_chat_months.py
+python scripts/map_chat_deterministic.py
+python scripts/reduce_chat_deterministic.py
+python scripts/build_chat_context.py --week N --season 2025 --no-ai
 
-# 4. Review
-/edit-week N      # → APPROVE / REVISE / REJECT
-
-# 5. Render to HTML
-/render-week N    # → weekN.html + config.js nav update
+# Weekly column generation
+/write-week N       # → weekN_content.json (reads chat context automatically)
+/edit-week N        # → APPROVE / REVISE / REJECT
+/pick-media N       # → media_picks.json (needs GIPHY API key in settings.local.json)
+# "resolve and render week N"  → media_cache.json + weekN.html
+# "push it"
 ```
 
 ### Voice Bible Key Rules
@@ -101,26 +119,30 @@ python scripts/extract_week_data.py --all
 - See `content/voice-bible.md` for full 12-pattern guide
 
 ### Current Status
-- 2025 data: ALL 18 weeks fetched and extracted (data/ and content/weeks/)
+- 2025 data: ALL 18 weeks fetched and extracted
 - League history: 2022-2026, 392 matchups, Elo ratings computed
-- Week 1 content: DRAFT generated (`content/weeks/week1_content.json`) — needs voice calibration
-- Remaining: Compare Week 1 draft to existing `week1.html`, calibrate voice, then generate Weeks 2-18
+- Chat integration: 21K messages analyzed, 18 weekly context files built
+- Weeks 1-5: content written, validated (PASS), rendered to HTML, pushed
+- Week 6+: data + chat context ready, content not yet written
+- Picks ledger: cumulative 14-10 through Week 5
 
 ### Python Note (Windows)
 Use `python` not `python3` on this machine. Python is at:
 `C:\Users\blake\AppData\Local\Programs\Python\Python312\python`
 
 ## Common Tasks
-- **Generate weekly column:** `/write-week N` → `/edit-week N` → `/render-week N`
-- **New weekly column (manual):** Copy `week1.html` → `week2.html`, update content + nav links
-- **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
+- **Generate weekly column:** `/write-week N` → `/edit-week N` → `/pick-media N` → resolve+render → push
+- **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
+- **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
+- **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
 - **Add chart:** Canvas 2D pattern from `preseason.html`, always handle `devicePixelRatio`
 - **Test changes:** Open in browser, check responsive, verify Canvas renders, test theme toggle
 
 ## Environment
-- No env vars, no secrets, no build commands
 - Local dev: `python -m http.server 8000` or open HTML directly
 - Python: use `python` not `python3` (Windows)
+- GIPHY API key: stored in `.claude/settings.local.json` (gitignored) — needed for `/pick-media`
 - GitHub Actions runs `fetch_sleeper.py` automatically on NFL Sundays
+- `chat/` directory and `content/chat/.map_cache/` are gitignored (privacy + intermediate data)
