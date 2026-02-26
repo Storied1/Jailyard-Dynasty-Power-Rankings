@@ -1,0 +1,962 @@
+{
+  "meta": {
+    "generated": "2026-02-26T00:45:08.981629Z",
+    "message_count": 21010,
+    "analysis_version": "1.0-deterministic",
+    "months_analyzed": 30
+  },
+  "culture": {
+    "summary": "The Jailyard Dynasty group chat is a 12-member WhatsApp group that migrated from iMessage in September 2023. The chat peaks during NFL season months (September-January) with 1000-2400 messages per month, dropping to 38-180 in the deep offseason (May-June). The group's culture revolves around competitive trash talk, prediction receipts, trade debates, and a rich vocabulary of inside jokes. The tanking/Sacko discourse is the league's most enduring controversy.",
+    "communication_patterns": {
+      "peak_activity_days": [
+        "Tue",
+        "Sun",
+        "Fri"
+      ],
+      "peak_hours": [
+        "16:00-22:00 PT"
+      ],
+      "avg_daily_messages": 23.3,
+      "media_vs_text_ratio": "~15% media"
+    },
+    "activity_triggers": [
+      "Trade announcements",
+      "Thursday Night Football",
+      "Monday Night Football",
+      "Draft day",
+      "Playoff matchups",
+      "Commissioner rulings",
+      "Injury news"
+    ]
+  },
+  "running_jokes": [
+    {
+      "name": "Sacko punishment talk",
+      "total_frequency": 621,
+      "first_seen": "2023-09",
+      "last_seen": "2026-02",
+      "still_active": true,
+      "sample_block": [
+        {
+          "sender": "Unknown",
+          "text": "‎Messages and calls are end-to-end encrypted. Only people in this chat can read, listen to, or share them.",
+          "timestamp": "2023-09-07T22:54:06Z"
+        },
+        {
+          "sender": "Sacko",
+          "text": "‎Sacko created this group",
+          "timestamp": "2023-09-07T22:54:06Z"
+        },
+        {
+          "sender": "Unknown",
+          "text": "‎You joined using a group link.",
+          "timestamp": "2023-09-07T23:27:40Z"
+        }
+      ]
+    },
+    {
+      "name": "Tanking accusations",
+      "total_frequency": 311,
+      "first_seen": "2023-10",
+      "last_seen": "2025-11",
+      "still_active": true,
+      "sample_block": [
+        {
+          "sender": "Zach",
+          "text": "So fucking bad. Can’t believe we have jones all that money after a 15 td season. Time to tank for Caleb Williams",
+          "timestamp": "2023-10-03T10:18:03Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Hopefully the bears end up winning a game",
+          "timestamp": "2023-10-03T10:18:17Z"
+        }
+      ]
+    },
+    {
+      "name": "Bust performance",
+      "total_frequency": 21,
+      "first_seen": "2023-09",
+      "last_seen": "2025-11",
+      "still_active": true,
+      "sample_block": [
+        {
+          "sender": "Sacko",
+          "text": "@⁨Brent Boone⁩ BROB is now more expensive than EVER",
+          "timestamp": "2023-09-10T19:55:27Z"
+        },
+        {
+          "sender": "Neo",
+          "text": "Nothing better than week 1 over reactions",
+          "timestamp": "2023-09-10T20:02:17Z"
+        },
+        {
+          "sender": "Sacko",
+          "text": "Because you drafted bust Richardson instead of Addison?",
+          "timestamp": "2023-09-10T20:03:28Z"
+        },
+        {
+          "sender": "Neo",
+          "text": "Do you know what overreaction means?",
+          "timestamp": "2023-09-10T20:03:59Z"
+        }
+      ]
+    },
+    {
+      "name": "Commissioner authority",
+      "total_frequency": 14,
+      "first_seen": "2023-10",
+      "last_seen": "2025-10",
+      "still_active": true,
+      "sample_block": [
+        {
+          "sender": "Brent Boone",
+          "text": "‎POLL:\nZach writes week 6 peer rankings\n‎OPTION: Yes (3 votes)\n‎OPTION: No (1 vote)",
+          "timestamp": "2023-10-19T14:46:51Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "@⁨Sacko⁩ is there something going on between you and Tyler Scott that we should all know about?\n‎[10/19/23, 8:30:08 AM] Brent Boone: ‎<attached: 00001651-PHOTO-2023-10-19-08-30-08.jpg>",
+          "timestamp": "2023-10-19T15:29:25Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "I wrote power rankings for my own league two weeks ago. Why don’t you step up commish?",
+          "timestamp": "2023-10-19T15:30:53Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I wrote week 1 didn’t I?",
+          "timestamp": "2023-10-19T15:31:20Z"
+        }
+      ]
+    },
+    {
+      "name": "Cooked/done",
+      "total_frequency": 13,
+      "first_seen": "2023-09",
+      "last_seen": "2025-12",
+      "still_active": true,
+      "sample_block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Anything is better than 0 yes",
+          "timestamp": "2023-09-12T17:45:30Z"
+        },
+        {
+          "sender": "~ Harlow",
+          "text": "Well obviously this year, but maybe even as a dynasty asset moving forward",
+          "timestamp": "2023-09-12T17:46:04Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Kyler Murray is cooked",
+          "timestamp": "2023-09-12T17:57:10Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I’m bout to cook your ass this week",
+          "timestamp": "2023-09-12T17:57:19Z"
+        }
+      ]
+    },
+    {
+      "name": "Collusion accusations",
+      "total_frequency": 11,
+      "first_seen": "2023-12",
+      "last_seen": "2023-12",
+      "still_active": false,
+      "sample_block": [
+        {
+          "sender": "Karim",
+          "text": "What collusion is happening here. I expect the minutes from this encounter to ensure no foul play",
+          "timestamp": "2023-12-02T14:19:51Z"
+        },
+        {
+          "sender": "Oscar",
+          "text": "Brent is offering Pat sexual favors (look at Brent’s right hand) for Pat’s 3d round pick (look at Brent’s left hand).  We need an investigation here",
+          "timestamp": "2023-12-02T14:23:44Z"
+        }
+      ]
+    },
+    {
+      "name": "Taking Ls",
+      "total_frequency": 8,
+      "first_seen": "2023-11",
+      "last_seen": "2024-11",
+      "still_active": false,
+      "sample_block": [
+        {
+          "sender": "Brent Boone",
+          "text": "An etienne injury is incoming",
+          "timestamp": "2023-11-03T19:58:45Z"
+        },
+        {
+          "sender": "Karim",
+          "text": "Étienne about to pull his hammy and it’s gonna be the Tank show!",
+          "timestamp": "2023-11-03T19:59:03Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "The denial is crazy. Just take the L on this trade and revel in your short term trade wins. \nCan’t believe you wanted to start this fight again, makes you look so bad.",
+          "timestamp": "2023-11-03T19:59:12Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "But etienne is sick",
+          "timestamp": "2023-11-03T19:59:20Z"
+        }
+      ]
+    },
+    {
+      "name": "Jailyard league identity",
+      "total_frequency": 5,
+      "first_seen": "2024-11",
+      "last_seen": "2024-12",
+      "still_active": false,
+      "sample_block": [
+        {
+          "sender": "Brent Boone",
+          "text": "It’s exclusive",
+          "timestamp": "2024-11-04T02:02:09Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Gauchos only",
+          "timestamp": "2024-11-04T02:02:19Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Jailyard residents only as of now",
+          "timestamp": "2024-11-04T02:02:40Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Didn’t noble get it?",
+          "timestamp": "2024-11-04T02:03:02Z"
+        }
+      ]
+    },
+    {
+      "name": "Taco/Sacko references",
+      "total_frequency": 3,
+      "first_seen": "2023-10",
+      "last_seen": "2023-10",
+      "still_active": false,
+      "sample_block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Then what to change it 1 year later",
+          "timestamp": "2023-10-19T14:33:47Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Want",
+          "timestamp": "2023-10-19T14:33:56Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I’m going to propose making taco swuad 5 players instead",
+          "timestamp": "2023-10-19T14:34:16Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "🍆",
+          "timestamp": "2023-10-19T14:34:22Z"
+        }
+      ]
+    },
+    {
+      "name": "Fraud label",
+      "total_frequency": 2,
+      "first_seen": "2024-05",
+      "last_seen": "2024-05",
+      "still_active": false,
+      "sample_block": [
+        {
+          "sender": "Sacko",
+          "text": "‎This message was deleted.",
+          "timestamp": "2024-05-30T01:31:02Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "CA lemon law has always been consumer friendly (e.g. consumer is entitled to attorney fees in they “prevail”, but not the other way around; availability of civil penalties of up to two times actual damages for “wilful failure” to comply with lemon law), but the recent massive year to year increase of lemon law lawsuit filings is a result of a much more aggressive LL consumer attorney bar. They are not only filing more cases but are also adding additional claims like fraud and unfair business practices that holds up resolution of the case (essentially holding the statutorily defined LL claims and its damages hostage because of the availability of punitive damages. \nAdditionally, recent appellate law in the area is mostly plaintiff friendly is very impactful. For example, a recent CA Supreme Court cases found that auto manufacturers are not entitled to a monetary set off if the plaintiff sells/trades in their vehicle or receives receives insurance proceeds for an accident. This means that a plaintiff, either before or after filing a lawsuit, can sell their vehicle and still receive full restitution for their vehicle, allowing for double recovery. \nBecause the deck is so stacked against the auto companies, you see a lot more repurchase (or more) offers early in cases in an attempt to keep attorney fees down. It also means a lot more cases go to trial, because auto companies offer high statutory settlement offers and if plaintiff fails to beat the offer at trial, then attorney fees are cutoff and the auto company is entitled to some costs. I’ve had 2 jury trials in last 3 months and probably will have 2-3 more this year at a minimum. That’s quite a lot considering 99% of civil cases settle before trial.",
+          "timestamp": "2024-05-30T01:49:32Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Who is your client?",
+          "timestamp": "2024-05-30T01:49:42Z"
+        }
+      ]
+    }
+  ],
+  "greatest_moments": [
+    {
+      "rank": 1,
+      "title": "Brent Boone's moment",
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "‎Brent Boone joined using a group link.",
+          "timestamp": "2023-09-08T00:39:23Z"
+        },
+        {
+          "sender": "Karim",
+          "text": "Sup guys! Good luck tonight and this weekend.",
+          "timestamp": "2023-09-07T23:43:41Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Classy, champ.",
+          "timestamp": "2023-09-07T23:44:03Z"
+        },
+        {
+          "sender": "Matt Russell",
+          "text": "Gibbs has some burst.",
+          "timestamp": "2023-09-08T00:39:39Z"
+        }
+      ],
+      "target_message_index": 4,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-09"
+    },
+    {
+      "rank": 2,
+      "title": "Matt Russell's moment",
+      "block": [
+        {
+          "sender": "Matt Russell",
+          "text": "Gibbs has some burst.",
+          "timestamp": "2023-09-08T00:39:39Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I hope so",
+          "timestamp": "2023-09-08T00:39:54Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "If he doesn’t",
+          "timestamp": "2023-09-08T00:39:58Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Fasho. Good lookin first run",
+          "timestamp": "2023-09-08T00:39:58Z"
+        }
+      ],
+      "target_message_index": 7,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-09"
+    },
+    {
+      "rank": 3,
+      "title": "Brent Boone's moment",
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "If he doesn’t",
+          "timestamp": "2023-09-08T00:39:58Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Fasho. Good lookin first run",
+          "timestamp": "2023-09-08T00:39:58Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "👀",
+          "timestamp": "2023-09-08T00:40:01Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Campbell with the fake punt call was ballsy",
+          "timestamp": "2023-09-08T00:40:24Z"
+        }
+      ],
+      "target_message_index": 9,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-09"
+    },
+    {
+      "rank": 4,
+      "title": "Zach's moment",
+      "block": [
+        {
+          "sender": "Zach",
+          "text": "Fasho. Good lookin first run",
+          "timestamp": "2023-09-08T00:39:58Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "👀",
+          "timestamp": "2023-09-08T00:40:01Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Campbell with the fake punt call was ballsy",
+          "timestamp": "2023-09-08T00:40:24Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Love that in arrowhead",
+          "timestamp": "2023-09-08T00:40:30Z"
+        }
+      ],
+      "target_message_index": 10,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-09"
+    },
+    {
+      "rank": 5,
+      "title": "Brent Boone's moment",
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Wow Aaron Rodgers",
+          "timestamp": "2023-09-12T01:17:22Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "What say you Ben ‎",
+          "timestamp": "2023-09-12T01:17:33Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Classic Jets",
+          "timestamp": "2023-09-12T01:17:41Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Zack Wilson looks like more of the same too",
+          "timestamp": "2023-09-12T01:17:52Z"
+        }
+      ],
+      "target_message_index": 165,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-09"
+    },
+    {
+      "rank": 6,
+      "title": "Karim's moment",
+      "block": [
+        {
+          "sender": "Karim",
+          "text": "If there’s anyone who ain’t got shit to do its Brent",
+          "timestamp": "2023-10-02T15:36:23Z"
+        },
+        {
+          "sender": "Karim",
+          "text": "Or are you not gaming at 3pm?",
+          "timestamp": "2023-10-02T15:36:34Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Flying to nyc for work",
+          "timestamp": "2023-10-02T15:36:51Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "We all know you don’t do Shit except watch Jackie KARIM",
+          "timestamp": "2023-10-02T15:36:59Z"
+        }
+      ],
+      "target_message_index": 77,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-10"
+    },
+    {
+      "rank": 7,
+      "title": "Karim's moment",
+      "block": [
+        {
+          "sender": "Karim",
+          "text": "Or are you not gaming at 3pm?",
+          "timestamp": "2023-10-02T15:36:34Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Flying to nyc for work",
+          "timestamp": "2023-10-02T15:36:51Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "We all know you don’t do Shit except watch Jackie KARIM",
+          "timestamp": "2023-10-02T15:36:59Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Don’t deflect",
+          "timestamp": "2023-10-02T15:37:06Z"
+        }
+      ],
+      "target_message_index": 78,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-10"
+    },
+    {
+      "rank": 8,
+      "title": "Brent Boone's moment",
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Flying to nyc for work",
+          "timestamp": "2023-10-02T15:36:51Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "We all know you don’t do Shit except watch Jackie KARIM",
+          "timestamp": "2023-10-02T15:36:59Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Don’t deflect",
+          "timestamp": "2023-10-02T15:37:06Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "This is a landslide the league is speaking",
+          "timestamp": "2023-10-02T15:37:24Z"
+        }
+      ],
+      "target_message_index": 79,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-10"
+    },
+    {
+      "rank": 9,
+      "title": "~ Patrick Raue's moment",
+      "block": [
+        {
+          "sender": "~ Patrick Raue",
+          "text": "One solo tackle for a LB playing 100% of snaps? Get the fuck off my team",
+          "timestamp": "2023-10-05T22:29:24Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Hahahahah",
+          "timestamp": "2023-10-05T22:29:54Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I really didn’t know why you picked him up",
+          "timestamp": "2023-10-05T22:30:06Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Pedestrian tackle numbers",
+          "timestamp": "2023-10-05T22:30:11Z"
+        }
+      ],
+      "target_message_index": 163,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-10"
+    },
+    {
+      "rank": 10,
+      "title": "Brent Boone's moment",
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "I really didn’t know why you picked him up",
+          "timestamp": "2023-10-05T22:30:06Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Pedestrian tackle numbers",
+          "timestamp": "2023-10-05T22:30:11Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I fucked up and dropped quay walker",
+          "timestamp": "2023-10-05T22:30:24Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Yeah idp can be tricky. My thought was that he has the potential for big games (see week 2) and I feel like leading tacklers on bad teams get a lot more opportunities because they’re usually trailing and there’s a lot of run plays.",
+          "timestamp": "2023-10-05T22:31:23Z"
+        }
+      ],
+      "target_message_index": 165,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-10"
+    },
+    {
+      "rank": 11,
+      "title": "Karim's moment",
+      "block": [
+        {
+          "sender": "Karim",
+          "text": "And yet a third round pick is not good enough for you 😑",
+          "timestamp": "2023-11-02T16:45:32Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Nobody should trade KARIM for anything other than his first round picks",
+          "timestamp": "2023-11-02T16:45:56Z"
+        },
+        {
+          "sender": "Karim",
+          "text": "Coach McD is the best",
+          "timestamp": "2023-11-02T16:47:05Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "By far the best",
+          "timestamp": "2023-11-02T16:47:16Z"
+        }
+      ],
+      "target_message_index": 36,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-11"
+    },
+    {
+      "rank": 12,
+      "title": "~ Patrick Raue's moment",
+      "block": [
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Ooo baby still more trades before the deadline. And between two playoff position clubs!",
+          "timestamp": "2023-11-02T20:21:18Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Zach had no idea what direction he’s going any ore",
+          "timestamp": "2023-11-02T20:22:59Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Anymore",
+          "timestamp": "2023-11-02T20:23:02Z"
+        },
+        {
+          "sender": "Karim",
+          "text": "Let’s goo! Zach haggled his way into this one but I think it is gonna benefit both sides",
+          "timestamp": "2023-11-02T20:23:30Z"
+        }
+      ],
+      "target_message_index": 46,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-11"
+    },
+    {
+      "rank": 13,
+      "title": "Brent Boone's moment",
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Zach had no idea what direction he’s going any ore",
+          "timestamp": "2023-11-02T20:22:59Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Anymore",
+          "timestamp": "2023-11-02T20:23:02Z"
+        },
+        {
+          "sender": "Karim",
+          "text": "Let’s goo! Zach haggled his way into this one but I think it is gonna benefit both sides",
+          "timestamp": "2023-11-02T20:23:30Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Nah I like that trade for Zach. He has solid flex options and 2 better rbs",
+          "timestamp": "2023-11-02T20:23:38Z"
+        }
+      ],
+      "target_message_index": 47,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-11"
+    },
+    {
+      "rank": 14,
+      "title": "Karim's moment",
+      "block": [
+        {
+          "sender": "Karim",
+          "text": "Let’s goo! Zach haggled his way into this one but I think it is gonna benefit both sides",
+          "timestamp": "2023-11-02T20:23:30Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Nah I like that trade for Zach. He has solid flex options and 2 better rbs",
+          "timestamp": "2023-11-02T20:23:38Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "He can still compete this year and now has 2 first rounders.",
+          "timestamp": "2023-11-02T20:23:51Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "He will miss on both picks",
+          "timestamp": "2023-11-02T20:24:01Z"
+        }
+      ],
+      "target_message_index": 49,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-11"
+    },
+    {
+      "rank": 15,
+      "title": "~ Patrick Raue's moment",
+      "block": [
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Nah I like that trade for Zach. He has solid flex options and 2 better rbs",
+          "timestamp": "2023-11-02T20:23:38Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "He can still compete this year and now has 2 first rounders.",
+          "timestamp": "2023-11-02T20:23:51Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "He will miss on both picks",
+          "timestamp": "2023-11-02T20:24:01Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Because he sucks",
+          "timestamp": "2023-11-02T20:24:03Z"
+        }
+      ],
+      "target_message_index": 50,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-11"
+    },
+    {
+      "rank": 16,
+      "title": "~ Patrick Raue's moment",
+      "block": [
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Tanking has been allowed to occur this year. So other teams tanking to fuck with you certainly acceptable. But it’s their choice, if they have the pride to play their best lineups, I would respect them for it. But not as much as if they tanked hard next week 😂",
+          "timestamp": "2023-12-03T22:33:55Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Matt and Noble, next week you have the chance to do the funniest thing in the league this year",
+          "timestamp": "2023-12-03T22:35:33Z"
+        },
+        {
+          "sender": "Sacko",
+          "text": "Is Pat turning to The Dark Side?",
+          "timestamp": "2023-12-03T22:35:59Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Out of necessity.  But it’s out of my hands since I bungled it this week\n‎[12/3/23, 2:37:07 PM] ~ Patrick Raue: ‎<attached: 00004966-GIF-2023-12-03-14-37-07.mp4>",
+          "timestamp": "2023-12-03T22:36:31Z"
+        }
+      ],
+      "target_message_index": 110,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-12"
+    },
+    {
+      "rank": 17,
+      "title": "~ Patrick Raue's moment",
+      "block": [
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Matt and Noble, next week you have the chance to do the funniest thing in the league this year",
+          "timestamp": "2023-12-03T22:35:33Z"
+        },
+        {
+          "sender": "Sacko",
+          "text": "Is Pat turning to The Dark Side?",
+          "timestamp": "2023-12-03T22:35:59Z"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Out of necessity.  But it’s out of my hands since I bungled it this week\n‎[12/3/23, 2:37:07 PM] ~ Patrick Raue: ‎<attached: 00004966-GIF-2023-12-03-14-37-07.mp4>",
+          "timestamp": "2023-12-03T22:36:31Z"
+        },
+        {
+          "sender": "Karim",
+          "text": "Wow I should have benched some guys to ensure Pat couldn’t make the playoffs",
+          "timestamp": "2023-12-03T22:37:45Z"
+        }
+      ],
+      "target_message_index": 111,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-12"
+    },
+    {
+      "rank": 18,
+      "title": "Oscar's moment",
+      "block": [
+        {
+          "sender": "Oscar",
+          "text": "Karim should win it.  Nice to see Deebo rack up points tho",
+          "timestamp": "2023-12-04T00:03:05Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I have Lamar, davante, Gus, and Zay flowers on bye this week",
+          "timestamp": "2023-12-04T00:03:41Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "👀",
+          "timestamp": "2023-12-04T00:03:46Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "We should all be manifesting a panthers win",
+          "timestamp": "2023-12-04T00:04:37Z"
+        }
+      ],
+      "target_message_index": 129,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-12"
+    },
+    {
+      "rank": 19,
+      "title": "Brent Boone's moment",
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "I have Lamar, davante, Gus, and Zay flowers on bye this week",
+          "timestamp": "2023-12-04T00:03:41Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "👀",
+          "timestamp": "2023-12-04T00:03:46Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "We should all be manifesting a panthers win",
+          "timestamp": "2023-12-04T00:04:37Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Rn",
+          "timestamp": "2023-12-04T00:04:40Z"
+        }
+      ],
+      "target_message_index": 130,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-12"
+    },
+    {
+      "rank": 20,
+      "title": "Brent Boone's moment",
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "We should all be manifesting a panthers win",
+          "timestamp": "2023-12-04T00:04:37Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Rn",
+          "timestamp": "2023-12-04T00:04:40Z"
+        },
+        {
+          "sender": "Zach",
+          "text": "Why?",
+          "timestamp": "2023-12-04T00:05:52Z"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Pats are 2-10",
+          "timestamp": "2023-12-04T00:06:33Z"
+        }
+      ],
+      "target_message_index": 132,
+      "why_great": "Triggered 9 rapid responses within 5 minutes",
+      "month": "2023-12"
+    }
+  ],
+  "lexicon": {
+    "attached": "Used 64 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02",
+    "brent": "Used 54 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-03; also 2025-04; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12",
+    "photo": "Used 40 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02",
+    "nate": "Used 33 times this month; also 2023-11; also 2024-01; also 2024-02; also 2024-08; also 2024-10; also 2024-12; also 2025-03; also 2025-04; also 2025-10; also 2025-12",
+    "boone": "Used 31 times this month; also 2024-06; also 2024-09; also 2024-11; also 2025-01; also 2025-03; also 2025-04; also 2025-05; also 2025-11",
+    "league": "Used 30 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-03; also 2024-05; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-10",
+    "sacko": "Used 29 times this month; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-12; also 2025-01; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02",
+    "karim": "Used 29 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-03; also 2024-12; also 2025-07",
+    "points": "Used 28 times this month; also 2023-11; also 2023-12; also 2024-08; also 2025-10; also 2025-12",
+    "matt": "Used 22 times this month; also 2025-07",
+    "zach": "Used 44 times this month; also 2024-09; also 2024-12; also 2025-05; also 2025-10",
+    "round": "Used 35 times this month; also 2025-03; also 2025-07",
+    "oscar": "Used 32 times this month; also 2025-07; also 2025-09; also 2025-11; also 2026-01",
+    "future": "Used 31 times this month",
+    "best": "Used 30 times this month",
+    "tanking": "Used 121 times this month; also 2024-08",
+    "tank": "Used 59 times this month; also 2024-04",
+    "didn": "Used 59 times this month; also 2024-11",
+    "next": "Used 51 times this month; also 2024-01; also 2025-12; also 2026-01; also 2026-02",
+    "purdy": "Used 48 times this month",
+    "blake": "Used 46 times this month; also 2024-01; also 2024-03",
+    "great": "Used 11 times this month; also 2024-04; also 2025-11",
+    "playoffs": "Used 9 times this month",
+    "trip": "Used 9 times this month",
+    "value": "Used 7 times this month",
+    "golf": "Used 6 times this month",
+    "love": "Used 6 times this month; also 2025-04; also 2025-12",
+    "sure": "Used 5 times this month",
+    "bracket": "Used 20 times this month; also 2025-03",
+    "sleeper": "Used 13 times this month",
+    "better": "Used 12 times this month; also 2024-10; also 2024-11; also 2025-11; also 2026-01",
+    "diggs": "Used 15 times this month",
+    "https": "Used 13 times this month; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02",
+    "bills": "Used 12 times this month",
+    "years": "Used 10 times this month; also 2024-06; also 2024-09",
+    "butker": "Used 15 times this month",
+    "instagram": "Used 11 times this month; also 2025-01; also 2025-05; also 2025-08; also 2025-09; also 2026-02",
+    "igsh": "Used 11 times this month; also 2025-01; also 2025-08; also 2025-09; also 2026-02",
+    "because": "Used 11 times this month; also 2025-02",
+    "biden": "Used 23 times this month",
+    "wars": "Used 12 times this month",
+    "star": "Used 11 times this month",
+    "work": "Used 15 times this month",
+    "status": "Used 15 times this month",
+    "shit": "Used 14 times this month; also 2024-10; also 2025-11",
+    "meeting": "Used 13 times this month",
+    "august": "Used 13 times this month; also 2025-06",
+    "vote": "Used 21 times this month",
+    "anti": "Used 17 times this month",
+    "punishment": "Used 17 times this month",
+    "damn": "Used 35 times this month",
+    "dodgers": "Used 28 times this month",
+    "trump": "Used 47 times this month",
+    "patrick": "Used 35 times this month",
+    "players": "Used 38 times this month",
+    "full": "Used 30 times this month",
+    "line": "Used 10 times this month; also 2025-02",
+    "jeanty": "Used 8 times this month",
+    "mahomes": "Used 13 times this month",
+    "lakers": "Used 10 times this month",
+    "hunter": "Used 10 times this month",
+    "chiefs": "Used 10 times this month",
+    "luka": "Used 9 times this month",
+    "harlow": "Used 7 times this month; also 2025-10",
+    "burger": "Used 6 times this month",
+    "send": "Used 5 times this month",
+    "fell": "Used 4 times this month",
+    "hurts": "Used 4 times this month",
+    "reel": "Used 3 times this month; also 2025-08; also 2025-09",
+    "slow": "Used 8 times this month",
+    "mobile": "Used 3 times this month",
+    "internet": "Used 3 times this month",
+    "price": "Used 3 times this month",
+    "noble": "Used 25 times this month",
+    "redraft": "Used 13 times this month",
+    "davante": "Used 10 times this month",
+    "bench": "Used 12 times this month",
+    "congrats": "Used 9 times this month",
+    "dolphins": "Used 7 times this month",
+    "mike": "Used 7 times this month",
+    "high": "Used 7 times this month",
+    "thunter": "Used 6 times this month",
+    "happy": "Used 4 times this month",
+    "pats": "Used 3 times this month"
+  }
+}
