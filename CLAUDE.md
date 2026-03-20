@@ -21,7 +21,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 | `history.html` | League Bible — all-time records, H2H matrix, Elo ratings, franchise profiles |
 | `draft.html` | Draft recap — full draft board, grades, storylines |
 | `trades.html` | Trade tracker — timeline, season filter, activity chart |
-| `week1-5.html` | Weekly columns — essay, power rankings, mailbag, matchup picks |
+| `week1-6.html` | Weekly columns — essay, power rankings, mailbag, matchup picks |
 | `config.js` | Central league config — name, Sleeper IDs, colors, nav (edit to rebrand) |
 
 ## Data
@@ -122,9 +122,9 @@ python scripts/build_chat_context.py --week N --season 2025 --no-ai
 - 2025 data: ALL 18 weeks fetched and extracted
 - League history: 2022-2026, 392 matchups, Elo ratings computed
 - Chat integration: 21K messages analyzed, 18 weekly context files built
-- Weeks 1-5: content written, validated (PASS), rendered to HTML, pushed
-- Week 6+: data + chat context ready, content not yet written
-- Picks ledger: cumulative 14-10 through Week 5
+- Weeks 1-6: content written, validated (PASS), rendered to HTML, pushed
+- Week 7+: data + chat context ready, content not yet written
+- Picks ledger: cumulative 18-12 through Week 5 (Week 6 results pending)
 
 ### Python Note (Windows)
 Use `python` not `python3` on this machine. Python is at:
@@ -140,9 +140,21 @@ Use `python` not `python3` on this machine. Python is at:
 - **Add chart:** Canvas 2D pattern from `preseason.html`, always handle `devicePixelRatio`
 - **Test changes:** Open in browser, check responsive, verify Canvas renders, test theme toggle
 
+## Local LLM Integration (Ollama)
+- **Ollama** running at `localhost:11434` with three models:
+  - `qwen3:30b-a3b` — 18GB MoE, creative writing / heavy reasoning
+  - `qwen3:8b` — 5.2GB, fast reviews and lightweight tasks
+  - `nomic-embed-text` — 274MB, embeddings (768-dim)
+- **MCP Server** (`scripts/ollama_mcp_server.py`) — exposes `ollama_generate`, `ollama_chat`, `ollama_embed` as Claude Code tools via `.mcp.json`
+- **Local Draft** (`scripts/local_draft.py`) — generate column drafts locally before Claude edits: `python scripts/local_draft.py --week N --section essay`
+- **Chat Embeddings** (`scripts/embed_chat.py`) — vectorize 21K WhatsApp messages for semantic search: `python scripts/embed_chat.py` then `--query "trade veto"`
+- **Post-Edit Hook** (`scripts/local_review_hook.py`) — Qwen 8B reviews diffs after every Write/Edit
+- **Qwen 3 thinking mode**: all Qwen 3 models use `<think>` tokens that consume `num_predict` budget — scripts double the token limit to compensate
+
 ## Environment
 - Local dev: `python -m http.server 8000` or open HTML directly
 - Python: use `python` not `python3` (Windows)
+- Ollama: `localhost:11434` — must be running for MCP server and local scripts
 - GIPHY API key: stored in `.claude/settings.local.json` (gitignored) — needed for `/pick-media`
 - GitHub Actions runs `fetch_sleeper.py` automatically on NFL Sundays
 - `chat/` directory and `content/chat/.map_cache/` are gitignored (privacy + intermediate data)

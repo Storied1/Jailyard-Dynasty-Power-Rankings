@@ -11,6 +11,22 @@ Before writing, you MUST read these files:
 4. Previous week content summaries (from the week data's `previous_weeks_summary`)
 5. `content/weeks/week${WEEK}_chat_context.json` — real chat context (if available)
 6. `content/chat/league-memory.json` — permanent league culture reference (if available)
+7. `content/weeks/week${WEEK}_draft.json` — **local LLM draft (if available)**
+
+### Using Local Drafts
+
+If `content/weeks/week${WEEK}_draft.json` exists, this is a pre-generated draft from the local Qwen 3 model. **Use it as your starting material, not a blank page.** Your job shifts from writing to refining:
+
+- **Keep** narrative ideas, structural choices, and creative angles that work
+- **Fix** any hallucinated stats — cross-reference EVERY number against `week_data.json`
+- **Upgrade** the voice — the draft may lack the full Voice Bible DNA. Apply all 12 patterns
+- **Enrich** with chat context — the draft may underuse group chat quotes. Weave in real quotes from `chat_context.json`
+- **Add** missing sections — the draft may lack `picks`, `special_picks`, `media_slots`, or `meta`. Generate these from scratch
+- **Rewrite** weak blurbs — if a ranking blurb is generic or doesn't use second person, rewrite it fully
+- **Verify** team/owner names match `team-profiles.json` exactly
+
+If the draft is missing or empty for a section, write that section from scratch as before.
+The draft is a starting point that saves time — not a constraint. Override anything that doesn't meet quality standards.
 
 ### Enriched Fields in Week Data
 

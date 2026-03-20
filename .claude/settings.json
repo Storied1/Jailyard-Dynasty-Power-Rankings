@@ -12,12 +12,30 @@
       "Bash(head *)",
       "Bash(tail *)",
       "Bash(sed *)",
-      "Bash(python3 -m http.server *)"
+      "Bash(python3 -m http.server *)",
+      "Bash(pip list)",
+      "mcp__ollama-local__ollama_generate",
+      "mcp__ollama-local__ollama_chat",
+      "mcp__ollama-local__ollama_embed"
     ],
     "deny": [
       "Bash(rm -rf /)",
       "Bash(rm -rf ~)",
       "Bash(rm -rf .git)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/local_review_hook.py",
+            "timeout": 30000
+          }
+        ]
+      }
     ]
   }
 }
