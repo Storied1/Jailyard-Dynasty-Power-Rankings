@@ -1,4 +1,4 @@
-# CLAUDE.md — The Jailyard Dynasty Power Rankings
+# AGENTS.md — The Jailyard Dynasty Power Rankings
 
 ## Quick Context
 Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependencies — pure HTML/CSS/JS, inline everything. Data from Sleeper API (cached JSON + live fallback). Glassmorphic dark theme with light toggle.
@@ -64,7 +64,7 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 1. **`/write-week N`** — Writer agent: essay, 12 power ranking blurbs, confessionals, mailbag, bits, matchup picks (reads chat context)
 2. **`/edit-week N`** — Editor-in-Chief: quality gate (data accuracy, voice score, variety, continuity, tone)
 3. **`/pick-media N`** — Meme Savant: auto-picks GIFs for each media slot (needs GIPHY API key)
-4. **Resolve + render** — Tell Claude "resolve and render week N" → `media_cache.json` + `weekN.html`
+4. **Resolve + render** — Tell Claude Code "resolve and render week N" → `media_cache.json` + `weekN.html`
 5. **Push** — "push it"
 
 ### Content Files
@@ -124,7 +124,7 @@ python scripts/build_chat_context.py --week N --season 2025 --no-ai
 - Chat integration: 21K messages analyzed, 18 weekly context files built
 - Weeks 1-6: content written, validated (PASS), rendered to HTML, pushed
 - Week 7+: data + chat context ready, content not yet written
-- Picks ledger: cumulative through Week 6 (Week 7+ pending)
+- Picks ledger: cumulative 18-12 through Week 5 (Week 6 results pending)
 
 ### Python Note (Windows)
 Use `python` not `python3` on this machine. Python is at:
@@ -141,22 +141,20 @@ Use `python` not `python3` on this machine. Python is at:
 - **Test changes:** Open in browser, check responsive, verify Canvas renders, test theme toggle
 
 ## Local LLM Integration (Ollama)
-- **Ollama** running at `localhost:11434` with abliterated models:
-  - `huihui_ai/qwen3.5-abliterated:9b` — 6.6GB, fast reviews and lightweight tasks
-  - `huihui_ai/qwen3.5-abliterated:35b` — 23GB MoE, creative writing / heavy reasoning
-  - `huihui_ai/qwen3-coder-abliterated:30b` — 18GB MoE, agentic coding
+- **Ollama** running at `localhost:11434` with three models:
+  - `qwen3:30b-a3b` — 18GB MoE, creative writing / heavy reasoning
+  - `qwen3:8b` — 5.2GB, fast reviews and lightweight tasks
   - `nomic-embed-text` — 274MB, embeddings (768-dim)
 - **MCP Server** (`scripts/ollama_mcp_server.py`) — exposes `ollama_generate`, `ollama_chat`, `ollama_embed` as Claude Code tools via `.mcp.json`
-- **Local Draft** (`scripts/local_draft.py`) — generate column drafts locally before Claude edits: `python scripts/local_draft.py --week N --section essay`
+- **Local Draft** (`scripts/local_draft.py`) — generate column drafts locally before Claude Code edits: `python scripts/local_draft.py --week N --section essay`
 - **Chat Embeddings** (`scripts/embed_chat.py`) — vectorize 21K WhatsApp messages for semantic search: `python scripts/embed_chat.py` then `--query "trade veto"`
-- **Batch Drafts** (`scripts/batch_drafts.py`) — orchestrates section-by-section local drafts across all 18 weeks
-- **Post-Edit Hook** (`scripts/local_review_hook.py`) — Qwen reviews diffs after every Write/Edit
-- **Qwen 3/3.5 thinking mode**: these models use `<think>` tokens that consume `num_predict` budget — scripts double the token limit to compensate
+- **Post-Edit Hook** (`scripts/local_review_hook.py`) — Qwen 8B reviews diffs after every Write/Edit
+- **Qwen 3 thinking mode**: all Qwen 3 models use `<think>` tokens that consume `num_predict` budget — scripts double the token limit to compensate
 
 ## Environment
 - Local dev: `python -m http.server 8000` or open HTML directly
 - Python: use `python` not `python3` (Windows)
 - Ollama: `localhost:11434` — must be running for MCP server and local scripts
-- GIPHY API key: stored in `.claude/settings.local.json` (gitignored) — needed for `/pick-media`
+- GIPHY API key: stored in `.Claude Code/settings.local.json` (gitignored) — needed for `/pick-media`
 - GitHub Actions runs `fetch_sleeper.py` automatically on NFL Sundays
 - `chat/` directory and `content/chat/.map_cache/` are gitignored (privacy + intermediate data)
