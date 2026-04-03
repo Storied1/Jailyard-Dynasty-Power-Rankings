@@ -21,18 +21,16 @@ import sys
 import time
 import urllib.request
 import urllib.error
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CHAT_DIR = REPO_ROOT / "chat"
+from shared import (
+    CHAT_DIR,
+    OLLAMA_BASE,
+    EMBED_MODEL,
+    EMBEDDING_BATCH_SIZE as BATCH_SIZE,
+)
+
 PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"
 EMBEDDINGS_PATH = CHAT_DIR / "embeddings.json"
-NAME_MAP_PATH = REPO_ROOT / "content" / "chat" / "name-map.json"
-
-OLLAMA_BASE = "http://localhost:11434"
-EMBED_MODEL = "nomic-embed-text"
-BATCH_SIZE = 50  # messages per embedding request
-EMBED_DIM = 768  # nomic-embed-text dimension
 
 
 # ---------------------------------------------------------------------------

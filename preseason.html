@@ -648,7 +648,7 @@ function idFromName(name){ return name.replace(/\s+/g,'-').toLowerCase(); }
 function sum(arr){ return arr.reduce((acc,[,val]) => acc + (Number(val)||0), 0); }
 function rankToPct(rank){ const max=league.teams.length; return (1 - (rank-1)/(max-1)) * 100; }
 function badgeTier(t){ if(t==='Contender') return 'good'; if(t==='Fraud') return 'bad'; if(t==='Trust the Process') return 'warn'; return ''; }
-function gradientFor(initials){ const seed=initials.charCodeAt(0)+initials.charCodeAt(1); const h1=seed%360; const h2=(h1+60)%360; return `linear-gradient(135deg, hsl(${h1},80%,55%), hsl(${h2},80%,55%))`; }
+// gradientFor now in config.js
 
 // Render navigation, cards, table and awards
 const toc = document.getElementById('toc');

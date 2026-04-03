@@ -18,9 +18,12 @@ import subprocess
 import sys
 import urllib.request
 import urllib.error
+from pathlib import Path
 
-OLLAMA_BASE = "http://localhost:11434"
-REVIEW_MODEL = "qwen3:8b"  # fast model for quick reviews
+# Ensure shared.py is importable when run as a hook from any CWD
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from shared import OLLAMA_BASE, MODEL_LIGHT as REVIEW_MODEL
 
 
 def get_diff():

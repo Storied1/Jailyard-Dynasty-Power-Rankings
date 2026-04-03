@@ -25,10 +25,9 @@ import json
 import subprocess
 import sys
 import time
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-WEEKS_DIR = REPO_ROOT / "content" / "weeks"
+from shared import REPO_ROOT, WEEKS_DIR
+
 DRAFT_SCRIPT = REPO_ROOT / "scripts" / "local_draft.py"
 STATE_FILE = WEEKS_DIR / ".batch_state.json"
 PYTHON = sys.executable

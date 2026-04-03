@@ -309,7 +309,7 @@ async function loadData(season) {
     const resp = await fetch('data/'+currentSeason+'/season_combined.json');
     if (resp.ok) {
       seasonData = await resp.json();
-      console.log('Loaded offline data for', currentSeason);
+      // Offline data loaded for currentSeason
       initFromOfflineData();
       return;
     }

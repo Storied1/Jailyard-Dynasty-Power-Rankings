@@ -436,10 +436,6 @@ const teaser = 'Boonist Monks -3.0 / Rasheeing the Scene -1.0 \u2014 two favorit
 // RENDERING
 // ═══════════════════════════════════════════════════════════
 
-function spreadToProb(spread){
-  return 1 / (1 + Math.pow(10, -spread / 7));
-}
-
 function renderWeek1(){
   // --- Essay ---
   const paragraphs = week1Essay.split('\n\n');

@@ -18,13 +18,9 @@ import json
 import re
 import sys
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CHAT_DIR = REPO_ROOT / "chat"
-CONTENT_CHAT_DIR = REPO_ROOT / "content" / "chat"
-WEEKS_DIR = REPO_ROOT / "content" / "weeks"
-DATA_DIR = REPO_ROOT / "data"
+from shared import CHAT_DIR, CONTENT_CHAT_DIR, WEEKS_DIR, DATA_DIR, load_json
+
 MEDIA_CATALOG_PATH = CONTENT_CHAT_DIR / "media-catalog.json"
 
 # Standard NFL 2025: Week 1 games Sept 4-8, cutoff Tue Sept 9 06:59:59 UTC
@@ -38,15 +34,6 @@ PRESEASON_END_2025 = datetime(2025, 9, 3, 23, 59, 59, tzinfo=timezone.utc)
 # File I/O helpers
 # ---------------------------------------------------------------------------
 
-def load_json(path, label=None):
-    """Load a JSON file. Returns None and prints warning if missing."""
-    if not path.exists():
-        tag = label or path.name
-        print(f"  WARN: {tag} not found at {path}")
-        return None
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
-
 
 def save_json(path, data):
     """Write data as pretty JSON with UTF-8."""
@@ -59,6 +46,7 @@ def save_json(path, data):
 # ---------------------------------------------------------------------------
 # Timestamp parsing
 # ---------------------------------------------------------------------------
+
 
 def parse_ts(ts_str):
     """Parse an ISO-8601 timestamp string to a timezone-aware UTC datetime."""
@@ -78,6 +66,7 @@ def parse_ts(ts_str):
 # ---------------------------------------------------------------------------
 # Temporal windowing
 # ---------------------------------------------------------------------------
+
 
 def compute_week_cutoff(week, season=2025):
     """
@@ -127,6 +116,7 @@ def filter_messages_in_window(messages, window_start, window_end):
 # Identity resolution
 # ---------------------------------------------------------------------------
 
+
 def build_identity_maps(identity_chain):
     """
     From identity_chain.json, build:
@@ -151,7 +141,11 @@ def build_identity_maps(identity_chain):
                 name_to_roster[wa_name.lower()] = rid
     else:
         # Fallback: list or dict with "identities"/"entries" key
-        entries = identity_chain if isinstance(identity_chain, list) else identity_chain.get("identities", identity_chain.get("entries", []))
+        entries = (
+            identity_chain
+            if isinstance(identity_chain, list)
+            else identity_chain.get("identities", identity_chain.get("entries", []))
+        )
         for entry in entries:
             rid = entry.get("roster_id")
             if rid is None:
@@ -178,6 +172,7 @@ def resolve_sender(sender, name_to_roster, roster_to_team):
 # ---------------------------------------------------------------------------
 # Week data helpers
 # ---------------------------------------------------------------------------
+
 
 def get_matchup_roster_pairs(week_data):
     """Return list of (roster_id_1, roster_id_2) from this week's matchups."""
@@ -231,6 +226,7 @@ def get_all_team_names(week_data):
 # Conversational block extraction
 # ---------------------------------------------------------------------------
 
+
 def extract_block(messages, target_idx, context_before=2, context_after=1):
     """Extract a conversational block around a target message index."""
     start = max(0, target_idx - context_before)
@@ -246,11 +242,15 @@ def extract_block(messages, target_idx, context_before=2, context_after=1):
             gap = abs((msg_ts - target_ts).total_seconds())
             if gap > 7200:
                 continue
-        block.append({
-            "sender": msg.get("sender", ""),
-            "text": msg.get("text", ""),
-            "timestamp_local": msg.get("timestamp_local", msg.get("timestamp_utc", ""))
-        })
+        block.append(
+            {
+                "sender": msg.get("sender", ""),
+                "text": msg.get("text", ""),
+                "timestamp_local": msg.get(
+                    "timestamp_local", msg.get("timestamp_utc", "")
+                ),
+            }
+        )
 
     adjusted_target = target_idx - start
     # Adjust for any messages skipped due to time gap
@@ -263,7 +263,7 @@ def extract_block(messages, target_idx, context_before=2, context_after=1):
 
     return {
         "block": block,
-        "target_message_index": max(0, min(adjusted_target, len(block) - 1))
+        "target_message_index": max(0, min(adjusted_target, len(block) - 1)),
     }
 
 
@@ -271,7 +271,10 @@ def extract_block(messages, target_idx, context_before=2, context_after=1):
 # Keyword matching
 # ---------------------------------------------------------------------------
 
-def build_keyword_index(week_data, identity_chain_data, roster_to_names, roster_to_team):
+
+def build_keyword_index(
+    week_data, identity_chain_data, roster_to_names, roster_to_team
+):
     """
     Build a set of keywords/phrases to search for in chat messages:
     team names, owner names, player names, WhatsApp names.
@@ -332,10 +335,19 @@ RELEVANCY_TYPES = [
 
 
 def score_message_relevancy(
-    msg, msg_idx, messages, week_data, matchup_pairs,
-    name_to_roster, roster_to_team, keywords,
-    high_scorer_rid, low_scorer_rid, relationships,
-    media_catalog=None, verbose=False
+    msg,
+    msg_idx,
+    messages,
+    week_data,
+    matchup_pairs,
+    name_to_roster,
+    roster_to_team,
+    keywords,
+    high_scorer_rid,
+    low_scorer_rid,
+    relationships,
+    media_catalog=None,
+    verbose=False,
 ):
     """
     Score a single message for relevancy to this week.
@@ -393,7 +405,7 @@ def score_message_relevancy(
         rel_type = "trash_talk"
         opp_team_display = roster_to_team.get(matchup_opponent_rid, "opponent")
         why = f"{sender} talking about opponent {opp_team_display} before their matchup"
-        suggested = f"Power ranking blurb or Overheard in the Chat"
+        suggested = "Power ranking blurb or Overheard in the Chat"
 
     # Hot take patterns
     hot_take_patterns = [
@@ -402,7 +414,9 @@ def score_message_relevancy(
         r"\b(bold prediction|hot take|unpopular opinion|mark my words)\b",
         r"\b(guaranteed|no chance|lock|easy win|no way)\b",
     ]
-    hot_take_hits = sum(1 for p in hot_take_patterns if re.search(p, text, re.IGNORECASE))
+    hot_take_hits = sum(
+        1 for p in hot_take_patterns if re.search(p, text, re.IGNORECASE)
+    )
     if hot_take_hits >= 2:
         score += 5.0
         rel_type = "hot_take"
@@ -460,14 +474,19 @@ def score_message_relevancy(
         if media_kw_matches:
             score += 3.0
             rel_type = rel_type or "media_relevant"
-            why = why or f"{sender} shared media about {media_kw_matches[0].split(':')[1]}"
+            why = (
+                why
+                or f"{sender} shared media about {media_kw_matches[0].split(':')[1]}"
+            )
             suggested = suggested or "Visual in Power ranking blurb"
 
     # Penalty: very short or unclear messages
     if len(text) < 20 and not media_desc:
         score -= 1.0
     # Penalty: media-only messages without catalog description
-    if (text.startswith("<Media omitted>") or text.startswith("image omitted")) and not media_desc:
+    if (
+        text.startswith("<Media omitted>") or text.startswith("image omitted")
+    ) and not media_desc:
         score -= 3.0
 
     if score < 2.0:
@@ -477,13 +496,14 @@ def score_message_relevancy(
         round(score, 1),
         rel_type,
         why or f"Keyword match from {sender}",
-        suggested or "Overheard in the Chat"
+        suggested or "Overheard in the Chat",
     )
 
 
 # ---------------------------------------------------------------------------
 # Arc matching
 # ---------------------------------------------------------------------------
+
 
 def find_active_arcs(arcs, week, season, week_data, roster_to_team):
     """Find arcs relevant to this week and annotate with weekly development."""
@@ -530,13 +550,22 @@ def find_active_arcs(arcs, week, season, week_data, roster_to_team):
                 margin = m.get("margin", 0)
                 developments.append(f"{winner} won by {margin}")
 
-        active.append({
-            "arc_id": arc.get("arc_id", arc.get("id", "")),
-            "title": arc.get("title", ""),
-            "status": status,
-            "this_week_development": "; ".join(developments) if developments else "Participants active this week",
-            "suggested_framing": arc.get("suggested_framing", arc.get("framing", "Continue tracking this arc"))
-        })
+        active.append(
+            {
+                "arc_id": arc.get("arc_id", arc.get("id", "")),
+                "title": arc.get("title", ""),
+                "status": status,
+                "this_week_development": (
+                    "; ".join(developments)
+                    if developments
+                    else "Participants active this week"
+                ),
+                "suggested_framing": arc.get(
+                    "suggested_framing",
+                    arc.get("framing", "Continue tracking this arc"),
+                ),
+            }
+        )
 
     return active
 
@@ -544,6 +573,7 @@ def find_active_arcs(arcs, week, season, week_data, roster_to_team):
 # ---------------------------------------------------------------------------
 # Prediction resolution
 # ---------------------------------------------------------------------------
+
 
 def resolve_predictions(predictions, week, season, week_data):
     """
@@ -554,7 +584,11 @@ def resolve_predictions(predictions, week, season, week_data):
         return []
 
     resolved = []
-    pred_list = predictions if isinstance(predictions, list) else predictions.get("predictions", [])
+    pred_list = (
+        predictions
+        if isinstance(predictions, list)
+        else predictions.get("predictions", [])
+    )
 
     # Build a lookup of team results this week
     team_results = {}
@@ -563,7 +597,7 @@ def resolve_predictions(predictions, week, season, week_data):
             t = m.get(side, {})
             tn = t.get("team_name", "").strip()
             pts = t.get("points", 0)
-            won = (m.get("winner", "").strip() == tn)
+            won = m.get("winner", "").strip() == tn
             team_results[tn.lower()] = {"points": pts, "won": won, "team_name": tn}
 
     # Build player point lookup
@@ -599,8 +633,26 @@ def resolve_predictions(predictions, week, season, week_data):
         for pname, pts in player_scores.items():
             if pname in quote_lower:
                 # Check sentiment of prediction
-                neg_words = ["washed", "bust", "done", "trash", "bad", "terrible", "won't", "can't"]
-                pos_words = ["elite", "best", "top", "mvp", "fire", "stud", "league winner", "going off"]
+                neg_words = [
+                    "washed",
+                    "bust",
+                    "done",
+                    "trash",
+                    "bad",
+                    "terrible",
+                    "won't",
+                    "can't",
+                ]
+                pos_words = [
+                    "elite",
+                    "best",
+                    "top",
+                    "mvp",
+                    "fire",
+                    "stud",
+                    "league winner",
+                    "going off",
+                ]
                 is_negative = any(w in quote_lower for w in neg_words)
                 is_positive = any(w in quote_lower for w in pos_words)
 
@@ -625,9 +677,25 @@ def resolve_predictions(predictions, week, season, week_data):
         # Try team-level resolution
         if resolution is None:
             for tname_lower, result in team_results.items():
-                if tname_lower in quote_lower or any(w in quote_lower for w in tname_lower.split() if len(w) > 3):
-                    neg_words = ["trash", "terrible", "worst", "bottom", "last", "no chance"]
-                    pos_words = ["championship", "best", "top", "title", "gonna win", "easy"]
+                if tname_lower in quote_lower or any(
+                    w in quote_lower for w in tname_lower.split() if len(w) > 3
+                ):
+                    neg_words = [
+                        "trash",
+                        "terrible",
+                        "worst",
+                        "bottom",
+                        "last",
+                        "no chance",
+                    ]
+                    pos_words = [
+                        "championship",
+                        "best",
+                        "top",
+                        "title",
+                        "gonna win",
+                        "easy",
+                    ]
                     is_negative = any(w in quote_lower for w in neg_words)
                     is_positive = any(w in quote_lower for w in pos_words)
 
@@ -642,15 +710,19 @@ def resolve_predictions(predictions, week, season, week_data):
                     break
 
         if resolution:
-            resolved.append({
-                "prediction_id": pred.get("prediction_id", pred.get("id", "")),
-                "author": author,
-                "original_quote": quote,
-                "made_at_local": pred.get("timestamp_local", pred.get("made_at", "")),
-                "resolution": resolution,
-                "evidence": evidence,
-                "comedic_value": comedic_value
-            })
+            resolved.append(
+                {
+                    "prediction_id": pred.get("prediction_id", pred.get("id", "")),
+                    "author": author,
+                    "original_quote": quote,
+                    "made_at_local": pred.get(
+                        "timestamp_local", pred.get("made_at", "")
+                    ),
+                    "resolution": resolution,
+                    "evidence": evidence,
+                    "comedic_value": comedic_value,
+                }
+            )
 
     return resolved
 
@@ -659,7 +731,10 @@ def resolve_predictions(predictions, week, season, week_data):
 # Sentiment snapshot
 # ---------------------------------------------------------------------------
 
-def build_sentiment_snapshot(window_messages, name_to_roster, roster_to_team, week_data):
+
+def build_sentiment_snapshot(
+    window_messages, name_to_roster, roster_to_team, week_data
+):
     """
     Build per-owner sentiment snapshot: activity level, mood, notable behavior.
     """
@@ -689,7 +764,6 @@ def build_sentiment_snapshot(window_messages, name_to_roster, roster_to_team, we
                 losers.add(rid)
 
     snapshot = {}
-    total_msgs = len(window_messages) if window_messages else 1
 
     for rid, team in roster_to_team.items():
         count = counts.get(rid, 0)
@@ -739,11 +813,7 @@ def build_sentiment_snapshot(window_messages, name_to_roster, roster_to_team, we
             notable = f"Most active chatter this week ({count} messages)"
 
         if team:
-            snapshot[team] = {
-                "activity": activity,
-                "mood": mood,
-                "notable": notable
-            }
+            snapshot[team] = {"activity": activity, "mood": mood, "notable": notable}
 
     return snapshot
 
@@ -763,7 +833,6 @@ def extract_chat_highlights(window_messages, scored_items, max_highlights=8):
     # Collect message indices already used in scored items
     used_indices = set()
     for item in scored_items:
-        block = item.get("block", [])
         # Mark a range around each used target
         ti = item.get("_source_idx")
         if ti is not None:
@@ -798,15 +867,25 @@ def extract_chat_highlights(window_messages, scored_items, max_highlights=8):
 
         if len(senders) >= 2 and (cluster_end - i) >= 2:
             # Found a conversation cluster
-            block_data = extract_block(window_messages, (i + cluster_end) // 2,
-                                       context_before=2, context_after=2)
+            block_data = extract_block(
+                window_messages,
+                (i + cluster_end) // 2,
+                context_before=2,
+                context_after=2,
+            )
 
             # Classify
-            combined_text = " ".join(m.get("text", "") for m in window_messages[i:cluster_end + 1]).lower()
+            combined_text = " ".join(
+                m.get("text", "") for m in window_messages[i : cluster_end + 1]
+            ).lower()
             category = "reaction"
-            if any(w in combined_text for w in ["bet", "wager", "put money", "calling it"]):
+            if any(
+                w in combined_text for w in ["bet", "wager", "put money", "calling it"]
+            ):
                 category = "debate"
-            elif any(w in combined_text for w in ["trash", "weak", "easy", "gonna destroy"]):
+            elif any(
+                w in combined_text for w in ["trash", "weak", "easy", "gonna destroy"]
+            ):
                 category = "trash_talk"
             elif any(w in combined_text for w in ["let's go", "lfg", "dub", "won"]):
                 category = "celebration"
@@ -817,12 +896,14 @@ def extract_chat_highlights(window_messages, scored_items, max_highlights=8):
             summary_parts = list(senders)[:3]
             summary = f"{', '.join(summary_parts)} exchanging messages"
 
-            highlights.append({
-                "block": block_data["block"],
-                "target_message_index": block_data["target_message_index"],
-                "category": category,
-                "summary": summary
-            })
+            highlights.append(
+                {
+                    "block": block_data["block"],
+                    "target_message_index": block_data["target_message_index"],
+                    "category": category,
+                    "summary": summary,
+                }
+            )
 
             # Skip past this cluster
             for idx in range(i, cluster_end + 1):
@@ -838,7 +919,10 @@ def extract_chat_highlights(window_messages, scored_items, max_highlights=8):
 # Suggested callbacks
 # ---------------------------------------------------------------------------
 
-def build_suggested_callbacks(league_memory, arcs, predictions, week_data, roster_to_team):
+
+def build_suggested_callbacks(
+    league_memory, arcs, predictions, week_data, roster_to_team
+):
     """Suggest callbacks to past events that connect to this week."""
     callbacks = []
 
@@ -846,17 +930,25 @@ def build_suggested_callbacks(league_memory, arcs, predictions, week_data, roste
     playing_teams = get_all_team_names(week_data)
 
     if league_memory:
-        entries = league_memory if isinstance(league_memory, list) else league_memory.get("entries", league_memory.get("memories", []))
+        entries = (
+            league_memory
+            if isinstance(league_memory, list)
+            else league_memory.get("entries", league_memory.get("memories", []))
+        )
         for entry in entries:
             text = json.dumps(entry).lower()
             for tn in playing_teams:
                 if tn in text:
-                    callbacks.append({
-                        "source": "league-memory",
-                        "content": entry.get("summary", entry.get("text", str(entry)[:120])),
-                        "from_when": entry.get("date", entry.get("season", "")),
-                        "connection_to_this_week": f"Involves {tn.title()}, who plays this week"
-                    })
+                    callbacks.append(
+                        {
+                            "source": "league-memory",
+                            "content": entry.get(
+                                "summary", entry.get("text", str(entry)[:120])
+                            ),
+                            "from_when": entry.get("date", entry.get("season", "")),
+                            "connection_to_this_week": f"Involves {tn.title()}, who plays this week",
+                        }
+                    )
                     break
             if len(callbacks) >= 5:
                 break
@@ -868,30 +960,40 @@ def build_suggested_callbacks(league_memory, arcs, predictions, week_data, roste
             arc_text = json.dumps(arc).lower()
             for tn in playing_teams:
                 if tn in arc_text:
-                    callbacks.append({
-                        "source": "arc",
-                        "content": arc.get("title", ""),
-                        "from_when": arc.get("started", arc.get("season", "")),
-                        "connection_to_this_week": f"Active arc involving {tn.title()}"
-                    })
+                    callbacks.append(
+                        {
+                            "source": "arc",
+                            "content": arc.get("title", ""),
+                            "from_when": arc.get("started", arc.get("season", "")),
+                            "connection_to_this_week": f"Active arc involving {tn.title()}",
+                        }
+                    )
                     break
             if len(callbacks) >= 8:
                 break
 
     # From predictions (already aged)
     if predictions:
-        pred_list = predictions if isinstance(predictions, list) else predictions.get("predictions", [])
+        pred_list = (
+            predictions
+            if isinstance(predictions, list)
+            else predictions.get("predictions", [])
+        )
         for pred in pred_list:
             if pred.get("status") == "open":
                 quote = pred.get("quote", pred.get("text", "")).lower()
                 for tn in playing_teams:
                     if tn in quote:
-                        callbacks.append({
-                            "source": "prediction",
-                            "content": pred.get("quote", pred.get("text", "")),
-                            "from_when": pred.get("timestamp_local", pred.get("made_at", "")),
-                            "connection_to_this_week": f"Open prediction about {tn.title()} — check if results confirm or deny"
-                        })
+                        callbacks.append(
+                            {
+                                "source": "prediction",
+                                "content": pred.get("quote", pred.get("text", "")),
+                                "from_when": pred.get(
+                                    "timestamp_local", pred.get("made_at", "")
+                                ),
+                                "connection_to_this_week": f"Open prediction about {tn.title()} — check if results confirm or deny",
+                            }
+                        )
                         break
             if len(callbacks) >= 10:
                 break
@@ -902,6 +1004,7 @@ def build_suggested_callbacks(league_memory, arcs, predictions, week_data, roste
 # ---------------------------------------------------------------------------
 # AI-assisted scoring (optional)
 # ---------------------------------------------------------------------------
+
 
 def ai_rescore_candidates(candidates, week_data, api_key=None):
     """
@@ -916,6 +1019,7 @@ def ai_rescore_candidates(candidates, week_data, api_key=None):
 
     if not api_key:
         import os
+
         api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         print("  WARN: No ANTHROPIC_API_KEY, skipping AI scoring")
@@ -923,13 +1027,15 @@ def ai_rescore_candidates(candidates, week_data, api_key=None):
 
     # Batch candidates into groups of 10
     client = anthropic.Anthropic(api_key=api_key)
-    batches = [candidates[i:i + 10] for i in range(0, len(candidates), 10)]
+    batches = [candidates[i : i + 10] for i in range(0, len(candidates), 10)]
 
     rescored = []
     for batch in batches:
         prompt_items = []
         for idx, c in enumerate(batch):
-            block_text = "\n".join(f"  {m['sender']}: {m['text']}" for m in c.get("block", []))
+            block_text = "\n".join(
+                f"  {m['sender']}: {m['text']}" for m in c.get("block", [])
+            )
             prompt_items.append(
                 f"[{idx}] Score: {c.get('score', 0)} | Type: {c.get('type', '?')}\n"
                 f"  Why: {c.get('why_relevant', '')}\n"
@@ -940,26 +1046,27 @@ def ai_rescore_candidates(candidates, week_data, api_key=None):
             "You are scoring fantasy football group chat messages for a weekly column.\n"
             "Rate each on a 1-10 scale for: humor, relevancy to this week's matchups, "
             "and how well it would read in a Bill Simmons-style column.\n"
-            "Return ONLY a JSON array of objects: [{\"idx\": 0, \"score\": 8.5, \"type\": \"trash_talk\", "
-            "\"why\": \"brief reason\"}]\n\n"
-            + "\n\n".join(prompt_items)
+            'Return ONLY a JSON array of objects: [{"idx": 0, "score": 8.5, "type": "trash_talk", '
+            '"why": "brief reason"}]\n\n' + "\n\n".join(prompt_items)
         )
 
         try:
             response = client.messages.create(
                 model="claude-haiku-4-5-20251001",
                 max_tokens=1024,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
             text = response.content[0].text
             # Extract JSON from response
-            json_match = re.search(r'\[.*\]', text, re.DOTALL)
+            json_match = re.search(r"\[.*\]", text, re.DOTALL)
             if json_match:
                 ai_scores = json.loads(json_match.group())
                 for ai_item in ai_scores:
                     bidx = ai_item.get("idx", -1)
                     if 0 <= bidx < len(batch):
-                        batch[bidx]["score"] = ai_item.get("score", batch[bidx].get("score", 0))
+                        batch[bidx]["score"] = ai_item.get(
+                            "score", batch[bidx].get("score", 0)
+                        )
                         if ai_item.get("type"):
                             batch[bidx]["type"] = ai_item["type"]
                         if ai_item.get("why"):
@@ -976,6 +1083,7 @@ def ai_rescore_candidates(candidates, week_data, api_key=None):
 # Main builder
 # ---------------------------------------------------------------------------
 
+
 def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=False):
     """Build the chat context JSON for a given week."""
     print(f"\n=== Building chat context: Week {week}, Season {season} ===")
@@ -985,13 +1093,17 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
     # --- Load all inputs ---
     messages = load_json(CHAT_DIR / "parsed_messages.json", "parsed_messages.json")
     identity_chain = load_json(CHAT_DIR / "identity_chain.json", "identity_chain.json")
-    league_memory = load_json(CONTENT_CHAT_DIR / "league-memory.json", "league-memory.json")
+    league_memory = load_json(
+        CONTENT_CHAT_DIR / "league-memory.json", "league-memory.json"
+    )
     arcs = load_json(CONTENT_CHAT_DIR / "arcs.json", "arcs.json")
     predictions = load_json(CONTENT_CHAT_DIR / "predictions.json", "predictions.json")
-    relationships = load_json(CONTENT_CHAT_DIR / "relationships.json", "relationships.json")
-    consensus = load_json(CONTENT_CHAT_DIR / "consensus.json", "consensus.json")
+    relationships = load_json(
+        CONTENT_CHAT_DIR / "relationships.json", "relationships.json"
+    )
+    load_json(CONTENT_CHAT_DIR / "consensus.json", "consensus.json")
     week_data = load_json(WEEKS_DIR / f"week{week}_data.json", f"week{week}_data.json")
-    season_data = load_json(DATA_DIR / str(season) / "season_combined.json", "season_combined.json")
+    load_json(DATA_DIR / str(season) / "season_combined.json", "season_combined.json")
 
     # Validate required files
     if messages is None:
@@ -1001,7 +1113,9 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
         print("ERROR: identity_chain.json is required. Run parse_whatsapp.py first.")
         sys.exit(1)
     if week_data is None:
-        print(f"ERROR: week{week}_data.json is required. Run extract_week_data.py --week {week} first.")
+        print(
+            f"ERROR: week{week}_data.json is required. Run extract_week_data.py --week {week} first."
+        )
         sys.exit(1)
 
     # Normalize messages to a list
@@ -1011,8 +1125,12 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
     print(f"  Loaded {len(messages)} total messages")
 
     # --- Build identity maps ---
-    roster_to_names, name_to_roster, roster_to_team = build_identity_maps(identity_chain)
-    print(f"  Identity chain: {len(name_to_roster)} WhatsApp names -> {len(roster_to_team)} rosters")
+    roster_to_names, name_to_roster, roster_to_team = build_identity_maps(
+        identity_chain
+    )
+    print(
+        f"  Identity chain: {len(name_to_roster)} WhatsApp names -> {len(roster_to_team)} rosters"
+    )
 
     # --- Compute temporal window ---
     if preseason:
@@ -1029,21 +1147,33 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
     # --- Week data helpers ---
     matchup_pairs = get_matchup_roster_pairs(week_data)
     high_scorer_rid, low_scorer_rid = get_week_high_low_scorers(week_data)
-    keywords = build_keyword_index(week_data, identity_chain, roster_to_names, roster_to_team)
+    keywords = build_keyword_index(
+        week_data, identity_chain, roster_to_names, roster_to_team
+    )
 
     if verbose:
         print(f"  Matchup pairs: {matchup_pairs}")
-        print(f"  High scorer roster: {high_scorer_rid}, Low scorer roster: {low_scorer_rid}")
+        print(
+            f"  High scorer roster: {high_scorer_rid}, Low scorer roster: {low_scorer_rid}"
+        )
         print(f"  Keywords indexed: {len(keywords)}")
 
     # --- Score every message in the window ---
     scored = []
     for idx, msg in enumerate(window_messages):
         result = score_message_relevancy(
-            msg, idx, window_messages, week_data, matchup_pairs,
-            name_to_roster, roster_to_team, keywords,
-            high_scorer_rid, low_scorer_rid, relationships,
-            verbose=verbose
+            msg,
+            idx,
+            window_messages,
+            week_data,
+            matchup_pairs,
+            name_to_roster,
+            roster_to_team,
+            keywords,
+            high_scorer_rid,
+            low_scorer_rid,
+            relationships,
+            verbose=verbose,
         )
         if result is None:
             continue
@@ -1053,18 +1183,20 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
         sender = msg.get("sender", "")
         sender_rid, sender_team = resolve_sender(sender, name_to_roster, roster_to_team)
 
-        scored.append({
-            "type": rel_type,
-            "block": block_data["block"],
-            "target_message_index": block_data["target_message_index"],
-            "author": sender,
-            "author_team": sender_team,
-            "author_roster_id": sender_rid,
-            "why_relevant": why,
-            "score": score_val,
-            "suggested_use": suggested,
-            "_source_idx": idx  # internal, stripped before output
-        })
+        scored.append(
+            {
+                "type": rel_type,
+                "block": block_data["block"],
+                "target_message_index": block_data["target_message_index"],
+                "author": sender,
+                "author_team": sender_team,
+                "author_roster_id": sender_rid,
+                "why_relevant": why,
+                "score": score_val,
+                "suggested_use": suggested,
+                "_source_idx": idx,  # internal, stripped before output
+            }
+        )
 
     print(f"  Scored candidates: {len(scored)}")
 
@@ -1113,7 +1245,9 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
     print(f"  Resolved predictions: {len(resolved_preds)}")
 
     # --- Sentiment snapshot ---
-    sentiment = build_sentiment_snapshot(window_messages, name_to_roster, roster_to_team, week_data)
+    sentiment = build_sentiment_snapshot(
+        window_messages, name_to_roster, roster_to_team, week_data
+    )
 
     # --- Chat highlights ---
     all_scored_items = high_relevancy + medium_relevancy
@@ -1129,7 +1263,9 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
     print(f"  Chat highlights: {len(highlights)}")
 
     # --- Suggested callbacks ---
-    callbacks = build_suggested_callbacks(league_memory, arcs, predictions, week_data, roster_to_team)
+    callbacks = build_suggested_callbacks(
+        league_memory, arcs, predictions, week_data, roster_to_team
+    )
     print(f"  Suggested callbacks: {len(callbacks)}")
 
     # --- Assemble output ---
@@ -1141,7 +1277,7 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
             "temporal_cutoff_utc": window_end.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "window_start_utc": window_start.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "messages_in_window": len(window_messages),
-            "total_context_items": total_context
+            "total_context_items": total_context,
         },
         "high_relevancy": high_relevancy,
         "medium_relevancy": medium_relevancy,
@@ -1149,7 +1285,7 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
         "resolved_predictions": resolved_preds,
         "sentiment_snapshot": sentiment,
         "this_weeks_chat_highlights": highlights,
-        "suggested_callbacks": callbacks
+        "suggested_callbacks": callbacks,
     }
 
     # --- Write output ---
@@ -1165,15 +1301,26 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Build per-week chat context for the AI column writer."
     )
-    parser.add_argument("--week", type=int, required=True, help="NFL week number (1-18)")
-    parser.add_argument("--season", type=int, default=2025, help="Season year (default: 2025)")
-    parser.add_argument("--preseason", action="store_true", help="Build preseason context window")
-    parser.add_argument("--no-ai", action="store_true", help="Deterministic only, no Claude API calls")
-    parser.add_argument("--verbose", action="store_true", help="Print detailed scoring info")
+    parser.add_argument(
+        "--week", type=int, required=True, help="NFL week number (1-18)"
+    )
+    parser.add_argument(
+        "--season", type=int, default=2025, help="Season year (default: 2025)"
+    )
+    parser.add_argument(
+        "--preseason", action="store_true", help="Build preseason context window"
+    )
+    parser.add_argument(
+        "--no-ai", action="store_true", help="Deterministic only, no Claude API calls"
+    )
+    parser.add_argument(
+        "--verbose", action="store_true", help="Print detailed scoring info"
+    )
 
     args = parser.parse_args()
 
@@ -1186,7 +1333,7 @@ def main():
         season=args.season,
         preseason=args.preseason,
         no_ai=args.no_ai,
-        verbose=args.verbose
+        verbose=args.verbose,
     )
 
 

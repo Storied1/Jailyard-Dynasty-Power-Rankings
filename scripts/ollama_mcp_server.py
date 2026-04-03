@@ -18,10 +18,12 @@ import json
 import sys
 import urllib.request
 import urllib.error
+from pathlib import Path
 
-OLLAMA_BASE = "http://localhost:11434"
-DEFAULT_MODEL = "qwen3:30b-a3b"
-EMBED_MODEL = "nomic-embed-text"
+# Ensure shared.py is importable when run as a subprocess from any CWD
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from shared import OLLAMA_BASE, MODEL_HEAVY as DEFAULT_MODEL, EMBED_MODEL
 
 # ---------------------------------------------------------------------------
 # Ollama API helpers

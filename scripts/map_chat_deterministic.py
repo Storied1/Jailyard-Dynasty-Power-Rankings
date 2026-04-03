@@ -9,17 +9,20 @@ Usage:
     python scripts/map_chat_deterministic.py --month 2024-03  # single month
 """
 
-import json
-import math
 import re
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-MAP_CACHE_DIR = REPO_ROOT / "content" / "chat" / ".map_cache"
-NAME_MAP_PATH = REPO_ROOT / "content" / "chat" / "name-map.json"
+from shared import (
+    MAP_CACHE_DIR,
+    NAME_MAP_PATH,
+    load_json,
+    save_json,
+    CONSENSUS_WINDOW_SIZE,
+    CONSENSUS_MIN_SENDERS,
+    RAPID_BURST_SEC,
+)
 
 # --- Prediction / hot-take detection patterns ---
 PREDICTION_PATTERNS = [
@@ -73,17 +76,6 @@ TRADE_PATTERNS = [
 ]
 
 
-def load_json(path):
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_json(path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-
-
 def parse_ts(ts_str):
     """Parse ISO timestamp string to datetime."""
     try:
@@ -98,14 +90,16 @@ def get_hour(ts_str):
     return dt.hour if dt else None
 
 
-def build_conversation_blocks(messages, max_gap_hours=2, context_before=2, context_after=1):
+def build_conversation_blocks(
+    messages, max_gap_hours=2, context_before=2, context_after=1
+):
     """Group messages into conversation blocks based on time gaps."""
     if not messages:
         return []
     blocks = []
     current_block = [0]  # indices into messages
     for i in range(1, len(messages)):
-        ts_prev = parse_ts(messages[i-1].get("timestamp_utc", ""))
+        ts_prev = parse_ts(messages[i - 1].get("timestamp_utc", ""))
         ts_curr = parse_ts(messages[i].get("timestamp_utc", ""))
         if ts_prev and ts_curr and (ts_curr - ts_prev) > timedelta(hours=max_gap_hours):
             blocks.append(current_block)
@@ -124,7 +118,7 @@ def extract_notable_block(messages, target_idx, context_before=2, context_after=
     block_msgs = []
     for i in range(start, end):
         if block_msgs:
-            prev_ts = parse_ts(messages[i-1].get("timestamp_utc", ""))
+            prev_ts = parse_ts(messages[i - 1].get("timestamp_utc", ""))
             curr_ts = parse_ts(messages[i].get("timestamp_utc", ""))
             if prev_ts and curr_ts and (curr_ts - prev_ts) > timedelta(hours=2):
                 if i <= target_idx:
@@ -132,19 +126,27 @@ def extract_notable_block(messages, target_idx, context_before=2, context_after=
                 else:
                     break  # stop adding after
         msg = messages[i]
-        block_msgs.append({
-            "sender": msg.get("sender") or "Unknown",
-            "text": msg.get("text", "") or (f"[{msg.get('media', 'media')}]" if msg.get("media") else ""),
-            "timestamp": msg.get("timestamp_utc", ""),
-        })
+        block_msgs.append(
+            {
+                "sender": msg.get("sender") or "Unknown",
+                "text": msg.get("text", "")
+                or (f"[{msg.get('media', 'media')}]" if msg.get("media") else ""),
+                "timestamp": msg.get("timestamp_utc", ""),
+            }
+        )
     return block_msgs
 
 
 def compute_posting_stats(member_msgs):
     """Compute posting statistics for a member's messages."""
     if not member_msgs:
-        return {"message_count": 0, "avg_length_chars": 0, "peak_hour": None,
-                "emoji_heavy": False, "media_count": 0}
+        return {
+            "message_count": 0,
+            "avg_length_chars": 0,
+            "peak_hour": None,
+            "emoji_heavy": False,
+            "media_count": 0,
+        }
 
     texts = [m.get("text", "") or "" for m in member_msgs]
     lengths = [len(t) for t in texts]
@@ -155,13 +157,14 @@ def compute_posting_stats(member_msgs):
     # Emoji detection
     emoji_pattern = re.compile(
         "["
-        "\U0001F600-\U0001F64F"  # emoticons
-        "\U0001F300-\U0001F5FF"  # symbols & pictographs
-        "\U0001F680-\U0001F6FF"  # transport & map
-        "\U0001F1E0-\U0001F1FF"  # flags
-        "\U00002702-\U000027B0"
-        "\U000024C2-\U0001F251"
-        "]+", flags=re.UNICODE
+        "\U0001f600-\U0001f64f"  # emoticons
+        "\U0001f300-\U0001f5ff"  # symbols & pictographs
+        "\U0001f680-\U0001f6ff"  # transport & map
+        "\U0001f1e0-\U0001f1ff"  # flags
+        "\U00002702-\U000027b0"
+        "\U000024c2-\U0001f251"
+        "]+",
+        flags=re.UNICODE,
     )
     emoji_msgs = sum(1 for t in texts if emoji_pattern.search(t))
     emoji_heavy = emoji_msgs > len(texts) * 0.2
@@ -188,14 +191,16 @@ def detect_predictions(messages):
         for pattern, pred_type in PREDICTION_PATTERNS:
             if re.search(pattern, text, re.IGNORECASE):
                 block = extract_notable_block(messages, i)
-                predictions.append({
-                    "author": msg.get("sender") or "Unknown",
-                    "type": pred_type,
-                    "quote_block": block,
-                    "target_message_index": i,
-                    "subject": (msg.get("text", "") or "")[:200],
-                    "made_at": msg.get("timestamp_utc", ""),
-                })
+                predictions.append(
+                    {
+                        "author": msg.get("sender") or "Unknown",
+                        "type": pred_type,
+                        "quote_block": block,
+                        "target_message_index": i,
+                        "subject": (msg.get("text", "") or "")[:200],
+                        "made_at": msg.get("timestamp_utc", ""),
+                    }
+                )
                 break  # one match per message
     return predictions
 
@@ -205,17 +210,16 @@ def detect_relationship_interactions(messages, name_map):
     members = set(name_map.keys())
     # Also track system name "system" to ignore
     pair_counts = Counter()
-    pair_exchanges = defaultdict(list)
 
     for i in range(1, len(messages)):
         sender = messages[i].get("sender") or ""
-        prev_sender = messages[i-1].get("sender") or ""
+        prev_sender = messages[i - 1].get("sender") or ""
         if not sender or not prev_sender or sender == prev_sender:
             continue
         if sender not in members or prev_sender not in members:
             continue
         # Check time gap
-        ts_prev = parse_ts(messages[i-1].get("timestamp_utc", ""))
+        ts_prev = parse_ts(messages[i - 1].get("timestamp_utc", ""))
         ts_curr = parse_ts(messages[i].get("timestamp_utc", ""))
         if ts_prev and ts_curr and (ts_curr - ts_prev) > timedelta(hours=2):
             continue
@@ -231,25 +235,31 @@ def detect_relationship_interactions(messages, name_map):
         exchanges = []
         for i in range(1, len(messages)):
             s = messages[i].get("sender") or ""
-            ps = messages[i-1].get("sender") or ""
+            ps = messages[i - 1].get("sender") or ""
             if not s or not ps:
                 continue
             if tuple(sorted([s, ps])) == pair:
-                block = extract_notable_block(messages, i, context_before=1, context_after=0)
+                block = extract_notable_block(
+                    messages, i, context_before=1, context_after=0
+                )
                 text = (messages[i].get("text", "") or "").lower()
                 # Classify tone heuristically
                 if any(w in text for w in ["lol", "lmao", "haha", "dead", "crying"]):
                     tone_hint = "comedic"
-                elif any(w in text for w in ["trash", "garbage", "worst", "fraud", "L "]):
+                elif any(
+                    w in text for w in ["trash", "garbage", "worst", "fraud", "L "]
+                ):
                     tone_hint = "competitive"
                 else:
                     tone_hint = "neutral"
-                exchanges.append({
-                    "block": block,
-                    "target_message_index": i,
-                    "label": f"{pair[0]} and {pair[1]} exchange",
-                    "tone_hint": tone_hint,
-                })
+                exchanges.append(
+                    {
+                        "block": block,
+                        "target_message_index": i,
+                        "label": f"{pair[0]} and {pair[1]} exchange",
+                        "tone_hint": tone_hint,
+                    }
+                )
                 if len(exchanges) >= 3:
                     break
 
@@ -258,13 +268,17 @@ def detect_relationship_interactions(messages, name_map):
         tone_counter = Counter(tone_hints)
         overall_tone = tone_counter.most_common(1)[0][0] if tone_counter else "neutral"
 
-        interactions.append({
-            "pair": list(pair),
-            "interaction_count": count,
-            "tone": overall_tone,
-            "notable_exchanges": [{k: v for k, v in e.items() if k != "tone_hint"}
-                                   for e in exchanges[:2]],
-        })
+        interactions.append(
+            {
+                "pair": list(pair),
+                "interaction_count": count,
+                "tone": overall_tone,
+                "notable_exchanges": [
+                    {k: v for k, v in e.items() if k != "tone_hint"}
+                    for e in exchanges[:2]
+                ],
+            }
+        )
 
     return interactions
 
@@ -284,14 +298,19 @@ def detect_running_jokes(messages):
     for name, indices in sorted(jokes.items(), key=lambda x: -len(x[1])):
         if len(indices) < 2:
             continue
-        # Pick first instance as representative
-        block = extract_notable_block(messages, indices[0])
-        result.append({
-            "name": name,
-            "instances": [{"block": extract_notable_block(messages, idx),
-                          "target_message_index": idx} for idx in indices[:3]],
-            "frequency_this_month": len(indices),
-        })
+        result.append(
+            {
+                "name": name,
+                "instances": [
+                    {
+                        "block": extract_notable_block(messages, idx),
+                        "target_message_index": idx,
+                    }
+                    for idx in indices[:3]
+                ],
+                "frequency_this_month": len(indices),
+            }
+        )
 
     return result[:10]
 
@@ -301,30 +320,42 @@ def detect_consensus(messages, name_map):
     # Look for message clusters with 4+ unique senders within 20 messages
     members = set(name_map.keys())
     snapshots = []
-    window = 20
+    window = CONSENSUS_WINDOW_SIZE
 
     for start in range(0, len(messages) - window, window // 2):
-        chunk = messages[start:start + window]
-        senders = set(m.get("sender") or "" for m in chunk if m.get("sender") or "" in members)
-        if len(senders) >= 4:
+        chunk = messages[start : start + window]
+        senders = set(
+            m.get("sender") or "" for m in chunk if m.get("sender") or "" in members
+        )
+        if len(senders) >= CONSENSUS_MIN_SENDERS:
             # Find the most-mentioned topic keywords
             all_text = " ".join((m.get("text", "") or "").lower() for m in chunk)
             # Look for trade/player/strategy discussions
             is_trade = bool(re.search(r"\btrade\b", all_text))
             is_draft = bool(re.search(r"\bdraft\b", all_text))
-            is_player = bool(re.search(r"\b(start|sit|pickup|waiver|add|drop)\b", all_text))
+            is_player = bool(
+                re.search(r"\b(start|sit|pickup|waiver|add|drop)\b", all_text)
+            )
 
             if is_trade or is_draft or is_player:
-                topic = "trade discussion" if is_trade else "draft discussion" if is_draft else "roster moves"
+                topic = (
+                    "trade discussion"
+                    if is_trade
+                    else "draft discussion" if is_draft else "roster moves"
+                )
                 # Find the message that sparked it
                 mid = start + window // 2
-                block = extract_notable_block(messages, mid, context_before=2, context_after=2)
-                snapshots.append({
-                    "topic": topic,
-                    "group_lean": f"{len(senders)} members engaged",
-                    "dissenters": [],
-                    "key_quotes": [{"block": block, "target_message_index": mid}],
-                })
+                block = extract_notable_block(
+                    messages, mid, context_before=2, context_after=2
+                )
+                snapshots.append(
+                    {
+                        "topic": topic,
+                        "group_lean": f"{len(senders)} members engaged",
+                        "dissenters": [],
+                        "key_quotes": [{"block": block, "target_message_index": mid}],
+                    }
+                )
                 if len(snapshots) >= 5:
                     break
 
@@ -345,7 +376,7 @@ def find_greatest_moments(messages, name_map):
         burst = 0
         for j in range(i + 1, min(i + 10, len(messages))):
             ts_j = parse_ts(messages[j].get("timestamp_utc", ""))
-            if ts_j and (ts_j - ts_start) < timedelta(minutes=5):
+            if ts_j and (ts_j - ts_start) < timedelta(seconds=RAPID_BURST_SEC):
                 burst += 1
             else:
                 break
@@ -353,14 +384,18 @@ def find_greatest_moments(messages, name_map):
         if burst >= 4:
             text = messages[i].get("text", "") or ""
             if len(text) > 10:  # skip media-only triggers
-                block = extract_notable_block(messages, i, context_before=0, context_after=3)
-                moments.append({
-                    "title": f"{messages[i].get('sender', 'Someone')}'s moment",
-                    "block": block,
-                    "target_message_index": i,
-                    "why_great": f"Triggered {burst} rapid responses within 5 minutes",
-                    "burst_size": burst,
-                })
+                block = extract_notable_block(
+                    messages, i, context_before=0, context_after=3
+                )
+                moments.append(
+                    {
+                        "title": f"{messages[i].get('sender', 'Someone')}'s moment",
+                        "block": block,
+                        "target_message_index": i,
+                        "why_great": f"Triggered {burst} rapid responses within 5 minutes",
+                        "burst_size": burst,
+                    }
+                )
 
     # Sort by burst size and take top 5
     moments.sort(key=lambda x: -x.get("burst_size", 0))
@@ -377,16 +412,92 @@ def extract_lexicon(messages):
         word_counts.update(words)
 
     # Filter to interesting terms (not super common)
-    COMMON = {"that", "this", "with", "from", "have", "they", "been", "would", "could",
-              "will", "just", "like", "what", "when", "your", "about", "know", "think",
-              "than", "more", "some", "into", "them", "then", "were", "said", "each",
-              "much", "make", "made", "well", "back", "also", "good", "even", "here",
-              "most", "want", "yeah", "need", "going", "really", "right", "still",
-              "gonna", "getting", "pretty", "though", "should", "thing", "being",
-              "doing", "their", "there", "these", "those", "which", "people", "after",
-              "before", "never", "first", "other", "over", "only", "come", "very",
-              "time", "look", "take", "down", "game", "team", "play", "player", "year",
-              "week", "season", "pick", "draft", "trade", "point", "start", "last"}
+    COMMON = {
+        "that",
+        "this",
+        "with",
+        "from",
+        "have",
+        "they",
+        "been",
+        "would",
+        "could",
+        "will",
+        "just",
+        "like",
+        "what",
+        "when",
+        "your",
+        "about",
+        "know",
+        "think",
+        "than",
+        "more",
+        "some",
+        "into",
+        "them",
+        "then",
+        "were",
+        "said",
+        "each",
+        "much",
+        "make",
+        "made",
+        "well",
+        "back",
+        "also",
+        "good",
+        "even",
+        "here",
+        "most",
+        "want",
+        "yeah",
+        "need",
+        "going",
+        "really",
+        "right",
+        "still",
+        "gonna",
+        "getting",
+        "pretty",
+        "though",
+        "should",
+        "thing",
+        "being",
+        "doing",
+        "their",
+        "there",
+        "these",
+        "those",
+        "which",
+        "people",
+        "after",
+        "before",
+        "never",
+        "first",
+        "other",
+        "over",
+        "only",
+        "come",
+        "very",
+        "time",
+        "look",
+        "take",
+        "down",
+        "game",
+        "team",
+        "play",
+        "player",
+        "year",
+        "week",
+        "season",
+        "pick",
+        "draft",
+        "trade",
+        "point",
+        "start",
+        "last",
+    }
 
     lexicon = {}
     for word, count in word_counts.most_common(50):
@@ -404,51 +515,75 @@ def find_candidate_arcs(messages, predictions, relationships, name_map):
     members = set(name_map.keys())
 
     # Trade saga detection
-    trade_msgs = [(i, m) for i, m in enumerate(messages)
-                  if any(re.search(p, (m.get("text", "") or "").lower()) for p in TRADE_PATTERNS)]
+    trade_msgs = [
+        (i, m)
+        for i, m in enumerate(messages)
+        if any(re.search(p, (m.get("text", "") or "").lower()) for p in TRADE_PATTERNS)
+    ]
     if len(trade_msgs) >= 3:
         # Cluster trade messages
-        block = extract_notable_block(messages, trade_msgs[0][0])
-        participants = list(set(m.get("sender") or "" for _, m in trade_msgs[:10]) & members)
-        arcs.append({
-            "title": "Trade activity surge",
-            "type": "trade_saga",
-            "participants": participants[:5],
-            "key_moments": [{"block": extract_notable_block(messages, idx),
-                            "target_message_index": idx,
-                            "significance": "Trade discussion"} for idx, _ in trade_msgs[:3]],
-            "status": "building" if len(trade_msgs) > 5 else "emerging",
-        })
+        participants = list(
+            set(m.get("sender") or "" for _, m in trade_msgs[:10]) & members
+        )
+        arcs.append(
+            {
+                "title": "Trade activity surge",
+                "type": "trade_saga",
+                "participants": participants[:5],
+                "key_moments": [
+                    {
+                        "block": extract_notable_block(messages, idx),
+                        "target_message_index": idx,
+                        "significance": "Trade discussion",
+                    }
+                    for idx, _ in trade_msgs[:3]
+                ],
+                "status": "building" if len(trade_msgs) > 5 else "emerging",
+            }
+        )
 
     # Rivalry detection from relationships
     for rel in relationships[:3]:
         if rel.get("tone") in ("competitive", "hostile"):
-            arcs.append({
-                "title": f"{rel['pair'][0]} vs {rel['pair'][1]}",
-                "type": "rivalry",
-                "participants": rel["pair"],
-                "key_moments": [{"block": ex["block"],
-                                "target_message_index": ex["target_message_index"],
-                                "significance": ex["label"]}
-                               for ex in rel.get("notable_exchanges", [])[:2]],
-                "status": "building",
-            })
+            arcs.append(
+                {
+                    "title": f"{rel['pair'][0]} vs {rel['pair'][1]}",
+                    "type": "rivalry",
+                    "participants": rel["pair"],
+                    "key_moments": [
+                        {
+                            "block": ex["block"],
+                            "target_message_index": ex["target_message_index"],
+                            "significance": ex["label"],
+                        }
+                        for ex in rel.get("notable_exchanges", [])[:2]
+                    ],
+                    "status": "building",
+                }
+            )
 
     # Prediction saga from predictions
     if len(predictions) >= 3:
         top_predictor = Counter(p["author"] for p in predictions).most_common(1)
         if top_predictor:
             name = top_predictor[0][0]
-            arcs.append({
-                "title": f"{name}'s hot take machine",
-                "type": "prediction_saga",
-                "participants": [name],
-                "key_moments": [{"block": p["quote_block"],
-                                "target_message_index": p["target_message_index"],
-                                "significance": p["subject"][:100]}
-                               for p in predictions if p["author"] == name][:3],
-                "status": "building",
-            })
+            arcs.append(
+                {
+                    "title": f"{name}'s hot take machine",
+                    "type": "prediction_saga",
+                    "participants": [name],
+                    "key_moments": [
+                        {
+                            "block": p["quote_block"],
+                            "target_message_index": p["target_message_index"],
+                            "significance": p["subject"][:100],
+                        }
+                        for p in predictions
+                        if p["author"] == name
+                    ][:3],
+                    "status": "building",
+                }
+            )
 
     return arcs[:8]
 
@@ -476,42 +611,62 @@ def process_month(month, chunk_path, name_map):
 
         # Find notable quotes (longest messages, messages with many responses)
         sorted_by_len = sorted(
-            [(i, m) for i, m in enumerate(messages) if m.get("sender") == member and len(m.get("text", "") or "") > 30],
-            key=lambda x: -len(x[1].get("text", "") or "")
+            [
+                (i, m)
+                for i, m in enumerate(messages)
+                if m.get("sender") == member and len(m.get("text", "") or "") > 30
+            ],
+            key=lambda x: -len(x[1].get("text", "") or ""),
         )
         notable_quotes = []
         for idx, msg in sorted_by_len[:3]:
             block = extract_notable_block(messages, idx)
-            notable_quotes.append({
-                "block": block,
-                "target_message_index": idx,
-                "context": f"Notable message ({len(msg.get('text', '') or '')} chars)",
-            })
+            notable_quotes.append(
+                {
+                    "block": block,
+                    "target_message_index": idx,
+                    "context": f"Notable message ({len(msg.get('text', '') or '')} chars)",
+                }
+            )
 
         # Observations
         observations = []
         if stats["message_count"] > msg_count * 0.15:
-            observations.append(f"Dominant voice this month ({stats['message_count']} of {msg_count} messages)")
+            observations.append(
+                f"Dominant voice this month ({stats['message_count']} of {msg_count} messages)"
+            )
         elif stats["message_count"] < msg_count * 0.03 and msg_count > 50:
             observations.append(f"Quiet month — only {stats['message_count']} messages")
         if stats["emoji_heavy"]:
             observations.append("Heavy emoji user this month")
         if stats["media_count"] > stats["message_count"] * 0.3:
-            observations.append(f"Media-heavy poster ({stats['media_count']} media items)")
+            observations.append(
+                f"Media-heavy poster ({stats['media_count']} media items)"
+            )
         if stats["peak_hour"] is not None:
             if stats["peak_hour"] >= 22 or stats["peak_hour"] <= 4:
-                observations.append(f"Night owl — peak activity at {stats['peak_hour']}:00")
+                observations.append(
+                    f"Night owl — peak activity at {stats['peak_hour']}:00"
+                )
         if stats["avg_length_chars"] > 150:
-            observations.append(f"Essay writer — avg {stats['avg_length_chars']} chars per message")
+            observations.append(
+                f"Essay writer — avg {stats['avg_length_chars']} chars per message"
+            )
         elif stats["avg_length_chars"] < 30 and stats["message_count"] > 10:
             observations.append("One-liner specialist")
 
-        persona_observations.append({
-            "member": member,
-            "observations": observations if observations else [f"Active with {stats['message_count']} messages"],
-            "notable_quotes": notable_quotes,
-            "posting_stats": stats,
-        })
+        persona_observations.append(
+            {
+                "member": member,
+                "observations": (
+                    observations
+                    if observations
+                    else [f"Active with {stats['message_count']} messages"]
+                ),
+                "notable_quotes": notable_quotes,
+                "posting_stats": stats,
+            }
+        )
 
     # --- Other extractions ---
     predictions = detect_predictions(messages)
@@ -538,7 +693,10 @@ def process_month(month, chunk_path, name_map):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="Deterministic MAP phase for chat analysis")
+
+    parser = argparse.ArgumentParser(
+        description="Deterministic MAP phase for chat analysis"
+    )
     parser.add_argument("--month", type=str, help="Process single month (YYYY-MM)")
     args = parser.parse_args()
 
@@ -578,8 +736,10 @@ def main():
             stats = result.get("persona_observations", [])
             preds = result.get("predictions_and_bets", [])
             arcs = result.get("candidate_arcs", [])
-            print(f" {result['message_count']} msgs, {len(stats)} members, "
-                  f"{len(preds)} predictions, {len(arcs)} arcs")
+            print(
+                f" {result['message_count']} msgs, {len(stats)} members, "
+                f"{len(preds)} predictions, {len(arcs)} arcs"
+            )
             success += 1
         except Exception as e:
             print(f" ERROR: {e}")

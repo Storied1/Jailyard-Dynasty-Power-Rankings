@@ -27,15 +27,14 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CONTENT_DIR = REPO_ROOT / "content"
-WEEKS_DIR = CONTENT_DIR / "weeks"
-VOICE_BIBLE = CONTENT_DIR / "voice-bible.md"
-TEAM_PROFILES = CONTENT_DIR / "team-profiles.json"
-
-OLLAMA_BASE = "http://localhost:11434"
-MODEL_HEAVY = "qwen3:30b-a3b"
-MODEL_LIGHT = "qwen3:8b"
+from shared import (
+    WEEKS_DIR,
+    VOICE_BIBLE_PATH as VOICE_BIBLE,
+    TEAM_PROFILES_PATH as TEAM_PROFILES,
+    OLLAMA_BASE,
+    MODEL_HEAVY,
+    MODEL_LIGHT,
+)
 
 # Section generation order and model assignment
 SECTIONS = [

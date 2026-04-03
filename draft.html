@@ -417,12 +417,7 @@ function renderDraftBoard() {
 }
 
 // --- Render grade cards ---
-function gradientFor(initials) {
-  const seed = initials.charCodeAt(0) + initials.charCodeAt(1);
-  const h1 = seed % 360;
-  const h2 = (h1 + 60) % 360;
-  return `linear-gradient(135deg, hsl(${h1},80%,55%), hsl(${h2},80%,55%))`;
-}
+// gradientFor now in config.js
 
 function renderGrades() {
   const grid = document.getElementById('gradeGrid');

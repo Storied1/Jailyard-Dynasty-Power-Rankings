@@ -300,19 +300,7 @@ var week3MediaCache = {
   }
 };
 
-function processMediaTokens(text) {
-  return text.replace(/\{\{media:([^}]+)\}\}/g, function(_, slotId) {
-    var slot = week3MediaCache[slotId];
-    if (!slot) return '';
-    return '<figure class="media-slot" id="media-' + slotId + '">' +
-      '<video loop muted playsinline' +
-      ' width="' + slot.width + '" height="' + slot.height + '"' +
-      ' poster="' + slot.poster_url + '" preload="none"' +
-      ' aria-label="' + slot.alt_text.replace(/"/g, '&quot;') + '">' +
-      '<source data-src="' + slot.mp4_url + '" type="video/mp4">' +
-      '</video></figure>';
-  });
-}
+// processMediaTokens, spreadToProb, parseMovement now in config.js
 
 // ═══════════════════════════════════════════════════════════
 // WEEK 3 DATA
@@ -477,25 +465,12 @@ var teaser3 = 'Kittler \u22121.0 / Boonist Monks \u22122.5 \u2014 two proven com
 // RENDERING
 // ═══════════════════════════════════════════════════════════
 
-function spreadToProb(spread){
-  return 1 / (1 + Math.pow(10, -spread / 7));
-}
-
-function parseMovement(movement) {
-  if (movement === 'steady') return { cls: 'steady', text: '\u2014' };
-  var parts = movement.split('_');
-  var dir = parts[0];
-  var n = parts[1] || '1';
-  if (dir === 'up') return { cls: 'up', text: '\u2191' + n };
-  return { cls: 'down', text: '\u2193' + n };
-}
-
 function renderWeek3(){
   // --- Essay ---
   var paragraphs = week3Essay.split('\n\n');
   var essayHtml = '<h3>The Column</h3>';
   paragraphs.forEach(function(p){
-    var processed = processMediaTokens(p);
+    var processed = processMediaTokens(p, week3MediaCache);
     if (processed.indexOf('<figure') === 0) {
       essayHtml += processed;
     } else {

@@ -39,14 +39,17 @@ except ImportError:
 try:
     import cv2
 except ImportError:
-    print("ERROR: opencv-python-headless required. Install with: pip install opencv-python-headless")
+    print(
+        "ERROR: opencv-python-headless required. Install with: pip install opencv-python-headless"
+    )
     sys.exit(1)
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-PARSED_MESSAGES = REPO_ROOT / "chat" / "parsed_messages.json"
+from shared import REPO_ROOT, CHAT_DIR, CONTENT_CHAT_DIR, MAX_IMAGE_SIZE, JPEG_QUALITY
+
+PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"
 MEDIA_DIR = REPO_ROOT / "WhatsApp Chat - The Jailyard"
-PROGRESS_PATH = REPO_ROOT / "content" / "chat" / ".media_progress.json"
-OUTPUT_PATH = REPO_ROOT / "content" / "chat" / "media-catalog.json"
+PROGRESS_PATH = CONTENT_CHAT_DIR / ".media_progress.json"
+OUTPUT_PATH = CONTENT_CHAT_DIR / "media-catalog.json"
 
 MODEL = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 1024
@@ -56,7 +59,10 @@ RATE_LIMIT_BASE_DELAY = 2.0
 
 # ── Image/Video Processing ───────────────────────────────────────────
 
-def read_image_as_base64(path: Path, max_size: int = 1024) -> tuple[str, str] | None:
+
+def read_image_as_base64(
+    path: Path, max_size: int = MAX_IMAGE_SIZE
+) -> tuple[str, str] | None:
     """Read an image file, resize if needed, return (base64_data, media_type) or None."""
     try:
         img = cv2.imread(str(path))
@@ -66,7 +72,7 @@ def read_image_as_base64(path: Path, max_size: int = 1024) -> tuple[str, str] | 
         if max(h, w) > max_size:
             scale = max_size / max(h, w)
             img = cv2.resize(img, (int(w * scale), int(h * scale)))
-        _, buffer = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        _, buffer = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY])
         b64 = base64.b64encode(buffer.tobytes()).decode("ascii")
         return b64, "image/jpeg"
     except Exception as e:
@@ -74,7 +80,9 @@ def read_image_as_base64(path: Path, max_size: int = 1024) -> tuple[str, str] | 
         return None
 
 
-def extract_video_frame(path: Path, target_sec: float = 1.0, max_size: int = 1024) -> tuple[str, str] | None:
+def extract_video_frame(
+    path: Path, target_sec: float = 1.0, max_size: int = MAX_IMAGE_SIZE
+) -> tuple[str, str] | None:
     """Extract a frame from a video at target_sec, return (base64_data, media_type) or None."""
     try:
         cap = cv2.VideoCapture(str(path))
@@ -101,7 +109,9 @@ def extract_video_frame(path: Path, target_sec: float = 1.0, max_size: int = 102
             scale = max_size / max(h, w)
             frame = cv2.resize(frame, (int(w * scale), int(h * scale)))
 
-        _, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        _, buffer = cv2.imencode(
+            ".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY]
+        )
         b64 = base64.b64encode(buffer.tobytes()).decode("ascii")
         return b64, "image/jpeg"
     except Exception as e:
@@ -136,6 +146,7 @@ def classify_media_type(filename: str) -> str:
 
 # ── AI Client ─────────────────────────────────────────────────────────
 
+
 def create_client() -> anthropic.Anthropic:
     """Create an Anthropic client. Requires ANTHROPIC_API_KEY env var."""
     key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
@@ -163,18 +174,22 @@ def describe_batch(client: anthropic.Anthropic, batch_items: list[dict]) -> list
     content = []
     for item in batch_items:
         b64, media_type = item["image_data"]
-        content.append({
-            "type": "text",
-            "text": f"Image {item['index']} (from {item['sender']}, {item['media_type']}):"
-        })
-        content.append({
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": media_type,
-                "data": b64,
+        content.append(
+            {
+                "type": "text",
+                "text": f"Image {item['index']} (from {item['sender']}, {item['media_type']}):",
             }
-        })
+        )
+        content.append(
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": media_type,
+                    "data": b64,
+                },
+            }
+        )
 
     for attempt in range(RATE_LIMIT_RETRIES):
         try:
@@ -187,6 +202,7 @@ def describe_batch(client: anthropic.Anthropic, batch_items: list[dict]) -> list
             raw = response.content[0].text.strip()
             # Parse JSON response
             import re
+
             if raw.startswith("```"):
                 raw = re.sub(r"^```\w*\n?", "", raw)
                 raw = re.sub(r"\n?```$", "", raw)
@@ -197,9 +213,15 @@ def describe_batch(client: anthropic.Anthropic, batch_items: list[dict]) -> list
                 if match:
                     return json.loads(match.group())
                 # Return empty descriptions
-                return [{"description": "Could not parse", "tags": ["other"], "humor_type": "none"}] * len(batch_items)
+                return [
+                    {
+                        "description": "Could not parse",
+                        "tags": ["other"],
+                        "humor_type": "none",
+                    }
+                ] * len(batch_items)
         except anthropic.RateLimitError:
-            delay = RATE_LIMIT_BASE_DELAY * (2 ** attempt)
+            delay = RATE_LIMIT_BASE_DELAY * (2**attempt)
             print(f"    Rate limited. Retrying in {delay:.0f}s...")
             time.sleep(delay)
         except anthropic.APIError as e:
@@ -207,12 +229,21 @@ def describe_batch(client: anthropic.Anthropic, batch_items: list[dict]) -> list
             if attempt < RATE_LIMIT_RETRIES - 1:
                 time.sleep(RATE_LIMIT_BASE_DELAY)
             else:
-                return [{"description": f"API error: {e}", "tags": ["other"], "humor_type": "none"}] * len(batch_items)
+                return [
+                    {
+                        "description": f"API error: {e}",
+                        "tags": ["other"],
+                        "humor_type": "none",
+                    }
+                ] * len(batch_items)
 
-    return [{"description": "Max retries exceeded", "tags": ["other"], "humor_type": "none"}] * len(batch_items)
+    return [
+        {"description": "Max retries exceeded", "tags": ["other"], "humor_type": "none"}
+    ] * len(batch_items)
 
 
 # ── Progress Management ──────────────────────────────────────────────
+
 
 def load_progress() -> dict:
     """Load progress state from cache file."""
@@ -231,14 +262,23 @@ def save_progress(progress: dict):
 
 # ── Main ─────────────────────────────────────────────────────────────
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Describe Jailyard WhatsApp media using Claude vision"
     )
-    parser.add_argument("--batch-size", type=int, default=5, help="Images per API call (default: 5)")
-    parser.add_argument("--dry-run", action="store_true", help="Count media without calling API")
-    parser.add_argument("--limit", type=int, default=0, help="Process only N items (for testing)")
-    parser.add_argument("--reset", action="store_true", help="Reset progress and start over")
+    parser.add_argument(
+        "--batch-size", type=int, default=5, help="Images per API call (default: 5)"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Count media without calling API"
+    )
+    parser.add_argument(
+        "--limit", type=int, default=0, help="Process only N items (for testing)"
+    )
+    parser.add_argument(
+        "--reset", action="store_true", help="Reset progress and start over"
+    )
     args = parser.parse_args()
 
     # ── Load parsed messages ──
@@ -264,14 +304,16 @@ def main():
             # Try with common variations
             continue
 
-        media_items.append({
-            "message_id": msg.get("id"),
-            "filename": filename,
-            "file_path": str(file_path),
-            "media_type": classify_media_type(filename),
-            "sender": msg.get("sender", "Unknown"),
-            "timestamp_utc": msg.get("timestamp_utc", ""),
-        })
+        media_items.append(
+            {
+                "message_id": msg.get("id"),
+                "filename": filename,
+                "file_path": str(file_path),
+                "media_type": classify_media_type(filename),
+                "sender": msg.get("sender", "Unknown"),
+                "timestamp_utc": msg.get("timestamp_utc", ""),
+            }
+        )
 
     # Count by type
     type_counts = {}
@@ -295,9 +337,11 @@ def main():
     completed_ids = set(progress.get("completed_ids", []))
     existing_items = {item["message_id"]: item for item in progress.get("items", [])}
 
-    remaining = [item for item in media_items if item["message_id"] not in completed_ids]
+    remaining = [
+        item for item in media_items if item["message_id"] not in completed_ids
+    ]
     if args.limit:
-        remaining = remaining[:args.limit]
+        remaining = remaining[: args.limit]
 
     print(f"  Already completed: {len(completed_ids)}")
     print(f"  Remaining: {len(remaining)}")
@@ -312,12 +356,21 @@ def main():
     client = create_client()
 
     # ── Process in batches ──
-    batches = [remaining[i:i + args.batch_size] for i in range(0, len(remaining), args.batch_size)]
+    batches = [
+        remaining[i : i + args.batch_size]
+        for i in range(0, len(remaining), args.batch_size)
+    ]
     total_batches = len(batches)
-    print(f"\n  Processing {len(remaining)} items in {total_batches} batches of {args.batch_size}...")
+    print(
+        f"\n  Processing {len(remaining)} items in {total_batches} batches of {args.batch_size}..."
+    )
 
     for bi, batch in enumerate(batches, 1):
-        print(f"  [{bi}/{total_batches}] Processing {len(batch)} items...", end=" ", flush=True)
+        print(
+            f"  [{bi}/{total_batches}] Processing {len(batch)} items...",
+            end=" ",
+            flush=True,
+        )
 
         # Load images
         batch_with_images = []
@@ -338,13 +391,15 @@ def main():
                 completed_ids.add(item["message_id"])
                 continue
 
-            batch_with_images.append({
-                "index": idx,
-                "image_data": img_data,
-                "sender": item["sender"],
-                "media_type": item["media_type"],
-                "item": item,
-            })
+            batch_with_images.append(
+                {
+                    "index": idx,
+                    "image_data": img_data,
+                    "sender": item["sender"],
+                    "media_type": item["media_type"],
+                    "item": item,
+                }
+            )
 
         if batch_with_images:
             descriptions = describe_batch(client, batch_with_images)
@@ -407,7 +462,9 @@ def write_catalog(progress: dict, media_items: list, type_counts: dict):
         ht = item.get("humor_type", "none")
         humor_counts[ht] = humor_counts.get(ht, 0) + 1
 
-    print(f"\n  Top tags: {json.dumps(dict(sorted(tag_counts.items(), key=lambda x: -x[1])[:10]))}")
+    print(
+        f"\n  Top tags: {json.dumps(dict(sorted(tag_counts.items(), key=lambda x: -x[1])[:10]))}"
+    )
     print(f"  Humor types: {json.dumps(humor_counts)}")
 
 

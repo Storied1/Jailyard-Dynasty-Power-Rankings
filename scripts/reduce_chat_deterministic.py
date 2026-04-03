@@ -12,30 +12,26 @@ Reads all content/chat/.map_cache/YYYY-MM.json MAP outputs and produces:
 No AI calls — pure aggregation, ranking, and formatting.
 """
 
-import json
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-MAP_CACHE_DIR = REPO_ROOT / "content" / "chat" / ".map_cache"
-CHAT_DIR = REPO_ROOT / "content" / "chat"
-NAME_MAP_PATH = CHAT_DIR / "name-map.json"
+from shared import (
+    REPO_ROOT,
+    MAP_CACHE_DIR,
+    CONTENT_CHAT_DIR as CHAT_DIR,
+    NAME_MAP_PATH,
+    load_json,
+    save_json as _save_json,
+)
+
 FINGERPRINTS_PATH = CHAT_DIR / "fingerprints.json"
 PERSONAS_DIR = CHAT_DIR / "personas"
 
 
-def load_json(path):
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
-
-
 def save_json(path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-    print(f"  Saved: {path.relative_to(REPO_ROOT)}")
+    """Save JSON and print the relative path."""
+    _save_json(path, data, verbose=True)
 
 
 def save_text(path, text):
@@ -67,24 +63,28 @@ def reduce_league_memory(map_outputs, name_map, total_messages):
             name = joke.get("name", "")
             freq = joke.get("frequency_this_month", 0)
             joke_counts[name] += freq
-            joke_instances[name].append({
-                "month": month,
-                "frequency": freq,
-                "sample": joke.get("instances", [{}])[0].get("block", []),
-            })
+            joke_instances[name].append(
+                {
+                    "month": month,
+                    "frequency": freq,
+                    "sample": joke.get("instances", [{}])[0].get("block", []),
+                }
+            )
 
     running_jokes = []
     for name, total in joke_counts.most_common(20):
         active_months = [inst["month"] for inst in joke_instances[name]]
         still_active = any(m >= "2025-09" for m in active_months)
-        running_jokes.append({
-            "name": name,
-            "total_frequency": total,
-            "first_seen": min(active_months),
-            "last_seen": max(active_months),
-            "still_active": still_active,
-            "sample_block": joke_instances[name][0].get("sample", []),
-        })
+        running_jokes.append(
+            {
+                "name": name,
+                "total_frequency": total,
+                "first_seen": min(active_months),
+                "last_seen": max(active_months),
+                "still_active": still_active,
+                "sample_block": joke_instances[name][0].get("sample", []),
+            }
+        )
 
     # Aggregate greatest moments
     all_moments = []
@@ -96,14 +96,16 @@ def reduce_league_memory(map_outputs, name_map, total_messages):
     # Rank by how descriptive the "why_great" is (proxy for quality)
     greatest_moments = []
     for i, moment in enumerate(all_moments[:20], 1):
-        greatest_moments.append({
-            "rank": i,
-            "title": moment.get("title", "Untitled"),
-            "block": moment.get("block", []),
-            "target_message_index": moment.get("target_message_index", 0),
-            "why_great": moment.get("why_great", ""),
-            "month": moment.get("month", ""),
-        })
+        greatest_moments.append(
+            {
+                "rank": i,
+                "title": moment.get("title", "Untitled"),
+                "block": moment.get("block", []),
+                "target_message_index": moment.get("target_message_index", 0),
+                "why_great": moment.get("why_great", ""),
+                "month": moment.get("month", ""),
+            }
+        )
 
     # Aggregate lexicon
     all_lexicon = {}
@@ -115,7 +117,6 @@ def reduce_league_memory(map_outputs, name_map, total_messages):
                 all_lexicon[term] = defn
 
     # Monthly message counts for activity patterns
-    monthly_counts = {m: d.get("message_count", 0) for m, d in map_outputs.items()}
     total_days = len(map_outputs) * 30  # rough estimate
     avg_daily = total_messages / total_days if total_days else 0
 
@@ -210,18 +211,24 @@ def reduce_arcs(map_outputs, name_map):
         titles = [a.get("title", "") for a in group]
         title = Counter(titles).most_common(1)[0][0] if titles else "Unnamed arc"
 
-        slug = f"{arc_type}-{'-'.join(p.lower().split()[0] for p in participants)}-{months[0]}" if participants else f"{arc_type}-{months[0]}"
+        slug = (
+            f"{arc_type}-{'-'.join(p.lower().split()[0] for p in participants)}-{months[0]}"
+            if participants
+            else f"{arc_type}-{months[0]}"
+        )
 
-        merged_arcs.append({
-            "arc_id": slug[:60],
-            "title": title,
-            "type": arc_type,
-            "status": status,
-            "span": {"start": months[0], "end": months[-1]} if months else {},
-            "participants": list(participants),
-            "key_moments": all_moments[:5],
-            "narrative_potential": min(10, len(group) * 2 + len(all_moments)),
-        })
+        merged_arcs.append(
+            {
+                "arc_id": slug[:60],
+                "title": title,
+                "type": arc_type,
+                "status": status,
+                "span": {"start": months[0], "end": months[-1]} if months else {},
+                "participants": list(participants),
+                "key_moments": all_moments[:5],
+                "narrative_potential": min(10, len(group) * 2 + len(all_moments)),
+            }
+        )
 
     # Sort by narrative potential
     merged_arcs.sort(key=lambda x: -x.get("narrative_potential", 0))
@@ -246,18 +253,20 @@ def reduce_predictions(map_outputs, name_map):
         key = (pred.get("author", ""), pred.get("subject", "")[:50])
         if key not in seen:
             seen.add(key)
-            unique_preds.append({
-                "id": f"pred-{len(unique_preds)+1:03d}",
-                "author_whatsapp": pred.get("author", ""),
-                "type": pred.get("type", "prediction"),
-                "quote_block": pred.get("quote_block", []),
-                "target_message_index": pred.get("target_message_index", 0),
-                "subject": pred.get("subject", ""),
-                "made_at": pred.get("made_at", ""),
-                "resolution": "pending",
-                "resolution_context": None,
-                "credibility_impact": 0,
-            })
+            unique_preds.append(
+                {
+                    "id": f"pred-{len(unique_preds)+1:03d}",
+                    "author_whatsapp": pred.get("author", ""),
+                    "type": pred.get("type", "prediction"),
+                    "quote_block": pred.get("quote_block", []),
+                    "target_message_index": pred.get("target_message_index", 0),
+                    "subject": pred.get("subject", ""),
+                    "made_at": pred.get("made_at", ""),
+                    "resolution": "pending",
+                    "resolution_context": None,
+                    "credibility_impact": 0,
+                }
+            )
 
     # Build credibility index
     cred_index = {}
@@ -283,7 +292,9 @@ def reduce_relationships(map_outputs, name_map):
     """Produce relationships.json from aggregated interaction data."""
     print("\n  Reducing: relationships.json...")
 
-    pair_data = defaultdict(lambda: {"count": 0, "tones": [], "exchanges": [], "months": []})
+    pair_data = defaultdict(
+        lambda: {"count": 0, "tones": [], "exchanges": [], "months": []}
+    )
 
     for month, data in map_outputs.items():
         for rel in data.get("relationship_interactions", []):
@@ -317,10 +328,16 @@ def reduce_relationships(map_outputs, name_map):
             dynamic = "frenemies" if info["count"] > 50 else "alliance"
 
         # Sentiment trajectory
-        early_tones = [t for t, m in zip(info["tones"], info["months"]) if m < "2025-01"]
-        late_tones = [t for t, m in zip(info["tones"], info["months"]) if m >= "2025-01"]
+        early_tones = [
+            t for t, m in zip(info["tones"], info["months"]) if m < "2025-01"
+        ]
+        late_tones = [
+            t for t, m in zip(info["tones"], info["months"]) if m >= "2025-01"
+        ]
         if early_tones and late_tones:
-            early_hostile = sum(1 for t in early_tones if t in ("hostile", "competitive"))
+            early_hostile = sum(
+                1 for t in early_tones if t in ("hostile", "competitive")
+            )
             late_hostile = sum(1 for t in late_tones if t in ("hostile", "competitive"))
             if late_hostile > early_hostile:
                 trajectory = "cooling"
@@ -331,14 +348,16 @@ def reduce_relationships(map_outputs, name_map):
         else:
             trajectory = "stable"
 
-        pairs.append({
-            "members": list(pair),
-            "interaction_count": info["count"],
-            "dynamic": dynamic,
-            "sentiment_trajectory": trajectory,
-            "peak_month": peak_month,
-            "signature_moments": info["exchanges"][:3],
-        })
+        pairs.append(
+            {
+                "members": list(pair),
+                "interaction_count": info["count"],
+                "dynamic": dynamic,
+                "sentiment_trajectory": trajectory,
+                "peak_month": peak_month,
+                "signature_moments": info["exchanges"][:3],
+            }
+        )
 
     result = {"pairs": pairs[:30]}
     save_json(CHAT_DIR / "relationships.json", result)
@@ -363,14 +382,16 @@ def reduce_consensus(map_outputs, name_map):
     snapshots = []
     for topic, snaps in topic_groups.items():
         for snap in snaps[:3]:
-            snapshots.append({
-                "topic": snap.get("topic", topic),
-                "period": snap.get("period", ""),
-                "group_opinion": snap.get("group_lean", ""),
-                "dissenters": snap.get("dissenters", []),
-                "key_quotes": snap.get("key_quotes", []),
-                "resolution": "pending",
-            })
+            snapshots.append(
+                {
+                    "topic": snap.get("topic", topic),
+                    "period": snap.get("period", ""),
+                    "group_opinion": snap.get("group_lean", ""),
+                    "dissenters": snap.get("dissenters", []),
+                    "key_quotes": snap.get("key_quotes", []),
+                    "resolution": "pending",
+                }
+            )
 
     result = {
         "snapshots": snapshots[:30],
@@ -408,8 +429,16 @@ def reduce_personas(map_outputs, name_map):
         display = identity.get("display_name", member)
 
         # Aggregate stats
-        total_msgs = sum(o.get("posting_stats", {}).get("message_count", 0) for o in observations)
-        active_months = len([o for o in observations if o.get("posting_stats", {}).get("message_count", 0) > 0])
+        total_msgs = sum(
+            o.get("posting_stats", {}).get("message_count", 0) for o in observations
+        )
+        active_months = len(
+            [
+                o
+                for o in observations
+                if o.get("posting_stats", {}).get("message_count", 0) > 0
+            ]
+        )
 
         # Collect all observations
         all_obs = []

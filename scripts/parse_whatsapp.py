@@ -26,7 +26,7 @@ if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+from shared import REPO_ROOT, NAME_MAP_PATH
 
 # WhatsApp line pattern: [M/D/YY, H:MM:SS AM/PM] Sender: message
 # The date can be M/D/YY or MM/DD/YY (single or double digit month/day)
@@ -60,8 +60,6 @@ PLATFORM_HISTORY = (
     "Migrated from iMessage to WhatsApp on 2023-09-07. "
     "League group chat predates this export."
 )
-
-NAME_MAP_PATH = REPO_ROOT / "content" / "chat" / "name-map.json"
 
 
 def build_alias_map() -> dict[str, str]:
@@ -108,7 +106,7 @@ def parse_poll(text: str) -> dict | None:
     """Parse poll content if message starts with POLL:."""
     if not text.startswith(POLL_PREFIX):
         return None
-    lines = text[len(POLL_PREFIX):].strip().split("\n")
+    lines = text[len(POLL_PREFIX) :].strip().split("\n")
     if not lines:
         return None
     question = lines[0].strip()
@@ -208,19 +206,21 @@ def parse_chat(input_path: Path) -> dict:
         if msg["sender"]:
             senders.add(msg["sender"])
 
-        output_messages.append({
-            "id": idx,
-            "timestamp_utc": format_utc(msg["utc_dt"]),
-            "timestamp_local": format_local(msg["local_dt"]),
-            "sender": msg["sender"],
-            "text": text,
-            "media": media,
-            "is_system": msg["is_system"],
-            "is_poll": is_poll,
-            "poll_data": poll_data,
-            "mentions": mentions,
-            "is_edited": is_edited,
-        })
+        output_messages.append(
+            {
+                "id": idx,
+                "timestamp_utc": format_utc(msg["utc_dt"]),
+                "timestamp_local": format_local(msg["local_dt"]),
+                "sender": msg["sender"],
+                "text": text,
+                "media": media,
+                "is_system": msg["is_system"],
+                "is_poll": is_poll,
+                "poll_data": poll_data,
+                "mentions": mentions,
+                "is_edited": is_edited,
+            }
+        )
 
     # Metadata
     sorted_senders = sorted(senders)
@@ -250,18 +250,62 @@ def build_identity_chain(name_map_path: Path) -> dict:
 
     # Hard-coded Sleeper roster data (from spec)
     roster_data = {
-        1:  {"owner_id": "510013812276232192",  "username": "GauchoTrain",    "team": "The Boonist Monks"},
-        2:  {"owner_id": "575194626101170176",  "username": "bchodos",        "team": "Kittler on the Roof"},
-        3:  {"owner_id": "575406354368348160",  "username": "kharlow",        "team": "Burden of Etienne-y Woody"},
-        4:  {"owner_id": "575878107617718272",  "username": "kevobucks",      "team": "Noble FFT"},
-        5:  {"owner_id": "510215233736572928",  "username": "KidBouzie",      "team": "The Legion of Bouz"},
-        6:  {"owner_id": "415249306090479616",  "username": "ToreroGaucho",   "team": "Rasheeing the Scene"},
-        7:  {"owner_id": "792312710317572096",  "username": "Chudders",       "team": "Chudders Football Team"},
-        8:  {"owner_id": "792563831732838400",  "username": "rango_",         "team": "MHJTIME"},
-        9:  {"owner_id": "793977545186979840",  "username": "Redrumsregrub",  "team": "Father Time"},
-        10: {"owner_id": "861064424906158080",  "username": "bLaker24",       "team": "General Ken-obi"},
-        11: {"owner_id": "510254202180411392",  "username": "zbcowan",        "team": "Sleeping Giants"},
-        12: {"owner_id": "865653448849391616",  "username": "GrayskullXX",    "team": "Ghastly Grayskull Gang"},
+        1: {
+            "owner_id": "510013812276232192",
+            "username": "GauchoTrain",
+            "team": "The Boonist Monks",
+        },
+        2: {
+            "owner_id": "575194626101170176",
+            "username": "bchodos",
+            "team": "Kittler on the Roof",
+        },
+        3: {
+            "owner_id": "575406354368348160",
+            "username": "kharlow",
+            "team": "Burden of Etienne-y Woody",
+        },
+        4: {
+            "owner_id": "575878107617718272",
+            "username": "kevobucks",
+            "team": "Noble FFT",
+        },
+        5: {
+            "owner_id": "510215233736572928",
+            "username": "KidBouzie",
+            "team": "The Legion of Bouz",
+        },
+        6: {
+            "owner_id": "415249306090479616",
+            "username": "ToreroGaucho",
+            "team": "Rasheeing the Scene",
+        },
+        7: {
+            "owner_id": "792312710317572096",
+            "username": "Chudders",
+            "team": "Chudders Football Team",
+        },
+        8: {"owner_id": "792563831732838400", "username": "rango_", "team": "MHJTIME"},
+        9: {
+            "owner_id": "793977545186979840",
+            "username": "Redrumsregrub",
+            "team": "Father Time",
+        },
+        10: {
+            "owner_id": "861064424906158080",
+            "username": "bLaker24",
+            "team": "General Ken-obi",
+        },
+        11: {
+            "owner_id": "510254202180411392",
+            "username": "zbcowan",
+            "team": "Sleeping Giants",
+        },
+        12: {
+            "owner_id": "865653448849391616",
+            "username": "GrayskullXX",
+            "team": "Ghastly Grayskull Gang",
+        },
     }
 
     # Build reverse lookup: roster_id -> whatsapp_name
@@ -317,7 +361,7 @@ def print_stats(data: dict) -> None:
     messages = data["messages"]
 
     print(f"\n{'='*50}")
-    print(f"  WhatsApp Chat Parse Results")
+    print("  WhatsApp Chat Parse Results")
     print(f"{'='*50}")
     print(f"  Messages:        {meta['message_count']}")
     print(f"  Unique senders:  {len(meta['members'])}")
@@ -331,7 +375,7 @@ def print_stats(data: dict) -> None:
 
     # Per-member counts
     counter = Counter(m["sender"] for m in messages if m["sender"])
-    print(f"\n  Messages per member:")
+    print("\n  Messages per member:")
     for sender, count in counter.most_common():
         print(f"    {sender:25s} {count:>5}")
     print(f"{'='*50}\n")
@@ -400,8 +444,10 @@ def main():
         )
         print(f"Wrote: {args.identity_output}")
     else:
-        print(f"Warning: name-map not found at {name_map_path}, skipping identity chain",
-              file=sys.stderr)
+        print(
+            f"Warning: name-map not found at {name_map_path}, skipping identity chain",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":

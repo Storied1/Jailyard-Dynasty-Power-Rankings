@@ -43,11 +43,17 @@ except ImportError:
 
 # ── Paths ───────────────────────────────────────────────────────────────
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CHAT_DIR = REPO_ROOT / "content" / "chat"
-PARSED_MESSAGES = REPO_ROOT / "chat" / "parsed_messages.json"  # lives in chat/, not content/chat/
-NAME_MAP_PATH = CHAT_DIR / "name-map.json"
-MAP_CACHE_DIR = CHAT_DIR / ".map_cache"
+from shared import (
+    REPO_ROOT,
+    CHAT_DIR,
+    CONTENT_CHAT_DIR,
+    NAME_MAP_PATH,
+    MAP_CACHE_DIR,
+)
+
+PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"  # lives in chat/, not content/chat/
+# analyze_chat.py uses CHAT_DIR to mean content/chat/ in its output paths
+CHAT_DIR = CONTENT_CHAT_DIR
 PERSONAS_DIR = CHAT_DIR / "personas"
 
 FINGERPRINTS_PATH = CHAT_DIR / "fingerprints.json"
@@ -69,6 +75,7 @@ RATE_LIMIT_BASE_DELAY = 2.0  # seconds
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
+
 
 def load_json(path: Path) -> dict | list:
     """Load a JSON file with UTF-8 encoding."""
@@ -95,10 +102,10 @@ def save_text(path: Path, text: str):
 def slugify(name: str) -> str:
     """Convert a WhatsApp display name to a filename-safe slug."""
     s = name.lower().strip()
-    s = re.sub(r"[~@#]", "", s)        # strip common prefixes
-    s = re.sub(r"[^\w\s-]", "", s)      # strip non-word chars
-    s = re.sub(r"[\s_]+", "-", s)       # spaces/underscores → hyphens
-    s = re.sub(r"-+", "-", s)           # collapse multiple hyphens
+    s = re.sub(r"[~@#]", "", s)  # strip common prefixes
+    s = re.sub(r"[^\w\s-]", "", s)  # strip non-word chars
+    s = re.sub(r"[\s_]+", "-", s)  # spaces/underscores → hyphens
+    s = re.sub(r"-+", "-", s)  # collapse multiple hyphens
     return s.strip("-")
 
 
@@ -147,8 +154,9 @@ def load_media_catalog() -> dict:
     return {item["message_id"]: item for item in items if "message_id" in item}
 
 
-def format_messages_for_prompt(messages: list[dict], limit: int = 0,
-                                media_lookup: dict | None = None) -> str:
+def format_messages_for_prompt(
+    messages: list[dict], limit: int = 0, media_lookup: dict | None = None
+) -> str:
     """Format messages as a readable chat log for AI consumption.
 
     When media_lookup is provided, inline media descriptions from the catalog
@@ -164,7 +172,9 @@ def format_messages_for_prompt(messages: list[dict], limit: int = 0,
 
         if media:
             # Try to get rich description from catalog
-            catalog_entry = media_lookup.get(msg_id) if media_lookup and msg_id else None
+            catalog_entry = (
+                media_lookup.get(msg_id) if media_lookup and msg_id else None
+            )
             if catalog_entry:
                 desc = catalog_entry.get("description", media)
                 media_type = catalog_entry.get("type", "media").upper()
@@ -182,6 +192,7 @@ def format_messages_for_prompt(messages: list[dict], limit: int = 0,
 
 
 # ── AI Client ──────────────────────────────────────────────────────────
+
 
 def create_client() -> anthropic.Anthropic:
     """Create an Anthropic client. Requires ANTHROPIC_API_KEY env var."""
@@ -206,7 +217,7 @@ def call_claude(client: anthropic.Anthropic, system: str, user: str) -> str:
             )
             return response.content[0].text
         except anthropic.RateLimitError:
-            delay = RATE_LIMIT_BASE_DELAY * (2 ** attempt)
+            delay = RATE_LIMIT_BASE_DELAY * (2**attempt)
             print(f"    Rate limited. Retrying in {delay:.0f}s...")
             time.sleep(delay)
         except anthropic.APIError as e:
@@ -388,9 +399,7 @@ def run_map_phase(
         print(f"  Media catalog loaded: {len(media_lookup)} entries")
 
     months_to_process = (
-        {single_month: monthly_chunks[single_month]}
-        if single_month
-        else monthly_chunks
+        {single_month: monthly_chunks[single_month]} if single_month else monthly_chunks
     )
     total = len(months_to_process)
     results = {}
@@ -424,6 +433,7 @@ def run_map_phase(
 
 
 # ── REDUCE Phase ───────────────────────────────────────────────────────
+
 
 def load_cached_map_outputs() -> dict[str, dict]:
     """Load all cached MAP phase outputs."""
@@ -613,14 +623,12 @@ def reduce_arcs(
             continue
         arcs = data.get("candidate_arcs", [])
         if arcs:
-            arc_summaries.append(json.dumps(
-                {"month": month, "arcs": arcs}, ensure_ascii=False
-            ))
+            arc_summaries.append(
+                json.dumps({"month": month, "arcs": arcs}, ensure_ascii=False)
+            )
 
     system = REDUCE_ARCS_SYSTEM.format(identity_context=identity_context)
-    user = REDUCE_ARCS_USER.format(
-        monthly_arcs="\n\n---\n\n".join(arc_summaries)
-    )
+    user = REDUCE_ARCS_USER.format(monthly_arcs="\n\n---\n\n".join(arc_summaries))
 
     result = call_claude_json(client, system, user)
     if isinstance(result, dict) and not isinstance(result, list):
@@ -695,9 +703,9 @@ def reduce_predictions(
             continue
         preds = data.get("predictions_and_bets", [])
         if preds:
-            pred_summaries.append(json.dumps(
-                {"month": month, "predictions": preds}, ensure_ascii=False
-            ))
+            pred_summaries.append(
+                json.dumps({"month": month, "predictions": preds}, ensure_ascii=False)
+            )
 
     system = REDUCE_PREDICTIONS_SYSTEM.format(identity_context=identity_context)
     user = REDUCE_PREDICTIONS_USER.format(
@@ -766,9 +774,9 @@ def reduce_relationships(
             continue
         rels = data.get("relationship_interactions", [])
         if rels:
-            rel_summaries.append(json.dumps(
-                {"month": month, "interactions": rels}, ensure_ascii=False
-            ))
+            rel_summaries.append(
+                json.dumps({"month": month, "interactions": rels}, ensure_ascii=False)
+            )
 
     system = REDUCE_RELATIONSHIPS_SYSTEM.format(identity_context=identity_context)
     user = REDUCE_RELATIONSHIPS_USER.format(
@@ -860,9 +868,9 @@ def reduce_consensus(
             continue
         snaps = data.get("consensus_snapshots", [])
         if snaps:
-            con_summaries.append(json.dumps(
-                {"month": month, "snapshots": snaps}, ensure_ascii=False
-            ))
+            con_summaries.append(
+                json.dumps({"month": month, "snapshots": snaps}, ensure_ascii=False)
+            )
 
     system = REDUCE_CONSENSUS_SYSTEM.format(identity_context=identity_context)
     user = REDUCE_CONSENSUS_USER.format(
@@ -977,7 +985,9 @@ def reduce_personas(
         fingerprints = fp_data.get("members", {})
         print(f"    Fingerprints loaded: {len(fingerprints)} members")
     else:
-        print("    WARNING: fingerprints.json not found — profiles will lack quantitative data")
+        print(
+            "    WARNING: fingerprints.json not found — profiles will lack quantitative data"
+        )
 
     # Load media catalog indexed by sender
     media_by_sender = defaultdict(list)
@@ -987,9 +997,13 @@ def reduce_personas(
             sender = item.get("sender", "")
             if sender:
                 media_by_sender[sender].append(item)
-        print(f"    Media catalog loaded: {sum(len(v) for v in media_by_sender.values())} items")
+        print(
+            f"    Media catalog loaded: {sum(len(v) for v in media_by_sender.values())} items"
+        )
     else:
-        print("    WARNING: media-catalog.json not found — profiles will lack media analysis")
+        print(
+            "    WARNING: media-catalog.json not found — profiles will lack media analysis"
+        )
 
     # Collect all persona observations by member
     member_data = defaultdict(list)
@@ -1033,19 +1047,31 @@ def reduce_personas(
 
         # Prepare fingerprint context
         fp = fingerprints.get(member, {})
-        fp_text = json.dumps(fp, ensure_ascii=False, indent=2) if fp else "No fingerprint data available."
+        fp_text = (
+            json.dumps(fp, ensure_ascii=False, indent=2)
+            if fp
+            else "No fingerprint data available."
+        )
 
         # Prepare media context — sample top items (limit to 50 to fit in prompt)
         member_media = media_by_sender.get(member, [])
         # Filter to items with actual descriptions
-        described_media = [m for m in member_media if m.get("description") and m["description"] != "Unable to read file"]
+        described_media = [
+            m
+            for m in member_media
+            if m.get("description") and m["description"] != "Unable to read file"
+        ]
         media_sample = described_media[:50]
         media_summary = {
             "total_media_sent": len(member_media),
             "described": len(described_media),
             "sample_items": media_sample,
         }
-        media_text = json.dumps(media_summary, ensure_ascii=False, indent=2) if member_media else "No media data available."
+        media_text = (
+            json.dumps(media_summary, ensure_ascii=False, indent=2)
+            if member_media
+            else "No media data available."
+        )
 
         system = REDUCE_PERSONA_SYSTEM.format(
             identity_context=identity_context,
@@ -1080,6 +1106,7 @@ def reduce_personas(
 
 
 # ── Main ───────────────────────────────────────────────────────────────
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -1128,7 +1155,9 @@ def main():
         print(f"  {total_messages:,} messages loaded")
 
         monthly_chunks = chunk_by_month(messages)
-        print(f"  {len(monthly_chunks)} monthly chunks: {list(monthly_chunks.keys())[0]} → {list(monthly_chunks.keys())[-1]}")
+        print(
+            f"  {len(monthly_chunks)} monthly chunks: {list(monthly_chunks.keys())[0]} → {list(monthly_chunks.keys())[-1]}"
+        )
 
         # Validate single-month arg
         if args.month:
@@ -1172,10 +1201,10 @@ def main():
     print(f"{'─' * 40}")
 
     # 1. League Memory
-    league_memory = reduce_league_memory(client, map_outputs, name_map, total_messages)
+    reduce_league_memory(client, map_outputs, name_map, total_messages)
 
     # 2. Arcs
-    arcs = reduce_arcs(client, map_outputs, name_map)
+    reduce_arcs(client, map_outputs, name_map)
 
     # 3. Predictions
     predictions = reduce_predictions(client, map_outputs, name_map)
@@ -1184,7 +1213,7 @@ def main():
     relationships = reduce_relationships(client, map_outputs, name_map)
 
     # 5. Consensus
-    consensus = reduce_consensus(client, map_outputs, name_map)
+    reduce_consensus(client, map_outputs, name_map)
 
     # 6. Personas (optional)
     if not args.skip_personas:
@@ -1198,14 +1227,22 @@ def main():
     print(f"{'=' * 60}")
     print(f"  Messages analyzed: {total_messages:,}")
     print(f"  Months covered:    {len(map_outputs)}")
-    print(f"\n  Outputs:")
-    for p in [OUT_LEAGUE_MEMORY, OUT_ARCS, OUT_PREDICTIONS, OUT_RELATIONSHIPS, OUT_CONSENSUS]:
+    print("\n  Outputs:")
+    for p in [
+        OUT_LEAGUE_MEMORY,
+        OUT_ARCS,
+        OUT_PREDICTIONS,
+        OUT_RELATIONSHIPS,
+        OUT_CONSENSUS,
+    ]:
         if p.exists():
             size_kb = p.stat().st_size / 1024
             print(f"    {p.relative_to(REPO_ROOT)} ({size_kb:.1f} KB)")
     if PERSONAS_DIR.exists():
         persona_files = list(PERSONAS_DIR.glob("*.md"))
-        print(f"    {PERSONAS_DIR.relative_to(REPO_ROOT)}/ ({len(persona_files)} profiles)")
+        print(
+            f"    {PERSONAS_DIR.relative_to(REPO_ROOT)}/ ({len(persona_files)} profiles)"
+        )
     print()
 
 

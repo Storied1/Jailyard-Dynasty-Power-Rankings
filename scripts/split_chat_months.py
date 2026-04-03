@@ -16,27 +16,21 @@ Each chunk file contains:
   - messages: list of message dicts (sender, text, timestamp_utc, media, etc.)
 """
 
-import json
 import sys
 from collections import defaultdict
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-PARSED_MESSAGES = REPO_ROOT / "chat" / "parsed_messages.json"
-NAME_MAP_PATH = REPO_ROOT / "content" / "chat" / "name-map.json"
-FINGERPRINTS_PATH = REPO_ROOT / "content" / "chat" / "fingerprints.json"
-MAP_CACHE_DIR = REPO_ROOT / "content" / "chat" / ".map_cache"
+from shared import (
+    REPO_ROOT,
+    CHAT_DIR,
+    NAME_MAP_PATH,
+    CONTENT_CHAT_DIR,
+    MAP_CACHE_DIR,
+    load_json,
+    save_json,
+)
 
-
-def load_json(path):
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_json(path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"
+FINGERPRINTS_PATH = CONTENT_CHAT_DIR / "fingerprints.json"
 
 
 def main():
@@ -83,7 +77,9 @@ def main():
             buckets[month_key].append(msg)
 
     sorted_months = sorted(buckets.keys())
-    print(f"Found {len(sorted_months)} months: {sorted_months[0]} to {sorted_months[-1]}")
+    print(
+        f"Found {len(sorted_months)} months: {sorted_months[0]} to {sorted_months[-1]}"
+    )
 
     # Write each month's chunk
     MAP_CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -100,7 +96,9 @@ def main():
         save_json(out_path, chunk)
         print(f"  {month}: {len(msgs):,} messages -> {out_path.name}")
 
-    print(f"\nDone. {len(sorted_months)} chunk files written to {MAP_CACHE_DIR.relative_to(REPO_ROOT)}")
+    print(
+        f"\nDone. {len(sorted_months)} chunk files written to {MAP_CACHE_DIR.relative_to(REPO_ROOT)}"
+    )
 
     # Print volume tiers for planning
     print("\n-- Volume Tiers --")

@@ -14,39 +14,32 @@ Output is saved to content/weeks/week{N}_data.json
 import json
 import os
 import sys
-from pathlib import Path
 
-PROJECT_DIR = Path(__file__).parent.parent
-DATA_DIR = PROJECT_DIR / "data"
-OUTPUT_DIR = PROJECT_DIR / "content" / "weeks"
-TEAM_PROFILES = PROJECT_DIR / "content" / "team-profiles.json"
+from shared import (
+    REPO_ROOT,
+    DATA_DIR,
+    WEEKS_DIR as OUTPUT_DIR,
+    TEAM_PROFILES_PATH,
+    load_json,
+)
+
+PROJECT_DIR = REPO_ROOT
 
 
 def load_season_data(season=2025):
     """Load the combined season data file."""
     path = DATA_DIR / str(season) / "season_combined.json"
-    if not path.exists():
-        print(f"ERROR: {path} not found. Run fetch_sleeper.py --season {season} first.")
-        sys.exit(1)
-    with open(path) as f:
-        return json.load(f)
+    return load_json(path, label=f"season_combined.json for {season}", required=True)
 
 
 def load_team_profiles():
     """Load team profiles for preseason context."""
-    if TEAM_PROFILES.exists():
-        with open(TEAM_PROFILES) as f:
-            return json.load(f)
-    return None
+    return load_json(TEAM_PROFILES_PATH)
 
 
 def load_history_data():
     """Load league history for H2H, Elo, and franchise stats."""
-    path = DATA_DIR / "league_history.json"
-    if path.exists():
-        with open(path) as f:
-            return json.load(f)
-    return None
+    return load_json(DATA_DIR / "league_history.json")
 
 
 def build_roster_lookup(data):
@@ -64,7 +57,166 @@ def build_roster_lookup(data):
     return lookup
 
 
-def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=None, history_data=None):
+def build_matchup_entry(m, roster_lookup, prev_rankings, history_data, rid_to_owner):
+    """Build a single matchup dict from raw matchup data."""
+    t1 = m["team1"]
+    t2 = m["team2"]
+    r1_info = roster_lookup.get(t1["roster_id"], {})
+    r2_info = roster_lookup.get(t2["roster_id"], {})
+
+    margin = abs(t1["points"] - t2["points"])
+    winner_rid = m.get("winner")
+
+    entry = {
+        "matchup_id": m["matchup_id"],
+        "team1": {
+            "roster_id": t1["roster_id"],
+            "team_name": r1_info.get("team_name", "?"),
+            "owner": r1_info.get("owner", "?"),
+            "points": t1["points"],
+            "projected": t1.get("projected", 0),
+            "top_scorers": [
+                {
+                    "name": p["name"],
+                    "position": p["position"],
+                    "team": p["team"],
+                    "points": p["points"],
+                }
+                for p in t1.get("top_starters", [])[:5]
+            ],
+        },
+        "team2": {
+            "roster_id": t2["roster_id"],
+            "team_name": r2_info.get("team_name", "?"),
+            "owner": r2_info.get("owner", "?"),
+            "points": t2["points"],
+            "projected": t2.get("projected", 0),
+            "top_scorers": [
+                {
+                    "name": p["name"],
+                    "position": p["position"],
+                    "team": p["team"],
+                    "points": p["points"],
+                }
+                for p in t2.get("top_starters", [])[:5]
+            ],
+        },
+        "winner": (
+            roster_lookup.get(winner_rid, {}).get("team_name", None)
+            if winner_rid
+            else "Tie"
+        ),
+        "margin": round(margin, 2),
+        "upset": (
+            winner_rid is not None
+            and prev_rankings.get(winner_rid, 99)
+            > prev_rankings.get(
+                t1["roster_id"] if winner_rid == t2["roster_id"] else t2["roster_id"], 0
+            )
+        ),
+    }
+
+    # Inject H2H history if available
+    if history_data:
+        oid1 = rid_to_owner.get(t1["roster_id"], "")
+        oid2 = rid_to_owner.get(t2["roster_id"], "")
+        h2h = history_data.get("h2h", {})
+        h2h_key = f"{oid1}|{oid2}"
+        h2h_entry = h2h.get(h2h_key)
+        if h2h_entry:
+            last_game = h2h_entry["games"][-1] if h2h_entry["games"] else None
+            entry["h2h"] = {
+                "team1_wins": h2h_entry["wins"],
+                "team2_wins": h2h_entry["losses"],
+                "total_games": h2h_entry["wins"] + h2h_entry["losses"],
+                "last_meeting": (
+                    {
+                        "season": last_game["season"],
+                        "week": last_game["week"],
+                        "score": f"{last_game['pts']}-{last_game['opp_pts']}",
+                    }
+                    if last_game
+                    else None
+                ),
+            }
+
+    return entry
+
+
+def build_standing_entry(
+    s, data, week_num, roster_lookup, prev_rankings, history_data, rid_to_owner
+):
+    """Build a single standings dict from raw standings data."""
+    rid = s["roster_id"]
+    info = roster_lookup.get(rid, {})
+    prev_rank = prev_rankings.get(rid, None)
+    current_rank = s["power_rank"]
+
+    if prev_rank is not None:
+        movement = prev_rank - current_rank  # positive = moved up
+    else:
+        movement = 0
+
+    streak = compute_streak(data, week_num, rid, roster_lookup)
+
+    entry = {
+        "rank": current_rank,
+        "prev_rank": prev_rank,
+        "movement": movement,
+        "team_name": info.get("team_name", "?"),
+        "owner": info.get("owner", "?"),
+        "record": f"{s['wins']}-{s['losses']}"
+        + (f"-{s['ties']}" if s.get("ties", 0) > 0 else ""),
+        "wins": s["wins"],
+        "losses": s["losses"],
+        "pf": round(s["pf"], 1),
+        "pa": round(s.get("pa", 0), 1),
+        "power_score": s["power_score"],
+        "week_points": s["week_points"],
+        "streak": streak,
+    }
+
+    # Inject Elo + franchise stats if history data available
+    if history_data:
+        oid = rid_to_owner.get(rid, "")
+        elo_current = history_data.get("elo_current", {})
+        franchise_stats = history_data.get("franchise_stats", {})
+        elo_history = history_data.get("elo_history", {})
+
+        if oid in elo_current:
+            entry["current_elo"] = elo_current[oid]
+
+        fstats = franchise_stats.get(oid)
+        if fstats:
+            entry["peak_elo"] = fstats.get("peak_elo")
+            at = fstats.get("all_time", {})
+            entry["all_time_record"] = f"{at.get('wins', 0)}-{at.get('losses', 0)}"
+            entry["championships"] = fstats.get("championships", 0)
+            entry["best_win_streak"] = fstats.get("best_win_streak", 0)
+
+        # Compute elo_change for this week
+        elo_change = None
+        if oid in elo_history:
+            entries = [e for e in elo_history[oid] if e["season"] == data["season"]]
+            this_elo = next((e["elo"] for e in entries if e["week"] == week_num), None)
+            prev_elo = next(
+                (e["elo"] for e in entries if e["week"] == week_num - 1), None
+            )
+            if this_elo is not None and prev_elo is not None:
+                elo_change = round(this_elo - prev_elo, 1)
+        entry["elo_change"] = elo_change
+
+    return entry
+
+
+def extract_week(
+    data,
+    week_num,
+    roster_lookup,
+    team_profiles=None,
+    prev_weeks=None,
+    history_data=None,
+):
     """
     Extract all AI-ready data for a single week.
 
@@ -114,72 +266,13 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
     matchups = []
     all_scores = {}
     for m in week_data["matchups"]:
-        t1 = m["team1"]
-        t2 = m["team2"]
-        r1_info = roster_lookup.get(t1["roster_id"], {})
-        r2_info = roster_lookup.get(t2["roster_id"], {})
-
-        all_scores[t1["roster_id"]] = t1["points"]
-        all_scores[t2["roster_id"]] = t2["points"]
-
-        margin = abs(t1["points"] - t2["points"])
-        winner_rid = m.get("winner")
-
-        matchup_entry = {
-            "matchup_id": m["matchup_id"],
-            "team1": {
-                "roster_id": t1["roster_id"],
-                "team_name": r1_info.get("team_name", "?"),
-                "owner": r1_info.get("owner", "?"),
-                "points": t1["points"],
-                "projected": t1.get("projected", 0),
-                "top_scorers": [
-                    {"name": p["name"], "position": p["position"], "team": p["team"], "points": p["points"]}
-                    for p in t1.get("top_starters", [])[:5]
-                ],
-            },
-            "team2": {
-                "roster_id": t2["roster_id"],
-                "team_name": r2_info.get("team_name", "?"),
-                "owner": r2_info.get("owner", "?"),
-                "points": t2["points"],
-                "projected": t2.get("projected", 0),
-                "top_scorers": [
-                    {"name": p["name"], "position": p["position"], "team": p["team"], "points": p["points"]}
-                    for p in t2.get("top_starters", [])[:5]
-                ],
-            },
-            "winner": roster_lookup.get(winner_rid, {}).get("team_name", None) if winner_rid else "Tie",
-            "margin": round(margin, 2),
-            "upset": (
-                winner_rid is not None
-                and prev_rankings.get(winner_rid, 99) > prev_rankings.get(
-                    t1["roster_id"] if winner_rid == t2["roster_id"] else t2["roster_id"], 0
-                )
-            ),
-        }
-
-        # Inject H2H history if available
-        if history_data:
-            oid1 = rid_to_owner.get(t1["roster_id"], "")
-            oid2 = rid_to_owner.get(t2["roster_id"], "")
-            h2h = history_data.get("h2h", {})
-            h2h_key = f"{oid1}|{oid2}"
-            h2h_entry = h2h.get(h2h_key)
-            if h2h_entry:
-                last_game = h2h_entry["games"][-1] if h2h_entry["games"] else None
-                matchup_entry["h2h"] = {
-                    "team1_wins": h2h_entry["wins"],
-                    "team2_wins": h2h_entry["losses"],
-                    "total_games": h2h_entry["wins"] + h2h_entry["losses"],
-                    "last_meeting": {
-                        "season": last_game["season"],
-                        "week": last_game["week"],
-                        "score": f"{last_game['pts']}-{last_game['opp_pts']}",
-                    } if last_game else None,
-                }
-
-        matchups.append(matchup_entry)
+        all_scores[m["team1"]["roster_id"]] = m["team1"]["points"]
+        all_scores[m["team2"]["roster_id"]] = m["team2"]["points"]
+        matchups.append(
+            build_matchup_entry(
+                m, roster_lookup, prev_rankings, history_data, rid_to_owner
+            )
+        )
 
     # Sort matchups by closest margin first (for narrative interest)
     matchups.sort(key=lambda x: x["margin"])
@@ -187,73 +280,21 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
     # --- Standings ---
     standings = []
     for s in week_data["standings"]:
-        rid = s["roster_id"]
-        info = roster_lookup.get(rid, {})
-        prev_rank = prev_rankings.get(rid, None)
-        current_rank = s["power_rank"]
-
-        if prev_rank is not None:
-            movement = prev_rank - current_rank  # positive = moved up
-        else:
-            movement = 0
-
-        # Compute streak from previous weeks
-        streak = compute_streak(data, week_num, rid, roster_lookup)
-
-        standing_entry = {
-            "rank": current_rank,
-            "prev_rank": prev_rank,
-            "movement": movement,
-            "team_name": info.get("team_name", "?"),
-            "owner": info.get("owner", "?"),
-            "record": f"{s['wins']}-{s['losses']}" + (f"-{s['ties']}" if s.get("ties", 0) > 0 else ""),
-            "wins": s["wins"],
-            "losses": s["losses"],
-            "pf": round(s["pf"], 1),
-            "pa": round(s.get("pa", 0), 1),
-            "power_score": s["power_score"],
-            "week_points": s["week_points"],
-            "streak": streak,
-        }
-
-        # Inject Elo + franchise stats if history data available
-        if history_data:
-            oid = rid_to_owner.get(rid, "")
-            elo_current = history_data.get("elo_current", {})
-            franchise_stats = history_data.get("franchise_stats", {})
-            elo_history = history_data.get("elo_history", {})
-
-            if oid in elo_current:
-                standing_entry["current_elo"] = elo_current[oid]
-
-            fstats = franchise_stats.get(oid)
-            if fstats:
-                standing_entry["peak_elo"] = fstats.get("peak_elo")
-                at = fstats.get("all_time", {})
-                standing_entry["all_time_record"] = f"{at.get('wins', 0)}-{at.get('losses', 0)}"
-                standing_entry["championships"] = fstats.get("championships", 0)
-                standing_entry["best_win_streak"] = fstats.get("best_win_streak", 0)
-
-            # Compute elo_change for this week
-            elo_change = None
-            if oid in elo_history:
-                entries = [e for e in elo_history[oid] if e["season"] == data["season"]]
-                this_elo = next((e["elo"] for e in entries if e["week"] == week_num), None)
-                prev_elo = next((e["elo"] for e in entries if e["week"] == week_num - 1), None)
-                if this_elo is not None and prev_elo is not None:
-                    elo_change = round(this_elo - prev_elo, 1)
-            standing_entry["elo_change"] = elo_change
-
-        standings.append(standing_entry)
+        standings.append(
+            build_standing_entry(
+                s,
+                data,
+                week_num,
+                roster_lookup,
+                prev_rankings,
+                history_data,
+                rid_to_owner,
+            )
+        )
 
     standings.sort(key=lambda x: x["rank"])
 
     # --- Weekly Awards ---
-    scores_by_team = {
-        roster_lookup.get(rid, {}).get("team_name", "?"): pts
-        for rid, pts in all_scores.items()
-    }
-
     high_scorer_rid = week_data["highest_scorer"]["roster_id"]
     low_scorer_rid = week_data["lowest_scorer"]["roster_id"]
 
@@ -262,7 +303,9 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
     biggest_blowout = max(matchups, key=lambda m: m["margin"]) if matchups else None
 
     # Top individual performer
-    top_performer = week_data["top_performers"][0] if week_data.get("top_performers") else None
+    top_performer = (
+        week_data["top_performers"][0] if week_data.get("top_performers") else None
+    )
 
     awards = {
         "high_scorer": {
@@ -275,34 +318,50 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
             "owner": roster_lookup.get(low_scorer_rid, {}).get("owner", "?"),
             "points": week_data["lowest_scorer"]["points"],
         },
-        "closest_game": {
-            "teams": f"{closest_matchup['team1']['team_name']} vs {closest_matchup['team2']['team_name']}",
-            "score": f"{max(closest_matchup['team1']['points'], closest_matchup['team2']['points']):.1f}-{min(closest_matchup['team1']['points'], closest_matchup['team2']['points']):.1f}",
-            "margin": closest_matchup["margin"],
-        } if closest_matchup else None,
-        "biggest_blowout": {
-            "winner": biggest_blowout["winner"],
-            "teams": f"{biggest_blowout['team1']['team_name']} vs {biggest_blowout['team2']['team_name']}",
-            "score": f"{max(biggest_blowout['team1']['points'], biggest_blowout['team2']['points']):.1f}-{min(biggest_blowout['team1']['points'], biggest_blowout['team2']['points']):.1f}",
-            "margin": biggest_blowout["margin"],
-        } if biggest_blowout else None,
-        "top_performer": {
-            "name": top_performer["name"],
-            "position": top_performer["position"],
-            "nfl_team": top_performer["team"],
-            "points": top_performer["points"],
-            "fantasy_team": roster_lookup.get(top_performer.get("roster_id"), {}).get("team_name", "?"),
-        } if top_performer else None,
+        "closest_game": (
+            {
+                "teams": f"{closest_matchup['team1']['team_name']} vs {closest_matchup['team2']['team_name']}",
+                "score": f"{max(closest_matchup['team1']['points'], closest_matchup['team2']['points']):.1f}-{min(closest_matchup['team1']['points'], closest_matchup['team2']['points']):.1f}",
+                "margin": closest_matchup["margin"],
+            }
+            if closest_matchup
+            else None
+        ),
+        "biggest_blowout": (
+            {
+                "winner": biggest_blowout["winner"],
+                "teams": f"{biggest_blowout['team1']['team_name']} vs {biggest_blowout['team2']['team_name']}",
+                "score": f"{max(biggest_blowout['team1']['points'], biggest_blowout['team2']['points']):.1f}-{min(biggest_blowout['team1']['points'], biggest_blowout['team2']['points']):.1f}",
+                "margin": biggest_blowout["margin"],
+            }
+            if biggest_blowout
+            else None
+        ),
+        "top_performer": (
+            {
+                "name": top_performer["name"],
+                "position": top_performer["position"],
+                "nfl_team": top_performer["team"],
+                "points": top_performer["points"],
+                "fantasy_team": roster_lookup.get(
+                    top_performer.get("roster_id"), {}
+                ).get("team_name", "?"),
+            }
+            if top_performer
+            else None
+        ),
     }
 
     # --- Season Context ---
     total_weeks_played = week_num
     all_weekly_totals = []
-    for w in weeks[:week_idx + 1]:
+    for w in weeks[: week_idx + 1]:
         week_total = sum(s["week_points"] for s in w["standings"])
         all_weekly_totals.append(week_total / data["total_rosters"])
 
-    season_avg_ppg = sum(all_weekly_totals) / len(all_weekly_totals) if all_weekly_totals else 0
+    season_avg_ppg = (
+        sum(all_weekly_totals) / len(all_weekly_totals) if all_weekly_totals else 0
+    )
 
     # Standings leaders/trailers
     best_record = standings[0]
@@ -338,14 +397,30 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
             r1_info = roster_lookup.get(m["team1"]["roster_id"], {})
             r2_info = roster_lookup.get(m["team2"]["roster_id"], {})
             # Find current ranks for each team
-            r1_rank = next((s["rank"] for s in standings if s["team_name"] == r1_info.get("team_name")), "?")
-            r2_rank = next((s["rank"] for s in standings if s["team_name"] == r2_info.get("team_name")), "?")
-            next_matchups.append({
-                "team1": r1_info.get("team_name", "?"),
-                "team1_rank": r1_rank,
-                "team2": r2_info.get("team_name", "?"),
-                "team2_rank": r2_rank,
-            })
+            r1_rank = next(
+                (
+                    s["rank"]
+                    for s in standings
+                    if s["team_name"] == r1_info.get("team_name")
+                ),
+                "?",
+            )
+            r2_rank = next(
+                (
+                    s["rank"]
+                    for s in standings
+                    if s["team_name"] == r2_info.get("team_name")
+                ),
+                "?",
+            )
+            next_matchups.append(
+                {
+                    "team1": r1_info.get("team_name", "?"),
+                    "team1_rank": r1_rank,
+                    "team2": r2_info.get("team_name", "?"),
+                    "team2_rank": r2_rank,
+                }
+            )
 
     # --- Team Profiles Summary (for callbacks) ---
     profiles_summary = {}
@@ -365,13 +440,15 @@ def extract_week(data, week_num, roster_lookup, team_profiles=None, prev_weeks=N
     prev_summaries = []
     if prev_weeks:
         for pw in prev_weeks:
-            prev_summaries.append({
-                "week": pw["meta"]["week"],
-                "high_scorer": pw["awards"]["high_scorer"]["team_name"],
-                "high_score": pw["awards"]["high_scorer"]["points"],
-                "leader": pw["standings"][0]["team_name"],
-                "leader_record": pw["standings"][0]["record"],
-            })
+            prev_summaries.append(
+                {
+                    "week": pw["meta"]["week"],
+                    "high_scorer": pw["awards"]["high_scorer"]["team_name"],
+                    "high_score": pw["awards"]["high_scorer"]["points"],
+                    "leader": pw["standings"][0]["team_name"],
+                    "leader_record": pw["standings"][0]["record"],
+                }
+            )
 
     # --- Build final output ---
     result = {
@@ -419,7 +496,7 @@ def compute_streak(data, up_to_week, roster_id, roster_lookup):
             if winner_rid == roster_id:
                 result = "W"
             elif winner_rid is None:
-                return f"T1" if streak_count == 0 else f"{streak_type}{streak_count}"
+                return "T1" if streak_count == 0 else f"{streak_type}{streak_count}"
             else:
                 result = "L"
 
@@ -462,14 +539,18 @@ def main():
             print("--week requires a number")
             sys.exit(1)
     else:
-        print("Usage: python extract_week_data.py --week N [--season YYYY] [--all] [--pretty]")
+        print(
+            "Usage: python extract_week_data.py --week N [--season YYYY] [--all] [--pretty]"
+        )
         sys.exit(1)
 
     # Extract sequentially so each week can reference previous weeks
     prev_weeks = []
     for week_num in sorted(weeks_to_extract):
         print(f"Extracting Week {week_num}...")
-        result = extract_week(data, week_num, roster_lookup, team_profiles, prev_weeks, history_data)
+        result = extract_week(
+            data, week_num, roster_lookup, team_profiles, prev_weeks, history_data
+        )
         if result is None:
             continue
 

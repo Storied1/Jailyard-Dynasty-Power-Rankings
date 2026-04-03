@@ -31,12 +31,14 @@ except ImportError:
     print("ERROR: 'requests' library required. Install with: pip install requests")
     sys.exit(2)
 
+from shared import GIPHY_CANDIDATES_PER_SLOT as CANDIDATES_PER_SLOT
+
 GIPHY_API_BASE = "https://api.giphy.com/v1/gifs"
-CANDIDATES_PER_SLOT = 3
 GIPHY_RATING = "pg-13"  # filter out explicit content
 
 
 # ── Giphy API ────────────────────────────────────────────────────────
+
 
 def get_api_key() -> str:
     """Read GIPHY_API_KEY from environment."""
@@ -49,7 +51,9 @@ def get_api_key() -> str:
     return key
 
 
-def search_giphy(query: str, api_key: str, limit: int = 3, offset: int = 0) -> list[dict]:
+def search_giphy(
+    query: str, api_key: str, limit: int = 3, offset: int = 0
+) -> list[dict]:
     """Search Giphy and return simplified result list."""
     params = {
         "api_key": api_key,
@@ -75,17 +79,19 @@ def search_giphy(query: str, api_key: str, limit: int = 3, offset: int = 0) -> l
         # Prefer original_mp4, fall back to fixed_width mp4
         mp4_url = original_mp4.get("mp4", "") or fixed.get("mp4", "")
 
-        results.append({
-            "giphy_id": gif.get("id", ""),
-            "title": gif.get("title", ""),
-            "mp4_url": mp4_url,
-            "gif_url": original.get("url", ""),
-            "poster_url": still.get("url", ""),
-            "width": int(original.get("width", 0) or 0),
-            "height": int(original.get("height", 0) or 0),
-            "rating": gif.get("rating", ""),
-            "source_url": gif.get("url", ""),
-        })
+        results.append(
+            {
+                "giphy_id": gif.get("id", ""),
+                "title": gif.get("title", ""),
+                "mp4_url": mp4_url,
+                "gif_url": original.get("url", ""),
+                "poster_url": still.get("url", ""),
+                "width": int(original.get("width", 0) or 0),
+                "height": int(original.get("height", 0) or 0),
+                "rating": gif.get("rating", ""),
+                "source_url": gif.get("url", ""),
+            }
+        )
 
     return results
 
@@ -121,6 +127,7 @@ def fetch_giphy_by_id(giphy_id: str, api_key: str) -> dict:
 
 # ── File I/O helpers ─────────────────────────────────────────────────
 
+
 def load_json(path: Path) -> dict:
     """Load JSON file, return empty dict if missing."""
     if path.exists():
@@ -131,7 +138,9 @@ def load_json(path: Path) -> dict:
 def save_json(path: Path, data: dict) -> None:
     """Write JSON with consistent formatting."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def content_dir(content_path: Path) -> Path:
@@ -140,6 +149,7 @@ def content_dir(content_path: Path) -> Path:
 
 
 # ── Core operations ──────────────────────────────────────────────────
+
 
 def load_content_slots(content_path: Path) -> list[dict]:
     """Load media_slots from content JSON (read-only)."""
@@ -178,13 +188,15 @@ def cmd_preview(content_path: Path) -> None:
         fallback = source.get("fallback_query", "")
         offset = state.get(slot_id, {}).get("offset", 0)
 
-        print(f"  Searching Giphy for [{slot_id}]: \"{query}\" (offset={offset})")
+        print(f'  Searching Giphy for [{slot_id}]: "{query}" (offset={offset})')
         results = search_giphy(query, api_key, limit=CANDIDATES_PER_SLOT, offset=offset)
 
         # Use fallback if primary returned < 3 results
         if len(results) < CANDIDATES_PER_SLOT and fallback:
-            print(f"    < {CANDIDATES_PER_SLOT} results, trying fallback: \"{fallback}\"")
-            extra = search_giphy(fallback, api_key, limit=CANDIDATES_PER_SLOT - len(results))
+            print(f'    < {CANDIDATES_PER_SLOT} results, trying fallback: "{fallback}"')
+            extra = search_giphy(
+                fallback, api_key, limit=CANDIDATES_PER_SLOT - len(results)
+            )
             # Deduplicate by giphy_id
             seen = {r["giphy_id"] for r in results}
             for r in extra:
@@ -236,7 +248,7 @@ def cmd_more(content_path: Path, slot_id: str) -> None:
     source = slot["source"]
     query = source.get("search_query", "")
 
-    print(f"Fetching more for [{slot_id}]: \"{query}\" (offset={offset})")
+    print(f'Fetching more for [{slot_id}]: "{query}" (offset={offset})')
     results = search_giphy(query, api_key, limit=CANDIDATES_PER_SLOT, offset=offset)
 
     if not results:
@@ -366,11 +378,11 @@ def cmd_resolve(content_path: Path) -> None:
             # Auto-pick: search and take top result
             query = source.get("search_query", "")
             fallback = source.get("fallback_query", "")
-            print(f"  [{sid}] no pick — auto-selecting from: \"{query}\"")
+            print(f'  [{sid}] no pick — auto-selecting from: "{query}"')
 
             results = search_giphy(query, api_key, limit=1)
             if not results and fallback:
-                print(f"    Trying fallback: \"{fallback}\"")
+                print(f'    Trying fallback: "{fallback}"')
                 results = search_giphy(fallback, api_key, limit=1)
 
             if not results:
@@ -399,10 +411,13 @@ def cmd_resolve(content_path: Path) -> None:
 
     save_json(cache_path, cache)
     print(f"\nCache written: {cache_path}")
-    print(f"  {len(resolved_slots)} slots resolved ({len([s for s in resolved_slots.values() if s.get('type') != 'custom'])} Giphy, {len([s for s in resolved_slots.values() if s.get('type') == 'custom'])} custom)")
+    print(
+        f"  {len(resolved_slots)} slots resolved ({len([s for s in resolved_slots.values() if s.get('type') != 'custom'])} Giphy, {len([s for s in resolved_slots.values() if s.get('type') == 'custom'])} custom)"
+    )
 
 
 # ── Preview HTML generator ───────────────────────────────────────────
+
 
 def _build_preview_html(slots: list[dict], candidates: dict, picks: dict) -> str:
     """Generate a self-contained preview HTML page."""
@@ -414,7 +429,6 @@ def _build_preview_html(slots: list[dict], candidates: dict, picks: dict) -> str
     for slot in giphy_slots:
         sid = slot["slot_id"]
         intent = slot.get("intent", "")
-        alt = slot.get("alt_text", "")
         source = slot.get("source", {})
         query = source.get("search_query", "")
         picked_id = picks.get(sid, "")
@@ -424,7 +438,11 @@ def _build_preview_html(slots: list[dict], candidates: dict, picks: dict) -> str
         for i, c in enumerate(cands, 1):
             is_picked = c["giphy_id"] == picked_id
             border = "3px solid #a855f7" if is_picked else "1px solid #333"
-            badge = '<span style="color:#a855f7;font-weight:700;">PICKED</span>' if is_picked else ""
+            badge = (
+                '<span style="color:#a855f7;font-weight:700;">PICKED</span>'
+                if is_picked
+                else ""
+            )
             cards.append(f"""
             <div style="flex:1;min-width:200px;max-width:300px;border:{border};border-radius:12px;padding:8px;background:#1a1a2e;">
               <video autoplay loop muted playsinline style="width:100%;border-radius:8px;"
@@ -439,7 +457,11 @@ def _build_preview_html(slots: list[dict], candidates: dict, picks: dict) -> str
               </div>
             </div>""")
 
-        no_results = "" if cands else '<p style="color:#f87171;">No candidates found. Try --more or different search terms.</p>'
+        no_results = (
+            ""
+            if cands
+            else '<p style="color:#f87171;">No candidates found. Try --more or different search terms.</p>'
+        )
 
         slot_sections.append(f"""
         <div style="margin-bottom:2rem;padding:1.5rem;background:#0f0f23;border-radius:16px;border:1px solid #333;">
@@ -504,23 +526,40 @@ def _build_preview_html(slots: list[dict], candidates: dict, picks: dict) -> str
 
 # ── CLI ──────────────────────────────────────────────────────────────
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Resolve media slots in Jailyard content JSON via Giphy API."
     )
     parser.add_argument(
-        "--content", required=True, type=Path,
-        help="Path to content JSON (e.g. content/preseason-2026/preseason_content.json)"
+        "--content",
+        required=True,
+        type=Path,
+        help="Path to content JSON (e.g. content/preseason-2026/preseason_content.json)",
     )
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--preview", action="store_true", help="Generate preview.html with 3 candidates per slot")
-    group.add_argument("--more", metavar="SLOT_ID", help="Fetch next 3 candidates for a specific slot")
-    group.add_argument("--pick", nargs=2, metavar=("SLOT_ID", "GIPHY_ID"), help="Set a Giphy pick for a slot")
-    group.add_argument("--resolve", action="store_true", help="Produce final media_cache.json")
     group.add_argument(
-        "--candidates-json", metavar="SLOT_ID",
-        help="Return JSON candidates for a slot to stdout (for agent use)"
+        "--preview",
+        action="store_true",
+        help="Generate preview.html with 3 candidates per slot",
+    )
+    group.add_argument(
+        "--more", metavar="SLOT_ID", help="Fetch next 3 candidates for a specific slot"
+    )
+    group.add_argument(
+        "--pick",
+        nargs=2,
+        metavar=("SLOT_ID", "GIPHY_ID"),
+        help="Set a Giphy pick for a slot",
+    )
+    group.add_argument(
+        "--resolve", action="store_true", help="Produce final media_cache.json"
+    )
+    group.add_argument(
+        "--candidates-json",
+        metavar="SLOT_ID",
+        help="Return JSON candidates for a slot to stdout (for agent use)",
     )
 
     args = parser.parse_args()

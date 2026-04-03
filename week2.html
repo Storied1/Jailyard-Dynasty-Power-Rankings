@@ -439,10 +439,6 @@ const teaser = 'Boonist Monks +1.0 / Noble FFT -1.0 \u2014 the league\u2019s hot
 // RENDERING
 // ═══════════════════════════════════════════════════════════
 
-function spreadToProb(spread){
-  return 1 / (1 + Math.pow(10, -spread / 7));
-}
-
 function renderWeek2(){
   // --- Essay ---
   const paragraphs = week2Essay.split('\n\n');

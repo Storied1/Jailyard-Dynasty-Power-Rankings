@@ -17,7 +17,6 @@ import argparse
 import io
 import json
 import re
-import string
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -28,26 +27,38 @@ if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_INPUT = REPO_ROOT / "chat" / "parsed_messages.json"
-DEFAULT_OUTPUT = REPO_ROOT / "content" / "chat" / "fingerprints.json"
+from shared import (
+    REPO_ROOT,
+    CHAT_DIR,
+    CONTENT_CHAT_DIR,
+    CONVERSATION_GAP_SEC,
+    REPLY_WINDOW_SEC,
+    UPPERCASE_THRESHOLD,
+    DISTINCTIVE_WORD_RATIO,
+    VOWEL_RATIO_MIN,
+    DISTINCTIVE_WORD_MIN_COUNT,
+    DISTINCTIVE_WORDS_KEEP,
+)
+
+DEFAULT_INPUT = CHAT_DIR / "parsed_messages.json"
+DEFAULT_OUTPUT = CONTENT_CHAT_DIR / "fingerprints.json"
 
 # Emoji regex — matches most Unicode emoji ranges
 EMOJI_RE = re.compile(
     "["
-    "\U0001F600-\U0001F64F"  # emoticons
-    "\U0001F300-\U0001F5FF"  # symbols & pictographs
-    "\U0001F680-\U0001F6FF"  # transport & map
-    "\U0001F1E0-\U0001F1FF"  # flags
-    "\U00002702-\U000027B0"  # dingbats
-    "\U000024C2-\U0001F251"  # enclosed characters
-    "\U0001F900-\U0001F9FF"  # supplemental symbols
-    "\U0001FA00-\U0001FA6F"  # chess symbols
-    "\U0001FA70-\U0001FAFF"  # symbols extended-A
-    "\U00002600-\U000026FF"  # misc symbols
-    "\U0000FE00-\U0000FE0F"  # variation selectors
-    "\U0000200D"             # zero width joiner
-    "\U0000203C-\U00003299"  # misc
+    "\U0001f600-\U0001f64f"  # emoticons
+    "\U0001f300-\U0001f5ff"  # symbols & pictographs
+    "\U0001f680-\U0001f6ff"  # transport & map
+    "\U0001f1e0-\U0001f1ff"  # flags
+    "\U00002702-\U000027b0"  # dingbats
+    "\U000024c2-\U0001f251"  # enclosed characters
+    "\U0001f900-\U0001f9ff"  # supplemental symbols
+    "\U0001fa00-\U0001fa6f"  # chess symbols
+    "\U0001fa70-\U0001faff"  # symbols extended-A
+    "\U00002600-\U000026ff"  # misc symbols
+    "\U0000fe00-\U0000fe0f"  # variation selectors
+    "\U0000200d"  # zero width joiner
+    "\U0000203c-\U00003299"  # misc
     "]+",
     flags=re.UNICODE,
 )
@@ -102,12 +113,12 @@ def compute_fingerprints(messages):
     """Compute per-member fingerprints from parsed messages."""
 
     # ── Collect raw data per member ──
-    member_msgs = defaultdict(list)       # sender -> [msg]
-    member_texts = defaultdict(list)      # sender -> [text]
-    member_words = defaultdict(list)      # sender -> [word, word, ...]
-    member_emojis = defaultdict(list)     # sender -> [emoji, ...]
-    member_hours = defaultdict(list)      # sender -> [hour, ...]
-    member_days = defaultdict(list)       # sender -> [weekday, ...]
+    member_msgs = defaultdict(list)  # sender -> [msg]
+    member_texts = defaultdict(list)  # sender -> [text]
+    member_words = defaultdict(list)  # sender -> [word, word, ...]
+    member_emojis = defaultdict(list)  # sender -> [emoji, ...]
+    member_hours = defaultdict(list)  # sender -> [hour, ...]
+    member_days = defaultdict(list)  # sender -> [weekday, ...]
     member_months = defaultdict(Counter)  # sender -> Counter(YYYY-MM)
     member_media = defaultdict(lambda: {"photo": 0, "gif_mp4": 0, "video": 0})
     member_lengths_chars = defaultdict(list)
@@ -164,7 +175,7 @@ def compute_fingerprints(messages):
         # Conversation starter detection (gap > 30 min from previous message)
         if ts and prev_ts:
             gap_seconds = (ts - prev_ts).total_seconds()
-            if gap_seconds > 1800:  # 30 minutes
+            if gap_seconds > CONVERSATION_GAP_SEC:
                 member_convo_starts[sender] += 1
         elif prev_ts is None:
             member_convo_starts[sender] += 1
@@ -177,7 +188,7 @@ def compute_fingerprints(messages):
         # Reply-to approximation: if posting within 2 min of someone else, consider it a "reply"
         if ts and prev_ts and prev_sender and prev_sender != sender:
             gap = (ts - prev_ts).total_seconds()
-            if gap < 120:
+            if gap < REPLY_WINDOW_SEC:
                 member_reply_targets[sender][prev_sender] += 1
 
         prev_sender = sender
@@ -206,7 +217,9 @@ def compute_fingerprints(messages):
         num_months = len(months_active) or 1
         avg_chars = sum(member_lengths_chars[sender]) / total_msgs if total_msgs else 0
         avg_words = sum(member_lengths_words[sender]) / total_msgs if total_msgs else 0
-        longest_msg = max(member_lengths_chars[sender]) if member_lengths_chars[sender] else 0
+        longest_msg = (
+            max(member_lengths_chars[sender]) if member_lengths_chars[sender] else 0
+        )
 
         volume = {
             "total_messages": total_msgs,
@@ -230,13 +243,21 @@ def compute_fingerprints(messages):
             "peak_hour_histogram": peak_hour_hist,
             "day_of_week": dow_hist,
             "late_night_pct": late_night_pct,
-            "peak_hour": max(range(24), key=lambda h: hour_counter.get(h, 0)) if total_msgs else None,
+            "peak_hour": (
+                max(range(24), key=lambda h: hour_counter.get(h, 0))
+                if total_msgs
+                else None
+            ),
         }
 
         # ── Style ──
         emoji_counter = Counter(member_emojis[sender])
-        top_emojis = [{"emoji": e, "count": c} for e, c in emoji_counter.most_common(10)]
-        emoji_freq = round(len(member_emojis[sender]) / total_msgs, 2) if total_msgs else 0
+        top_emojis = [
+            {"emoji": e, "count": c} for e, c in emoji_counter.most_common(10)
+        ]
+        emoji_freq = (
+            round(len(member_emojis[sender]) / total_msgs, 2) if total_msgs else 0
+        )
 
         # Caps ratio: fraction of messages with >50% uppercase alpha chars
         caps_msgs = 0
@@ -244,7 +265,11 @@ def compute_fingerprints(messages):
         exclamation_msgs = 0
         for t in texts:
             alpha = [c for c in t if c.isalpha()]
-            if alpha and sum(1 for c in alpha if c.isupper()) / len(alpha) > 0.5:
+            if (
+                alpha
+                and sum(1 for c in alpha if c.isupper()) / len(alpha)
+                > UPPERCASE_THRESHOLD
+            ):
                 caps_msgs += 1
             if "?" in t:
                 question_msgs += 1
@@ -256,37 +281,50 @@ def compute_fingerprints(messages):
             "emoji_frequency": emoji_freq,
             "caps_ratio": round(caps_msgs / total_msgs, 3) if total_msgs else 0,
             "question_ratio": round(question_msgs / total_msgs, 3) if total_msgs else 0,
-            "exclamation_ratio": round(exclamation_msgs / total_msgs, 3) if total_msgs else 0,
+            "exclamation_ratio": (
+                round(exclamation_msgs / total_msgs, 3) if total_msgs else 0
+            ),
         }
 
         # ── Vocabulary ──
         word_counter = Counter(words)
         unique_words = len(word_counter)
-        avg_word_len = round(sum(len(w) for w in words) / total_words_member, 2) if total_words_member else 0
+        avg_word_len = (
+            round(sum(len(w) for w in words) / total_words_member, 2)
+            if total_words_member
+            else 0
+        )
 
         # Distinctive words via frequency ratio
         distinctive = []
         vowels = set("aeiou")
         if total_words_member > 0 and total_group_words > 0:
             for word, count in word_counter.items():
-                if word in STOPWORDS or count < 8 or len(word) < 3 or len(word) > 15:
+                if (
+                    word in STOPWORDS
+                    or count < DISTINCTIVE_WORD_MIN_COUNT
+                    or len(word) < 3
+                    or len(word) > 15
+                ):
                     continue
                 # Filter garbled strings (URL fragments, encryption)
                 vowel_count = sum(1 for c in word if c in vowels)
-                if vowel_count == 0 or vowel_count / len(word) < 0.30:
+                if vowel_count == 0 or vowel_count / len(word) < VOWEL_RATIO_MIN:
                     continue
                 member_rate = count / total_words_member
                 group_rate = group_word_freq[word] / total_group_words
                 if group_rate > 0:
                     ratio = member_rate / group_rate
-                    if ratio >= 3.0:
-                        distinctive.append({
-                            "word": word,
-                            "count": count,
-                            "ratio": round(ratio, 1),
-                        })
+                    if ratio >= DISTINCTIVE_WORD_RATIO:
+                        distinctive.append(
+                            {
+                                "word": word,
+                                "count": count,
+                                "ratio": round(ratio, 1),
+                            }
+                        )
             distinctive.sort(key=lambda x: x["ratio"], reverse=True)
-            distinctive = distinctive[:20]
+            distinctive = distinctive[:DISTINCTIVE_WORDS_KEEP]
 
         vocabulary = {
             "unique_words": unique_words,
@@ -301,16 +339,15 @@ def compute_fingerprints(messages):
 
         media_out = {
             "photos_sent": media_stats.get("photo", 0),
-            "gifs_videos_sent": media_stats.get("gif_mp4", 0) + media_stats.get("video", 0),
+            "gifs_videos_sent": media_stats.get("gif_mp4", 0)
+            + media_stats.get("video", 0),
             "media_to_text_ratio": media_text_ratio,
         }
 
         # ── Social ──
         reply_dist = dict(member_reply_targets[sender].most_common(12))
         mention_dist = dict(member_mentions_of[sender].most_common(12))
-        convo_start_ratio = round(
-            member_convo_starts[sender] / total_convo_starts, 3
-        )
+        convo_start_ratio = round(member_convo_starts[sender] / total_convo_starts, 3)
 
         social = {
             "reply_to_distribution": reply_dist,
@@ -343,11 +380,15 @@ def main():
         description="Quantitative fingerprinting of Jailyard WhatsApp members"
     )
     parser.add_argument(
-        "--input", type=Path, default=DEFAULT_INPUT,
+        "--input",
+        type=Path,
+        default=DEFAULT_INPUT,
         help=f"Path to parsed_messages.json (default: {DEFAULT_INPUT.relative_to(REPO_ROOT)})",
     )
     parser.add_argument(
-        "--output", type=Path, default=DEFAULT_OUTPUT,
+        "--output",
+        type=Path,
+        default=DEFAULT_OUTPUT,
         help=f"Output path (default: {DEFAULT_OUTPUT.relative_to(REPO_ROOT)})",
     )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON")
@@ -378,7 +419,11 @@ def main():
     print(f"\n{'='*50}")
     print(f"  Fingerprint Summary ({result['metadata']['member_count']} members)")
     print(f"{'='*50}")
-    for name, fp in sorted(result["members"].items(), key=lambda x: x[1]["volume"]["total_messages"], reverse=True):
+    for name, fp in sorted(
+        result["members"].items(),
+        key=lambda x: x[1]["volume"]["total_messages"],
+        reverse=True,
+    ):
         v = fp["volume"]
         t = fp["timing"]
         s = fp["style"]
