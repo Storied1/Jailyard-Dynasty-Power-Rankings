@@ -21,7 +21,6 @@ import sys
 import time
 import urllib.request
 import urllib.error
-from datetime import datetime
 from pathlib import Path
 
 BASE_URL = "https://api.sleeper.app/v1"
@@ -47,12 +46,14 @@ def fetch_json(endpoint, retries=3, delay=1):
     url = f"{BASE_URL}{endpoint}"
     for attempt in range(retries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "JailyardDynasty/1.0"})
+            req = urllib.request.Request(
+                url, headers={"User-Agent": "JailyardDynasty/1.0"}
+            )
             with urllib.request.urlopen(req, timeout=15) as resp:
                 return json.loads(resp.read().decode())
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
             if attempt < retries - 1:
-                wait = delay * (2 ** attempt)
+                wait = delay * (2**attempt)
                 print(f"  Retry {attempt + 1} after {wait}s: {e}")
                 time.sleep(wait)
             else:
@@ -102,7 +103,9 @@ def fetch_season(season, league_id):
     playoff_week_start = settings.get("playoff_week_start", DEFAULT_REG_WEEKS + 1)
     reg_season_weeks = playoff_week_start - 1
     total_weeks = reg_season_weeks + PLAYOFF_WEEKS
-    print(f"  Regular season: {reg_season_weeks} weeks, playoffs start week {playoff_week_start}")
+    print(
+        f"  Regular season: {reg_season_weeks} weeks, playoffs start week {playoff_week_start}"
+    )
 
     # 2. Users
     print("\n[2/6] Users...")
@@ -129,11 +132,15 @@ def fetch_season(season, league_id):
             # Check if this week has real data (points > 0 for at least one team)
             has_data = any(m.get("points", 0) > 0 for m in matchups)
             if not has_data:
-                print(f"  Week {week}: no scores (season may not have reached this week)")
+                print(
+                    f"  Week {week}: no scores (season may not have reached this week)"
+                )
                 break
             all_matchups[str(week)] = matchups
             total_pts = sum(m.get("points", 0) for m in matchups)
-            print(f"  Week {week}: {len(matchups)} entries, {total_pts:.1f} total points")
+            print(
+                f"  Week {week}: {len(matchups)} entries, {total_pts:.1f} total points"
+            )
         else:
             print(f"  Week {week}: no data")
             break
@@ -152,7 +159,7 @@ def fetch_season(season, league_id):
         json.dump(brackets, f, indent=2)
 
     # 6. Transactions (trades, waivers)
-    print(f"\n[6/6] Transactions...")
+    print("\n[6/6] Transactions...")
     all_transactions = {}
     for week in range(1, len(all_matchups) + 1):
         txns = fetch_json(f"/league/{league_id}/transactions/{week}")
@@ -162,12 +169,13 @@ def fetch_season(season, league_id):
     with open(season_dir / "transactions.json", "w") as f:
         json.dump(all_transactions, f, indent=2)
     trades = sum(
-        1 for wk in all_transactions.values()
-        for t in wk if t.get("type") == "trade"
+        1 for wk in all_transactions.values() for t in wk if t.get("type") == "trade"
     )
     waivers = sum(
-        1 for wk in all_transactions.values()
-        for t in wk if t.get("type") in ("waiver", "free_agent")
+        1
+        for wk in all_transactions.values()
+        for t in wk
+        if t.get("type") in ("waiver", "free_agent")
     )
     print(f"  {trades} trades, {waivers} waiver/FA moves")
 
@@ -180,7 +188,9 @@ def fetch_season(season, league_id):
             season_type = "post"
         proj_url = f"https://api.sleeper.app/projections/nfl/{season}/{week}?season_type={season_type}"
         try:
-            req = urllib.request.Request(proj_url, headers={"User-Agent": "JailyardDynasty/1.0"})
+            req = urllib.request.Request(
+                proj_url, headers={"User-Agent": "JailyardDynasty/1.0"}
+            )
             with urllib.request.urlopen(req, timeout=15) as resp:
                 proj_data = json.loads(resp.read().decode())
                 if proj_data:
@@ -200,14 +210,30 @@ def fetch_season(season, league_id):
 
     # Build the combined data file for season.html
     print("\nBuilding combined season data...")
-    build_season_data(season, season_dir, league, users, rosters, all_matchups,
-                      brackets=brackets, projections=all_projections)
+    build_season_data(
+        season,
+        season_dir,
+        league,
+        users,
+        rosters,
+        all_matchups,
+        brackets=brackets,
+        projections=all_projections,
+    )
 
     print(f"\nDone! Data saved to {season_dir}/")
 
 
-def build_season_data(season, season_dir, league, users, rosters, all_matchups,
-                      brackets=None, projections=None):
+def build_season_data(
+    season,
+    season_dir,
+    league,
+    users,
+    rosters,
+    all_matchups,
+    brackets=None,
+    projections=None,
+):
     """
     Build a single combined JSON file with everything the season.html page needs,
     including computed power rankings for each week, projected scores, and bracket data.
@@ -240,9 +266,9 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
                     "losses": r.get("settings", {}).get("losses", 0),
                     "ties": r.get("settings", {}).get("ties", 0),
                     "fpts": r.get("settings", {}).get("fpts", 0)
-                        + r.get("settings", {}).get("fpts_decimal", 0) / 100,
+                    + r.get("settings", {}).get("fpts_decimal", 0) / 100,
                     "fpts_against": r.get("settings", {}).get("fpts_against", 0)
-                        + r.get("settings", {}).get("fpts_against_decimal", 0) / 100,
+                    + r.get("settings", {}).get("fpts_against_decimal", 0) / 100,
                 },
             }
 
@@ -264,8 +290,9 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
 
     # Process weekly data
     weekly_data = []
-    cumulative_records = {rid: {"wins": 0, "losses": 0, "ties": 0, "pf": 0, "pa": 0}
-                         for rid in roster_map}
+    cumulative_records = {
+        rid: {"wins": 0, "losses": 0, "ties": 0, "pf": 0, "pa": 0} for rid in roster_map
+    }
     cumulative_points_history = {rid: [] for rid in roster_map}
 
     settings = league.get("settings", {})
@@ -292,13 +319,19 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
             if isinstance(week_proj_data, dict):
                 proj_iter = week_proj_data.items()
             elif isinstance(week_proj_data, list):
-                proj_iter = ((item.get("player_id", ""), item) for item in week_proj_data if isinstance(item, dict))
+                proj_iter = (
+                    (item.get("player_id", ""), item)
+                    for item in week_proj_data
+                    if isinstance(item, dict)
+                )
             else:
                 proj_iter = []
             for pid, pdata in proj_iter:
                 if isinstance(pdata, dict):
                     # Sleeper projections use pts_ppr or pts_half_ppr or a generic pts field
-                    proj_pts = pdata.get("pts_ppr", pdata.get("pts_half_ppr", pdata.get("pts_std", 0)))
+                    proj_pts = pdata.get(
+                        "pts_ppr", pdata.get("pts_half_ppr", pdata.get("pts_std", 0))
+                    )
                     if proj_pts:
                         week_proj[pid] = proj_pts
 
@@ -334,7 +367,9 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
                     pts = starter_pts[i] if i < len(starter_pts) else 0
                     info = player_info(pid)
                     proj = week_proj.get(pid, 0)
-                    result.append({"pid": pid, **info, "points": pts, "projected": round(proj, 2)})
+                    result.append(
+                        {"pid": pid, **info, "points": pts, "projected": round(proj, 2)}
+                    )
                 result.sort(key=lambda x: x["points"], reverse=True)
                 return result
 
@@ -343,22 +378,24 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
                 starters = team_entry.get("starters", [])
                 return round(sum(week_proj.get(pid, 0) for pid in starters), 2)
 
-            matchup_results.append({
-                "matchup_id": mid,
-                "team1": {
-                    "roster_id": r1,
-                    "points": p1,
-                    "projected": proj_total(t1),
-                    "top_starters": top_starters(t1)[:5],
-                },
-                "team2": {
-                    "roster_id": r2,
-                    "points": p2,
-                    "projected": proj_total(t2),
-                    "top_starters": top_starters(t2)[:5],
-                },
-                "winner": winner,
-            })
+            matchup_results.append(
+                {
+                    "matchup_id": mid,
+                    "team1": {
+                        "roster_id": r1,
+                        "points": p1,
+                        "projected": proj_total(t1),
+                        "top_starters": top_starters(t1)[:5],
+                    },
+                    "team2": {
+                        "roster_id": r2,
+                        "points": p2,
+                        "projected": proj_total(t2),
+                        "top_starters": top_starters(t2)[:5],
+                    },
+                    "winner": winner,
+                }
+            )
 
             # Collect all starters for top performers
             for team_entry in [t1, t2]:
@@ -368,10 +405,14 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
                     pts = starter_pts[i] if i < len(starter_pts) else 0
                     if pts > 0:
                         info = player_info(pid)
-                        week_top_players.append({
-                            "pid": pid, **info, "points": pts,
-                            "roster_id": team_entry["roster_id"]
-                        })
+                        week_top_players.append(
+                            {
+                                "pid": pid,
+                                **info,
+                                "points": pts,
+                                "roster_id": team_entry["roster_id"],
+                            }
+                        )
 
         # Update cumulative records (regular season only)
         if not is_playoff:
@@ -419,52 +460,72 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
             win_pct = (rec["wins"] + 0.5 * rec["ties"]) / max(total_games, 1)
 
             # Points for (normalized to league average)
-            avg_pf = sum(r["pf"] for r in cumulative_records.values()) / max(len(cumulative_records), 1)
+            avg_pf = sum(r["pf"] for r in cumulative_records.values()) / max(
+                len(cumulative_records), 1
+            )
             pf_factor = rec["pf"] / max(avg_pf, 1)
 
             # Recent form (last 3 weeks' points)
             recent = cumulative_points_history.get(rid, [])[-3:]
             recent_avg = sum(recent) / max(len(recent), 1)
             league_recent_avg = sum(
-                sum(cumulative_points_history.get(r, [])[-3:]) / max(len(cumulative_points_history.get(r, [])[-3:]), 1)
+                sum(cumulative_points_history.get(r, [])[-3:])
+                / max(len(cumulative_points_history.get(r, [])[-3:]), 1)
                 for r in roster_map
             ) / max(len(roster_map), 1)
             recent_factor = recent_avg / max(league_recent_avg, 1)
 
             # Strength of schedule (points against normalized)
-            avg_pa = sum(r["pa"] for r in cumulative_records.values()) / max(len(cumulative_records), 1)
+            avg_pa = sum(r["pa"] for r in cumulative_records.values()) / max(
+                len(cumulative_records), 1
+            )
             sos_factor = rec["pa"] / max(avg_pa, 1)
 
-            power_score = (0.40 * win_pct + 0.30 * pf_factor + 0.20 * recent_factor + 0.10 * sos_factor)
+            power_score = (
+                0.40 * win_pct
+                + 0.30 * pf_factor
+                + 0.20 * recent_factor
+                + 0.10 * sos_factor
+            )
 
-            standings.append({
-                "roster_id": rid,
-                **rec,
-                "power_score": round(power_score, 4),
-                "week_points": week_scores.get(rid, 0),
-            })
+            standings.append(
+                {
+                    "roster_id": rid,
+                    **rec,
+                    "power_score": round(power_score, 4),
+                    "week_points": week_scores.get(rid, 0),
+                }
+            )
 
         # Sort by power score descending
         standings.sort(key=lambda x: x["power_score"], reverse=True)
         for i, s in enumerate(standings):
             s["power_rank"] = i + 1
 
-        weekly_data.append({
-            "week": week,
-            "is_playoff": is_playoff,
-            "matchups": matchup_results,
-            "standings": standings,
-            "top_performers": week_top_players[:10],
-            "bottom_performers": week_top_players[-3:] if len(week_top_players) >= 3 else [],
-            "highest_scorer": {
-                "roster_id": max(week_scores, key=week_scores.get) if week_scores else None,
-                "points": max(week_scores.values()) if week_scores else 0,
-            },
-            "lowest_scorer": {
-                "roster_id": min(week_scores, key=week_scores.get) if week_scores else None,
-                "points": min(week_scores.values()) if week_scores else 0,
-            },
-        })
+        weekly_data.append(
+            {
+                "week": week,
+                "is_playoff": is_playoff,
+                "matchups": matchup_results,
+                "standings": standings,
+                "top_performers": week_top_players[:10],
+                "bottom_performers": (
+                    week_top_players[-3:] if len(week_top_players) >= 3 else []
+                ),
+                "highest_scorer": {
+                    "roster_id": (
+                        max(week_scores, key=week_scores.get) if week_scores else None
+                    ),
+                    "points": max(week_scores.values()) if week_scores else 0,
+                },
+                "lowest_scorer": {
+                    "roster_id": (
+                        min(week_scores, key=week_scores.get) if week_scores else None
+                    ),
+                    "points": min(week_scores.values()) if week_scores else 0,
+                },
+            }
+        )
 
     # Build the final combined output
     combined = {
@@ -485,7 +546,9 @@ def build_season_data(season, season_dir, league, users, rosters, all_matchups,
     out_path = season_dir / "season_combined.json"
     with open(out_path, "w") as f:
         json.dump(combined, f, indent=2)
-    print(f"  Combined data saved to {out_path} ({os.path.getsize(out_path) / 1024:.0f} KB)")
+    print(
+        f"  Combined data saved to {out_path} ({os.path.getsize(out_path) / 1024:.0f} KB)"
+    )
 
 
 def is_season_cached(season):
@@ -548,6 +611,7 @@ def main():
         except Exception as e:
             print(f"\nERROR processing {season} season: {e}")
             import traceback
+
             traceback.print_exc()
             failed_seasons.append(season)
             print("Continuing with remaining seasons...")
@@ -614,12 +678,16 @@ def build_league_history(seasons):
             if info.get("team_name"):
                 franchise_map[oid]["team_name"] = info["team_name"]
 
-    print(f"  Identified {len(franchise_map)} franchises across {len(all_seasons)} seasons")
+    print(
+        f"  Identified {len(franchise_map)} franchises across {len(all_seasons)} seasons"
+    )
 
     # ---------------------------------------------------------------
     # 2. Gather all matchups across all seasons
     # ---------------------------------------------------------------
-    all_games = []  # [{season, week, r1_owner, r2_owner, p1, p2, winner_owner, is_playoff}]
+    all_games = (
+        []
+    )  # [{season, week, r1_owner, r2_owner, p1, p2, winner_owner, is_playoff}]
     for s, data in sorted(all_seasons.items()):
         rid_to_owner = {}
         for rid_str, info in data.get("roster_map", {}).items():
@@ -638,13 +706,18 @@ def build_league_history(seasons):
                 w = m.get("winner")
                 winner_owner = rid_to_owner.get(w, "") if w else None
 
-                all_games.append({
-                    "season": s, "week": week,
-                    "o1": o1, "o2": o2,
-                    "p1": p1, "p2": p2,
-                    "winner_owner": winner_owner,
-                    "is_playoff": is_playoff,
-                })
+                all_games.append(
+                    {
+                        "season": s,
+                        "week": week,
+                        "o1": o1,
+                        "o2": o2,
+                        "p1": p1,
+                        "p2": p2,
+                        "winner_owner": winner_owner,
+                        "is_playoff": is_playoff,
+                    }
+                )
 
     print(f"  Processed {len(all_games)} total matchups")
 
@@ -688,16 +761,24 @@ def build_league_history(seasons):
         elo[o1] += k_adj * (s1 - e1)
         elo[o2] += k_adj * (s2 - e2)
 
-        elo_history[o1].append({
-            "season": game["season"], "week": game["week"],
-            "elo": round(elo[o1], 1),
-        })
-        elo_history[o2].append({
-            "season": game["season"], "week": game["week"],
-            "elo": round(elo[o2], 1),
-        })
+        elo_history[o1].append(
+            {
+                "season": game["season"],
+                "week": game["week"],
+                "elo": round(elo[o1], 1),
+            }
+        )
+        elo_history[o2].append(
+            {
+                "season": game["season"],
+                "week": game["week"],
+                "elo": round(elo[o2], 1),
+            }
+        )
 
-    print(f"  Elo ratings computed (top: {max(elo.values()):.0f}, bottom: {min(elo.values()):.0f})")
+    print(
+        f"  Elo ratings computed (top: {max(elo.values()):.0f}, bottom: {min(elo.values()):.0f})"
+    )
 
     # ---------------------------------------------------------------
     # 4. Head-to-Head Rivalry Matrix
@@ -708,17 +789,23 @@ def build_league_history(seasons):
         if not o1 or not o2:
             continue
         # Store BOTH directions so every matrix cell is populated
-        for a, b, pa_, pb_ in [(o1, o2, game["p1"], game["p2"]),
-                                (o2, o1, game["p2"], game["p1"])]:
+        for a, b, pa_, pb_ in [
+            (o1, o2, game["p1"], game["p2"]),
+            (o2, o1, game["p2"], game["p1"]),
+        ]:
             key = (a, b)
             if key not in h2h:
                 h2h[key] = {"wins": 0, "losses": 0, "pf": 0, "pa": 0, "games": []}
             h2h[key]["pf"] += pa_
             h2h[key]["pa"] += pb_
-            h2h[key]["games"].append({
-                "season": game["season"], "week": game["week"],
-                "pts": pa_, "opp_pts": pb_,
-            })
+            h2h[key]["games"].append(
+                {
+                    "season": game["season"],
+                    "week": game["week"],
+                    "pts": pa_,
+                    "opp_pts": pb_,
+                }
+            )
             if game["winner_owner"] == a:
                 h2h[key]["wins"] += 1
             elif game["winner_owner"] == b:
@@ -741,8 +828,10 @@ def build_league_history(seasons):
     }
 
     # Streak tracking
-    streaks = {oid: {"current_w": 0, "current_l": 0, "best_w": 0, "best_l": 0}
-               for oid in franchise_map}
+    streaks = {
+        oid: {"current_w": 0, "current_l": 0, "best_w": 0, "best_l": 0}
+        for oid in franchise_map
+    }
 
     for game in all_games:
         o1, o2 = game["o1"], game["o2"]
@@ -758,11 +847,18 @@ def build_league_history(seasons):
         name2 = f2.get("team_name") or f2.get("username", "?")
 
         # Highest single-week score
-        for pts, name, opp_name, oid in [(p1, name1, name2, o1), (p2, name2, name1, o2)]:
+        for pts, name, opp_name, oid in [
+            (p1, name1, name2, o1),
+            (p2, name2, name1, o2),
+        ]:
             if pts > records["highest_score"]["points"]:
                 records["highest_score"] = {
-                    "points": pts, "team": name, "opponent": opp_name,
-                    "season": game["season"], "week": game["week"], "owner_id": oid,
+                    "points": pts,
+                    "team": name,
+                    "opponent": opp_name,
+                    "season": game["season"],
+                    "week": game["week"],
+                    "owner_id": oid,
                 }
 
         # Lowest winning score
@@ -773,31 +869,41 @@ def build_league_history(seasons):
             winner_oid = o1 if p1 > p2 else o2
             if winner_pts < records["lowest_winning_score"]["points"]:
                 records["lowest_winning_score"] = {
-                    "points": winner_pts, "team": winner_name, "opponent": loser_name,
-                    "season": game["season"], "week": game["week"], "owner_id": winner_oid,
+                    "points": winner_pts,
+                    "team": winner_name,
+                    "opponent": loser_name,
+                    "season": game["season"],
+                    "week": game["week"],
+                    "owner_id": winner_oid,
                 }
 
         # Biggest blowout
         if margin > records["biggest_blowout"]["margin"]:
             records["biggest_blowout"] = {
-                "margin": round(margin, 2), "winner": name1 if p1 > p2 else name2,
+                "margin": round(margin, 2),
+                "winner": name1 if p1 > p2 else name2,
                 "loser": name2 if p1 > p2 else name1,
                 "score": f"{max(p1,p2):.1f}-{min(p1,p2):.1f}",
-                "season": game["season"], "week": game["week"],
+                "season": game["season"],
+                "week": game["week"],
             }
 
         # Combined scores
         if combined > records["highest_combined"]["points"]:
             records["highest_combined"] = {
-                "points": round(combined, 2), "teams": f"{name1} vs {name2}",
+                "points": round(combined, 2),
+                "teams": f"{name1} vs {name2}",
                 "score": f"{p1:.1f}-{p2:.1f}",
-                "season": game["season"], "week": game["week"],
+                "season": game["season"],
+                "week": game["week"],
             }
         if combined < records["lowest_combined"]["points"] and combined > 0:
             records["lowest_combined"] = {
-                "points": round(combined, 2), "teams": f"{name1} vs {name2}",
+                "points": round(combined, 2),
+                "teams": f"{name1} vs {name2}",
                 "score": f"{p1:.1f}-{p2:.1f}",
-                "season": game["season"], "week": game["week"],
+                "season": game["season"],
+                "week": game["week"],
             }
 
         # Win/loss streaks
@@ -809,15 +915,21 @@ def build_league_history(seasons):
                 if won:
                     streaks[oid]["current_w"] += 1
                     streaks[oid]["current_l"] = 0
-                    streaks[oid]["best_w"] = max(streaks[oid]["best_w"], streaks[oid]["current_w"])
+                    streaks[oid]["best_w"] = max(
+                        streaks[oid]["best_w"], streaks[oid]["current_w"]
+                    )
                 else:
                     streaks[oid]["current_l"] += 1
                     streaks[oid]["current_w"] = 0
-                    streaks[oid]["best_l"] = max(streaks[oid]["best_l"], streaks[oid]["current_l"])
+                    streaks[oid]["best_l"] = max(
+                        streaks[oid]["best_l"], streaks[oid]["current_l"]
+                    )
 
     # Find longest streaks
     best_win_streak = max(streaks.values(), key=lambda x: x["best_w"])
-    best_win_oid = [oid for oid, s in streaks.items() if s["best_w"] == best_win_streak["best_w"]][0]
+    best_win_oid = [
+        oid for oid, s in streaks.items() if s["best_w"] == best_win_streak["best_w"]
+    ][0]
     f = franchise_map.get(best_win_oid, {})
     records["longest_win_streak"] = {
         "count": best_win_streak["best_w"],
@@ -826,7 +938,9 @@ def build_league_history(seasons):
     }
 
     best_loss_streak = max(streaks.values(), key=lambda x: x["best_l"])
-    best_loss_oid = [oid for oid, s in streaks.items() if s["best_l"] == best_loss_streak["best_l"]][0]
+    best_loss_oid = [
+        oid for oid, s in streaks.items() if s["best_l"] == best_loss_streak["best_l"]
+    ][0]
     f = franchise_map.get(best_loss_oid, {})
     records["longest_losing_streak"] = {
         "count": best_loss_streak["best_l"],
@@ -864,20 +978,30 @@ def build_league_history(seasons):
             if rid_str in data.get("roster_map", {}):
                 r = data["roster_map"][rid_str]
                 rec = r.get("final_record", {})
-                w, l, t = rec.get("wins", 0), rec.get("losses", 0), rec.get("ties", 0)
+                w, losses, t = (
+                    rec.get("wins", 0),
+                    rec.get("losses", 0),
+                    rec.get("ties", 0),
+                )
                 pf = rec.get("fpts", 0)
                 pa = rec.get("fpts_against", 0)
 
                 stats["all_time"]["wins"] += w
-                stats["all_time"]["losses"] += l
+                stats["all_time"]["losses"] += losses
                 stats["all_time"]["ties"] += t
                 stats["all_time"]["pf"] += pf
                 stats["all_time"]["pa"] += pa
 
-                stats["season_results"].append({
-                    "season": s, "wins": w, "losses": l, "ties": t,
-                    "pf": round(pf, 1), "pa": round(pa, 1),
-                })
+                stats["season_results"].append(
+                    {
+                        "season": s,
+                        "wins": w,
+                        "losses": losses,
+                        "ties": t,
+                        "pf": round(pf, 1),
+                        "pa": round(pa, 1),
+                    }
+                )
 
         stats["all_time"]["pf"] = round(stats["all_time"]["pf"], 1)
         stats["all_time"]["pa"] = round(stats["all_time"]["pa"], 1)
@@ -891,23 +1015,26 @@ def build_league_history(seasons):
                 brackets = json.load(f)
             winners = brackets.get("winners", [])
             if winners:
-                # Find the championship game (highest round)
+                # Find the championship game (highest round, lowest matchup_id).
+                # Sleeper brackets have 2 games at max round: championship (m=6)
+                # and 3rd-place (m=7). We only want the championship.
                 max_round = max((g.get("r", 0) for g in winners), default=0)
-                for game in winners:
-                    if game.get("r") == max_round:
-                        rid_to_owner = {}
-                        for rid_str, info in all_seasons[s].get("roster_map", {}).items():
-                            rid_to_owner[int(rid_str)] = info.get("owner_id", "")
-                        champ_rid = game.get("w")
-                        r1 = game.get("t1")
-                        r2 = game.get("t2")
-                        for rid in [r1, r2]:
-                            oid = rid_to_owner.get(rid, "")
-                            if oid in franchise_stats:
-                                franchise_stats[oid]["finals"] += 1
-                        champ_oid = rid_to_owner.get(champ_rid, "")
-                        if champ_oid in franchise_stats:
-                            franchise_stats[champ_oid]["championships"] += 1
+                champ_round = [g for g in winners if g.get("r") == max_round]
+                if champ_round:
+                    game = min(champ_round, key=lambda g: g.get("m", 999))
+                    rid_to_owner = {}
+                    for rid_str, info in all_seasons[s].get("roster_map", {}).items():
+                        rid_to_owner[int(rid_str)] = info.get("owner_id", "")
+                    champ_rid = game.get("w")
+                    r1 = game.get("t1")
+                    r2 = game.get("t2")
+                    for rid in [r1, r2]:
+                        oid = rid_to_owner.get(rid, "")
+                        if oid in franchise_stats:
+                            franchise_stats[oid]["finals"] += 1
+                    champ_oid = rid_to_owner.get(champ_rid, "")
+                    if champ_oid in franchise_stats:
+                        franchise_stats[champ_oid]["championships"] += 1
 
     # ---------------------------------------------------------------
     # 7. Build final output
@@ -916,8 +1043,10 @@ def build_league_history(seasons):
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         "seasons": list(all_seasons.keys()),
         "total_games": len(all_games),
-        "franchise_map": {oid: {"username": f["username"], "team_name": f.get("team_name", "")}
-                          for oid, f in franchise_map.items()},
+        "franchise_map": {
+            oid: {"username": f["username"], "team_name": f.get("team_name", "")}
+            for oid, f in franchise_map.items()
+        },
         "records": records,
         "elo_current": {oid: round(e, 1) for oid, e in elo.items()},
         "elo_history": elo_history,
@@ -928,8 +1057,10 @@ def build_league_history(seasons):
     out_path = DATA_DIR / "league_history.json"
     with open(out_path, "w") as f:
         json.dump(history, f, indent=2)
-    print(f"  League history saved to {out_path} ({os.path.getsize(out_path) / 1024:.0f} KB)")
-    print(f"  Open history.html in a browser to explore.")
+    print(
+        f"  League history saved to {out_path} ({os.path.getsize(out_path) / 1024:.0f} KB)"
+    )
+    print("  Open history.html in a browser to explore.")
 
 
 if __name__ == "__main__":

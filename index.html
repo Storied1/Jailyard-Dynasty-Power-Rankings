@@ -75,25 +75,20 @@
     background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.25);
     color:var(--accent); margin-bottom:1.5rem; letter-spacing:.04em; text-transform:uppercase;
   }
-  .hero-badge .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s ease-in-out infinite; }
-  @keyframes pulse{ 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  .hero-badge .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
 
   .hero-title{
     font-size:clamp(2.8rem,7vw,5.5rem); font-weight:800; line-height:1.05;
     letter-spacing:-.03em;
     background:linear-gradient(135deg,#fff 0%,#c4b5fd 40%,#f9a8d4 70%,#fff 100%);
-    background-size:200% 200%;
     -webkit-background-clip:text; background-clip:text; color:transparent;
-    animation:shimmer 6s ease-in-out infinite;
   }
-  @keyframes shimmer{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
   .hero-sub{
     margin:1.2rem auto 0; font-size:clamp(1rem,2vw,1.25rem); color:var(--muted);
     max-width:640px; line-height:1.65;
   }
-  .hero-sub .typed-cursor{ display:inline-block; width:2px; height:1.1em; background:var(--accent); margin-left:2px; vertical-align:text-bottom; animation:blink .7s step-end infinite; }
-  @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:0} }
+  .hero-sub .typed-cursor{ display:inline-block; width:2px; height:1.1em; background:var(--accent); margin-left:2px; vertical-align:text-bottom; opacity:.7; }
 
   .hero-ctas{
     display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-top:2.5rem;
@@ -263,12 +258,11 @@
     font-size:clamp(1.2rem,3.5vw,2rem); font-weight:800; letter-spacing:.1em;
     text-transform:uppercase; text-align:center; margin-bottom:2.5rem;
     background:linear-gradient(135deg,#fde68a,#fbbf24,#d97706,#fbbf24,#fde68a);
-    background-size:200% 200%; animation:shimmer 4s ease-in-out infinite;
     -webkit-background-clip:text; background-clip:text; color:transparent;
     opacity:0; transform:translateY(20px);
   }
   .vault-overlay.active .vault-title{
-    animation:vault-in .7s .4s ease-out forwards, shimmer 4s ease-in-out infinite;
+    animation:vault-in .7s .4s ease-out forwards;
   }
   @keyframes vault-in{ to{opacity:1;transform:translateY(0)} }
 
@@ -778,6 +772,8 @@
       gem:'#ec4899', tag:'The Kenaissance' },
     { year:'2024', name:'Kittler on the Roof', runner:'Sleeping Giants',
       gem:'#10b981', tag:'Third Time\u2019s the Charm' },
+    { year:'2025', name:'General Ken\u2011obi', runner:'Rasheeing the Scene',
+      gem:'#f59e0b', tag:'Back\u2011to\u2011Back' },
   ];
 
   // Find the Champions stat and make it clickable
