@@ -220,167 +220,183 @@ const teams = [
   { name:'Kittler on the Roof', owner:'bchodos', initials:'KR', slot:12 },
 ];
 
-// 5 rounds x 12 picks (pick order may differ due to trades)
+// 6 rounds x 12 picks — data from Sleeper draft API (draft ID 1180228858937966593)
 const draftPicks = [
   // Round 1
-  { round:1, pick:1,  team:'MHJTIME',                  player:'Travis Hunter',       pos:'WR', college:'Colorado',    note:'Traded up from 1.10 — gave up 2026 1st + 2025 2.10' },
-  { round:1, pick:2,  team:'Chudders Football Team',    player:'Ashton Jeanty',       pos:'RB', college:'Boise State', note:'Dream pick at 1.02' },
-  { round:1, pick:3,  team:'Father Time',               player:'Tetairoa McMillan',   pos:'WR', college:'Arizona',     note:'Traded up from 1.08 — gave 2026 3rd + swap' },
-  { round:1, pick:4,  team:'Noble FFT',                 player:'Shedeur Sanders',     pos:'QB', college:'Colorado',    note:'Traded to Burden of E.W. at the draft' },
-  { round:1, pick:5,  team:'The Boonist Monks',         player:'Cam Ward',            pos:'QB', college:'Miami',       note:'Traded to Legion of Bouz for 2025 1.05 + 2026 2nd' },
-  { round:1, pick:6,  team:'Rasheeing the Scene',       player:'Kaleb Johnson',       pos:'RB', college:'Iowa',        note:'Traded to General Ken\u2011obi for 2025 1.06 + 2.06' },
-  { round:1, pick:7,  team:'Ghastly Grayskull Gang',    player:'Luther Burden III',   pos:'WR', college:'Missouri',    note:'Traded to Burden of E.W. — team name synergy' },
-  { round:1, pick:8,  team:'Burden of Etienne\u2011y Woody', player:'Colston Loveland', pos:'TE', college:'Michigan', note:'Traded to Chudders FT for 1.08 + 2026 2nd' },
-  { round:1, pick:9,  team:'General Ken\u2011obi',      player:'RJ Harvey',           pos:'RB', college:'UCF',         note:'Traded to Kittler on the Roof — pick swap + 3rd' },
-  { round:1, pick:10, team:'Burden of Etienne\u2011y Woody', player:'Will Howard',    pos:'QB', college:'Ohio State',  note:'Original pick — best QB available' },
-  { round:1, pick:11, team:'Sleeping Giants',           player:'Jalen Milroe',        pos:'QB', college:'Alabama',     note:'' },
-  { round:1, pick:12, team:'Kittler on the Roof',       player:'Quinshon Judkins',    pos:'RB', college:'Ohio State',  note:'Traded to Rasheeing the Scene for 1.12 + 2.12' },
+  { round:1, pick:1,  team:'Chudders Football Team',         player:'Ashton Jeanty',       pos:'RB', college:'Boise State',     note:'' },
+  { round:1, pick:2,  team:'Ghastly Grayskull Gang',         player:'Omarion Hampton',     pos:'RB', college:'North Carolina',  note:'' },
+  { round:1, pick:3,  team:'Father Time',                    player:'Tetairoa McMillan',   pos:'WR', college:'Arizona',         note:'' },
+  { round:1, pick:4,  team:'MHJTIME',                        player:'Travis Hunter',       pos:'WR', college:'Colorado',        note:'' },
+  { round:1, pick:5,  team:'Chudders Football Team',         player:'Emeka Egbuka',        pos:'WR', college:'Ohio State',      note:'' },
+  { round:1, pick:6,  team:'Ghastly Grayskull Gang',         player:'TreVeyon Henderson',  pos:'RB', college:'Ohio State',      note:'' },
+  { round:1, pick:7,  team:'Rasheeing the Scene',            player:'Quinshon Judkins',    pos:'RB', college:'Ohio State',      note:'' },
+  { round:1, pick:8,  team:'Noble FFT',                      player:'Matthew Golden',      pos:'WR', college:'Texas',           note:'' },
+  { round:1, pick:9,  team:'General Ken\u2011obi',           player:'Kaleb Johnson',       pos:'RB', college:'Iowa',            note:'' },
+  { round:1, pick:10, team:'Burden of Etienne\u2011y Woody', player:'Luther Burden',       pos:'WR', college:'Missouri',        note:'' },
+  { round:1, pick:11, team:'Noble FFT',                      player:'Tyler Warren',        pos:'TE', college:'Penn State',      note:'' },
+  { round:1, pick:12, team:'Kittler on the Roof',            player:'RJ Harvey',           pos:'RB', college:'UCF',             note:'' },
 
   // Round 2
-  { round:2, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'Devin Neal',     pos:'RB', college:'Kansas',      note:'' },
-  { round:2, pick:2,  team:'Chudders Football Team',    player:'Bhayshul Tuten',      pos:'RB', college:'Virginia Tech',note:'' },
-  { round:2, pick:3,  team:'The Legion of Bouz',        player:'Matthew Golden',      pos:'WR', college:'Texas',       note:'Traded to Noble FFT' },
-  { round:2, pick:4,  team:'Noble FFT',                 player:'Jonathon Brooks',     pos:'RB', college:'Texas',       note:'Traded to Sleeping Giants' },
-  { round:2, pick:5,  team:'MHJTIME',                   player:'Harold Fannin Jr.',   pos:'TE', college:'Bowling Green',note:'Acquired via trade for 1.10 deal' },
-  { round:2, pick:6,  team:'General Ken\u2011obi',      player:'Mason Taylor',        pos:'TE', college:'LSU',         note:'Acquired via 1.06 swap with Rasheeing' },
-  { round:2, pick:7,  team:'Ghastly Grayskull Gang',    player:'Emeka Egbuka',        pos:'WR', college:'Ohio State',  note:'Traded to Chudders FT for future 2nd' },
-  { round:2, pick:8,  team:'Father Time',               player:'Isaac Guerendo',      pos:'RB', college:'Louisville',  note:'' },
-  { round:2, pick:9,  team:'The Boonist Monks',         player:'Ray Davis',           pos:'RB', college:'Kentucky',    note:'Swapped picks with original owner' },
-  { round:2, pick:10, team:'Rasheeing the Scene',       player:'Keon Coleman',        pos:'WR', college:'Florida St.', note:'' },
-  { round:2, pick:11, team:'Sleeping Giants',           player:'Jaylin Noel',         pos:'WR', college:'Iowa State',  note:'Traded to Chudders FT' },
-  { round:2, pick:12, team:'Rasheeing the Scene',       player:'Trey Benson',         pos:'RB', college:'Florida St.', note:'Acquired via 1.12 deal with Kittler' },
+  { round:2, pick:1,  team:'Chudders Football Team',         player:'Colston Loveland',    pos:'TE', college:'Michigan',        note:'' },
+  { round:2, pick:2,  team:'Ghastly Grayskull Gang',         player:'Jayden Higgins',      pos:'WR', college:'Iowa State',      note:'' },
+  { round:2, pick:3,  team:'Rasheeing the Scene',            player:'Tre Harris',          pos:'WR', college:'Ole Miss',        note:'' },
+  { round:2, pick:4,  team:'Sleeping Giants',                player:'Kyle Williams',       pos:'WR', college:'Washington State',note:'' },
+  { round:2, pick:5,  team:'The Legion of Bouz',             player:'Cameron Ward',        pos:'QB', college:'Miami',           note:'' },
+  { round:2, pick:6,  team:'The Legion of Bouz',             player:'Cam Skattebo',        pos:'RB', college:'Arizona State',   note:'' },
+  { round:2, pick:7,  team:'Chudders Football Team',         player:'Bhayshul Tuten',      pos:'RB', college:'Virginia Tech',   note:'' },
+  { round:2, pick:8,  team:'Noble FFT',                      player:'Jack Bech',           pos:'WR', college:'TCU',             note:'' },
+  { round:2, pick:9,  team:'General Ken\u2011obi',           player:'Mason Taylor',        pos:'TE', college:'LSU',             note:'' },
+  { round:2, pick:10, team:'Burden of Etienne\u2011y Woody', player:'Jalen Royals',        pos:'WR', college:'Utah State',      note:'' },
+  { round:2, pick:11, team:'Chudders Football Team',         player:'Jaylin Noel',         pos:'WR', college:'Iowa State',      note:'' },
+  { round:2, pick:12, team:'Kittler on the Roof',            player:'Elijah Arroyo',       pos:'TE', college:'Miami',           note:'' },
 
   // Round 3
-  { round:3, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'Luke Altmyer',   pos:'QB', college:'Illinois',    note:'' },
-  { round:3, pick:2,  team:'Chudders Football Team',    player:'Pat Bryant',          pos:'WR', college:'Illinois',    note:'' },
-  { round:3, pick:3,  team:'The Legion of Bouz',        player:'Ben Sinnott',         pos:'TE', college:'Kansas State',note:'' },
-  { round:3, pick:4,  team:'Noble FFT',                 player:'Ricky Pearsall',      pos:'WR', college:'Florida',     note:'' },
-  { round:3, pick:5,  team:'The Boonist Monks',         player:'Rashid Shaheed',      pos:'WR', college:'Weber State', note:'' },
-  { round:3, pick:6,  team:'Rasheeing the Scene',       player:'Braelon Allen',       pos:'RB', college:'Wisconsin',   note:'Traded to Father Time' },
-  { round:3, pick:7,  team:'Ghastly Grayskull Gang',    player:'Quentin Johnston',    pos:'WR', college:'TCU',         note:'' },
-  { round:3, pick:8,  team:'Father Time',               player:'Rome Odunze',         pos:'WR', college:'Washington',  note:'' },
-  { round:3, pick:9,  team:'General Ken\u2011obi',      player:'Cade Otton',          pos:'TE', college:'Washington',  note:'' },
-  { round:3, pick:10, team:'MHJTIME',                   player:'Courtland Sutton',    pos:'WR', college:'SMU',         note:'' },
-  { round:3, pick:11, team:'Sleeping Giants',           player:'Devin Neal',          pos:'RB', college:'Kansas',      note:'Traded pick — used on depth' },
-  { round:3, pick:12, team:'Kittler on the Roof',       player:'Christian Watson',    pos:'WR', college:'N. Dakota St.',note:'' },
+  { round:3, pick:1,  team:'Chudders Football Team',         player:'Pat Bryant',          pos:'WR', college:'Illinois',        note:'' },
+  { round:3, pick:2,  team:'Ghastly Grayskull Gang',         player:'Elic Ayomanor',       pos:'WR', college:'Stanford',        note:'' },
+  { round:3, pick:3,  team:'Father Time',                    player:'Jaxson Dart',         pos:'QB', college:'Ole Miss',        note:'' },
+  { round:3, pick:4,  team:'Burden of Etienne\u2011y Woody', player:'Jarquez Hunter',      pos:'RB', college:'Auburn',          note:'' },
+  { round:3, pick:5,  team:'Rasheeing the Scene',            player:'Jaydon Blue',         pos:'RB', college:'Texas',           note:'' },
+  { round:3, pick:6,  team:'Rasheeing the Scene',            player:'Dylan Sampson',       pos:'RB', college:'Tennessee',       note:'' },
+  { round:3, pick:7,  team:'The Legion of Bouz',             player:'DJ Giddens',          pos:'RB', college:'Kansas State',    note:'' },
+  { round:3, pick:8,  team:'Noble FFT',                      player:'Isaac TeSlaa',        pos:'WR', college:'Northern Iowa',   note:'' },
+  { round:3, pick:9,  team:'General Ken\u2011obi',           player:'Abdul Carter',        pos:'DL', college:'Penn State',      note:'' },
+  { round:3, pick:10, team:'MHJTIME',                        player:'Harold Fannin',       pos:'TE', college:'Bowling Green',   note:'' },
+  { round:3, pick:11, team:'Sleeping Giants',                player:'Devin Neal',          pos:'RB', college:'Kansas',          note:'' },
+  { round:3, pick:12, team:'Sleeping Giants',                player:'Ollie Gordon',        pos:'RB', college:'Oklahoma State',  note:'' },
 
   // Round 4
-  { round:4, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'Mike Gesicki',   pos:'TE', college:'Penn State',  note:'' },
-  { round:4, pick:2,  team:'Chudders Football Team',    player:'DeMario Douglas',     pos:'WR', college:'Liberty',     note:'' },
-  { round:4, pick:3,  team:'The Legion of Bouz',        player:'Jakobi Meyers',       pos:'WR', college:'N.C. State',  note:'' },
-  { round:4, pick:4,  team:'Noble FFT',                 player:'Ja\'Tavion Sanders',  pos:'TE', college:'Texas',       note:'' },
-  { round:4, pick:5,  team:'The Boonist Monks',         player:'Antonio Gibson',      pos:'RB', college:'Memphis',     note:'' },
-  { round:4, pick:6,  team:'Rasheeing the Scene',       player:'Austin Ekeler',       pos:'RB', college:'W. Colorado', note:'' },
-  { round:4, pick:7,  team:'Ghastly Grayskull Gang',    player:'Tank Dell',           pos:'WR', college:'Houston',     note:'' },
-  { round:4, pick:8,  team:'Father Time',               player:'Michael Mayer',       pos:'TE', college:'Notre Dame',  note:'' },
-  { round:4, pick:9,  team:'General Ken\u2011obi',      player:'Kendre Miller',       pos:'RB', college:'TCU',         note:'' },
-  { round:4, pick:10, team:'MHJTIME',                   player:'Zach Ertz',           pos:'TE', college:'Stanford',    note:'' },
-  { round:4, pick:11, team:'Sleeping Giants',           player:'Brenton Strange',     pos:'TE', college:'Penn State',  note:'' },
-  { round:4, pick:12, team:'Kittler on the Roof',       player:'Dameon Pierce',       pos:'RB', college:'Florida',     note:'' },
+  { round:4, pick:1,  team:'Chudders Football Team',         player:'Brashard Smith',      pos:'RB', college:'SMU',             note:'' },
+  { round:4, pick:2,  team:'The Boonist Monks',              player:"Dont'e Thornton",     pos:'WR', college:'Oregon',          note:'' },
+  { round:4, pick:3,  team:'Father Time',                    player:'Shedeur Sanders',     pos:'QB', college:'Colorado',        note:'' },
+  { round:4, pick:4,  team:'Burden of Etienne\u2011y Woody', player:'Woody Marks',         pos:'RB', college:'USC',             note:'' },
+  { round:4, pick:5,  team:'Chudders Football Team',         player:'Jordan James',        pos:'RB', college:'Oregon',          note:'' },
+  { round:4, pick:6,  team:'The Legion of Bouz',             player:'Tory Horton',         pos:'WR', college:'Colorado State',  note:'' },
+  { round:4, pick:7,  team:'The Boonist Monks',              player:'Oronde Gadsden',      pos:'TE', college:'Syracuse',        note:'' },
+  { round:4, pick:8,  team:'Chudders Football Team',         player:'Tyler Shough',        pos:'QB', college:'Louisville',      note:'' },
+  { round:4, pick:9,  team:'General Ken\u2011obi',           player:'Tahj Brooks',         pos:'RB', college:'Texas Tech',      note:'' },
+  { round:4, pick:10, team:'Chudders Football Team',         player:'Jacory Croskey-Merritt', pos:'RB', college:'Arizona',      note:'' },
+  { round:4, pick:11, team:'Sleeping Giants',                player:'Jalen Milroe',        pos:'QB', college:'Alabama',         note:'' },
+  { round:4, pick:12, team:'Sleeping Giants',                player:'Jaylin Lane',         pos:'WR', college:'Tennessee',       note:'' },
 
   // Round 5
-  { round:5, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'George Pickens', pos:'WR', college:'Georgia',     note:'' },
-  { round:5, pick:2,  team:'Chudders Football Team',    player:'Adonai Mitchell',     pos:'WR', college:'Texas',       note:'' },
-  { round:5, pick:3,  team:'The Legion of Bouz',        player:'Tommy Tremble',       pos:'TE', college:'Notre Dame',  note:'' },
-  { round:5, pick:4,  team:'Noble FFT',                 player:'Terrance Ferguson',   pos:'TE', college:'Oregon',      note:'' },
-  { round:5, pick:5,  team:'The Boonist Monks',         player:'Nick Chubb',          pos:'RB', college:'Georgia',     note:'' },
-  { round:5, pick:6,  team:'Rasheeing the Scene',       player:'Michael Pittman',     pos:'WR', college:'USC',         note:'' },
-  { round:5, pick:7,  team:'Ghastly Grayskull Gang',    player:'Dalton Schultz',      pos:'TE', college:'Stanford',    note:'' },
-  { round:5, pick:8,  team:'Father Time',               player:'Jerry Jeudy',         pos:'WR', college:'Alabama',     note:'' },
-  { round:5, pick:9,  team:'General Ken\u2011obi',      player:'Jermaine Burton',     pos:'WR', college:'Alabama',     note:'' },
-  { round:5, pick:10, team:'MHJTIME',                   player:'Daniel Jones',        pos:'QB', college:'Duke',        note:'' },
-  { round:5, pick:11, team:'Sleeping Giants',           player:'Stefon Diggs',        pos:'WR', college:'Maryland',    note:'' },
-  { round:5, pick:12, team:'Kittler on the Roof',       player:'Luke Musgrave',       pos:'TE', college:'Oregon St.',  note:'' },
+  { round:5, pick:1,  team:'Burden of Etienne\u2011y Woody', player:'Trevor Etienne',      pos:'RB', college:'Georgia',         note:'' },
+  { round:5, pick:2,  team:'MHJTIME',                        player:'Damien Martinez',     pos:'RB', college:'Miami',           note:'' },
+  { round:5, pick:3,  team:'Father Time',                    player:'Mitchell Evans',      pos:'TE', college:'Notre Dame',      note:'' },
+  { round:5, pick:4,  team:'Burden of Etienne\u2011y Woody', player:'Kyle Monangai',       pos:'RB', college:'Rutgers',         note:'' },
+  { round:5, pick:5,  team:'Noble FFT',                      player:'Savion Williams',     pos:'WR', college:'TCU',             note:'' },
+  { round:5, pick:6,  team:'The Legion of Bouz',             player:'Xavier Restrepo',     pos:'WR', college:'Miami',           note:'' },
+  { round:5, pick:7,  team:'The Boonist Monks',              player:'Malaki Starks',       pos:'DB', college:'Georgia',         note:'' },
+  { round:5, pick:8,  team:'Rasheeing the Scene',            player:'Tai Felton',          pos:'WR', college:'Maryland',        note:'' },
+  { round:5, pick:9,  team:'General Ken\u2011obi',           player:'Chimere Dike',        pos:'WR', college:'Ohio State',      note:'' },
+  { round:5, pick:10, team:'MHJTIME',                        player:'Jalon Walker',        pos:'DL', college:'Georgia',         note:'' },
+  { round:5, pick:11, team:'Sleeping Giants',                player:'Efton Chism',         pos:'WR', college:'Oklahoma',        note:'' },
+  { round:5, pick:12, team:'Kittler on the Roof',            player:'Thomas Fidone',       pos:'TE', college:'Nebraska',        note:'' },
+
+  // Round 6
+  { round:6, pick:1,  team:'Chudders Football Team',         player:'Jordan Watkins',      pos:'WR', college:'Louisville',      note:'' },
+  { round:6, pick:2,  team:'Ghastly Grayskull Gang',         player:'Arian Smith',         pos:'WR', college:'Georgia',         note:'' },
+  { round:6, pick:3,  team:'Father Time',                    player:'Mykel Williams',      pos:'DL', college:'Georgia',         note:'' },
+  { round:6, pick:4,  team:'Burden of Etienne\u2011y Woody', player:'Will Howard',         pos:'QB', college:'Ohio State',      note:'' },
+  { round:6, pick:5,  team:'Noble FFT',                      player:'LeQuint Allen',       pos:'RB', college:'Syracuse',        note:'' },
+  { round:6, pick:6,  team:'The Legion of Bouz',             player:'Phil Mafah',          pos:'RB', college:'Clemson',         note:'' },
+  { round:6, pick:7,  team:'The Boonist Monks',              player:'KeAndre Lambert-Smith', pos:'WR', college:'Auburn',        note:'' },
+  { round:6, pick:8,  team:'Rasheeing the Scene',            player:'Gunnar Helm',         pos:'TE', college:'Texas',           note:'' },
+  { round:6, pick:9,  team:'General Ken\u2011obi',           player:'Jimmy Horn',          pos:'WR', college:'Colorado',        note:'' },
+  { round:6, pick:10, team:'MHJTIME',                        player:'Kalel Mullings',      pos:'RB', college:'Michigan',        note:'' },
+  { round:6, pick:11, team:'Sleeping Giants',                player:'Dillon Gabriel',      pos:'QB', college:'Oregon',          note:'' },
+  { round:6, pick:12, team:'Kittler on the Roof',            player:'Andy Borregales',     pos:'K',  college:'Miami',           note:'' },
 ];
 
+// NOTE: picks arrays are Sleeper-verified. Grade letters and analysis text are from an earlier
+// session and reference some incorrect players/trades — editorial revision needed.
 const draftGrades = [
   {
-    team:'MHJTIME', grade:'A',
-    picks:['1.01 Travis Hunter','2.05 Harold Fannin Jr.'],
-    analysis:'Aggressive and brilliant. Trading up for Travis Hunter gives you a potential WR1 alongside Chase and Nabers. Fannin is a lottery ticket at TE. You sacrificed future capital, but with this core your window is now.'
-  },
-  {
     team:'Chudders Football Team', grade:'A',
-    picks:['1.02 Ashton Jeanty','1.08 Colston Loveland','2.02 Bhayshul Tuten','2.07 Emeka Egbuka','2.11 Jaylin Noel'],
-    analysis:'Five picks in the first two rounds is a dynasty masterclass. Jeanty and Tuten give you a lethal RB room alongside Gibbs. Loveland fills the TE void and Egbuka is a plug-and-play WR2. The rebuild is ahead of schedule.'
+    picks:['1.01 Ashton Jeanty','1.05 Emeka Egbuka','2.01 Colston Loveland','2.07 Bhayshul Tuten','2.11 Jaylin Noel','3.01 Pat Bryant','4.01 Brashard Smith','4.05 Jordan James','4.08 Tyler Shough','4.10 Jacory Croskey-Merritt','6.01 Jordan Watkins'],
+    analysis:'Eleven picks — the most in the draft by a mile. Jeanty and Egbuka in Round 1, Loveland and Tuten in Round 2. The rebuild is loading up at every position. Quantity and quality.'
   },
   {
-    team:'Father Time', grade:'A-',
-    picks:['1.03 Tetairoa McMillan','2.08 Isaac Guerendo','3.06 Braelon Allen','3.08 Rome Odunze'],
-    analysis:'McMillan alongside Brian Thomas Jr. and Ladd McConkey is a frightening young WR corps. Guerendo and Allen provide RB depth you badly needed. Smart, needs-based drafting throughout.'
+    team:'Burden of Etienne\u2011y Woody', grade:'A-',
+    picks:['1.10 Luther Burden','2.10 Jalen Royals','3.04 Jarquez Hunter','4.04 Woody Marks','5.01 Trevor Etienne','5.04 Kyle Monangai','6.04 Will Howard'],
+    analysis:'Seven picks headlined by the name-synergy pick of the century. Luther Burden to Burden of Etienne\u2011y Woody was destiny. RB depth with Hunter, Marks, Etienne, and Monangai. Howard adds a QB option.'
+  },
+  {
+    team:'Ghastly Grayskull Gang', grade:'A-',
+    picks:['1.02 Omarion Hampton','1.06 TreVeyon Henderson','2.02 Jayden Higgins','3.02 Elic Ayomanor','6.02 Arian Smith'],
+    analysis:'Two first-round RBs is a power move. Hampton and Henderson give you an immediate backfield upgrade. Higgins and Ayomanor add WR depth. Aggressive and decisive.'
+  },
+  {
+    team:'Father Time', grade:'B+',
+    picks:['1.03 Tetairoa McMillan','3.03 Jaxson Dart','4.03 Shedeur Sanders','5.03 Mitchell Evans','6.03 Mykel Williams'],
+    analysis:'McMillan is a franchise WR pick. Two QBs in Dart and Sanders hedge the position. Evans and Williams are late-round upside plays. Smart, needs-based drafting.'
   },
   {
     team:'General Ken\u2011obi', grade:'B+',
-    picks:['1.06 Kaleb Johnson','2.06 Mason Taylor','3.09 Cade Otton'],
-    analysis:'Johnson adds thunder to the backfield, and two mid-round TEs are solid bets for LaPorta insurance. Could have been more aggressive to address QB, but you don\'t have many holes to fill.'
+    picks:['1.09 Kaleb Johnson','2.09 Mason Taylor','3.09 Abdul Carter','4.09 Tahj Brooks','5.09 Chimere Dike','6.09 Jimmy Horn'],
+    analysis:'Johnson adds thunder to the backfield. Taylor is a TE investment. Carter is an IDP gem at DL. Six picks all in the 9 slot — methodical and consistent.'
   },
   {
-    team:'Burden of Etienne\u2011y Woody', grade:'B+',
-    picks:['1.07 Luther Burden III','1.10 Will Howard','2.01 Devin Neal','3.01 Luke Altmyer'],
-    analysis:'Four picks in the first three rounds. Luther Burden is a perfect name-synergy pick AND fills a need. Howard and Altmyer give you QB options beyond Kyler. Neal is a capable flex play. Solid rebuild execution.'
+    team:'Sleeping Giants', grade:'B+',
+    picks:['2.04 Kyle Williams','3.11 Devin Neal','3.12 Ollie Gordon','4.11 Jalen Milroe','4.12 Jaylin Lane','5.11 Efton Chism','6.11 Dillon Gabriel'],
+    analysis:'Seven picks without a first-rounder. Williams, Neal, and Gordon provide RB/WR depth. Milroe and Gabriel give you two QB prospects. Quantity-focused rebuild.'
   },
   {
     team:'Rasheeing the Scene', grade:'B',
-    picks:['1.12 Quinshon Judkins','2.10 Keon Coleman','2.12 Trey Benson','3.06 Braelon Allen'],
-    analysis:'Judkins adds to an already-loaded backfield which feels redundant, but the value was right. Coleman is the WR help you need. Trading for extra late-round picks was smart asset management.'
+    picks:['1.07 Quinshon Judkins','2.03 Tre Harris','3.05 Jaydon Blue','3.06 Dylan Sampson','5.08 Tai Felton','6.08 Gunnar Helm'],
+    analysis:'Judkins is a first-round RB who fills a need. Harris adds WR help. Two late-round RBs in Blue and Sampson provide depth. Helm is a TE dart throw.'
   },
   {
-    team:'Sleeping Giants', grade:'B-',
-    picks:['1.11 Jalen Milroe','2.04 Jonathon Brooks','3.11 Devin Neal'],
-    analysis:'Milroe is a polarizing pick — elite rushing upside but raw as a passer. Brooks adds youth to an aging backfield. Nothing flashy, but addressed the right positions.'
+    team:'MHJTIME', grade:'B',
+    picks:['1.04 Travis Hunter','3.10 Harold Fannin','5.02 Damien Martinez','5.10 Jalon Walker','6.10 Kalel Mullings'],
+    analysis:'Travis Hunter at 1.04 is the headliner — a potential WR1 alongside Chase. Fannin is a TE lottery ticket. Late-round RB and IDP picks fill out the class. Solid top-heavy draft.'
   },
   {
-    team:'Ghastly Grayskull Gang', grade:'B-',
-    picks:['3.07 Quentin Johnston','4.07 Tank Dell','5.07 Dalton Schultz'],
-    analysis:'You traded your top picks for proven players during the season. The picks you made are depth plays. Johnston and Dell are boom-or-bust WRs who could pop if given volume.'
+    team:'Noble FFT', grade:'B',
+    picks:['1.08 Matthew Golden','1.11 Tyler Warren','2.08 Jack Bech','3.08 Isaac TeSlaa','5.05 Savion Williams','6.05 LeQuint Allen'],
+    analysis:'Two first-round picks — Golden the WR and Warren the TE. Six picks total with WR-heavy focus. Bech and TeSlaa are developmental but have upside.'
   },
   {
     team:'The Legion of Bouz', grade:'B-',
-    picks:['1.05 Cam Ward','3.03 Ben Sinnott','4.03 Jakobi Meyers'],
-    analysis:'Ward behind Mahomes is a luxury, not a need — but dynasty is about the long game. Sinnott addresses the TE desert. Meyers is a safe floor play. Could have invested more in RB youth.'
+    picks:['2.05 Cameron Ward','2.06 Cam Skattebo','3.07 DJ Giddens','4.06 Tory Horton','5.06 Xavier Restrepo','6.06 Phil Mafah'],
+    analysis:'No first-round pick. Ward at 2.05 is the QB insurance behind Mahomes. Skattebo and Giddens add RB depth. Restrepo and Horton are WR lottery tickets. Steady but unspectacular.'
   },
   {
     team:'Kittler on the Roof', grade:'B-',
-    picks:['1.09 RJ Harvey','3.12 Christian Watson','4.12 Dameon Pierce'],
-    analysis:'Harvey is a solid RB2 behind Jonathan Taylor. Watson is a reclamation project and Pierce is depth. As defending champ you\'re not rebuilding, so safe picks make sense.'
+    picks:['1.12 RJ Harvey','2.12 Elijah Arroyo','5.12 Thomas Fidone','6.12 Andy Borregales'],
+    analysis:'Only four picks — the fewest in the draft. Harvey is a solid RB2 behind Jonathan Taylor. Arroyo and Fidone are TE investments. As defending champion, the roster doesn\'t need much.'
   },
   {
-    team:'Noble FFT', grade:'C+',
-    picks:['2.03 Matthew Golden','3.04 Ricky Pearsall','4.04 Ja\'Tavion Sanders'],
-    analysis:'Trading out of 1.04 was bold. Golden and Pearsall are developmental WRs who need time. Sanders is a late-round flier at TE. You got future capital but left value on the board.'
-  },
-  {
-    team:'The Boonist Monks', grade:'C',
-    picks:['2.09 Ray Davis','3.05 Rashid Shaheed','4.05 Antonio Gibson','5.05 Nick Chubb'],
-    analysis:'Traded out of 1.05 for future capital, which makes sense given your win-now core. But the picks you made are aging vets and deep sleepers. Davis is the only one with real upside.'
+    team:'The Boonist Monks', grade:'C+',
+    picks:['4.02 Dont\'e Thornton','4.07 Oronde Gadsden','5.07 Malaki Starks','6.07 KeAndre Lambert-Smith'],
+    analysis:'No picks until Round 4 — traded early capital for win-now assets. Thornton and Lambert-Smith are WR fliers. Gadsden is a TE dart throw. Starks is an IDP play. All depth, no splash.'
   },
 ];
 
 const storylines = [
   {
-    emoji:'1\uFE0F\u20E3',
-    title:'MHJTIME Trades Up for Travis Hunter',
-    text:'The most aggressive move of the draft. MHJTIME shipped a 2026 first-round pick and his original 2025 second-rounder to Burden of Etienne\u2011y Woody to jump from 1.10 to 1.01 and land the consensus top prospect. Paired with Ja\'Marr Chase and Malik Nabers, this gives MHJTIME arguably the most talented WR room in dynasty fantasy football history.'
-  },
-  {
-    emoji:'\uD83D\uDD04',
-    title:'Seven First-Round Trades',
-    text:'Only five of the twelve first-round picks were made by their original owners. The frenzy started when MHJTIME traded up to 1.01 and cascaded through the round. Chudders at 1.02 was the only top-four pick that stayed put. By pick 1.08, three different teams had swapped into spots they didn\'t own entering the day.'
-  },
-  {
     emoji:'\uD83C\uDFAF',
-    title:'Chudders Loads Up with Five Top-24 Picks',
-    text:'The rebuild accelerated in a big way. Between their own picks and acquired selections, Chudders made five picks in the first two rounds — headlined by Ashton Jeanty at 1.02 and Colston Loveland at 1.08. Combined with last year\'s Gibbs pick, the young core is taking shape fast.'
+    title:'Chudders Loads Up with Eleven Picks',
+    text:'The most aggressive draft in Jailyard history. Chudders made eleven selections \u2014 nearly double the next-closest team \u2014 headlined by Ashton Jeanty at 1.01 and Emeka Egbuka at 1.05. Five picks in the first two rounds alone. The rebuild isn\'t coming \u2014 it\'s here.'
   },
   {
     emoji:'\uD83D\uDE02',
     title:'Luther Burden Goes to Burden of Etienne\u2011y Woody',
-    text:'The group chat exploded when Luther Burden III was drafted at 1.07 by the team literally named after him. "It was destiny," owner kharlo w posted. "We\'ve been manifesting this since the team name was created." Burden slots in as the WR2 behind Justin Jefferson.'
+    text:'The group chat exploded when Luther Burden was drafted at 1.10 by the team literally named after him. "It was destiny," owner kharlow posted. "We\'ve been manifesting this since the team name was created." You can\'t script it better than this.'
+  },
+  {
+    emoji:'1\uFE0F\u20E3',
+    title:'Travis Hunter Falls to 1.04',
+    text:'The consensus top prospect in dynasty rookie drafts slid to the fourth pick, where MHJTIME gladly scooped him up. Paired with Ja\'Marr Chase and Malik Nabers, Hunter gives MHJTIME arguably the most talented WR room in the Jailyard.'
   },
   {
     emoji:'\uD83D\uDCC9',
-    title:'Noble FFT and Boonist Monks Trade Down',
-    text:'Both teams held top-five picks and traded out, accumulating future assets instead. Noble FFT moved out of 1.04 and settled for Matthew Golden in the second round. The Boonist Monks shipped 1.05 and landed Cam Ward for the Legion of Bouz. Both teams bet their future capital will be worth more than any single rookie.'
+    title:'Boonist Monks Go Dark Until Round 4',
+    text:'The Monks didn\'t make a single pick until 4.02 \u2014 Dont\'e Thornton. They traded all their early capital for win-now assets, betting the farm on their current core. Only four picks total, the fewest alongside Kittler on the Roof.'
+  },
+  {
+    emoji:'\uD83D\uDD04',
+    title:'Ghastly Grayskull Gang Goes RB-RB in Round 1',
+    text:'Omarion Hampton at 1.02 and TreVeyon Henderson at 1.06 \u2014 Ghastly committed to rebuilding the backfield with two first-round running backs. A bold strategy in a dynasty format that increasingly values receivers.'
   },
   {
     emoji:'\uD83C\uDF1F',
@@ -396,7 +412,7 @@ function renderDraftBoard() {
   for (let p = 1; p <= 12; p++) html += `<th>Pick ${p}</th>`;
   html += '</tr></thead><tbody>';
 
-  for (let r = 1; r <= 5; r++) {
+  for (let r = 1; r <= 6; r++) {
     html += `<tr><td class="round-header" colspan="13" style="font-weight:700;background:rgba(139,92,246,0.06);text-align:left;color:var(--accent);">Round ${r}</td></tr><tr><td style="font-weight:600;color:var(--muted);font-size:.8rem;">R${r}</td>`;
     const roundPicks = draftPicks.filter(dp => dp.round === r).sort((a, b) => a.pick - b.pick);
     roundPicks.forEach(dp => {
