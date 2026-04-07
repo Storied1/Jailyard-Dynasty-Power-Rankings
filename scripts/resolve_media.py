@@ -31,7 +31,11 @@ except ImportError:
     print("ERROR: 'requests' library required. Install with: pip install requests")
     sys.exit(2)
 
-from shared import GIPHY_CANDIDATES_PER_SLOT as CANDIDATES_PER_SLOT
+from shared import (
+    GIPHY_CANDIDATES_PER_SLOT as CANDIDATES_PER_SLOT,
+    load_json as _load_json,
+    save_json,
+)
 
 GIPHY_API_BASE = "https://api.giphy.com/v1/gifs"
 GIPHY_RATING = "pg-13"  # filter out explicit content
@@ -130,17 +134,7 @@ def fetch_giphy_by_id(giphy_id: str, api_key: str) -> dict:
 
 def load_json(path: Path) -> dict:
     """Load JSON file, return empty dict if missing."""
-    if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))
-    return {}
-
-
-def save_json(path: Path, data: dict) -> None:
-    """Write JSON with consistent formatting."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    return _load_json(path) or {}
 
 
 def content_dir(content_path: Path) -> Path:

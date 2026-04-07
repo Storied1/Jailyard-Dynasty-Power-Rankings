@@ -216,14 +216,9 @@ footer{padding:3rem 1rem;text-align:center;color:var(--muted);font-size:.85rem;b
 // ============================================================
 //  CONSTANTS
 // ============================================================
-const LEAGUE_IDS = {
-  2022:'792314138780090368',
-  2023:'918335334096846848',
-  2024:'1048889097223266304',
-  2025:'1180228858937966592'
-};
+const LEAGUE_IDS = LEAGUE_CONFIG.sleeperLeagueIds;
 const SLEEPER = 'https://api.sleeper.app/v1';
-const SEASON = 2025;
+const SEASON = LEAGUE_CONFIG.currentSeason;
 
 // ============================================================
 //  STATE
@@ -266,7 +261,7 @@ async function loadData(){
       initFromCache();
       return;
     }
-  } catch(e){}
+  } catch(e){ console.error('Cache load failed, trying live API:', e); }
 
   // Live Sleeper API
   try {
@@ -307,7 +302,7 @@ async function loadData(){
         if(!matchups.some(m => (m.points||0) > 0)) break;
         allMatchups[w] = matchups;
         totalWeeksLoaded = w;
-      } catch(e){ break; }
+      } catch(e){ console.error(`Week ${w} load failed:`, e); break; }
     }
 
     if(totalWeeksLoaded === 0){
@@ -318,7 +313,13 @@ async function loadData(){
     computeAllRankings();
     initUI();
   } catch(e){
-    document.getElementById('content').innerHTML = '<div class="loading"><h2 style="color:var(--fg)">Could not load data</h2><p style="margin-top:.5rem">'+e.message+'</p></div>';
+    document.getElementById('content').innerHTML = `
+      <div class="empty-state">
+        <h2 style="color:var(--fg);margin-bottom:.5rem">Could not load data</h2>
+        <p>Run the fetch script first to cache the data, or check your internet connection for the live Sleeper API.</p>
+        <code>python fetch_sleeper.py</code>
+        <p style="margin-top:1rem;font-size:.82rem">${e.message}</p>
+      </div>`;
   }
 }
 

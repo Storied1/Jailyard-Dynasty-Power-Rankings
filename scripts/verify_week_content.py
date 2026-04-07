@@ -15,7 +15,7 @@ import sys
 import unicodedata
 from pathlib import Path
 
-from shared import WEEKS_DIR, CONTENT_CHAT_DIR as CHAT_DIR
+from shared import WEEKS_DIR, CONTENT_CHAT_DIR as CHAT_DIR, load_json as _load_json
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -76,11 +76,16 @@ def movement_str_to_delta(movement: str) -> int | None:
 
 
 def load_json(path: Path) -> dict:
+    """Load JSON, exit with code 2 on missing/invalid file."""
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, FileNotFoundError) as e:
+        result = _load_json(path)
+    except (json.JSONDecodeError, ValueError) as e:
         print(f"ERROR: Cannot load {path}: {e}")
         sys.exit(2)
+    if result is None:
+        print(f"ERROR: Cannot load {path}")
+        sys.exit(2)
+    return result
 
 
 def load_prev_content(week: int) -> dict | None:

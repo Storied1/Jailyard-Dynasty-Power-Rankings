@@ -29,11 +29,6 @@ FINGERPRINTS_PATH = CHAT_DIR / "fingerprints.json"
 PERSONAS_DIR = CHAT_DIR / "personas"
 
 
-def save_json(path, data):
-    """Save JSON and print the relative path."""
-    _save_json(path, data, verbose=True)
-
-
 def save_text(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
@@ -167,7 +162,7 @@ def reduce_league_memory(map_outputs, name_map, total_messages):
         "greatest_moments": greatest_moments,
         "lexicon": all_lexicon,
     }
-    save_json(CHAT_DIR / "league-memory.json", result)
+    _save_json(CHAT_DIR / "league-memory.json", result, verbose=True)
     return result
 
 
@@ -232,7 +227,7 @@ def reduce_arcs(map_outputs, name_map):
 
     # Sort by narrative potential
     merged_arcs.sort(key=lambda x: -x.get("narrative_potential", 0))
-    save_json(CHAT_DIR / "arcs.json", merged_arcs[:30])
+    _save_json(CHAT_DIR / "arcs.json", merged_arcs[:30], verbose=True)
     return merged_arcs[:30]
 
 
@@ -284,7 +279,7 @@ def reduce_predictions(map_outputs, name_map):
         "predictions": unique_preds,
         "credibility_index": cred_index,
     }
-    save_json(CHAT_DIR / "predictions.json", result)
+    _save_json(CHAT_DIR / "predictions.json", result, verbose=True)
     return result
 
 
@@ -360,7 +355,7 @@ def reduce_relationships(map_outputs, name_map):
         )
 
     result = {"pairs": pairs[:30]}
-    save_json(CHAT_DIR / "relationships.json", result)
+    _save_json(CHAT_DIR / "relationships.json", result, verbose=True)
     return result
 
 
@@ -398,7 +393,7 @@ def reduce_consensus(map_outputs, name_map):
         "collective_wrongs": [],
         "lone_wolves": [],
     }
-    save_json(CHAT_DIR / "consensus.json", result)
+    _save_json(CHAT_DIR / "consensus.json", result, verbose=True)
     return result
 
 

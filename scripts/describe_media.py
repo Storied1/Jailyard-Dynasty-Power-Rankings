@@ -44,7 +44,14 @@ except ImportError:
     )
     sys.exit(1)
 
-from shared import REPO_ROOT, CHAT_DIR, CONTENT_CHAT_DIR, MAX_IMAGE_SIZE, JPEG_QUALITY
+from shared import (
+    REPO_ROOT,
+    CHAT_DIR,
+    CONTENT_CHAT_DIR,
+    MAX_IMAGE_SIZE,
+    JPEG_QUALITY,
+    DESCRIPTION_BATCH_SIZE,
+)
 
 PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"
 MEDIA_DIR = REPO_ROOT / "WhatsApp Chat - The Jailyard"
@@ -268,7 +275,10 @@ def main():
         description="Describe Jailyard WhatsApp media using Claude vision"
     )
     parser.add_argument(
-        "--batch-size", type=int, default=5, help="Images per API call (default: 5)"
+        "--batch-size",
+        type=int,
+        default=DESCRIPTION_BATCH_SIZE,
+        help=f"Images per API call (default: {DESCRIPTION_BATCH_SIZE})",
     )
     parser.add_argument(
         "--dry-run", action="store_true", help="Count media without calling API"

@@ -8,6 +8,7 @@ import json
 import sys
 import urllib.request
 import urllib.error
+from datetime import datetime, timezone
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -54,6 +55,23 @@ def load_json(path, label=None, required=False, warn=None):
         return None
     with open(path, encoding="utf-8") as f:
         return json.load(f)
+
+
+def parse_ts(ts_str):
+    """Parse an ISO-8601 timestamp string to a timezone-aware UTC datetime.
+
+    Returns None for None input or unparseable strings.
+    """
+    if ts_str is None:
+        return None
+    s = ts_str.replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(s)
+    except (ValueError, TypeError):
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 def save_json(path, data, indent=2, ensure_ascii=False, verbose=False):
@@ -110,7 +128,6 @@ def ollama_request(endpoint, payload, timeout=300):
 
 # Embedding
 EMBEDDING_BATCH_SIZE = 50
-NOMIC_EMBED_DIM = 768
 
 # Chat timing thresholds (seconds)
 CONVERSATION_GAP_SEC = 1800  # 30 min — new conversation block
@@ -121,7 +138,6 @@ RAPID_BURST_SEC = 300  # 5 min — rapid burst window
 UPPERCASE_THRESHOLD = 0.5
 DISTINCTIVE_WORD_RATIO = 3.0
 VOWEL_RATIO_MIN = 0.30
-DISTINCTIVE_WORD_MIN_FRACTION = 0.2
 DISTINCTIVE_WORD_MIN_COUNT = 8
 DISTINCTIVE_WORDS_KEEP = 20
 
@@ -135,7 +151,7 @@ JPEG_QUALITY = 85
 DESCRIPTION_BATCH_SIZE = 5
 GIPHY_CANDIDATES_PER_SLOT = 3
 
-# Token budgets (LLM generation)
+# Token budgets (LLM generation) — used by local_draft.py, batch_drafts.py
 SECTION_TOKEN_BUDGETS = {
     "essay": 4096,
     "rankings": 6144,

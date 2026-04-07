@@ -124,7 +124,7 @@ python scripts/build_chat_context.py --week N --season 2025 --no-ai
 - Chat integration: 21K messages analyzed, 18 weekly context files built
 - Weeks 1-6: content written, validated (PASS), rendered to HTML, pushed
 - Week 7+: data + chat context ready, content not yet written
-- Picks ledger: cumulative 18-12 through Week 5 (Week 6 results pending)
+- Picks ledger: cumulative through Week 6 (Week 7+ pending)
 
 ### Python Note (Windows)
 Use `python` not `python3` on this machine. Python is at:
@@ -142,8 +142,8 @@ Use `python` not `python3` on this machine. Python is at:
 
 ## Local LLM Integration (Ollama)
 - **Ollama** running at `localhost:11434` with three models:
-  - `qwen3:30b-a3b` — 18GB MoE, creative writing / heavy reasoning
-  - `qwen3:8b` — 5.2GB, fast reviews and lightweight tasks
+  - `huihui_ai/qwen3.5-abliterated:35b` — 23GB MoE, creative writing / heavy reasoning
+  - `huihui_ai/qwen3.5-abliterated:9b` — 6.6GB, fast reviews and lightweight tasks
   - `nomic-embed-text` — 274MB, embeddings (768-dim)
 - **MCP Server** (`scripts/ollama_mcp_server.py`) — exposes `ollama_generate`, `ollama_chat`, `ollama_embed` as Claude Code tools via `.mcp.json`
 - **Local Draft** (`scripts/local_draft.py`) — generate column drafts locally before Claude Code edits: `python scripts/local_draft.py --week N --section essay`

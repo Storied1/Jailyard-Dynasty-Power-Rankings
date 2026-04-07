@@ -34,15 +34,17 @@ from shared import (
     OLLAMA_BASE,
     MODEL_HEAVY,
     MODEL_LIGHT,
+    SECTION_TOKEN_BUDGETS,
+    load_json,
 )
 
 # Section generation order and model assignment
 SECTIONS = [
-    ("essay", MODEL_HEAVY, 4096),
-    ("rankings", MODEL_HEAVY, 6144),
-    ("confessionals", MODEL_LIGHT, 2048),
-    ("mailbag", MODEL_LIGHT, 2048),
-    ("bits", MODEL_LIGHT, 1024),
+    ("essay", MODEL_HEAVY, SECTION_TOKEN_BUDGETS["essay"]),
+    ("rankings", MODEL_HEAVY, SECTION_TOKEN_BUDGETS["rankings"]),
+    ("confessionals", MODEL_LIGHT, SECTION_TOKEN_BUDGETS["confessionals"]),
+    ("mailbag", MODEL_LIGHT, SECTION_TOKEN_BUDGETS["mailbag"]),
+    ("bits", MODEL_LIGHT, SECTION_TOKEN_BUDGETS["bits"]),
 ]
 
 MAX_RETRIES = 2
@@ -85,13 +87,6 @@ def ollama_generate(model, prompt, system=None, temperature=0.7, max_tokens=4096
 # ---------------------------------------------------------------------------
 # File loaders
 # ---------------------------------------------------------------------------
-
-
-def load_json(path):
-    if not path.exists():
-        return None
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def load_text(path):

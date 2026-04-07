@@ -49,6 +49,8 @@ from shared import (
     CONTENT_CHAT_DIR,
     NAME_MAP_PATH,
     MAP_CACHE_DIR,
+    load_json,
+    save_json as _save_json,
 )
 
 PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"  # lives in chat/, not content/chat/
@@ -77,18 +79,9 @@ RATE_LIMIT_BASE_DELAY = 2.0  # seconds
 # ── Helpers ─────────────────────────────────────────────────────────────
 
 
-def load_json(path: Path) -> dict | list:
-    """Load a JSON file with UTF-8 encoding."""
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_json(path: Path, data, indent=2):
-    """Save data as JSON with UTF-8 encoding."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=indent, ensure_ascii=False)
-    print(f"  Saved: {path.relative_to(REPO_ROOT)}")
+def save_json(path, data, indent=2):
+    """Save data as JSON with UTF-8 encoding (delegates to shared)."""
+    _save_json(path, data, indent=indent, verbose=True)
 
 
 def save_text(path: Path, text: str):

@@ -38,6 +38,7 @@ from shared import (
     VOWEL_RATIO_MIN,
     DISTINCTIVE_WORD_MIN_COUNT,
     DISTINCTIVE_WORDS_KEEP,
+    parse_ts,
 )
 
 DEFAULT_INPUT = CHAT_DIR / "parsed_messages.json"
@@ -83,20 +84,6 @@ STOPWORDS = frozenset(
 
 # Word tokenizer
 WORD_RE = re.compile(r"[a-zA-Z']+")
-
-
-def parse_ts(ts_str):
-    """Parse ISO-8601 to UTC datetime."""
-    if not ts_str:
-        return None
-    s = ts_str.replace("Z", "+00:00")
-    try:
-        dt = datetime.fromisoformat(s)
-    except ValueError:
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
 
 
 def extract_emojis(text):

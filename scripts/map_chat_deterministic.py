@@ -12,13 +12,14 @@ Usage:
 import re
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from shared import (
     MAP_CACHE_DIR,
     NAME_MAP_PATH,
     load_json,
     save_json,
+    parse_ts,
     CONSENSUS_WINDOW_SIZE,
     CONSENSUS_MIN_SENDERS,
     RAPID_BURST_SEC,
@@ -74,14 +75,6 @@ TRADE_PATTERNS = [
     r"\brobbery\b",
     r"\bsteal\b",
 ]
-
-
-def parse_ts(ts_str):
-    """Parse ISO timestamp string to datetime."""
-    try:
-        return datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
-    except (ValueError, TypeError):
-        return None
 
 
 def get_hour(ts_str):

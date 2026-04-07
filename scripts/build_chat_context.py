@@ -19,7 +19,15 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
-from shared import CHAT_DIR, CONTENT_CHAT_DIR, WEEKS_DIR, DATA_DIR, load_json
+from shared import (
+    CHAT_DIR,
+    CONTENT_CHAT_DIR,
+    WEEKS_DIR,
+    DATA_DIR,
+    load_json,
+    save_json as _save_json,
+    parse_ts,
+)
 
 MEDIA_CATALOG_PATH = CONTENT_CHAT_DIR / "media-catalog.json"
 
@@ -36,31 +44,8 @@ PRESEASON_END_2025 = datetime(2025, 9, 3, 23, 59, 59, tzinfo=timezone.utc)
 
 
 def save_json(path, data):
-    """Write data as pretty JSON with UTF-8."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-    print(f"  Wrote {path}")
-
-
-# ---------------------------------------------------------------------------
-# Timestamp parsing
-# ---------------------------------------------------------------------------
-
-
-def parse_ts(ts_str):
-    """Parse an ISO-8601 timestamp string to a timezone-aware UTC datetime."""
-    if ts_str is None:
-        return None
-    # Handle Z suffix
-    s = ts_str.replace("Z", "+00:00")
-    try:
-        dt = datetime.fromisoformat(s)
-    except ValueError:
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+    """Write data as pretty JSON with UTF-8 (delegates to shared)."""
+    _save_json(path, data, verbose=True)
 
 
 # ---------------------------------------------------------------------------
