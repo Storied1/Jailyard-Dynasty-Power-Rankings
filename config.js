@@ -458,6 +458,10 @@ function renderNav() {
     .getElementById("navThemeToggle")
     .addEventListener("click", function () {
       document.documentElement.classList.toggle("light");
+      localStorage.setItem(
+        "theme",
+        document.documentElement.classList.contains("light") ? "light" : "dark",
+      );
       window.dispatchEvent(new Event("themechange"));
     });
 
@@ -489,6 +493,10 @@ function renderNav() {
  * Call once from each page's <script> block.
  */
 function applyConfig() {
+  // Restore saved theme before first paint
+  var saved = localStorage.getItem("theme");
+  if (saved === "light") document.documentElement.classList.add("light");
+
   renderNav();
   applyConfigColors();
   applyLeagueName();

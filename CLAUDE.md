@@ -44,6 +44,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - **Sleeper bracket data has 2 games at max round** — championship (`min(matchup_id)`) + 3rd-place. Always filter to `min(m)` when detecting finals/champions.
 - **NEVER trust AI-generated inline data arrays** — always cross-reference against Sleeper API endpoints before publishing (draft picks, records, etc.)
 - **No repeating animations** — `animation-iteration-count: infinite` is banned for shimmer, pulse, blink, glow. Loading spinners and tickers are OK.
+- **Quality gates are binary** — if a gate (`/edit-week`, `verify_week_content.py`, `/review`, `/grill`) finds an error, the verdict follows the gate's rules. Never rationalize "minor" exceptions. Fix first, approve second.
 
 ## Known Patterns
 - Data loading: try cached JSON → catch → live Sleeper API → catch → error UI
@@ -127,12 +128,13 @@ python scripts/build_chat_context.py --week N --season 2025 --no-ai
 - 2025 data: ALL 18 weeks fetched, extracted, and verified against Sleeper API
 - League history: 2022-2026, 392 matchups, Elo ratings computed, championship data verified
 - Chat integration: 21K messages analyzed, 18 weekly context files built (consent obtained)
-- Weeks 1-6: content written, validated (PASS), rendered to HTML, pushed
-- Week 7+: data + chat context ready, content not yet written
-- Picks ledger: cumulative through Week 6 (Week 7+ pending)
+- Weeks 1-6: content written, editor-reviewed (3 APPROVE, 3 REVISE→fixed), validated (PASS), rendered to HTML, pushed
+- Week 7+: data + chat context ready, content not yet written. **Week 7 green-lit.**
+- Picks ledger: cumulative 18-12 through Week 6 (Week 7+ pending)
 - Project health: B overall (A- content pipeline, C+ maintainability). Simplify+refactor done 2026-04-07. Health card at `.claude/onboard-report.md`
 - Draft board: rebuilt from Sleeper API (72 picks, 6 rounds). Grade text approximate — needs editorial polish.
-- Remaining before Week 7: `/edit-week` 1-6, theme persistence fix, `/vault-decide`
+- Theme persistence: fixed (localStorage in config.js, 2026-04-08)
+- Quality standard: recorded in Obsidian vault (2026-04-08)
 
 ### Python Note (Windows)
 Use `python` not `python3` on this machine. Python is at:

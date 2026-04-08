@@ -126,6 +126,8 @@ If the verdict is **APPROVE**, the content is ready for rendering.
 If **REVISE**, list specific changes needed and let the writer fix them.
 If **REJECT**, explain what needs to be completely rewritten and why.
 
+**IMPORTANT: There is no "APPROVE with notes."** If ANY fix is needed — even a single word — the verdict is REVISE. Fix it, re-verify, then re-review for APPROVE. Quality gates are binary.
+
 ## Usage
 ```
 /edit-week 3

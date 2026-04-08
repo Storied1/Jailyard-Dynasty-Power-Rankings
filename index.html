@@ -1,906 +1,1678 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Jailyard — Dynasty League HQ</title>
-<meta name="view-transition" content="same-origin" />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Jailyard — Dynasty League HQ</title>
+    <meta name="view-transition" content="same-origin" />
 
-<!-- Social / SEO meta -->
-<meta name="description" content="The Jailyard: a 12-team dynasty fantasy football league since 2022. Season recaps, all-time records, Elo ratings, power rankings, and full league history." />
-<meta property="og:title" content="The Jailyard — Dynasty League HQ" />
-<meta property="og:description" content="Four seasons. Twelve managers. One dynasty league to rule them all. Explore the complete history of The Jailyard." />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+    <!-- Social / SEO meta -->
+    <meta
+      name="description"
+      content="The Jailyard: a 12-team dynasty fantasy football league since 2022. Season recaps, all-time records, Elo ratings, power rankings, and full league history."
+    />
+    <meta property="og:title" content="The Jailyard — Dynasty League HQ" />
+    <meta
+      property="og:description"
+      content="Four seasons. Twelve managers. One dynasty league to rule them all. Explore the complete history of The Jailyard."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>"
+    />
 
-<!-- Speculation Rules: prerender linked pages for instant navigation -->
-<script type="speculationrules">
-{"prerender":[{"where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}
-</script>
-
-<style>
-  :root{
-    --bg: #0b0d10;
-    --fg: #e8ecf0;
-    --muted: #7a8194;
-    --accent: #8b5cf6;
-    --accent2: #ec4899;
-    --card: rgba(255,255,255,0.03);
-    --border: rgba(255,255,255,0.07);
-    --glass: rgba(255,255,255,0.05);
-    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    --maxw: 1200px;
-    --good: #16a34a;
-    --bad: #dc2626;
-    --warn: #ca8a04;
-    --glow-1: rgba(139,92,246,0.15);
-    --glow-2: rgba(236,72,153,0.12);
-    font-family: var(--font);
-    color-scheme: dark;
-  }
-  html.light{
-    --bg:#f7f9fc; --fg:#111418; --muted:#5f6672;
-    --card:rgba(0,0,0,0.03); --glass:rgba(0,0,0,0.04); --glow-1:rgba(139,92,246,0.08); --glow-2:rgba(236,72,153,0.06);
-    --border:rgba(0,0,0,0.08); color-scheme:light;
-  }
-  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
-  html{ scroll-behavior:smooth; }
-  body{ background:var(--bg); color:var(--fg); overflow-x:hidden; }
-  a{ color:inherit; text-decoration:none; }
-
-  .btn:focus-visible, .card-link:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:999px; }
-
-  /* --- Hero section --- */
-  .hero{
-    position:relative; min-height:100vh; display:flex; flex-direction:column;
-    justify-content:center; align-items:center; text-align:center; overflow:hidden;
-  }
-  .hero canvas{
-    position:absolute; inset:0; width:100%; height:100%; z-index:0;
-  }
-  .hero-glow{
-    position:absolute; width:600px; height:600px; border-radius:50%; filter:blur(120px); opacity:.5; z-index:0;
-    pointer-events:none; transition:transform .4s ease-out;
-  }
-  .hero-glow.g1{ top:-10%; left:10%; background:var(--glow-1); }
-  .hero-glow.g2{ bottom:-15%; right:5%; background:var(--glow-2); }
-
-  .hero-content{
-    position:relative; z-index:2; padding:2rem 1.5rem; max-width:900px;
-  }
-  .hero-badge{
-    display:inline-flex; align-items:center; gap:.45rem;
-    padding:.3rem .9rem; border-radius:999px; font-size:.78rem; font-weight:600;
-    background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.25);
-    color:var(--accent); margin-bottom:1.5rem; letter-spacing:.04em; text-transform:uppercase;
-  }
-  .hero-badge .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
-
-  .hero-title{
-    font-size:clamp(2.8rem,7vw,5.5rem); font-weight:800; line-height:1.05;
-    letter-spacing:-.03em;
-    background:linear-gradient(135deg,#fff 0%,#c4b5fd 40%,#f9a8d4 70%,#fff 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-
-  .hero-sub{
-    margin:1.2rem auto 0; font-size:clamp(1rem,2vw,1.25rem); color:var(--muted);
-    max-width:640px; line-height:1.65;
-  }
-  .hero-sub .typed-cursor{ display:inline-block; width:2px; height:1.1em; background:var(--accent); margin-left:2px; vertical-align:text-bottom; opacity:.7; }
-
-  .hero-ctas{
-    display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-top:2.5rem;
-  }
-  .btn{
-    display:inline-flex; align-items:center; gap:.5rem;
-    padding:.85rem 1.6rem; border-radius:999px; font-weight:600; font-size:.95rem;
-    transition:transform .2s, box-shadow .2s;
-  }
-  .btn:hover{ transform:translateY(-2px); }
-  .btn-primary{
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    color:#fff; box-shadow:0 4px 20px rgba(139,92,246,0.3);
-  }
-  .btn-primary:hover{ box-shadow:0 8px 30px rgba(139,92,246,0.45); }
-  .btn-ghost{
-    background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--fg);
-  }
-  .btn-ghost:hover{ background:rgba(255,255,255,0.08); }
-
-  .scroll-indicator{
-    position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); z-index:2;
-    display:flex; flex-direction:column; align-items:center; gap:.4rem; color:var(--muted); font-size:.78rem;
-    animation:float 3s ease-in-out infinite;
-  }
-  .scroll-indicator svg{ width:20px; height:20px; stroke:var(--muted); fill:none; stroke-width:2; }
-  @keyframes float{ 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
-
-  /* --- Stats ticker --- */
-  .stats-section{
-    position:relative; z-index:2; padding:5rem 1.5rem;
-    background:linear-gradient(180deg,var(--bg) 0%,rgba(15,17,22,1) 100%);
-  }
-  .stats-grid{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:2rem;
-    max-width:900px; margin:0 auto; text-align:center;
-  }
-  .stat-item{ opacity:0; transform:translateY(30px); transition:all .7s cubic-bezier(.17,.67,.24,1); }
-  .stat-item.visible{ opacity:1; transform:none; }
-  .stat-number{
-    font-size:clamp(2.2rem,5vw,3.2rem); font-weight:800; letter-spacing:-.02em;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .stat-label{ font-size:.88rem; color:var(--muted); margin-top:.3rem; }
-
-  /* --- Cards section --- */
-  .pages-section{
-    position:relative; z-index:2; padding:5rem 1.5rem 6rem;
-  }
-  .pages-section .section-label{
-    text-align:center; margin-bottom:3rem;
-  }
-  .pages-section .section-label h2{
-    font-size:clamp(1.6rem,4vw,2.4rem); font-weight:700; margin-bottom:.5rem;
-  }
-  .pages-section .section-label p{ color:var(--muted); max-width:500px; margin:0 auto; }
-
-  .page-cards{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-    gap:1.5rem; max-width:900px; margin:0 auto;
-  }
-  .page-card{
-    position:relative; background:var(--card); border:1px solid var(--border);
-    border-radius:20px; padding:2rem 2rem 2.5rem; overflow:hidden;
-    transition:transform .3s cubic-bezier(.17,.67,.24,1), box-shadow .3s, border-color .3s;
-    opacity:0; transform:translateY(40px);
-  }
-  .page-card.visible{ opacity:1; transform:none; }
-  .page-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 20px 50px rgba(0,0,0,0.35);
-    border-color:rgba(139,92,246,0.2);
-  }
-  .page-card::before{
-    content:''; position:absolute; top:0; left:0; right:0; height:3px;
-    background:linear-gradient(90deg,var(--accent),var(--accent2));
-    opacity:0; transition:opacity .3s;
-  }
-  .page-card:hover::before{ opacity:1; }
-
-  .page-card .icon-wrap{
-    width:56px; height:56px; border-radius:14px; display:grid; place-items:center;
-    background:rgba(139,92,246,0.1); margin-bottom:1.2rem;
-  }
-  .page-card .icon-wrap img{ width:32px; height:32px; }
-  .page-card h3{ font-size:1.25rem; margin-bottom:.6rem; }
-  .page-card p{ color:var(--muted); font-size:.92rem; line-height:1.55; margin-bottom:1.5rem; }
-  .page-card .card-link{
-    display:inline-flex; align-items:center; gap:.4rem;
-    font-weight:600; font-size:.9rem; color:var(--accent);
-    transition:gap .2s, color .2s;
-  }
-  .page-card .card-link:hover{ gap:.7rem; color:var(--accent2); }
-  .page-card .card-link svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
-
-  /* --- Footer --- */
-  footer{
-    padding:3rem 1.5rem; text-align:center; color:var(--muted); font-size:.82rem;
-    border-top:1px solid var(--border);
-  }
-  footer .footer-brand{ font-weight:700; font-size:1rem; color:var(--fg); margin-bottom:.4rem; }
-
-  /* --- View Transitions --- */
-  @view-transition{ navigation:auto; }
-  ::view-transition-old(root){ animation:fade-out .2s ease-in; }
-  ::view-transition-new(root){ animation:fade-in .3s ease-out; }
-  @keyframes fade-out{ to{opacity:0;filter:blur(2px);} }
-  @keyframes fade-in{ from{opacity:0;filter:blur(2px);} }
-
-  /* --- Fun facts ticker --- */
-  .fun-ticker{
-    overflow:hidden; background:rgba(139,92,246,0.06); border-top:1px solid var(--border);
-    padding:.75rem 0; position:relative;
-  }
-  .fun-ticker-inner{
-    display:flex; gap:4rem; white-space:nowrap;
-    animation:ticker 40s linear infinite;
-    width:max-content;
-  }
-  .fun-ticker-inner:hover{ animation-play-state:paused; }
-  .fun-ticker-item{
-    display:inline-flex; align-items:center; gap:.5rem; font-size:.85rem; color:var(--muted);
-  }
-  .fun-ticker-item .emoji{ font-size:1.1rem; }
-  @keyframes ticker{ 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-
-  /* --- Championship Vault --- */
-  .champions-trigger .stat-number{
-    cursor:pointer; transition:text-shadow .3s, transform .2s;
-    position:relative;
-  }
-  .champions-trigger .stat-number:hover{
-    text-shadow:0 0 30px rgba(251,191,36,0.5);
-    transform:scale(1.08);
-  }
-  .champions-trigger .stat-label::after{
-    content:' \2022 tap to explore'; font-size:.72rem; color:rgba(251,191,36,0.5);
-    opacity:0; transition:opacity .3s;
-  }
-  .champions-trigger:hover .stat-label::after{ opacity:1; }
-
-  .vault-overlay{
-    position:fixed; inset:0; z-index:8000;
-    display:none; justify-content:center; align-items:center;
-    flex-direction:column; background:rgba(0,0,0,0);
-    transition:background .6s;
-  }
-  .vault-overlay.active{ background:rgba(0,0,0,0.96); }
-
-  .vault-letterbox{
-    position:fixed; left:0; right:0; height:0; background:#000; z-index:8001;
-    transition:height .5s cubic-bezier(.4,0,.2,1);
-  }
-  .vault-letterbox.top{ top:0; }
-  .vault-letterbox.bot{ bottom:0; }
-  .vault-overlay.active .vault-letterbox{ height:7vh; }
-
-  .vault-close{
-    position:absolute; top:max(8vh,50px); right:1.5rem; z-index:8002;
-    background:none; border:none; color:var(--muted); cursor:pointer;
-    font-size:2rem; line-height:1; transition:color .2s, transform .2s;
-  }
-  .vault-close:hover{ color:#fbbf24; transform:rotate(90deg); }
-
-  .vault-title{
-    font-size:clamp(1.2rem,3.5vw,2rem); font-weight:800; letter-spacing:.1em;
-    text-transform:uppercase; text-align:center; margin-bottom:2.5rem;
-    background:linear-gradient(135deg,#fde68a,#fbbf24,#d97706,#fbbf24,#fde68a);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-    opacity:0; transform:translateY(20px);
-  }
-  .vault-overlay.active .vault-title{
-    animation:vault-in .7s .4s ease-out forwards;
-  }
-  @keyframes vault-in{ to{opacity:1;transform:translateY(0)} }
-
-  .vault-rings{
-    display:flex; flex-wrap:wrap; justify-content:center; gap:2.5rem;
-    max-width:960px; width:90%; position:relative; z-index:1;
-  }
-  .vault-ring{
-    width:240px; text-align:center;
-    opacity:0; transform:scale(.7) translateY(30px);
-  }
-  .vault-ring.reveal{
-    animation:ring-pop .8s cubic-bezier(.17,.67,.24,1) forwards;
-  }
-  @keyframes ring-pop{
-    0%{opacity:0;transform:scale(.7) translateY(30px)}
-    60%{transform:scale(1.06) translateY(-5px)}
-    100%{opacity:1;transform:scale(1) translateY(0)}
-  }
-
-  .ring-circle{
-    width:140px; height:140px; margin:0 auto 1.2rem; position:relative; border-radius:50%;
-    background:conic-gradient(from 0deg,#fde68a,#fbbf24,#d97706,#b45309,#d97706,#fbbf24,#fde68a);
-    box-shadow:0 0 40px rgba(251,191,36,0.35);
-    animation:ring-glow 3s ease-in-out infinite alternate;
-  }
-  .ring-circle::before{
-    content:''; position:absolute; inset:20px; border-radius:50%;
-    background:radial-gradient(circle at 40% 40%,#1a1a2e,#0a0a18);
-  }
-  .ring-circle::after{
-    content:attr(data-year); position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-    font-size:1.5rem; font-weight:800; color:#fbbf24;
-    text-shadow:0 0 15px rgba(251,191,36,0.5);
-  }
-  @keyframes ring-glow{
-    from{box-shadow:0 0 30px rgba(251,191,36,0.25)}
-    to{box-shadow:0 0 55px rgba(251,191,36,0.55),0 0 100px rgba(251,191,36,0.12)}
-  }
-  .ring-gem{
-    position:absolute; width:14px; height:14px; border-radius:3px;
-    transform:rotate(45deg);
-  }
-  .ring-champ{
-    font-size:1.1rem; font-weight:700; color:#fde68a; margin-bottom:.25rem;
-  }
-  .ring-vs{ font-size:.82rem; color:var(--muted); margin-bottom:.4rem; }
-  .ring-tag{
-    display:inline-block; padding:.2rem .6rem; border-radius:999px; font-size:.75rem;
-    background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2);
-    color:#fbbf24; margin:.12rem .08rem;
-  }
-  .vault-footer{
-    margin-top:2rem; text-align:center; opacity:0;
-  }
-  .vault-overlay.active .vault-footer{
-    animation:vault-in .7s 2s ease-out forwards;
-  }
-  .vault-footer span{
-    font-size:.85rem; color:var(--muted); letter-spacing:.1em; text-transform:uppercase;
-  }
-  .vault-particles{
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-  }
-  @media(max-width:600px){
-    .vault-rings{ gap:1.5rem; }
-    .vault-ring{ width:200px; }
-    .ring-circle{ width:110px; height:110px; }
-    .ring-circle::before{ inset:16px; }
-    .ring-circle::after{ font-size:1.2rem; }
-    .champions-trigger .stat-label::after{ content:' \2022 tap'; }
-  }
-
-  /* --- Easter egg confetti --- */
-  .confetti-piece{
-    position:fixed; width:10px; height:10px; z-index:9999; pointer-events:none;
-    animation:confetti-fall 3s ease-in forwards;
-  }
-  @keyframes confetti-fall{
-    0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1);}
-    100%{opacity:0;transform:translateY(100vh) rotate(720deg) scale(0.3);}
-  }
-
-  /* --- Scroll progress bar --- */
-  .scroll-progress{
-    position:fixed; top:0; left:0; height:3px; z-index:200;
-    background:linear-gradient(90deg,var(--accent),var(--accent2));
-    width:0%; transition:width .1s linear; pointer-events:none;
-  }
-
-  /* --- Keyboard shortcut overlay --- */
-  .kbd-overlay{
-    position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.7);
-    backdrop-filter:blur(6px); display:none; place-items:center;
-    opacity:0; transition:opacity .2s;
-  }
-  .kbd-overlay.show{ display:grid; opacity:1; }
-  .kbd-box{
-    background:var(--bg); border:1px solid var(--border); border-radius:16px;
-    padding:2rem 2.5rem; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.5);
-  }
-  .kbd-box h3{ font-size:1.1rem; margin-bottom:1rem; }
-  .kbd-row{ display:flex; justify-content:space-between; align-items:center; padding:.45rem 0; border-bottom:1px solid var(--border); }
-  .kbd-row:last-child{ border:none; }
-  .kbd-row kbd{
-    display:inline-block; padding:.2rem .5rem; border-radius:6px; font-size:.8rem;
-    background:rgba(255,255,255,0.08); border:1px solid var(--border);
-    font-family:system-ui; min-width:24px; text-align:center;
-  }
-  .kbd-row span{ color:var(--muted); font-size:.88rem; }
-
-  /* --- Responsive --- */
-  @media(max-width:600px){
-    .hero-glow{ width:300px; height:300px; }
-    .page-cards{ grid-template-columns:1fr; }
-    .stats-grid{ grid-template-columns:repeat(2,1fr); }
-  }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-</style>
-</head>
-<body>
-
-<div class="scroll-progress" id="scrollProgress"></div>
-
-<!-- Keyboard shortcut overlay -->
-<div class="kbd-overlay" id="kbdOverlay">
-  <div class="kbd-box">
-    <h3>Keyboard Shortcuts</h3>
-    <div class="kbd-row"><span>Show this help</span><kbd>?</kbd></div>
-    <div class="kbd-row"><span>Go to League Bible</span><kbd>1</kbd></div>
-    <div class="kbd-row"><span>Go to Season Hub</span><kbd>2</kbd></div>
-    <div class="kbd-row"><span>Go to Rankings</span><kbd>3</kbd></div>
-    <div class="kbd-row"><span>Go to Power Rankings</span><kbd>4</kbd></div>
-    <div class="kbd-row"><span>Go to Draft Recap</span><kbd>5</kbd></div>
-    <div class="kbd-row"><span>Go to Trades</span><kbd>6</kbd></div>
-    <div class="kbd-row"><span>Go to Week 1</span><kbd>7</kbd></div>
-    <div class="kbd-row"><span>Toggle theme</span><kbd>T</kbd></div>
-    <div class="kbd-row"><span>Back to top</span><kbd>Home</kbd></div>
-    <div class="kbd-row"><span>Close overlay</span><kbd>Esc</kbd></div>
-  </div>
-</div>
-
-<div id="site-nav"></div>
-
-<section class="hero" id="top">
-  <canvas id="starfield" aria-hidden="true"></canvas>
-  <div class="hero-glow g1"></div>
-  <div class="hero-glow g2"></div>
-  <div class="hero-content">
-    <div class="hero-badge"><span class="dot"></span> Est. 2022 &middot; 4 Seasons</div>
-    <h1 class="hero-title">Welcome to<br>The Jailyard</h1>
-    <p class="hero-sub" id="typed"></p>
-    <div class="hero-ctas">
-      <a href="history.html" class="btn btn-primary">
-        League Bible
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-      <a href="season.html" class="btn btn-ghost">
-        2025 Season
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-  </div>
-  <div class="scroll-indicator">
-    Scroll
-    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-  </div>
-</section>
-
-<section class="stats-section">
-  <div class="stats-grid">
-    <div class="stat-item">
-      <div class="stat-number" data-target="12">0</div>
-      <div class="stat-label">Teams</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number" data-target="4">0</div>
-      <div class="stat-label">Seasons</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number" data-target="3">0</div>
-      <div class="stat-label">Champions</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number" data-target="60" data-suffix="+">0</div>
-      <div class="stat-label">Trades</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number" data-target="500" data-suffix="+">0</div>
-      <div class="stat-label">Rostered Players</div>
-    </div>
-  </div>
-</section>
-
-<section class="pages-section">
-  <div class="section-label">
-    <h2>Explore the League</h2>
-    <p>Four seasons of dynasty history, data, and analysis &mdash; all in one place.</p>
-  </div>
-  <div class="page-cards" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
-    <div class="page-card">
-      <div class="icon-wrap" style="background:rgba(139,92,246,0.12);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
-      </div>
-      <h3>League Bible</h3>
-      <p>All-time records, franchise profiles, head-to-head rivalries, and Elo ratings from four seasons of league history.</p>
-      <a href="history.html" class="card-link">
-        Explore History
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-    <div class="page-card">
-      <div class="icon-wrap" style="background:rgba(236,72,153,0.1);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
-      </div>
-      <h3>2025 Season Recap</h3>
-      <p>Complete week-by-week results, power rankings, standings, top performers and trend charts for the finished 2025 season.</p>
-      <a href="season.html" class="card-link">
-        Explore Season
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-    <div class="page-card">
-      <div class="icon-wrap" style="background:rgba(0,208,132,0.1);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00d084" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
-      </div>
-      <h3>Preseason Rankings</h3>
-      <p>How we saw the league before 2025 kicked off. Sortable tables, data charts, rosters and analysis for all twelve franchises.</p>
-      <a href="preseason.html" class="card-link">
-        View Rankings
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-    <div class="page-card">
-      <div class="icon-wrap" style="background:rgba(6,182,212,0.1);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
-      </div>
-      <h3>2025 Rookie Draft</h3>
-      <p>Full draft board, team grades, key storylines and a breakdown of every pick from the five-round rookie draft.</p>
-      <a href="draft.html" class="card-link">
-        View Draft Recap
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-    <div class="page-card">
-      <div class="icon-wrap" style="background:rgba(249,115,22,0.1);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M14 14l7 7M3 8V3h5M10 10L3 3"/></svg>
-      </div>
-      <h3>Trade Tracker</h3>
-      <p>Every blockbuster deal, every fleece and every "what were they thinking?" moment across four seasons of trades.</p>
-      <a href="trades.html" class="card-link">
-        View Trades
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-    <div class="page-card">
-      <div class="icon-wrap" style="background:rgba(251,191,36,0.1);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      </div>
-      <h3>Week 1 Column</h3>
-      <p>The 2025 opening essay, reader mailbag, game picks with spreads and our bold upset calls.</p>
-      <a href="week1.html" class="card-link">
-        Read the Column
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-    <div class="page-card">
-      <div class="icon-wrap" style="background:rgba(251,191,36,0.1);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      </div>
-      <h3>Power Rankings</h3>
-      <p>Bill Simmons-style weekly power rankings with tiered analysis, recap, preview, and The Confessional.</p>
-      <a href="power-rankings.html" class="card-link">
-        Read Rankings
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-  </div>
-</section>
-
-<div class="fun-ticker" aria-hidden="true">
-  <div class="fun-ticker-inner" id="ticker"></div>
-</div>
-
-<div class="vault-overlay" id="dynastyVault">
-  <div class="vault-letterbox top"></div>
-  <div class="vault-letterbox bot"></div>
-  <button class="vault-close" aria-label="Close vault">&times;</button>
-  <canvas class="vault-particles" id="vaultParticles" aria-hidden="true"></canvas>
-  <h2 class="vault-title">The Championship Vault</h2>
-  <div class="vault-rings" id="vaultRings"></div>
-  <div class="vault-footer"><span>The Dynasty Continues&hellip;</span></div>
-</div>
-
-<footer>
-  <div class="footer-brand">The Jailyard</div>
-  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;margin-bottom:1rem;">
-    <a href="history.html" style="color:var(--muted);font-size:.85rem;">League Bible</a>
-    <a href="season.html" style="color:var(--muted);font-size:.85rem;">Season Hub</a>
-    <a href="preseason.html" style="color:var(--muted);font-size:.85rem;">Rankings</a>
-    <a href="draft.html" style="color:var(--muted);font-size:.85rem;">Draft Recap</a>
-    <a href="trades.html" style="color:var(--muted);font-size:.85rem;">Trades</a>
-    <a href="week1.html" style="color:var(--muted);font-size:.85rem;">Week 1</a>
-  </div>
-  &copy; 2022&ndash;2026 The Jailyard Dynasty League. All rights reserved.
-</footer>
-
-<script src="config.js"></script>
-<script>
-// --- Starfield canvas ---
-(function(){
-  const canvas = document.getElementById('starfield');
-  const ctx = canvas.getContext('2d');
-  let W, H, stars = [], mouse = { x: 0.5, y: 0.5 };
-  const STAR_COUNT = 180;
-
-  function resize(){
-    const dpr = devicePixelRatio || 1;
-    W = canvas.width = canvas.clientWidth * dpr;
-    H = canvas.height = canvas.clientHeight * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  function initStars(){
-    stars = [];
-    for(let i = 0; i < STAR_COUNT; i++){
-      stars.push({
-        x: Math.random() * canvas.clientWidth,
-        y: Math.random() * canvas.clientHeight,
-        r: Math.random() * 1.4 + 0.3,
-        speed: Math.random() * 0.3 + 0.05,
-        alpha: Math.random() * 0.6 + 0.2,
-        drift: (Math.random() - 0.5) * 0.15
-      });
-    }
-  }
-  function draw(){
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    ctx.clearRect(0, 0, w, h);
-    const mx = (mouse.x - 0.5) * 20;
-    const my = (mouse.y - 0.5) * 20;
-    stars.forEach(s => {
-      s.y -= s.speed;
-      s.x += s.drift;
-      if(s.y < -5){ s.y = h + 5; s.x = Math.random() * w; }
-      if(s.x < -5) s.x = w + 5;
-      if(s.x > w + 5) s.x = -5;
-      const px = s.x + mx * (s.r / 1.5);
-      const py = s.y + my * (s.r / 1.5);
-      ctx.beginPath();
-      ctx.arc(px, py, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(200,200,255,${s.alpha})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  window.addEventListener('resize', () => { resize(); initStars(); });
-  document.addEventListener('mousemove', e => {
-    mouse.x = e.clientX / window.innerWidth;
-    mouse.y = e.clientY / window.innerHeight;
-  });
-  resize(); initStars(); draw();
-})();
-
-// --- Nav scroll effect ---
-
-// --- Typewriter effect ---
-(function(){
-  const text = "The official home of The Jailyard dynasty league. Four seasons of records, rivalries, and rankings \u2014 from 2022 to the 2025 championship.";
-  const el = document.getElementById('typed');
-  let i = 0;
-  el.innerHTML = '<span class="typed-cursor"></span>';
-  function type(){
-    if(i < text.length){
-      el.innerHTML = text.slice(0, i + 1) + '<span class="typed-cursor"></span>';
-      i++;
-      setTimeout(type, 22 + Math.random() * 18);
-    } else {
-      // remove cursor after a pause
-      setTimeout(() => { el.innerHTML = text; }, 2000);
-    }
-  }
-  setTimeout(type, 800);
-})();
-
-// --- Animated stat counters ---
-(function(){
-  const items = document.querySelectorAll('.stat-item');
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if(!e.isIntersecting) return;
-      e.target.classList.add('visible');
-      const numEl = e.target.querySelector('.stat-number');
-      const target = parseInt(numEl.dataset.target);
-      const suffix = numEl.dataset.suffix || '';
-      const duration = 1200;
-      const start = performance.now();
-      function tick(now){
-        const elapsed = now - start;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-        numEl.textContent = Math.round(eased * target) + suffix;
-        if(progress < 1) requestAnimationFrame(tick);
+    <!-- Speculation Rules: prerender linked pages for instant navigation -->
+    <script type="speculationrules">
+      {
+        "prerender": [
+          { "where": { "href_matches": "/*.html" }, "eagerness": "moderate" }
+        ]
       }
-      requestAnimationFrame(tick);
-      io.unobserve(e.target);
-    });
-  }, { threshold: 0.4 });
-  items.forEach(item => io.observe(item));
-})();
+    </script>
 
-// --- Card entrance animations ---
-(function(){
-  const cards = document.querySelectorAll('.page-card');
-  const io = new IntersectionObserver(entries => {
-    entries.forEach((e, i) => {
-      if(!e.isIntersecting) return;
-      setTimeout(() => e.target.classList.add('visible'), i * 150);
-      io.unobserve(e.target);
-    });
-  }, { threshold: 0.15 });
-  cards.forEach(c => io.observe(c));
-})();
-
-// --- Parallax glow orbs on mouse move ---
-(function(){
-  const g1 = document.querySelector('.hero-glow.g1');
-  const g2 = document.querySelector('.hero-glow.g2');
-  document.addEventListener('mousemove', e => {
-    const x = e.clientX / window.innerWidth;
-    const y = e.clientY / window.innerHeight;
-    g1.style.transform = `translate(${x * 30}px, ${y * 20}px)`;
-    g2.style.transform = `translate(${-x * 25}px, ${-y * 15}px)`;
-  });
-})();
-
-
-// --- Fun facts ticker ---
-(function(){
-  const facts = [
-    {e:'🏈', t:'4 seasons and counting since 2022'},
-    {e:'🏆', t:'3 different champions in 4 years \u2014 Legion of Bouz, General Ken\u2011obi, Kittler on the Roof'},
-    {e:'📊', t:'500+ players rostered across all teams'},
-    {e:'🔥', t:'Kittler on the Roof made three straight championship appearances (2022\u20132024)'},
-    {e:'💥', t:'Every matchup tracked for head-to-head rivalry stats'},
-    {e:'🎯', t:'Power rankings computed from win rate, scoring, recent form, and consistency'},
-    {e:'📈', t:'Elo ratings update after every game with margin weighting'},
-    {e:'🧠', t:'12 GMs battling for dynasty supremacy'},
-    {e:'📋', t:'60 picks made in the 2025 rookie draft across 5 rounds'},
-    {e:'🤝', t:'Seven first-round picks were traded on draft day alone'},
-    {e:'⚡', t:'All data pulled live from the Sleeper API'},
-    {e:'🎲', t:'MHJTIME went from last place in 2023 to top 3 in 2025 \u2014 the ultimate rebuild'},
-  ];
-  const ticker = document.getElementById('ticker');
-  const html = facts.map(f => `<span class="fun-ticker-item"><span class="emoji">${f.e}</span>${f.t}</span>`).join('');
-  ticker.innerHTML = html + html; // duplicate for seamless loop
-})();
-
-// --- Konami code easter egg ---
-(function(){
-  const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-  let idx = 0;
-  document.addEventListener('keydown', e => {
-    if(e.key === code[idx]){ idx++; } else { idx = 0; }
-    if(idx === code.length){
-      idx = 0;
-      const colors = ['#8b5cf6','#ec4899','#10b981','#f59e0b','#3b82f6','#ef4444','#06b6d4'];
-      for(let i = 0; i < 100; i++){
-        const el = document.createElement('div');
-        el.className = 'confetti-piece';
-        el.style.left = Math.random()*100 + 'vw';
-        el.style.top = -10 + 'px';
-        el.style.background = colors[Math.floor(Math.random()*colors.length)];
-        el.style.borderRadius = Math.random()>.5?'50%':'2px';
-        el.style.width = (Math.random()*8+6) + 'px';
-        el.style.height = (Math.random()*8+6) + 'px';
-        el.style.animationDuration = (Math.random()*2+2) + 's';
-        el.style.animationDelay = (Math.random()*0.8) + 's';
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 4000);
+    <style>
+      :root {
+        --bg: #0b0d10;
+        --fg: #e8ecf0;
+        --muted: #7a8194;
+        --accent: #8b5cf6;
+        --accent2: #ec4899;
+        --card: rgba(255, 255, 255, 0.03);
+        --border: rgba(255, 255, 255, 0.07);
+        --glass: rgba(255, 255, 255, 0.05);
+        --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        --maxw: 1200px;
+        --good: #16a34a;
+        --bad: #dc2626;
+        --warn: #ca8a04;
+        --glow-1: rgba(139, 92, 246, 0.15);
+        --glow-2: rgba(236, 72, 153, 0.12);
+        font-family: var(--font);
+        color-scheme: dark;
       }
-    }
-  });
-})();
+      html.light {
+        --bg: #f7f9fc;
+        --fg: #111418;
+        --muted: #5f6672;
+        --card: rgba(0, 0, 0, 0.03);
+        --glass: rgba(0, 0, 0, 0.04);
+        --glow-1: rgba(139, 92, 246, 0.08);
+        --glow-2: rgba(236, 72, 153, 0.06);
+        --border: rgba(0, 0, 0, 0.08);
+        color-scheme: light;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        overflow-x: hidden;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
 
-// --- Scroll progress bar ---
-(function(){
-  const bar = document.getElementById('scrollProgress');
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
-  }, {passive:true});
-})();
+      .btn:focus-visible,
+      .card-link:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 999px;
+      }
 
-// --- Championship Vault ---
-(function(){
-  const CHAMPS = [
-    { year:'2022', name:'The Legion of Bouz', runner:'Kittler on the Roof',
-      gem:'#8b5cf6', tag:'Inaugural Champion' },
-    { year:'2023', name:'General Ken\u2011obi', runner:'Kittler on the Roof',
-      gem:'#ec4899', tag:'The Kenaissance' },
-    { year:'2024', name:'Kittler on the Roof', runner:'Sleeping Giants',
-      gem:'#10b981', tag:'Third Time\u2019s the Charm' },
-    { year:'2025', name:'General Ken\u2011obi', runner:'Rasheeing the Scene',
-      gem:'#f59e0b', tag:'Back\u2011to\u2011Back' },
-  ];
+      /* --- Hero section --- */
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        overflow: hidden;
+      }
+      .hero canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+      .hero-glow {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        filter: blur(120px);
+        opacity: 0.5;
+        z-index: 0;
+        pointer-events: none;
+        transition: transform 0.4s ease-out;
+      }
+      .hero-glow.g1 {
+        top: -10%;
+        left: 10%;
+        background: var(--glow-1);
+      }
+      .hero-glow.g2 {
+        bottom: -15%;
+        right: 5%;
+        background: var(--glow-2);
+      }
 
-  // Find the Champions stat and make it clickable
-  const statItems = document.querySelectorAll('.stat-item');
-  let champItem = null;
-  statItems.forEach(item => {
-    if(item.querySelector('.stat-label')?.textContent === 'Champions'){
-      item.classList.add('champions-trigger');
-      champItem = item;
-    }
-  });
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        padding: 2rem 1.5rem;
+        max-width: 900px;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.3rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: rgba(139, 92, 246, 0.12);
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        color: var(--accent);
+        margin-bottom: 1.5rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .hero-badge .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
 
-  const vault = document.getElementById('dynastyVault');
-  const ringsEl = document.getElementById('vaultRings');
-  const pCanvas = document.getElementById('vaultParticles');
-  const pCtx = pCanvas.getContext('2d');
-  let particles = [], animId = null;
+      .hero-title {
+        font-size: clamp(2.8rem, 7vw, 5.5rem);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        background: linear-gradient(
+          135deg,
+          #fff 0%,
+          #c4b5fd 40%,
+          #f9a8d4 70%,
+          #fff 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
 
-  function openVault(){
-    ringsEl.innerHTML = '';
-    CHAMPS.forEach((c, i) => {
-      const ring = document.createElement('div');
-      ring.className = 'vault-ring';
+      .hero-sub {
+        margin: 1.2rem auto 0;
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        color: var(--muted);
+        max-width: 640px;
+        line-height: 1.65;
+      }
+      .hero-sub .typed-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1.1em;
+        background: var(--accent);
+        margin-left: 2px;
+        vertical-align: text-bottom;
+        opacity: 0.7;
+      }
 
-      // Four gems at compass points of the ring
-      const positions = [
-        'top:-3px;left:50%;margin-left:-7px',
-        'bottom:-3px;left:50%;margin-left:-7px',
-        'top:50%;left:-3px;margin-top:-7px',
-        'top:50%;right:-3px;margin-top:-7px'
-      ];
-      const gems = positions.map(pos =>
-        `<span class="ring-gem" style="${pos};background:${c.gem};box-shadow:0 0 12px ${c.gem}"></span>`
-      ).join('');
+      .hero-ctas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2.5rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.85rem 1.6rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+      }
+      .btn-primary:hover {
+        box-shadow: 0 8px 30px rgba(139, 92, 246, 0.45);
+      }
+      .btn-ghost {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        color: var(--fg);
+      }
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
 
-      ring.innerHTML = `
+      .scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--muted);
+        font-size: 0.78rem;
+        animation: float 3s ease-in-out infinite;
+      }
+      .scroll-indicator svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--muted);
+        fill: none;
+        stroke-width: 2;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateX(-50%) translateY(0);
+        }
+        50% {
+          transform: translateX(-50%) translateY(8px);
+        }
+      }
+
+      /* --- Stats ticker --- */
+      .stats-section {
+        position: relative;
+        z-index: 2;
+        padding: 5rem 1.5rem;
+        background: linear-gradient(
+          180deg,
+          var(--bg) 0%,
+          rgba(15, 17, 22, 1) 100%
+        );
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .stat-item {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.7s cubic-bezier(0.17, 0.67, 0.24, 1);
+      }
+      .stat-item.visible {
+        opacity: 1;
+        transform: none;
+      }
+      .stat-number {
+        font-size: clamp(2.2rem, 5vw, 3.2rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .stat-label {
+        font-size: 0.88rem;
+        color: var(--muted);
+        margin-top: 0.3rem;
+      }
+
+      /* --- Cards section --- */
+      .pages-section {
+        position: relative;
+        z-index: 2;
+        padding: 5rem 1.5rem 6rem;
+      }
+      .pages-section .section-label {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+      .pages-section .section-label h2 {
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .pages-section .section-label p {
+        color: var(--muted);
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .page-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .page-card {
+        position: relative;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 2rem 2rem 2.5rem;
+        overflow: hidden;
+        transition:
+          transform 0.3s cubic-bezier(0.17, 0.67, 0.24, 1),
+          box-shadow 0.3s,
+          border-color 0.3s;
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      .page-card.visible {
+        opacity: 1;
+        transform: none;
+      }
+      .page-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        border-color: rgba(139, 92, 246, 0.2);
+      }
+      .page-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .page-card:hover::before {
+        opacity: 1;
+      }
+
+      .page-card .icon-wrap {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: rgba(139, 92, 246, 0.1);
+        margin-bottom: 1.2rem;
+      }
+      .page-card .icon-wrap img {
+        width: 32px;
+        height: 32px;
+      }
+      .page-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.6rem;
+      }
+      .page-card p {
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.55;
+        margin-bottom: 1.5rem;
+      }
+      .page-card .card-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--accent);
+        transition:
+          gap 0.2s,
+          color 0.2s;
+      }
+      .page-card .card-link:hover {
+        gap: 0.7rem;
+        color: var(--accent2);
+      }
+      .page-card .card-link svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+      }
+
+      /* --- Footer --- */
+      footer {
+        padding: 3rem 1.5rem;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.82rem;
+        border-top: 1px solid var(--border);
+      }
+      footer .footer-brand {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--fg);
+        margin-bottom: 0.4rem;
+      }
+
+      /* --- View Transitions --- */
+      @view-transition {
+        navigation: auto;
+      }
+      ::view-transition-old(root) {
+        animation: fade-out 0.2s ease-in;
+      }
+      ::view-transition-new(root) {
+        animation: fade-in 0.3s ease-out;
+      }
+      @keyframes fade-out {
+        to {
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+
+      /* --- Fun facts ticker --- */
+      .fun-ticker {
+        overflow: hidden;
+        background: rgba(139, 92, 246, 0.06);
+        border-top: 1px solid var(--border);
+        padding: 0.75rem 0;
+        position: relative;
+      }
+      .fun-ticker-inner {
+        display: flex;
+        gap: 4rem;
+        white-space: nowrap;
+        animation: ticker 40s linear infinite;
+        width: max-content;
+      }
+      .fun-ticker-inner:hover {
+        animation-play-state: paused;
+      }
+      .fun-ticker-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .fun-ticker-item .emoji {
+        font-size: 1.1rem;
+      }
+      @keyframes ticker {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+
+      /* --- Championship Vault --- */
+      .champions-trigger .stat-number {
+        cursor: pointer;
+        transition:
+          text-shadow 0.3s,
+          transform 0.2s;
+        position: relative;
+      }
+      .champions-trigger .stat-number:hover {
+        text-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+        transform: scale(1.08);
+      }
+      .champions-trigger .stat-label::after {
+        content: " \2022 tap to explore";
+        font-size: 0.72rem;
+        color: rgba(251, 191, 36, 0.5);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .champions-trigger:hover .stat-label::after {
+        opacity: 1;
+      }
+
+      .vault-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        background: rgba(0, 0, 0, 0);
+        transition: background 0.6s;
+      }
+      .vault-overlay.active {
+        background: rgba(0, 0, 0, 0.96);
+      }
+
+      .vault-letterbox {
+        position: fixed;
+        left: 0;
+        right: 0;
+        height: 0;
+        background: #000;
+        z-index: 8001;
+        transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .vault-letterbox.top {
+        top: 0;
+      }
+      .vault-letterbox.bot {
+        bottom: 0;
+      }
+      .vault-overlay.active .vault-letterbox {
+        height: 7vh;
+      }
+
+      .vault-close {
+        position: absolute;
+        top: max(8vh, 50px);
+        right: 1.5rem;
+        z-index: 8002;
+        background: none;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 2rem;
+        line-height: 1;
+        transition:
+          color 0.2s,
+          transform 0.2s;
+      }
+      .vault-close:hover {
+        color: #fbbf24;
+        transform: rotate(90deg);
+      }
+
+      .vault-title {
+        font-size: clamp(1.2rem, 3.5vw, 2rem);
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-align: center;
+        margin-bottom: 2.5rem;
+        background: linear-gradient(
+          135deg,
+          #fde68a,
+          #fbbf24,
+          #d97706,
+          #fbbf24,
+          #fde68a
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      .vault-overlay.active .vault-title {
+        animation: vault-in 0.7s 0.4s ease-out forwards;
+      }
+      @keyframes vault-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .vault-rings {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2.5rem;
+        max-width: 960px;
+        width: 90%;
+        position: relative;
+        z-index: 1;
+      }
+      .vault-ring {
+        width: 240px;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.7) translateY(30px);
+      }
+      .vault-ring.reveal {
+        animation: ring-pop 0.8s cubic-bezier(0.17, 0.67, 0.24, 1) forwards;
+      }
+      @keyframes ring-pop {
+        0% {
+          opacity: 0;
+          transform: scale(0.7) translateY(30px);
+        }
+        60% {
+          transform: scale(1.06) translateY(-5px);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .ring-circle {
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 1.2rem;
+        position: relative;
+        border-radius: 50%;
+        background: conic-gradient(
+          from 0deg,
+          #fde68a,
+          #fbbf24,
+          #d97706,
+          #b45309,
+          #d97706,
+          #fbbf24,
+          #fde68a
+        );
+        box-shadow: 0 0 40px rgba(251, 191, 36, 0.35);
+        animation: ring-glow 3s ease-in-out infinite alternate;
+      }
+      .ring-circle::before {
+        content: "";
+        position: absolute;
+        inset: 20px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 40% 40%, #1a1a2e, #0a0a18);
+      }
+      .ring-circle::after {
+        content: attr(data-year);
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #fbbf24;
+        text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+      }
+      @keyframes ring-glow {
+        from {
+          box-shadow: 0 0 30px rgba(251, 191, 36, 0.25);
+        }
+        to {
+          box-shadow:
+            0 0 55px rgba(251, 191, 36, 0.55),
+            0 0 100px rgba(251, 191, 36, 0.12);
+        }
+      }
+      .ring-gem {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        transform: rotate(45deg);
+      }
+      .ring-champ {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fde68a;
+        margin-bottom: 0.25rem;
+      }
+      .ring-vs {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin-bottom: 0.4rem;
+      }
+      .ring-tag {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        background: rgba(251, 191, 36, 0.08);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+        margin: 0.12rem 0.08rem;
+      }
+      .vault-footer {
+        margin-top: 2rem;
+        text-align: center;
+        opacity: 0;
+      }
+      .vault-overlay.active .vault-footer {
+        animation: vault-in 0.7s 2s ease-out forwards;
+      }
+      .vault-footer span {
+        font-size: 0.85rem;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .vault-particles {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+      @media (max-width: 600px) {
+        .vault-rings {
+          gap: 1.5rem;
+        }
+        .vault-ring {
+          width: 200px;
+        }
+        .ring-circle {
+          width: 110px;
+          height: 110px;
+        }
+        .ring-circle::before {
+          inset: 16px;
+        }
+        .ring-circle::after {
+          font-size: 1.2rem;
+        }
+        .champions-trigger .stat-label::after {
+          content: " \2022 tap";
+        }
+      }
+
+      /* --- Easter egg confetti --- */
+      .confetti-piece {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        z-index: 9999;
+        pointer-events: none;
+        animation: confetti-fall 3s ease-in forwards;
+      }
+      @keyframes confetti-fall {
+        0% {
+          opacity: 1;
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(100vh) rotate(720deg) scale(0.3);
+        }
+      }
+
+      /* --- Scroll progress bar --- */
+      .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        z-index: 200;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        width: 0%;
+        transition: width 0.1s linear;
+        pointer-events: none;
+      }
+
+      /* --- Keyboard shortcut overlay --- */
+      .kbd-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9000;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(6px);
+        display: none;
+        place-items: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .kbd-overlay.show {
+        display: grid;
+        opacity: 1;
+      }
+      .kbd-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem 2.5rem;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+      .kbd-box h3 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+      .kbd-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.45rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .kbd-row:last-child {
+        border: none;
+      }
+      .kbd-row kbd {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--border);
+        font-family: system-ui;
+        min-width: 24px;
+        text-align: center;
+      }
+      .kbd-row span {
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      /* --- Responsive --- */
+      @media (max-width: 600px) {
+        .hero-glow {
+          width: 300px;
+          height: 300px;
+        }
+        .page-cards {
+          grid-template-columns: 1fr;
+        }
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Keyboard shortcut overlay -->
+    <div class="kbd-overlay" id="kbdOverlay">
+      <div class="kbd-box">
+        <h3>Keyboard Shortcuts</h3>
+        <div class="kbd-row"><span>Show this help</span><kbd>?</kbd></div>
+        <div class="kbd-row"><span>Go to League Bible</span><kbd>1</kbd></div>
+        <div class="kbd-row"><span>Go to Season Hub</span><kbd>2</kbd></div>
+        <div class="kbd-row"><span>Go to Rankings</span><kbd>3</kbd></div>
+        <div class="kbd-row"><span>Go to Power Rankings</span><kbd>4</kbd></div>
+        <div class="kbd-row"><span>Go to Draft Recap</span><kbd>5</kbd></div>
+        <div class="kbd-row"><span>Go to Trades</span><kbd>6</kbd></div>
+        <div class="kbd-row"><span>Go to Week 1</span><kbd>7</kbd></div>
+        <div class="kbd-row"><span>Toggle theme</span><kbd>T</kbd></div>
+        <div class="kbd-row"><span>Back to top</span><kbd>Home</kbd></div>
+        <div class="kbd-row"><span>Close overlay</span><kbd>Esc</kbd></div>
+      </div>
+    </div>
+
+    <div id="site-nav"></div>
+
+    <section class="hero" id="top">
+      <canvas id="starfield" aria-hidden="true"></canvas>
+      <div class="hero-glow g1"></div>
+      <div class="hero-glow g2"></div>
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="dot"></span> Est. 2022 &middot; 4 Seasons
+        </div>
+        <h1 class="hero-title">Welcome to<br />The Jailyard</h1>
+        <p class="hero-sub" id="typed"></p>
+        <div class="hero-ctas">
+          <a href="history.html" class="btn btn-primary">
+            League Bible
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+          <a href="season.html" class="btn btn-ghost">
+            2025 Season
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="scroll-indicator">
+        Scroll
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+      </div>
+    </section>
+
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" data-target="12">0</div>
+          <div class="stat-label">Teams</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" data-target="4">0</div>
+          <div class="stat-label">Seasons</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" data-target="3">0</div>
+          <div class="stat-label">Champions</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" data-target="60" data-suffix="+">0</div>
+          <div class="stat-label">Trades</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" data-target="500" data-suffix="+">0</div>
+          <div class="stat-label">Rostered Players</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pages-section">
+      <div class="section-label">
+        <h2>Explore the League</h2>
+        <p>
+          Four seasons of dynasty history, data, and analysis &mdash; all in one
+          place.
+        </p>
+      </div>
+      <div
+        class="page-cards"
+        style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))"
+      >
+        <div class="page-card">
+          <div class="icon-wrap" style="background: rgba(139, 92, 246, 0.12)">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--accent)"
+              stroke-width="2"
+            >
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path
+                d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+              />
+              <path d="M8 7h8M8 11h6" />
+            </svg>
+          </div>
+          <h3>League Bible</h3>
+          <p>
+            All-time records, franchise profiles, head-to-head rivalries, and
+            Elo ratings from four seasons of league history.
+          </p>
+          <a href="history.html" class="card-link">
+            Explore History
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+        <div class="page-card">
+          <div class="icon-wrap" style="background: rgba(236, 72, 153, 0.1)">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--accent2)"
+              stroke-width="2"
+            >
+              <path d="M12 20V10M18 20V4M6 20v-4" />
+            </svg>
+          </div>
+          <h3>2025 Season Recap</h3>
+          <p>
+            Complete week-by-week results, power rankings, standings, top
+            performers and trend charts for the finished 2025 season.
+          </p>
+          <a href="season.html" class="card-link">
+            Explore Season
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+        <div class="page-card">
+          <div class="icon-wrap" style="background: rgba(0, 208, 132, 0.1)">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#00d084"
+              stroke-width="2"
+            >
+              <path d="M3 3v18h18" />
+              <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+            </svg>
+          </div>
+          <h3>Preseason Rankings</h3>
+          <p>
+            How we saw the league before 2025 kicked off. Sortable tables, data
+            charts, rosters and analysis for all twelve franchises.
+          </p>
+          <a href="preseason.html" class="card-link">
+            View Rankings
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+        <div class="page-card">
+          <div class="icon-wrap" style="background: rgba(6, 182, 212, 0.1)">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#06b6d4"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18M9 3v18" />
+            </svg>
+          </div>
+          <h3>2025 Rookie Draft</h3>
+          <p>
+            Full draft board, team grades, key storylines and a breakdown of
+            every pick from the five-round rookie draft.
+          </p>
+          <a href="draft.html" class="card-link">
+            View Draft Recap
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+        <div class="page-card">
+          <div class="icon-wrap" style="background: rgba(249, 115, 22, 0.1)">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#f97316"
+              stroke-width="2"
+            >
+              <path
+                d="M16 3h5v5M4 20L21 3M21 16v5h-5M14 14l7 7M3 8V3h5M10 10L3 3"
+              />
+            </svg>
+          </div>
+          <h3>Trade Tracker</h3>
+          <p>
+            Every blockbuster deal, every fleece and every "what were they
+            thinking?" moment across four seasons of trades.
+          </p>
+          <a href="trades.html" class="card-link">
+            View Trades
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+        <div class="page-card">
+          <div class="icon-wrap" style="background: rgba(251, 191, 36, 0.1)">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fbbf24"
+              stroke-width="2"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          </div>
+          <h3>Week 1 Column</h3>
+          <p>
+            The 2025 opening essay, reader mailbag, game picks with spreads and
+            our bold upset calls.
+          </p>
+          <a href="week1.html" class="card-link">
+            Read the Column
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+        <div class="page-card">
+          <div class="icon-wrap" style="background: rgba(251, 191, 36, 0.1)">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fbbf24"
+              stroke-width="2"
+            >
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+          </div>
+          <h3>Power Rankings</h3>
+          <p>
+            Bill Simmons-style weekly power rankings with tiered analysis,
+            recap, preview, and The Confessional.
+          </p>
+          <a href="power-rankings.html" class="card-link">
+            Read Rankings
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="fun-ticker" aria-hidden="true">
+      <div class="fun-ticker-inner" id="ticker"></div>
+    </div>
+
+    <div class="vault-overlay" id="dynastyVault">
+      <div class="vault-letterbox top"></div>
+      <div class="vault-letterbox bot"></div>
+      <button class="vault-close" aria-label="Close vault">&times;</button>
+      <canvas
+        class="vault-particles"
+        id="vaultParticles"
+        aria-hidden="true"
+      ></canvas>
+      <h2 class="vault-title">The Championship Vault</h2>
+      <div class="vault-rings" id="vaultRings"></div>
+      <div class="vault-footer"><span>The Dynasty Continues&hellip;</span></div>
+    </div>
+
+    <footer>
+      <div class="footer-brand">The Jailyard</div>
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.8rem;
+          margin-bottom: 1rem;
+        "
+      >
+        <a href="history.html" style="color: var(--muted); font-size: 0.85rem"
+          >League Bible</a
+        >
+        <a href="season.html" style="color: var(--muted); font-size: 0.85rem"
+          >Season Hub</a
+        >
+        <a href="preseason.html" style="color: var(--muted); font-size: 0.85rem"
+          >Rankings</a
+        >
+        <a href="draft.html" style="color: var(--muted); font-size: 0.85rem"
+          >Draft Recap</a
+        >
+        <a href="trades.html" style="color: var(--muted); font-size: 0.85rem"
+          >Trades</a
+        >
+        <a href="week1.html" style="color: var(--muted); font-size: 0.85rem"
+          >Week 1</a
+        >
+      </div>
+      &copy; 2022&ndash;2026 The Jailyard Dynasty League. All rights reserved.
+    </footer>
+
+    <script src="config.js"></script>
+    <script>
+      // --- Starfield canvas ---
+      (function () {
+        const canvas = document.getElementById("starfield");
+        const ctx = canvas.getContext("2d");
+        let W,
+          H,
+          stars = [],
+          mouse = { x: 0.5, y: 0.5 };
+        const STAR_COUNT = 180;
+
+        function resize() {
+          const dpr = devicePixelRatio || 1;
+          W = canvas.width = canvas.clientWidth * dpr;
+          H = canvas.height = canvas.clientHeight * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        function initStars() {
+          stars = [];
+          for (let i = 0; i < STAR_COUNT; i++) {
+            stars.push({
+              x: Math.random() * canvas.clientWidth,
+              y: Math.random() * canvas.clientHeight,
+              r: Math.random() * 1.4 + 0.3,
+              speed: Math.random() * 0.3 + 0.05,
+              alpha: Math.random() * 0.6 + 0.2,
+              drift: (Math.random() - 0.5) * 0.15,
+            });
+          }
+        }
+        function draw() {
+          const w = canvas.clientWidth,
+            h = canvas.clientHeight;
+          ctx.clearRect(0, 0, w, h);
+          const mx = (mouse.x - 0.5) * 20;
+          const my = (mouse.y - 0.5) * 20;
+          stars.forEach((s) => {
+            s.y -= s.speed;
+            s.x += s.drift;
+            if (s.y < -5) {
+              s.y = h + 5;
+              s.x = Math.random() * w;
+            }
+            if (s.x < -5) s.x = w + 5;
+            if (s.x > w + 5) s.x = -5;
+            const px = s.x + mx * (s.r / 1.5);
+            const py = s.y + my * (s.r / 1.5);
+            ctx.beginPath();
+            ctx.arc(px, py, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(200,200,255,${s.alpha})`;
+            ctx.fill();
+          });
+          requestAnimationFrame(draw);
+        }
+        window.addEventListener("resize", () => {
+          resize();
+          initStars();
+        });
+        document.addEventListener("mousemove", (e) => {
+          mouse.x = e.clientX / window.innerWidth;
+          mouse.y = e.clientY / window.innerHeight;
+        });
+        resize();
+        initStars();
+        draw();
+      })();
+
+      // --- Nav scroll effect ---
+
+      // --- Typewriter effect ---
+      (function () {
+        const text =
+          "The official home of The Jailyard dynasty league. Four seasons of records, rivalries, and rankings \u2014 from 2022 to the 2025 championship.";
+        const el = document.getElementById("typed");
+        let i = 0;
+        el.innerHTML = '<span class="typed-cursor"></span>';
+        function type() {
+          if (i < text.length) {
+            el.innerHTML =
+              text.slice(0, i + 1) + '<span class="typed-cursor"></span>';
+            i++;
+            setTimeout(type, 22 + Math.random() * 18);
+          } else {
+            // remove cursor after a pause
+            setTimeout(() => {
+              el.innerHTML = text;
+            }, 2000);
+          }
+        }
+        setTimeout(type, 800);
+      })();
+
+      // --- Animated stat counters ---
+      (function () {
+        const items = document.querySelectorAll(".stat-item");
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              e.target.classList.add("visible");
+              const numEl = e.target.querySelector(".stat-number");
+              const target = parseInt(numEl.dataset.target);
+              const suffix = numEl.dataset.suffix || "";
+              const duration = 1200;
+              const start = performance.now();
+              function tick(now) {
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+                numEl.textContent = Math.round(eased * target) + suffix;
+                if (progress < 1) requestAnimationFrame(tick);
+              }
+              requestAnimationFrame(tick);
+              io.unobserve(e.target);
+            });
+          },
+          { threshold: 0.4 },
+        );
+        items.forEach((item) => io.observe(item));
+      })();
+
+      // --- Card entrance animations ---
+      (function () {
+        const cards = document.querySelectorAll(".page-card");
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e, i) => {
+              if (!e.isIntersecting) return;
+              setTimeout(() => e.target.classList.add("visible"), i * 150);
+              io.unobserve(e.target);
+            });
+          },
+          { threshold: 0.15 },
+        );
+        cards.forEach((c) => io.observe(c));
+      })();
+
+      // --- Parallax glow orbs on mouse move ---
+      (function () {
+        const g1 = document.querySelector(".hero-glow.g1");
+        const g2 = document.querySelector(".hero-glow.g2");
+        document.addEventListener("mousemove", (e) => {
+          const x = e.clientX / window.innerWidth;
+          const y = e.clientY / window.innerHeight;
+          g1.style.transform = `translate(${x * 30}px, ${y * 20}px)`;
+          g2.style.transform = `translate(${-x * 25}px, ${-y * 15}px)`;
+        });
+      })();
+
+      // --- Fun facts ticker ---
+      (function () {
+        const facts = [
+          { e: "🏈", t: "4 seasons and counting since 2022" },
+          {
+            e: "🏆",
+            t: "3 different champions in 4 years \u2014 Legion of Bouz, General Ken\u2011obi, Kittler on the Roof",
+          },
+          { e: "📊", t: "500+ players rostered across all teams" },
+          {
+            e: "🔥",
+            t: "Kittler on the Roof made three straight championship appearances (2022\u20132024)",
+          },
+          {
+            e: "💥",
+            t: "Every matchup tracked for head-to-head rivalry stats",
+          },
+          {
+            e: "🎯",
+            t: "Power rankings computed from win rate, scoring, recent form, and consistency",
+          },
+          {
+            e: "📈",
+            t: "Elo ratings update after every game with margin weighting",
+          },
+          { e: "🧠", t: "12 GMs battling for dynasty supremacy" },
+          {
+            e: "📋",
+            t: "60 picks made in the 2025 rookie draft across 5 rounds",
+          },
+          {
+            e: "🤝",
+            t: "Seven first-round picks were traded on draft day alone",
+          },
+          { e: "⚡", t: "All data pulled live from the Sleeper API" },
+          {
+            e: "🎲",
+            t: "MHJTIME went from last place in 2023 to top 3 in 2025 \u2014 the ultimate rebuild",
+          },
+        ];
+        const ticker = document.getElementById("ticker");
+        const html = facts
+          .map(
+            (f) =>
+              `<span class="fun-ticker-item"><span class="emoji">${f.e}</span>${f.t}</span>`,
+          )
+          .join("");
+        ticker.innerHTML = html + html; // duplicate for seamless loop
+      })();
+
+      // --- Konami code easter egg ---
+      (function () {
+        const code = [
+          "ArrowUp",
+          "ArrowUp",
+          "ArrowDown",
+          "ArrowDown",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowLeft",
+          "ArrowRight",
+          "b",
+          "a",
+        ];
+        let idx = 0;
+        document.addEventListener("keydown", (e) => {
+          if (e.key === code[idx]) {
+            idx++;
+          } else {
+            idx = 0;
+          }
+          if (idx === code.length) {
+            idx = 0;
+            const colors = [
+              "#8b5cf6",
+              "#ec4899",
+              "#10b981",
+              "#f59e0b",
+              "#3b82f6",
+              "#ef4444",
+              "#06b6d4",
+            ];
+            for (let i = 0; i < 100; i++) {
+              const el = document.createElement("div");
+              el.className = "confetti-piece";
+              el.style.left = Math.random() * 100 + "vw";
+              el.style.top = -10 + "px";
+              el.style.background =
+                colors[Math.floor(Math.random() * colors.length)];
+              el.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+              el.style.width = Math.random() * 8 + 6 + "px";
+              el.style.height = Math.random() * 8 + 6 + "px";
+              el.style.animationDuration = Math.random() * 2 + 2 + "s";
+              el.style.animationDelay = Math.random() * 0.8 + "s";
+              document.body.appendChild(el);
+              setTimeout(() => el.remove(), 4000);
+            }
+          }
+        });
+      })();
+
+      // --- Scroll progress bar ---
+      (function () {
+        const bar = document.getElementById("scrollProgress");
+        window.addEventListener(
+          "scroll",
+          () => {
+            const h =
+              document.documentElement.scrollHeight - window.innerHeight;
+            bar.style.width = h > 0 ? (window.scrollY / h) * 100 + "%" : "0%";
+          },
+          { passive: true },
+        );
+      })();
+
+      // --- Championship Vault ---
+      (function () {
+        const CHAMPS = [
+          {
+            year: "2022",
+            name: "The Legion of Bouz",
+            runner: "Kittler on the Roof",
+            gem: "#8b5cf6",
+            tag: "Inaugural Champion",
+          },
+          {
+            year: "2023",
+            name: "General Ken\u2011obi",
+            runner: "Kittler on the Roof",
+            gem: "#ec4899",
+            tag: "The Kenaissance",
+          },
+          {
+            year: "2024",
+            name: "Kittler on the Roof",
+            runner: "Sleeping Giants",
+            gem: "#10b981",
+            tag: "Third Time\u2019s the Charm",
+          },
+          {
+            year: "2025",
+            name: "General Ken\u2011obi",
+            runner: "Rasheeing the Scene",
+            gem: "#f59e0b",
+            tag: "Back\u2011to\u2011Back",
+          },
+        ];
+
+        // Find the Champions stat and make it clickable
+        const statItems = document.querySelectorAll(".stat-item");
+        let champItem = null;
+        statItems.forEach((item) => {
+          if (item.querySelector(".stat-label")?.textContent === "Champions") {
+            item.classList.add("champions-trigger");
+            champItem = item;
+          }
+        });
+
+        const vault = document.getElementById("dynastyVault");
+        const ringsEl = document.getElementById("vaultRings");
+        const pCanvas = document.getElementById("vaultParticles");
+        const pCtx = pCanvas.getContext("2d");
+        let particles = [],
+          animId = null;
+
+        function openVault() {
+          ringsEl.innerHTML = "";
+          CHAMPS.forEach((c, i) => {
+            const ring = document.createElement("div");
+            ring.className = "vault-ring";
+
+            // Four gems at compass points of the ring
+            const positions = [
+              "top:-3px;left:50%;margin-left:-7px",
+              "bottom:-3px;left:50%;margin-left:-7px",
+              "top:50%;left:-3px;margin-top:-7px",
+              "top:50%;right:-3px;margin-top:-7px",
+            ];
+            const gems = positions
+              .map(
+                (pos) =>
+                  `<span class="ring-gem" style="${pos};background:${c.gem};box-shadow:0 0 12px ${c.gem}"></span>`,
+              )
+              .join("");
+
+            ring.innerHTML = `
         <div class="ring-circle" data-year="${c.year}">${gems}</div>
         <div class="ring-champ">${c.name}</div>
         <div class="ring-vs">defeated ${c.runner}</div>
         <span class="ring-tag">${c.tag}</span>
       `;
-      ringsEl.appendChild(ring);
-      setTimeout(() => ring.classList.add('reveal'), 700 + i * 450);
-    });
+            ringsEl.appendChild(ring);
+            setTimeout(() => ring.classList.add("reveal"), 700 + i * 450);
+          });
 
-    vault.style.display = 'flex';
-    requestAnimationFrame(() => vault.classList.add('active'));
-    startParticles();
-    document.body.style.overflow = 'hidden';
-  }
+          vault.style.display = "flex";
+          requestAnimationFrame(() => vault.classList.add("active"));
+          startParticles();
+          document.body.style.overflow = "hidden";
+        }
 
-  function closeVault(){
-    vault.classList.remove('active');
-    setTimeout(() => {
-      vault.style.display = 'none';
-      document.body.style.overflow = '';
-      if(animId) cancelAnimationFrame(animId);
-      animId = null;
-    }, 600);
-  }
+        function closeVault() {
+          vault.classList.remove("active");
+          setTimeout(() => {
+            vault.style.display = "none";
+            document.body.style.overflow = "";
+            if (animId) cancelAnimationFrame(animId);
+            animId = null;
+          }, 600);
+        }
 
-  function startParticles(){
-    const dpr = devicePixelRatio || 1;
-    const w = window.innerWidth, h = window.innerHeight;
-    pCanvas.width = w * dpr;
-    pCanvas.height = h * dpr;
-    pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    particles = [];
-    for(let i = 0; i < 50; i++){
-      particles.push({
-        x: Math.random() * w, y: Math.random() * h,
-        r: Math.random() * 2 + 0.5,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: -Math.random() * 0.7 - 0.15,
-        alpha: Math.random() * 0.6 + 0.3,
-        color: ['#fbbf24','#fde68a','#d97706'][Math.floor(Math.random()*3)],
-        life: Math.random() * 250 + 80
-      });
-    }
-    drawParticles();
-  }
+        function startParticles() {
+          const dpr = devicePixelRatio || 1;
+          const w = window.innerWidth,
+            h = window.innerHeight;
+          pCanvas.width = w * dpr;
+          pCanvas.height = h * dpr;
+          pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          particles = [];
+          for (let i = 0; i < 50; i++) {
+            particles.push({
+              x: Math.random() * w,
+              y: Math.random() * h,
+              r: Math.random() * 2 + 0.5,
+              vx: (Math.random() - 0.5) * 0.4,
+              vy: -Math.random() * 0.7 - 0.15,
+              alpha: Math.random() * 0.6 + 0.3,
+              color: ["#fbbf24", "#fde68a", "#d97706"][
+                Math.floor(Math.random() * 3)
+              ],
+              life: Math.random() * 250 + 80,
+            });
+          }
+          drawParticles();
+        }
 
-  function drawParticles(){
-    const w = window.innerWidth, h = window.innerHeight;
-    pCtx.clearRect(0, 0, w, h);
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy; p.life--;
-      if(p.life <= 0 || p.y < -10){
-        p.x = Math.random() * w; p.y = h + 10;
-        p.life = Math.random() * 250 + 80;
-      }
-      pCtx.beginPath();
-      pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      pCtx.globalAlpha = p.alpha * Math.min(p.life / 30, 1);
-      pCtx.fillStyle = p.color;
-      pCtx.fill();
-    });
-    pCtx.globalAlpha = 1;
-    animId = requestAnimationFrame(drawParticles);
-  }
+        function drawParticles() {
+          const w = window.innerWidth,
+            h = window.innerHeight;
+          pCtx.clearRect(0, 0, w, h);
+          particles.forEach((p) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+            if (p.life <= 0 || p.y < -10) {
+              p.x = Math.random() * w;
+              p.y = h + 10;
+              p.life = Math.random() * 250 + 80;
+            }
+            pCtx.beginPath();
+            pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            pCtx.globalAlpha = p.alpha * Math.min(p.life / 30, 1);
+            pCtx.fillStyle = p.color;
+            pCtx.fill();
+          });
+          pCtx.globalAlpha = 1;
+          animId = requestAnimationFrame(drawParticles);
+        }
 
-  if(champItem){
-    champItem.querySelector('.stat-number').addEventListener('click', openVault);
-  }
-  vault.querySelector('.vault-close').addEventListener('click', closeVault);
-  vault.addEventListener('click', e => { if(e.target === vault) closeVault(); });
-  document.addEventListener('keydown', e => {
-    if(e.key === 'Escape' && vault.classList.contains('active')) closeVault();
-  });
-})();
+        if (champItem) {
+          champItem
+            .querySelector(".stat-number")
+            .addEventListener("click", openVault);
+        }
+        vault
+          .querySelector(".vault-close")
+          .addEventListener("click", closeVault);
+        vault.addEventListener("click", (e) => {
+          if (e.target === vault) closeVault();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && vault.classList.contains("active"))
+            closeVault();
+        });
+      })();
 
-// --- Keyboard shortcuts ---
-(function(){
-  const overlay = document.getElementById('kbdOverlay');
-  const pages = {1:'history.html',2:'season.html',3:'preseason.html',4:'power-rankings.html',5:'draft.html',6:'trades.html',7:'week1.html'};
-  document.addEventListener('keydown', e => {
-    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
-    if(e.key==='?'){ overlay.classList.toggle('show'); return; }
-    if(e.key==='Escape'){ overlay.classList.remove('show'); return; }
-    if(e.key==='t'||e.key==='T'){ document.documentElement.classList.toggle('light'); return; }
-    if(e.key==='Home'){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); return; }
-    if(pages[e.key]){ window.location.href=pages[e.key]; }
-  });
-  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('show'); });
-})();
+      // --- Keyboard shortcuts ---
+      (function () {
+        const overlay = document.getElementById("kbdOverlay");
+        const pages = {
+          1: "history.html",
+          2: "season.html",
+          3: "preseason.html",
+          4: "power-rankings.html",
+          5: "draft.html",
+          6: "trades.html",
+          7: "week1.html",
+        };
+        document.addEventListener("keydown", (e) => {
+          if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+            return;
+          if (e.key === "?") {
+            overlay.classList.toggle("show");
+            return;
+          }
+          if (e.key === "Escape") {
+            overlay.classList.remove("show");
+            return;
+          }
+          if (e.key === "t" || e.key === "T") {
+            document.documentElement.classList.toggle("light");
+            localStorage.setItem(
+              "theme",
+              document.documentElement.classList.contains("light")
+                ? "light"
+                : "dark",
+            );
+            return;
+          }
+          if (e.key === "Home") {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return;
+          }
+          if (pages[e.key]) {
+            window.location.href = pages[e.key];
+          }
+        });
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) overlay.classList.remove("show");
+        });
+      })();
 
-applyConfig();
-</script>
-</body>
+      applyConfig();
+    </script>
+  </body>
 </html>
