@@ -675,7 +675,7 @@ league.teams.forEach(team => {
   const link = document.createElement('a');
   link.href = `#${idFromName(team.name)}`;
   link.textContent = `#${team.rank} ${team.name}`;
-  toc.appendChild(link);
+  if (toc) toc.appendChild(link);
   // card
   const card = document.createElement('article');
   card.className = 'card fade-up';
