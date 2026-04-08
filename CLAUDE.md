@@ -45,6 +45,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - **NEVER trust AI-generated inline data arrays** — always cross-reference against Sleeper API endpoints before publishing (draft picks, records, etc.)
 - **No repeating animations** — `animation-iteration-count: infinite` is banned for shimmer, pulse, blink, glow. Loading spinners and tickers are OK.
 - **Quality gates are binary** — if a gate (`/edit-week`, `verify_week_content.py`, `/review`, `/grill`) finds an error, the verdict follows the gate's rules. Never rationalize "minor" exceptions. Fix first, approve second.
+- **Content fixes require HTML re-render** — editing `weekN_content.json` does NOT update `weekN.html`. After any content fix, re-render the affected week's HTML before pushing.
 
 ## Known Patterns
 - Data loading: try cached JSON → catch → live Sleeper API → catch → error UI
@@ -54,6 +55,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - Speculation Rules for prerendering linked pages
 - Intersection Observer for scroll-triggered `.visible` class animations
 - `scripts/shared.py` is the canonical source for: `load_json`, `save_json`, `parse_ts`, all path constants, Ollama config, and shared constants. Never define local copies — import from shared.
+- Theme has two toggle paths: nav button (config.js) + keyboard shortcut `t`/`T` (index.html only). Both must stay in sync.
 - `franchise_map` stores CURRENT team names, not historical. Cross-season records show 2025 names for all eras. Known limitation, deferred.
 
 ## Style Conventions
