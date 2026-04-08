@@ -41,6 +41,9 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - **Use `--accent2`** not `--accent-2` (standardized across files)
 - **Canvas charts must handle `devicePixelRatio`** for Retina displays
 - **Data changes must update all consumers** — if you change `league.teams` schema, grep for every reference
+- **Sleeper bracket data has 2 games at max round** — championship (`min(matchup_id)`) + 3rd-place. Always filter to `min(m)` when detecting finals/champions.
+- **NEVER trust AI-generated inline data arrays** — always cross-reference against Sleeper API endpoints before publishing (draft picks, records, etc.)
+- **No repeating animations** — `animation-iteration-count: infinite` is banned for shimmer, pulse, blink, glow. Loading spinners and tickers are OK.
 
 ## Known Patterns
 - Data loading: try cached JSON → catch → live Sleeper API → catch → error UI
@@ -49,6 +52,8 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - View Transitions API for page navigation polish
 - Speculation Rules for prerendering linked pages
 - Intersection Observer for scroll-triggered `.visible` class animations
+- `scripts/shared.py` is the canonical source for: `load_json`, `save_json`, `parse_ts`, all path constants, Ollama config, and shared constants. Never define local copies — import from shared.
+- `franchise_map` stores CURRENT team names, not historical. Cross-season records show 2025 names for all eras. Known limitation, deferred.
 
 ## Style Conventions
 - CSS: kebab-case classes, BEM-like for hero section, `clamp()` for responsive type
@@ -119,12 +124,15 @@ python scripts/build_chat_context.py --week N --season 2025 --no-ai
 - See `content/voice-bible.md` for full 12-pattern guide
 
 ### Current Status
-- 2025 data: ALL 18 weeks fetched and extracted
-- League history: 2022-2026, 392 matchups, Elo ratings computed
-- Chat integration: 21K messages analyzed, 18 weekly context files built
+- 2025 data: ALL 18 weeks fetched, extracted, and verified against Sleeper API
+- League history: 2022-2026, 392 matchups, Elo ratings computed, championship data verified
+- Chat integration: 21K messages analyzed, 18 weekly context files built (consent obtained)
 - Weeks 1-6: content written, validated (PASS), rendered to HTML, pushed
 - Week 7+: data + chat context ready, content not yet written
 - Picks ledger: cumulative through Week 6 (Week 7+ pending)
+- Project health: B overall (A- content pipeline, C+ maintainability). Simplify+refactor done 2026-04-07. Health card at `.claude/onboard-report.md`
+- Draft board: rebuilt from Sleeper API (72 picks, 6 rounds). Grade text approximate — needs editorial polish.
+- Remaining before Week 7: `/edit-week` 1-6, theme persistence fix, `/vault-decide`
 
 ### Python Note (Windows)
 Use `python` not `python3` on this machine. Python is at:
@@ -160,3 +168,4 @@ Use `python` not `python3` on this machine. Python is at:
 - GIPHY API key: stored in `.claude/settings.local.json` (gitignored) — needed for `/pick-media`
 - GitHub Actions runs `fetch_sleeper.py` automatically on NFL Sundays
 - `chat/` directory and `content/chat/.map_cache/` are gitignored (privacy + intermediate data)
+- **Pre-commit hook gotcha**: eslint v10 fails with exit code 2 when no `eslint.config.js` exists. The global hook at `~/tools/hooks/pre-commit` now skips eslint when no config is found, but be aware if the hook is ever reverted.
