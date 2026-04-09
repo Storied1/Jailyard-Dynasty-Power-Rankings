@@ -6,7 +6,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 ## Tech Stack
 - HTML5 / CSS3 / Vanilla JS (no frameworks, no npm, no build)
 - Canvas 2D API for charts (scatter, stacked bar, trend, Elo)
-- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 17 scripts)
+- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 18 scripts)
 - GitHub Actions for automated weekly data fetches
 - Hosted as static files (GitHub Pages or direct)
 
@@ -21,7 +21,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 | `history.html` | League Bible — all-time records, H2H matrix, Elo ratings, franchise profiles |
 | `draft.html` | Draft recap — full draft board, grades, storylines |
 | `trades.html` | Trade tracker — timeline, season filter, activity chart |
-| `week1-6.html` | Weekly columns — essay, power rankings, mailbag, matchup picks |
+| `week1.html` – `week6.html` | Weekly columns (one per week) — essay, power rankings, mailbag, matchup picks |
 | `config.js` | Central league config — name, Sleeper IDs, colors, nav (edit to rebrand) |
 
 ## Data
@@ -99,21 +99,21 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 
 ### Workflow
 ```bash
-# Data pipeline (already done for 2025, all 18 weeks)
+# Data pipeline
 python fetch_sleeper.py --season 2025
 python scripts/extract_week_data.py --all
 
-# Chat pipeline (already done — 30 months analyzed, 18 weeks contextualized)
+# Chat pipeline
 python scripts/split_chat_months.py
 python scripts/map_chat_deterministic.py
 python scripts/reduce_chat_deterministic.py
 python scripts/build_chat_context.py --week N --season 2025 --no-ai
 
 # Weekly column generation
-/write-week N       # → weekN_content.json (reads chat context automatically)
+/write-week N       # → weekN_content.json
 /edit-week N        # → APPROVE / REVISE / REJECT
-/pick-media N       # → media_picks.json (needs GIPHY API key in settings.local.json)
-# "resolve and render week N"  → media_cache.json + weekN.html
+/pick-media N       # → media_picks.json
+# "resolve and render week N"  → weekN.html
 # "push it"
 ```
 
@@ -126,21 +126,24 @@ python scripts/build_chat_context.py --week N --season 2025 --no-ai
 - **Playful roasts only** — make owners laugh, never wince
 - See `content/voice-bible.md` for full 12-pattern guide
 
-### Current Status
-- 2025 data: ALL 18 weeks fetched, extracted, and verified against Sleeper API
-- League history: 2022-2026, 392 matchups, Elo ratings computed, championship data verified
-- Chat integration: 21K messages analyzed, 18 weekly context files built (consent obtained)
-- Weeks 1-6: content written, editor-reviewed (3 APPROVE, 3 REVISE→fixed), validated (PASS), rendered to HTML, pushed
-- Week 7+: data + chat context ready, content not yet written. **Week 7 green-lit.**
-- Picks ledger: cumulative 18-12 through Week 6 (Week 7+ pending)
-- Project health: B overall (A- content pipeline, C+ maintainability). Simplify+refactor done 2026-04-07. Health card at `.claude/onboard-report.md`
-- Draft board: rebuilt from Sleeper API (72 picks, 6 rounds). Grade text approximate — needs editorial polish.
-- Theme persistence: fixed (localStorage in config.js, 2026-04-08)
-- Quality standard: recorded in Obsidian vault (2026-04-08)
-
 ### Python Note (Windows)
 Use `python` not `python3` on this machine. Python is at:
 `C:\Users\blake\AppData\Local\Programs\Python\Python312\python`
+
+## Slash Commands (`.claude/commands/`)
+| Command | Purpose |
+|---------|---------|
+| `/write-week N` | Generate weekly column content |
+| `/edit-week N` | Editor-in-Chief quality gate |
+| `/render-week N` | Render content JSON → HTML |
+| `/render-preseason` | Render preseason page |
+| `/pick-media N` | Auto-pick GIFs for media slots |
+| `/review-media` | Creative director media review |
+| `/data-refresh` | Refresh data from Sleeper API |
+| `/audit` | Security and quality scan |
+| `/review` | Code review |
+| `/refactor` | Behavior-preserving cleanup |
+| `/test` | Run tests and validation |
 
 ## Common Tasks
 - **Generate weekly column:** `/write-week N` → `/edit-week N` → `/pick-media N` → resolve+render → push
