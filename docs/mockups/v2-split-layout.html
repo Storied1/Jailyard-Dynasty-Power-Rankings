@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Jailyard // Week 9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════════════════════════
+     RESET & ROOT
+     ═══════════════════════════════════════════════════════════════ */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-left: #0f0f0f;
+    --bg-right: #161616;
+    --fg: #e0ddd5;
+    --fg-dim: #8a8780;
+    --fg-faint: #5a5852;
+    --blue: #4dabf7;
+    --blue-dim: rgba(77, 171, 247, 0.15);
+    --blue-glow: rgba(77, 171, 247, 0.08);
+    --border: #222;
+    --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --good: #51cf66;
+    --bad: #ff6b6b;
+    --warn: #fcc419;
+  }
+
+  html {
+    background: var(--bg-left);
+    color: var(--fg);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--blue);
+    color: #000;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SPLIT LAYOUT
+     ═══════════════════════════════════════════════════════════════ */
+  .split {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── LEFT PANEL: EDITORIAL ─────────────────────────────────── */
+  .panel-left {
+    flex: 0 0 65%;
+    max-width: 65%;
+    background: var(--bg-left);
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 3rem 4rem 2rem;
+    position: relative;
+  }
+
+  .editorial {
+    max-width: 580px;
+    width: 100%;
+    padding-top: 3.5rem;
+  }
+
+  /* ── RIGHT PANEL: DATA SIDEBAR ─────────────────────────────── */
+  .panel-right {
+    flex: 0 0 35%;
+    max-width: 35%;
+    background: var(--bg-right);
+    border-left: 1px solid var(--blue);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 3.5rem 1.8rem 3rem 1.8rem;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+  }
+
+  .panel-right::-webkit-scrollbar { width: 5px; }
+  .panel-right::-webkit-scrollbar-track { background: transparent; }
+  .panel-right::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  /* Subtle glow on the divider */
+  .panel-right::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -1px;
+    bottom: 0;
+    width: 1px;
+    background: var(--blue);
+    box-shadow: -4px 0 20px rgba(77, 171, 247, 0.12), 4px 0 20px rgba(77, 171, 247, 0.12);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     LEFT PANEL — TYPOGRAPHY
+     ═══════════════════════════════════════════════════════════════ */
+  .week-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .week-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--blue), transparent);
+    opacity: 0.4;
+  }
+
+  .essay-title {
+    font-family: var(--serif);
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--fg);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+  }
+
+  .essay-subtitle {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--fg-dim);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+
+  .essay p {
+    font-family: var(--serif);
+    font-size: 1.08rem;
+    line-height: 1.72;
+    color: var(--fg);
+    margin-bottom: 1.4rem;
+    text-align: left;
+  }
+
+  /* Drop cap on first paragraph */
+  .essay p:first-of-type::first-letter {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 3.8em;
+    float: left;
+    line-height: 0.78;
+    margin: 0.06em 0.12em 0 0;
+    color: var(--blue);
+  }
+
+  /* ── Pull Quote ─────────────────────────────────────────────── */
+  .pullquote {
+    margin: 2.2rem 0 2.2rem -1.2rem;
+    padding: 1rem 0 1rem 1.4rem;
+    border-left: 3px solid var(--blue);
+    font-family: var(--serif);
+    font-size: 1.22rem;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+
+  .pullquote cite {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    font-style: normal;
+    font-family: var(--mono);
+    color: var(--fg-faint);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Section Dividers ───────────────────────────────────────── */
+  .section-break {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2.8rem 0 2rem;
+  }
+
+  .section-break .label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+
+  .section-break::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     LEFT PANEL — POWER RANKINGS
+     ═══════════════════════════════════════════════════════════════ */
+  .ranking-entry {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.6rem;
+    align-items: flex-start;
+  }
+
+  .rank-num {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--blue);
+    line-height: 1;
+    min-width: 2.5rem;
+    text-align: right;
+    flex-shrink: 0;
+    padding-top: 0.15rem;
+  }
+
+  .rank-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .rank-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .rank-name {
+    font-family: var(--serif);
+    font-size: 1.12rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .rank-record {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .rank-movement {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  .rank-movement.up { color: var(--good); }
+  .rank-movement.down { color: var(--bad); }
+  .rank-movement.steady { color: var(--fg-faint); }
+
+  .rank-blurb {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--fg-dim);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     LEFT PANEL — MAILBAG
+     ═══════════════════════════════════════════════════════════════ */
+  .mailbag-q {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--fg);
+    margin-bottom: 0.3rem;
+    line-height: 1.5;
+  }
+
+  .mailbag-q .sender {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-style: normal;
+    color: var(--blue);
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+
+  .mailbag-a {
+    font-family: var(--serif);
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--fg-dim);
+    margin-bottom: 2rem;
+    padding-left: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     RIGHT PANEL — DATA DASHBOARD
+     ═══════════════════════════════════════════════════════════════ */
+  .dash-section {
+    margin-bottom: 2rem;
+  }
+
+  .dash-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    margin-bottom: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dash-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Your Team Card ─────────────────────────────────────────── */
+  .your-team {
+    background: var(--blue-glow);
+    border: 1px solid rgba(77, 171, 247, 0.12);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+  }
+
+  .your-team-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+  }
+
+  .your-team-name {
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  .your-team-badge {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--blue);
+    background: var(--blue-dim);
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+  }
+
+  .your-team-stats {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .your-team-stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .your-team-stat .val {
+    font-family: var(--mono);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--fg);
+    line-height: 1;
+  }
+
+  .your-team-stat .lbl {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+  }
+
+  .sparkline-container {
+    margin-top: 0.3rem;
+  }
+
+  .sparkline-label {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+
+  .sparkline-svg {
+    display: block;
+    width: 100%;
+  }
+
+  /* ── Matchup Card ───────────────────────────────────────────── */
+  .matchup-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+  }
+
+  .matchup-vs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.7rem;
+  }
+
+  .matchup-team {
+    text-align: center;
+    flex: 1;
+  }
+
+  .matchup-team .name {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--fg);
+    display: block;
+    line-height: 1.3;
+  }
+
+  .matchup-team .record {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--fg-faint);
+  }
+
+  .matchup-divider {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.1em;
+    padding: 0 0.6rem;
+    flex-shrink: 0;
+  }
+
+  .prob-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    overflow: hidden;
+    margin-bottom: 0.35rem;
+  }
+
+  .prob-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--blue);
+    transition: width 0.8s ease;
+  }
+
+  .prob-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    color: var(--fg-faint);
+  }
+
+  .prob-labels .favored {
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  /* ── Standings Table ────────────────────────────────────────── */
+  .standings-table {
+    width: 100%;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    border-collapse: collapse;
+  }
+
+  .standings-table th {
+    font-size: 0.56rem;
+    font-weight: 600;
+    color: var(--fg-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0 0 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .standings-table th:last-child {
+    text-align: right;
+  }
+
+  .standings-table td {
+    padding: 0.32rem 0;
+    color: var(--fg-dim);
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    vertical-align: middle;
+  }
+
+  .standings-table td:first-child {
+    color: var(--fg-faint);
+    width: 1.4rem;
+  }
+
+  .standings-table td:last-child {
+    text-align: right;
+    font-weight: 500;
+    color: var(--fg-dim);
+  }
+
+  .standings-table tr.you td {
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  .standings-table tr.playoff-line td {
+    border-bottom: 1px dashed rgba(77, 171, 247, 0.25);
+  }
+
+  .standings-table .streak {
+    font-size: 0.56rem;
+    margin-left: 0.3rem;
+  }
+
+  .standings-table .streak.win { color: var(--good); }
+  .standings-table .streak.loss { color: var(--bad); }
+
+  /* ── Trending Items ─────────────────────────────────────────── */
+  .trending-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.55rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    line-height: 1.4;
+    color: var(--fg-dim);
+  }
+
+  .trending-icon {
+    font-size: 0.72rem;
+    flex-shrink: 0;
+    line-height: 1.35;
+  }
+
+  .trending-item strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════════ */
+  .editorial-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.04em;
+    line-height: 1.8;
+  }
+
+  .editorial-footer a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     MOBILE RESPONSIVE
+     ═══════════════════════════════════════════════════════════════ */
+  @media (max-width: 960px) {
+    .split {
+      flex-direction: column;
+    }
+
+    .panel-left {
+      flex: none;
+      max-width: 100%;
+      padding: 0 1.5rem 2rem;
+      justify-content: center;
+    }
+
+    .editorial {
+      max-width: 600px;
+    }
+
+    .panel-right {
+      flex: none;
+      max-width: 100%;
+      height: auto;
+      position: relative;
+      border-left: none;
+      border-top: 1px solid var(--blue);
+      padding: 2rem 1.5rem;
+    }
+
+    .panel-right::before {
+      top: -1px;
+      left: 0;
+      right: 0;
+      bottom: auto;
+      width: auto;
+      height: 1px;
+      box-shadow: 0 -4px 20px rgba(77, 171, 247, 0.12), 0 4px 20px rgba(77, 171, 247, 0.12);
+    }
+
+    .essay-title {
+      font-size: 1.9rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .panel-left {
+      padding: 0 1rem 2rem;
+    }
+
+    .panel-right {
+      padding: 1.5rem 1rem;
+    }
+
+    .editorial {
+      padding-top: 2rem;
+    }
+
+    .essay-title {
+      font-size: 1.65rem;
+    }
+
+    .pullquote {
+      margin-left: 0;
+      font-size: 1.05rem;
+    }
+
+    .rank-num {
+      font-size: 1.6rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="split">
+
+  <!-- ════════════════════════════════════════════════════════════
+       LEFT PANEL — EDITORIAL
+       ════════════════════════════════════════════════════════════ -->
+  <div class="panel-left">
+    <article class="editorial">
+
+      <div class="week-label">Week 9</div>
+
+      <h1 class="essay-title">Three Teams at 7-2 and Nobody Knows Who's Real</h1>
+      <p class="essay-subtitle">Ken-obi drops 154 on the defending champ, MHJTIME's five-game heater quietly rewrites the season, and the Legion falls from first to fifth in two weeks.</p>
+
+      <!-- ── Essay ──────────────────────────────────────────── -->
+      <div class="essay">
+        <p>Something broke in this league around Week 7, and I'm not sure we've figured out how to put it back together. Two weeks ago The Legion of Bouz was sitting at 6-1, Mahomes was doing Mahomes things, and the rest of us were arguing about who'd be lucky enough to face them in the semifinals rather than the finals. Then they lost. Then they lost again. Now KidBouzie is 6-3, dropping from first to fifth in the power rankings like a guy who showed up to a black-tie event in cargo shorts. Christian McCaffrey went for 31.8 this week and it didn't matter because Rasheeing the Scene had Josh Allen going full video game. The 146.92 from ToreroGaucho felt almost casual, the kind of score that says "I've been here the whole time, you just weren't paying attention."</p>
+
+        <p>Meanwhile, General Ken-obi decided to remind Kittler on the Roof what it feels like to play a real team. A 62.48-point margin. Drake London put up 34.3 points like he was personally offended by the defending champion's existence. Kittler scored 92.38, their lowest total since... actually, let's not look that up. The 2024 champs have now lost four straight and dropped to 4-5. The floor didn't just crack; it fell through into the basement. You hate to see a dynasty defending its title with a kicker outscoring their starting running back, but here we are.</p>
+
+        <p>But the real story of Week 9 — and maybe the real story of the entire first half — is MHJTIME's silent five-game winning streak. No one talks about rango_ because talking about rango_ means admitting you were wrong about the running backs. Rico Dowdle dropped 27.1. Marvin Harrison Jr. went for 19.1. Even Daniel Jones — Daniel Jones! — contributed a serviceable 17 from the quarterback spot. They've climbed from the bottom half to 6-3 and second in the power rankings, and the scariest part is that Ja'Marr Chase and Malik Nabers haven't even had their monster weeks yet. When both of them go off in the same Sunday? Pray for whoever's on the other side of that matchup.</p>
+      </div>
+
+      <!-- ── Pull Quote ─────────────────────────────────────── -->
+      <blockquote class="pullquote">
+        "Three teams at 7-2 and they all think they're the best team in the league. Two of them are wrong. The problem is figuring out which two."
+        <cite>The Jailyard Group Chat, Sunday 4:47 PM</cite>
+      </blockquote>
+
+      <!-- ── Power Rankings ─────────────────────────────────── -->
+      <div class="section-break"><span class="label">Power Rankings</span></div>
+
+      <div class="ranking-entry">
+        <div class="rank-num">1</div>
+        <div class="rank-body">
+          <div class="rank-header">
+            <span class="rank-name">General Ken-obi</span>
+            <span class="rank-record">7-2 &middot; 1348.0 PF</span>
+            <span class="rank-movement up">&uarr;1</span>
+          </div>
+          <p class="rank-blurb">Drake London's 34.3 was the exclamation point on a 154.86-point week that felt more like a statement than a box score. You annihilated the defending champ by 62 points and took the top spot for the first time since Week 1. The roster is deep, the schedule is softening, and nobody wants to face you in the playoffs. Two championships in three years isn't a fluke — it's a franchise.</p>
+        </div>
+      </div>
+
+      <div class="ranking-entry">
+        <div class="rank-num">2</div>
+        <div class="rank-body">
+          <div class="rank-header">
+            <span class="rank-name">MHJTIME</span>
+            <span class="rank-record">6-3 &middot; 1411.5 PF</span>
+            <span class="rank-movement up">&uarr;1</span>
+          </div>
+          <p class="rank-blurb">Five straight wins. League-leading 1,411 points scored. And you did it this week with Rico Dowdle and Daniel Jones as your QB1. The running back problem everyone kept citing? Turns out it's less of a problem when you have the best receiver trio in fantasy football compensating every single week. Toilet-bowl runner-up to legitimate title contender in two seasons. That's a story.</p>
+        </div>
+      </div>
+
+      <div class="ranking-entry">
+        <div class="rank-num">3</div>
+        <div class="rank-body">
+          <div class="rank-header">
+            <span class="rank-name">Rasheeing the Scene</span>
+            <span class="rank-record">7-2 &middot; 1278.8 PF</span>
+            <span class="rank-movement up">&uarr;1</span>
+          </div>
+          <p class="rank-blurb">Josh Allen dropped 28.82 and you rode a three-game win streak to 7-2. The preseason take was that your receivers were barely road legal. Nine weeks later, nobody's laughing. Rashee Rice is producing, Achane is a weekly cheat code, and you just beat the team that was sitting in first place. The question isn't whether you're real anymore — it's whether you can sustain it with the league's 10th-ranked schedule ahead.</p>
+        </div>
+      </div>
+
+      <div class="ranking-entry">
+        <div class="rank-num">4</div>
+        <div class="rank-body">
+          <div class="rank-header">
+            <span class="rank-name">Sleeping Giants</span>
+            <span class="rank-record">7-2 &middot; 1280.2 PF</span>
+            <span class="rank-movement up">&uarr;1</span>
+          </div>
+          <p class="rank-blurb">You survived a 2.04-point margin against Grayskull and didn't even blink. Three teams at 7-2 and you're the one everyone keeps forgetting about, which is exactly how the Giants like it. Sam Darnold at quarterback might be the league's most delicious irony, but 7-2 is 7-2. At some point the rest of this league needs to stop sleeping on the Sleeping Giants. (Sorry, had to.)</p>
+        </div>
+      </div>
+
+      <!-- ── Mailbag ────────────────────────────────────────── -->
+      <div class="section-break"><span class="label">Mailbag</span></div>
+
+      <div class="mailbag-q">
+        <span class="sender">@GrayskullXX via group chat</span>
+        "Is Kittler on the Roof cooked? Four straight losses and Brock Bowers just hung 37.3 on them in a loss. What's happening?"
+      </div>
+      <p class="mailbag-a">They're not cooked — they're medium rare and getting colder by the week. The 2024 champ is now 4-5 with the league's lowest score this week (92.38). Jonathan Taylor and Tony Pollard have been ghosts. Joe Burrow isn't broken, but the supporting cast is crumbling around him like a sandcastle at high tide. The good news: the schedule eases up. The bad news: you don't get style points for "easing up" when your season is on the line. They need to win four of their last five to feel safe, and right now nothing about this roster feels safe.</p>
+
+      <div class="mailbag-q">
+        <span class="sender">@Chudders via DM</span>
+        "I'm 1-8 and my only win was in Week 3. Am I allowed to start talking about the 2026 draft yet?"
+      </div>
+      <p class="mailbag-a">Brother, you've been allowed since Week 5. You have the league's richest draft capital — multiple firsts in both 2026 and 2027. Justin Herbert is 27. Jahmyr Gibbs and Ashton Jeanty are going to be monsters. The 2025 season is a write-off and everyone knows it, including you, including the group chat that roasts you every Sunday at 4 PM. But here's the thing: the teams you're losing to now are the ones who'll be selling you their future picks in two months. Patience isn't glamorous, but it's the only play.</p>
+
+      <!-- ── Footer ─────────────────────────────────────────── -->
+      <footer class="editorial-footer">
+        The Jailyard Dynasty League &middot; Est. 2022 &middot; 12 Teams<br>
+        Data via <a href="https://sleeper.com">Sleeper API</a> &middot; Column generated Week 9, 2025 season
+      </footer>
+
+    </article>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       RIGHT PANEL — DATA DASHBOARD
+       ════════════════════════════════════════════════════════════ -->
+  <div class="panel-right">
+
+    <!-- ── Your Team ────────────────────────────────────────── -->
+    <div class="dash-section">
+      <div class="dash-label">Your Team</div>
+      <div class="your-team">
+        <div class="your-team-header">
+          <span class="your-team-name">General Ken-obi</span>
+          <span class="your-team-badge">#1 POWER RANK</span>
+        </div>
+        <div class="your-team-stats">
+          <div class="your-team-stat">
+            <span class="val">7-2</span>
+            <span class="lbl">Record</span>
+          </div>
+          <div class="your-team-stat">
+            <span class="val">1348</span>
+            <span class="lbl">Points For</span>
+          </div>
+          <div class="your-team-stat">
+            <span class="val">1700</span>
+            <span class="lbl">Elo</span>
+          </div>
+          <div class="your-team-stat">
+            <span class="val">W2</span>
+            <span class="lbl">Streak</span>
+          </div>
+        </div>
+        <div class="sparkline-container">
+          <div class="sparkline-label">Elo Trend (Weeks 1-9)</div>
+          <svg class="sparkline-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-label="Elo sparkline chart showing General Ken-obi's rating climbing from around 1620 to 1700 over 9 weeks">
+            <!-- Faint grid -->
+            <line x1="0" y1="20" x2="200" y2="20" stroke="#333" stroke-width="0.5" stroke-dasharray="2,4"/>
+            <!-- Area fill -->
+            <path d="M0,28 L25,25 L50,18 L75,22 L100,16 L125,14 L150,15 L175,12 L200,4 L200,40 L0,40Z" fill="url(#sparkGrad)" opacity="0.5"/>
+            <!-- Line -->
+            <polyline points="0,28 25,25 50,18 75,22 100,16 125,14 150,15 175,12 200,4" fill="none" stroke="#4dabf7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- End dot -->
+            <circle cx="200" cy="4" r="2.5" fill="#4dabf7"/>
+            <defs>
+              <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4dabf7" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#4dabf7" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── This Week's Matchup (Week 10) ────────────────────── -->
+    <div class="dash-section">
+      <div class="dash-label">Week 10 Matchup</div>
+      <div class="matchup-card">
+        <div class="matchup-vs">
+          <div class="matchup-team">
+            <span class="name" style="color:var(--blue)">General<br>Ken-obi</span>
+            <span class="record">7-2 &middot; #1</span>
+          </div>
+          <span class="matchup-divider">VS</span>
+          <div class="matchup-team">
+            <span class="name">The Boonist<br>Monks</span>
+            <span class="record">5-4 &middot; #6</span>
+          </div>
+        </div>
+        <div class="prob-bar">
+          <div class="prob-fill" style="width: 68%"></div>
+        </div>
+        <div class="prob-labels">
+          <span class="favored">68% WIN</span>
+          <span>32% WIN</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── League Snapshot ──────────────────────────────────── -->
+    <div class="dash-section">
+      <div class="dash-label">League Snapshot</div>
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Team</th>
+            <th>W-L</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="you">
+            <td>1</td>
+            <td>General Ken-obi <span class="streak win">W2</span></td>
+            <td>7-2</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>MHJTIME <span class="streak win">W5</span></td>
+            <td>6-3</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Rasheeing the Scene <span class="streak win">W3</span></td>
+            <td>7-2</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Sleeping Giants <span class="streak win">W1</span></td>
+            <td>7-2</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>The Legion of Bouz <span class="streak loss">L2</span></td>
+            <td>6-3</td>
+          </tr>
+          <tr class="playoff-line">
+            <td>6</td>
+            <td>The Boonist Monks <span class="streak loss">L1</span></td>
+            <td>5-4</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>Noble FFT <span class="streak loss">L1</span></td>
+            <td>5-4</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>Kittler on the Roof <span class="streak loss">L4</span></td>
+            <td>4-5</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td>Grayskull Gang <span class="streak loss">L5</span></td>
+            <td>2-7</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td>Burden of E-W <span class="streak win">W1</span></td>
+            <td>2-7</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td>Father Time <span class="streak win">W2</span></td>
+            <td>2-7</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td>Chudders FT <span class="streak loss">L4</span></td>
+            <td>1-8</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Trending ─────────────────────────────────────────── -->
+    <div class="dash-section">
+      <div class="dash-label">Trending</div>
+
+      <div class="trending-item">
+        <span class="trending-icon">&#x1F525;</span>
+        <span><strong>MHJTIME:</strong> 5-game win streak, league-leading 1,411.5 PF</span>
+      </div>
+      <div class="trending-item">
+        <span class="trending-icon">&#x1F4C9;</span>
+        <span><strong>Kittler on the Roof:</strong> 4-game skid, defending champ in freefall</span>
+      </div>
+      <div class="trending-item">
+        <span class="trending-icon">&#x1F480;</span>
+        <span><strong>Chudders FT:</strong> 1-8, mathematically alive but spiritually departed</span>
+      </div>
+      <div class="trending-item">
+        <span class="trending-icon">&#x1F3AF;</span>
+        <span><strong>Week 9 MVP:</strong> Caleb Williams (37.7 pts) in a Noble FFT loss</span>
+      </div>
+      <div class="trending-item">
+        <span class="trending-icon">&#x26A1;</span>
+        <span><strong>Blowout alert:</strong> Ken-obi 154.9, Kittler 92.4 &mdash; margin: 62.5</span>
+      </div>
+    </div>
+
+    <!-- ── Week 9 Results ───────────────────────────────────── -->
+    <div class="dash-section">
+      <div class="dash-label">Week 9 Results</div>
+      <div style="font-family:var(--mono);font-size:0.64rem;line-height:2;color:var(--fg-dim);">
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--good)">Ken-obi 154.9</span>
+          <span>Kittler 92.4</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--good)">Rasheeing 146.9</span>
+          <span>Legion 135.2</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--good)">MHJTIME 144.5</span>
+          <span>Boonist 130.4</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--good)">Father Time 137.5</span>
+          <span>Chudders 120.9</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--good)">Sleeping 136.8</span>
+          <span>Grayskull 134.8</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--good)">Burden 136.4</span>
+          <span>Noble 134.3</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

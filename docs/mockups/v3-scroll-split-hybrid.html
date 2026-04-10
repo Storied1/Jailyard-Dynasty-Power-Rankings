@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0c0c0c;
+  --bg-sidebar: #111111;
+  --fg: #e8e4de;
+  --fg-dim: #a09b91;
+  --accent: #c9a84c;
+  --accent-dim: rgba(201, 168, 76, 0.15);
+  --accent-glow: rgba(201, 168, 76, 0.3);
+  --data-blue: #4dabf7;
+  --data-blue-dim: rgba(77, 171, 247, 0.15);
+  --muted: #7a7568;
+  --border: rgba(201, 168, 76, 0.12);
+  --border-sidebar: rgba(201, 168, 76, 0.08);
+  --good: #51cf66;
+  --bad: #ff6b6b;
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --sidebar-width: 280px;
+  --content-max: 720px;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 19px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL PROGRESS BAR
+   ═══════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #e8c860);
+  z-index: 9999;
+  transition: width 0.05s linear;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT: SPLIT FRAME
+   ═══════════════════════════════════════════════════════════ */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding-right: var(--sidebar-width);
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-left: 1px solid var(--border-sidebar);
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar scrollbar */
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION ANIMATION SYSTEM
+   ═══════════════════════════════════════════════════════════ */
+.scene {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scene.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scene.visible .stagger-1 { transition-delay: 0.1s; }
+.scene.visible .stagger-2 { transition-delay: 0.2s; }
+.scene.visible .stagger-3 { transition-delay: 0.3s; }
+
+/* ═══════════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.hero-league {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: hero-fade-in 1s 0.3s forwards;
+}
+
+.hero-week {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(6rem, 18vw, 14rem);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: var(--fg);
+  text-transform: uppercase;
+  opacity: 0;
+  animation: hero-fade-in 1s 0.6s forwards;
+}
+
+.hero-week span {
+  display: block;
+  font-size: 0.35em;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  margin-top: 0.3em;
+}
+
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 3rem;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  animation: hero-fade-in 1s 1.2s forwards;
+}
+
+.hero-scroll-hint::after {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 32px;
+  background: var(--accent);
+  margin: 0.8rem auto 0;
+  opacity: 0.4;
+}
+
+@keyframes hero-fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ESSAY SECTIONS
+   ═══════════════════════════════════════════════════════════ */
+.essay-section {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 6rem 2rem;
+}
+
+.essay-section p {
+  margin-bottom: 1.5em;
+  color: var(--fg);
+}
+
+.drop-cap::first-letter {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: 4.2em;
+  float: left;
+  line-height: 0.8;
+  margin-right: 0.08em;
+  margin-top: 0.05em;
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAT BREAK (FULL WIDTH)
+   ═══════════════════════════════════════════════════════════ */
+.stat-break {
+  padding: 8rem 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.stat-break::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, var(--accent-dim) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+.stat-number {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(5rem, 14vw, 11rem);
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.04em;
+  position: relative;
+}
+
+.stat-label {
+  font-family: var(--body);
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin-top: 1rem;
+  font-style: italic;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PULL QUOTE
+   ═══════════════════════════════════════════════════════════ */
+.pull-quote {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 6rem 2rem;
+  text-align: center;
+}
+
+.pull-quote blockquote {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.5;
+  color: var(--fg);
+  position: relative;
+  padding: 0 1rem;
+}
+
+.pull-quote blockquote::before {
+  content: '\201C';
+  font-family: var(--headline);
+  font-size: 5rem;
+  color: var(--accent);
+  position: absolute;
+  top: -2rem;
+  left: -0.5rem;
+  line-height: 1;
+  opacity: 0.5;
+}
+
+.pull-quote .attribution {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   POWER RANKINGS
+   ═══════════════════════════════════════════════════════════ */
+.rankings-header {
+  text-align: center;
+  padding: 6rem 2rem 3rem;
+}
+
+.rankings-title {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(3rem, 8vw, 6rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg);
+  line-height: 1;
+}
+
+.rankings-subtitle {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 1rem;
+}
+
+.rank-entry {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  min-height: 45vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.rank-entry::before {
+  content: attr(data-rank);
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(8rem, 20vw, 14rem);
+  position: absolute;
+  right: -1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(201, 168, 76, 0.05);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rank-entry-content {
+  position: relative;
+  z-index: 1;
+}
+
+.rank-team-name {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--fg);
+  margin-bottom: 0.3rem;
+}
+
+.rank-meta {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 1.2rem;
+}
+
+.rank-meta .rank-number {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.rank-blurb {
+  font-family: var(--body);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--fg-dim);
+  max-width: 560px;
+}
+
+.rank-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--border);
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAILBAG
+   ═══════════════════════════════════════════════════════════ */
+.mailbag {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 4rem 2rem 6rem;
+}
+
+.mailbag-header {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.mailbag-q {
+  margin-bottom: 2.5rem;
+}
+
+.mailbag-q .question {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent-dim);
+}
+
+.mailbag-q .sender {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.8rem;
+  padding-left: 1rem;
+}
+
+.mailbag-q .answer {
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--fg-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+.site-footer {
+  text-align: center;
+  padding: 4rem 2rem;
+  border-top: 1px solid var(--border);
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.site-footer p {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════════════════ */
+.sidebar-inner {
+  padding: 1.2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sidebar-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-sidebar);
+}
+
+.sidebar-section:last-child {
+  border-bottom: none;
+}
+
+.sidebar-section-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.7rem;
+}
+
+/* My Team Section */
+.team-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.team-selector select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-sidebar);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7568'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.team-selector select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.my-team-hero {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.my-team-name {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.my-team-rank {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.my-team-record {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg-dim);
+  margin-bottom: 0.6rem;
+}
+
+/* Sparkline */
+.sparkline-container {
+  height: 36px;
+  width: 100%;
+  margin-bottom: 0.2rem;
+}
+
+.sparkline-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sparkline-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* Next Matchup */
+.matchup-vs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.matchup-opponent {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--fg);
+  text-transform: uppercase;
+}
+
+.matchup-opp-record {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.win-prob-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bad);
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+
+.win-prob-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--good);
+  transition: width 0.6s ease;
+}
+
+.win-prob-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.win-prob-labels .favored {
+  color: var(--good);
+  font-weight: 600;
+}
+
+.win-prob-labels .underdog {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+/* Standings */
+.standings-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.standings-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  transition: background 0.2s;
+}
+
+.standings-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.standings-row.highlighted {
+  background: var(--accent-dim);
+}
+
+.standings-row .s-rank {
+  width: 18px;
+  text-align: right;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.standings-row .s-abbr {
+  flex: 1;
+  color: var(--fg);
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.standings-row .s-record {
+  color: var(--fg-dim);
+  font-size: 10px;
+}
+
+.standings-row.highlighted .s-abbr {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.playoff-line {
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--muted) 0, var(--muted) 4px, transparent 4px, transparent 8px);
+  margin: 3px 6px;
+  opacity: 0.4;
+}
+
+.playoff-tag {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 1px;
+  margin-bottom: 2px;
+  opacity: 0.5;
+}
+
+/* Trending */
+.trending-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.trending-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.trending-text {
+  color: var(--fg-dim);
+}
+
+.trending-text strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE DRAWER
+   ═══════════════════════════════════════════════════════════ */
+.drawer-toggle {
+  display: none;
+  position: fixed;
+  bottom: 1.2rem;
+  right: 1.2rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 200;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.drawer-toggle:hover {
+  transform: scale(1.05);
+}
+
+.drawer-toggle:active {
+  transform: scale(0.95);
+}
+
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 149;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.drawer-overlay.active {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .main-content {
+    padding-right: 0;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 0;
+    max-height: 70vh;
+    border-left: none;
+    border-top: 1px solid var(--accent);
+    border-radius: 16px 16px 0 0;
+    transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    z-index: 150;
+  }
+
+  .sidebar.open {
+    height: 60vh;
+    overflow-y: auto;
+  }
+
+  .drawer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .drawer-overlay.active {
+    display: block;
+  }
+
+  .hero-week {
+    font-size: clamp(4rem, 16vw, 8rem);
+  }
+
+  .rank-entry {
+    min-height: 35vh;
+    padding: 2rem 1.5rem;
+  }
+
+  .stat-number {
+    font-size: clamp(4rem, 12vw, 8rem);
+  }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 17px; }
+  .essay-section { padding: 3rem 1.2rem; }
+  .pull-quote { padding: 3rem 1.2rem; }
+  .mailbag { padding: 2rem 1.2rem 4rem; }
+  .rank-entry { min-height: auto; padding: 2rem 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress Bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<div class="layout">
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAIN CONTENT: CINEMATIC SCROLL MAGAZINE
+       ═══════════════════════════════════════════════════════ -->
+  <main class="main-content">
+
+    <!-- HERO -->
+    <section class="hero">
+      <p class="hero-league">The Jailyard Dynasty</p>
+      <h1 class="hero-week">
+        WEEK 9
+        <span>The Column</span>
+      </h1>
+      <p class="hero-scroll-hint">Scroll</p>
+    </section>
+
+    <!-- ESSAY SCENE 1 -->
+    <section class="essay-section scene">
+      <p class="drop-cap">There is a specific kind of panic that sets in around Week 9 of a dynasty season, and it has nothing to do with your actual roster. It is the slow, creeping realization that the narratives you built in August -- the ones you repeated to yourself in the mirror while brushing your teeth, the ones you whispered into the group chat at 1 a.m. like a football shaman -- are colliding with the cold math of a standings page that could not care less about your feelings.</p>
+      <p>General Ken-obi sits at 7-2 and the rest of the league is doing that thing where they pretend not to notice. Nobody wants to crown anyone in Week 9. That is a jinx that transcends sport. But here is the thing about Ken-obi: the roster is not just winning. It is winning the way a team wins when the infrastructure is sound. Points for is first, points against is third-lowest, and the schedule has been moderately difficult. This is not a house of cards. This is a house of bricks with a moat and a guy checking IDs at the door.</p>
+    </section>
+
+    <!-- FULL-WIDTH STAT BREAK -->
+    <section class="stat-break scene">
+      <div class="stat-number">62.5</div>
+      <div class="stat-label">The margin in the week's biggest blowout. Father Time did not just lose -- they got eulogized.</div>
+    </section>
+
+    <!-- ESSAY SCENE 2 -->
+    <section class="essay-section scene">
+      <p>Meanwhile, the middle of the standings looks like a mosh pit at a concert where nobody knows the band. Five teams at 5-4, all of them convinced they are one waiver wire pickup away from a championship run. Spoiler: at least three of them are wrong, and the other two are going to need injury luck that borders on divine intervention. The playoff cutoff line at rank 6 is going to be a bloodbath over the final four weeks, and the group chat already smells like desperation.</p>
+    </section>
+
+    <!-- PULL QUOTE -->
+    <section class="pull-quote scene">
+      <blockquote>
+        Five teams at 5-4, all of them convinced they are one move away from a title run. At least three of them are lying to themselves.
+      </blockquote>
+      <p class="attribution">-- The Jailyard Column, Week 9</p>
+    </section>
+
+    <!-- POWER RANKINGS TITLE -->
+    <section class="rankings-header scene">
+      <h2 class="rankings-title">Power Rankings</h2>
+      <p class="rankings-subtitle">Week 9 &middot; 2025 Season</p>
+    </section>
+
+    <!-- RANK #1 -->
+    <article class="rank-entry scene" data-rank="1">
+      <div class="rank-entry-content">
+        <h3 class="rank-team-name">General Ken-obi</h3>
+        <p class="rank-meta"><span class="rank-number">#1</span> &middot; 7-2 &middot; +142.3 PF differential</p>
+        <p class="rank-blurb">You are doing the thing that great dynasty teams do: winning games you are supposed to win by margins that make people uncomfortable. The roster is deep, the matchups have been favorable but not suspiciously so, and you have the look of a team that is going to be annoying to play in December. The throne is yours. Try not to get weird about it.</p>
+      </div>
+    </article>
+
+    <div class="rank-divider"></div>
+
+    <!-- RANK #2 -->
+    <article class="rank-entry scene" data-rank="2">
+      <div class="rank-entry-content">
+        <h3 class="rank-team-name">MHJTIME</h3>
+        <p class="rank-meta"><span class="rank-number">#2</span> &middot; 6-3 &middot; 5-game win streak</p>
+        <p class="rank-blurb">Five straight wins and nobody is talking about it, which is exactly how you like it. The quiet assassin of the Jailyard. Your roster has figured out some kind of rhythm that feels sustainable, not fluky, and the underlying numbers back up the vibes. The only question is whether the Week 4 loss was an aberration or a tell. Right now, it looks like an aberration.</p>
+      </div>
+    </article>
+
+    <div class="rank-divider"></div>
+
+    <!-- RANK #3 -->
+    <article class="rank-entry scene" data-rank="3">
+      <div class="rank-entry-content">
+        <h3 class="rank-team-name">Rasheeing the Scene</h3>
+        <p class="rank-meta"><span class="rank-number">#3</span> &middot; 6-3 &middot; Highest ceiling in league</p>
+        <p class="rank-blurb">Your best weeks are better than anyone else's best weeks, which is both a compliment and an indictment. The ceiling is championship-caliber. The floor is "how did you lose to that roster?" You are the Ferrari of the league: exhilarating when everything clicks, absolutely maddening when it does not. Consistency is the only thing between you and the 1 seed.</p>
+      </div>
+    </article>
+
+    <div class="rank-divider"></div>
+
+    <!-- RANK #4 -->
+    <article class="rank-entry scene" data-rank="4">
+      <div class="rank-entry-content">
+        <h3 class="rank-team-name">Sleeping Giants</h3>
+        <p class="rank-meta"><span class="rank-number">#4</span> &middot; 5-4 &middot; Dangerous floater</p>
+        <p class="rank-blurb">The name has never been more appropriate. You are right there, lurking at 5-4 with a roster that could absolutely wake up and ruin someone's playoff hopes. The problem is that "could" has been doing a lot of heavy lifting this season. At some point the potential energy needs to become kinetic, and the next four weeks will determine whether this is a sleeping giant or just a guy who hit snooze too many times.</p>
+      </div>
+    </article>
+
+    <!-- MAILBAG -->
+    <section class="mailbag scene">
+      <h2 class="mailbag-header">Mailbag</h2>
+
+      <div class="mailbag-q">
+        <p class="question">Is it too early to start tanking if you are 3-6? Asking for a friend whose team name rhymes with "Schmoonist Schmonks."</p>
+        <p class="sender">-- Anonymous (definitely not the Boonist Monks owner)</p>
+        <p class="answer">Look, I am not going to sit here and tell you that 3-6 is a death sentence in a 12-team league with 6 playoff spots. Mathematically, you are alive. But you are alive the way a houseplant is alive when you have forgotten to water it for three weeks and there is one green leaf hanging on. The question is not "can you make the playoffs" -- it is "should you be allocating your emotional bandwidth to a 12% chance when you could be building for 2026?" The answer depends on how much you enjoy suffering.</p>
+      </div>
+
+      <div class="mailbag-q">
+        <p class="question">Father Time is 2-7. At what point does the league intervene? Like a wellness check, but for fantasy football.</p>
+        <p class="sender">-- Concerned League Citizen</p>
+        <p class="answer">Father Time is having the kind of season that makes you rethink the entire concept of dynasty football. Last in points for, last in points against differential, and the schedule is not getting any easier. This is not a team that is unlucky. This is a team that is methodically speedrunning the worst season in league history. The only intervention available is the draft lottery, and honestly, that might be the plan. Respect the long game, even when the long game looks like a controlled demolition.</p>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-footer scene">
+      <p>The Jailyard Dynasty &middot; Est. 2022 &middot; Week 9 Column</p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIDEBAR: PERSISTENT DATA PANEL
+       ═══════════════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+
+      <!-- MY TEAM -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">My Team</div>
+        <div class="team-selector">
+          <select id="teamSelect">
+            <option value="ken">General Ken-obi</option>
+            <option value="mhj">MHJTIME</option>
+            <option value="ras">Rasheeing the Scene</option>
+            <option value="slg">Sleeping Giants</option>
+            <option value="leg">Legion of Bouz</option>
+            <option value="kit">Kittler on the Roof</option>
+            <option value="gha">Ghastly Grayskull</option>
+            <option value="chu">Chudders Football Team</option>
+            <option value="nob">Noble FFT</option>
+            <option value="bur">Burden of Etienne-y Woody</option>
+            <option value="boo">Boonist Monks</option>
+            <option value="fat">Father Time</option>
+          </select>
+        </div>
+        <div class="my-team-hero">
+          <span class="my-team-name" id="myTeamName">General Ken-obi</span>
+          <span class="my-team-rank" id="myTeamRank">#1</span>
+        </div>
+        <div class="my-team-record" id="myTeamRecord">7-2 &middot; 1st Place</div>
+
+        <!-- Elo Sparkline -->
+        <div class="sparkline-container">
+          <svg id="eloSparkline" viewBox="0 0 240 36" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--data-blue)" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="var(--data-blue)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path id="sparkArea" fill="url(#sparkGrad)"/>
+            <polyline id="sparkLine" fill="none" stroke="var(--data-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle id="sparkDot" r="3" fill="var(--data-blue)"/>
+          </svg>
+        </div>
+        <div class="sparkline-label">Elo trend &middot; 9 weeks</div>
+      </div>
+
+      <!-- NEXT MATCHUP -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Next Matchup</div>
+        <div class="matchup-vs">
+          <span class="matchup-opponent" id="matchupOpp">Father Time</span>
+          <span class="matchup-opp-record" id="matchupOppRec">2-7</span>
+        </div>
+        <div class="win-prob-bar">
+          <div class="win-prob-fill" id="winProbFill" style="width: 75%"></div>
+        </div>
+        <div class="win-prob-labels">
+          <span class="favored" id="probFav">75% Win</span>
+          <span class="underdog" id="probDog">25%</span>
+        </div>
+      </div>
+
+      <!-- STANDINGS -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Standings</div>
+        <ul class="standings-list" id="standingsList">
+          <!-- Populated by JS -->
+        </ul>
+      </div>
+
+      <!-- THIS WEEK -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">This Week</div>
+        <div class="trending-item">
+          <span class="trending-icon">&#x1F525;</span>
+          <span class="trending-text"><strong>MHJTIME:</strong> 5-game win streak</span>
+        </div>
+        <div class="trending-item">
+          <span class="trending-icon">&#x1F480;</span>
+          <span class="trending-text"><strong>Father Time:</strong> Last in PF, last in PA diff</span>
+        </div>
+        <div class="trending-item">
+          <span class="trending-icon">&#x26A0;&#xFE0F;</span>
+          <span class="trending-text"><strong>Playoff race:</strong> 5 teams at 5-4 for 3 spots</span>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+</div>
+
+<!-- Mobile Drawer Toggle -->
+<button class="drawer-toggle" id="drawerToggle" aria-label="Toggle data panel">
+  <span id="drawerIcon">&#x25B2;</span>
+</button>
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ═══════════════════════════════════════════════════════
+     TEAMS DATA
+     ═══════════════════════════════════════════════════════ */
+  var teams = [
+    { key: 'ken', name: 'General Ken-obi',           abbr: 'KEN', rank: 1,  record: '7-2', elo: [1520,1535,1528,1550,1562,1555,1578,1590,1601], opp: 'Father Time', oppRec: '2-7', prob: 75 },
+    { key: 'mhj', name: 'MHJTIME',                   abbr: 'MHJ', rank: 2,  record: '6-3', elo: [1500,1488,1502,1495,1518,1530,1545,1558,1572], opp: 'Boonist Monks', oppRec: '3-6', prob: 68 },
+    { key: 'ras', name: 'Rasheeing the Scene',        abbr: 'RAS', rank: 3,  record: '6-3', elo: [1510,1525,1540,1530,1518,1535,1548,1560,1555], opp: 'Noble FFT', oppRec: '4-5', prob: 62 },
+    { key: 'slg', name: 'Sleeping Giants',            abbr: 'SLG', rank: 4,  record: '5-4', elo: [1500,1510,1498,1512,1505,1518,1508,1520,1515], opp: 'Ghastly Grayskull', oppRec: '5-4', prob: 52 },
+    { key: 'leg', name: 'Legion of Bouz',             abbr: 'LEG', rank: 5,  record: '5-4', elo: [1500,1515,1508,1520,1510,1498,1512,1505,1510], opp: 'Kittler on the Roof', oppRec: '5-4', prob: 50 },
+    { key: 'kit', name: 'Kittler on the Roof',        abbr: 'KIT', rank: 6,  record: '5-4', elo: [1500,1490,1505,1495,1510,1520,1508,1515,1512], opp: 'Legion of Bouz', oppRec: '5-4', prob: 50 },
+    { key: 'gha', name: 'Ghastly Grayskull',          abbr: 'GHA', rank: 7,  record: '5-4', elo: [1500,1510,1498,1488,1502,1495,1510,1505,1500], opp: 'Sleeping Giants', oppRec: '5-4', prob: 48 },
+    { key: 'chu', name: 'Chudders Football Team',     abbr: 'CHU', rank: 8,  record: '4-5', elo: [1500,1490,1502,1488,1478,1492,1485,1490,1488], opp: 'Burden of Etienne-y Woody', oppRec: '3-6', prob: 58 },
+    { key: 'nob', name: 'Noble FFT',                  abbr: 'NOB', rank: 9,  record: '4-5', elo: [1500,1510,1498,1488,1502,1492,1478,1485,1480], opp: 'Rasheeing the Scene', oppRec: '6-3', prob: 38 },
+    { key: 'bur', name: 'Burden of Etienne-y Woody',  abbr: 'BUR', rank: 10, record: '3-6', elo: [1500,1485,1478,1490,1475,1468,1458,1470,1462], opp: 'Chudders Football Team', oppRec: '4-5', prob: 42 },
+    { key: 'boo', name: 'Boonist Monks',              abbr: 'BOO', rank: 11, record: '3-6', elo: [1500,1488,1475,1468,1480,1470,1460,1465,1458], opp: 'MHJTIME', oppRec: '6-3', prob: 32 },
+    { key: 'fat', name: 'Father Time',                abbr: 'FAT', rank: 12, record: '2-7', elo: [1500,1480,1465,1450,1440,1432,1420,1415,1408], opp: 'General Ken-obi', oppRec: '7-2', prob: 25 }
+  ];
+
+  /* ═══════════════════════════════════════════════════════
+     SCROLL PROGRESS
+     ═══════════════════════════════════════════════════════ */
+  var progressBar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }, { passive: true });
+
+  /* ═══════════════════════════════════════════════════════
+     INTERSECTION OBSERVER (SCENE FADE-IN)
+     ═══════════════════════════════════════════════════════ */
+  var scenes = document.querySelectorAll('.scene');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  scenes.forEach(function(s) { observer.observe(s); });
+
+  /* ═══════════════════════════════════════════════════════
+     STANDINGS BUILDER (safe DOM methods, no innerHTML)
+     ═══════════════════════════════════════════════════════ */
+  function buildStandings(selectedKey) {
+    var list = document.getElementById('standingsList');
+    while (list.firstChild) { list.removeChild(list.firstChild); }
+
+    for (var i = 0; i < teams.length; i++) {
+      var t = teams[i];
+
+      // Insert playoff cutoff after rank 6
+      if (i === 6) {
+        var line = document.createElement('li');
+        line.className = 'playoff-line';
+        line.setAttribute('aria-hidden', 'true');
+        list.appendChild(line);
+
+        var tag = document.createElement('li');
+        tag.className = 'playoff-tag';
+        tag.textContent = 'PLAYOFF CUTOFF';
+        list.appendChild(tag);
+      }
+
+      var row = document.createElement('li');
+      row.className = 'standings-row' + (t.key === selectedKey ? ' highlighted' : '');
+
+      var rankSpan = document.createElement('span');
+      rankSpan.className = 's-rank';
+      rankSpan.textContent = t.rank;
+
+      var abbrSpan = document.createElement('span');
+      abbrSpan.className = 's-abbr';
+      abbrSpan.textContent = t.abbr;
+
+      var recSpan = document.createElement('span');
+      recSpan.className = 's-record';
+      recSpan.textContent = t.record;
+
+      row.appendChild(rankSpan);
+      row.appendChild(abbrSpan);
+      row.appendChild(recSpan);
+      list.appendChild(row);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SPARKLINE BUILDER
+     ═══════════════════════════════════════════════════════ */
+  function buildSparkline(eloData) {
+    var w = 240, h = 36, pad = 4;
+    var min = Math.min.apply(null, eloData);
+    var max = Math.max.apply(null, eloData);
+    var range = max - min || 1;
+
+    var points = eloData.map(function(v, i) {
+      var x = pad + (i / (eloData.length - 1)) * (w - pad * 2);
+      var y = h - pad - ((v - min) / range) * (h - pad * 2);
+      return { x: x, y: y };
+    });
+
+    var lineStr = points.map(function(p) { return p.x + ',' + p.y; }).join(' ');
+    document.getElementById('sparkLine').setAttribute('points', lineStr);
+
+    var last = points[points.length - 1];
+    document.getElementById('sparkDot').setAttribute('cx', last.x);
+    document.getElementById('sparkDot').setAttribute('cy', last.y);
+
+    // Build SVG path for the fill area under the line
+    var pathParts = ['M' + points[0].x + ',' + (h - pad)];
+    for (var i = 0; i < points.length; i++) {
+      pathParts.push('L' + points[i].x + ',' + points[i].y);
+    }
+    pathParts.push('L' + last.x + ',' + (h - pad) + ' Z');
+    document.getElementById('sparkArea').setAttribute('d', pathParts.join(' '));
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     TEAM SELECTION
+     ═══════════════════════════════════════════════════════ */
+  var ordinals = ['', '1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'];
+
+  function selectTeam(key) {
+    var team = null;
+    for (var i = 0; i < teams.length; i++) {
+      if (teams[i].key === key) { team = teams[i]; break; }
+    }
+    if (!team) return;
+
+    document.getElementById('myTeamName').textContent = team.name;
+    document.getElementById('myTeamRank').textContent = '#' + team.rank;
+    document.getElementById('myTeamRecord').textContent = team.record + ' \u00B7 ' + ordinals[team.rank] + ' Place';
+
+    document.getElementById('matchupOpp').textContent = team.opp;
+    document.getElementById('matchupOppRec').textContent = team.oppRec;
+    document.getElementById('winProbFill').style.width = team.prob + '%';
+    document.getElementById('probFav').textContent = team.prob + '% Win';
+    document.getElementById('probDog').textContent = (100 - team.prob) + '%';
+
+    buildSparkline(team.elo);
+    buildStandings(key);
+  }
+
+  document.getElementById('teamSelect').addEventListener('change', function() {
+    selectTeam(this.value);
+  });
+
+  // Initial render
+  selectTeam('ken');
+
+  /* ═══════════════════════════════════════════════════════
+     MOBILE DRAWER
+     ═══════════════════════════════════════════════════════ */
+  var sidebar = document.getElementById('sidebar');
+  var toggle = document.getElementById('drawerToggle');
+  var overlay = document.getElementById('drawerOverlay');
+  var icon = document.getElementById('drawerIcon');
+  var isOpen = false;
+
+  function toggleDrawer() {
+    isOpen = !isOpen;
+    sidebar.classList.toggle('open', isOpen);
+    overlay.classList.toggle('active', isOpen);
+    overlay.style.display = isOpen ? 'block' : 'none';
+    icon.textContent = isOpen ? '\u25BC' : '\u25B2';
+    toggle.setAttribute('aria-expanded', isOpen.toString());
+  }
+
+  toggle.addEventListener('click', toggleDrawer);
+  overlay.addEventListener('click', toggleDrawer);
+
+})();
+</script>
+</body>
+</html>

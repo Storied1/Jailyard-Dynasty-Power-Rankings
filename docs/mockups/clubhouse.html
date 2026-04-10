@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 / The Jailyard Dynasty / The Clubhouse</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400;1,6..72,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  /* ── Reset ─────────────────────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── Tokens ────────────────────────────────────────────── */
+  :root {
+    --bg:       #0a0a0b;
+    --bg-card:  #111113;
+    --fg:       #e8e4de;
+    --fg-muted: #8a8580;
+    --accent:   #d4a04a;
+    --border:   rgba(255, 255, 255, 0.08);
+    --serif:    'Newsreader', Georgia, 'Times New Roman', serif;
+    --sans:     'Inter', system-ui, -apple-system, sans-serif;
+    --measure:  680px;
+  }
+
+  /* ── Grain texture ─────────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+
+  /* ── Base ───────────────────────────────────────────────── */
+  html {
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ────────────────────────────────────────────── */
+  .container {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  /* ── Dateline Header ───────────────────────────────────── */
+  .dateline {
+    padding: 2rem 0 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .dateline-text {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .dateline-text span {
+    color: var(--accent);
+  }
+
+  /* ── Cold Open ─────────────────────────────────────────── */
+  .cold-open {
+    margin-bottom: 3rem;
+  }
+  .cold-open-quote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    line-height: 1.35;
+    color: var(--fg);
+    margin-bottom: 0.75rem;
+  }
+  .cold-open-quote::before {
+    content: '\201C';
+    color: var(--accent);
+    margin-right: 0.05em;
+  }
+  .cold-open-quote::after {
+    content: '\201D';
+    color: var(--accent);
+    margin-left: 0.05em;
+  }
+  .cold-open-context {
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+
+  /* ── Section Headings ──────────────────────────────────── */
+  .section-label {
+    font-family: var(--sans);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Essay ─────────────────────────────────────────────── */
+  .essay {
+    margin-bottom: 3rem;
+  }
+  .essay p {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    line-height: 1.78;
+    margin-bottom: 1.25rem;
+    color: var(--fg);
+  }
+  .essay p:first-of-type::first-letter {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 3.5em;
+    float: left;
+    line-height: 0.8;
+    margin-right: 0.08em;
+    margin-top: 0.07em;
+    color: var(--accent);
+  }
+
+  /* ── Pull Quote ────────────────────────────────────────── */
+  .pull-quote {
+    border-left: 3px solid var(--accent);
+    padding: 0.25rem 0 0.25rem 1.25rem;
+    margin: 2rem 0;
+  }
+  .pull-quote p {
+    font-family: var(--serif) !important;
+    font-style: italic;
+    font-size: 1.2rem !important;
+    line-height: 1.55 !important;
+    color: var(--fg);
+    margin-bottom: 0;
+  }
+  .pull-quote-attr {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    margin-top: 0.5rem;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Power Rankings ────────────────────────────────────── */
+  .rankings {
+    margin-bottom: 3rem;
+  }
+  .rank-card {
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    transition: border-color 0.2s ease;
+  }
+  .rank-card:hover {
+    border-color: rgba(212, 160, 74, 0.2);
+  }
+  .rank-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+  }
+  .rank-number {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--fg-muted);
+    min-width: 2rem;
+  }
+  .rank-card:first-child .rank-number {
+    color: var(--accent);
+  }
+  .rank-team {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--fg);
+  }
+  .rank-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-left: auto;
+  }
+  .rank-record {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--fg-muted);
+  }
+  .rank-movement {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-family: var(--sans);
+  }
+  .rank-movement.up {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+  }
+  .rank-movement.down {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+  }
+  .rank-movement.hold {
+    color: var(--fg-muted);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .rank-verdict {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+    margin-left: 2.75rem;
+  }
+  .rank-blurb {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--fg);
+    margin-left: 2.75rem;
+    margin-bottom: 0.85rem;
+  }
+  .rank-reactions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 2.75rem;
+  }
+  .reaction-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.55rem;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .reaction-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  .reaction-btn.active {
+    background: rgba(212, 160, 74, 0.12);
+    border-color: rgba(212, 160, 74, 0.3);
+    color: var(--fg);
+  }
+  .reaction-emoji {
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+  .reaction-count {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Verdict Card (Shareable) ──────────────────────────── */
+  .verdict-section {
+    margin-bottom: 4rem;
+  }
+  .verdict-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    max-width: 380px;
+    position: relative;
+    overflow: hidden;
+  }
+  .verdict-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+  .verdict-card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .verdict-card-rank {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .verdict-card-record {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--fg-muted);
+    letter-spacing: 0.02em;
+  }
+  .verdict-card-team {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 1.35rem;
+    color: var(--fg);
+    margin-bottom: 0.6rem;
+  }
+  .verdict-card-line {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--fg);
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+  }
+  .verdict-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+  }
+  .verdict-card-brand {
+    font-family: var(--sans);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .verdict-card-week {
+    font-family: var(--sans);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .verdict-caption {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    margin-top: 1rem;
+    font-style: italic;
+  }
+
+  /* ── Footer ────────────────────────────────────────────── */
+  .mockup-footer {
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+  }
+  .mockup-footer p {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    color: var(--fg-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Responsive ────────────────────────────────────────── */
+  @media (max-width: 480px) {
+    html { font-size: 16px; }
+    .cold-open-quote { font-size: 1.35rem; }
+    .rank-header { flex-wrap: wrap; }
+    .rank-meta { margin-left: 2.75rem; margin-top: 0.25rem; }
+    .rank-verdict,
+    .rank-blurb,
+    .rank-reactions { margin-left: 0; }
+    .rank-number { min-width: auto; }
+    .verdict-card { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ── Dateline ──────────────────────────────────────── -->
+  <header class="dateline">
+    <p class="dateline-text">Week 9 <span>/</span> The Jailyard Dynasty <span>/</span> Nov 5, 2025</p>
+  </header>
+
+  <!-- ── Cold Open ─────────────────────────────────────── -->
+  <section class="cold-open">
+    <p class="cold-open-quote">He really started Goff over Lamar.</p>
+    <p class="cold-open-context">The group chat went silent for eleven minutes. That's longer than any of you were quiet during the draft. Then someone just typed "bro." and the floodgates opened.</p>
+  </section>
+
+  <!-- ── Essay ─────────────────────────────────────────── -->
+  <section class="essay">
+    <div class="section-label">The Column</div>
+
+    <p>There are weeks where the fantasy gods reach into the wire, yank out an outcome so absurd that no amount of optimization or roster-tinkering could have predicted it, and drop it in your lap like a cat leaving a dead bird on the doorstep. Week 9 was that cat. Three of the top four scorers were on bye. The league's most-traded player this season scored 42 points on someone's bench. And General Ken-obi, who has been operating with the quiet menace of a card counter at a casino that hasn't caught on yet, put together a 168-point masterpiece against a Legion team that genuinely thought this was their week to make a statement.</p>
+
+    <div class="pull-quote">
+      <p>This league has a funny way of punishing confidence. You don't get smoked when you expect to lose. You get smoked the week you finally tell the group chat you feel good about your lineup.</p>
+    </div>
+
+    <p>The broader picture is starting to crystallize in a way that should terrify at least four of you. We're past the halfway point now, and the gap between the playoff teams and the pretenders isn't shrinking -- it's calcifying. The teams at the top have depth. The teams at the bottom have hope, and hope is the most dangerous drug in dynasty because it convinces you to hold players you should be selling and sell futures you're going to need. Father Time is 2-7. That's not a rough patch. That's a franchise in freefall, and the trade deadline is two weeks away.</p>
+
+    <p>But here's the thing about dynasty that makes it unlike anything else in fantasy sports: the 2-7 team isn't dead. They're just playing a different game now. And if they play it right -- if they sell the aging assets, stockpile the picks, and trust the process -- they'll be the team everyone's afraid of in 2027. The question is whether they have the stomach for it.</p>
+  </section>
+
+  <!-- ── Power Rankings ────────────────────────────────── -->
+  <section class="rankings">
+    <div class="section-label">Power Rankings</div>
+
+    <!-- #1 -->
+    <div class="rank-card">
+      <div class="rank-header">
+        <span class="rank-number">1</span>
+        <span class="rank-team">General Ken-obi</span>
+        <div class="rank-meta">
+          <span class="rank-record">7-2</span>
+          <span class="rank-movement hold">--</span>
+        </div>
+      </div>
+      <div class="rank-verdict">The machine keeps humming.</div>
+      <p class="rank-blurb">You dropped 168 in a week where three of the top scorers were on bye. Your roster has the depth of a team that's been drafting well for three years, because it has been. Lamar is playing at an MVP level, your receivers are finally healthy at the same time, and you're getting RB2 production from a waiver pickup nobody else wanted. The scariest part? You haven't even needed your best week yet. You're winning with B-plus performances and that's the hallmark of a legitimate contender, not a one-week wonder.</p>
+      <div class="rank-reactions">
+        <button class="reaction-btn" data-team="kenobi" data-type="fire" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F525;</span>
+          <span class="reaction-count">12</span>
+        </button>
+        <button class="reaction-btn" data-team="kenobi" data-type="clown" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F921;</span>
+          <span class="reaction-count">3</span>
+        </button>
+        <button class="reaction-btn" data-team="kenobi" data-type="skull" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F480;</span>
+          <span class="reaction-count">8</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- #5 -->
+    <div class="rank-card">
+      <div class="rank-header">
+        <span class="rank-number">5</span>
+        <span class="rank-team">Legion of Bouz</span>
+        <div class="rank-meta">
+          <span class="rank-record">5-4</span>
+          <span class="rank-movement down">&darr;2</span>
+        </div>
+      </div>
+      <div class="rank-verdict">Statement week turned into a confession.</div>
+      <p class="rank-blurb">You told the group chat you were going to "make a run" this week. Then Ken-obi hung 168 on you and you scored 104. That's not a loss, that's a TED Talk on hubris. Your roster is talented enough to win any given week, but you keep leaving points on the bench and starting the wrong guy when it matters. At 5-4 you're still solidly in the playoff picture, but the margin for error just got thinner than your RB depth. Stop overthinking your lineup. The answer is usually the obvious one.</p>
+      <div class="rank-reactions">
+        <button class="reaction-btn" data-team="legion" data-type="fire" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F525;</span>
+          <span class="reaction-count">4</span>
+        </button>
+        <button class="reaction-btn" data-team="legion" data-type="clown" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F921;</span>
+          <span class="reaction-count">11</span>
+        </button>
+        <button class="reaction-btn" data-team="legion" data-type="skull" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F480;</span>
+          <span class="reaction-count">6</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- #8 -->
+    <div class="rank-card">
+      <div class="rank-header">
+        <span class="rank-number">8</span>
+        <span class="rank-team">Chudders Football Team</span>
+        <div class="rank-meta">
+          <span class="rank-record">4-5</span>
+          <span class="rank-movement up">&uarr;1</span>
+        </div>
+      </div>
+      <div class="rank-verdict">The cockroach of the playoff race.</div>
+      <p class="rank-blurb">You traded away your best player and somehow won by 30. Nobody can explain it. You can't explain it. Your roster looks like a clearance rack at a sporting goods store, and yet here you are, one game back of the last playoff spot with the easiest remaining schedule in the league. Sometimes dynasty rewards the bold and sometimes it rewards the lucky. You're cashing checks from both accounts right now, and honestly? Ride it until the wheels fall off. They might not.</p>
+      <div class="rank-reactions">
+        <button class="reaction-btn" data-team="chudders" data-type="fire" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F525;</span>
+          <span class="reaction-count">7</span>
+        </button>
+        <button class="reaction-btn" data-team="chudders" data-type="clown" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F921;</span>
+          <span class="reaction-count">5</span>
+        </button>
+        <button class="reaction-btn" data-team="chudders" data-type="skull" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F480;</span>
+          <span class="reaction-count">2</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- #12 -->
+    <div class="rank-card">
+      <div class="rank-header">
+        <span class="rank-number">12</span>
+        <span class="rank-team">Father Time</span>
+        <div class="rank-meta">
+          <span class="rank-record">2-7</span>
+          <span class="rank-movement down">&darr;1</span>
+        </div>
+      </div>
+      <div class="rank-verdict">The rebuild starts now. Or it doesn't, and that's worse.</div>
+      <p class="rank-blurb">You're staring down 2-7 and the group chat has already started making "Father Time is undefeated" jokes at your expense, which, given your team name, is the kind of poetic cruelty this league specializes in. Your roster is old, your picks are gone, and your best player is quietly asking to be traded in the DMs. There are two moves here: sell everything that isn't nailed down and stockpile 2026 picks, or keep running it back and finish 3-14. One of those paths leads somewhere. Choose wisely.</p>
+      <div class="rank-reactions">
+        <button class="reaction-btn" data-team="ftime" data-type="fire" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F525;</span>
+          <span class="reaction-count">2</span>
+        </button>
+        <button class="reaction-btn" data-team="ftime" data-type="clown" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F921;</span>
+          <span class="reaction-count">8</span>
+        </button>
+        <button class="reaction-btn" data-team="ftime" data-type="skull" onclick="react(this)">
+          <span class="reaction-emoji">&#x1F480;</span>
+          <span class="reaction-count">14</span>
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── Verdict Card ──────────────────────────────────── -->
+  <section class="verdict-section">
+    <div class="section-label">Verdict Card</div>
+
+    <div class="verdict-card">
+      <div class="verdict-card-header">
+        <span class="verdict-card-rank">#1</span>
+        <span class="verdict-card-record">7-2</span>
+      </div>
+      <div class="verdict-card-team">General Ken-obi</div>
+      <p class="verdict-card-line">The machine keeps humming. You dropped 168 in a bye-week wasteland and made it look routine. That's not luck. That's roster construction.</p>
+      <div class="verdict-card-footer">
+        <span class="verdict-card-brand">The Jailyard Dynasty</span>
+        <span class="verdict-card-week">Week 9</span>
+      </div>
+    </div>
+
+    <p class="verdict-caption">Screenshot-ready. Send it to the group chat.</p>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────── -->
+  <footer class="mockup-footer">
+    <p>The Clubhouse &mdash; concept mockup &mdash; The Jailyard Dynasty &mdash; 2025 Season</p>
+  </footer>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /**
+   * Reaction button handler.
+   * Toggles active state and increments/decrements count.
+   */
+  window.react = function(btn) {
+    var countEl = btn.querySelector('.reaction-count');
+    var count = parseInt(countEl.textContent, 10);
+
+    if (btn.classList.contains('active')) {
+      btn.classList.remove('active');
+      countEl.textContent = count - 1;
+    } else {
+      btn.classList.add('active');
+      countEl.textContent = count + 1;
+    }
+  };
+})();
+</script>
+
+</body>
+</html>

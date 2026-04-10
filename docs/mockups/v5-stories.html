@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Week 9 Stories — The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & TOKENS
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --fg: #e8e4de;
+  --fg-dim: #9a9590;
+  --fg-faint: #5a5652;
+  --gold: #c9a84c;
+  --gold-dim: rgba(201, 168, 76, 0.15);
+  --gold-glow: rgba(201, 168, 76, 0.35);
+  --muted: #7a7568;
+  --border: rgba(201, 168, 76, 0.12);
+  --good: #4ade80;
+  --bad: #f87171;
+  --warn: #fbbf24;
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --card-count: 13;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #050505;
+  color: var(--fg);
+  font-family: var(--body);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PHONE FRAME — Desktop constrains to mobile ratio
+   ═══════════════════════════════════════════════════════════ */
+.stories-frame {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050505;
+}
+
+.stories-viewport {
+  width: 100%;
+  height: 100%;
+  max-width: 430px;
+  max-height: 932px;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* On desktop, add a phone-shaped border */
+@media (min-width: 500px) {
+  .stories-viewport {
+    border-radius: 40px;
+    box-shadow:
+      0 0 0 2px rgba(201, 168, 76, 0.08),
+      0 40px 100px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL CONTAINER — Snap scroll between cards
+   ═══════════════════════════════════════════════════════════ */
+.stories-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.stories-scroll::-webkit-scrollbar { display: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   PROGRESS BAR — Top of viewport
+   ═══════════════════════════════════════════════════════════ */
+.progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  gap: 3px;
+  padding: 12px 16px 0;
+  pointer-events: none;
+}
+
+.progress-segment {
+  flex: 1;
+  height: 2px;
+  background: rgba(232, 228, 222, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-segment .fill {
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.15s ease-out;
+  border-radius: 2px;
+}
+
+.progress-segment.active .fill,
+.progress-segment.passed .fill {
+  transform: scaleX(1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD COUNTER — Below progress bar
+   ═══════════════════════════════════════════════════════════ */
+.card-counter {
+  position: absolute;
+  top: 22px;
+  right: 16px;
+  z-index: 100;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-dim);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STORY CARD — Each is full viewport
+   ═══════════════════════════════════════════════════════════ */
+.story-card {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 32px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle content fade-in */
+.story-card .card-content {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.story-card.visible .card-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scroll hint on first card */
+.scroll-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-faint);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.scroll-hint .chevron {
+  width: 16px;
+  height: 16px;
+  border-right: 1.5px solid var(--fg-faint);
+  border-bottom: 1.5px solid var(--fg-faint);
+  transform: rotate(45deg);
+  animation: hint-bounce 2s ease-in-out infinite;
+}
+@keyframes hint-bounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50% { transform: rotate(45deg) translateY(4px); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 1: THE COLD OPEN
+   ═══════════════════════════════════════════════════════════ */
+.card-cold-open { background: var(--bg); }
+
+.cold-open-quote {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: clamp(28px, 7vw, 36px);
+  line-height: 1.2;
+  color: var(--fg);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  max-width: 360px;
+}
+
+.cold-open-quote em {
+  font-style: normal;
+  color: var(--gold);
+}
+
+.cold-open-attr {
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg-faint);
+  letter-spacing: 0.04em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 2: THE HEADLINE STAT
+   ═══════════════════════════════════════════════════════════ */
+.card-headline-stat {
+  background: var(--bg);
+}
+
+.stat-number {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(80px, 22vw, 120px);
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 60px var(--gold-glow), 0 0 120px rgba(201, 168, 76, 0.15);
+}
+
+.stat-label {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: clamp(18px, 4.5vw, 22px);
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+}
+
+.stat-sublabel {
+  font-family: var(--body);
+  font-size: 15px;
+  color: var(--fg-dim);
+  margin-top: 12px;
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 3: THE ESSAY HOOK
+   ═══════════════════════════════════════════════════════════ */
+.card-essay-hook { background: var(--bg); }
+
+.essay-hook-text {
+  font-family: var(--body);
+  font-size: clamp(18px, 4.8vw, 22px);
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--fg);
+  text-align: center;
+  max-width: 340px;
+  font-style: italic;
+}
+
+.essay-hook-rule {
+  width: 40px;
+  height: 2px;
+  background: var(--gold);
+  margin-top: 24px;
+  border: none;
+}
+
+.essay-hook-week {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 4: MATCHUP OF THE WEEK
+   ═══════════════════════════════════════════════════════════ */
+.card-matchup { background: var(--bg); }
+
+.matchup-header {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.matchup-team {
+  text-align: center;
+}
+
+.matchup-team-name {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: clamp(22px, 6vw, 30px);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.matchup-team-name.winner { color: var(--gold); }
+.matchup-team-name.loser { color: var(--fg-faint); }
+
+.matchup-score {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: clamp(32px, 9vw, 48px);
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.matchup-score.winner { color: var(--gold); }
+.matchup-score.loser { color: var(--fg-faint); }
+
+.matchup-vs {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  margin: 20px 0;
+}
+
+.matchup-verdict {
+  margin-top: 28px;
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 5: CHAT REACTION
+   ═══════════════════════════════════════════════════════════ */
+.card-chat { background: var(--bg); }
+
+.chat-bubble-container {
+  max-width: 320px;
+  width: 100%;
+}
+
+.chat-bubble {
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 18px 18px 18px 4px;
+  padding: 16px 20px;
+  position: relative;
+}
+
+.chat-bubble-text {
+  font-family: var(--body);
+  font-size: 18px;
+  color: var(--fg);
+  line-height: 1.5;
+}
+
+.chat-bubble-attr {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+  letter-spacing: 0.03em;
+}
+
+.chat-context {
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg-faint);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.chat-context strong {
+  color: var(--fg-dim);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 6: QUICK RANKINGS OVERVIEW
+   ═══════════════════════════════════════════════════════════ */
+.card-rankings-overview {
+  background: var(--bg);
+  padding: 50px 20px 30px;
+}
+
+.rankings-header {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.rankings-list {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ranking-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  cursor: default;
+  position: relative;
+}
+
+.ranking-row:hover {
+  background: rgba(232, 228, 222, 0.03);
+}
+
+.ranking-row.highlighted {
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+}
+
+.rank-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-dim);
+  text-align: right;
+}
+
+.ranking-row.highlighted .rank-num {
+  color: var(--gold);
+}
+
+.rank-name {
+  font-family: var(--headline);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rank-record {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-dim);
+}
+
+.rank-movement {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 28px;
+  text-align: right;
+}
+
+.rank-movement.up { color: var(--good); }
+.rank-movement.down { color: var(--bad); }
+.rank-movement.steady { color: var(--fg-faint); }
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 7/8/9: POWER RANKING SPOTLIGHT
+   ═══════════════════════════════════════════════════════════ */
+.card-pr-spotlight { background: var(--bg); }
+
+.pr-rank {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(100px, 28vw, 140px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--gold);
+  text-shadow: 0 0 80px var(--gold-glow);
+  opacity: 0.9;
+}
+
+.pr-rank.muted-rank {
+  color: var(--fg-faint);
+  text-shadow: none;
+  opacity: 0.4;
+}
+
+.pr-team-name {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: clamp(22px, 6vw, 28px);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--fg);
+  margin-top: -8px;
+}
+
+.pr-rank.muted-rank ~ .pr-team-name {
+  color: var(--fg-dim);
+}
+
+.pr-record {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+}
+
+.card-pr-spotlight.muted-card .pr-record {
+  color: var(--fg-faint);
+}
+
+.pr-movement {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-top: 8px;
+}
+
+.pr-movement.up {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--good);
+}
+.pr-movement.down {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--bad);
+}
+.pr-movement.steady {
+  background: rgba(122, 117, 104, 0.1);
+  color: var(--muted);
+}
+
+.pr-blurb {
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--fg-dim);
+  text-align: center;
+  max-width: 340px;
+  margin-top: 20px;
+}
+
+.pr-blurb em {
+  color: var(--fg);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 10: PULL QUOTE
+   ═══════════════════════════════════════════════════════════ */
+.card-pull-quote { background: var(--bg); }
+
+.pull-quote-mark {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: 72px;
+  color: var(--gold);
+  line-height: 1;
+  opacity: 0.3;
+  margin-bottom: -20px;
+}
+
+.pull-quote-text {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: clamp(20px, 5.2vw, 26px);
+  line-height: 1.6;
+  color: var(--fg);
+  text-align: center;
+  max-width: 340px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 11: MAILBAG
+   ═══════════════════════════════════════════════════════════ */
+.card-mailbag { background: var(--bg); }
+
+.mailbag-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.mailbag-question {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: clamp(18px, 4.5vw, 22px);
+  color: var(--gold);
+  text-align: center;
+  line-height: 1.4;
+  max-width: 340px;
+}
+
+.mailbag-divider {
+  width: 30px;
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+  border: none;
+}
+
+.mailbag-answer {
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--fg-dim);
+  text-align: center;
+  max-width: 340px;
+}
+
+.mailbag-answer strong {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 12: THE PREDICTION
+   ═══════════════════════════════════════════════════════════ */
+.card-prediction { background: var(--bg); }
+
+.prediction-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--fg-faint);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.prediction-text {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: clamp(24px, 6.5vw, 32px);
+  color: var(--fg);
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.25;
+  max-width: 360px;
+  letter-spacing: -0.01em;
+}
+
+.prediction-text strong {
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.prediction-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+  padding: 6px 16px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.prediction-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD 13: THE KICKER
+   ═══════════════════════════════════════════════════════════ */
+.card-kicker { background: var(--bg); }
+
+.kicker-text {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: clamp(22px, 5.5vw, 28px);
+  color: var(--fg);
+  text-align: center;
+  line-height: 1.4;
+  max-width: 340px;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.kicker-rule {
+  width: 40px;
+  height: 2px;
+  background: var(--gold);
+  margin: 28px 0;
+  border: none;
+}
+
+.kicker-byline {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.kicker-byline span {
+  display: block;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DECORATIVE ELEMENTS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Grain texture overlay */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Vignette on each card */
+.story-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(10, 10, 10, 0.4) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 430px) {
+  .stories-viewport {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .story-card {
+    padding: 56px 24px 32px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="grain-overlay"></div>
+
+<div class="stories-frame">
+  <div class="stories-viewport">
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="card-counter" id="cardCounter">1 / 13</div>
+
+    <!-- Scrollable Card Stack -->
+    <div class="stories-scroll" id="storiesScroll">
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 1 — THE COLD OPEN
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-cold-open" id="card-1">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="cold-open-quote">
+            "We're not changing rules like that <em>midseason</em>"
+          </div>
+          <div class="cold-open-attr">
+            &mdash; Brent Boone, Thursday 7:48 AM
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <span>Swipe up</span>
+          <div class="chevron"></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 2 — THE HEADLINE STAT
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-headline-stat" id="card-2">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="stat-number">154.9</div>
+          <div class="stat-label">General Ken-obi's Week 9</div>
+          <div class="stat-sublabel">
+            The biggest blowout of the season. 62-point margin. Kittler went silent in the chat for three days.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 3 — THE ESSAY HOOK
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-essay-hook" id="card-3">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="essay-hook-text">
+            Three teams are 7-2. Only one of them was ranked outside the top five in preseason. The Sleeping Giants keep winning games nobody expected them to, and the group chat has run out of explanations.
+          </div>
+          <hr class="essay-hook-rule">
+          <div class="essay-hook-week">Week 9 Column</div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 4 — THE MATCHUP OF THE WEEK
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-matchup" id="card-4">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="matchup-header">Blowout of the Week</div>
+
+          <div class="matchup-team">
+            <div class="matchup-team-name winner">General Ken-obi</div>
+            <div class="matchup-score winner">154.9</div>
+          </div>
+
+          <div class="matchup-vs">VS</div>
+
+          <div class="matchup-team">
+            <div class="matchup-team-name loser">Kittler on the Roof</div>
+            <div class="matchup-score loser">92.4</div>
+          </div>
+
+          <div class="matchup-verdict">62.5-point annihilation</div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 5 — CHAT REACTION
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-chat" id="card-5">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="chat-bubble-container">
+            <div class="chat-bubble">
+              <div class="chat-bubble-text">
+                "Just as THUNTER was about to set the league on fire... he was going to be the alpha in that offense starting this week!! I hate fantasy football"
+              </div>
+              <div class="chat-bubble-attr">&mdash; Sacko (Kittler on the Roof), Friday</div>
+            </div>
+          </div>
+          <div class="chat-context">
+            <strong>Kittler</strong> scored 92.4 this week.<br>
+            That's 46 points below the league average.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 6 — QUICK RANKINGS OVERVIEW
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-rankings-overview" id="card-6">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;width:100%;">
+          <div class="rankings-header">Week 9 Power Rankings</div>
+          <div class="rankings-list">
+
+            <div class="ranking-row highlighted">
+              <span class="rank-num">1</span>
+              <span class="rank-name">General Ken-obi</span>
+              <span class="rank-record">7-2</span>
+              <span class="rank-movement up">&uarr;1</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">2</span>
+              <span class="rank-name">MHJTIME</span>
+              <span class="rank-record">6-3</span>
+              <span class="rank-movement up">&uarr;1</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">3</span>
+              <span class="rank-name">Rasheeing the Scene</span>
+              <span class="rank-record">7-2</span>
+              <span class="rank-movement up">&uarr;1</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">4</span>
+              <span class="rank-name">Sleeping Giants</span>
+              <span class="rank-record">7-2</span>
+              <span class="rank-movement up">&uarr;1</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">5</span>
+              <span class="rank-name">The Legion of Bouz</span>
+              <span class="rank-record">6-3</span>
+              <span class="rank-movement down">&darr;4</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">6</span>
+              <span class="rank-name">The Boonist Monks</span>
+              <span class="rank-record">5-4</span>
+              <span class="rank-movement steady">&mdash;</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">7</span>
+              <span class="rank-name">Noble FFT</span>
+              <span class="rank-record">5-4</span>
+              <span class="rank-movement steady">&mdash;</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">8</span>
+              <span class="rank-name">Kittler on the Roof</span>
+              <span class="rank-record">4-5</span>
+              <span class="rank-movement steady">&mdash;</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">9</span>
+              <span class="rank-name">Grayskull Gang</span>
+              <span class="rank-record">2-7</span>
+              <span class="rank-movement steady">&mdash;</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">10</span>
+              <span class="rank-name">Burden of Woody</span>
+              <span class="rank-record">2-7</span>
+              <span class="rank-movement up">&uarr;1</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">11</span>
+              <span class="rank-name">Father Time</span>
+              <span class="rank-record">2-7</span>
+              <span class="rank-movement down">&darr;1</span>
+            </div>
+
+            <div class="ranking-row">
+              <span class="rank-num">12</span>
+              <span class="rank-name">Chudders FT</span>
+              <span class="rank-record">1-8</span>
+              <span class="rank-movement steady">&mdash;</span>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 7 — #1 POWER RANKING
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-pr-spotlight" id="card-7">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="pr-rank">1</div>
+          <div class="pr-team-name">General Ken-obi</div>
+          <div class="pr-record">7-2 &middot; 1348.0 PF</div>
+          <div class="pr-movement up">&uarr;1 from last week</div>
+          <div class="pr-blurb">
+            Drake London went supernova with <em>34.3 points</em>. Your roster is the preseason No. 1 finally playing like it. Two championships already in the vault, a seven-game heater underway, and the highest Elo in the league at <em>1700.2</em>. The only question left is whether anyone can stop you.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 8 — #5 POWER RANKING
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-pr-spotlight" id="card-8">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="pr-rank">5</div>
+          <div class="pr-team-name">The Legion of Bouz</div>
+          <div class="pr-record">6-3 &middot; 1369.4 PF</div>
+          <div class="pr-movement down">&darr;4 from last week</div>
+          <div class="pr-blurb">
+            The fall from No. 1 is real. Back-to-back losses after starting <em>6-1</em>, and Rasheeing handed you an 11.7-point beatdown this week. McCaffrey's <em>31.8 points</em> weren't enough when Mahomes gives you 11.5. The defending dynasty-season leader is suddenly looking mortal, and the chat has gone dead silent.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 9 — #12 POWER RANKING
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-pr-spotlight muted-card" id="card-9">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="pr-rank muted-rank">12</div>
+          <div class="pr-team-name">Chudders Football Team</div>
+          <div class="pr-record">1-8 &middot; 1080.8 PF</div>
+          <div class="pr-movement steady">&mdash; still last</div>
+          <div class="pr-blurb">
+            Herbert's <em>28.7</em> was the lone bright spot in another lost week. The rebuild was always the plan, but <em>1-8</em> with the lowest point total in the league tests anyone's patience. Ashton Jeanty flashes and the draft capital is there. This is what rock bottom looks like before the climb.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 10 — PULL QUOTE
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-pull-quote" id="card-10">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="pull-quote-mark">&ldquo;</div>
+          <div class="pull-quote-text">
+            This league has a funny way of punishing confidence and rewarding whoever cares the least. The Legion started 6-1 and talked like champions. Sleeping Giants just kept showing up.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 11 — MAILBAG
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-mailbag" id="card-11">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="mailbag-label">Mailbag</div>
+          <div class="mailbag-question">
+            Is it time to panic if you're Kittler on the Roof?
+          </div>
+          <hr class="mailbag-divider">
+          <div class="mailbag-answer">
+            <strong>Four-game losing streak.</strong> Scored 92.4 this week, which is 46 points below the league average. The defending champ has fallen from preseason No. 6 to the wrong side of .500 at 4-5. The good news? Burrow, Taylor, and Nacua are all still on the roster. The bad news? They need to remember that.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 12 — THE PREDICTION
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-prediction" id="card-12">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="prediction-label">Bold Prediction</div>
+          <div class="prediction-text">
+            <strong>MHJTIME</strong> finishes with the most total points scored this season but loses in the first round of playoffs
+          </div>
+          <div class="prediction-pill">
+            <span class="dot"></span>
+            Unresolved
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           CARD 13 — THE KICKER
+           ═══════════════════════════════════════════════════════ -->
+      <section class="story-card card-kicker" id="card-13">
+        <div class="card-content" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="kicker-text">
+            Nine weeks in. Three teams at 7-2. And the only guy who saw it coming is the one who stopped checking his lineup in August.
+          </div>
+          <hr class="kicker-rule">
+          <div class="kicker-byline">
+            Week 9
+            <span>The Jailyard Dynasty</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var scroll = document.getElementById('storiesScroll');
+  var cards = document.querySelectorAll('.story-card');
+  var progressBar = document.getElementById('progressBar');
+  var cardCounter = document.getElementById('cardCounter');
+  var totalCards = cards.length;
+
+  // Build progress segments using DOM methods (no innerHTML)
+  for (var i = 0; i < totalCards; i++) {
+    var seg = document.createElement('div');
+    seg.className = 'progress-segment';
+    var fill = document.createElement('div');
+    fill.className = 'fill';
+    seg.appendChild(fill);
+    progressBar.appendChild(seg);
+  }
+  var segments = progressBar.querySelectorAll('.progress-segment');
+
+  // Intersection Observer: track visible card
+  var currentCard = 0;
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+        var idx = Array.prototype.indexOf.call(cards, entry.target);
+        if (idx !== -1) {
+          currentCard = idx;
+          updateUI(idx);
+        }
+        // Fade in content
+        entry.target.classList.add('visible');
+      }
+    });
+  }, {
+    root: scroll,
+    threshold: 0.5
+  });
+
+  cards.forEach(function(card) {
+    observer.observe(card);
+  });
+
+  // Mark first card visible immediately
+  cards[0].classList.add('visible');
+
+  function updateUI(idx) {
+    // Progress bar
+    segments.forEach(function(seg, i) {
+      seg.classList.remove('active', 'passed');
+      if (i < idx) seg.classList.add('passed');
+      if (i === idx) seg.classList.add('active');
+    });
+
+    // Counter
+    cardCounter.textContent = (idx + 1) + ' / ' + totalCards;
+
+    // URL hash (without scrolling)
+    var id = cards[idx].id;
+    if (id && history.replaceState) {
+      history.replaceState(null, '', '#' + id);
+    }
+  }
+
+  // Initial state
+  updateUI(0);
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      navigateTo(currentCard + 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      navigateTo(currentCard - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      navigateTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      navigateTo(totalCards - 1);
+    }
+  });
+
+  function navigateTo(idx) {
+    if (idx < 0 || idx >= totalCards) return;
+    cards[idx].scrollIntoView({ behavior: 'auto' });
+  }
+
+  // Handle direct URL hash on load
+  function handleHash() {
+    var hash = window.location.hash;
+    if (hash) {
+      var target = document.querySelector(hash);
+      if (target) {
+        setTimeout(function() {
+          target.scrollIntoView({ behavior: 'auto' });
+        }, 100);
+      }
+    }
+  }
+  handleHash();
+  window.addEventListener('hashchange', handleHash);
+
+  // Touch: hide scroll hint after first scroll
+  var scrollHint = document.querySelector('.scroll-hint');
+  if (scrollHint) {
+    var dismissed = false;
+    scroll.addEventListener('scroll', function() {
+      if (!dismissed && scroll.scrollTop > 50) {
+        scrollHint.style.opacity = '0';
+        scrollHint.style.transition = 'opacity 0.3s ease';
+        dismissed = true;
+      }
+    }, { passive: true });
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — Spatial Depth — The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --void: #000000;
+  --bg: #000000;
+  --fg: #e8e4de;
+  --fg-dim: #9a9590;
+  --fg-faint: #4a4642;
+  --fg-ghost: #2a2622;
+
+  /* Warm foreground colors (close objects) */
+  --gold: #d4a843;
+  --amber: #e8a030;
+  --warm-white: #fff5e0;
+
+  /* Cool background colors (far objects) */
+  --steel: #5a6a78;
+  --slate: #3a4652;
+  --frost: #7a8a98;
+
+  /* Accents */
+  --good: #4ade80;
+  --bad: #f87171;
+  --chat-green: #25d366;
+
+  /* Type */
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* Spatial */
+  --perspective: 1200px;
+  --front-z: 80px;
+  --mid-z: 0px;
+  --back-z: -180px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL
+   ═══════════════════════════════════════════════════════════ */
+html {
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--void);
+  color: var(--fg);
+  font-family: var(--body);
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SPATIAL CONTAINER
+   The perspective origin. Everything inside lives in 3D space.
+   ═══════════════════════════════════════════════════════════ */
+.spatial-container {
+  position: relative;
+  perspective: var(--perspective);
+  perspective-origin: 50% 40%;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DEPTH LAYERS
+   Each layer is positioned absolutely and moves at different
+   scroll rates via JS. transform-style: preserve-3d lets
+   translateZ create actual visual depth.
+   ═══════════════════════════════════════════════════════════ */
+.depth-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.depth-layer > * {
+  pointer-events: auto;
+}
+
+/* Back layer: dim, cool, blurred */
+.layer-back {
+  z-index: 1;
+  color: var(--steel);
+}
+
+/* Middle layer: normal reading */
+.layer-mid {
+  z-index: 10;
+  color: var(--fg);
+}
+
+/* Front layer: bright, warm, large */
+.layer-front {
+  z-index: 20;
+  color: var(--warm-white);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL SPACER
+   Creates the scrollable height that drives parallax.
+   ═══════════════════════════════════════════════════════════ */
+.scroll-spacer {
+  height: 600vh;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BACK LAYER ELEMENTS
+   Team names, chat quotes, standings — the ambient data field.
+   ═══════════════════════════════════════════════════════════ */
+.back-team-name {
+  position: absolute;
+  font-family: var(--headline);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--slate);
+  opacity: 0;
+  transition: opacity 0.8s ease, transform 0.8s ease, color 0.6s ease, filter 0.6s ease;
+  filter: blur(1.2px);
+  white-space: nowrap;
+}
+
+.back-team-name.visible {
+  opacity: 1;
+}
+
+/* Highlight state: name pulls forward when mentioned */
+.back-team-name.highlight {
+  color: var(--gold);
+  filter: blur(0);
+  transform: scale(1.15) !important;
+  text-shadow: 0 0 30px rgba(212, 168, 67, 0.3);
+  z-index: 15;
+}
+
+.back-chat-quote {
+  position: absolute;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.78rem;
+  color: var(--fg-faint);
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  max-width: 280px;
+  line-height: 1.4;
+  filter: blur(0.8px);
+  padding-left: 12px;
+  border-left: 2px solid rgba(37, 211, 102, 0.15);
+}
+
+.back-chat-quote.visible {
+  opacity: 1;
+}
+
+.back-standings {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--fg-ghost);
+  line-height: 2;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transition: opacity 1.5s ease, color 0.6s ease, filter 0.6s ease;
+  filter: blur(1px);
+}
+
+.back-standings.visible {
+  opacity: 1;
+}
+
+/* Convergence: standings pull to mid layer */
+.back-standings.converge {
+  color: var(--fg-dim);
+  filter: blur(0);
+}
+
+.back-rival-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(90, 106, 120, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.back-rival-line.visible {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MIDDLE LAYER ELEMENTS
+   The essay. Where you read.
+   ═══════════════════════════════════════════════════════════ */
+.mid-content {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.essay-section {
+  max-width: 640px;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.essay-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.essay-p {
+  font-family: var(--body);
+  font-size: 1.12rem;
+  line-height: 1.75;
+  color: var(--fg);
+  margin-bottom: 1.8rem;
+}
+
+.essay-p .team-mention {
+  color: var(--gold);
+  font-weight: 500;
+  cursor: default;
+}
+
+.pull-quote {
+  font-family: var(--headline);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--warm-white);
+  text-align: center;
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem 0;
+  border-top: 1px solid rgba(212, 168, 67, 0.2);
+  border-bottom: 1px solid rgba(212, 168, 67, 0.2);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.pull-quote.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ranking-blurb {
+  max-width: 640px;
+  width: 100%;
+  padding: 1.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.ranking-blurb.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.blurb-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.blurb-rank {
+  font-family: var(--headline);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+  min-width: 2.5rem;
+}
+
+.blurb-team {
+  font-family: var(--headline);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+}
+
+.blurb-record {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--fg-dim);
+  margin-left: auto;
+}
+
+.blurb-text {
+  font-family: var(--body);
+  font-size: 0.95rem;
+  color: var(--fg-dim);
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FRONT LAYER ELEMENTS
+   Hero card. Close enough to touch.
+   ═══════════════════════════════════════════════════════════ */
+.front-hero {
+  position: absolute;
+  top: 12vh;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  width: 100%;
+  max-width: 700px;
+  padding: 0 24px;
+}
+
+.hero-week {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(6rem, 18vw, 14rem);
+  letter-spacing: -0.02em;
+  color: var(--warm-white);
+  line-height: 0.85;
+  text-shadow: 0 0 80px rgba(255, 245, 224, 0.15);
+  margin-bottom: 1.5rem;
+}
+
+.hero-week .week-label {
+  display: block;
+  font-size: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: -0.15em;
+}
+
+.hero-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1.5rem 3rem;
+  background: rgba(212, 168, 67, 0.06);
+  border: 1px solid rgba(212, 168, 67, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.hero-team-name {
+  font-family: var(--headline);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+
+.hero-rank-record {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--fg-dim);
+  letter-spacing: 0.1em;
+}
+
+.hero-score {
+  font-family: var(--headline);
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 900;
+  color: var(--warm-white);
+  line-height: 1;
+  text-shadow: 0 0 60px rgba(255, 245, 224, 0.2);
+  margin-top: 0.2rem;
+}
+
+.hero-score-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--fg-faint);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONVERGENCE ZONE
+   At the end, all layers merge to a single plane.
+   ═══════════════════════════════════════════════════════════ */
+.convergence-rankings {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.convergence-rankings.visible {
+  opacity: 1;
+}
+
+.convergence-title {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--warm-white);
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.convergence-title span {
+  color: var(--gold);
+}
+
+.conv-rows-container {
+  width: 100%;
+  max-width: 500px;
+}
+
+.conv-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 500px;
+  width: 100%;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.conv-row.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.conv-rank {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--gold);
+  min-width: 2rem;
+  text-align: right;
+}
+
+.conv-rank.top3 {
+  color: var(--amber);
+  text-shadow: 0 0 12px rgba(232, 160, 48, 0.3);
+}
+
+.conv-name {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+  flex: 1;
+}
+
+.conv-record {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+}
+
+.conv-pts {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--fg-faint);
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+.conv-bar {
+  width: 60px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.conv-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--amber));
+  transition: width 1s cubic-bezier(0.17, 0.67, 0.24, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DEPTH INDICATOR (side)
+   Shows which layer you're in.
+   ═══════════════════════════════════════════════════════════ */
+.depth-indicator {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.depth-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-faint);
+  transition: background 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.depth-dot.active {
+  background: var(--gold);
+  transform: scale(1.5);
+  box-shadow: 0 0 12px rgba(212, 168, 67, 0.4);
+}
+
+.depth-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--fg-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  margin-top: 8px;
+  transition: color 0.4s ease;
+}
+
+.depth-label.active {
+  color: var(--gold);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL PROGRESS
+   ═══════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--amber));
+  z-index: 200;
+  transition: width 0.1s linear;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HINT
+   ═══════════════════════════════════════════════════════════ */
+.scroll-hint {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.scroll-hint.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scroll-hint-text {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--fg-faint);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.scroll-hint-arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 1.5px solid var(--fg-faint);
+  border-bottom: 1.5px solid var(--fg-faint);
+  transform: rotate(45deg);
+  animation: hint-bounce 2s ease-in-out infinite;
+}
+
+@keyframes hint-bounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50% { transform: rotate(45deg) translateY(6px); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  :root {
+    --perspective: 800px;
+    --front-z: 40px;
+    --mid-z: 0px;
+    --back-z: -80px;
+  }
+
+  .hero-week {
+    font-size: clamp(4rem, 22vw, 8rem);
+  }
+
+  .hero-card {
+    padding: 1.2rem 2rem;
+  }
+
+  .hero-score {
+    font-size: clamp(2.5rem, 14vw, 4rem);
+  }
+
+  .back-team-name {
+    font-size: 0.9rem !important;
+  }
+
+  .back-chat-quote {
+    display: none;
+  }
+
+  .depth-indicator {
+    right: 12px;
+  }
+
+  .depth-label {
+    display: none;
+  }
+
+  .essay-p {
+    font-size: 1rem;
+  }
+
+  .pull-quote {
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+  }
+
+  .convergence-title {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .front-hero {
+    top: 8vh;
+  }
+
+  .hero-card {
+    padding: 1rem 1.5rem;
+  }
+
+  .back-standings {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll progress bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Depth indicator -->
+<div class="depth-indicator" id="depthIndicator">
+  <div class="depth-dot" data-layer="front"></div>
+  <div class="depth-dot" data-layer="mid"></div>
+  <div class="depth-dot" data-layer="back"></div>
+  <div class="depth-label" id="depthLabel">FRONT</div>
+</div>
+
+<!-- Scroll hint -->
+<div class="scroll-hint" id="scrollHint">
+  <span class="scroll-hint-text">Scroll into the depth</span>
+  <div class="scroll-hint-arrow"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SPATIAL CONTAINER — The 3D space
+     ═══════════════════════════════════════════════════════════ -->
+<div class="spatial-container" id="spatialContainer">
+
+  <!-- ───────────────────────────────────────────────────────
+       BACK LAYER — The ambient data field
+       ─────────────────────────────────────────────────────── -->
+  <div class="depth-layer layer-back" id="layerBack">
+
+    <!-- All 12 team names, scattered — sized by rank (bigger = higher ranked) -->
+    <div class="back-team-name" id="bt-kenobi" style="top: 15vh; left: 8%; font-size: 2.2rem;" data-team="General Ken-obi">GENERAL KEN-OBI</div>
+    <div class="back-team-name" id="bt-mhjtime" style="top: 22vh; right: 12%; font-size: 1.6rem;" data-team="MHJTIME">MHJTIME</div>
+    <div class="back-team-name" id="bt-rashee" style="top: 35vh; left: 5%; font-size: 1.5rem;" data-team="Rasheeing the Scene">RASHEEING THE SCENE</div>
+    <div class="back-team-name" id="bt-giants" style="top: 42vh; right: 6%; font-size: 1.5rem;" data-team="Sleeping Giants">SLEEPING GIANTS</div>
+    <div class="back-team-name" id="bt-legion" style="top: 55vh; left: 15%; font-size: 1.3rem;" data-team="The Legion of Bouz">THE LEGION OF BOUZ</div>
+    <div class="back-team-name" id="bt-monks" style="top: 60vh; right: 10%; font-size: 1.15rem;" data-team="The Boonist Monks">THE BOONIST MONKS</div>
+    <div class="back-team-name" id="bt-noble" style="top: 72vh; left: 8%; font-size: 1.05rem;" data-team="Noble FFT">NOBLE FFT</div>
+    <div class="back-team-name" id="bt-kittler" style="top: 78vh; right: 15%; font-size: 0.95rem;" data-team="Kittler on the Roof">KITTLER ON THE ROOF</div>
+    <div class="back-team-name" id="bt-grayskull" style="top: 88vh; left: 12%; font-size: 0.85rem;" data-team="Ghastly Grayskull Gang">GHASTLY GRAYSKULL GANG</div>
+    <div class="back-team-name" id="bt-burden" style="top: 94vh; right: 8%; font-size: 0.8rem;" data-team="Burden of Etienne-y Woody">BURDEN OF ETIENNE-Y WOODY</div>
+    <div class="back-team-name" id="bt-father" style="top: 102vh; left: 6%; font-size: 0.78rem;" data-team="Father Time">FATHER TIME</div>
+    <div class="back-team-name" id="bt-chudders" style="top: 108vh; right: 12%; font-size: 0.72rem;" data-team="Chudders Football Team">CHUDDERS FOOTBALL TEAM</div>
+
+    <!-- Chat quotes drifting in the background -->
+    <div class="back-chat-quote" style="top: 28vh; left: 60%;">"Ken-obi is COOKING right now"</div>
+    <div class="back-chat-quote" style="top: 50vh; right: 5%; left: auto; text-align: right;">"Legion's second loss in a row. Dynasty crumbling?"</div>
+    <div class="back-chat-quote" style="top: 68vh; left: 55%;">"Kittler dropped 92 points. Ninety. Two."</div>
+    <div class="back-chat-quote" style="top: 85vh; left: 62%;">"Three teams at 7-2. This is chaos."</div>
+
+    <!-- Faint rival connection lines -->
+    <div class="back-rival-line" style="top: 38vh; left: 15%; width: 70%; transform: rotate(-3deg);"></div>
+    <div class="back-rival-line" style="top: 58vh; left: 10%; width: 80%; transform: rotate(2deg);"></div>
+
+    <!-- Ambient standings list (dim, blurred) -->
+    <div class="back-standings" id="backStandings" style="top: 130vh; left: 50%; transform: translateX(-50%);">
+      <div>01  KEN-OBI ........... 7-2</div>
+      <div>02  MHJTIME ........... 6-3</div>
+      <div>03  RASHEEING ......... 7-2</div>
+      <div>04  SLEEPING GIANTS ... 7-2</div>
+      <div>05  LEGION OF BOUZ .... 6-3</div>
+      <div>06  BOONIST MONKS ..... 5-4</div>
+      <div>07  NOBLE FFT ......... 5-4</div>
+      <div>08  KITTLER ........... 4-5</div>
+      <div>09  GRAYSKULL GANG .... 2-7</div>
+      <div>10  BURDEN ............ 2-7</div>
+      <div>11  FATHER TIME ....... 2-7</div>
+      <div>12  CHUDDERS .......... 1-8</div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────────
+       MIDDLE LAYER — The essay (reading distance)
+       ─────────────────────────────────────────────────────── -->
+  <div class="depth-layer layer-mid" id="layerMid">
+    <div class="mid-content" style="top: 110vh;">
+
+      <!-- Essay paragraph 1 -->
+      <div class="essay-section" data-highlight-team="General Ken-obi">
+        <p class="essay-p">
+          There's a moment in every dynasty season when the noise stops and the signal comes through clean. Week 9 was that moment. <span class="team-mention" data-team="General Ken-obi">General Ken-obi</span> didn't just win — they detonated Kittler on the Roof by 62.48 points, the kind of margin that makes you check if the other team actually set a lineup. Drake London went supernova with 34.3 points, and suddenly the preseason #1 pick looked like exactly what everyone feared they'd become: inevitable.
+        </p>
+      </div>
+
+      <!-- Essay paragraph 2 -->
+      <div class="essay-section" data-highlight-team="The Legion of Bouz">
+        <p class="essay-p">
+          Meanwhile, <span class="team-mention" data-team="The Legion of Bouz">The Legion of Bouz</span> is learning what happens when you build a dynasty on vibes and McCaffrey alone. Two straight losses — including getting handled by <span class="team-mention" data-team="Rasheeing the Scene">Rasheeing the Scene</span>, who apparently decided that Josh Allen + Rashee Rice is a personality now. The Legion dropped from first to fifth in a single week. That's not a stumble. That's the league telling you the throne doesn't come with a warranty.
+        </p>
+      </div>
+
+      <!-- Pull quote -->
+      <div class="pull-quote">
+        Three teams at 7-2. One team at 1-8. The middle is a knife fight and the bottom is a graveyard.
+      </div>
+
+      <!-- Essay paragraph 3 -->
+      <div class="essay-section" data-highlight-team="MHJTIME">
+        <p class="essay-p">
+          The real story is <span class="team-mention" data-team="MHJTIME">MHJTIME</span> riding a five-game win streak with Rico Dowdle — yes, Rico Dowdle — leading the charge with 27.1 points. When your RB1 is a waiver-wire pickup outscoring Bijan Robinson, you're either a genius or you're living on borrowed time. Either way, 6-3 with the league's highest point total (1,411.5) means this team is dangerously real. The chat knows it. The standings confirm it. The rest of you should be worried.
+        </p>
+      </div>
+
+      <!-- Section header: Rankings -->
+      <div class="essay-section">
+        <h2 style="font-family: var(--headline); font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold); margin: 3rem 0 1.5rem; text-align: center;">
+          Power Rankings
+        </h2>
+      </div>
+
+      <!-- Ranking blurb: #1 -->
+      <div class="ranking-blurb" data-highlight-team="General Ken-obi">
+        <div class="blurb-header">
+          <span class="blurb-rank">1</span>
+          <span class="blurb-team">General Ken-obi</span>
+          <span class="blurb-record">7-2 &middot; 1,348.0 PF</span>
+        </div>
+        <p class="blurb-text">The 62-point margin over Kittler wasn't a game — it was a statement of fact. Drake London, Sam LaPorta, and Chase Brown all cleared 16 points. When your floor looks like everyone else's ceiling, you're not competing. You're just waiting for the bracket to catch up.</p>
+      </div>
+
+      <!-- Ranking blurb: #2 -->
+      <div class="ranking-blurb" data-highlight-team="MHJTIME">
+        <div class="blurb-header">
+          <span class="blurb-rank">2</span>
+          <span class="blurb-team">MHJTIME</span>
+          <span class="blurb-record">6-3 &middot; 1,411.5 PF</span>
+        </div>
+        <p class="blurb-text">Five straight wins and the league's highest point total. Rico Dowdle leading the RB room is either an indictment or a miracle. Marvin Harrison Jr. and Ja'Marr Chase as your WR combo is borderline unfair. The only question: can Daniel Jones really be your quarterback in December?</p>
+      </div>
+
+      <!-- Ranking blurb: #3 -->
+      <div class="ranking-blurb" data-highlight-team="Rasheeing the Scene">
+        <div class="blurb-header">
+          <span class="blurb-rank">3</span>
+          <span class="blurb-team">Rasheeing the Scene</span>
+          <span class="blurb-record">7-2 &middot; 1,278.8 PF</span>
+        </div>
+        <p class="blurb-text">Three straight wins including taking down the Legion. Josh Allen dropped 28.82 and this team has quietly become the most balanced roster in the league. De'Von Achane and Travis Etienne provide the floor. Rashee Rice provides the ceiling. And you're providing nightmares for whoever draws you in the playoffs.</p>
+      </div>
+
+      <!-- Ranking blurb: #4 -->
+      <div class="ranking-blurb" data-highlight-team="Sleeping Giants">
+        <div class="blurb-header">
+          <span class="blurb-rank">4</span>
+          <span class="blurb-team">Sleeping Giants</span>
+          <span class="blurb-record">7-2 &middot; 1,280.2 PF</span>
+        </div>
+        <p class="blurb-text">Beat Grayskull by 2.04 points — the week's closest game. Sam Darnold leading your scoring feels like a punchline, but 7-2 is 7-2. The name has never been more apt: a roster of aging stars who refuse to acknowledge the calendar. Josh Jacobs and Derrick Henry keep grinding. The clock keeps ticking.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────────
+       FRONT LAYER — Hero card (close enough to touch)
+       ─────────────────────────────────────────────────────── -->
+  <div class="depth-layer layer-front" id="layerFront">
+    <div class="front-hero" id="frontHero">
+      <div class="hero-week">
+        <span class="week-label">Week</span>
+        9
+      </div>
+      <div class="hero-card">
+        <div class="hero-team-name">General Ken-obi</div>
+        <div class="hero-rank-record">#1 &nbsp;&middot;&nbsp; 7-2</div>
+        <div class="hero-score">154.86</div>
+        <div class="hero-score-label">Week High Score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────────
+       CONVERGENCE LAYER — All planes merge at the end
+       ─────────────────────────────────────────────────────── -->
+  <div class="depth-layer" id="layerConverge" style="z-index: 30;">
+    <div class="convergence-rankings" id="convergenceZone" style="top: 480vh;">
+      <div class="convergence-title">Week 9 <span>Power Rankings</span></div>
+      <div class="conv-rows-container" id="convRows"></div>
+    </div>
+  </div>
+
+  <!-- Scroll spacer drives the total scrollable height -->
+  <div class="scroll-spacer"></div>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ═══════════════════════════════════════════════════════════
+     DATA — Week 9 standings from Sleeper API
+     ═══════════════════════════════════════════════════════════ */
+  var standings = [
+    { rank: 1,  name: 'General Ken-obi',           record: '7-2', pf: 1348.0, pts: 154.86 },
+    { rank: 2,  name: 'MHJTIME',                   record: '6-3', pf: 1411.5, pts: 144.48 },
+    { rank: 3,  name: 'Rasheeing the Scene',        record: '7-2', pf: 1278.8, pts: 146.92 },
+    { rank: 4,  name: 'Sleeping Giants',            record: '7-2', pf: 1280.2, pts: 136.80 },
+    { rank: 5,  name: 'The Legion of Bouz',         record: '6-3', pf: 1369.4, pts: 135.20 },
+    { rank: 6,  name: 'The Boonist Monks',          record: '5-4', pf: 1345.0, pts: 130.36 },
+    { rank: 7,  name: 'Noble FFT',                  record: '5-4', pf: 1239.0, pts: 134.30 },
+    { rank: 8,  name: 'Kittler on the Roof',        record: '4-5', pf: 1202.7, pts:  92.38 },
+    { rank: 9,  name: 'Ghastly Grayskull Gang',     record: '2-7', pf: 1180.8, pts: 134.76 },
+    { rank: 10, name: 'Burden of Etienne-y Woody',  record: '2-7', pf: 1115.9, pts: 136.44 },
+    { rank: 11, name: 'Father Time',                record: '2-7', pf: 1111.9, pts: 137.52 },
+    { rank: 12, name: 'Chudders Football Team',     record: '1-8', pf: 1080.8, pts: 120.90 }
+  ];
+
+  var maxPF = 0;
+  for (var i = 0; i < standings.length; i++) {
+    if (standings[i].pf > maxPF) maxPF = standings[i].pf;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     BUILD CONVERGENCE ROWS (safe DOM methods)
+     ═══════════════════════════════════════════════════════════ */
+  var convContainer = document.getElementById('convRows');
+
+  standings.forEach(function(s) {
+    var row = document.createElement('div');
+    row.className = 'conv-row';
+
+    var rankEl = document.createElement('span');
+    rankEl.className = 'conv-rank' + (s.rank <= 3 ? ' top3' : '');
+    rankEl.textContent = s.rank;
+    row.appendChild(rankEl);
+
+    var nameEl = document.createElement('span');
+    nameEl.className = 'conv-name';
+    nameEl.textContent = s.name;
+    row.appendChild(nameEl);
+
+    var recEl = document.createElement('span');
+    recEl.className = 'conv-record';
+    recEl.textContent = s.record;
+    row.appendChild(recEl);
+
+    var ptsEl = document.createElement('span');
+    ptsEl.className = 'conv-pts';
+    ptsEl.textContent = s.pts.toFixed(1);
+    row.appendChild(ptsEl);
+
+    var barEl = document.createElement('div');
+    barEl.className = 'conv-bar';
+    var fillEl = document.createElement('div');
+    fillEl.className = 'conv-bar-fill';
+    fillEl.style.width = '0%';
+    fillEl.dataset.target = ((s.pf / maxPF) * 100).toFixed(1);
+    barEl.appendChild(fillEl);
+    row.appendChild(barEl);
+
+    convContainer.appendChild(row);
+  });
+
+  /* ═══════════════════════════════════════════════════════════
+     SCROLL ENGINE
+     ═══════════════════════════════════════════════════════════ */
+  var layerFront  = document.getElementById('layerFront');
+  var layerMid    = document.getElementById('layerMid');
+  var layerBack   = document.getElementById('layerBack');
+  var layerConv   = document.getElementById('layerConverge');
+  var progressBar = document.getElementById('scrollProgress');
+  var scrollHint  = document.getElementById('scrollHint');
+  var depthDots   = document.querySelectorAll('.depth-dot');
+  var depthLabel  = document.getElementById('depthLabel');
+
+  /* Parallax rates:
+     Front moves fastest (2.0x scroll) — hero flies away quickly.
+     Mid moves at 1.0x — the reading experience.
+     Back moves at 0.35x — always present, contextual. */
+  var FRONT_RATE = 2.0;
+  var MID_RATE   = 1.0;
+  var BACK_RATE  = 0.35;
+  var CONV_RATE  = 1.0;
+
+  var docHeight = 0;
+  function updateDocHeight() {
+    docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  }
+  updateDocHeight();
+  window.addEventListener('resize', updateDocHeight);
+
+  /* ═══════════════════════════════════════════════════════════
+     INTERSECTION OBSERVERS
+     ═══════════════════════════════════════════════════════════ */
+
+  // General visibility (fade-in on scroll)
+  var visibilityObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll(
+    '.essay-section, .pull-quote, .ranking-blurb, ' +
+    '.back-team-name, .back-chat-quote, .back-rival-line, ' +
+    '.back-standings, .conv-row'
+  ).forEach(function(el) {
+    visibilityObserver.observe(el);
+  });
+
+  // Team mention highlighting: when a mention scrolls into view,
+  // the corresponding back-layer name glows gold
+  var backTeamNames = document.querySelectorAll('.back-team-name');
+  var mentionObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      var section = entry.target.closest('[data-highlight-team]');
+      if (!section) return;
+      var teamName = section.dataset.highlightTeam;
+      backTeamNames.forEach(function(btn) {
+        if (btn.dataset.team === teamName) {
+          btn.classList.toggle('highlight', entry.isIntersecting);
+        }
+      });
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.team-mention').forEach(function(el) {
+    mentionObserver.observe(el);
+  });
+
+  // Convergence zone: when it enters viewport, all layers merge
+  var convergenceZone = document.getElementById('convergenceZone');
+  var convObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+
+        // Animate the PF bars after a short delay
+        setTimeout(function() {
+          var fills = entry.target.querySelectorAll('.conv-bar-fill');
+          for (var i = 0; i < fills.length; i++) {
+            fills[i].style.width = fills[i].dataset.target + '%';
+          }
+        }, 300);
+
+        // Stagger row reveals
+        var rows = entry.target.querySelectorAll('.conv-row');
+        for (var j = 0; j < rows.length; j++) {
+          (function(row, delay) {
+            setTimeout(function() { row.classList.add('visible'); }, delay);
+          })(rows[j], j * 80);
+        }
+
+        // Pull back-layer standings forward (sharpen + brighten)
+        var bs = document.getElementById('backStandings');
+        if (bs) bs.classList.add('converge');
+      }
+    });
+  }, { threshold: 0.1 });
+  convObserver.observe(convergenceZone);
+
+  /* ═══════════════════════════════════════════════════════════
+     MAIN SCROLL HANDLER
+     ═══════════════════════════════════════════════════════════ */
+  var ticking = false;
+
+  // Cache CSS variable values (read once)
+  var rootStyle = getComputedStyle(document.documentElement);
+  var frontZ = rootStyle.getPropertyValue('--front-z').trim();
+  var midZ   = rootStyle.getPropertyValue('--mid-z').trim();
+  var backZ  = rootStyle.getPropertyValue('--back-z').trim();
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function() {
+      var scrollY = window.pageYOffset;
+      var progress = docHeight > 0 ? scrollY / docHeight : 0;
+
+      // Update progress bar
+      progressBar.style.width = (progress * 100) + '%';
+
+      // Hide scroll hint after minimal scroll
+      if (scrollY > 100) {
+        scrollHint.classList.add('hidden');
+      }
+
+      // Apply parallax transforms per layer
+      layerFront.style.transform = 'translateY(' + (-scrollY * FRONT_RATE) + 'px) translateZ(' + frontZ + ')';
+      layerMid.style.transform   = 'translateY(' + (-scrollY * MID_RATE) + 'px) translateZ(' + midZ + ')';
+      layerBack.style.transform  = 'translateY(' + (-scrollY * BACK_RATE) + 'px) translateZ(' + backZ + ')';
+      layerConv.style.transform  = 'translateY(' + (-scrollY * CONV_RATE) + 'px)';
+
+      // Update depth indicator
+      var activeLayer = 'front';
+      var labelText = 'CLOSE';
+      if (progress > 0.65) {
+        activeLayer = 'converge';
+        labelText = 'MERGE';
+      } else if (progress > 0.35) {
+        activeLayer = 'back';
+        labelText = 'DEEP';
+      } else if (progress > 0.12) {
+        activeLayer = 'mid';
+        labelText = 'READ';
+      }
+
+      depthDots.forEach(function(dot) {
+        var isActive = dot.dataset.layer === activeLayer ||
+          (activeLayer === 'converge' && dot.dataset.layer === 'back');
+        dot.classList.toggle('active', isActive);
+      });
+      depthLabel.textContent = labelText;
+      depthLabel.classList.toggle('active', progress > 0.05);
+
+      ticking = false;
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll(); // Initial state
+
+  // Stagger back-layer team name entrance
+  setTimeout(function() {
+    var names = document.querySelectorAll('.back-team-name');
+    for (var k = 0; k < names.length; k++) {
+      (function(el, delay) {
+        setTimeout(function() { el.classList.add('visible'); }, delay);
+      })(names[k], k * 120);
+    }
+  }, 500);
+
+})();
+</script>
+</body>
+</html>

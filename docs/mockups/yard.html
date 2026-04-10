@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAILYARD INTELLIGENCE DIVISION // WEEKLY BRIEFING #09</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+  /* ===================================================================
+     RESET & ROOT
+     =================================================================== */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --bg-card: #0f0f0f;
+    --fg: #e0e0e0;
+    --fg-dim: #888;
+    --green: #39ff14;
+    --green-dim: #1a7a0a;
+    --amber: #ff9500;
+    --red: #ff2d2d;
+    --red-dim: #661111;
+    --border: #1a1a1a;
+    --border-green: #1a3a12;
+    --classified-bg: #111;
+    --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+  }
+
+  html { background: var(--bg); color: var(--fg); }
+
+  body {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ===================================================================
+     CRT SCAN LINES
+     =================================================================== */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 2px,
+      rgba(0, 0, 0, 0.15) 4px
+    );
+  }
+
+  /* Vignette overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 9998;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.4) 100%);
+  }
+
+  /* ===================================================================
+     LAYOUT
+     =================================================================== */
+  .terminal-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 8px 12px 40px;
+  }
+
+  /* ===================================================================
+     STATUS BAR (top ticker)
+     =================================================================== */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 12px;
+    background: #050505;
+    border-bottom: 1px solid var(--border-green);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--green-dim);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .status-bar .live-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-right: 6px;
+    box-shadow: 0 0 4px var(--green);
+  }
+  .status-bar .timestamp { color: var(--green); }
+
+  /* ===================================================================
+     CLASSIFIED HEADER
+     =================================================================== */
+  .classified-header {
+    position: relative;
+    border: 1px solid var(--border-green);
+    background: var(--bg-card);
+    padding: 20px 24px;
+    margin: 8px 0;
+    overflow: hidden;
+  }
+  .classified-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .classified-header .header-line {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--green);
+    line-height: 2;
+    position: relative;
+  }
+  .classified-header .header-title {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg);
+    margin: 8px 0 4px;
+    position: relative;
+  }
+  .classified-header .header-subtitle {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--fg-dim);
+    position: relative;
+  }
+
+  /* CLASSIFIED stamp */
+  .stamp {
+    position: absolute;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 52px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255, 45, 45, 0.18);
+    transform: rotate(-12deg);
+    border: 4px solid rgba(255, 45, 45, 0.18);
+    padding: 4px 20px;
+    top: 10px;
+    right: 20px;
+    pointer-events: none;
+    user-select: none;
+    z-index: 2;
+  }
+
+  /* ===================================================================
+     SECTION HEADERS
+     =================================================================== */
+  .section-header {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--green);
+    padding: 6px 0 4px;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border-green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-header .section-id {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--fg-dim);
+    letter-spacing: 0.1em;
+  }
+  .section-header::before {
+    content: '//';
+    color: var(--green-dim);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  /* ===================================================================
+     CELL BLOCK TIERS (The Count)
+     =================================================================== */
+  .tier-block {
+    margin-bottom: 2px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .tier-block::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .tier-label {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: rgba(57, 255, 20, 0.06);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  .tier-label .tier-name { color: var(--green); }
+  .tier-label .tier-desc {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--fg-dim);
+    letter-spacing: 0.08em;
+  }
+  .tier-block.penthouse .tier-label { background: rgba(57, 255, 20, 0.1); }
+  .tier-block.hole .tier-label { background: rgba(255, 45, 45, 0.08); }
+  .tier-block.hole .tier-label .tier-name { color: var(--red); }
+
+  .tier-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    padding: 1px;
+    position: relative;
+  }
+
+  /* Team cards */
+  .inmate-card {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: rgba(10, 10, 10, 0.8);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: start;
+  }
+  .inmate-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .status-indicator {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .status-indicator.green {
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+  .status-indicator.amber {
+    background: var(--amber);
+    box-shadow: 0 0 6px var(--amber);
+  }
+  .status-indicator.red {
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+    animation: pulse-red 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 4px var(--red); }
+    50% { box-shadow: 0 0 14px var(--red), 0 0 20px rgba(255, 45, 45, 0.3); }
+  }
+
+  .card-body { position: relative; min-width: 0; }
+  .card-name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-record {
+    font-size: 11px;
+    color: var(--fg-dim);
+    margin-top: 1px;
+  }
+  .card-record span { color: var(--fg); font-weight: 600; }
+  .card-wiretap {
+    font-size: 10px;
+    color: var(--fg-dim);
+    margin-top: 6px;
+    font-style: italic;
+    line-height: 1.4;
+    border-left: 2px solid var(--border-green);
+    padding-left: 8px;
+  }
+  .card-wiretap::before {
+    content: 'WIRE TAP // ';
+    color: var(--green-dim);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+
+  .threat-badge {
+    font-family: var(--mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid;
+    position: relative;
+    white-space: nowrap;
+  }
+  .threat-badge.elevated {
+    color: var(--green);
+    border-color: var(--green-dim);
+    background: rgba(57, 255, 20, 0.05);
+  }
+  .threat-badge.guarded {
+    color: var(--amber);
+    border-color: rgba(255, 149, 0, 0.3);
+    background: rgba(255, 149, 0, 0.05);
+  }
+  .threat-badge.low {
+    color: var(--fg-dim);
+    border-color: var(--border);
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .threat-badge.critical {
+    color: var(--red);
+    border-color: rgba(255, 45, 45, 0.4);
+    background: rgba(255, 45, 45, 0.06);
+    animation: badge-flash 2s ease-in-out infinite;
+  }
+  @keyframes badge-flash {
+    0%, 100% { border-color: rgba(255, 45, 45, 0.4); }
+    50% { border-color: rgba(255, 45, 45, 0.8); }
+  }
+
+  .card-timestamp {
+    font-size: 8px;
+    color: var(--fg-dim);
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+    opacity: 0.6;
+  }
+
+  /* ===================================================================
+     INTERCEPTED COMMS
+     =================================================================== */
+  .comms-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .comm-entry {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .comm-entry::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .comm-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .comm-ts {
+    font-size: 9px;
+    color: var(--green-dim);
+    letter-spacing: 0.1em;
+  }
+  .comm-sender {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--amber);
+  }
+  .comm-channel {
+    font-size: 8px;
+    color: var(--fg-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+  .comm-body {
+    font-size: 12px;
+    color: var(--fg);
+    line-height: 1.6;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 2px solid var(--amber);
+    position: relative;
+  }
+  .comm-annotation {
+    font-size: 10px;
+    color: var(--green);
+    font-style: italic;
+    margin-top: 6px;
+    padding-left: 10px;
+    position: relative;
+  }
+  .comm-annotation::before {
+    content: 'ANALYST NOTE: ';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  /* Redaction bars */
+  .redacted {
+    background: #111;
+    color: #111;
+    padding: 0 2px;
+    user-select: none;
+    border-radius: 1px;
+    position: relative;
+  }
+  .redacted::selection { background: #111; color: #111; }
+
+  /* ===================================================================
+     THE POLYGRAPH
+     =================================================================== */
+  .polygraph-box {
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .polygraph-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .polygraph-subject {
+    padding: 6px 12px;
+    background: rgba(255, 45, 45, 0.05);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  .polygraph-subject .subj-name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  .polygraph-subject .subj-id {
+    font-size: 9px;
+    color: var(--fg-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .polygraph-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    position: relative;
+  }
+  .poly-col {
+    padding: 12px;
+    position: relative;
+  }
+  .poly-col:first-child { border-right: 1px solid var(--border); }
+  .poly-col-header {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .poly-col:first-child .poly-col-header { color: var(--amber); }
+  .poly-col:last-child .poly-col-header { color: var(--red); }
+  .poly-col-body {
+    font-size: 11px;
+    color: var(--fg);
+    line-height: 1.5;
+  }
+  .poly-col-body .poly-ts {
+    font-size: 8px;
+    color: var(--fg-dim);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .poly-col-body .poly-quote {
+    font-style: italic;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 2px solid var(--amber);
+  }
+  .poly-col-body .poly-intel {
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 2px solid var(--red);
+  }
+
+  .polygraph-verdict {
+    padding: 8px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    background: rgba(255, 45, 45, 0.03);
+  }
+  .verdict-rating {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--red);
+    letter-spacing: 0.05em;
+  }
+  .verdict-archetype {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 600;
+  }
+  .archetype-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 149, 0, 0.1);
+    border: 1px solid rgba(255, 149, 0, 0.3);
+    font-size: 12px;
+  }
+
+  /* ===================================================================
+     THREAT MATRIX
+     =================================================================== */
+  .threat-matrix {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+  }
+  .matrix-cell {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .matrix-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .matrix-cell .mc-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .matrix-cell .mc-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .matrix-cell .mc-dot.g { background: var(--green); box-shadow: 0 0 4px var(--green); }
+  .matrix-cell .mc-dot.a { background: var(--amber); box-shadow: 0 0 4px var(--amber); }
+  .matrix-cell .mc-dot.r { background: var(--red); box-shadow: 0 0 4px var(--red); }
+  .matrix-cell .mc-dot.d { background: var(--fg-dim); }
+  .matrix-cell .mc-name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+  }
+  .matrix-cell .mc-stats {
+    font-size: 9px;
+    color: var(--fg-dim);
+    letter-spacing: 0.06em;
+    position: relative;
+  }
+  .matrix-cell .mc-stats span { font-weight: 600; }
+  .matrix-cell .mc-trend {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    position: relative;
+    margin-top: 2px;
+  }
+  .mc-trend.up { color: var(--green); }
+  .mc-trend.down { color: var(--red); }
+  .mc-trend.flat { color: var(--fg-dim); }
+
+  /* ===================================================================
+     PROCESSED STAMP (bottom)
+     =================================================================== */
+  .processed-stamp {
+    text-align: center;
+    padding: 24px 0 12px;
+    position: relative;
+  }
+  .processed-stamp .stamp-text {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 36px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(57, 255, 20, 0.12);
+    border: 3px solid rgba(57, 255, 20, 0.12);
+    display: inline-block;
+    padding: 4px 24px;
+    transform: rotate(-3deg);
+  }
+  .processed-stamp .processed-meta {
+    font-size: 9px;
+    color: var(--fg-dim);
+    letter-spacing: 0.15em;
+    margin-top: 8px;
+  }
+
+  /* ===================================================================
+     SCROLLBAR
+     =================================================================== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #050505; }
+  ::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+  /* ===================================================================
+     RESPONSIVE
+     =================================================================== */
+  @media (max-width: 900px) {
+    .threat-matrix { grid-template-columns: repeat(3, 1fr); }
+    .polygraph-columns { grid-template-columns: 1fr; }
+    .poly-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+  @media (max-width: 640px) {
+    .threat-matrix { grid-template-columns: repeat(2, 1fr); }
+    .tier-cards { grid-template-columns: 1fr; }
+    .classified-header .header-title { font-size: 18px; }
+    .stamp { font-size: 32px; top: 6px; right: 6px; }
+    body { font-size: 12px; }
+    .terminal-container { padding: 4px 6px 30px; }
+  }
+
+  /* ===================================================================
+     BLINK CURSOR (terminal cursor indicator only)
+     =================================================================== */
+  .cursor-blink {
+    display: inline-block;
+    width: 7px;
+    height: 14px;
+    background: var(--green);
+    animation: blink-cursor 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  @keyframes blink-cursor {
+    50% { opacity: 0; }
+  }
+
+  /* ===================================================================
+     SEPARATOR & STRIPS
+     =================================================================== */
+  .sep {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2px 0;
+  }
+
+  .classification-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 3px 0;
+    background: rgba(255, 45, 45, 0.04);
+    border-top: 1px solid rgba(255, 45, 45, 0.15);
+    border-bottom: 1px solid rgba(255, 45, 45, 0.15);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--red);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .operator-id {
+    font-size: 9px;
+    color: var(--fg-dim);
+    letter-spacing: 0.08em;
+    text-align: right;
+    padding: 4px 0;
+    position: relative;
+  }
+
+  .poly-intel-highlight {
+    color: var(--red);
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div>
+      <span class="live-dot"></span>
+      <span>JAILYARD SIGINT NETWORK // NODE 7-ALPHA // UPLINK ACTIVE</span>
+    </div>
+    <div>
+      <span>CLEARANCE: YARD-05</span>
+      &nbsp;&middot;&nbsp;
+      <span class="timestamp" id="liveClock"></span>
+    </div>
+  </div>
+
+  <!-- CLASSIFICATION STRIP -->
+  <div class="classification-strip">
+    <span>&#9632; YARD EYES ONLY &#9632;</span>
+    <span>UNAUTHORIZED DISTRIBUTION IS A FEDERAL OFFENSE</span>
+    <span>&#9632; YARD EYES ONLY &#9632;</span>
+  </div>
+
+  <div class="terminal-container">
+
+    <!-- ================================================================
+         CLASSIFIED HEADER
+         ================================================================ -->
+    <div class="classified-header">
+      <div class="stamp">CLASSIFIED</div>
+      <div class="header-line">JAILYARD INTELLIGENCE DIVISION // SURVEILLANCE &amp; ANALYSIS BUREAU</div>
+      <div class="header-title" id="headerTitle">WEEKLY BRIEFING #09</div>
+      <div class="header-line">SUBJECT: YARD ACTIVITY REPORT // WEEK ENDING 09-NOV-2025 // 21:00:47 EST</div>
+      <div class="header-subtitle">
+        CLASSIFICATION: YARD EYES ONLY &nbsp;&middot;&nbsp;
+        DISTRIBUTION: WARDEN + DEPUTIES ONLY &nbsp;&middot;&nbsp;
+        HANDLING: JAILYARD-NOFORN-ORCON
+      </div>
+    </div>
+
+    <div class="operator-id">
+      PREPARED BY: ANALYST <span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span> // DIVISION: YARD-SIGINT // REF: JY-2025-WK09-0047
+    </div>
+
+    <!-- ================================================================
+         THE COUNT -- CELL BLOCK TIERS
+         ================================================================ -->
+    <div class="section-header">
+      THE COUNT <span class="section-id">SEC 01 // POPULATION STATUS</span>
+    </div>
+
+    <!-- PENTHOUSE -->
+    <div class="tier-block penthouse">
+      <div class="tier-label">
+        <span class="tier-name">&#9650; PENTHOUSE</span>
+        <span class="tier-desc">YARD SUPREMACY // 7+ WINS</span>
+      </div>
+      <div class="tier-cards">
+        <div class="inmate-card">
+          <div class="status-indicator green"></div>
+          <div class="card-body">
+            <div class="card-name">General Ken-obi</div>
+            <div class="card-record">REC: <span>7-2</span> &nbsp;&middot;&nbsp; PF: <span>1,247.8</span> &nbsp;&middot;&nbsp; STREAK: <span>W3</span></div>
+            <div class="card-wiretap">Subject continues to operate with surgical precision. Roster optimization borders on obsessive. Other inmates have filed complaints.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 16:42:11 EST</div>
+          </div>
+          <div class="threat-badge elevated">THREAT: ELEVATED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A BLOCK -->
+    <div class="tier-block">
+      <div class="tier-label">
+        <span class="tier-name">A BLOCK</span>
+        <span class="tier-desc">COMPETITIVE POPULATION // 5-6 WINS</span>
+      </div>
+      <div class="tier-cards">
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">Legion of Bouz</div>
+            <div class="card-record">REC: <span>5-4</span> &nbsp;&middot;&nbsp; PF: <span>1,189.2</span> &nbsp;&middot;&nbsp; STREAK: <span>L1</span></div>
+            <div class="card-wiretap">Defending champion showing cracks. Intel suggests growing frustration with WR corps. Multiple trade feelers intercepted.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 17:14:33 EST</div>
+          </div>
+          <div class="threat-badge guarded">THREAT: GUARDED</div>
+        </div>
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">MHJTIME</div>
+            <div class="card-record">REC: <span>5-4</span> &nbsp;&middot;&nbsp; PF: <span>1,156.4</span> &nbsp;&middot;&nbsp; STREAK: <span>W2</span></div>
+            <div class="card-wiretap">Subject remains dangerously quiet. Two consecutive wins with minimal roster movement. Surveillance finds no weaknesses. Concerning.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 15:58:07 EST</div>
+          </div>
+          <div class="threat-badge guarded">THREAT: GUARDED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B BLOCK -->
+    <div class="tier-block">
+      <div class="tier-label">
+        <span class="tier-name">B BLOCK</span>
+        <span class="tier-desc">GENERAL POPULATION // .500 INMATES</span>
+      </div>
+      <div class="tier-cards">
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">Noble FFT</div>
+            <div class="card-record">REC: <span>5-4</span> &nbsp;&middot;&nbsp; PF: <span>1,134.6</span> &nbsp;&middot;&nbsp; STREAK: <span>W1</span></div>
+            <div class="card-wiretap">Subject appears deceptively competent. Record flatters actual roster quality. Field agents recommend continued monitoring.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 14:22:55 EST</div>
+          </div>
+          <div class="threat-badge guarded">THREAT: GUARDED</div>
+        </div>
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">Ghastly Grayskull</div>
+            <div class="card-record">REC: <span>5-4</span> &nbsp;&middot;&nbsp; PF: <span>1,102.1</span> &nbsp;&middot;&nbsp; STREAK: <span>L1</span></div>
+            <div class="card-wiretap">Continues to roster players whose names field agents cannot pronounce. Threat level downgraded after catastrophic Week 8 loss.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 13:47:20 EST</div>
+          </div>
+          <div class="threat-badge guarded">THREAT: GUARDED</div>
+        </div>
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">Rasheeing the Scene</div>
+            <div class="card-record">REC: <span>4-5</span> &nbsp;&middot;&nbsp; PF: <span>1,098.7</span> &nbsp;&middot;&nbsp; STREAK: <span>L2</span></div>
+            <div class="card-wiretap">Two-game skid has Subject exhibiting erratic behavior in group chat. Multiple references to "blowing it up." Analysts believe this is posturing.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 12:31:48 EST</div>
+          </div>
+          <div class="threat-badge low">THREAT: LOW</div>
+        </div>
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">Kittler on the Roof</div>
+            <div class="card-record">REC: <span>4-5</span> &nbsp;&middot;&nbsp; PF: <span>1,078.3</span> &nbsp;&middot;&nbsp; STREAK: <span>L3</span></div>
+            <div class="card-wiretap">Former early-season darling in freefall. Subject was overheard muttering about "schedule makers" and "conspiracy." Delusional but harmless.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 11:05:39 EST</div>
+          </div>
+          <div class="threat-badge low">THREAT: LOW</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C BLOCK -->
+    <div class="tier-block">
+      <div class="tier-label">
+        <span class="tier-name">C BLOCK</span>
+        <span class="tier-desc">AT-RISK POPULATION // BELOW .500</span>
+      </div>
+      <div class="tier-cards">
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">Chudders Football Team</div>
+            <div class="card-record">REC: <span>4-5</span> &nbsp;&middot;&nbsp; PF: <span>1,044.2</span> &nbsp;&middot;&nbsp; STREAK: <span>W1</span></div>
+            <div class="card-wiretap">Subject won this week but field agents confirm it was against the weakest opponent. Analysts remain skeptical. Monitoring continues.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 18:12:04 EST</div>
+          </div>
+          <div class="threat-badge low">THREAT: LOW</div>
+        </div>
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">Sleeping Giants</div>
+            <div class="card-record">REC: <span>4-5</span> &nbsp;&middot;&nbsp; PF: <span>1,031.9</span> &nbsp;&middot;&nbsp; STREAK: <span>L1</span></div>
+            <div class="card-wiretap">Name remains disturbingly accurate. Subject's roster has enough talent to compete but consistently underperforms. Possible sabotage from within.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 17:55:18 EST</div>
+          </div>
+          <div class="threat-badge low">THREAT: LOW</div>
+        </div>
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">Burden of Etienne-y Woody</div>
+            <div class="card-record">REC: <span>3-6</span> &nbsp;&middot;&nbsp; PF: <span>989.4</span> &nbsp;&middot;&nbsp; STREAK: <span>L4</span></div>
+            <div class="card-wiretap">Four-game losing streak. Subject reportedly staring at waiver wire for hours. Field agents describe morale as "catastrophically low."</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 10:22:47 EST</div>
+          </div>
+          <div class="threat-badge low">THREAT: MINIMAL</div>
+        </div>
+        <div class="inmate-card">
+          <div class="status-indicator amber"></div>
+          <div class="card-body">
+            <div class="card-name">The Boonist Monks</div>
+            <div class="card-record">REC: <span>3-6</span> &nbsp;&middot;&nbsp; PF: <span>967.1</span> &nbsp;&middot;&nbsp; STREAK: <span>W1</span></div>
+            <div class="card-wiretap">Surprising victory this week. Analysts divided on whether this represents a legitimate turnaround or a statistical anomaly. Leaning anomaly.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 09:44:31 EST</div>
+          </div>
+          <div class="threat-badge low">THREAT: MINIMAL</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THE HOLE -->
+    <div class="tier-block hole">
+      <div class="tier-label">
+        <span class="tier-name">&#9660; THE HOLE</span>
+        <span class="tier-desc">SOLITARY CONFINEMENT // 2 OR FEWER WINS</span>
+      </div>
+      <div class="tier-cards">
+        <div class="inmate-card">
+          <div class="status-indicator red"></div>
+          <div class="card-body">
+            <div class="card-name">Father Time</div>
+            <div class="card-record">REC: <span>2-7</span> &nbsp;&middot;&nbsp; PF: <span>892.3</span> &nbsp;&middot;&nbsp; STREAK: <span>L5</span></div>
+            <div class="card-wiretap">Subject appears to believe starting three Jaguars constitutes a strategy. Five consecutive losses. Yard privileges under review.</div>
+            <div class="card-timestamp">LAST OBSERVED: 09-NOV-2025 // 08:17:55 EST</div>
+          </div>
+          <div class="threat-badge critical">THREAT: CRITICAL</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         INTERCEPTED COMMS
+         ================================================================ -->
+    <div class="section-header">
+      INTERCEPTED COMMS <span class="section-id">SEC 02 // SIGINT INTERCEPTS</span>
+    </div>
+
+    <div class="comms-feed">
+      <div class="comm-entry">
+        <div class="comm-meta">
+          <span class="comm-ts">07-NOV-2025 // 22:14:03 EST</span>
+          <span class="comm-sender">B<span class="redacted">&#9608;&#9608;&#9608;&#9608;</span> B.</span>
+          <span class="comm-channel">WHATSAPP // CH-JAILYARD-MAIN</span>
+        </div>
+        <div class="comm-body">
+          bro Father Time is actually cooked. 2-7 with that roster is an achievement in failure. like you have to TRY to be that bad. genuinely impressive
+        </div>
+        <div class="comm-annotation">Subject demonstrates awareness of peer's declining status. Possible attempt to establish dominance hierarchy through public ridicule. Consistent with previous behavioral patterns.</div>
+      </div>
+
+      <div class="comm-entry">
+        <div class="comm-meta">
+          <span class="comm-ts">08-NOV-2025 // 09:31:47 EST</span>
+          <span class="comm-sender">M<span class="redacted">&#9608;&#9608;&#9608;</span> H.</span>
+          <span class="comm-channel">WHATSAPP // CH-JAILYARD-MAIN</span>
+        </div>
+        <div class="comm-body">
+          I'm telling you right now Ken-obi is going to choke in the playoffs. happens every year. regular season king, postseason ghost. book it.
+        </div>
+        <div class="comm-annotation">Classic deflection tactic. Subject is 5-4 and attempting to delegitimize the frontrunner before a potential head-to-head matchup. File under: preemptive excuse manufacturing.</div>
+      </div>
+
+      <div class="comm-entry">
+        <div class="comm-meta">
+          <span class="comm-ts">09-NOV-2025 // 14:08:22 EST</span>
+          <span class="comm-sender"><span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span> G.</span>
+          <span class="comm-channel">WHATSAPP // CH-JAILYARD-TRADES</span>
+        </div>
+        <div class="comm-body">
+          would anyone take <span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span> for a 2026 first? asking for a friend. the friend is me. I am the friend
+        </div>
+        <div class="comm-annotation">Subject employing humor as cover for genuine desperation. Third trade feeler in 48 hours. Behavioral analysis: spiral stage 2 of 5. Recommend close monitoring.</div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         THE POLYGRAPH
+         ================================================================ -->
+    <div class="section-header">
+      THE POLYGRAPH <span class="section-id">SEC 03 // CREDIBILITY ANALYSIS</span>
+    </div>
+
+    <div class="polygraph-box">
+      <div class="polygraph-subject">
+        <div>
+          <span class="subj-name">SUBJECT: LEGION OF BOUZ</span>
+        </div>
+        <span class="subj-id">FILE #: JY-LOB-2025-0412 // STATUS: ACTIVE SURVEILLANCE</span>
+      </div>
+      <div class="polygraph-columns">
+        <div class="poly-col">
+          <div class="poly-col-header">CHAT INTERCEPT</div>
+          <div class="poly-col-body">
+            <span class="poly-ts">03-NOV-2025 // 19:44:12 EST</span>
+            <div class="poly-quote">"I'm not trading Bijan for anything. He's untouchable. Dynasty cornerstone. Anyone who asks is getting blocked."</div>
+          </div>
+        </div>
+        <div class="poly-col">
+          <div class="poly-col-header">FIELD INTELLIGENCE</div>
+          <div class="poly-col-body">
+            <span class="poly-ts">04-NOV &mdash; 09-NOV-2025 // AGGREGATED</span>
+            <div class="poly-intel">Proposed Bijan Robinson in <span class="poly-intel-highlight">3 separate trade offers</span> this week. Targets included: a 2026 1st + WR2, a top-5 QB, and a package deal with <span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>. All rejected.</div>
+          </div>
+        </div>
+      </div>
+      <div class="polygraph-verdict">
+        <span class="verdict-rating">CREDIBILITY RATING: 34/100 &nbsp;&middot;&nbsp; DECEPTION INDEX: HIGH &nbsp;&middot;&nbsp; PATTERN: SERIAL</span>
+        <div class="verdict-archetype">
+          <span class="archetype-badge">&#129416;</span>
+          ARCHETYPE: SHARK
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         THREAT MATRIX
+         ================================================================ -->
+    <div class="section-header">
+      THREAT MATRIX <span class="section-id">SEC 04 // ALL-INMATE STATUS BOARD</span>
+    </div>
+
+    <div class="threat-matrix" id="threatMatrix"></div>
+
+    <!-- ================================================================
+         PROCESSED STAMP
+         ================================================================ -->
+    <hr class="sep">
+    <div class="classification-strip">
+      <span>&#9632; END OF BRIEFING &#9632;</span>
+      <span>DESTROY AFTER READING</span>
+      <span>&#9632; YARD EYES ONLY &#9632;</span>
+    </div>
+    <div class="processed-stamp">
+      <div class="stamp-text">PROCESSED</div>
+      <div class="processed-meta">
+        BRIEFING #09 FILED: 09-NOV-2025 // 21:47:33 EST &nbsp;&middot;&nbsp;
+        NEXT BRIEFING: 16-NOV-2025 // 21:00:00 EST &nbsp;&middot;&nbsp;
+        ANALYST: <span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ===================================================================
+  // LIVE CLOCK
+  // ===================================================================
+  function formatMilTime(d) {
+    var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    var day = String(d.getDate()).padStart(2, '0');
+    var mon = months[d.getMonth()];
+    var year = d.getFullYear();
+    var h = String(d.getHours()).padStart(2, '0');
+    var m = String(d.getMinutes()).padStart(2, '0');
+    var s = String(d.getSeconds()).padStart(2, '0');
+    return day + '-' + mon + '-' + year + ' // ' + h + ':' + m + ':' + s + ' EST';
+  }
+
+  var clockEl = document.getElementById('liveClock');
+  function tickClock() {
+    clockEl.textContent = formatMilTime(new Date());
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  // ===================================================================
+  // THREAT MATRIX — build via DOM methods (no innerHTML)
+  // ===================================================================
+  var teams = [
+    { name: 'General Ken-obi',           rec: '7-2', pf: '1247.8', dot: 'g', trend: 'up',   trendLabel: '\u25B2 W3 STREAK' },
+    { name: 'Legion of Bouz',            rec: '5-4', pf: '1189.2', dot: 'a', trend: 'down',  trendLabel: '\u25BC L1 // DECLINING' },
+    { name: 'MHJTIME',                   rec: '5-4', pf: '1156.4', dot: 'a', trend: 'up',    trendLabel: '\u25B2 W2 STREAK' },
+    { name: 'Noble FFT',                 rec: '5-4', pf: '1134.6', dot: 'a', trend: 'flat',  trendLabel: '\u2500 STABLE' },
+    { name: 'Ghastly Grayskull',         rec: '5-4', pf: '1102.1', dot: 'a', trend: 'down',  trendLabel: '\u25BC L1 // WATCH' },
+    { name: 'Rasheeing the Scene',       rec: '4-5', pf: '1098.7', dot: 'a', trend: 'down',  trendLabel: '\u25BC L2 // ERRATIC' },
+    { name: 'Kittler on the Roof',       rec: '4-5', pf: '1078.3', dot: 'a', trend: 'down',  trendLabel: '\u25BC L3 // FREEFALL' },
+    { name: 'Chudders Football Team',    rec: '4-5', pf: '1044.2', dot: 'a', trend: 'flat',  trendLabel: '\u2500 W1 // SUSPECT' },
+    { name: 'Sleeping Giants',           rec: '4-5', pf: '1031.9', dot: 'd', trend: 'down',  trendLabel: '\u25BC L1 // DORMANT' },
+    { name: 'Burden of Etienne-y Woody', rec: '3-6', pf: '989.4',  dot: 'd', trend: 'down',  trendLabel: '\u25BC L4 // CRITICAL' },
+    { name: 'The Boonist Monks',         rec: '3-6', pf: '967.1',  dot: 'd', trend: 'flat',  trendLabel: '\u25B2 W1 // ANOMALY' },
+    { name: 'Father Time',               rec: '2-7', pf: '892.3',  dot: 'r', trend: 'down',  trendLabel: '\u25BC L5 // TERMINAL' }
+  ];
+
+  var matrixEl = document.getElementById('threatMatrix');
+  var frag = document.createDocumentFragment();
+
+  teams.forEach(function(t) {
+    var cell = document.createElement('div');
+    cell.className = 'matrix-cell';
+
+    var header = document.createElement('div');
+    header.className = 'mc-header';
+
+    var dot = document.createElement('div');
+    dot.className = 'mc-dot ' + t.dot;
+    header.appendChild(dot);
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'mc-name';
+    nameEl.textContent = t.name;
+    header.appendChild(nameEl);
+
+    cell.appendChild(header);
+
+    var stats = document.createElement('div');
+    stats.className = 'mc-stats';
+
+    var recLabel = document.createTextNode('REC: ');
+    var recVal = document.createElement('span');
+    recVal.textContent = t.rec;
+    var sep = document.createTextNode(' \u00B7 PF: ');
+    var pfVal = document.createElement('span');
+    pfVal.textContent = t.pf;
+    stats.appendChild(recLabel);
+    stats.appendChild(recVal);
+    stats.appendChild(sep);
+    stats.appendChild(pfVal);
+    cell.appendChild(stats);
+
+    var trendEl = document.createElement('div');
+    trendEl.className = 'mc-trend ' + t.trend;
+    trendEl.textContent = t.trendLabel;
+    cell.appendChild(trendEl);
+
+    frag.appendChild(cell);
+  });
+
+  matrixEl.appendChild(frag);
+
+  // ===================================================================
+  // TYPEWRITER EFFECT on header (one-time, not repeating)
+  // ===================================================================
+  var headerTitle = document.getElementById('headerTitle');
+  if (headerTitle) {
+    var fullText = headerTitle.textContent;
+    headerTitle.textContent = '';
+    var charIdx = 0;
+    var cursor = document.createElement('span');
+    cursor.className = 'cursor-blink';
+    headerTitle.appendChild(cursor);
+
+    function typeChar() {
+      if (charIdx < fullText.length) {
+        headerTitle.insertBefore(document.createTextNode(fullText[charIdx]), cursor);
+        charIdx++;
+        setTimeout(typeChar, 40 + Math.random() * 60);
+      } else {
+        setTimeout(function() { cursor.remove(); }, 2000);
+      }
+    }
+    setTimeout(typeChar, 600);
+  }
+
+  // ===================================================================
+  // REDACTION HOVER -- briefly flash on hover
+  // ===================================================================
+  var redactedEls = document.querySelectorAll('.redacted');
+  redactedEls.forEach(function(el) {
+    el.style.cursor = 'pointer';
+    el.title = '[REDACTED \u2014 CLEARANCE REQUIRED]';
+    el.addEventListener('mouseenter', function() {
+      el.style.background = 'rgba(255, 45, 45, 0.15)';
+      el.style.color = 'rgba(255, 45, 45, 0.15)';
+    });
+    el.addEventListener('mouseleave', function() {
+      el.style.background = '#111';
+      el.style.color = '#111';
+    });
+  });
+
+  // ===================================================================
+  // INTERSECTION OBSERVER -- fade in sections on scroll
+  // ===================================================================
+  var sections = document.querySelectorAll('.tier-block, .comm-entry, .polygraph-box, .matrix-cell');
+  sections.forEach(function(el) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(6px)';
+    el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+  });
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+  sections.forEach(function(el) { observer.observe(el); });
+
+})();
+</script>
+</body>
+</html>

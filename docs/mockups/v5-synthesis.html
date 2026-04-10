@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #111111;
+  --fg: #e8e4de;
+  --fg-dim: #9a9590;
+  --fg-faint: #5a5652;
+  --accent: #c9a84c;
+  --accent-dim: rgba(201, 168, 76, 0.12);
+  --chat-green: #25d366;
+  --chat-green-dim: rgba(37, 211, 102, 0.08);
+  --data-blue: #4dabf7;
+  --data-blue-dim: rgba(77, 171, 247, 0.12);
+  --good: #4ade80;
+  --bad: #f87171;
+  --border: rgba(255, 255, 255, 0.06);
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --chat-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --measure: 680px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL
+   ═══════════════════════════════════════════════════════════ */
+html {
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* Subtle grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL PROGRESS
+   ═══════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--accent);
+  z-index: 9999;
+  transition: width 0.06s linear;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════ */
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.content-column {
+  max-width: var(--measure);
+  width: 100%;
+  padding: 0 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   REVEAL ANIMATION (only opacity, never position shift)
+   ═══════════════════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   1. COMPACT HEADER
+   ═══════════════════════════════════════════════════════════ */
+.compact-header {
+  padding: 2.5rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+.header-week {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(2.8rem, 8vw, 4rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.header-brand {
+  font-family: var(--headline);
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-top: 0.4rem;
+}
+
+.header-date {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--fg-faint);
+  margin-top: 0.3rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   2. CHAT MESSAGES (woven into flow)
+   ═══════════════════════════════════════════════════════════ */
+.chat-bubble {
+  margin: 1.8rem 0;
+  padding: 10px 14px 8px;
+  background: var(--chat-green-dim);
+  border-left: 3px solid var(--chat-green);
+  border-radius: 0 8px 8px 0;
+  max-width: 88%;
+}
+
+.chat-sender {
+  font-family: var(--chat-font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--chat-green);
+  margin-bottom: 2px;
+}
+
+.chat-text {
+  font-family: var(--chat-font);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--fg);
+}
+
+.chat-time {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--fg-faint);
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   3. ESSAY PROSE
+   ═══════════════════════════════════════════════════════════ */
+.prose {
+  margin-bottom: 1.5em;
+  color: rgba(232, 228, 222, 0.92);
+  font-size: 1rem;
+  line-height: 1.78;
+}
+
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: 3.8em;
+  line-height: 0.78;
+  margin-right: 0.07em;
+  margin-top: 0.06em;
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   4. INLINE STAT MOMENT
+   ═══════════════════════════════════════════════════════════ */
+.stat-moment {
+  margin: 2.5rem 0;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.stat-number {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(3rem, 10vw, 4.5rem);
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--fg-dim);
+  margin-top: 0.35rem;
+  line-height: 1.4;
+}
+
+.stat-context {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--fg-faint);
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   5. PULL QUOTE
+   ═══════════════════════════════════════════════════════════ */
+.pull-quote {
+  margin: 3rem 0;
+  padding: 0 0 0 1.25rem;
+  border-left: 3px solid var(--accent);
+}
+
+.pull-quote blockquote {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: clamp(1.15rem, 3vw, 1.35rem);
+  line-height: 1.55;
+  color: var(--fg);
+}
+
+.pull-quote .quote-attr {
+  display: block;
+  margin-top: 0.6rem;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   6. MINI DATA VIZ (inline bar chart)
+   ═══════════════════════════════════════════════════════════ */
+.mini-viz {
+  margin: 2.5rem 0;
+  padding: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.mini-viz-title {
+  font-family: var(--headline);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-bottom: 1rem;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.bar-team {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--fg-dim);
+  width: 110px;
+  min-width: 110px;
+  text-align: right;
+  padding-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  flex: 1;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--data-blue);
+  transition: width 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  width: 0;
+}
+
+.bar-fill.gold { background: var(--accent); }
+
+.bar-value {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: var(--fg-dim);
+  min-width: 36px;
+  padding-left: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   7. SECTION HEADING
+   ═══════════════════════════════════════════════════════════ */
+.section-heading {
+  margin: 3rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.section-heading h2 {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.section-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   8. POWER RANKING ENTRY
+   ═══════════════════════════════════════════════════════════ */
+.rank-entry {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rank-entry:last-child {
+  border-bottom: none;
+}
+
+.rank-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.rank-number {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: 2.2rem;
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  min-width: 1.8rem;
+}
+
+.rank-team {
+  font-family: var(--headline);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.rank-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.rank-record {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--fg-dim);
+}
+
+.rank-movement {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.rank-movement.up {
+  color: var(--good);
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.rank-movement.down {
+  color: var(--bad);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.rank-movement.hold {
+  color: var(--fg-faint);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.rank-verdict {
+  font-family: var(--headline);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.01em;
+}
+
+.rank-blurb {
+  font-family: var(--body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(232, 228, 222, 0.88);
+}
+
+.rank-blurb .hl {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   9. MAILBAG
+   ═══════════════════════════════════════════════════════════ */
+.mailbag-item {
+  margin-bottom: 2.5rem;
+}
+
+.mailbag-q {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  color: var(--accent);
+  line-height: 1.35;
+  margin-bottom: 0.2rem;
+}
+
+.mailbag-from {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-bottom: 0.75rem;
+}
+
+.mailbag-a {
+  font-family: var(--body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(232, 228, 222, 0.88);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   10. FOOTER
+   ═══════════════════════════════════════════════════════════ */
+.site-footer {
+  margin-top: 3rem;
+  padding: 2rem 0 3rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.footer-text {
+  font-family: var(--headline);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DESKTOP SIDEBAR (>900px)
+   ═══════════════════════════════════════════════════════════ */
+.sidebar {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  html { font-size: 19px; }
+
+  .page-wrapper {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    gap: 2.5rem;
+  }
+
+  .content-column {
+    padding: 0;
+  }
+
+  .sidebar {
+    display: block;
+    position: sticky;
+    top: 2rem;
+    width: 260px;
+    min-width: 260px;
+    height: fit-content;
+    max-height: calc(100vh - 4rem);
+    padding: 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-top: 5.5rem;
+    align-self: flex-start;
+  }
+
+  .sidebar-label {
+    font-family: var(--headline);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+  }
+
+  .sidebar-team-name {
+    font-family: var(--headline);
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--fg);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .sidebar-stats {
+    display: flex;
+    gap: 1rem;
+    margin: 0.6rem 0 1rem;
+  }
+
+  .sidebar-stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-stat-value {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .sidebar-stat-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Sparkline */
+  .sparkline-container {
+    margin-bottom: 1rem;
+  }
+
+  .sparkline-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .sparkline-container svg {
+    width: 100%;
+    height: 32px;
+    display: block;
+  }
+
+  /* Next matchup */
+  .next-matchup {
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+
+  .next-matchup-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .next-matchup-opponent {
+    font-family: var(--headline);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--fg);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .win-prob-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.2rem;
+  }
+
+  .win-prob-fill {
+    height: 100%;
+    background: var(--good);
+    border-radius: 3px;
+  }
+
+  .win-prob-text {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--fg-faint);
+  }
+
+  /* Mini standings */
+  .mini-standings {
+    list-style: none;
+  }
+
+  .mini-standings-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .mini-standings li {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    line-height: 1.7;
+    color: var(--fg-dim);
+    padding: 0 0.15rem;
+  }
+
+  .mini-standings li.you {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .mini-standings li .seed {
+    color: var(--fg-faint);
+    min-width: 1.2rem;
+  }
+
+  .mini-standings li .team-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 0.4rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE REFINEMENTS (<480px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .rank-header {
+    flex-wrap: wrap;
+  }
+
+  .rank-meta {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 0.15rem;
+  }
+
+  .chat-bubble {
+    max-width: 94%;
+  }
+
+  .bar-team {
+    width: 80px;
+    min-width: 80px;
+    font-size: 0.56rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<div class="page-wrapper">
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT COLUMN
+     ═══════════════════════════════════════════════════════════ -->
+<main class="content-column">
+
+  <!-- 1. COMPACT HEADER -->
+  <header class="compact-header">
+    <div class="header-week">Week 9</div>
+    <div class="header-brand">The Jailyard Dynasty</div>
+    <div class="header-date">November 3, 2025</div>
+  </header>
+
+  <!-- 2. COLD OPEN CHAT MESSAGE -->
+  <div class="chat-bubble reveal">
+    <div class="chat-sender">Kevin</div>
+    <div class="chat-text">He really started Goff over Lamar.</div>
+    <div class="chat-time">Sun 1:14 PM</div>
+  </div>
+
+  <!-- 3. ESSAY OPENING -->
+  <section class="reveal">
+    <p class="prose drop-cap">There are weeks where the fantasy gods reach into the wire, yank out an outcome so absurd that no amount of optimization could have predicted it, and drop it in your lap like a cat leaving a dead bird on the doorstep. Week 9 was that cat. Three of the top four scorers were on bye. The league's most-traded player this season scored 42 points on someone's bench. And General Ken-obi, who has been operating with the quiet menace of a card counter at a casino that hasn't caught on yet, put together a 165-point masterpiece against a Legion team that genuinely thought this was their week to make a statement.</p>
+
+    <p class="prose">The broader picture is starting to crystallize in a way that should terrify at least four of you. We're past the halfway point, and the gap between the playoff teams and the pretenders isn't shrinking -- it's calcifying. The teams at the top have depth. The teams at the bottom have hope, and hope is the most dangerous drug in dynasty because it convinces you to hold players you should be selling and sell futures you're going to need.</p>
+  </section>
+
+  <!-- 4. INLINE STAT MOMENT -->
+  <div class="stat-moment reveal">
+    <div class="stat-number">165.2</div>
+    <div class="stat-label">Highest score this week</div>
+    <div class="stat-context">General Ken-obi &middot; W9</div>
+  </div>
+
+  <!-- 5. CHAT INTERLUDE -->
+  <div class="chat-bubble reveal">
+    <div class="chat-sender">Marcus</div>
+    <div class="chat-text">Bro that lineup was DISRESPECTFUL. He didn't even need Puka.</div>
+    <div class="chat-time">Sun 4:32 PM</div>
+  </div>
+
+  <div class="chat-bubble reveal" style="margin-top: 0.6rem;">
+    <div class="chat-sender">Tyler</div>
+    <div class="chat-text">I'm literally never talking trash before a game again. Universe corrected me immediately.</div>
+    <div class="chat-time">Sun 4:34 PM</div>
+  </div>
+
+  <!-- 6. ESSAY CONTINUATION -->
+  <section class="reveal">
+    <p class="prose">This league has a funny way of punishing confidence. You don't get smoked when you expect to lose. You get smoked the week you finally tell the group chat you feel good about your lineup. Five of the top six teams lost this week. Five of six. The entire top half of the power rankings looked at Week 9 and collectively decided to take a vacation. Meanwhile, the teams everyone had written off came in swinging like they had nothing to lose, because they didn't.</p>
+  </section>
+
+  <!-- 7. PULL QUOTE -->
+  <div class="pull-quote reveal">
+    <blockquote>
+      Dynasty is the only sport where you can do everything right and still wake up on Monday morning wondering what the point of it all was.
+      <span class="quote-attr">The Jailyard Group Chat, 1:47 AM</span>
+    </blockquote>
+  </div>
+
+  <!-- 8. MINI DATA VIZ -->
+  <div class="mini-viz reveal" id="miniViz">
+    <div class="mini-viz-title">Top 5 Scorers &middot; Week 9</div>
+    <div class="bar-row">
+      <span class="bar-team">Gen. Ken-obi</span>
+      <div class="bar-track"><div class="bar-fill gold" data-width="100"></div></div>
+      <span class="bar-value">165.2</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-team">Chudders</span>
+      <div class="bar-track"><div class="bar-fill" data-width="87"></div></div>
+      <span class="bar-value">143.8</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-team">MHJTIME</span>
+      <div class="bar-track"><div class="bar-fill" data-width="82"></div></div>
+      <span class="bar-value">135.4</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-team">Rasheeing</span>
+      <div class="bar-track"><div class="bar-fill" data-width="78"></div></div>
+      <span class="bar-value">128.9</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-team">Sleeping Giants</span>
+      <div class="bar-track"><div class="bar-fill" data-width="73"></div></div>
+      <span class="bar-value">120.6</span>
+    </div>
+  </div>
+
+  <!-- 9. POWER RANKINGS -->
+  <div class="section-heading reveal">
+    <h2>Power Rankings</h2>
+  </div>
+
+  <!-- #1 -->
+  <article class="rank-entry reveal">
+    <div class="rank-header">
+      <span class="rank-number">1</span>
+      <span class="rank-team">General Ken-obi</span>
+      <div class="rank-meta">
+        <span class="rank-record">7-2</span>
+        <span class="rank-movement hold">--</span>
+      </div>
+    </div>
+    <div class="rank-verdict">The machine keeps humming.</div>
+    <p class="rank-blurb">You dropped <span class="hl">165 points</span> in a week where three of the top scorers were on bye. Your roster has the depth of a team that's been drafting well for three years, because it has been. Lamar is playing at an MVP level, your receivers are finally healthy at the same time, and you're getting RB2 production from a waiver pickup nobody else wanted. The scariest part? You haven't even needed your best week yet. You're winning with B-plus performances and that's the hallmark of a legitimate contender.</p>
+  </article>
+
+  <!-- #2 -->
+  <article class="rank-entry reveal">
+    <div class="rank-header">
+      <span class="rank-number">2</span>
+      <span class="rank-team">MHJTIME</span>
+      <div class="rank-meta">
+        <span class="rank-record">6-3</span>
+        <span class="rank-movement up">&uarr;1</span>
+      </div>
+    </div>
+    <div class="rank-verdict">The silent assassin.</div>
+    <p class="rank-blurb">While everyone else is having public meltdowns in the group chat, you're just quietly stringing together wins like a man who knows exactly what his roster is. Nobody talks about MHJTIME. That's how you like it. Six wins, third in points, and a schedule that sets up beautifully for a top-two seed. The only question is whether your ceiling is high enough for a playoff run, but you keep answering that question every Sunday.</p>
+  </article>
+
+  <!-- Chat inside rankings flow -->
+  <div class="chat-bubble reveal" style="margin: 1rem 0 1.5rem;">
+    <div class="chat-sender">Andre</div>
+    <div class="chat-text">Rasheeing at 3?? Over the Giants?? The disrespect is wild.</div>
+    <div class="chat-time">Mon 9:18 AM</div>
+  </div>
+
+  <!-- #3 -->
+  <article class="rank-entry reveal">
+    <div class="rank-header">
+      <span class="rank-number">3</span>
+      <span class="rank-team">Rasheeing</span>
+      <div class="rank-meta">
+        <span class="rank-record">6-3</span>
+        <span class="rank-movement hold">--</span>
+      </div>
+    </div>
+    <div class="rank-verdict">Built different. Literally.</div>
+    <p class="rank-blurb">Your team looks like it was assembled by someone who actually knows what dynasty means. Young core, premium picks invested wisely, and a ceiling that gets higher every week as your rookies develop. At 6-3 you're right in the mix, and unlike the fading teams above you, your arrow is pointing straight up. The question isn't whether you'll make the playoffs. It's whether you'll be the scariest 3-seed anyone's ever seen.</p>
+  </article>
+
+  <!-- #4 -->
+  <article class="rank-entry reveal">
+    <div class="rank-header">
+      <span class="rank-number">4</span>
+      <span class="rank-team">Sleeping Giants</span>
+      <div class="rank-meta">
+        <span class="rank-record">5-4</span>
+        <span class="rank-movement down">&darr;1</span>
+      </div>
+    </div>
+    <div class="rank-verdict">The name is becoming a liability.</div>
+    <p class="rank-blurb">At some point the Sleeping Giants have to actually wake up, right? You've been hovering around .500 all season like a man treading water and calling it swimming. The talent is there on paper -- your top three is as good as anyone's -- but you keep losing the weeks where you need to win because your depth is nonexistent and your bye-week management has been atrocious. Four of your five losses came by single digits. That's not bad luck. That's a roster screaming for one more piece.</p>
+  </article>
+
+  <!-- 10. CHAT CLOSER -->
+  <div class="chat-bubble reveal" style="margin: 2rem 0;">
+    <div class="chat-sender">Kevin</div>
+    <div class="chat-text">Real talk though, if Father Time doesn't sell by the deadline, we're staging an intervention. Someone send the group chat coordinates.</div>
+    <div class="chat-time">Mon 11:42 PM</div>
+  </div>
+
+  <!-- 11. MAILBAG -->
+  <div class="section-heading reveal">
+    <h2>Mailbag</h2>
+  </div>
+
+  <div class="mailbag-item reveal">
+    <div class="mailbag-q">Is it time to panic about the Legion? Four losses in five weeks feels like more than a slump.</div>
+    <div class="mailbag-from">Kevin, via group chat</div>
+    <p class="mailbag-a">I'm not hitting the panic button yet, but I'm standing next to it with my hand hovering. The talent is real -- CeeDee, Breece, the stack with Dak -- on paper, this is a top-three roster. But paper doesn't win matchups, and the Legion has been getting outcoached at the lineup level for a month straight. If the Legion goes 1-2 in the next three weeks, we're not talking about a slump anymore. We're talking about a full-blown identity crisis.</p>
+  </div>
+
+  <div class="mailbag-item reveal">
+    <div class="mailbag-q">Which team scares you most going into the second half?</div>
+    <div class="mailbag-from">Marcus, via DM</div>
+    <p class="mailbag-a">Chudders. And I know that sounds insane given they're 4-5, but hear me out. They've won three straight. Their roster is clicking at the right time. And most importantly, nobody is gameplanning for them. That's the most dangerous team in any fantasy league -- the one that gets hot late, sneaks into the bracket, and suddenly has the swagger of a team that's been there all year. If Chudders makes the playoffs, I don't want to see them in Round 1.</p>
+  </div>
+
+  <!-- 12. FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-text">Week 9 &middot; The Jailyard Dynasty &middot; Est. 2022</div>
+  </footer>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DESKTOP SIDEBAR (only visible >900px)
+     ═══════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-label">My Team</div>
+  <div class="sidebar-team-name">General Ken-obi</div>
+
+  <div class="sidebar-stats">
+    <div class="sidebar-stat">
+      <span class="sidebar-stat-value">#1</span>
+      <span class="sidebar-stat-label">Rank</span>
+    </div>
+    <div class="sidebar-stat">
+      <span class="sidebar-stat-value">7-2</span>
+      <span class="sidebar-stat-label">Record</span>
+    </div>
+    <div class="sidebar-stat">
+      <span class="sidebar-stat-value">1,247</span>
+      <span class="sidebar-stat-label">PF</span>
+    </div>
+  </div>
+
+  <!-- Elo Sparkline -->
+  <div class="sparkline-container">
+    <div class="sparkline-label">Elo Trend</div>
+    <svg viewBox="0 0 200 32" preserveAspectRatio="none">
+      <polyline
+        points="5,28 28,24 51,20 74,18 97,15 120,12 143,10 166,8 189,5"
+        fill="none"
+        stroke="#c9a84c"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <circle cx="189" cy="5" r="2.5" fill="#c9a84c" />
+    </svg>
+  </div>
+
+  <!-- Next Matchup -->
+  <div class="next-matchup">
+    <div class="next-matchup-label">Week 10 Matchup</div>
+    <div class="next-matchup-opponent">vs. Sleeping Giants</div>
+    <div class="win-prob-bar">
+      <div class="win-prob-fill" style="width: 68%;"></div>
+    </div>
+    <div class="win-prob-text">68% projected win probability</div>
+  </div>
+
+  <!-- Mini Standings -->
+  <div class="mini-standings-label">Standings</div>
+  <ul class="mini-standings">
+    <li class="you"><span class="seed">1.</span><span class="team-name">Gen. Ken-obi</span><span>7-2</span></li>
+    <li><span class="seed">2.</span><span class="team-name">MHJTIME</span><span>6-3</span></li>
+    <li><span class="seed">3.</span><span class="team-name">Rasheeing</span><span>6-3</span></li>
+    <li><span class="seed">4.</span><span class="team-name">Sleeping Giants</span><span>5-4</span></li>
+    <li><span class="seed">5.</span><span class="team-name">Legion</span><span>5-4</span></li>
+    <li><span class="seed">6.</span><span class="team-name">Kittler</span><span>5-4</span></li>
+    <li><span class="seed">7.</span><span class="team-name">Ghastly</span><span>5-4</span></li>
+    <li><span class="seed">8.</span><span class="team-name">Chudders</span><span>4-5</span></li>
+    <li><span class="seed">9.</span><span class="team-name">Noble</span><span>4-5</span></li>
+    <li><span class="seed">10.</span><span class="team-name">Burden</span><span>3-6</span></li>
+    <li><span class="seed">11.</span><span class="team-name">Boonist Monks</span><span>3-6</span></li>
+    <li><span class="seed">12.</span><span class="team-name">Father Time</span><span>2-7</span></li>
+  </ul>
+</aside>
+
+</div><!-- /page-wrapper -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── Scroll Progress ──────────────────────────────────────
+  var progressBar = document.getElementById('scrollProgress');
+
+  function updateProgress() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0) {
+      progressBar.style.width = ((scrollTop / docHeight) * 100) + '%';
+    }
+  }
+
+  // ── IntersectionObserver — fade-in reveals ───────────────
+  var reveals = document.querySelectorAll('.reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: '0px 0px -40px 0px',
+    threshold: 0.1
+  });
+
+  reveals.forEach(function(el) {
+    observer.observe(el);
+  });
+
+  // ── Mini bar chart animation ─────────────────────────────
+  var vizBox = document.getElementById('miniViz');
+  var barsAnimated = false;
+
+  var barObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !barsAnimated) {
+        barsAnimated = true;
+        var fills = vizBox.querySelectorAll('.bar-fill');
+        fills.forEach(function(fill, i) {
+          setTimeout(function() {
+            fill.style.width = fill.getAttribute('data-width') + '%';
+          }, i * 100);
+        });
+        barObserver.unobserve(vizBox);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  barObserver.observe(vizBox);
+
+  // ── Scroll listener (throttled via rAF) ──────────────────
+  var ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  updateProgress();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty // Scrollytelling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & ROOT
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0c0c0c;
+  --bg-elevated: #141414;
+  --fg: #e8e4de;
+  --fg-dim: #9a9590;
+  --fg-faint: #5a5652;
+  --accent: #c9a84c;
+  --accent-dim: rgba(201, 168, 76, 0.15);
+  --accent-glow: rgba(201, 168, 76, 0.35);
+  --muted: #7a7568;
+  --border: rgba(201, 168, 76, 0.12);
+  --good: #4ade80;
+  --bad: #f87171;
+  --warn: #fbbf24;
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --viz-width: 45%;
+  --narrative-width: 55%;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL PROGRESS
+   ═══════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #e8c860);
+  z-index: 9999;
+  transition: width 0.05s linear;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════ */
+.site-header {
+  text-align: center;
+  padding: 4rem 2rem 3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.site-header .kicker {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.site-header h1 {
+  font-family: var(--headline);
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 0.5rem;
+}
+
+.site-header h1 span {
+  color: var(--accent);
+}
+
+.site-header .subtitle {
+  font-family: var(--body);
+  font-size: 1.15rem;
+  color: var(--fg-dim);
+  font-style: italic;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLLYTELLING CONTAINER
+   ═══════════════════════════════════════════════════════════ */
+.scrolly {
+  position: relative;
+  display: flex;
+  gap: 0;
+}
+
+/* Sticky visualization panel */
+.scrolly__viz {
+  position: sticky;
+  top: 0;
+  width: var(--viz-width);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  z-index: 10;
+}
+
+.viz-label {
+  font-family: var(--headline);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  transition: opacity 0.4s ease;
+}
+
+/* The chart area */
+.chart {
+  width: 100%;
+  max-width: 480px;
+}
+
+.chart-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+}
+
+.chart-bar.dimmed {
+  opacity: 0.12;
+}
+
+.chart-bar.highlighted .bar-fill {
+  background: var(--accent) !important;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.chart-bar.rise .bar-fill {
+  background: var(--good) !important;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.3);
+}
+
+.chart-bar.fall .bar-fill {
+  background: var(--bad) !important;
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.3);
+}
+
+.bar-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--fg-dim);
+  width: 130px;
+  min-width: 130px;
+  text-align: right;
+  padding-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.4s ease;
+}
+
+.chart-bar.highlighted .bar-label,
+.chart-bar.rise .bar-label,
+.chart-bar.fall .bar-label {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.bar-track {
+  flex: 1;
+  height: 22px;
+  position: relative;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.5), rgba(201, 168, 76, 0.3));
+  transition: width 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+              background 0.4s ease,
+              box-shadow 0.4s ease;
+}
+
+.bar-score {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--fg-faint);
+  width: 42px;
+  min-width: 42px;
+  text-align: right;
+  padding-left: 6px;
+  transition: color 0.4s ease;
+}
+
+.chart-bar.highlighted .bar-score,
+.chart-bar.rise .bar-score,
+.chart-bar.fall .bar-score {
+  color: var(--fg);
+}
+
+/* Step indicator dots */
+.step-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 1.5rem;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-faint);
+  transition: all 0.3s ease;
+}
+
+.step-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  transform: scale(1.3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NARRATIVE PANEL
+   ═══════════════════════════════════════════════════════════ */
+.scrolly__narrative {
+  width: var(--narrative-width);
+  padding: 0;
+}
+
+.step {
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 3rem 4rem 2.5rem;
+  position: relative;
+}
+
+.step:first-child {
+  min-height: 100vh;
+}
+
+/* Faint divider between steps */
+.step + .step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2.5rem;
+  right: 3rem;
+  height: 1px;
+  background: var(--border);
+}
+
+.step .step-number {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  opacity: 0.6;
+  transition: opacity 0.5s ease;
+}
+
+.step.active .step-number {
+  opacity: 1;
+}
+
+.step h2 {
+  font-family: var(--headline);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.step.active h2 {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.step p {
+  max-width: 540px;
+  color: var(--fg-dim);
+  margin-bottom: 1rem;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.6s ease 0.15s, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.15s;
+}
+
+.step.active p {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.step p strong {
+  color: var(--fg);
+}
+
+.step p em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+/* Pull quote */
+.step .pull-quote {
+  font-family: var(--headline);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.35;
+  border-left: 3px solid var(--accent);
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  max-width: 480px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.6s ease 0.25s, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.25s;
+}
+
+.step.active .pull-quote {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Stat callout inline */
+.stat-callout {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Kicker line */
+.step .kicker-line {
+  font-family: var(--body);
+  font-size: 1.1rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--fg);
+  margin-top: 1rem;
+  opacity: 0;
+  transition: opacity 0.8s ease 0.4s;
+}
+
+.step.active .kicker-line {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   POWER RANKINGS SECTION (below scrollytelling)
+   ═══════════════════════════════════════════════════════════ */
+.rankings-section {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 5rem 2rem 4rem;
+  border-top: 1px solid var(--border);
+}
+
+.rankings-section .section-head {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.rankings-section .section-head .kicker {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.rankings-section .section-head h2 {
+  font-family: var(--headline);
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.ranking-card {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.ranking-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ranking-card .rank-num {
+  font-family: var(--headline);
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  min-width: 48px;
+}
+
+.ranking-card .rank-body h3 {
+  font-family: var(--headline);
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-bottom: 0.15rem;
+}
+
+.ranking-card .rank-body .record {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.ranking-card .rank-body .movement {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  margin-left: 0.75rem;
+}
+
+.movement.up { color: var(--good); }
+.movement.down { color: var(--bad); }
+.movement.steady { color: var(--fg-faint); }
+
+.ranking-card .rank-body p {
+  color: var(--fg-dim);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  max-width: 600px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--fg-faint);
+  letter-spacing: 0.04em;
+}
+
+footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE: STACKED LAYOUT
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  :root {
+    --viz-width: 100%;
+    --narrative-width: 100%;
+  }
+
+  .scrolly {
+    flex-direction: column;
+  }
+
+  .scrolly__viz {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: auto;
+    min-height: 280px;
+    max-height: 45vh;
+    padding: 1.25rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .chart {
+    max-width: 100%;
+  }
+
+  .bar-label {
+    width: 90px;
+    min-width: 90px;
+    font-size: 0.6rem;
+  }
+
+  .bar-track {
+    height: 16px;
+  }
+
+  .chart-bar {
+    margin-bottom: 3px;
+  }
+
+  .bar-score {
+    font-size: 0.58rem;
+    width: 36px;
+    min-width: 36px;
+  }
+
+  .step-dots {
+    margin-top: 0.75rem;
+  }
+
+  .scrolly__narrative {
+    width: 100%;
+  }
+
+  .step {
+    min-height: 70vh;
+    padding: 3rem 1.5rem;
+  }
+
+  .step:first-child {
+    min-height: 60vh;
+  }
+
+  .step + .step::before {
+    left: 1.5rem;
+    right: 1.5rem;
+  }
+
+  .site-header {
+    padding: 3rem 1.5rem 2rem;
+  }
+
+  .rankings-section {
+    padding: 3rem 1.5rem;
+  }
+}
+
+@media (max-width: 500px) {
+  body { font-size: 16px; }
+
+  .bar-label {
+    width: 70px;
+    min-width: 70px;
+    font-size: 0.55rem;
+  }
+
+  .step {
+    padding: 2.5rem 1.25rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll progress bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="kicker">The Jailyard Dynasty &middot; 2025 Season</div>
+  <h1>Week 9: <span>Regime Change</span></h1>
+  <div class="subtitle">Ken-obi dropped 165 on a league that swore he was mortal. The chart tells the rest.</div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCROLLYTELLING
+     ═══════════════════════════════════════════════════════════ -->
+<section class="scrolly" id="scrolly">
+
+  <!-- LEFT: Sticky visualization -->
+  <div class="scrolly__viz">
+    <div class="viz-label" id="vizLabel">Week 8 Power Rankings</div>
+    <div class="chart" id="chart"></div>
+    <div class="step-dots" id="stepDots"></div>
+  </div>
+
+  <!-- RIGHT: Scrolling narrative -->
+  <div class="scrolly__narrative">
+
+    <!-- STEP 1: Week 8 standings -->
+    <div class="step" data-step="0">
+      <div class="step-number">Chapter I</div>
+      <h2>The State of Play</h2>
+      <p>Entering Week 9 the Jailyard looked like a league that had figured itself out. <strong>MHJTIME</strong> sat atop the rankings at 6-2, riding the deepest receiver room in the league like a man who'd found a cheat code. <strong>Rasheeing Is Believing</strong> lurked one game back, the platonic ideal of "solid everywhere, spectacular nowhere."</p>
+      <p>Ken-obi? Sure, the talent was there &mdash; it's always there &mdash; but a <span class="stat-callout">5-3</span> record felt like underperformance for a roster that costs more than a small country's GDP. The group chat had started calling him "the 2024 Dodgers of fantasy" &mdash; too talented to fail, somehow always finding a way to make it interesting.</p>
+      <p>Father Time, meanwhile, was running a hospice ward disguised as a fantasy roster. <span class="stat-callout">2-6</span> and sinking. The kind of team where you check the score at halftime and think, <em>"Ah."</em></p>
+      <div class="pull-quote">"Everyone had opinions. Then Sunday happened."</div>
+    </div>
+
+    <!-- STEP 2: Sunday scores -->
+    <div class="step" data-step="1">
+      <div class="step-number">Chapter II</div>
+      <h2>Then Sunday Happened.</h2>
+      <p><strong>Ken-obi exploded for 165 points.</strong> That's not a weekly score &mdash; that's a war crime. CeeDee Lamb and Nico Collins combined for the kind of afternoon that makes opposing managers close the app entirely. Saquon Barkley added insult to injury with 28 carries and a tone-setting, demoralizing, "I am still the best running back alive" performance.</p>
+      <p>MHJTIME answered with <span class="stat-callout">148</span>, because of course he did. That's the second-highest score of the week and it barely mattered. Rasheeing posted a quiet 142, the kind of week that gets a golf clap and zero group chat messages. Sleeping Giants (<span class="stat-callout">138</span>) kept doing their thing &mdash; which is winning games nobody notices.</p>
+      <p>At the bottom: Father Time's <span class="stat-callout">85</span> was the score equivalent of a white flag tied to a mailbox. Boonist Monks barely cracked triple digits at 100. Some weeks the data tells a story. This week it screamed one.</p>
+    </div>
+
+    <!-- STEP 3: New rankings -->
+    <div class="step" data-step="2">
+      <div class="step-number">Chapter III</div>
+      <h2>The New Order</h2>
+      <p><strong>Ken-obi vaults to #1.</strong> When you drop 165 in a week where nobody else cracked 150, the algorithm doesn't really have a choice. Seven wins, two losses, and a point differential that looks like a typo. MHJTIME slides to #2 despite winning &mdash; the vibes are still excellent, but the throne has a new occupant.</p>
+      <p>The real movers? <strong>Sleeping Giants</strong> climbed two spots to #4 by being relentlessly boring and effective &mdash; the Tim Duncan of Jailyard rosters. <strong>Chudders</strong> fell to #8 after getting bodied, the kind of loss where you stare at the ceiling afterward and contemplate your draft decisions.</p>
+      <p>Legion held steady at #5. Not climbing, not falling. Just... existing. The fantasy football equivalent of a pension fund.</p>
+      <div class="pull-quote">"The top of this league isn't a ladder anymore &mdash; it's a knife fight in an elevator."</div>
+    </div>
+
+    <!-- STEP 4: Featured matchup -->
+    <div class="step" data-step="3">
+      <div class="step-number">Chapter IV</div>
+      <h2>The Matchup That Mattered</h2>
+      <p><strong>Ken-obi 165, Father Time 85.</strong> An 80-point margin. Eighty. That's not a fantasy matchup, that's a nature documentary &mdash; the lion doesn't negotiate with the gazelle.</p>
+      <p>Ken-obi's lineup was a masterclass: every starter finished above their projection, four players crossed the 20-point threshold, and the bench scored enough to beat three other teams outright. Father Time, to his credit, started the right guys. They just didn't do anything. Sometimes the fantasy gods look at your roster and say <em>"Not today. Not any day this season, actually."</em></p>
+      <p>The group chat reacted exactly how you'd expect. Screenshots of the final score with crying-laughing emojis. A Drake meme. Someone said "thoughts and prayers" and meant it semi-literally. Dynasty leagues are built on hope, and Father Time's hope is currently in a medically induced coma.</p>
+      <p class="kicker-line">The scoreboard doesn't lie. It just occasionally commits acts of cruelty.</p>
+    </div>
+
+    <!-- STEP 5: What it means -->
+    <div class="step" data-step="4">
+      <div class="step-number">Chapter V</div>
+      <h2>What It Means</h2>
+      <p>Nine weeks in, the Jailyard has its hierarchy. Ken-obi is the team everyone feared he'd become &mdash; the one where you check the matchup and your first thought isn't strategy, it's acceptance. MHJTIME is the only roster that can match him firepower-for-firepower. Everyone else is fighting for the privilege of losing to one of them in the playoffs.</p>
+      <p>The middle of this league &mdash; Kittler, Legion, Ghastly, Sleeping Giants &mdash; is a four-team thunderdome where any given Sunday could reshuffle the entire bracket. One good waiver pickup, one injury to a key starter, and you're watching your playoff odds swing by 20 percentage points.</p>
+      <p>And at the bottom? Father Time and Boonist Monks are already roster-building for 2026. That's not an insult. That's dynasty. The smartest move you can make when the present is bleak is to mortgage it for a future where the group chat fears <em>your</em> team name on the schedule.</p>
+      <div class="pull-quote">"In dynasty, you're either building a contender or becoming someone else's championship story. Week 9 just made that line a lot clearer."</div>
+    </div>
+
+  </div><!-- /narrative -->
+</section><!-- /scrolly -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     POWER RANKINGS BLURBS
+     ═══════════════════════════════════════════════════════════ -->
+<section class="rankings-section" id="rankings">
+  <div class="section-head">
+    <div class="kicker">Week 9</div>
+    <h2>Power Rankings</h2>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer>
+  <div>&copy; 2022&ndash;2026 The Jailyard Dynasty League &middot; <a href="index.html">Home</a></div>
+  <div style="margin-top:0.5rem;color:var(--fg-faint);">V3 Scrollytelling Mockup &middot; Format Prototype</div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── TEAM DATA ─────────────────────────────────────────────
+  var teams = [
+    { name: 'General Ken-obi',       abbr: 'Ken-obi',      w8rank: 3,  w9rank: 1,  score: 165, record: '7-2', w8record: '6-2', movement: 'up'    },
+    { name: 'MHJTIME',               abbr: 'MHJTIME',      w8rank: 1,  w9rank: 2,  score: 148, record: '6-3', w8record: '6-2', movement: 'down'  },
+    { name: 'Rasheeing Is Believing', abbr: 'Rasheeing',    w8rank: 2,  w9rank: 3,  score: 142, record: '6-3', w8record: '6-2', movement: 'steady'},
+    { name: 'Sleeping Giants',       abbr: 'Sleep. Giants', w8rank: 6,  w9rank: 4,  score: 138, record: '5-4', w8record: '4-4', movement: 'up'    },
+    { name: 'Legion',                abbr: 'Legion',        w8rank: 5,  w9rank: 5,  score: 130, record: '5-4', w8record: '5-3', movement: 'steady'},
+    { name: 'Kittler on the Roof',   abbr: 'Kittler',       w8rank: 4,  w9rank: 6,  score: 135, record: '5-4', w8record: '5-3', movement: 'down'  },
+    { name: 'Ghastly Encounters',    abbr: 'Ghastly',       w8rank: 7,  w9rank: 7,  score: 125, record: '5-4', w8record: '4-4', movement: 'steady'},
+    { name: 'Chudders',              abbr: 'Chudders',      w8rank: 8,  w9rank: 8,  score: 108, record: '4-5', w8record: '4-4', movement: 'down'  },
+    { name: 'Noble FFT',             abbr: 'Noble',         w8rank: 9,  w9rank: 9,  score: 120, record: '4-5', w8record: '4-4', movement: 'steady'},
+    { name: 'Burden of Proof',       abbr: 'Burden',        w8rank: 10, w9rank: 10, score: 115, record: '3-6', w8record: '3-5', movement: 'steady'},
+    { name: 'Boonist Monks',         abbr: 'Boonist',       w8rank: 11, w9rank: 11, score: 100, record: '3-6', w8record: '3-5', movement: 'steady'},
+    { name: 'Father Time',           abbr: 'Father Time',   w8rank: 12, w9rank: 12, score: 85,  record: '2-7', w8record: '2-6', movement: 'down'  }
+  ];
+
+  var maxScore = 180; // scale reference
+
+  // ─── RANKING BLURBS ────────────────────────────────────────
+  var blurbs = [
+    {
+      rank: 1,
+      name: 'General Ken-obi',
+      record: '7-2',
+      movementCls: 'up',
+      movementText: '\u21912',
+      text: 'You dropped 165 on a league that collectively gasped, closed the Sleeper app, and reopened it to make sure the number was real. CeeDee Lamb is a cheat code. Nico Collins is the cheat code\'s cheat code. Your roster doesn\'t have a weakness so much as it has "areas where you\'re merely elite instead of historically dominant." The group chat has officially stopped making fun of your 2024 playoff exit \u2014 hard to roast a man standing on top of a mountain of points. You\'re the one-seed until someone proves otherwise, and right now, nobody\'s even filing the paperwork.'
+    },
+    {
+      rank: 2,
+      name: 'MHJTIME',
+      record: '6-3',
+      movementCls: 'down',
+      movementText: '\u21931',
+      text: 'You scored 148 and somehow it felt like a quiet week. That\'s the Jailyard tax \u2014 when the guy above you drops 165, your excellent performance gets reduced to a footnote. Your receiver corps is still the deepest collection of pass-catchers this side of an NFL roster, and your floor is high enough to beat most teams even when nothing goes right. The problem isn\'t your team. The problem is Ken-obi\'s team exists in the same league as yours. You\'re Salieri watching Mozart, except Salieri was also pretty good at music.'
+    },
+    {
+      rank: 3,
+      name: 'Rasheeing Is Believing',
+      record: '6-3',
+      movementCls: 'steady',
+      movementText: '\u2014',
+      text: 'The most consistently solid team in the league, which is both a compliment and the kind of thing people say about a Honda Accord. 142 points, no drama, another win in the column. You don\'t have the ceiling of Ken-obi or the weaponry of MHJTIME, but you also don\'t have any weeks where the group chat sends you condolence GIFs. Your path to a championship is "be really good every week and hope the top two have a bad day simultaneously." It\'s worked before. It can work again.'
+    },
+    {
+      rank: 12,
+      name: 'Father Time',
+      record: '2-7',
+      movementCls: 'down',
+      movementText: '\u21931',
+      text: 'Eighty-five points. Brother, some teams score that by halftime. This isn\'t a roster anymore \u2014 it\'s an archaeological dig site where you occasionally find fragments of what used to be fantasy-relevant players. The 80-point loss to Ken-obi wasn\'t just a defeat, it was the kind of existential event that makes a manager open the trade calculator at 2 AM on a Tuesday. The 2026 draft can\'t come fast enough. Until then, you\'re the Jailyard\'s designated charity case, and the group chat is already workshopping your "most improved" arc for next season.'
+    }
+  ];
+
+  // ─── BUILD CHART (using DOM methods, no innerHTML) ─────────
+  var chartEl = document.getElementById('chart');
+  var vizLabel = document.getElementById('vizLabel');
+  var stepDotsEl = document.getElementById('stepDots');
+  var barEls = [];
+
+  // Create bars in initial order (Week 8 ranking)
+  var sorted = teams.slice().sort(function(a, b) { return a.w8rank - b.w8rank; });
+
+  sorted.forEach(function(team) {
+    var bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    bar.dataset.teamAbbr = team.abbr;
+
+    var label = document.createElement('div');
+    label.className = 'bar-label';
+    label.textContent = team.abbr;
+
+    var track = document.createElement('div');
+    track.className = 'bar-track';
+
+    var fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    fill.style.width = ((team.score / maxScore) * 100).toFixed(1) + '%';
+    track.appendChild(fill);
+
+    var score = document.createElement('div');
+    score.className = 'bar-score';
+    score.textContent = team.score;
+
+    bar.appendChild(label);
+    bar.appendChild(track);
+    bar.appendChild(score);
+    chartEl.appendChild(bar);
+    barEls.push({ el: bar, team: team });
+  });
+
+  // Create step dots
+  var totalSteps = 5;
+  for (var i = 0; i < totalSteps; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'step-dot' + (i === 0 ? ' active' : '');
+    stepDotsEl.appendChild(dot);
+  }
+
+  // ─── BUILD RANKING CARDS (using DOM methods) ───────────────
+  var rankingsSection = document.getElementById('rankings');
+
+  blurbs.forEach(function(blurb) {
+    var card = document.createElement('div');
+    card.className = 'ranking-card';
+    card.dataset.rank = blurb.rank;
+
+    var rankNum = document.createElement('div');
+    rankNum.className = 'rank-num';
+    rankNum.textContent = blurb.rank;
+
+    var body = document.createElement('div');
+    body.className = 'rank-body';
+
+    var h3 = document.createElement('h3');
+    h3.textContent = blurb.name;
+
+    var recordDiv = document.createElement('div');
+    recordDiv.className = 'record';
+    recordDiv.textContent = blurb.record + ' ';
+
+    var movSpan = document.createElement('span');
+    movSpan.className = 'movement ' + blurb.movementCls;
+    movSpan.textContent = blurb.movementText;
+    recordDiv.appendChild(movSpan);
+
+    var pEl = document.createElement('p');
+    pEl.textContent = blurb.text;
+
+    body.appendChild(h3);
+    body.appendChild(recordDiv);
+    body.appendChild(pEl);
+    card.appendChild(rankNum);
+    card.appendChild(body);
+    rankingsSection.appendChild(card);
+  });
+
+  // ─── STEP HANDLERS ────────────────────────────────────────
+  // Each step function re-sorts and styles the bars
+
+  function clearBarStates() {
+    barEls.forEach(function(b) {
+      b.el.classList.remove('dimmed', 'highlighted', 'rise', 'fall');
+    });
+  }
+
+  function sortBarsBy(sortFn) {
+    var sortedTeams = barEls.slice().sort(function(a, b) {
+      return sortFn(a.team) - sortFn(b.team);
+    });
+
+    // Calculate current positions
+    var children = Array.from(chartEl.children);
+    var positions = [];
+    children.forEach(function(child) {
+      positions.push(child.offsetTop);
+    });
+
+    // Map each bar to its new position via translateY
+    sortedTeams.forEach(function(barObj, newIdx) {
+      var currentIdx = children.indexOf(barObj.el);
+      var dy = positions[newIdx] - positions[currentIdx];
+      barObj.el.style.transform = 'translateY(' + dy + 'px)';
+      barObj.el.style.zIndex = newIdx;
+    });
+  }
+
+  function resetSort() {
+    barEls.forEach(function(b) {
+      b.el.style.transform = 'translateY(0)';
+      b.el.style.zIndex = '';
+    });
+  }
+
+  // Step 0: Week 8 standings (initial state)
+  function applyStep0() {
+    clearBarStates();
+    resetSort();
+    vizLabel.textContent = 'Week 8 Power Rankings';
+  }
+
+  // Step 1: Sort by Week 9 score (highest first)
+  function applyStep1() {
+    clearBarStates();
+    vizLabel.textContent = 'Week 9 Scores (Highest First)';
+
+    sortBarsBy(function(t) { return -t.score; });
+
+    // Highlight extreme performers
+    barEls.forEach(function(b) {
+      if (b.team.score >= 140 || b.team.score <= 90) {
+        b.el.classList.add('highlighted');
+      }
+    });
+  }
+
+  // Step 2: Sort by Week 9 power rankings, show movement
+  function applyStep2() {
+    clearBarStates();
+    vizLabel.textContent = 'Week 9 Power Rankings';
+
+    sortBarsBy(function(t) { return t.w9rank; });
+
+    barEls.forEach(function(b) {
+      if (b.team.movement === 'up') {
+        b.el.classList.add('rise');
+      } else if (b.team.movement === 'down') {
+        b.el.classList.add('fall');
+      }
+    });
+  }
+
+  // Step 3: Featured matchup — dim all except Ken-obi and Father Time
+  function applyStep3() {
+    clearBarStates();
+    vizLabel.textContent = 'Featured Matchup';
+
+    sortBarsBy(function(t) { return t.w9rank; });
+
+    barEls.forEach(function(b) {
+      if (b.team.abbr === 'Ken-obi' || b.team.abbr === 'Father Time') {
+        b.el.classList.add('highlighted');
+      } else {
+        b.el.classList.add('dimmed');
+      }
+    });
+  }
+
+  // Step 4: Final rankings, all bars visible
+  function applyStep4() {
+    clearBarStates();
+    vizLabel.textContent = 'Final Week 9 Rankings';
+
+    sortBarsBy(function(t) { return t.w9rank; });
+  }
+
+  var stepHandlers = [applyStep0, applyStep1, applyStep2, applyStep3, applyStep4];
+  var activeStep = -1;
+
+  function setActiveStep(idx) {
+    if (idx === activeStep) return;
+    activeStep = idx;
+
+    // Update step dots
+    var dots = stepDotsEl.querySelectorAll('.step-dot');
+    dots.forEach(function(dot, i) {
+      dot.classList.toggle('active', i === idx);
+    });
+
+    // Apply step handler
+    if (stepHandlers[idx]) {
+      stepHandlers[idx]();
+    }
+
+    // Update step text active states
+    var steps = document.querySelectorAll('.step');
+    steps.forEach(function(step, i) {
+      step.classList.toggle('active', i === idx);
+    });
+  }
+
+  // ─── INTERSECTION OBSERVER ────────────────────────────────
+  var steps = document.querySelectorAll('.step');
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var idx = parseInt(entry.target.dataset.step);
+        setActiveStep(idx);
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: '-35% 0px -35% 0px',
+    threshold: 0
+  });
+
+  steps.forEach(function(step) {
+    observer.observe(step);
+  });
+
+  // Initialize first step
+  setActiveStep(0);
+
+  // ─── RANKING CARDS: INTERSECTION OBSERVER ─────────────────
+  var rankCards = document.querySelectorAll('.ranking-card');
+  var cardObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, {
+    rootMargin: '0px 0px -80px 0px',
+    threshold: 0.1
+  });
+
+  rankCards.forEach(function(card) {
+    cardObserver.observe(card);
+  });
+
+  // ─── SCROLL PROGRESS BAR ──────────────────────────────────
+  var progressBar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = progress + '%';
+  }, { passive: true });
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Jailyard Dynasty — Week 9</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════════
+       RESET & BASE
+       ═══════════════════════════════════════════════════ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --paper: #faf8f5;
+      --ink: #1a1a1a;
+      --ink-light: #4a4a4a;
+      --ink-muted: #7a7a7a;
+      --navy: #1a2744;
+      --navy-light: #2a3d5e;
+      --rule: #d4d0c8;
+      --rule-light: #e8e4dc;
+      --good: #1a6b3c;
+      --bad: #9b2c2c;
+      --steady: #7a7a7a;
+      --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    html {
+      font-size: 18px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       TOP BAR
+       ═══════════════════════════════════════════════════ */
+    .topbar {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem 0.75rem;
+      border-top: 3px solid var(--navy);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .topbar-league {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--navy);
+    }
+
+    .topbar-date {
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .topbar-rule {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .topbar-rule hr {
+      border: none;
+      border-top: 1px solid var(--rule);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       ARTICLE CONTAINER
+       ═══════════════════════════════════════════════════ */
+    .article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       HEADLINE & BYLINE
+       ═══════════════════════════════════════════════════ */
+    .headline {
+      font-family: var(--serif);
+      font-weight: 900;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      color: var(--ink);
+      margin: 2.5rem 0 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .byline {
+      font-family: var(--sans);
+      font-size: 0.83rem;
+      font-weight: 500;
+      color: var(--ink-muted);
+      letter-spacing: 0.02em;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       ESSAY BODY
+       ═══════════════════════════════════════════════════ */
+    .essay p {
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+      color: var(--ink);
+    }
+
+    /* Drop cap */
+    .essay p:first-of-type::first-letter {
+      float: left;
+      font-family: var(--serif);
+      font-weight: 900;
+      font-size: 4.2rem;
+      line-height: 0.8;
+      padding-right: 0.12em;
+      padding-top: 0.06em;
+      color: var(--navy);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       PULL QUOTE
+       ═══════════════════════════════════════════════════ */
+    .pull-quote {
+      max-width: 620px;
+      margin: 2.5rem auto;
+      padding: 1.8rem 0;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      text-align: center;
+    }
+
+    .pull-quote p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: clamp(1.3rem, 3vw, 1.65rem);
+      line-height: 1.45;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SECTION HEADERS
+       ═══════════════════════════════════════════════════ */
+    .section-header {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--navy);
+      margin: 3.5rem 0 1.5rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 2px solid var(--navy);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       POWER RANKINGS
+       ═══════════════════════════════════════════════════ */
+    .rankings-list {
+      list-style: none;
+    }
+
+    .ranking-entry {
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--rule-light);
+    }
+
+    .ranking-entry:last-child {
+      border-bottom: none;
+    }
+
+    .ranking-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .ranking-number {
+      font-family: var(--serif);
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: var(--navy);
+      line-height: 1;
+      min-width: 1.8rem;
+    }
+
+    .ranking-team {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--ink);
+    }
+
+    .ranking-record {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.83rem;
+      color: var(--ink-muted);
+    }
+
+    .ranking-movement {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 0.78rem;
+      margin-left: auto;
+    }
+
+    .ranking-movement.up { color: var(--good); }
+    .ranking-movement.down { color: var(--bad); }
+    .ranking-movement.steady { color: var(--steady); }
+
+    .ranking-blurb {
+      font-size: 0.94rem;
+      color: var(--ink-light);
+      line-height: 1.65;
+      padding-left: 2.4rem;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       MAILBAG
+       ═══════════════════════════════════════════════════ */
+    .mailbag-item {
+      margin-bottom: 2rem;
+    }
+
+    .mailbag-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .mailbag-question {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+      line-height: 1.45;
+    }
+
+    .mailbag-from {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .mailbag-answer {
+      font-size: 0.94rem;
+      color: var(--ink-light);
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════ */
+    .site-footer {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+      border-top: 1px solid var(--rule);
+      text-align: center;
+    }
+
+    .site-footer p {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      html { font-size: 16px; }
+
+      .topbar {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+        text-align: center;
+      }
+
+      .headline {
+        margin-top: 1.8rem;
+      }
+
+      .essay p:first-of-type::first-letter {
+        font-size: 3.4rem;
+      }
+
+      .ranking-header {
+        gap: 0.4rem;
+      }
+
+      .ranking-blurb {
+        padding-left: 0;
+        margin-top: 0.3rem;
+      }
+
+      .ranking-movement {
+        margin-left: 0;
+      }
+
+      .pull-quote {
+        margin: 2rem auto;
+        padding: 1.3rem 0;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       PRINT STYLES (because broadsheet)
+       ═══════════════════════════════════════════════════ */
+    @media print {
+      body { background: #fff; }
+      .topbar { border-top-width: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── TOP BAR ─── -->
+  <header class="topbar">
+    <span class="topbar-league">The Jailyard Dynasty</span>
+    <span class="topbar-date">Week 9 &middot; Nov 5, 2025</span>
+  </header>
+  <div class="topbar-rule"><hr></div>
+
+  <!-- ─── ARTICLE ─── -->
+  <article class="article">
+
+    <h1 class="headline">The Week Everything Shifted</h1>
+    <p class="byline">By The Jailyard Staff</p>
+
+    <!-- ─── ESSAY ─── -->
+    <section class="essay">
+      <p>Nine weeks into the season and we finally have separation. General Ken-obi's
+      quiet, methodical march to 7-2 stopped being quiet somewhere around Week 7, and
+      now the rest of the league is doing that thing where they pretend they always knew
+      he was the frontrunner. They didn't. The group chat receipts from September tell a
+      very different story — something about "schedule-inflated" and "wait until he plays
+      a real team." Well, he played three real teams. He beat all three. The narrative
+      adjustment has been swift and unconvincing, like watching someone delete a bad take
+      in real time except everyone already screenshotted it.</p>
+
+      <p>Meanwhile, the middle of the standings has turned into one of those highway
+      pileups where you can't tell which car hit which. Legion of Bouz at 5-4 feels like
+      a team that could finish anywhere from third to ninth, and that's not an insult — it's
+      an acknowledgment that their weekly scoring variance would make a statistician
+      physically ill. One week they're dropping 160 and looking like a championship
+      squad. The next they're limping to 95 and you're checking if someone forgot to set
+      their lineup. The algorithm doesn't know what to do with them, and honestly,
+      neither do we.</p>
+
+      <!-- Pull Quote -->
+      <div class="pull-quote">
+        <p>"The middle of these standings has turned into a highway pileup where you
+        can't tell which car hit which — and half the drivers are still accelerating."</p>
+      </div>
+
+      <p>At the bottom, Father Time's 2-7 record has graduated from "slow start" to
+      "structural problem" territory. The roster construction isn't bad on paper — there's
+      real talent buried in there — but the weekly execution has been the fantasy football
+      equivalent of showing up to a gunfight with a butter knife. Every. Single. Week.
+      The group chat has already started the "fire sale or hold?" debate, and if you've
+      been around this league long enough, you know that debate only ends one way. The
+      real question isn't whether Father Time sells. It's whether anyone's offering
+      enough to make it worth picking up the phone.</p>
+    </section>
+
+    <!-- ─── POWER RANKINGS ─── -->
+    <h2 class="section-header">Power Rankings</h2>
+
+    <ol class="rankings-list">
+
+      <li class="ranking-entry">
+        <div class="ranking-header">
+          <span class="ranking-number">1.</span>
+          <span class="ranking-team">General Ken-obi</span>
+          <span class="ranking-record">(7-2)</span>
+          <span class="ranking-movement up">&#9650; 2</span>
+        </div>
+        <p class="ranking-blurb">You've been the best team in this league for a month
+        and the group chat is only now catching up. Your roster doesn't have a single
+        glaring hole — your RB depth is the envy of the league, your receivers are
+        producing at a clip that makes matchup-proofing irrelevant, and your weekly
+        floor is higher than most teams' ceilings. The only thing stopping you from a
+        title is the playoff variance that dynasty owners pretend doesn't exist. Keep
+        stacking wins. Let everyone else figure out the tiebreakers.</p>
+      </li>
+
+      <li class="ranking-entry">
+        <div class="ranking-header">
+          <span class="ranking-number">5.</span>
+          <span class="ranking-team">Legion of Bouz</span>
+          <span class="ranking-record">(5-4)</span>
+          <span class="ranking-movement down">&#9660; 1</span>
+        </div>
+        <p class="ranking-blurb">Your season so far is a Rorschach test. Optimists see
+        a squad with three top-20 weeks and a clear path to the playoffs. Pessimists see
+        a team that's lost two of its last three and can't seem to string together
+        consistent performances when it matters. The truth, as always, is somewhere in
+        the middle — but the middle in this league means you're one bad week from the
+        bubble and one good week from the three-seed. Figure out your QB situation before
+        Week 10 or this ranking is heading south in a hurry.</p>
+      </li>
+
+      <li class="ranking-entry">
+        <div class="ranking-header">
+          <span class="ranking-number">8.</span>
+          <span class="ranking-team">Chudders Football Team</span>
+          <span class="ranking-record">(4-5)</span>
+          <span class="ranking-movement steady">&mdash;</span>
+        </div>
+        <p class="ranking-blurb">Perfectly mediocre. That's not a roast — it's a
+        diagnosis. You're the team that nobody is afraid to play but nobody wants to
+        overlook, either. Your points-for is almost exactly league average. Your
+        points-against is almost exactly league average. You are the .500 line made
+        flesh, and the only way out of this purgatory is a trade or a bye-week miracle
+        from a running back you probably drafted too early. The chat has started calling
+        you "The Baseline." Embrace it or change it — but this rank isn't moving without
+        a reason.</p>
+      </li>
+
+      <li class="ranking-entry">
+        <div class="ranking-header">
+          <span class="ranking-number">12.</span>
+          <span class="ranking-team">Father Time</span>
+          <span class="ranking-record">(2-7)</span>
+          <span class="ranking-movement down">&#9660; 2</span>
+        </div>
+        <p class="ranking-blurb">The vibes are bad and the record is worse. At 2-7,
+        your season isn't over mathematically — but it's over in every way that matters.
+        The group chat has already transitioned from sympathy to dark comedy, and your
+        inbox is probably full of lowball offers from managers who think they're being
+        subtle about it. Here's the move: pick two untouchable pieces, price everyone
+        else, and start building for 2026. The dynasty window hasn't closed — but this
+        season's window got bricked shut around Week 5 and nobody bothered to tell you
+        until now.</p>
+      </li>
+
+    </ol>
+
+    <!-- ─── MAILBAG ─── -->
+    <h2 class="section-header">The Mailbag</h2>
+
+    <div class="mailbag-item">
+      <p class="mailbag-question">"Is it too early to call General Ken-obi the
+      favorite for the championship? Feels like everyone's afraid to say it."</p>
+      <p class="mailbag-from">— Danny, via the group chat</p>
+      <p class="mailbag-answer">Not too early at all. It's actually late. Ken-obi has
+      been the best team in this league since Week 4, and the only reason people
+      haven't said it out loud is because of what happened last year — that ugly
+      first-round playoff exit that nobody in the chat has let him forget. But this
+      year's roster is deeper, the schedule is favorable down the stretch, and
+      most importantly, his weekly floor has been absurdly consistent. Is he
+      guaranteed the title? Of course not. This is fantasy football. But if you're
+      not putting him at the top of your "most likely to be hoisting the trophy"
+      list, you're letting last year's bias do your thinking for you.</p>
+    </div>
+
+    <div class="mailbag-item">
+      <p class="mailbag-question">"What's the over/under on trade deadline deals
+      this year? The chat has been suspiciously quiet."</p>
+      <p class="mailbag-from">— Marcus, via text</p>
+      <p class="mailbag-answer">The quiet is the tell. When the chat goes silent
+      about trades, it means DMs are on fire. I'd set the over/under at 4.5 deals
+      before the deadline, and I'm hammering the over. You've got at least three
+      teams (Father Time, Chudders, and one more I won't name yet) who should be
+      selling, and three or four contenders who need a specific piece to feel good
+      about their playoff odds. The ingredients are all there. Someone just has
+      to send the first offer and break the seal. My guess? It happens before
+      Sunday.</p>
+    </div>
+
+  </article>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="site-footer">
+    <p>&copy; 2022&ndash;2026 The Jailyard Dynasty League. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0c0c0c;
+  --fg: #e8e4de;
+  --accent: #c9a84c;
+  --accent-dim: rgba(201, 168, 76, 0.15);
+  --accent-glow: rgba(201, 168, 76, 0.3);
+  --muted: #7a7568;
+  --border: rgba(201, 168, 76, 0.12);
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 19px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL PROGRESS BAR
+   ═══════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #e8c860);
+  z-index: 9999;
+  transition: width 0.05s linear;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION ANIMATION SYSTEM
+   ═══════════════════════════════════════════════════════════ */
+.scene {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scene.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children within a scene */
+.scene.visible .stagger-1 { transition-delay: 0.1s; }
+.scene.visible .stagger-2 { transition-delay: 0.2s; }
+.scene.visible .stagger-3 { transition-delay: 0.3s; }
+
+/* ═══════════════════════════════════════════════════════════
+   CONTENT COLUMN
+   ═══════════════════════════════════════════════════════════ */
+.column {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   OPENING / HERO
+   ═══════════════════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  padding: 2rem;
+}
+
+.hero-kicker {
+  font-family: var(--headline);
+  font-weight: 600;
+  font-size: clamp(0.75rem, 1.2vw, 1rem);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards 0.3s;
+}
+
+.hero-week {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(5rem, 18vw, 14rem);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: var(--fg);
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards 0.5s;
+}
+
+.hero-divider {
+  width: 60px;
+  height: 3px;
+  background: var(--accent);
+  margin: 2rem auto;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.8s;
+}
+
+.hero-date {
+  font-family: var(--headline);
+  font-weight: 400;
+  font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 1s;
+}
+
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 1.4s;
+}
+
+.hero-scroll-hint span {
+  font-family: var(--headline);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.scroll-arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50% { transform: rotate(45deg) translateY(6px); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ESSAY SCENES
+   ═══════════════════════════════════════════════════════════ */
+.essay-scene {
+  padding: 5rem 0;
+}
+
+.essay-scene p {
+  margin-bottom: 1.5em;
+  color: rgba(232, 228, 222, 0.9);
+}
+
+/* Drop cap */
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: 4.2em;
+  line-height: 0.8;
+  margin-right: 0.08em;
+  margin-top: 0.05em;
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FULL-WIDTH STAT MOMENT
+   ═══════════════════════════════════════════════════════════ */
+.stat-moment {
+  width: 100vw;
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  padding: 4rem 2rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(201, 168, 76, 0.04) 50%, transparent 100%);
+}
+
+.stat-number {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(6rem, 20vw, 16rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--accent);
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.stat-label {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  color: var(--muted);
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FULL-WIDTH PULL QUOTE
+   ═══════════════════════════════════════════════════════════ */
+.pull-quote {
+  width: 100vw;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  position: relative;
+}
+
+.pull-quote blockquote {
+  font-family: var(--body);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.5vw, 2.4rem);
+  line-height: 1.6;
+  color: var(--fg);
+  max-width: 800px;
+  position: relative;
+}
+
+.pull-quote blockquote::before {
+  content: "\201C";
+  font-family: var(--headline);
+  font-size: 6rem;
+  color: var(--accent);
+  position: absolute;
+  top: -2.5rem;
+  left: -1.5rem;
+  line-height: 1;
+  opacity: 0.5;
+}
+
+.pull-quote .quote-attr {
+  display: block;
+  margin-top: 1.5rem;
+  font-family: var(--headline);
+  font-style: normal;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION TITLE (Power Rankings, Mailbag, etc.)
+   ═══════════════════════════════════════════════════════════ */
+.section-title {
+  width: 100vw;
+  min-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.section-title h2 {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fg);
+  line-height: 1;
+}
+
+.section-title .section-rule {
+  width: 80px;
+  height: 3px;
+  background: var(--accent);
+  margin-top: 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   POWER RANKING CARD (full-viewport per team)
+   ═══════════════════════════════════════════════════════════ */
+.rank-card {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 3rem 2rem;
+}
+
+.rank-bg-number {
+  position: absolute;
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(12rem, 35vw, 28rem);
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.07;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Special treatment for #12 — heavy, sinking */
+.rank-card.rank-last .rank-bg-number {
+  opacity: 0.04;
+  bottom: -5%;
+  top: auto;
+  transform: none;
+  color: #4a3520;
+}
+
+.rank-content {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  width: 100%;
+}
+
+.rank-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.rank-position {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+
+.rank-record {
+  font-family: var(--headline);
+  font-weight: 400;
+  font-size: 1rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.rank-movement {
+  font-family: var(--headline);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.rank-movement.up { color: #5cb85c; }
+.rank-movement.down { color: #d9534f; }
+.rank-movement.steady { color: var(--muted); }
+
+.rank-team-name {
+  font-family: var(--headline);
+  font-weight: 900;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  color: var(--fg);
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.rank-blurb {
+  font-family: var(--body);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: rgba(232, 228, 222, 0.85);
+  max-width: 580px;
+}
+
+.rank-blurb .stat-highlight {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Divider between rank cards */
+.rank-divider {
+  width: 100vw;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 10%, var(--border) 50%, transparent 90%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAILBAG
+   ═══════════════════════════════════════════════════════════ */
+.mailbag {
+  padding: 5rem 0;
+}
+
+.mailbag-item {
+  margin-bottom: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.mailbag-item:last-child {
+  border-bottom: none;
+}
+
+.mailbag-q {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+  line-height: 1.4;
+}
+
+.mailbag-from {
+  font-family: var(--headline);
+  font-weight: 400;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.mailbag-a {
+  font-family: var(--body);
+  color: rgba(232, 228, 222, 0.9);
+  line-height: 1.75;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+.site-footer {
+  width: 100vw;
+  text-align: center;
+  padding: 4rem 2rem 3rem;
+  border-top: 1px solid var(--border);
+}
+
+.footer-brand {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.footer-copy {
+  font-family: var(--headline);
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: rgba(122, 117, 104, 0.6);
+  letter-spacing: 0.1em;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-nav a {
+  font-family: var(--headline);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-nav a:hover {
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  body { font-size: 17px; }
+
+  .column { padding: 0 1.25rem; }
+
+  .essay-scene { padding: 3rem 0; }
+
+  .stat-moment { min-height: 50vh; padding: 3rem 1.5rem; }
+
+  .pull-quote { min-height: 40vh; padding: 3rem 1.5rem; }
+  .pull-quote blockquote::before { font-size: 4rem; top: -1.5rem; left: -0.5rem; }
+
+  .rank-card { min-height: 80vh; padding: 2.5rem 1.5rem; }
+  .rank-bg-number { font-size: clamp(8rem, 40vw, 16rem); right: -5%; }
+
+  .drop-cap::first-letter { font-size: 3.2em; }
+
+  .section-title { min-height: 30vh; }
+
+  .mailbag { padding: 3rem 0; }
+}
+
+@media (max-width: 480px) {
+  .hero-week { font-size: clamp(4rem, 22vw, 8rem); }
+
+  .rank-card { min-height: 70vh; }
+  .rank-bg-number { font-size: 10rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress Bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     1. OPENING / HERO
+     ═══════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-kicker">The Jailyard Dynasty</div>
+  <div class="hero-week">WEEK 9</div>
+  <div class="hero-divider"></div>
+  <div class="hero-date">November 3, 2025</div>
+  <div class="hero-scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     2. SCENE 1 — Essay Opening
+     ═══════════════════════════════════════════════════════════ -->
+<section class="essay-scene scene">
+  <div class="column">
+    <p class="drop-cap">There are weeks in a dynasty season where the standings shift and you feel it coming, like tectonic plates grinding underneath the surface. Week 9 was not one of those weeks. Week 9 was the earthquake. The kind that rearranges furniture and sends owners spiraling into group chat meltdowns at 1 AM, arguing about whether Puka Nacua is a league-winner or a glorified decoy. This was the week that separated pretenders from contenders, and brother, the pretenders got absolutely demolished.</p>
+
+    <p>Five of the top six teams lost this week. Read that again. Five of six. The entire top half of the power rankings looked at Week 9 and collectively decided to take a vacation. Meanwhile, the teams everyone had written off? They came in swinging like they had nothing to lose, because they didn't. The chaos index hit a season-high, and the group chat nearly imploded trying to process all of it in real time.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     3. FULL-WIDTH STAT MOMENT
+     ═══════════════════════════════════════════════════════════ -->
+<section class="stat-moment scene">
+  <div class="stat-number">142.7</div>
+  <div class="stat-label">The highest-scoring loss in league history. Sometimes the fantasy gods just want to watch you suffer.</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     4. SCENE 2 — Essay Continues
+     ═══════════════════════════════════════════════════════════ -->
+<section class="essay-scene scene">
+  <div class="column">
+    <p>General Ken-obi posted 142.7 points and still lost. That's not a typo. That's a war crime. In any other week in any other league, 142 gets you a trophy, a parade, and maybe a key to the city. In the Jailyard this week, it got you an L and a very expensive therapy bill. The man did everything right, his roster exploded for numbers we haven't seen since Week 3, and it still wasn't enough because his opponent decided to have the game of his life at the exact worst possible moment. Dynasty is a cruel, beautiful sport, and Week 9 is Exhibit A in the prosecution's case.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     5. FULL-WIDTH PULL QUOTE
+     ═══════════════════════════════════════════════════════════ -->
+<section class="pull-quote scene">
+  <blockquote>
+    Dynasty is the only sport where you can do everything right and still wake up on Monday morning wondering what the point of it all was.
+    <span class="quote-attr">The Jailyard Group Chat, 1:47 AM</span>
+  </blockquote>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     6. POWER RANKINGS TITLE
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section-title scene">
+  <h2>Power Rankings</h2>
+  <div class="section-rule"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     7. RANK #1 — General Ken-obi
+     ═══════════════════════════════════════════════════════════ -->
+<div class="rank-divider"></div>
+<section class="rank-card scene">
+  <div class="rank-bg-number">1</div>
+  <div class="rank-content">
+    <div class="rank-meta">
+      <span class="rank-position">#1</span>
+      <span class="rank-record">7-2</span>
+      <span class="rank-movement steady">&#8212;</span>
+    </div>
+    <h3 class="rank-team-name">General Ken-obi</h3>
+    <p class="rank-blurb">You dropped <span class="stat-highlight">142.7 points</span> and still lost, which is either the unluckiest thing that's ever happened in this league or definitive proof that the simulation is rigged against you personally. Here's the thing though: you're still sitting at 7-2 with the second-highest points-for in the league. Your roster is a machine. Lamar is playing like he wants a third MVP. Puka is finally healthy and producing WR1 numbers. The loss stings, but you're the team nobody wants to see in the playoffs. Take the L, pour something expensive, and remember: <span class="stat-highlight">142</span> points doesn't lie. You're the best team in this league and everyone knows it.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     8. RANK #5 — Legion of Bouz
+     ═══════════════════════════════════════════════════════════ -->
+<div class="rank-divider"></div>
+<section class="rank-card scene">
+  <div class="rank-bg-number">5</div>
+  <div class="rank-content">
+    <div class="rank-meta">
+      <span class="rank-position">#5</span>
+      <span class="rank-record">5-4</span>
+      <span class="rank-movement down">&#8595;2</span>
+    </div>
+    <h3 class="rank-team-name">Legion of Bouz</h3>
+    <p class="rank-blurb">Remember when you were 4-0 and the group chat was crowning you the runaway favorite? That was five weeks and four losses ago. You've gone <span class="stat-highlight">1-4</span> since the bye, and the vibes have shifted from "unbeatable juggernaut" to "team that peaked in September." Your ceiling is still elite when everyone's healthy and firing, but your floor has been horrifying. CeeDee Lamb is giving you WR2 numbers at best, your RB depth is a prayer and a bus ticket, and you're leaking points at a rate that should concern anyone with a playoff bracket circled on their calendar. The talent is there. The consistency isn't. Fix it before the Jailyard forgets you were ever on top.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     9. RANK #8 — Chudders Football Team
+     ═══════════════════════════════════════════════════════════ -->
+<div class="rank-divider"></div>
+<section class="rank-card scene">
+  <div class="rank-bg-number">8</div>
+  <div class="rank-content">
+    <div class="rank-meta">
+      <span class="rank-position">#8</span>
+      <span class="rank-record">4-5</span>
+      <span class="rank-movement up">&#8593;3</span>
+    </div>
+    <h3 class="rank-team-name">Chudders Football Team</h3>
+    <p class="rank-blurb">You're the Week 9 chaos agent and you're not apologizing for it. A <span class="stat-highlight">three-game win streak</span> has dragged you from the basement back into the playoff conversation, and the scary part is your roster actually looks like it's figured something out. Your waiver-wire pickups have been surgical, your lineup decisions have been sharp, and your points-against luck has finally started regressing to the mean. You're still a game under .500, which means nobody's scared of you yet, but that's exactly how you want it. The league's sleeping on Chudders. Keep it that way.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     10. RANK #12 — Father Time
+     ═══════════════════════════════════════════════════════════ -->
+<div class="rank-divider"></div>
+<section class="rank-card rank-last scene">
+  <div class="rank-bg-number">12</div>
+  <div class="rank-content">
+    <div class="rank-meta">
+      <span class="rank-position">#12</span>
+      <span class="rank-record">2-7</span>
+      <span class="rank-movement down">&#8595;1</span>
+    </div>
+    <h3 class="rank-team-name">Father Time</h3>
+    <p class="rank-blurb">What is there left to say? You're 2-7. Your roster is aging like milk in the sun. Your best player is a running back on a team that doesn't want to run the ball, your QB situation is a revolving door of disappointment, and your dynasty assets have the trade value of a used napkin. The group chat has officially started referring to your matchup as "the bye week," which is brutal but also statistically accurate since your opponents are averaging <span class="stat-highlight">128 points</span> against you. The rebuild isn't coming, it's here. Sell everything. Acquire picks. Accept the tank. Father Time waits for no one, but ironically, Father Time's team is going to be waiting a very long time for relevance.</p>
+  </div>
+</section>
+<div class="rank-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     11. MAILBAG TITLE
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section-title scene">
+  <h2>Mailbag</h2>
+  <div class="section-rule"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     11b. MAILBAG Q&As
+     ═══════════════════════════════════════════════════════════ -->
+<section class="mailbag scene">
+  <div class="column">
+    <div class="mailbag-item">
+      <div class="mailbag-q">Is it time to panic about the Legion? Four losses in five weeks feels like more than a slump.</div>
+      <div class="mailbag-from">Kevin, via group chat</div>
+      <p class="mailbag-a">I'm not hitting the panic button yet, but I'm definitely standing next to it with my hand hovering. The talent is real. CeeDee, Breece, the stack with Dak -- on paper, this is a top-three roster. But paper doesn't win matchups, and the Legion has been getting outcoached at the lineup level for a month straight. The wrong guys are in the flex. The streamers aren't streaming. And the schedule isn't getting easier. I'll say this: if the Legion goes 1-2 in the next three weeks, we're not talking about a slump anymore. We're talking about a full-blown identity crisis. The window is closing, and the playoff picture doesn't care about your September record.</p>
+    </div>
+
+    <div class="mailbag-item">
+      <div class="mailbag-q">Which team scares you most going into the second half of the season?</div>
+      <div class="mailbag-from">Marcus, via DM</div>
+      <p class="mailbag-a">Chudders. And I know that sounds insane given they're 4-5, but hear me out. They've won three straight. Their roster is clicking at the right time. And most importantly, nobody is gameplanning for them. Every other contender is looking at Ken-obi or the Legion when they think about playoff matchups. Nobody's looking over their shoulder at the 4-5 team with momentum and nothing to lose. That's the most dangerous team in any fantasy league -- the one that gets hot late, sneaks into the bracket, and suddenly has the swagger of a team that's been there all year. If Chudders makes the playoffs, I don't want to see them in Round 1.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     12. FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer class="site-footer scene">
+  <nav class="footer-nav">
+    <a href="#">Home</a>
+    <a href="#">Season Hub</a>
+    <a href="#">League Bible</a>
+    <a href="#">Power Rankings</a>
+    <a href="#">Trades</a>
+  </nav>
+  <div class="footer-brand">The Jailyard Dynasty</div>
+  <div class="footer-copy">&copy; 2022&ndash;2026 The Jailyard Dynasty League. All rights reserved.</div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── Scroll Progress Bar ──────────────────────────────────
+  var progressBar = document.getElementById('scrollProgress');
+  function updateProgress() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = progress + '%';
+  }
+
+  // ── IntersectionObserver for Scroll Animations ───────────
+  var scenes = document.querySelectorAll('.scene');
+  var observerOptions = {
+    root: null,
+    rootMargin: '0px 0px -80px 0px',
+    threshold: 0.15
+  };
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Once visible, stop observing (one-time reveal)
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  scenes.forEach(function(scene) {
+    observer.observe(scene);
+  });
+
+  // ── Scroll event (throttled via rAF) ─────────────────────
+  var ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateProgress();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // Initial call
+  updateProgress();
+
+})();
+</script>
+</body>
+</html>

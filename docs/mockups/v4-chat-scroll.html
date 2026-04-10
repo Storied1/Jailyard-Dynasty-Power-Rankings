@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty // Chat Scrollytelling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & ROOT
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0c0c0c;
+  --bg-elevated: #141414;
+  --bg-card: #1a1a1a;
+  --fg: #e8e4de;
+  --fg-dim: #9a9590;
+  --fg-faint: #5a5652;
+  --accent: #c9a84c;
+  --accent-dim: rgba(201, 168, 76, 0.15);
+  --accent-glow: rgba(201, 168, 76, 0.35);
+  --chat-green: #25d366;
+  --chat-green-dim: rgba(37, 211, 102, 0.12);
+  --chat-green-glow: rgba(37, 211, 102, 0.25);
+  --muted: #7a7568;
+  --border: rgba(201, 168, 76, 0.12);
+  --border-chat: rgba(37, 211, 102, 0.15);
+  --good: #4ade80;
+  --bad: #f87171;
+  --warn: #fbbf24;
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --chat-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL PROGRESS
+   ═══════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--chat-green));
+  z-index: 9999;
+  transition: width 0.05s linear;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════ */
+.site-header {
+  text-align: center;
+  padding: 5rem 2rem 3.5rem;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.site-header .kicker {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.site-header h1 {
+  font-family: var(--headline);
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 0.6rem;
+}
+
+.site-header h1 span {
+  color: var(--accent);
+}
+
+.site-header .subtitle {
+  font-family: var(--body);
+  font-size: 1.15rem;
+  color: var(--fg-dim);
+  font-style: italic;
+  max-width: 560px;
+  margin: 0 auto 1rem;
+}
+
+.site-header .byline {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--fg-faint);
+}
+
+.site-header .byline span {
+  color: var(--chat-green);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLLYTELLING CONTAINER
+   ═══════════════════════════════════════════════════════════ */
+.scrolly {
+  position: relative;
+  display: flex;
+  gap: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STICKY DASHBOARD PANEL (LEFT)
+   ═══════════════════════════════════════════════════════════ */
+.scrolly__dashboard {
+  position: sticky;
+  top: 0;
+  width: 50%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* -- Dashboard header bar -- */
+.dash-header {
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.dash-header .dash-title {
+  font-family: var(--headline);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.dash-header .dash-step-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--fg-faint);
+  letter-spacing: 0.06em;
+  transition: color 0.4s ease;
+}
+
+.dash-header .dash-step-label.active {
+  color: var(--fg-dim);
+}
+
+/* -- Chart zone (top 58%) -- */
+.dash-chart-zone {
+  flex: 0 0 58%;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.chart-week-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-bottom: 0.6rem;
+  transition: all 0.5s ease;
+}
+
+.chart-week-label .label-highlight {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* -- Bar chart -- */
+.chart {
+  width: 100%;
+}
+
+.chart-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+}
+
+.chart-bar.dimmed {
+  opacity: 0.12;
+}
+
+.chart-bar.highlighted .bar-fill {
+  background: var(--accent) !important;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.chart-bar.rise .bar-fill {
+  background: var(--good) !important;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.2);
+}
+
+.chart-bar.fall .bar-fill {
+  background: var(--bad) !important;
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.2);
+}
+
+.bar-rank {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: var(--fg-faint);
+  width: 18px;
+  min-width: 18px;
+  text-align: center;
+  transition: color 0.4s ease;
+}
+
+.chart-bar.highlighted .bar-rank,
+.chart-bar.rise .bar-rank,
+.chart-bar.fall .bar-rank {
+  color: var(--fg-dim);
+}
+
+.bar-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--fg-dim);
+  width: 110px;
+  min-width: 110px;
+  text-align: right;
+  padding-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.4s ease;
+}
+
+.chart-bar.highlighted .bar-label,
+.chart-bar.rise .bar-label,
+.chart-bar.fall .bar-label {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.bar-track {
+  flex: 1;
+  height: 18px;
+  position: relative;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.45), rgba(201, 168, 76, 0.2));
+  transition: width 0.7s cubic-bezier(0.23, 1, 0.32, 1),
+              background 0.4s ease,
+              box-shadow 0.4s ease;
+}
+
+.bar-score {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--fg-faint);
+  width: 38px;
+  min-width: 38px;
+  text-align: right;
+  padding-left: 5px;
+  transition: color 0.4s ease;
+}
+
+.chart-bar.highlighted .bar-score,
+.chart-bar.rise .bar-score,
+.chart-bar.fall .bar-score {
+  color: var(--fg);
+}
+
+/* -- Divider between chart and chat -- */
+.dash-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 1.25rem;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dash-divider-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  padding: 0 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: var(--chat-green);
+  white-space: nowrap;
+}
+
+/* -- Chat zone (bottom ~40%) -- */
+.dash-chat-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.25rem 1rem;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+
+/* Fade-out at top of chat area */
+.dash-chat-zone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--bg), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.chat-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: flex-end;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* -- Chat message bubble -- */
+.chat-msg {
+  background: var(--bg-card);
+  border: 1px solid var(--border-chat);
+  border-radius: 8px;
+  padding: 8px 12px 6px;
+  max-width: 92%;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  flex-shrink: 0;
+}
+
+.chat-msg.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chat-msg.fading {
+  opacity: 0.25;
+  transform: translateY(0) scale(0.97);
+}
+
+.chat-msg .chat-sender {
+  font-family: var(--chat-font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--chat-green);
+  margin-bottom: 2px;
+}
+
+.chat-msg .chat-text {
+  font-family: var(--chat-font);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--fg);
+}
+
+.chat-msg .chat-time {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  color: var(--fg-faint);
+  text-align: right;
+  margin-top: 3px;
+}
+
+/* Prediction tag */
+.chat-msg .prediction-tag {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STEP INDICATOR
+   ═══════════════════════════════════════════════════════════ */
+.step-dots {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+
+.step-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fg-faint);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.step-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  transform: scale(1.4);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NARRATIVE PANEL (RIGHT)
+   ═══════════════════════════════════════════════════════════ */
+.scrolly__narrative {
+  width: 50%;
+  padding: 0;
+}
+
+.step {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 3rem 4rem 2.5rem;
+  position: relative;
+}
+
+/* Faint divider between steps */
+.step + .step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2.5rem;
+  right: 3rem;
+  height: 1px;
+  background: var(--border);
+}
+
+.step .step-number {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
+}
+
+.step .step-title {
+  font-family: var(--headline);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  margin-bottom: 1rem;
+  line-height: 1.1;
+}
+
+.step .step-title .title-accent {
+  color: var(--accent);
+}
+
+.step p {
+  font-family: var(--body);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--fg-dim);
+  margin-bottom: 1rem;
+  max-width: 520px;
+}
+
+.step p strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.step p em.stat {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-style: normal;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.step .pull-quote {
+  border-left: 3px solid var(--accent);
+  padding: 0.75rem 1.25rem;
+  margin: 1.25rem 0;
+  font-style: italic;
+  color: var(--fg);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+.step .pull-quote .quote-attr {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-style: normal;
+  color: var(--fg-faint);
+}
+
+/* Chat reference in narrative */
+.chat-ref {
+  display: inline;
+  color: var(--chat-green);
+  font-family: var(--chat-font);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AFTER SCROLLYTELLING — EDITORIAL BLURBS
+   ═══════════════════════════════════════════════════════════ */
+.editorial-section {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.editorial-section .section-kicker {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.blurb {
+  display: flex;
+  gap: 1.25rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.blurb:last-child {
+  border-bottom: none;
+}
+
+.blurb-rank {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  font-family: var(--headline);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--accent);
+  border: 2px solid var(--accent-dim);
+  border-radius: 8px;
+  background: var(--accent-dim);
+}
+
+.blurb-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.blurb-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.blurb-name {
+  font-family: var(--headline);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.blurb-record {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--fg-faint);
+}
+
+.blurb-movement {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.blurb-movement.up { color: var(--good); }
+.blurb-movement.down { color: var(--bad); }
+.blurb-movement.steady { color: var(--fg-faint); }
+
+.blurb-text {
+  font-family: var(--body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--fg-dim);
+}
+
+.blurb-text strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+.site-footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--fg-faint);
+  letter-spacing: 0.05em;
+}
+
+.site-footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE — STACKED LAYOUT
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .scrolly {
+    flex-direction: column;
+  }
+
+  .scrolly__dashboard {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .scrolly__narrative {
+    width: 100%;
+  }
+
+  .step {
+    min-height: 70vh;
+    padding: 3rem 1.5rem;
+  }
+
+  .step + .step::before {
+    left: 1.5rem;
+    right: 1.5rem;
+  }
+
+  .step p {
+    font-size: 0.95rem;
+  }
+
+  .bar-label {
+    width: 80px;
+    min-width: 80px;
+    font-size: 0.55rem;
+  }
+
+  .bar-rank {
+    display: none;
+  }
+
+  .chat-msg .chat-text {
+    font-size: 0.75rem;
+  }
+
+  .chat-msg .chat-sender {
+    font-size: 0.65rem;
+  }
+
+  .dash-chart-zone {
+    flex: 0 0 55%;
+    padding: 0.75rem 1rem;
+  }
+
+  .dash-chat-zone {
+    padding: 0.6rem 1rem;
+  }
+
+  .chat-feed {
+    gap: 4px;
+  }
+
+  .chat-msg {
+    padding: 6px 10px 5px;
+  }
+
+  .editorial-section {
+    padding: 3rem 1.5rem;
+  }
+
+  .blurb {
+    gap: 1rem;
+  }
+
+  .blurb-rank {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-header {
+    padding: 3.5rem 1.25rem 2.5rem;
+  }
+
+  .site-header h1 {
+    font-size: 2rem;
+  }
+
+  .step {
+    padding: 2.5rem 1.25rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll progress bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="kicker">The Jailyard Dynasty &middot; 2025 Season</div>
+  <h1>Week 9: <span>The Coronation</span></h1>
+  <p class="subtitle">One team dropped 165 points. The group chat lost its collective mind. The power rankings will never be the same.</p>
+  <p class="byline">Week 9 Column &middot; <span>21 chat messages referenced</span> &middot; Nov 2025</p>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCROLLYTELLING
+     ═══════════════════════════════════════════════════════════ -->
+<section class="scrolly" id="scrolly">
+
+  <!-- LEFT: Pinned dashboard -->
+  <div class="scrolly__dashboard" id="dashboard">
+    <div class="dash-header">
+      <span class="dash-title">Live Dashboard</span>
+      <span class="dash-step-label" id="dashStepLabel">Before Sunday</span>
+    </div>
+
+    <!-- Chart zone -->
+    <div class="dash-chart-zone">
+      <div class="chart-week-label" id="chartWeekLabel">
+        Power Rankings &mdash; <span class="label-highlight">Week 8</span>
+      </div>
+      <div class="chart" id="chart"></div>
+    </div>
+
+    <!-- Divider -->
+    <div class="dash-divider">
+      <span class="dash-divider-label">GROUP CHAT</span>
+    </div>
+
+    <!-- Chat zone -->
+    <div class="dash-chat-zone">
+      <div class="chat-feed" id="chatFeed"></div>
+    </div>
+
+    <!-- Step dots -->
+    <div class="step-dots" id="stepDots"></div>
+  </div>
+
+  <!-- RIGHT: Scrolling narrative -->
+  <div class="scrolly__narrative">
+
+    <!-- Step 1: Before Sunday -->
+    <div class="step" data-step="0">
+      <span class="step-number">Saturday Night</span>
+      <h2 class="step-title">Before <span class="title-accent">Sunday</span></h2>
+      <p>
+        Another week, another round of delusion in the Jailyard group chat. By Saturday night the trash talk is already flowing, lineup screenshots are getting dropped like diss tracks, and everyone is absolutely convinced <strong>this</strong> is their week.
+      </p>
+      <p>
+        The Week 8 power rankings have <strong>Ken-obi</strong> parked at the top, <strong>Kittler on the Roof</strong> lurking at two, and <strong>Legion</strong> starting to fade from the conversation entirely. Kid Bouzie is doing what Kid Bouzie always does: announcing his arrival before the bus even leaves the station.
+      </p>
+      <div class="pull-quote">
+        "The Saturday night group chat is the fantasy football equivalent of a locker room speech. Everyone talks like they're about to hang a banner. By Monday morning, most of them are filing insurance claims."
+        <span class="quote-attr">&mdash; The Jailyard Power Rankings, Week 9</span>
+      </div>
+      <p>
+        <span class="chat-ref">@bLaker24</span> is already in the replies, keeping the receipts. He always keeps the receipts.
+      </p>
+    </div>
+
+    <!-- Step 2: Sunday Morning -->
+    <div class="step" data-step="1">
+      <span class="step-number">Sunday 10 AM</span>
+      <h2 class="step-title">Sunday <span class="title-accent">Morning</span></h2>
+      <p>
+        The calm before the carnage. This is the hour where managers make the decisions that will either define their season or haunt their group chat mentions for months. And this week, <strong>@rango_</strong> decided to get weird with it.
+      </p>
+      <p>
+        Starting <strong>Jared Goff</strong> over <strong>Lamar Jackson</strong> is the kind of galaxy-brain move that either makes you look like a genius or gets your DMs flooded with clown emojis. There is no middle ground. The chat barely reacted &mdash; which tells you everything about how seriously people take rango_'s lineup decisions at this point.
+      </p>
+      <p>
+        Across the league, lineups are locking in. <em class="stat">72%</em> of managers made at least one last-minute swap. The anxiety is palpable. You can feel it in the timestamps &mdash; messages at <em class="stat">10:03</em>, <em class="stat">10:07</em>, <em class="stat">10:14</em>. Everyone refreshing one more time.
+      </p>
+    </div>
+
+    <!-- Step 3: The Afternoon Chaos -->
+    <div class="step" data-step="2">
+      <span class="step-number">Sunday Afternoon</span>
+      <h2 class="step-title">The Afternoon <span class="title-accent">Chaos</span></h2>
+      <p>
+        And then the games started, and the group chat became a crime scene.
+      </p>
+      <p>
+        <strong>Rico Dowdle</strong> went nuclear. The kind of performance that makes you check the stat line twice because surely there's a glitch. <span class="chat-ref">@bLaker24</span> was first to the chat, all caps, no punctuation, pure adrenaline. This is what dynasty football is about &mdash; the moment your guy goes off and you get to be insufferable about it in a group chat full of people who explicitly told you he was a waiver wire flier.
+      </p>
+      <p>
+        Meanwhile, <span class="chat-ref">@Redrumsregrub</span> was living through a very different Sunday. The kind where you open the app at halftime and immediately close it. The kind where you don't check the score again until Monday because you already know. <em class="stat">"I'm getting cooked"</em> is the universal fantasy football white flag, and he planted it at <em class="stat">3:12 PM</em>.
+      </p>
+      <p>
+        By Sunday night, <span class="chat-ref">@bLaker24</span> dropped the final score: <strong>165 points</strong>. One hundred and sixty five. He typed it out in words, which is the fantasy football equivalent of a victory lap in slow motion. The chat exploded. <span class="chat-ref">@zbcowan</span> called the league rigged. Classic.
+      </p>
+    </div>
+
+    <!-- Step 4: The Aftermath -->
+    <div class="step" data-step="3">
+      <span class="step-number">Monday Morning</span>
+      <h2 class="step-title">The <span class="title-accent">Aftermath</span></h2>
+      <p>
+        Monday morning in the Jailyard chat is either a funeral or a parade. This week it was both.
+      </p>
+      <p>
+        The power rankings reshuffle quietly overnight as the last stat corrections trickle in and the new order crystallizes. <strong>Ken-obi</strong> holds the top spot, but the gap narrowed &mdash; <em class="stat">bLaker24's</em> 165-point eruption put the entire league on notice. You don't drop that kind of number and stay anonymous in the rankings.
+      </p>
+      <p>
+        Even <span class="chat-ref">@KidBouzie</span> had to tip the cap. The same KidBouzie who was calling his shot 36 hours earlier. <em>"Ok respect. That was a clinic."</em> &mdash; the highest compliment a Jailyard manager can give, because it requires admitting someone else is better than you, even temporarily.
+      </p>
+      <div class="pull-quote">
+        "The Monday morning group chat is the only honest power ranking in fantasy football. You can't fake respect at 9:30 AM on a Monday. You either earned it or you didn't."
+        <span class="quote-attr">&mdash; The Jailyard Power Rankings, Week 9</span>
+      </div>
+    </div>
+
+    <!-- Step 5: The New Order -->
+    <div class="step" data-step="4">
+      <span class="step-number">Looking Ahead</span>
+      <h2 class="step-title">The New <span class="title-accent">Order</span></h2>
+      <p>
+        The bars settle into their new positions and the story writes itself in the movement arrows. Green glows and red drops. The teams that showed up and the teams that showed out.
+      </p>
+      <p>
+        <strong>Ken-obi</strong> stays on top but the crown feels heavier now. <strong>bLaker24</strong> surges three spots on the back of that 165-point performance &mdash; the kind of week that changes how people talk about your team for the rest of the season. <strong>MHJTIME</strong> slides after a quiet week, and <strong>Kittler on the Roof</strong> holds steady in the upper tier where the defending champ belongs.
+      </p>
+      <p>
+        And then <span class="chat-ref">@bLaker24</span> did what bLaker24 does. He dropped a prediction into the chat like a grenade and walked away. "Ken-obi is going undefeated the rest of the way. Book it." Bold. Reckless. The kind of take that ages like wine or like milk, with absolutely nothing in between.
+      </p>
+      <p>
+        The group chat screenshot has been saved. The receipts are filed. See you in Week 10.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     EDITORIAL BLURBS
+     ═══════════════════════════════════════════════════════════ -->
+<section class="editorial-section">
+  <div class="section-kicker">Week 9 Power Rankings &mdash; Top 4</div>
+
+  <div class="blurb">
+    <div class="blurb-rank">1</div>
+    <div class="blurb-content">
+      <div class="blurb-header">
+        <span class="blurb-name">General Ken-obi</span>
+        <span class="blurb-record">7-2 &middot; 1,187 PF</span>
+        <span class="blurb-movement steady">&mdash;</span>
+      </div>
+      <p class="blurb-text">
+        You held the top spot through a week where someone literally dropped 165 on the league, and you did it by being boringly excellent. <strong>Saquon Barkley</strong> and <strong>CeeDee Lamb</strong> are cruise control, your depth chart is three deep at every position, and the rest of the league knows it. The only question is whether bLaker24's prediction about running the table is a compliment or a curse. In the Jailyard, those are the same thing.
+      </p>
+    </div>
+  </div>
+
+  <div class="blurb">
+    <div class="blurb-rank">2</div>
+    <div class="blurb-content">
+      <div class="blurb-header">
+        <span class="blurb-name">Kittler on the Roof</span>
+        <span class="blurb-record">6-3 &middot; 1,102 PF</span>
+        <span class="blurb-movement steady">&mdash;</span>
+      </div>
+      <p class="blurb-text">
+        The defending champion is doing what defending champions do &mdash; winning ugly, managing the roster like a portfolio, and letting everyone else beat each other up. Your <strong>George Kittle</strong> anchor gives you a positional edge nobody in this league can match, and the mid-week trade for a WR2 shows you're not content to coast. The chat called it a panic move. You called it a championship move. We'll see who's right by Week 14.
+      </p>
+    </div>
+  </div>
+
+  <div class="blurb">
+    <div class="blurb-rank">3</div>
+    <div class="blurb-content">
+      <div class="blurb-header">
+        <span class="blurb-name">bLaker24</span>
+        <span class="blurb-record">6-3 &middot; 1,156 PF</span>
+        <span class="blurb-movement up">&uarr;3</span>
+      </div>
+      <p class="blurb-text">
+        One sixty-five. That's the number. That's the blurb. You dropped the highest score of the season and you have the chat messages to prove it was earned, not lucky. <strong>Rico Dowdle</strong> went off, your WR corps stacked, and for one glorious Sunday you were the best team in the Jailyard and everyone had to sit there and watch it happen. The surge from six to three is the system catching up to what the scoreboard already told us. Now do it again.
+      </p>
+    </div>
+  </div>
+
+  <div class="blurb">
+    <div class="blurb-rank">4</div>
+    <div class="blurb-content">
+      <div class="blurb-header">
+        <span class="blurb-name">MHJTIME</span>
+        <span class="blurb-record">6-3 &middot; 1,089 PF</span>
+        <span class="blurb-movement down">&darr;1</span>
+      </div>
+      <p class="blurb-text">
+        A quiet week from the wide receiver factory. Your arsenal of pass catchers should be putting up crooked numbers every Sunday, but the running back situation keeps dragging the overall ceiling down. You slid one spot and the group chat barely mentioned it &mdash; which is actually worse than getting roasted, because it means people stopped paying attention. Time to remind them. The schedule softens after the bye, and if your WR room gets hot simultaneously? Watch out.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+  <a href="index.html">The Jailyard Dynasty</a> &middot; Mockup v4: Chat Scrollytelling &middot; 2025 Season
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCRIPT — All inline, zero dependencies, safe DOM methods
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── DATA ──────────────────────────────────────────────────
+  // Week 8 power rankings (starting state)
+  var teamsWeek8 = [
+    { name: 'Ken-obi',           score: 92 },
+    { name: 'Kittler on the Roof', score: 88 },
+    { name: 'Legion',            score: 84 },
+    { name: 'MHJTIME',           score: 81 },
+    { name: 'Kid Bouzie',        score: 78 },
+    { name: 'bLaker24',          score: 74 },
+    { name: 'rango_',            score: 71 },
+    { name: 'Redrumsregrub',     score: 67 },
+    { name: 'zbcowan',           score: 63 },
+    { name: 'Sacko',             score: 58 },
+    { name: 'Fat Randy',         score: 53 },
+    { name: 'Waiver Wire',       score: 48 }
+  ];
+
+  // Week 9 power rankings (final state)
+  var teamsWeek9 = [
+    { name: 'Ken-obi',           score: 94 },
+    { name: 'Kittler on the Roof', score: 87 },
+    { name: 'bLaker24',          score: 86 },
+    { name: 'MHJTIME',           score: 80 },
+    { name: 'Legion',            score: 77 },
+    { name: 'Kid Bouzie',        score: 75 },
+    { name: 'rango_',            score: 70 },
+    { name: 'zbcowan',           score: 65 },
+    { name: 'Redrumsregrub',     score: 60 },
+    { name: 'Sacko',             score: 56 },
+    { name: 'Fat Randy',         score: 51 },
+    { name: 'Waiver Wire',       score: 46 }
+  ];
+
+  // This week's scores (for the re-sorting transition in step 2)
+  var weekScores = [
+    { name: 'bLaker24',          score: 165 },
+    { name: 'Ken-obi',           score: 142 },
+    { name: 'Kittler on the Roof', score: 128 },
+    { name: 'rango_',            score: 124 },
+    { name: 'Kid Bouzie',        score: 119 },
+    { name: 'Legion',            score: 112 },
+    { name: 'zbcowan',           score: 108 },
+    { name: 'Sacko',             score: 101 },
+    { name: 'MHJTIME',           score: 97 },
+    { name: 'Fat Randy',         score: 89 },
+    { name: 'Waiver Wire',       score: 82 },
+    { name: 'Redrumsregrub',     score: 76 }
+  ];
+
+  // Chat messages per step
+  var chatSteps = [
+    // Step 0: Before Sunday
+    [
+      { sender: '@KidBouzie',   text: 'This is the week I take the #1 spot',                time: 'Sat 11:42 PM' },
+      { sender: '@bLaker24',    text: 'Lmao you said that last week too',                   time: 'Sat 11:43 PM' }
+    ],
+    // Step 1: Sunday Morning
+    [
+      { sender: '@rango_',      text: "Starting Goff over Lamar. Don't @ me.",              time: 'Sun 10:15 AM' }
+    ],
+    // Step 2: The Afternoon Chaos
+    [
+      { sender: '@bLaker24',    text: 'RICO DOWDLE ARE YOU KIDDING ME',                     time: 'Sun 2:47 PM' },
+      { sender: '@Redrumsregrub', text: "I'm getting cooked",                               time: 'Sun 3:12 PM' },
+      { sender: '@bLaker24',    text: '165 points. ONE HUNDRED AND SIXTY FIVE.',            time: 'Sun 7:55 PM' },
+      { sender: '@zbcowan',     text: 'This league is rigged',                              time: 'Sun 8:01 PM' }
+    ],
+    // Step 3: The Aftermath
+    [
+      { sender: '@KidBouzie',   text: 'ok respect. that was a clinic.',                     time: 'Mon 9:30 AM' }
+    ],
+    // Step 4: The New Order
+    [
+      { sender: '@bLaker24',    text: "Ken-obi is going undefeated the rest of the way. Book it.", time: 'Mon 10:15 AM', prediction: 'PREDICTION \u2014 UNRESOLVED' }
+    ]
+  ];
+
+  // Maximum score for bar width calculation
+  var maxScore = 165;
+
+  // ── STATE ─────────────────────────────────────────────────
+  var currentStep = -1;
+  var chatMessageElements = []; // track currently rendered messages
+
+  // ── DOM REFS ──────────────────────────────────────────────
+  var chart = document.getElementById('chart');
+  var chatFeed = document.getElementById('chatFeed');
+  var chartWeekLabel = document.getElementById('chartWeekLabel');
+  var dashStepLabel = document.getElementById('dashStepLabel');
+  var stepDotsContainer = document.getElementById('stepDots');
+  var scrollProgress = document.getElementById('scrollProgress');
+
+  // ── HELPER: build a chart bar using DOM methods ───────────
+  function createBarElement(team, index) {
+    var bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    bar.dataset.team = team.name;
+    bar.style.order = index;
+
+    var rank = document.createElement('span');
+    rank.className = 'bar-rank';
+    rank.textContent = index + 1;
+
+    var label = document.createElement('span');
+    label.className = 'bar-label';
+    label.textContent = team.name;
+
+    var track = document.createElement('div');
+    track.className = 'bar-track';
+
+    var fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    fill.style.width = (team.score / maxScore * 100) + '%';
+
+    track.appendChild(fill);
+
+    var score = document.createElement('span');
+    score.className = 'bar-score';
+    score.textContent = team.score;
+
+    bar.appendChild(rank);
+    bar.appendChild(label);
+    bar.appendChild(track);
+    bar.appendChild(score);
+    return bar;
+  }
+
+  // ── RENDER CHART (full rebuild) ───────────────────────────
+  function renderChart(teams) {
+    while (chart.firstChild) { chart.removeChild(chart.firstChild); }
+    teams.forEach(function(team, i) {
+      chart.appendChild(createBarElement(team, i));
+    });
+  }
+
+  // ── UPDATE CHART (animate existing bars) ──────────────────
+  function updateChart(teams, highlights) {
+    var bars = chart.querySelectorAll('.chart-bar');
+    bars.forEach(function(bar) {
+      var teamName = bar.dataset.team;
+      var match = null;
+      var newIndex = -1;
+      for (var i = 0; i < teams.length; i++) {
+        if (teams[i].name === teamName) {
+          match = teams[i];
+          newIndex = i;
+          break;
+        }
+      }
+      if (!match) return;
+
+      // Update score and bar width
+      bar.querySelector('.bar-fill').style.width = (match.score / maxScore * 100) + '%';
+      bar.querySelector('.bar-score').textContent = match.score;
+      bar.querySelector('.bar-rank').textContent = newIndex + 1;
+
+      // Use CSS order for sorting animation
+      bar.style.order = newIndex;
+
+      // Reset classes
+      bar.classList.remove('highlighted', 'dimmed', 'rise', 'fall');
+
+      if (highlights) {
+        if (highlights.rise && highlights.rise.indexOf(teamName) !== -1) {
+          bar.classList.add('rise');
+        } else if (highlights.fall && highlights.fall.indexOf(teamName) !== -1) {
+          bar.classList.add('fall');
+        } else if (highlights.dim) {
+          bar.classList.add('dimmed');
+        }
+      }
+    });
+  }
+
+  // ── HELPER: update the chart week label text ──────────────
+  function setChartLabel(prefix, week) {
+    // Clear existing children
+    while (chartWeekLabel.firstChild) { chartWeekLabel.removeChild(chartWeekLabel.firstChild); }
+    var textNode = document.createTextNode(prefix + ' \u2014 ');
+    var spanEl = document.createElement('span');
+    spanEl.className = 'label-highlight';
+    spanEl.textContent = week;
+    chartWeekLabel.appendChild(textNode);
+    chartWeekLabel.appendChild(spanEl);
+  }
+
+  // ── CHAT MESSAGE ──────────────────────────────────────────
+  function addChatMessage(msg, delay) {
+    return new Promise(function(resolve) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.className = 'chat-msg';
+
+        var sender = document.createElement('div');
+        sender.className = 'chat-sender';
+        sender.textContent = msg.sender;
+
+        var text = document.createElement('div');
+        text.className = 'chat-text';
+        text.textContent = msg.text;
+
+        var time = document.createElement('div');
+        time.className = 'chat-time';
+        time.textContent = msg.time;
+
+        el.appendChild(sender);
+        el.appendChild(text);
+        el.appendChild(time);
+
+        if (msg.prediction) {
+          var tag = document.createElement('div');
+          tag.className = 'prediction-tag';
+          tag.textContent = msg.prediction;
+          el.appendChild(tag);
+        }
+
+        chatFeed.appendChild(el);
+        chatMessageElements.push(el);
+
+        // Trigger slide-in animation on next frame
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            el.classList.add('visible');
+          });
+        });
+
+        resolve();
+      }, delay);
+    });
+  }
+
+  function clearChat() {
+    chatMessageElements.forEach(function(el) {
+      el.classList.add('fading');
+    });
+    setTimeout(function() {
+      while (chatFeed.firstChild) { chatFeed.removeChild(chatFeed.firstChild); }
+      chatMessageElements = [];
+    }, 400);
+  }
+
+  // ── STEP LABELS ───────────────────────────────────────────
+  var stepLabels = [
+    'Before Sunday',
+    'Sunday Morning',
+    'The Afternoon Chaos',
+    'The Aftermath',
+    'The New Order'
+  ];
+
+  // ── INIT STEP DOTS ────────────────────────────────────────
+  for (var d = 0; d < 5; d++) {
+    var dot = document.createElement('div');
+    dot.className = 'step-dot';
+    dot.dataset.step = d;
+    stepDotsContainer.appendChild(dot);
+  }
+
+  // ── STEP TRANSITIONS ─────────────────────────────────────
+  function goToStep(step) {
+    if (step === currentStep) return;
+    currentStep = step;
+
+    // Update step dots
+    var dots = stepDotsContainer.querySelectorAll('.step-dot');
+    dots.forEach(function(d, i) {
+      d.classList.toggle('active', i === step);
+    });
+
+    // Update dashboard label
+    dashStepLabel.textContent = stepLabels[step] || '';
+    dashStepLabel.classList.add('active');
+
+    switch (step) {
+      case 0: // Before Sunday — Week 8 rankings
+        setChartLabel('Power Rankings', 'Week 8');
+        renderChart(teamsWeek8);
+        clearChat();
+        setTimeout(function() {
+          var msgs = chatSteps[0];
+          addChatMessage(msgs[0], 0).then(function() {
+            return addChatMessage(msgs[1], 600);
+          });
+        }, 300);
+        break;
+
+      case 1: // Sunday Morning — same chart, one more chat
+        setChartLabel('Power Rankings', 'Week 8');
+        // Don't re-render chart, just add a message
+        addChatMessage(chatSteps[1][0], 0);
+        break;
+
+      case 2: // Afternoon Chaos — switch to weekly scores, rapid chat
+        setChartLabel("This Week's Scores", 'Week 9');
+        updateChart(weekScores, null);
+        var chaosMessages = chatSteps[2];
+        chaosMessages.forEach(function(msg, i) {
+          addChatMessage(msg, i * 500);
+        });
+        break;
+
+      case 3: // Aftermath — Week 9 final rankings
+        setChartLabel('Power Rankings', 'Week 9');
+        updateChart(teamsWeek9, null);
+        // Fade old chat, then add new
+        clearChat();
+        setTimeout(function() {
+          addChatMessage(chatSteps[3][0], 0);
+        }, 500);
+        break;
+
+      case 4: // New Order — highlight movers
+        setChartLabel('Power Rankings', 'Week 9 Final');
+        updateChart(teamsWeek9, {
+          rise: ['bLaker24', 'zbcowan'],
+          fall: ['Legion', 'MHJTIME', 'Redrumsregrub'],
+          dim: false
+        });
+        clearChat();
+        setTimeout(function() {
+          addChatMessage(chatSteps[4][0], 0);
+        }, 500);
+        break;
+    }
+  }
+
+  // ── INTERSECTION OBSERVER ─────────────────────────────────
+  var steps = document.querySelectorAll('.step');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var stepIndex = parseInt(entry.target.dataset.step, 10);
+        goToStep(stepIndex);
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: '-30% 0px -30% 0px',
+    threshold: 0
+  });
+
+  steps.forEach(function(step) {
+    observer.observe(step);
+  });
+
+  // ── SCROLL PROGRESS ───────────────────────────────────────
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    scrollProgress.style.width = pct + '%';
+  }, { passive: true });
+
+  // ── INITIAL STATE ─────────────────────────────────────────
+  renderChart(teamsWeek8);
+  goToStep(0);
+
+})();
+</script>
+</body>
+</html>

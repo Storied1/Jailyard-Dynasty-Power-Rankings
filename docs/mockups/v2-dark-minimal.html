@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 18px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: #111111;
+    color: #d4d4d4;
+    font-family: 'Source Serif 4', serif;
+    font-weight: 400;
+    line-height: 1.8;
+    letter-spacing: 0.01em;
+    padding: 0 1.25rem;
+  }
+
+  .column {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 4rem 0 6rem;
+  }
+
+  /* --- Header --- */
+  .header {
+    margin-bottom: 3.5rem;
+  }
+
+  .header-week {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    margin-bottom: 0.25rem;
+  }
+
+  .header-date {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: #777;
+    font-style: italic;
+  }
+
+  /* --- Essay --- */
+  .essay p {
+    margin-bottom: 1.5rem;
+  }
+
+  .essay p:first-of-type::first-letter {
+    float: left;
+    font-size: 3.8rem;
+    line-height: 0.8;
+    font-weight: 700;
+    color: #f5f0e8;
+    padding-right: 0.12em;
+    padding-top: 0.08em;
+  }
+
+  /* --- Pull Quote --- */
+  .pull-quote {
+    margin: 3rem auto;
+    max-width: 520px;
+    text-align: center;
+    font-size: 1.35rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: #f5f0e8;
+    font-style: italic;
+  }
+
+  /* --- Section Break --- */
+  .section-break {
+    text-align: center;
+    margin: 3rem 0;
+    color: #555;
+    font-size: 1.2rem;
+    letter-spacing: 0.5em;
+    user-select: none;
+  }
+
+  /* --- Section Headings --- */
+  .section-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    margin-bottom: 2.5rem;
+  }
+
+  /* --- Power Rankings --- */
+  .ranking-entry {
+    margin-bottom: 2.5rem;
+  }
+
+  .ranking-entry:last-child {
+    margin-bottom: 0;
+  }
+
+  .ranking-header {
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .ranking-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f5f0e8;
+    margin-right: 0.15em;
+  }
+
+  .ranking-team {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #d4d4d4;
+  }
+
+  .ranking-record {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: #777;
+    margin-left: 0.4em;
+  }
+
+  .ranking-blurb {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #b0b0b0;
+  }
+
+  /* --- Mailbag --- */
+  .mailbag-entry {
+    margin-bottom: 2.5rem;
+  }
+
+  .mailbag-entry:last-child {
+    margin-bottom: 0;
+  }
+
+  .mailbag-question {
+    font-weight: 600;
+    color: #d4d4d4;
+    margin-bottom: 0.75rem;
+  }
+
+  .mailbag-sender {
+    font-weight: 300;
+    color: #777;
+    font-style: italic;
+  }
+
+  .mailbag-answer {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #b0b0b0;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 480px) {
+    html {
+      font-size: 16px;
+    }
+
+    .column {
+      padding: 3rem 0 4rem;
+    }
+
+    .header {
+      margin-bottom: 2.5rem;
+    }
+
+    .essay p:first-of-type::first-letter {
+      font-size: 3.2rem;
+    }
+
+    .pull-quote {
+      font-size: 1.15rem;
+      margin: 2rem auto;
+    }
+
+    .ranking-number {
+      font-size: 1.7rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<article class="column">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-week">Week 9</div>
+    <div class="header-date">November 5, 2025</div>
+  </header>
+
+  <!-- Essay -->
+  <section class="essay">
+    <p>Something breaks in every dynasty league around Week 9. The pretenders have run out of duct tape. The contenders have stopped pretending they aren't refreshing their trade calculators at 2 a.m. And somewhere in the middle, there's a team that was supposed to figure it out by now -- a team whose owner spent all of August telling the group chat about their "sneaky depth" -- and they're sitting at 4-5 wondering how it all went sideways. That's the temperature check right now in the Jailyard: the gap between what people thought they were building and what the scoreboard says they actually built.</p>
+
+    <p>General Ken-obi is doing that thing where a team gets so consistently good that you forget to be impressed by it. Seven wins. Two losses, both by single digits against top-four teams. A roster that doesn't have a single glaring weakness. It's the dynasty equivalent of that friend who just quietly maxes out their 401k every year while everyone else is chasing meme stocks -- boring, inevitable, and deeply annoying to play against. The rest of the top four is shuffling deck chairs, but Ken-obi isn't shuffling anything. They're just winning.</p>
+
+    <p>Meanwhile, at the bottom of the standings, Father Time has crossed over from "bad season" into "archaeological dig." You're not watching a team lose anymore. You're watching someone excavate the ruins of what used to be a competitive roster and try to sell the artifacts for future draft capital. The 2-7 record doesn't capture the full hopelessness -- it's the <em>way</em> they're losing, by margins that suggest the other team could have started their kicker in the flex and still covered.</p>
+  </section>
+
+  <!-- Pull Quote -->
+  <div class="pull-quote">
+    The gap between what people thought they were building and what the scoreboard says they actually built.
+  </div>
+
+  <!-- Section Break -->
+  <div class="section-break">&middot;</div>
+
+  <!-- Power Rankings -->
+  <section>
+    <h2 class="section-heading">Power Rankings</h2>
+
+    <div class="ranking-entry">
+      <div class="ranking-header">
+        <span class="ranking-number">1.</span>
+        <span class="ranking-team">General Ken-obi</span>
+        <span class="ranking-record">7-2</span>
+      </div>
+      <p class="ranking-blurb">Your roster is the reason other owners open the Sleeper app, stare at it for forty-five seconds, and then close it without doing anything. You've got the highest points-for in the league by a margin that shouldn't be legal in a twelve-team format. The scary part isn't that you're winning -- it's that you haven't even needed a top-five week from your QB to do it. You're winning on floor alone, and your ceiling hasn't shown up yet. When it does, someone's losing by sixty.</p>
+    </div>
+
+    <div class="ranking-entry">
+      <div class="ranking-header">
+        <span class="ranking-number">5.</span>
+        <span class="ranking-team">Legion of Bouz</span>
+        <span class="ranking-record">5-4</span>
+      </div>
+      <p class="ranking-blurb">You are the most interesting 5-4 team I've ever seen, and I mean that as roughly 60% compliment. Your wins have been emphatic -- top-three scoring weeks, the kind of performances that make people check the trade deadline calendar. But your losses have been the dynasty equivalent of stepping on a rake in the dark: sudden, painful, completely avoidable. If you could figure out which version of this team is showing up each Sunday, you'd be a top-three squad. Instead, you're the league's favorite coin flip.</p>
+    </div>
+
+    <div class="ranking-entry">
+      <div class="ranking-header">
+        <span class="ranking-number">8.</span>
+        <span class="ranking-team">Chudders Football Team</span>
+        <span class="ranking-record">4-5</span>
+      </div>
+      <p class="ranking-blurb">The "sneaky depth" era is over. It's just regular depth now, and regular depth at 4-5 means you're one bad week from having a very uncomfortable conversation with yourself about whether this is a retool or a rebuild. Your roster isn't bad -- that's almost the problem. It's good enough to win five or six more games and land you in the seventh seed, where you'll get bounced in round one and draft fifteenth. The dynasty no-man's-land. You need to pick a direction, and you needed to pick it two weeks ago.</p>
+    </div>
+
+    <div class="ranking-entry">
+      <div class="ranking-header">
+        <span class="ranking-number">12.</span>
+        <span class="ranking-team">Father Time</span>
+        <span class="ranking-record">2-7</span>
+      </div>
+      <p class="ranking-blurb">Look, there's no way to sugarcoat a 2-7 record when your two wins came against teams that were also, at the time, terrible. You are speedrunning the tank, and honestly? Respect. At least own it. Your draft capital situation for next year is quietly excellent -- three picks in the first two rounds, a young QB who's flashing, and the kind of cap space that lets you be aggressive in the offseason. This season is a write-off. But if you play the next four months right, this is the last time you're down here.</p>
+    </div>
+  </section>
+
+  <!-- Section Break -->
+  <div class="section-break">&middot;</div>
+
+  <!-- Mailbag -->
+  <section>
+    <h2 class="section-heading">Mailbag</h2>
+
+    <div class="mailbag-entry">
+      <p class="mailbag-question">"Is it too early to call Ken-obi the favorite for the championship, or are we doing that thing where we crown someone in November and they flame out in the playoffs?" <span class="mailbag-sender">-- Danny, via group chat</span></p>
+      <p class="mailbag-answer">It's never too early to call someone the favorite. It's too early to call them the champion. There's a difference, and that difference is the playoffs -- three rounds of single-elimination chaos where the best team in the league can lose because their RB1 gets a stomach bug on Saturday night. Ken-obi is absolutely the favorite. They've been the most consistent team wire-to-wire, they've got the depth to survive a bye week or an injury, and their schedule down the stretch is soft. But "favorite" in dynasty playoffs means something like 25% odds, not 80%. This league is too deep and too weird for coronations. Ask the 2023 version of Legion of Bouz, who went 10-3 in the regular season and lost in the semis to a team that started two waiver-wire pickups at receiver.</p>
+    </div>
+
+    <div class="mailbag-entry">
+      <p class="mailbag-question">"I'm sitting at 4-5 with the sixth-most points scored. Do I buy or sell at the deadline?" <span class="mailbag-sender">-- Anonymous (but we all know who this is)</span></p>
+      <p class="mailbag-answer">The fact that you're asking this question anonymously tells me everything I need to know about where your head is at. Here's the honest answer: look at your roster and ask yourself one question -- not "can I make the playoffs?" because yes, mathematically, you can. The question is "can I win three straight playoff games against the top seeds?" If the answer is anything other than an immediate, confident yes, you sell. You sell your aging assets for picks, you sell your rental players for young upside, and you turn this 4-5 season into a 2026 contender. The worst thing you can do in dynasty is be mediocre for three years in a row. Mediocrity is the silent killer. Pick a lane.</p>
+    </div>
+  </section>
+
+</article>
+
+</body>
+</html>

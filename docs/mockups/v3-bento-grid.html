@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty | Bento Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0a0a0a;
+  color: #e8e4de;
+  font-family: 'Newsreader', serif;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── Layout Container ─── */
+.bento-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* ─── Page Header ─── */
+.page-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 1.5rem 0 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 1.5rem;
+}
+
+.page-header-brand {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  text-decoration: none;
+}
+
+.page-header-issue {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: rgba(232,228,222,0.4);
+  letter-spacing: 0.05em;
+}
+
+/* ─── Bento Grid ─── */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+/* ─── Card Base ─── */
+.bento-card {
+  background: #141414;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+
+  /* Scroll reveal */
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.bento-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+.bento-card:hover {
+  border-color: rgba(201,168,76,0.25);
+  box-shadow: 0 0 20px rgba(201,168,76,0.06);
+}
+
+/* ─── Span Utilities ─── */
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+.span-4 { grid-column: span 4; }
+.row-2  { grid-row: span 2; }
+
+/* ─── Typography ─── */
+.headline {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.serif {
+  font-family: 'Newsreader', serif;
+}
+
+.gold { color: #c9a84c; }
+.muted { color: rgba(232,228,222,0.45); }
+.red { color: #c44; }
+
+/* ─── Card: Essay (Hero) ─── */
+.card-essay {
+  grid-column: span 3;
+}
+
+.card-essay .essay-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 0.75rem;
+}
+
+.card-essay h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  line-height: 1.1;
+  color: #e8e4de;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.card-essay .essay-body {
+  font-family: 'Newsreader', serif;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: rgba(232,228,222,0.8);
+}
+
+.card-essay .essay-body .drop-cap {
+  float: left;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 4.2rem;
+  line-height: 0.8;
+  margin-right: 0.15em;
+  margin-top: 0.05em;
+  color: #c9a84c;
+}
+
+.card-essay .essay-body p {
+  margin-bottom: 1rem;
+}
+
+.card-essay .essay-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Card: Standings ─── */
+.card-standings {
+  grid-row: span 2;
+}
+
+.card-standings .standings-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 1rem;
+}
+
+.standings-list {
+  list-style: none;
+}
+
+.standings-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.standings-list li:last-child {
+  border-bottom: none;
+}
+
+.standings-list .rank-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: rgba(232,228,222,0.35);
+  width: 1.4rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.standings-list .team-name {
+  flex: 1;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: rgba(232,228,222,0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.standings-list .team-record {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(232,228,222,0.4);
+  flex-shrink: 0;
+}
+
+.standings-list li.highlighted .team-name {
+  color: #c9a84c;
+  font-weight: 700;
+}
+
+.standings-list li.highlighted .rank-num {
+  color: #c9a84c;
+}
+
+.standings-list .playoff-line {
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
+  margin: 0.25rem 0;
+  border-bottom: none;
+  padding: 0;
+}
+
+/* ─── Card: Stat ─── */
+.card-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 140px;
+}
+
+.card-stat .stat-number {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 3rem;
+  line-height: 1;
+  color: #c9a84c;
+  letter-spacing: -0.02em;
+}
+
+.card-stat .stat-label {
+  font-family: 'Newsreader', serif;
+  font-size: 0.85rem;
+  color: rgba(232,228,222,0.55);
+  margin-top: 0.5rem;
+  line-height: 1.3;
+}
+
+.card-stat .stat-sublabel {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(232,228,222,0.3);
+  margin-top: 0.25rem;
+  letter-spacing: 0.03em;
+}
+
+/* ─── Card: Quote ─── */
+.card-quote {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-quote blockquote {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(232,228,222,0.85);
+  margin-bottom: 0.75rem;
+}
+
+.card-quote blockquote::before {
+  content: "\201C";
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.5rem;
+  line-height: 0;
+  vertical-align: -0.35em;
+  color: #c9a84c;
+  margin-right: 0.1em;
+}
+
+.card-quote .quote-attr {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(232,228,222,0.35);
+  letter-spacing: 0.03em;
+}
+
+/* ─── Card: Power Ranking ─── */
+.card-rank {
+  position: relative;
+}
+
+.card-rank .rank-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 12px 12px 0 0;
+}
+
+.card-rank .rank-accent.gold-accent {
+  background: linear-gradient(90deg, #c9a84c, #d4b65a);
+}
+
+.card-rank .rank-accent.red-accent {
+  background: linear-gradient(90deg, #c44, #a33);
+}
+
+.card-rank .rank-accent.neutral-accent {
+  background: linear-gradient(90deg, rgba(232,228,222,0.15), rgba(232,228,222,0.08));
+}
+
+.card-rank .rank-big {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: rgba(232,228,222,0.08);
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+}
+
+.card-rank .rank-team {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #e8e4de;
+  margin-top: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+
+.card-rank .rank-record {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(232,228,222,0.4);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.03em;
+}
+
+.card-rank .rank-verdict {
+  font-family: 'Newsreader', serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(232,228,222,0.65);
+}
+
+/* ─── Card: Mailbag ─── */
+.card-mailbag .mailbag-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 1rem;
+}
+
+.card-mailbag .mailbag-q {
+  font-family: 'Newsreader', serif;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #c9a84c;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.card-mailbag .mailbag-a {
+  font-family: 'Newsreader', serif;
+  font-size: 0.95rem;
+  color: rgba(232,228,222,0.75);
+  line-height: 1.65;
+}
+
+.card-mailbag .mailbag-from {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(232,228,222,0.3);
+  margin-top: 0.5rem;
+}
+
+/* ─── Card: Matchup ─── */
+.card-matchup .matchup-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 0.8rem;
+}
+
+.card-matchup .matchup-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.card-matchup .matchup-side {
+  text-align: center;
+  flex: 1;
+}
+
+.card-matchup .matchup-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #e8e4de;
+  margin-bottom: 0.15rem;
+}
+
+.card-matchup .matchup-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #c9a84c;
+}
+
+.card-matchup .matchup-vs {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: rgba(232,228,222,0.3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 0.5rem;
+}
+
+.card-matchup .prob-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.card-matchup .prob-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c9a84c, #d4b65a);
+  border-radius: 2px;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-matchup .prob-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(232,228,222,0.3);
+  margin-top: 0.3rem;
+}
+
+/* ─── Card: Trending ─── */
+.card-trend .trend-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 0.8rem;
+}
+
+.card-trend .trend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 0.85rem;
+}
+
+.card-trend .trend-item:last-child {
+  border-bottom: none;
+}
+
+.card-trend .trend-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 1.2rem;
+  text-align: center;
+}
+
+.card-trend .trend-text {
+  color: rgba(232,228,222,0.75);
+  font-family: 'Newsreader', serif;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* ─── Card: Pull Quote ─── */
+.card-pullquote {
+  grid-column: span 4;
+  text-align: center;
+  padding: 2.5rem 3rem;
+  border-top: 1px solid rgba(201,168,76,0.15);
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+  background: transparent;
+}
+
+.card-pullquote blockquote {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 1.5rem;
+  line-height: 1.55;
+  color: rgba(232,228,222,0.9);
+  max-width: 700px;
+  margin: 0 auto;
+  letter-spacing: 0.01em;
+}
+
+.card-pullquote .pq-dash {
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: #c9a84c;
+  margin: 1rem auto 0;
+}
+
+/* ─── Footer ─── */
+.bento-footer {
+  text-align: center;
+  padding: 3rem 0 2rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(232,228,222,0.2);
+  letter-spacing: 0.05em;
+}
+
+/* ─── Responsive: Tablet ─── */
+@media (max-width: 900px) {
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .card-essay {
+    grid-column: span 2;
+  }
+
+  .card-standings {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+
+  .card-pullquote {
+    grid-column: span 2;
+    padding: 2rem 1.5rem;
+  }
+
+  .card-pullquote blockquote {
+    font-size: 1.25rem;
+  }
+
+  .card-mailbag.span-2 {
+    grid-column: span 2;
+  }
+
+  .card-essay h2 {
+    font-size: 1.6rem;
+  }
+}
+
+/* ─── Responsive: Mobile ─── */
+@media (max-width: 600px) {
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-wrap {
+    padding: 1rem 0.75rem 3rem;
+  }
+
+  .card-essay,
+  .card-standings,
+  .card-pullquote,
+  .span-2, .span-3, .span-4 {
+    grid-column: span 1;
+  }
+
+  .card-essay h2 {
+    font-size: 1.4rem;
+  }
+
+  .card-pullquote blockquote {
+    font-size: 1.1rem;
+  }
+
+  .card-pullquote {
+    padding: 1.5rem 1rem;
+  }
+
+  .card-rank .rank-big {
+    font-size: 2.5rem;
+  }
+
+  .card-stat .stat-number {
+    font-size: 2.4rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div class="bento-wrap">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <a href="#" class="page-header-brand">The Jailyard Dynasty</a>
+    <span class="page-header-issue">Week 9 &middot; 2025 Season &middot; Nov 4</span>
+  </header>
+
+  <!-- Bento Grid -->
+  <div class="bento-grid">
+
+    <!-- ═══ ROW 1 ═══ -->
+
+    <!-- Essay (spans 3 cols) -->
+    <div class="bento-card card-essay" data-delay="0">
+      <div class="essay-label">The Column</div>
+      <h2>The Unkillable Team at the Top and the Empire Crumbling Below</h2>
+      <div class="essay-body">
+        <p><span class="drop-cap">T</span>here are weeks that reorder your priors, and then there is Week 9 in the Jailyard. Ken-obi dropped 165 on a roster that had no business putting up 165. Lamar sat on the bench. The "wrong" lineup still obliterated the field. That is what happens when a team is operating on a different frequency than the rest of the league &mdash; the mistakes don't even matter because the margin is that obscene. Seven wins in nine weeks. The point-scoring machine doesn't have an off switch, and the rest of you are still looking for the plug.</p>
+        <p>Meanwhile, the bottom half of the standings has turned into a telenovela. Father Time is running a roster that looks like it was assembled during a power outage &mdash; 2-7 and somehow still finding new ways to lose. The trade deadline is approaching and half the league is trying to figure out whether to buy, sell, or just close the app and pretend the season isn't happening. The group chat has been <em>unhinged</em>.</p>
+      </div>
+    </div>
+
+    <!-- Standings (spans 2 rows) -->
+    <div class="bento-card card-standings row-2" data-delay="1">
+      <div class="standings-title">Standings</div>
+      <ul class="standings-list">
+        <li class="highlighted">
+          <span class="rank-num">1</span>
+          <span class="team-name">General Ken-obi</span>
+          <span class="team-record">7-2</span>
+        </li>
+        <li>
+          <span class="rank-num">2</span>
+          <span class="team-name">Kittler</span>
+          <span class="team-record">7-2</span>
+        </li>
+        <li>
+          <span class="rank-num">3</span>
+          <span class="team-name">Prestige Worldwide</span>
+          <span class="team-record">6-3</span>
+        </li>
+        <li>
+          <span class="rank-num">4</span>
+          <span class="team-name">Big Chas</span>
+          <span class="team-record">6-3</span>
+        </li>
+        <li>
+          <span class="rank-num">5</span>
+          <span class="team-name">Legion of Bouz</span>
+          <span class="team-record">5-4</span>
+        </li>
+        <li>
+          <span class="rank-num">6</span>
+          <span class="team-name">Motown Hitmen</span>
+          <span class="team-record">5-4</span>
+        </li>
+        <li class="playoff-line"></li>
+        <li>
+          <span class="rank-num">7</span>
+          <span class="team-name">Franchise Four</span>
+          <span class="team-record">5-4</span>
+        </li>
+        <li>
+          <span class="rank-num">8</span>
+          <span class="team-name">Chudders Football</span>
+          <span class="team-record">4-5</span>
+        </li>
+        <li>
+          <span class="rank-num">9</span>
+          <span class="team-name">Miami Dice</span>
+          <span class="team-record">3-6</span>
+        </li>
+        <li>
+          <span class="rank-num">10</span>
+          <span class="team-name">Skol City</span>
+          <span class="team-record">3-6</span>
+        </li>
+        <li>
+          <span class="rank-num">11</span>
+          <span class="team-name">The Mixon Admin</span>
+          <span class="team-record">3-6</span>
+        </li>
+        <li>
+          <span class="rank-num">12</span>
+          <span class="team-name">Father Time</span>
+          <span class="team-record">2-7</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ═══ ROW 2 ═══ -->
+
+    <!-- Stat: High Score -->
+    <div class="bento-card card-stat" data-delay="2">
+      <div class="stat-number">165.2</div>
+      <div class="stat-label">Highest Score This Week</div>
+      <div class="stat-sublabel">General Ken-obi</div>
+    </div>
+
+    <!-- Stat: Blowout -->
+    <div class="bento-card card-stat" data-delay="3">
+      <div class="stat-number">62.5</div>
+      <div class="stat-label">Biggest Blowout Margin</div>
+      <div class="stat-sublabel">Ken-obi over Father Time</div>
+    </div>
+
+    <!-- Quote -->
+    <div class="bento-card card-quote" data-delay="4">
+      <blockquote>He really started Goff over Lamar. And still won by sixty. I hate it here.</blockquote>
+      <div class="quote-attr">@DustinB &middot; Group Chat &middot; Sun 4:47 PM</div>
+    </div>
+
+    <!-- ═══ ROW 3: Power Rankings ═══ -->
+
+    <!-- #1 -->
+    <div class="bento-card card-rank" data-delay="5">
+      <div class="rank-accent gold-accent"></div>
+      <div class="rank-big">#1</div>
+      <div class="rank-team">General Ken-obi</div>
+      <div class="rank-record">7-2 &middot; PF: 1,294</div>
+      <div class="rank-verdict">Benched his QB1 and still posted the week's highest score. That's not a roster, that's a cheat code.</div>
+    </div>
+
+    <!-- #5 -->
+    <div class="bento-card card-rank" data-delay="6">
+      <div class="rank-accent neutral-accent"></div>
+      <div class="rank-big">#5</div>
+      <div class="rank-team">Legion of Bouz</div>
+      <div class="rank-record">5-4 &middot; PF: 1,108</div>
+      <div class="rank-verdict">The 4-0 start feels like a different era. Three losses in five weeks and the vibes in the group chat have shifted.</div>
+    </div>
+
+    <!-- #8 -->
+    <div class="bento-card card-rank" data-delay="7">
+      <div class="rank-accent neutral-accent"></div>
+      <div class="rank-big">#8</div>
+      <div class="rank-team">Chudders Football</div>
+      <div class="rank-record">4-5 &middot; PF: 1,041</div>
+      <div class="rank-verdict">Hovering right at the Mendoza line. Not dead yet, but the margin for error evaporated two weeks ago.</div>
+    </div>
+
+    <!-- #12 -->
+    <div class="bento-card card-rank" data-delay="8">
+      <div class="rank-accent red-accent"></div>
+      <div class="rank-big">#12</div>
+      <div class="rank-team">Father Time</div>
+      <div class="rank-record">2-7 &middot; PF: 892</div>
+      <div class="rank-verdict">The tank is fully operational. At this point the draft lottery is the only scoreboard that matters.</div>
+    </div>
+
+    <!-- ═══ ROW 4 ═══ -->
+
+    <!-- Mailbag (spans 2 cols) -->
+    <div class="bento-card card-mailbag span-2" data-delay="9">
+      <div class="mailbag-title">Mailbag</div>
+      <div class="mailbag-q">Q: Is it time to panic about Legion of Bouz? They were 4-0 and now they look lost. &mdash; @RealBouzFan</div>
+      <div class="mailbag-a">Not panic. But it's time to stop pretending the 4-0 start was a statement. It was a schedule gift. The Legion played four bottom-half teams in the first month and beat them in ways that looked impressive until you realized the competition was running 2019 rosters. Now the schedule has teeth, and the roster has questions &mdash; specifically at receiver, where "WR2 by committee" is not a strategy so much as an admission of defeat. The next three weeks are all playoff-caliber opponents. If they go 1-2 or worse, the narrative flips from "early frontrunner" to "cautionary tale" faster than you can say "sell high on your aging RB1."</div>
+      <div class="mailbag-from">via Group Chat DMs</div>
+    </div>
+
+    <!-- Matchup of the Week -->
+    <div class="bento-card card-matchup" data-delay="10">
+      <div class="matchup-label">Matchup of the Week</div>
+      <div class="matchup-teams">
+        <div class="matchup-side">
+          <div class="matchup-name">Ken-obi</div>
+          <div class="matchup-score">165.2</div>
+        </div>
+        <div class="matchup-vs">vs</div>
+        <div class="matchup-side">
+          <div class="matchup-name">Father Time</div>
+          <div class="matchup-score">102.7</div>
+        </div>
+      </div>
+      <div class="prob-bar">
+        <div class="prob-fill" style="width: 0%;" data-target="89"></div>
+      </div>
+      <div class="prob-label">
+        <span>Ken-obi 89%</span>
+        <span>Father Time 11%</span>
+      </div>
+    </div>
+
+    <!-- Trending -->
+    <div class="bento-card card-trend" data-delay="11">
+      <div class="trend-title">Trending</div>
+      <div class="trend-item">
+        <span class="trend-icon" style="color:#4a4;">&#9650;</span>
+        <span class="trend-text">Kittler: 3 straight wins, playoff locked</span>
+      </div>
+      <div class="trend-item">
+        <span class="trend-icon" style="color:#c44;">&#9660;</span>
+        <span class="trend-text">Legion of Bouz: 1-3 in last 4, schedule gets harder</span>
+      </div>
+      <div class="trend-item">
+        <span class="trend-icon" style="color:#c9a84c;">&#9733;</span>
+        <span class="trend-text">Trade deadline in 2 weeks &mdash; 4 teams exploring deals</span>
+      </div>
+    </div>
+
+    <!-- ═══ ROW 5: Pull Quote ═══ -->
+
+    <div class="bento-card card-pullquote" data-delay="12">
+      <blockquote>There are dynasty leagues where the competitive window opens and closes. And then there is Ken-obi's window, which is less a window and more a hole they drove a truck through.</blockquote>
+      <span class="pq-dash"></span>
+    </div>
+
+  </div><!-- .bento-grid -->
+
+  <footer class="bento-footer">
+    The Jailyard Dynasty &middot; Est. 2022 &middot; Week 9, 2025 Season
+  </footer>
+
+</div><!-- .bento-wrap -->
+
+<script>
+(function() {
+  // ─── Scroll Reveal with Stagger ───
+  var cards = document.querySelectorAll('.bento-card');
+  var staggerDelay = 80; // ms between each card
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var card = entry.target;
+        var delay = parseInt(card.dataset.delay, 10) || 0;
+        setTimeout(function() {
+          card.classList.add('visible');
+        }, delay * staggerDelay);
+        observer.unobserve(card);
+      }
+    });
+  }, {
+    threshold: 0.08,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  cards.forEach(function(card) {
+    observer.observe(card);
+  });
+
+  // ─── Animated Probability Bar ───
+  var probFills = document.querySelectorAll('.prob-fill[data-target]');
+  var probObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var fill = entry.target;
+        var target = fill.dataset.target;
+        setTimeout(function() {
+          fill.style.width = target + '%';
+        }, 400);
+        probObserver.unobserve(fill);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  probFills.forEach(function(fill) {
+    probObserver.observe(fill);
+  });
+})();
+</script>
+
+</body>
+</html>

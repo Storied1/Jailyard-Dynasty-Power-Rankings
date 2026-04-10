@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Playfield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Newsreader:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #e0e0e0;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: default;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ── Canvas fills viewport ── */
+#field {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+}
+
+/* ── Ambient chat quotes ── */
+.ambient-text {
+  position: fixed;
+  z-index: 0;
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+  color: rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform;
+}
+.ambient-text.a1 {
+  top: 18%;
+  animation: drift-r 42s linear infinite;
+}
+.ambient-text.a2 {
+  top: 55%;
+  animation: drift-l 38s linear infinite;
+  animation-delay: -12s;
+}
+.ambient-text.a3 {
+  top: 78%;
+  animation: drift-r 50s linear infinite;
+  animation-delay: -25s;
+}
+@keyframes drift-r {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(110vw); }
+}
+@keyframes drift-l {
+  0%   { transform: translateX(110vw); }
+  100% { transform: translateX(-120%); }
+}
+
+/* ── Bloom panel ── */
+.bloom-panel {
+  position: fixed;
+  z-index: 50;
+  width: clamp(280px, 36vw, 420px);
+  padding: 1.6rem 1.8rem;
+  background: rgba(6, 6, 18, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.bloom-panel.open {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.bloom-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.3rem;
+}
+.bloom-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+.bloom-record {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 1rem;
+}
+.bloom-blurb {
+  font-family: 'Newsreader', serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 1.1rem;
+}
+.bloom-stat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.7rem;
+  line-height: 1.4;
+}
+.bloom-stat-value {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+}
+.bloom-quote-wrap {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.45;
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  padding-left: 0.8rem;
+}
+.bloom-quote-attr {
+  display: block;
+  font-style: normal;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.2);
+  margin-top: 0.3rem;
+  letter-spacing: 0.05em;
+}
+
+/* ── H2H tooltip ── */
+.h2h-tooltip {
+  position: fixed;
+  z-index: 40;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(10, 10, 30, 0.8);
+  backdrop-filter: blur(8px);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.h2h-tooltip.show { opacity: 1; }
+
+/* ── Hover label ── */
+.hover-label {
+  position: fixed;
+  z-index: 30;
+  font-family: 'JetBrains Mono', monospace;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  text-align: center;
+}
+.hover-label.show { opacity: 1; }
+.hover-label .hl-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.04em;
+}
+.hover-label .hl-record {
+  font-size: 0.65rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 0.1rem;
+}
+
+/* ── Field Notes overlay ── */
+.field-notes-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+.field-notes-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.field-notes-content {
+  max-width: 600px;
+  padding: 3rem 2.5rem;
+  font-family: 'Newsreader', serif;
+  font-size: 1.15rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.8);
+}
+.field-notes-content .drop-cap::first-letter {
+  float: left;
+  font-size: 4.2rem;
+  line-height: 0.85;
+  font-weight: 600;
+  color: #d4a04a;
+  margin-right: 0.12em;
+  margin-top: 0.06em;
+}
+.field-notes-content .fn-body {
+  margin-top: 1.2rem;
+}
+.field-notes-content .fn-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.15);
+  margin-top: 2.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Timeline rail ── */
+.timeline-rail {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 60;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+.timeline-track {
+  position: relative;
+  width: min(80vw, 500px);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.timeline-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 8px 6px;
+  transition: color 0.2s;
+  user-select: none;
+}
+.timeline-marker:hover { color: rgba(255, 255, 255, 0.5); }
+.timeline-marker.active { color: rgba(255, 255, 255, 0.7); font-weight: 700; }
+.timeline-scrubber {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: grab;
+  transition: background 0.2s, box-shadow 0.2s;
+  z-index: 2;
+}
+.timeline-scrubber:hover {
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+.timeline-scrubber.dragging { cursor: grabbing; }
+
+@media (max-width: 600px) {
+  .bloom-panel { width: clamp(260px, 85vw, 360px); padding: 1.2rem 1.4rem; }
+  .bloom-name { font-size: 1.1rem; }
+  .bloom-blurb { font-size: 0.92rem; }
+  .field-notes-content { padding: 2rem 1.5rem; font-size: 1rem; }
+  .ambient-text { font-size: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="field"></canvas>
+
+<!-- Ambient chat quotes -->
+<div class="ambient-text a1">"trade him while you can"</div>
+<div class="ambient-text a2">"this league is rigged"</div>
+<div class="ambient-text a3">"imagine losing to Father Time"</div>
+
+<!-- Bloom panel (populated via textContent in JS) -->
+<div class="bloom-panel" id="bloom">
+  <div class="bloom-rank" id="bloomRank"></div>
+  <div class="bloom-name" id="bloomName"></div>
+  <div class="bloom-record" id="bloomRecord"></div>
+  <div class="bloom-blurb" id="bloomBlurb"></div>
+  <div class="bloom-stat" id="bloomStat">Top performer: <span class="bloom-stat-value" id="bloomStatVal"></span></div>
+  <div class="bloom-quote-wrap">
+    <span id="bloomQuoteText"></span>
+    <span class="bloom-quote-attr" id="bloomQuoteAttr"></span>
+  </div>
+</div>
+
+<!-- H2H tooltip -->
+<div class="h2h-tooltip" id="h2hTip"></div>
+
+<!-- Hover label -->
+<div class="hover-label" id="hoverLabel">
+  <div class="hl-name" id="hlName"></div>
+  <div class="hl-record" id="hlRecord"></div>
+</div>
+
+<!-- Field Notes overlay -->
+<div class="field-notes-overlay" id="fieldNotes">
+  <div class="field-notes-content">
+    <p class="drop-cap">Twelve dots on a dark screen. That is all you get. No instructions, no welcome banner, no helpful tooltip appearing after three seconds of inactivity. Just the dots, pulsing faintly, each one a different shade of warmth or cold depending on where it sits in the hierarchy of a twelve-team dynasty league that has been running since 2022.</p>
+    <p class="fn-body">The brightest one is General Ken-obi. Seven and two. The dimmest, almost invisible at the edge, is Father Time at two and seven. Between them, the entire emotional spectrum of a fantasy football season: the smug confidence of a team that knows it is good, the quiet desperation of one that traded its future and got nothing back, the manic energy of a mid-table squad that could go either way and knows it.</p>
+    <p class="fn-body">Click a dot. See what it knows. Hover over a thread. See who owes whom. Drag the timeline. Watch empires rise and fall.</p>
+    <div class="fn-hint">click anywhere to close</div>
+  </div>
+</div>
+
+<!-- Timeline rail -->
+<div class="timeline-rail" id="timelineRail">
+  <div class="timeline-track" id="timelineTrack">
+    <span class="timeline-marker" data-year="2022" style="left:0%">2022</span>
+    <span class="timeline-marker" data-year="2023" style="left:33.3%">2023</span>
+    <span class="timeline-marker" data-year="2024" style="left:66.6%">2024</span>
+    <span class="timeline-marker active" data-year="2025" style="left:100%">2025</span>
+    <div class="timeline-scrubber" id="scrubber" style="left:100%"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ─── Team Data ──────────────────────────────────────────────
+  var teams = [
+    {
+      name: 'General Ken-obi', rank: 1, record: '7-2', wins: 7, losses: 2,
+      color: '#d4a04a', ring: 'center',
+      blurb: 'You have the best roster in the league and everyone knows it. The only question is whether you\u2019re bored or paranoid. Two titles already in the vault. The field is chasing a ghost.',
+      topPerformer: 'Saquon Barkley \u2014 28.4 pts',
+      chatQuote: '\u201cKen-obi is running this league like a dictatorship\u201d',
+      chatAttr: '@KidBouzie, Week 8'
+    },
+    {
+      name: 'Noble FFT', rank: 2, record: '6-3', wins: 6, losses: 3,
+      color: '#6e8efb', ring: 'inner',
+      blurb: 'The quiet contender. You don\u2019t talk much in the group chat, which either means you\u2019re plotting or you genuinely don\u2019t care. Both options are terrifying.',
+      topPerformer: 'Ja\u2019Marr Chase \u2014 26.1 pts',
+      chatQuote: '\u201cNoble is the one I\u2019m actually scared of\u201d',
+      chatAttr: '@Kittler, Week 5'
+    },
+    {
+      name: 'MHJTIME', rank: 3, record: '6-3', wins: 6, losses: 3,
+      color: '#f472b6', ring: 'inner',
+      blurb: 'You built this roster through trades that made everyone else uncomfortable. Half the league thinks you fleeced them. They\u2019re right.',
+      topPerformer: 'CeeDee Lamb \u2014 24.8 pts',
+      chatQuote: '\u201cHow does MHJ keep getting away with these trades\u201d',
+      chatAttr: '@Ghastly, Week 7'
+    },
+    {
+      name: 'Ghastly Grayskull', rank: 4, record: '5-4', wins: 5, losses: 4,
+      color: '#a78bfa', ring: 'inner',
+      blurb: 'The vibes team. When your roster shows up, nobody can touch you. When it doesn\u2019t, you look like you drafted at a gas station.',
+      topPerformer: 'Tyreek Hill \u2014 23.2 pts',
+      chatQuote: '\u201cGhastly is a top 3 team on Thursdays and a bottom 3 team on Sundays\u201d',
+      chatAttr: '@FatherTime, Week 4'
+    },
+    {
+      name: 'Legion of Bouz', rank: 5, record: '5-4', wins: 5, losses: 4,
+      color: '#f97316', ring: 'mid',
+      blurb: 'Started 4-0 and had the league shook. Then reality came knocking and it brought receipts. Still dangerous. Still loud.',
+      topPerformer: 'Josh Allen \u2014 31.2 pts',
+      chatQuote: '\u201c4-0 and I\u2019m hearing NOTHING from this chat\u201d',
+      chatAttr: '@KidBouzie, Week 4'
+    },
+    {
+      name: 'Rasheeing the Scene', rank: 6, record: '5-4', wins: 5, losses: 4,
+      color: '#34d399', ring: 'mid',
+      blurb: 'Steady. Boring. Effective. You\u2019re the team that wins 105-102 every week and nobody writes about it. Which is exactly how you like it.',
+      topPerformer: 'Rashee Rice \u2014 22.6 pts',
+      chatQuote: '\u201cRashee out here being invisible and 5-4\u201d',
+      chatAttr: '@LegionBouzie, Week 9'
+    },
+    {
+      name: 'Kittler on the Roof', rank: 7, record: '4-5', wins: 4, losses: 5,
+      color: '#fb7185', ring: 'mid',
+      blurb: 'The perennial rival. Every game against Ken-obi feels like a playoff. You\u2019ve been chasing that throne since 2022 and the gap is only getting wider.',
+      topPerformer: 'George Kittle \u2014 19.8 pts',
+      chatQuote: '\u201cKittler is one trade away from being scary again\u201d',
+      chatAttr: '@Noble, Week 6'
+    },
+    {
+      name: 'Chudders', rank: 8, record: '4-5', wins: 4, losses: 5,
+      color: '#38bdf8', ring: 'mid',
+      blurb: 'Rebuilding, but make it fashion. You traded away the present for a future that looks increasingly promising. Patience is either your greatest virtue or your longest con.',
+      topPerformer: 'Bijan Robinson \u2014 25.1 pts',
+      chatQuote: '\u201cChudders is either tanking or a genius, no in between\u201d',
+      chatAttr: '@MHJTIME, Week 3'
+    },
+    {
+      name: 'Burden of Etienne-y Woody', rank: 9, record: '3-6', wins: 3, losses: 6,
+      color: '#818cf8', ring: 'outer',
+      blurb: 'The name is longer than the win streak. Something has to give. Hopefully it\u2019s the roster construction and not your sanity.',
+      topPerformer: 'Travis Etienne \u2014 18.4 pts',
+      chatQuote: '\u201cThat team name is doing more work than the roster\u201d',
+      chatAttr: '@Ghastly, Week 7'
+    },
+    {
+      name: 'Sleeping Giants', rank: 10, record: '3-6', wins: 3, losses: 6,
+      color: '#94a3b8', ring: 'outer',
+      blurb: 'Three and six, but every loss was close. You\u2019re not bad. You\u2019re unlucky. Which in dynasty terms means the same thing, but at least you can sleep at night.',
+      topPerformer: 'Amon-Ra St. Brown \u2014 21.3 pts',
+      chatQuote: '\u201cSleeping Giants are the definition of fantasy pain\u201d',
+      chatAttr: '@Rasheeing, Week 8'
+    },
+    {
+      name: 'Boonist Monks', rank: 11, record: '3-6', wins: 3, losses: 6,
+      color: '#a1a1aa', ring: 'outer',
+      blurb: 'Meditation isn\u2019t going to fix this roster. But maybe a top-3 pick will. The rebuild is real, the timeline is unclear, and the group chat has moved on.',
+      topPerformer: 'Breece Hall \u2014 20.7 pts',
+      chatQuote: '\u201cBoonist went from contender to monk in one offseason\u201d',
+      chatAttr: '@Kittler, Week 6'
+    },
+    {
+      name: 'Father Time', rank: 12, record: '2-7', wins: 2, losses: 7,
+      color: '#475569', ring: 'far',
+      blurb: 'Two and seven. The clock is ticking, the roster is aging, and the league is circling. But you\u2019ve been here before. The only question is whether you\u2019re rebuilding or just\u2026 existing.',
+      topPerformer: 'Derrick Henry \u2014 17.9 pts',
+      chatQuote: '\u201cFather Time is undefeated and so is this guy\u2019s losing streak\u201d',
+      chatAttr: '@KidBouzie, Week 9'
+    }
+  ];
+
+  // ─── H2H connection data ───────────────────────────────────
+  var connections = [
+    { a: 0, b: 6, h2h: '5-3', rivalry: true },
+    { a: 0, b: 1, h2h: '4-2' },
+    { a: 1, b: 2, h2h: '3-3' },
+    { a: 2, b: 3, h2h: '4-3' },
+    { a: 4, b: 5, h2h: '3-4' },
+    { a: 3, b: 7, h2h: '2-3' },
+    { a: 8, b: 9, h2h: '3-3' },
+    { a: 10, b: 11, h2h: '4-2' },
+    { a: 0, b: 4, h2h: '4-4' },
+    { a: 5, b: 6, h2h: '2-4' }
+  ];
+
+  // ─── Canvas setup ──────────────────────────────────────────
+  var canvas = document.getElementById('field');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var W, H, cx, cy;
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx = W / 2;
+    cy = H / 2;
+    computePositions();
+  }
+
+  // ─── Position computation ──────────────────────────────────
+  function computePositions() {
+    var scale = Math.min(W, H);
+    var rInner = scale * 0.14;
+    var rMid = scale * 0.28;
+    var rOuter = scale * 0.38;
+    var rFar = scale * 0.44;
+
+    teams[0].x = cx;
+    teams[0].y = cy;
+    teams[0].radius = scale * 0.025;
+
+    var innerTeams = teams.slice(1, 4);
+    innerTeams.forEach(function(t, i) {
+      var angle = -Math.PI / 2 + (i * 2 * Math.PI / 3);
+      t.x = cx + Math.cos(angle) * rInner;
+      t.y = cy + Math.sin(angle) * rInner;
+      t.radius = scale * 0.019;
+    });
+
+    var midTeams = teams.slice(4, 8);
+    midTeams.forEach(function(t, i) {
+      var angle = -Math.PI / 4 + (i * 2 * Math.PI / 4);
+      t.x = cx + Math.cos(angle) * rMid;
+      t.y = cy + Math.sin(angle) * rMid;
+      t.radius = scale * 0.015;
+    });
+
+    var outerTeams = teams.slice(8, 11);
+    outerTeams.forEach(function(t, i) {
+      var angle = -Math.PI / 3 + (i * 2 * Math.PI / 3);
+      t.x = cx + Math.cos(angle) * rOuter;
+      t.y = cy + Math.sin(angle) * rOuter;
+      t.radius = scale * 0.012;
+    });
+
+    teams[11].x = cx + rFar * 0.7;
+    teams[11].y = cy + rFar * 0.7;
+    teams[11].radius = scale * 0.009;
+  }
+
+  // ─── Drawing ───────────────────────────────────────────────
+  var breathPhase = 0;
+  var hoveredTeam = null;
+  var hoveredConn = null;
+  var openBloomIdx = -1;
+
+  function draw() {
+    breathPhase += 0.008;
+    ctx.clearRect(0, 0, W, H);
+
+    // Background gradient
+    var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.6);
+    grad.addColorStop(0, '#0a0a1a');
+    grad.addColorStop(1, '#000000');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw connections
+    connections.forEach(function(conn) {
+      var ta = teams[conn.a];
+      var tb = teams[conn.b];
+      var isHovered = (hoveredConn === conn);
+      var lineWidth = conn.rivalry ? (isHovered ? 2.5 : 1.5) : (isHovered ? 1.8 : 0.5);
+      var alpha = conn.rivalry ? (isHovered ? 0.5 : 0.15) : (isHovered ? 0.35 : 0.05);
+
+      ctx.beginPath();
+      ctx.moveTo(ta.x, ta.y);
+      ctx.lineTo(tb.x, tb.y);
+      ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+    });
+
+    // Draw nodes
+    var breath = Math.sin(breathPhase) * 0.03;
+
+    teams.forEach(function(t, i) {
+      var r = t.radius * (1 + breath);
+      var isHovered = (hoveredTeam === i);
+      var isOpen = (openBloomIdx === i);
+
+      // Outer glow
+      var glowSize = isHovered ? r * 4 : (isOpen ? r * 3.5 : r * 2.5);
+      var glowAlpha = isHovered ? 0.35 : (isOpen ? 0.3 : 0.15);
+      var glowGrad = ctx.createRadialGradient(t.x, t.y, r * 0.5, t.x, t.y, glowSize);
+      glowGrad.addColorStop(0, hexToRgba(t.color, glowAlpha));
+      glowGrad.addColorStop(1, hexToRgba(t.color, 0));
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, glowSize, 0, Math.PI * 2);
+      ctx.fillStyle = glowGrad;
+      ctx.fill();
+
+      // Node body
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = t.color;
+      ctx.fill();
+
+      // Bright center highlight
+      var coreGrad = ctx.createRadialGradient(t.x - r * 0.2, t.y - r * 0.2, 0, t.x, t.y, r);
+      coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
+      coreGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = coreGrad;
+      ctx.fill();
+    });
+
+    // Field Notes dot (center pulsing)
+    var fnPulse = 1 + Math.sin(breathPhase * 1.5) * 0.3;
+    var fnR = 3 * fnPulse;
+    var fnGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, fnR * 6);
+    fnGlow.addColorStop(0, 'rgba(212, 160, 74, 0.25)');
+    fnGlow.addColorStop(1, 'rgba(212, 160, 74, 0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, fnR * 6, 0, Math.PI * 2);
+    ctx.fillStyle = fnGlow;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx, cy, fnR, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(212, 160, 74, 0.6)';
+    ctx.fill();
+
+    requestAnimationFrame(draw);
+  }
+
+  // ─── Utilities ─────────────────────────────────────────────
+  function hexToRgba(hex, alpha) {
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+
+  function dist(x1, y1, x2, y2) {
+    var dx = x1 - x2;
+    var dy = y1 - y2;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function pointToSegDist(px, py, x1, y1, x2, y2) {
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return dist(px, py, x1, y1);
+    var t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
+    return dist(px, py, x1 + t * dx, y1 + t * dy);
+  }
+
+  // ─── DOM refs ──────────────────────────────────────────────
+  var bloomPanel = document.getElementById('bloom');
+  var h2hTip = document.getElementById('h2hTip');
+  var hoverLabel = document.getElementById('hoverLabel');
+  var hlName = document.getElementById('hlName');
+  var hlRecord = document.getElementById('hlRecord');
+
+  function getMousePos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    var clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function hitTestTeam(mx, my) {
+    var hitRadius = Math.min(W, H) * 0.035;
+    for (var i = 0; i < teams.length; i++) {
+      if (dist(mx, my, teams[i].x, teams[i].y) < Math.max(teams[i].radius + 8, hitRadius)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  function hitTestConnection(mx, my) {
+    var threshold = 12;
+    for (var i = 0; i < connections.length; i++) {
+      var c = connections[i];
+      var d = pointToSegDist(mx, my, teams[c.a].x, teams[c.a].y, teams[c.b].x, teams[c.b].y);
+      if (d < threshold) return c;
+    }
+    return null;
+  }
+
+  function hitTestFieldNotes(mx, my) {
+    return dist(mx, my, cx, cy) < 18;
+  }
+
+  // ─── Bloom ─────────────────────────────────────────────────
+  function openBloom(idx) {
+    var t = teams[idx];
+    openBloomIdx = idx;
+
+    document.getElementById('bloomRank').textContent = 'Power Rank #' + t.rank;
+    document.getElementById('bloomName').textContent = t.name;
+    document.getElementById('bloomName').style.color = t.color;
+    document.getElementById('bloomRecord').textContent = t.record;
+    document.getElementById('bloomBlurb').textContent = t.blurb;
+    document.getElementById('bloomStatVal').textContent = t.topPerformer;
+    document.getElementById('bloomQuoteText').textContent = t.chatQuote;
+    document.getElementById('bloomQuoteAttr').textContent = t.chatAttr;
+
+    // Position bloom near the node but within viewport
+    var px = t.x + t.radius + 20;
+    var py = t.y - 60;
+    var panelW = Math.min(420, W * 0.36);
+    if (panelW < 280) panelW = 280;
+
+    if (px + panelW > W - 20) px = t.x - panelW - t.radius - 20;
+    if (px < 20) px = 20;
+    if (py < 20) py = 20;
+    if (py + 300 > H - 50) py = H - 350;
+
+    bloomPanel.style.left = px + 'px';
+    bloomPanel.style.top = py + 'px';
+    bloomPanel.classList.add('open');
+  }
+
+  function closeBloom() {
+    openBloomIdx = -1;
+    bloomPanel.classList.remove('open');
+  }
+
+  // ─── Field Notes ───────────────────────────────────────────
+  var fieldNotesEl = document.getElementById('fieldNotes');
+
+  function openFieldNotes() {
+    fieldNotesEl.classList.add('open');
+  }
+  function closeFieldNotes() {
+    fieldNotesEl.classList.remove('open');
+  }
+
+  fieldNotesEl.addEventListener('click', closeFieldNotes);
+
+  // ─── Mouse/Touch interaction ───────────────────────────────
+  canvas.addEventListener('mousemove', function(e) {
+    var pos = getMousePos(e);
+    var teamIdx = hitTestTeam(pos.x, pos.y);
+    var conn = hitTestConnection(pos.x, pos.y);
+
+    // Team hover
+    if (teamIdx >= 0 && openBloomIdx < 0) {
+      hoveredTeam = teamIdx;
+      canvas.style.cursor = 'pointer';
+      var t = teams[teamIdx];
+      hlName.textContent = t.name;
+      hlRecord.textContent = t.record;
+      hoverLabel.style.left = (t.x) + 'px';
+      hoverLabel.style.top = (t.y - t.radius - 22) + 'px';
+      hoverLabel.style.transform = 'translateX(-50%)';
+      hoverLabel.classList.add('show');
+    } else if (hitTestFieldNotes(pos.x, pos.y) && openBloomIdx < 0) {
+      hoveredTeam = null;
+      canvas.style.cursor = 'pointer';
+      hoverLabel.classList.remove('show');
+    } else {
+      hoveredTeam = null;
+      canvas.style.cursor = 'default';
+      hoverLabel.classList.remove('show');
+    }
+
+    // Connection hover
+    if (conn && teamIdx < 0 && openBloomIdx < 0) {
+      hoveredConn = conn;
+      var midX = (teams[conn.a].x + teams[conn.b].x) / 2;
+      var midY = (teams[conn.a].y + teams[conn.b].y) / 2;
+      h2hTip.textContent = 'H2H: ' + conn.h2h;
+      h2hTip.style.left = (midX + 10) + 'px';
+      h2hTip.style.top = (midY - 20) + 'px';
+      h2hTip.classList.add('show');
+      canvas.style.cursor = 'pointer';
+    } else {
+      hoveredConn = null;
+      h2hTip.classList.remove('show');
+    }
+  });
+
+  canvas.addEventListener('click', function(e) {
+    var pos = getMousePos(e);
+    var teamIdx = hitTestTeam(pos.x, pos.y);
+
+    if (openBloomIdx >= 0) {
+      closeBloom();
+      return;
+    }
+
+    if (hitTestFieldNotes(pos.x, pos.y) && teamIdx < 0) {
+      openFieldNotes();
+      return;
+    }
+
+    if (teamIdx >= 0) {
+      openBloom(teamIdx);
+    }
+  });
+
+  // Touch support
+  canvas.addEventListener('touchstart', function(e) {
+    var pos = getMousePos(e);
+    var teamIdx = hitTestTeam(pos.x, pos.y);
+
+    if (openBloomIdx >= 0) {
+      closeBloom();
+      e.preventDefault();
+      return;
+    }
+
+    if (hitTestFieldNotes(pos.x, pos.y) && teamIdx < 0) {
+      openFieldNotes();
+      e.preventDefault();
+      return;
+    }
+
+    if (teamIdx >= 0) {
+      openBloom(teamIdx);
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (fieldNotesEl.classList.contains('open')) {
+        closeFieldNotes();
+      } else if (openBloomIdx >= 0) {
+        closeBloom();
+      }
+    }
+  });
+
+  // ─── Timeline scrubbing ────────────────────────────────────
+  var scrubber = document.getElementById('scrubber');
+  var track = document.getElementById('timelineTrack');
+  var markers = document.querySelectorAll('.timeline-marker');
+  var isDragging = false;
+  var currentYear = 2025;
+
+  // Historical position seeds (deterministic pseudo-shuffle per year)
+  var yearSeeds = {
+    2022: [8, 5, 10, 3, 1, 11, 6, 9, 2, 7, 4, 12],
+    2023: [3, 1, 7, 5, 9, 4, 2, 8, 11, 6, 10, 12],
+    2024: [2, 6, 1, 8, 3, 7, 5, 4, 10, 9, 12, 11],
+    2025: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  };
+
+  function shuffleToYear(year) {
+    if (currentYear === year) return;
+    currentYear = year;
+
+    markers.forEach(function(m) {
+      m.classList.toggle('active', parseInt(m.dataset.year) === year);
+    });
+
+    var seed = yearSeeds[year] || yearSeeds[2025];
+    var scale = Math.min(W, H);
+    var rings = {
+      center: { r: 0, count: 1, idx: 0 },
+      inner: { r: scale * 0.14, count: 3, idx: 0 },
+      mid: { r: scale * 0.28, count: 4, idx: 0 },
+      outer: { r: scale * 0.38, count: 3, idx: 0 },
+      far: { r: scale * 0.44, count: 1, idx: 0 }
+    };
+
+    seed.forEach(function(rank, teamIdx) {
+      var ringKey;
+      if (rank === 1) { ringKey = 'center'; }
+      else if (rank <= 4) { ringKey = 'inner'; }
+      else if (rank <= 8) { ringKey = 'mid'; }
+      else if (rank <= 11) { ringKey = 'outer'; }
+      else { ringKey = 'far'; }
+
+      var ring = rings[ringKey];
+      var t = teams[teamIdx];
+
+      if (ringKey === 'center') {
+        t.targetX = cx;
+        t.targetY = cy;
+        t.targetRadius = scale * 0.025;
+      } else if (ringKey === 'far') {
+        t.targetX = cx + ring.r * 0.7;
+        t.targetY = cy + ring.r * 0.7;
+        t.targetRadius = scale * 0.009;
+      } else {
+        var angle = -Math.PI / 2 + (ring.idx * 2 * Math.PI / ring.count);
+        t.targetX = cx + Math.cos(angle) * ring.r;
+        t.targetY = cy + Math.sin(angle) * ring.r;
+        if (ringKey === 'inner') t.targetRadius = scale * 0.019;
+        else if (ringKey === 'mid') t.targetRadius = scale * 0.015;
+        else t.targetRadius = scale * 0.012;
+      }
+      ring.idx++;
+    });
+
+    animateTransition();
+  }
+
+  var transitionProgress = 1;
+  var transitionStart = null;
+  var transitionDuration = 800;
+
+  function animateTransition() {
+    teams.forEach(function(t) {
+      t.fromX = t.x;
+      t.fromY = t.y;
+      t.fromRadius = t.radius;
+      if (t.targetX === undefined) {
+        t.targetX = t.x;
+        t.targetY = t.y;
+        t.targetRadius = t.radius;
+      }
+    });
+    transitionProgress = 0;
+    transitionStart = performance.now();
+    tickTransition();
+  }
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function tickTransition() {
+    if (transitionProgress >= 1) return;
+    var now = performance.now();
+    transitionProgress = Math.min(1, (now - transitionStart) / transitionDuration);
+    var eased = easeInOutCubic(transitionProgress);
+
+    teams.forEach(function(t) {
+      if (t.targetX !== undefined) {
+        t.x = t.fromX + (t.targetX - t.fromX) * eased;
+        t.y = t.fromY + (t.targetY - t.fromY) * eased;
+        t.radius = t.fromRadius + (t.targetRadius - t.fromRadius) * eased;
+      }
+    });
+
+    if (transitionProgress < 1) {
+      requestAnimationFrame(tickTransition);
+    }
+  }
+
+  // Scrubber dragging
+  scrubber.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    scrubber.classList.add('dragging');
+    e.preventDefault();
+  });
+  scrubber.addEventListener('touchstart', function(e) {
+    isDragging = true;
+    scrubber.classList.add('dragging');
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('mousemove', handleScrub);
+  document.addEventListener('touchmove', handleScrub, { passive: false });
+
+  function handleScrub(e) {
+    if (!isDragging) return;
+    var clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    var rect = track.getBoundingClientRect();
+    var pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    scrubber.style.left = (pct * 100) + '%';
+
+    var years = [2022, 2023, 2024, 2025];
+    var positions = [0, 0.333, 0.666, 1];
+    var closest = 2025;
+    var minDist = Infinity;
+    positions.forEach(function(p, i) {
+      var d = Math.abs(pct - p);
+      if (d < minDist) { minDist = d; closest = years[i]; }
+    });
+    shuffleToYear(closest);
+  }
+
+  document.addEventListener('mouseup', function() {
+    if (isDragging) {
+      isDragging = false;
+      scrubber.classList.remove('dragging');
+    }
+  });
+  document.addEventListener('touchend', function() {
+    if (isDragging) {
+      isDragging = false;
+      scrubber.classList.remove('dragging');
+    }
+  });
+
+  // Click on year markers
+  markers.forEach(function(m) {
+    m.addEventListener('click', function() {
+      var year = parseInt(m.dataset.year);
+      var positions = { 2022: '0%', 2023: '33.3%', 2024: '66.6%', 2025: '100%' };
+      scrubber.style.left = positions[year];
+      shuffleToYear(year);
+    });
+  });
+
+  // ─── Init ──────────────────────────────────────────────────
+  window.addEventListener('resize', function() {
+    resize();
+    teams.forEach(function(t) {
+      t.targetX = t.x;
+      t.targetY = t.y;
+      t.targetRadius = t.radius;
+    });
+  });
+
+  resize();
+
+  teams.forEach(function(t) {
+    t.targetX = t.x;
+    t.targetY = t.y;
+    t.targetRadius = t.radius;
+  });
+
+  draw();
+})();
+</script>
+</body>
+</html>

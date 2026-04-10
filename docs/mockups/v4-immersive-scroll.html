@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty // Immersive Scrollytelling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & ROOT
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-overlay: rgba(10, 10, 10, 0.85);
+  --bg-overlay-light: rgba(10, 10, 10, 0.65);
+  --fg: #e8e4de;
+  --fg-dim: #9a9590;
+  --fg-faint: #5a5652;
+  --accent: #c9a84c;
+  --accent-dim: rgba(201, 168, 76, 0.15);
+  --accent-glow: rgba(201, 168, 76, 0.4);
+  --muted: #7a7568;
+  --border: rgba(201, 168, 76, 0.12);
+  --good: #4ade80;
+  --bad: #f87171;
+  --warn: #fbbf24;
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 19px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL PROGRESS BAR
+   ═══════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #e8c860);
+  z-index: 9999;
+  transition: width 0.05s linear;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FULL-VIEWPORT CANVAS (STICKY)
+   ═══════════════════════════════════════════════════════════ */
+.viz-container {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+}
+
+.viz-container canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL TRIGGERS (invisible spacers)
+   ═══════════════════════════════════════════════════════════ */
+.scroll-spacer {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.scroll-step {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.scroll-step:first-child {
+  margin-top: -100vh;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NARRATIVE TEXT OVERLAYS
+   ═══════════════════════════════════════════════════════════ */
+.narrative-block {
+  pointer-events: auto;
+  max-width: 520px;
+  padding: 2.5rem 2.5rem;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  margin-left: 6vw;
+}
+
+.narrative-block.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-step.right .narrative-block {
+  margin-left: auto;
+  margin-right: 6vw;
+}
+
+.scroll-step.center .narrative-block {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;
+  text-align: center;
+}
+
+.narrative-block .step-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.narrative-block h2 {
+  font-family: var(--headline);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  margin-bottom: 1rem;
+}
+
+.narrative-block p {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--fg-dim);
+  margin-bottom: 0.8rem;
+}
+
+.narrative-block p:last-child {
+  margin-bottom: 0;
+}
+
+.narrative-block .highlight-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.narrative-block .kicker-line {
+  font-style: italic;
+  color: var(--fg);
+  font-size: 17px;
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EDITORIAL SECTION (POST-SCROLLYTELLING)
+   ═══════════════════════════════════════════════════════════ */
+.editorial-section {
+  position: relative;
+  z-index: 10;
+  background: var(--bg);
+  padding: 6rem 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.editorial-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.editorial-section .section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.editorial-section .section-header .kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.editorial-section .section-header h2 {
+  font-family: var(--headline);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+
+/* Power ranking blurbs */
+.ranking-blurb {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 1.5rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.ranking-blurb.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ranking-blurb:last-child {
+  border-bottom: none;
+}
+
+.rank-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.rank-number {
+  font-family: var(--headline);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.rank-movement {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.rank-movement.up { color: var(--good); }
+.rank-movement.down { color: var(--bad); }
+.rank-movement.steady { color: var(--fg-faint); }
+
+.blurb-content h3 {
+  font-family: var(--headline);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 0.2rem;
+}
+
+.blurb-record {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg-dim);
+  margin-bottom: 0.8rem;
+}
+
+.blurb-content p {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--fg-dim);
+}
+
+.blurb-content .blurb-kicker {
+  font-style: italic;
+  color: var(--fg);
+  margin-top: 0.6rem;
+}
+
+.team-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+.site-footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  position: relative;
+  z-index: 10;
+}
+
+.site-footer .footer-brand {
+  font-family: var(--headline);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--fg);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.3rem;
+}
+
+.site-footer .footer-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+  letter-spacing: 0.04em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .narrative-block {
+    max-width: 92vw;
+    margin-left: 4vw !important;
+    margin-right: 4vw !important;
+    padding: 1.8rem 1.5rem;
+  }
+
+  .scroll-step.right .narrative-block,
+  .scroll-step.center .narrative-block {
+    margin-left: 4vw !important;
+    margin-right: 4vw !important;
+    text-align: left;
+  }
+
+  .narrative-block h2 {
+    font-size: 1.6rem;
+  }
+
+  .narrative-block p {
+    font-size: 16px;
+  }
+
+  .ranking-blurb {
+    grid-template-columns: 60px 1fr;
+    gap: 1rem;
+  }
+
+  .rank-number {
+    font-size: 2rem;
+  }
+
+  .editorial-section {
+    padding: 4rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 17px; }
+
+  .narrative-block {
+    padding: 1.5rem 1.2rem;
+    border-radius: 8px;
+  }
+
+  .ranking-blurb {
+    grid-template-columns: 50px 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll progress bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FULL-VIEWPORT SCATTER PLOT (STICKY BACKGROUND)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="viz-container" id="vizContainer">
+  <canvas id="scatterCanvas"></canvas>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCROLL STEPS (trigger narrative + viz transitions)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="scroll-spacer">
+
+  <!-- Step 1: The Landscape -->
+  <div class="scroll-step center" data-step="1">
+    <div class="narrative-block" id="narrative-1">
+      <div class="step-kicker">Week 9 / The Jailyard</div>
+      <h2>The Landscape</h2>
+      <p>Twelve teams. Four quadrants. Nine weeks of evidence. The scatter plot you're standing inside tells you everything the standings won't: who's dominant, who's cursed, who's been getting away with murder, and who never had a chance.</p>
+      <p>X-axis is points scored. Y-axis is points allowed. The bigger the circle, the more wins. Find your team. Then find the truth.</p>
+      <p class="kicker-line">The quadrant doesn't lie. The record sometimes does.</p>
+    </div>
+  </div>
+
+  <!-- Step 2: The Dominant -->
+  <div class="scroll-step" data-step="2">
+    <div class="narrative-block" id="narrative-2">
+      <div class="step-kicker">Top-Right Quadrant</div>
+      <h2>The Dominant</h2>
+      <p><span class="highlight-name">Ken-obi</span> lives in the penthouse of this chart — outscoring everyone while giving up the fewest points. That's not luck. That's structural superiority. At 7-2, the only thing separating them from a perfect record is two weeks where the fantasy gods decided to make a point.</p>
+      <p><span class="highlight-name">MHJTIME</span> is right there too — the points for are real, the defense is stiff, and the 6-3 record undersells how good this roster is week to week.</p>
+      <p class="kicker-line">This is where championships are built. Not in the standings — in the margins.</p>
+    </div>
+  </div>
+
+  <!-- Step 3: The Cursed -->
+  <div class="scroll-step right" data-step="3">
+    <div class="narrative-block" id="narrative-3">
+      <div class="step-kicker">Top-Left Quadrant</div>
+      <h2>The Cursed</h2>
+      <p><span class="highlight-name">Kittler</span> is putting up 1,220 points through nine weeks and somehow staring at a 5-4 record. That's because you're also giving up 1,200. You're in a shootout every single week and nobody told you to bring a helmet.</p>
+      <p><span class="highlight-name">Rasheeing</span> is flirting with this quadrant too — 1,250 PF against 1,120 PA. The offense is there. The problem is the universe keeps matching you against other people's best weeks.</p>
+      <p class="kicker-line">The Cursed don't lose because they're bad. They lose because they're interesting.</p>
+    </div>
+  </div>
+
+  <!-- Step 4: The Frauds -->
+  <div class="scroll-step" data-step="4">
+    <div class="narrative-block" id="narrative-4">
+      <div class="step-kicker">Bottom-Left Quadrant</div>
+      <h2>The Frauds</h2>
+      <p><span class="highlight-name">Chudders</span> at 4-5 with 1,100 PF and 1,050 PA. You're not winning games. You're surviving them. The points for are in the bottom third of the league. You're the team equivalent of that guy who shows up to a potluck with store-bought cookies and somehow wins the dessert contest.</p>
+      <p>The numbers say you belong lower. The record says you belong higher. The truth is somewhere in the middle — and it's coming for you.</p>
+      <p class="kicker-line">You're not good. You're fortunate. And fortune is a rental.</p>
+    </div>
+  </div>
+
+  <!-- Step 5: The Week That Was -->
+  <div class="scroll-step right" data-step="5">
+    <div class="narrative-block" id="narrative-5">
+      <div class="step-kicker">Week 9 Results</div>
+      <h2>The Week That Was</h2>
+      <p><span class="highlight-name">Ken-obi</span> handled <span class="highlight-name">Burden</span> like rent was due. <span class="highlight-name">MHJTIME</span> ground out a win against <span class="highlight-name">Ghastly</span> that looked closer than it was. And <span class="highlight-name">Father Time</span> continues to exist, technically, on the schedule.</p>
+      <p>The lines connecting each matchup show you the distance between opponents on this chart. The longer the line, the more lopsided the matchup was before they even set lineups.</p>
+      <p class="kicker-line">Six games. Six stories. Only the dots know which ones mattered.</p>
+    </div>
+  </div>
+
+  <!-- Step 6: Movement -->
+  <div class="scroll-step center" data-step="6">
+    <div class="narrative-block" id="narrative-6">
+      <div class="step-kicker">Week-Over-Week</div>
+      <h2>Movement</h2>
+      <p>Watch the dots. The ones that travel the farthest this week tell you everything you need to know about the state of the league.</p>
+      <p><span class="highlight-name">Boonist Monks</span> slid hard toward the bottom-right — scoring went down, points against went up. That's the double whammy. Meanwhile <span class="highlight-name">Sleeping Giants</span> pushed deeper into the middle, settling into the pack where the playoff picture turns into a knife fight.</p>
+      <p class="kicker-line">In dynasty, the dots never stop moving. The question is which direction.</p>
+    </div>
+  </div>
+
+  <!-- Step 7: The Verdict -->
+  <div class="scroll-step" data-step="7">
+    <div class="narrative-block" id="narrative-7">
+      <div class="step-kicker">Power Rankings</div>
+      <h2>The Verdict</h2>
+      <p>The numbers next to each dot are this week's power rankings. Not the standings — those reward schedule luck. This rewards process. The chart tells you what the rankings believe: if you're in the top-right, you're probably near the top. If you're not, you'd better start asking why.</p>
+      <p class="kicker-line">Here's how it shakes out. Argue with the quadrant, not me.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     EDITORIAL: POWER RANKING BLURBS
+     ═══════════════════════════════════════════════════════════ -->
+<section class="editorial-section">
+  <div class="editorial-inner">
+    <div class="section-header">
+      <div class="kicker">Week 9 Power Rankings</div>
+      <h2>The Board</h2>
+    </div>
+
+    <!-- #1 Ken-obi -->
+    <div class="ranking-blurb" data-blurb>
+      <div class="rank-badge">
+        <div class="rank-number">1</div>
+        <div class="rank-movement steady">--</div>
+      </div>
+      <div class="blurb-content">
+        <h3><span class="team-dot" style="background:#c9a84c"></span>Ken-obi</h3>
+        <div class="blurb-record">7-2 &middot; 1,350 PF &middot; 1,050 PA</div>
+        <p>You have the most points in the league and give up the fewest. That's not a team — that's a siege. Your roster is doing what great rosters do: it's making everyone else's Monday morning feel worse. Seven wins through nine weeks with a points differential that looks like a typo. The only thing that could slow you down is the kind of injury luck that makes fantasy managers stare at the ceiling at 2 a.m.</p>
+        <p class="blurb-kicker">The penthouse has a doorman, and his name is your weekly floor.</p>
+      </div>
+    </div>
+
+    <!-- #2 MHJTIME -->
+    <div class="ranking-blurb" data-blurb>
+      <div class="rank-badge">
+        <div class="rank-number">2</div>
+        <div class="rank-movement up">&#8593;1</div>
+      </div>
+      <div class="blurb-content">
+        <h3><span class="team-dot" style="background:#6366f1"></span>MHJTIME</h3>
+        <div class="blurb-record">6-3 &middot; 1,280 PF &middot; 1,100 PA</div>
+        <p>You're the team nobody wants to draw in the playoffs — not because you blow people out, but because you never, ever go away. The scoring is second in the league. The defense is top-four. Three losses that all came down to single possessions on Monday night. This is a roster that's been doing the right things and catching the wrong breaks, which means the correction is going to be violent and it's going to happen in December.</p>
+        <p class="blurb-kicker">The vibes are immaculate. The schedule is about to cooperate.</p>
+      </div>
+    </div>
+
+    <!-- #8 Chudders -->
+    <div class="ranking-blurb" data-blurb>
+      <div class="rank-badge">
+        <div class="rank-number">8</div>
+        <div class="rank-movement down">&#8595;2</div>
+      </div>
+      <div class="blurb-content">
+        <h3><span class="team-dot" style="background:#ec4899"></span>Chudders</h3>
+        <div class="blurb-record">4-5 &middot; 1,100 PF &middot; 1,050 PA</div>
+        <p>Four wins with bottom-third scoring. You're the slot machine that keeps hitting cherries on the third reel — enough to make noise, not enough to cash out. The points against are low, which means your schedule has been soft, not your defense. When the second half gauntlet hits, this record is going to feel like it was written in pencil. The chat's already circling. They can smell the regression.</p>
+        <p class="blurb-kicker">Fortune is a rental, and the landlord just sent a notice.</p>
+      </div>
+    </div>
+
+    <!-- #12 Father Time -->
+    <div class="ranking-blurb" data-blurb>
+      <div class="rank-badge">
+        <div class="rank-number">12</div>
+        <div class="rank-movement steady">--</div>
+      </div>
+      <div class="blurb-content">
+        <h3><span class="team-dot" style="background:#f87171"></span>Father Time</h3>
+        <div class="blurb-record">2-7 &middot; 950 PF &middot; 1,250 PA</div>
+        <p>Lowest points scored. Highest points allowed. You're in the bottom-left of the scatter plot — the quadrant we don't even have a nice name for. The group chat has moved from roasting you to something closer to concern. Two wins through nine weeks with a 300-point differential working against you. This isn't a slump. This is a roster telling you it needs a controlled demolition and a three-year plan.</p>
+        <p class="blurb-kicker">The dynasty is long. The rebuild starts now. Or it started three weeks ago and you missed the memo.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="footer-brand">The Jailyard Dynasty League</div>
+  <div class="footer-meta">V4 Immersive Scrollytelling Mockup &middot; Week 9, 2025</div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT — Canvas 2D scatter plot + scroll-driven transitions
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── TEAM DATA ───────────────────────────────────────────
+  var teams = [
+    { name: 'Ken-obi',          pf: 1350, pa: 1050, wins: 7, losses: 2, color: '#c9a84c', rank: 1,  prevPF: 1200, prevPA: 935,  quadrant: 'dominant' },
+    { name: 'MHJTIME',          pf: 1280, pa: 1100, wins: 6, losses: 3, color: '#6366f1', rank: 2,  prevPF: 1135, prevPA: 975,  quadrant: 'dominant' },
+    { name: 'Rasheeing',        pf: 1250, pa: 1120, wins: 6, losses: 3, color: '#10b981', rank: 3,  prevPF: 1110, prevPA: 995,  quadrant: 'cursed' },
+    { name: 'Sleeping Giants',  pf: 1200, pa: 1150, wins: 5, losses: 4, color: '#3b82f6', rank: 4,  prevPF: 1065, prevPA: 1010, quadrant: 'cursed' },
+    { name: 'Legion',           pf: 1180, pa: 1130, wins: 5, losses: 4, color: '#8b5cf6', rank: 5,  prevPF: 1050, prevPA: 1005, quadrant: 'cursed' },
+    { name: 'Kittler',          pf: 1220, pa: 1200, wins: 5, losses: 4, color: '#f59e0b', rank: 6,  prevPF: 1080, prevPA: 1060, quadrant: 'cursed' },
+    { name: 'Ghastly',          pf: 1150, pa: 1100, wins: 5, losses: 4, color: '#06b6d4', rank: 7,  prevPF: 1025, prevPA: 985,  quadrant: 'lucky' },
+    { name: 'Chudders',         pf: 1100, pa: 1050, wins: 4, losses: 5, color: '#ec4899', rank: 8,  prevPF: 985,  prevPA: 930,  quadrant: 'lucky' },
+    { name: 'Noble',            pf: 1080, pa: 1150, wins: 4, losses: 5, color: '#a78bfa', rank: 9,  prevPF: 960,  prevPA: 1020, quadrant: 'bad' },
+    { name: 'Burden',           pf: 1050, pa: 1200, wins: 3, losses: 6, color: '#fb923c', rank: 10, prevPF: 935,  prevPA: 1060, quadrant: 'bad' },
+    { name: 'Boonist Monks',    pf: 1020, pa: 1180, wins: 3, losses: 6, color: '#14b8a6', rank: 11, prevPF: 920,  prevPA: 1030, quadrant: 'bad' },
+    { name: 'Father Time',      pf: 950,  pa: 1250, wins: 2, losses: 7, color: '#f87171', rank: 12, prevPF: 855,  prevPA: 1100, quadrant: 'bad' }
+  ];
+
+  // Week 9 matchups: [winner index, loser index]
+  var matchups = [
+    [0, 9],   // Ken-obi beat Burden
+    [1, 6],   // MHJTIME beat Ghastly
+    [2, 10],  // Rasheeing beat Boonist Monks
+    [3, 5],   // Sleeping Giants beat Kittler
+    [4, 8],   // Legion beat Noble
+    [7, 11]   // Chudders beat Father Time
+  ];
+
+  // ─── CANVAS SETUP ────────────────────────────────────────
+  var canvas = document.getElementById('scatterCanvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var margin = { top: 80, right: 80, bottom: 80, left: 100 };
+  var plotW, plotH, canvasW, canvasH;
+
+  // Data ranges
+  var pfMin = 900, pfMax = 1400;
+  var paMin = 1000, paMax = 1300;
+  var pfMid = (pfMin + pfMax) / 2;
+  var paMid = (paMin + paMax) / 2;
+
+  // Animation state
+  var currentStep = 0;
+  var animProgress = 0; // 0-1 for step 6 animation
+  var animRunning = false;
+  var animStartTime = 0;
+  var ANIM_DURATION = 1200; // ms
+
+  function xScale(val) { return margin.left + ((val - pfMin) / (pfMax - pfMin)) * plotW; }
+  function yScale(val) { return margin.top + plotH - ((val - paMin) / (paMax - paMin)) * plotH; }
+  function rScale(wins) { return (12 + wins * 3.5) * (canvasW < 600 ? 0.7 : 1); }
+
+  function resizeCanvas() {
+    var container = document.getElementById('vizContainer');
+    canvasW = container.clientWidth;
+    canvasH = container.clientHeight;
+    canvas.width = canvasW * dpr;
+    canvas.height = canvasH * dpr;
+    canvas.style.width = canvasW + 'px';
+    canvas.style.height = canvasH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    plotW = canvasW - margin.left - margin.right;
+    plotH = canvasH - margin.top - margin.bottom;
+  }
+
+  // ─── DRAWING ─────────────────────────────────────────────
+  function draw() {
+    ctx.clearRect(0, 0, canvasW, canvasH);
+    drawGrid();
+    drawQuadrantLabels();
+    if (currentStep === 5) drawMatchupLines();
+    drawTeamCircles();
+    if (currentStep === 7) drawRankLabels();
+  }
+
+  function drawGrid() {
+    ctx.save();
+    // Vertical grid lines (PF)
+    for (var pf = 950; pf <= 1400; pf += 50) {
+      var x = xScale(pf);
+      ctx.beginPath();
+      ctx.moveTo(x, margin.top);
+      ctx.lineTo(x, margin.top + plotH);
+      if (pf === Math.round(pfMid)) {
+        ctx.strokeStyle = 'rgba(201, 168, 76, 0.2)';
+        ctx.setLineDash([]);
+      } else {
+        ctx.strokeStyle = 'rgba(201, 168, 76, 0.07)';
+        ctx.setLineDash([2, 6]);
+      }
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Tick labels
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#5a5652';
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(pf, x, margin.top + plotH + 22);
+    }
+
+    // Horizontal grid lines (PA)
+    for (var pa = 1000; pa <= 1300; pa += 50) {
+      var y = yScale(pa);
+      ctx.beginPath();
+      ctx.moveTo(margin.left, y);
+      ctx.lineTo(margin.left + plotW, y);
+      if (pa === Math.round(paMid)) {
+        ctx.strokeStyle = 'rgba(201, 168, 76, 0.2)';
+        ctx.setLineDash([]);
+      } else {
+        ctx.strokeStyle = 'rgba(201, 168, 76, 0.07)';
+        ctx.setLineDash([2, 6]);
+      }
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#5a5652';
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(pa, margin.left - 12, y + 4);
+    }
+
+    // Axis titles
+    ctx.fillStyle = '#9a9590';
+    ctx.font = '600 12px "Barlow Condensed", sans-serif';
+    ctx.letterSpacing = '0.06em';
+    ctx.textAlign = 'center';
+    ctx.fillText('POINTS FOR (TOTAL SEASON)', margin.left + plotW / 2, margin.top + plotH + 52);
+
+    ctx.save();
+    ctx.translate(margin.left - 65, margin.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('POINTS AGAINST (TOTAL SEASON)', 0, 0);
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  function drawQuadrantLabels() {
+    ctx.save();
+    ctx.font = '700 14px "Barlow Condensed", sans-serif';
+    ctx.textAlign = 'center';
+
+    var labels = [
+      { id: 'dominant', text: 'DOMINANT',        x: xScale(pfMid + (pfMax - pfMid) * 0.5), y: yScale(paMin + (paMid - paMin) * 0.35) },
+      { id: 'cursed',   text: 'CURSED',          x: xScale(pfMid + (pfMax - pfMid) * 0.5), y: yScale(paMid + (paMax - paMid) * 0.65) },
+      { id: 'lucky',    text: 'LUCKY / FRAUD',   x: xScale(pfMin + (pfMid - pfMin) * 0.5), y: yScale(paMin + (paMid - paMin) * 0.35) },
+      { id: 'bad',      text: 'BOTTOM DWELLERS', x: xScale(pfMin + (pfMid - pfMin) * 0.5), y: yScale(paMid + (paMax - paMid) * 0.65) }
+    ];
+
+    labels.forEach(function(l) {
+      var isHighlighted = false;
+      if (currentStep === 2 && l.id === 'dominant') isHighlighted = true;
+      if (currentStep === 3 && l.id === 'cursed') isHighlighted = true;
+      if (currentStep === 4 && l.id === 'lucky') isHighlighted = true;
+
+      ctx.globalAlpha = isHighlighted ? 0.8 : 0.2;
+      ctx.fillStyle = isHighlighted ? '#c9a84c' : '#5a5652';
+      ctx.fillText(l.text, l.x, l.y);
+    });
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function drawMatchupLines() {
+    ctx.save();
+    ctx.setLineDash([6, 4]);
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(154, 149, 144, 0.4)';
+
+    matchups.forEach(function(m) {
+      var a = teams[m[0]];
+      var b = teams[m[1]];
+      ctx.beginPath();
+      ctx.moveTo(xScale(a.pf), yScale(a.pa));
+      ctx.lineTo(xScale(b.pf), yScale(b.pa));
+      ctx.stroke();
+    });
+
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  function drawTeamCircles() {
+    var highlightQuad = null;
+    if (currentStep === 2) highlightQuad = 'dominant';
+    if (currentStep === 3) highlightQuad = 'cursed';
+    if (currentStep === 4) highlightQuad = 'lucky';
+
+    var winners = [];
+    if (currentStep === 5) {
+      matchups.forEach(function(m) { winners.push(m[0]); });
+    }
+
+    teams.forEach(function(t, i) {
+      var cx, cy;
+
+      // Step 6: interpolate between previous and current
+      if (currentStep === 6) {
+        var p = animProgress;
+        cx = xScale(t.prevPF + (t.pf - t.prevPF) * p);
+        cy = yScale(t.prevPA + (t.pa - t.prevPA) * p);
+      } else {
+        cx = xScale(t.pf);
+        cy = yScale(t.pa);
+      }
+
+      var r = rScale(t.wins);
+      var isDimmed = highlightQuad && t.quadrant !== highlightQuad;
+      var isWinner = winners.indexOf(i) !== -1;
+      var alpha = isDimmed ? 0.12 : 0.7;
+      var strokeAlpha = isDimmed ? 0.15 : 0.9;
+
+      ctx.save();
+
+      // Glow for highlighted or winner circles
+      if (!isDimmed && (highlightQuad === t.quadrant || isWinner)) {
+        ctx.shadowColor = t.color;
+        ctx.shadowBlur = 20;
+      }
+
+      // Circle fill
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = t.color;
+      ctx.fill();
+
+      // Circle stroke
+      ctx.globalAlpha = strokeAlpha;
+      ctx.strokeStyle = t.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+      ctx.restore();
+
+      // Team name label
+      ctx.save();
+      ctx.globalAlpha = isDimmed ? 0.2 : 1;
+      ctx.fillStyle = '#e8e4de';
+      ctx.font = '500 10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(t.name, cx, cy - r - 7);
+      ctx.restore();
+
+      // Record inside circle
+      ctx.save();
+      ctx.globalAlpha = isDimmed ? 0.2 : 0.9;
+      ctx.fillStyle = '#e8e4de';
+      ctx.font = '600 9px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t.wins + '-' + t.losses, cx, cy);
+      ctx.restore();
+    });
+  }
+
+  function drawRankLabels() {
+    ctx.save();
+    ctx.font = '800 20px "Barlow Condensed", sans-serif';
+
+    teams.forEach(function(t) {
+      var cx = xScale(t.pf);
+      var cy = yScale(t.pa);
+      var r = rScale(t.wins);
+
+      ctx.fillStyle = '#c9a84c';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('#' + t.rank, cx + r + 8, cy);
+    });
+
+    ctx.restore();
+  }
+
+  // ─── STEP TRANSITIONS ───────────────────────────────────
+  function applyStep(step) {
+    if (step === currentStep) return;
+    currentStep = step;
+    animProgress = 0;
+
+    if (step === 6) {
+      // Start animation
+      animProgress = 0;
+      animRunning = true;
+      animStartTime = performance.now();
+      requestAnimationFrame(animateStep6);
+    } else {
+      animRunning = false;
+      draw();
+    }
+  }
+
+  function animateStep6(now) {
+    if (!animRunning || currentStep !== 6) return;
+    var elapsed = now - animStartTime;
+    // Ease out cubic
+    var t = Math.min(elapsed / ANIM_DURATION, 1);
+    animProgress = 1 - Math.pow(1 - t, 3);
+    draw();
+    if (t < 1) {
+      requestAnimationFrame(animateStep6);
+    }
+  }
+
+  // ─── INTERSECTION OBSERVER ──────────────────────────────
+  function setupObserver() {
+    var steps = document.querySelectorAll('.scroll-step');
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        var narrative = entry.target.querySelector('.narrative-block');
+        if (entry.isIntersecting) {
+          narrative.classList.add('active');
+          var stepNum = parseInt(entry.target.dataset.step, 10);
+          applyStep(stepNum);
+        } else {
+          narrative.classList.remove('active');
+        }
+      });
+    }, {
+      threshold: 0.4,
+      rootMargin: '-10% 0px -10% 0px'
+    });
+
+    steps.forEach(function(step) {
+      observer.observe(step);
+    });
+
+    // Blurb observer
+    var blurbObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.ranking-blurb').forEach(function(b) {
+      blurbObserver.observe(b);
+    });
+  }
+
+  // ─── SCROLL PROGRESS ────────────────────────────────────
+  function setupScrollProgress() {
+    var bar = document.getElementById('scrollProgress');
+    window.addEventListener('scroll', function() {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      bar.style.width = pct + '%';
+    }, { passive: true });
+  }
+
+  // ─── RESIZE ──────────────────────────────────────────────
+  var resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      dpr = window.devicePixelRatio || 1;
+      resizeCanvas();
+      draw();
+    }, 150);
+  });
+
+  // ─── INIT ────────────────────────────────────────────────
+  function init() {
+    resizeCanvas();
+    setupObserver();
+    setupScrollProgress();
+    currentStep = 1;
+    draw();
+    document.getElementById('narrative-1').classList.add('active');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+</body>
+</html>

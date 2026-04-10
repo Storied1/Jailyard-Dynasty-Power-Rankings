@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — Kinetic Typography | The Jailyard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,700;0,6..72,800;1,6..72,400&family=Barlow+Condensed:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset ─────────────────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #000;
+    color: #e8ecf0;
+    overflow-x: hidden;
+    font-family: 'Newsreader', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── Typography tokens ─────────────────────────────── */
+  .f-serif   { font-family: 'Newsreader', Georgia, serif; }
+  .f-sans    { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+  .f-mono    { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+  /* ── Team colors ───────────────────────────────────── */
+  :root {
+    --c-kenobi:    #d4a04a;
+    --c-mhjtime:   #4dabf7;
+    --c-legion:    #ef4444;
+    --c-kittler:   #8b5cf6;
+    --c-father:    #64748b;
+    --c-boonist:   #f97316;
+    --c-noble:     #22d3ee;
+    --c-sleeping:  #10b981;
+    --c-grayskull: #a1a1aa;
+    --c-rashee:    #f472b6;
+    --c-burden:    #facc15;
+    --c-chudders:  #fb923c;
+  }
+
+  /* ── Section scaffolding ───────────────────────────── */
+  .section {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* ── SECTION 1: The Chaos Cloud ────────────────────── */
+  #chaos {
+    height: 300vh;
+    position: relative;
+  }
+  #chaos-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .team-name {
+    position: absolute;
+    white-space: nowrap;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    mix-blend-mode: screen;
+    transition: none;
+    will-change: transform, opacity, font-size;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  /* ── Week label ────────────────────────────────────── */
+  .week-label {
+    position: absolute;
+    top: 6vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(11px, 1.4vw, 14px);
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    z-index: 10;
+  }
+
+  /* ── Scroll cue ────────────────────────────────────── */
+  .scroll-cue {
+    position: absolute;
+    bottom: 4vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    z-index: 10;
+  }
+  .scroll-cue::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 30px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+    margin: 8px auto 0;
+    animation: cue-pulse 2s ease-in-out infinite;
+  }
+  @keyframes cue-pulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.4); }
+  }
+
+  /* ── SECTION 2: Scores Landscape ───────────────────── */
+  #scores {
+    height: 300vh;
+    position: relative;
+  }
+  #scores-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+  }
+  .score-num {
+    position: absolute;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+    pointer-events: none;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .score-label {
+    position: absolute;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 300;
+    font-size: clamp(9px, 1.1vw, 12px);
+    letter-spacing: 0.08em;
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* ── SECTION 3: The Narrative ──────────────────────── */
+  #narrative {
+    position: relative;
+    min-height: 100vh;
+    padding: 12vh 0 16vh;
+  }
+  .narrative-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .narrative-bg.visible { opacity: 1; }
+  .narrative-bg .bg-name {
+    position: absolute;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    line-height: 1;
+    white-space: nowrap;
+    transition: opacity 0.8s ease;
+  }
+  .narrative-col {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .narrative-col h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 6vw, 64px);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+    margin-bottom: 0.6em;
+    color: rgba(255,255,255,0.9);
+  }
+  .narrative-col p {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: clamp(16px, 2vw, 19px);
+    line-height: 1.75;
+    color: rgba(255,255,255,0.72);
+    margin-bottom: 1.5em;
+  }
+  .narrative-col p strong {
+    color: rgba(255,255,255,0.92);
+    font-weight: 700;
+  }
+  .narrative-col .stat-inline {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.9em;
+    padding: 0 0.15em;
+  }
+  .narrative-col .mention {
+    transition: color 0.4s ease;
+  }
+
+  /* ── SECTION 4: Rankings Resolve ────────────────────── */
+  #rankings {
+    height: 400vh;
+    position: relative;
+  }
+  #rankings-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rank-item {
+    position: absolute;
+    white-space: nowrap;
+    will-change: transform, opacity, font-size;
+    pointer-events: none;
+  }
+  .rank-item .rank-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    margin-right: 0.3em;
+  }
+  .rank-item .rank-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .rank-item .rank-record {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 300;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    margin-left: 0.4em;
+    font-size: 0.6em;
+    vertical-align: middle;
+  }
+  .rank-item .rank-movement {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.5em;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    margin-left: 0.3em;
+    vertical-align: middle;
+  }
+  .rank-item .rank-movement.up { color: #10b981; }
+  .rank-item .rank-movement.down { color: #ef4444; }
+  .rank-item .rank-movement.steady { color: #64748b; }
+
+  /* ── SECTION 5: Chat Quotes ────────────────────────── */
+  #chat {
+    position: relative;
+    min-height: 100vh;
+    padding: 10vh 0 14vh;
+    overflow: hidden;
+  }
+  .chat-quote {
+    position: absolute;
+    font-family: 'Newsreader', Georgia, serif;
+    font-style: italic;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.5);
+    max-width: 340px;
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+  .chat-quote .chat-attr {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-size: 0.7em;
+    margin-top: 0.5em;
+    opacity: 0.5;
+    letter-spacing: 0.05em;
+  }
+  .chat-section-label {
+    position: relative;
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 300;
+    font-size: clamp(12px, 1.5vw, 15px);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.15);
+    margin-bottom: 8vh;
+    z-index: 2;
+  }
+
+  /* ── SECTION 6: The Kicker ─────────────────────────── */
+  #kicker {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 32px;
+  }
+  .kicker-text {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 800;
+    font-size: clamp(28px, 5vw, 56px);
+    line-height: 1.3;
+    color: rgba(255,255,255,0);
+    max-width: 800px;
+    transition: color 1.2s ease;
+  }
+  .kicker-text.visible {
+    color: rgba(255,255,255,0.95);
+  }
+
+  /* ── Nav dot rail ──────────────────────────────────── */
+  .dot-nav {
+    position: fixed;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .dot-nav a {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.3s, transform 0.3s;
+    text-decoration: none;
+  }
+  .dot-nav a.active {
+    background: rgba(255,255,255,0.7);
+    transform: scale(1.4);
+  }
+  .dot-nav a:hover {
+    background: rgba(255,255,255,0.5);
+  }
+
+  /* ── Mobile scaling ────────────────────────────────── */
+  @media (max-width: 768px) {
+    .dot-nav { right: 8px; gap: 10px; }
+    .dot-nav a { width: 6px; height: 6px; }
+    .narrative-col { padding: 0 16px; }
+    .chat-quote { max-width: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Dot nav rail -->
+<nav class="dot-nav" aria-label="Section navigation">
+  <a href="#chaos" data-section="chaos" title="Teams"></a>
+  <a href="#scores" data-section="scores" title="Scores"></a>
+  <a href="#narrative" data-section="narrative" title="The Column"></a>
+  <a href="#rankings" data-section="rankings" title="Rankings"></a>
+  <a href="#chat" data-section="chat" title="Group Chat"></a>
+  <a href="#kicker" data-section="kicker" title="Kicker"></a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 1: The Chaos Cloud                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="chaos" class="section">
+  <div id="chaos-sticky">
+    <div class="week-label">The Jailyard &mdash; Week 9 &mdash; 2025</div>
+    <div class="scroll-cue">scroll</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 2: Scores Landscape                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="scores" class="section">
+  <div id="scores-sticky"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 3: The Narrative                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="narrative-bg" id="narrative-bg"></div>
+<section id="narrative" class="section">
+  <div class="narrative-col">
+    <h2>The Week<br>Ken-obi<br>Went Nuclear</h2>
+
+    <p>There is a moment in every fantasy season where the standings stop being hypothetical and start becoming fate. <span class="mention" data-team="kenobi" style="color:var(--c-kenobi)"><strong>General Ken-obi</strong></span> just made that moment Week 9. <span class="stat-inline" style="color:var(--c-kenobi)">154.86 points</span>. A <span class="stat-inline" style="color:var(--c-kenobi)">62.48-point</span> margin of victory over <span class="mention" data-team="kittler" style="color:var(--c-kittler)">Kittler on the Roof</span>, who managed a heartbreaking <span class="stat-inline" style="color:var(--c-kittler)">92.38</span>. Drake London went supernova: <span class="stat-inline">34.3 points</span>. LaPorta added <span class="stat-inline">18.7</span>. The defending champ didn't just lose this week &mdash; the defending champ got exposed.</p>
+
+    <p>Meanwhile, <span class="mention" data-team="mhjtime" style="color:var(--c-mhjtime)"><strong>MHJTIME</strong></span> quietly stacked another win, <span class="stat-inline" style="color:var(--c-mhjtime)">144.48</span> to <span class="mention" data-team="boonist" style="color:var(--c-boonist)">The Boonist Monks</span>' <span class="stat-inline" style="color:var(--c-boonist)">130.36</span>. That's five straight. Rico Dowdle &mdash; a running back nobody wanted in August &mdash; dropped <span class="stat-inline">27.1 points</span> and looked like the waiver wire steal of the season. Marvin Harrison added <span class="stat-inline">19.1</span>. The WR trio is doing exactly what everyone feared it would.</p>
+
+    <p><span class="mention" data-team="rashee" style="color:var(--c-rashee)"><strong>Rasheeing the Scene</strong></span> pulled the week's most satisfying upset, knocking off <span class="mention" data-team="legion" style="color:var(--c-legion)"><strong>The Legion of Bouz</strong></span> <span class="stat-inline" style="color:var(--c-rashee)">146.92</span> to <span class="stat-inline" style="color:var(--c-legion)">135.2</span>. Josh Allen did Josh Allen things &mdash; <span class="stat-inline">28.82 points</span> &mdash; and Legion's slide continues. Two straight losses. A drop from first to fifth. CMC's <span class="stat-inline">31.8</span> wasn't enough. Mahomes' <span class="stat-inline">11.5</span> was the quiet disaster.</p>
+
+    <p>At the bottom, things are getting ugly. <span class="mention" data-team="chudders" style="color:var(--c-chudders)"><strong>Chudders Football Team</strong></span> sits at <span class="stat-inline" style="color:var(--c-chudders)">1-8</span>. <span class="mention" data-team="grayskull" style="color:var(--c-grayskull)"><strong>Ghastly Grayskull Gang</strong></span> has lost five in a row. <span class="mention" data-team="burden" style="color:var(--c-burden)"><strong>Burden of Etienne-y Woody</strong></span> finally won one &mdash; by <span class="stat-inline">2.14 points</span> over <span class="mention" data-team="noble" style="color:var(--c-noble)">Noble FFT</span> &mdash; and celebrated like it was the Super Bowl. When you're 2-7, a win IS the Super Bowl.</p>
+
+    <p>The standings have split into two realities. Three teams at 7-2. Two at 6-3. Then a cliff. The separation is happening right in front of us, and it's not subtle. <span class="mention" data-team="sleeping" style="color:var(--c-sleeping)"><strong>Sleeping Giants</strong></span> escaped <span class="mention" data-team="grayskull" style="color:var(--c-grayskull)">Grayskull</span> by just <span class="stat-inline">2.04 points</span> in the week's closest game. Brock Bowers had <span class="stat-inline">37.3</span> in a loss. Fantasy football remains a game where the best individual performance doesn't guarantee anything.</p>
+
+    <p><span class="mention" data-team="father" style="color:var(--c-father)"><strong>Father Time</strong></span> beat <span class="mention" data-team="chudders" style="color:var(--c-chudders)">Chudders</span> by <span class="stat-inline">16.62</span> to snap a brutal skid. It doesn't fix the 2-7 record. It doesn't change the trajectory. But Davante Adams dropping <span class="stat-inline">20.5</span> and the Ravens D posting <span class="stat-inline">19.0</span> at least gave them something to talk about in a week where most of the bottom six had nothing.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 4: Rankings Resolve                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="rankings" class="section">
+  <div id="rankings-sticky"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 5: Chat Quotes                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="chat" class="section">
+  <div class="chat-section-label">Overheard in the Group Chat</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 6: The Kicker                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="kicker" class="section">
+  <div class="kicker-text">
+    Three teams at 7-2. The cliff below them is real.<br>
+    We're past the point of hypotheticals now.
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Data ──────────────────────────────────────────── */
+  var teams = [
+    { name: 'General Ken-obi',         short: 'KEN-OBI',    color: '#d4a04a', rank: 1,  score: 154.86, record: '7-2', move: 1,  dir: 'up' },
+    { name: 'MHJTIME',                 short: 'MHJTIME',    color: '#4dabf7', rank: 2,  score: 144.48, record: '6-3', move: 1,  dir: 'up' },
+    { name: 'Rasheeing the Scene',     short: 'RASHEE',     color: '#f472b6', rank: 3,  score: 146.92, record: '7-2', move: 1,  dir: 'up' },
+    { name: 'Sleeping Giants',         short: 'SLEEPING',   color: '#10b981', rank: 4,  score: 136.80, record: '7-2', move: 1,  dir: 'up' },
+    { name: 'The Legion of Bouz',      short: 'LEGION',     color: '#ef4444', rank: 5,  score: 135.20, record: '6-3', move: -4, dir: 'down' },
+    { name: 'The Boonist Monks',       short: 'BOONIST',    color: '#f97316', rank: 6,  score: 130.36, record: '5-4', move: 0,  dir: 'steady' },
+    { name: 'Noble FFT',               short: 'NOBLE',      color: '#22d3ee', rank: 7,  score: 134.30, record: '5-4', move: 0,  dir: 'steady' },
+    { name: 'Kittler on the Roof',     short: 'KITTLER',    color: '#8b5cf6', rank: 8,  score: 92.38,  record: '4-5', move: 0,  dir: 'steady' },
+    { name: 'Ghastly Grayskull Gang',  short: 'GRAYSKULL',  color: '#a1a1aa', rank: 9,  score: 134.76, record: '2-7', move: 0,  dir: 'steady' },
+    { name: 'Burden of Etienne-y Woody', short: 'BURDEN',   color: '#facc15', rank: 10, score: 136.44, record: '2-7', move: 1,  dir: 'up' },
+    { name: 'Father Time',             short: 'FATHER TIME', color: '#64748b', rank: 11, score: 137.52, record: '2-7', move: -1, dir: 'down' },
+    { name: 'Chudders Football Team',  short: 'CHUDDERS',   color: '#fb923c', rank: 12, score: 120.90, record: '1-8', move: 0,  dir: 'steady' }
+  ];
+
+  var chatQuotes = [
+    { text: "We\u2019re not changing rules like that midseason", author: 'Brent Boone' },
+    { text: "Just as THUNTER was about to set the league on fire\u2026 I hate fantasy football", author: 'Sacko' },
+    { text: "Maybe playing 2 ways as a rookie wasn\u2019t a good call", author: 'Neo' },
+    { text: "This league is rigged", author: 'Anonymous' },
+    { text: "Drake London just ended that man\u2019s whole career", author: 'Group Chat' },
+    { text: "1-8. There\u2019s always next year.", author: 'Chudders' },
+    { text: "Five straight wins and nobody\u2019s talking about us", author: 'MHJTIME' },
+    { text: "62 points?? That\u2019s not a game, that\u2019s a crime scene", author: 'Group Chat' }
+  ];
+
+  /* ── Helpers ────────────────────────────────────────── */
+  var maxScore = Math.max.apply(null, teams.map(function(t){ return t.score; }));
+  var minScore = Math.min.apply(null, teams.map(function(t){ return t.score; }));
+
+  function lerp(a, b, t) { return a + (b - a) * Math.max(0, Math.min(1, t)); }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
+
+  function scoreSizePx(score, minPx, maxPx) {
+    var t = (score - minScore) / (maxScore - minScore);
+    return lerp(minPx, maxPx, t);
+  }
+  function rankSizePx(rank, minPx, maxPx) {
+    var t = 1 - (rank - 1) / 11;
+    return lerp(minPx, maxPx, t);
+  }
+  function rankOpacity(rank) {
+    return lerp(0.3, 1.0, 1 - (rank - 1) / 11);
+  }
+
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
+  var isMobile = vw < 768;
+
+  window.addEventListener('resize', function() {
+    vw = window.innerWidth;
+    vh = window.innerHeight;
+    isMobile = vw < 768;
+  });
+
+  /* ── SECTION 1: Chaos Cloud Setup ──────────────────── */
+  var chaosContainer = document.getElementById('chaos-sticky');
+  var chaosEls = [];
+
+  var chaosPositions = [
+    { idx: 0, x: 0.42, y: 0.42 },
+    { idx: 1, x: 0.15, y: 0.35 },
+    { idx: 2, x: 0.68, y: 0.28 },
+    { idx: 3, x: 0.28, y: 0.62 },
+    { idx: 4, x: 0.72, y: 0.55 },
+    { idx: 5, x: 0.08, y: 0.52 },
+    { idx: 6, x: 0.55, y: 0.72 },
+    { idx: 7, x: 0.82, y: 0.42 },
+    { idx: 8, x: 0.35, y: 0.22 },
+    { idx: 9, x: 0.12, y: 0.75 },
+    { idx: 10, x: 0.85, y: 0.72 },
+    { idx: 11, x: 0.58, y: 0.15 }
+  ];
+
+  teams.forEach(function(team, i) {
+    var el = document.createElement('div');
+    el.className = 'team-name';
+    el.textContent = team.short;
+    el.style.color = team.color;
+
+    var sizePx = isMobile
+      ? rankSizePx(team.rank, 14, 72)
+      : rankSizePx(team.rank, 18, 160);
+
+    el.style.fontSize = sizePx + 'px';
+    el.style.opacity = rankOpacity(team.rank);
+
+    var pos = chaosPositions[i];
+    el.style.left = (pos.x * 100) + '%';
+    el.style.top = (pos.y * 100) + '%';
+    el.style.transform = 'translate(-50%, -50%)';
+
+    var glowIntensity = Math.round(lerp(2, 20, 1 - (team.rank - 1) / 11));
+    el.style.textShadow = '0 0 ' + glowIntensity + 'px ' + team.color + '40';
+
+    chaosContainer.appendChild(el);
+    chaosEls.push({
+      el: el,
+      baseX: pos.x,
+      baseY: pos.y,
+      baseSize: sizePx,
+      baseOpacity: rankOpacity(team.rank),
+      team: team
+    });
+  });
+
+  /* ── SECTION 2: Scores Setup ───────────────────────── */
+  var scoresContainer = document.getElementById('scores-sticky');
+  var scoreEls = [];
+
+  var scorePositions = [
+    { x: 0.38, y: 0.38 },
+    { x: 0.12, y: 0.30 },
+    { x: 0.70, y: 0.25 },
+    { x: 0.25, y: 0.58 },
+    { x: 0.75, y: 0.50 },
+    { x: 0.05, y: 0.55 },
+    { x: 0.55, y: 0.68 },
+    { x: 0.85, y: 0.38 },
+    { x: 0.42, y: 0.20 },
+    { x: 0.15, y: 0.78 },
+    { x: 0.82, y: 0.75 },
+    { x: 0.60, y: 0.12 }
+  ];
+
+  teams.forEach(function(team, i) {
+    var pos = scorePositions[i];
+    var sizePx = isMobile
+      ? scoreSizePx(team.score, 20, 80)
+      : scoreSizePx(team.score, 28, 150);
+
+    var numEl = document.createElement('div');
+    numEl.className = 'score-num';
+    numEl.textContent = team.score.toFixed(1);
+    numEl.style.color = team.color;
+    numEl.style.fontSize = sizePx + 'px';
+    numEl.style.left = (pos.x * 100) + '%';
+    numEl.style.top = (pos.y * 100) + '%';
+    numEl.style.transform = 'translate(-50%, -50%)';
+    numEl.style.opacity = '0';
+    var glowS = Math.round(lerp(2, 16, (team.score - minScore) / (maxScore - minScore)));
+    numEl.style.textShadow = '0 0 ' + glowS + 'px ' + team.color + '50';
+    scoresContainer.appendChild(numEl);
+
+    var labelEl = document.createElement('div');
+    labelEl.className = 'score-label';
+    labelEl.textContent = team.short;
+    labelEl.style.color = team.color;
+    labelEl.style.left = (pos.x * 100) + '%';
+    labelEl.style.top = (pos.y * 100 + (isMobile ? 4 : 5)) + '%';
+    labelEl.style.transform = 'translateX(-50%)';
+    labelEl.style.opacity = '0';
+    scoresContainer.appendChild(labelEl);
+
+    scoreEls.push({ numEl: numEl, labelEl: labelEl, baseSize: sizePx });
+  });
+
+  /* ── SECTION 3: Narrative BG Setup ─────────────────── */
+  var narrativeBg = document.getElementById('narrative-bg');
+  var bgNames = [];
+  teams.forEach(function(team) {
+    var el = document.createElement('div');
+    el.className = 'bg-name';
+    el.textContent = team.short;
+    el.style.color = team.color;
+    el.style.fontSize = (isMobile ? 50 : 120) + 'px';
+    el.style.opacity = '0.04';
+    el.style.left = rand(5, 80) + '%';
+    el.style.top = rand(10, 85) + '%';
+    narrativeBg.appendChild(el);
+    bgNames.push({ el: el, team: team, baseOpacity: 0.04 });
+  });
+
+  /* ── SECTION 4: Rankings Resolve Setup ─────────────── */
+  var rankingsContainer = document.getElementById('rankings-sticky');
+  var rankEls = [];
+
+  teams.forEach(function(team, i) {
+    var el = document.createElement('div');
+    el.className = 'rank-item';
+
+    var numSpan = document.createElement('span');
+    numSpan.className = 'rank-num';
+    numSpan.textContent = '#' + team.rank;
+    numSpan.style.color = 'rgba(255,255,255,0.4)';
+    numSpan.style.fontSize = (isMobile ? 14 : 20) + 'px';
+    el.appendChild(numSpan);
+
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'rank-name';
+    nameSpan.textContent = team.short;
+    nameSpan.style.color = team.color;
+    el.appendChild(nameSpan);
+
+    var recSpan = document.createElement('span');
+    recSpan.className = 'rank-record';
+    recSpan.textContent = team.record;
+    recSpan.style.color = 'rgba(255,255,255,0.35)';
+    el.appendChild(recSpan);
+
+    var moveSpan = document.createElement('span');
+    moveSpan.className = 'rank-movement ' + team.dir;
+    if (team.dir === 'up') moveSpan.textContent = '\u2191' + team.move;
+    else if (team.dir === 'down') moveSpan.textContent = '\u2193' + Math.abs(team.move);
+    else moveSpan.textContent = '\u2014';
+    el.appendChild(moveSpan);
+
+    var sizePx = isMobile
+      ? rankSizePx(team.rank, 14, 56)
+      : rankSizePx(team.rank, 20, 100);
+
+    el.style.fontSize = sizePx + 'px';
+    el.style.opacity = rankOpacity(team.rank);
+
+    var cp = chaosPositions[i];
+    el.style.left = (cp.x * 100) + '%';
+    el.style.top = (cp.y * 100) + '%';
+    el.style.transform = 'translate(-50%, -50%)';
+
+    var glow = Math.round(lerp(2, 14, 1 - (team.rank - 1) / 11));
+    nameSpan.style.textShadow = '0 0 ' + glow + 'px ' + team.color + '40';
+
+    rankingsContainer.appendChild(el);
+
+    var finalY = 10 + (i * (isMobile ? 6.8 : 6.5));
+    var finalSize = isMobile ? lerp(16, 32, 1 - i / 11) : lerp(22, 52, 1 - i / 11);
+
+    rankEls.push({
+      el: el,
+      numSpan: numSpan,
+      recSpan: recSpan,
+      moveSpan: moveSpan,
+      nameSpan: nameSpan,
+      chaosX: cp.x,
+      chaosY: cp.y,
+      chaosSize: sizePx,
+      finalX: isMobile ? 0.5 : 0.38,
+      finalY: finalY / 100,
+      finalSize: finalSize,
+      team: team
+    });
+  });
+
+  /* ── SECTION 5: Chat Quotes Setup ──────────────────── */
+  var chatSection = document.getElementById('chat');
+  var chatEls = [];
+
+  chatQuotes.forEach(function(q, i) {
+    var el = document.createElement('div');
+    el.className = 'chat-quote';
+
+    // Build content safely with textContent / DOM methods
+    var quoteText = document.createElement('span');
+    quoteText.textContent = '\u201c' + q.text + '\u201d';
+    el.appendChild(quoteText);
+
+    var attr = document.createElement('span');
+    attr.className = 'chat-attr';
+    attr.textContent = '\u2014 ' + q.author;
+    el.appendChild(attr);
+
+    var rot = rand(-6, 6);
+    var x = isMobile ? rand(5, 55) : rand(5, 75);
+    var y = 15 + (i * (isMobile ? 11 : 10));
+
+    el.style.left = x + '%';
+    el.style.top = y + '%';
+    el.style.transform = 'rotate(' + rot + 'deg)';
+    el.style.fontSize = clamp(rand(14, 22), 14, 22) + 'px';
+    el.style.opacity = '0';
+
+    chatSection.appendChild(el);
+    chatEls.push({ el: el, finalOpacity: rand(0.35, 0.7) });
+  });
+
+  /* ── Section progress helpers ──────────────────────── */
+  function getSectionProgress(sectionEl) {
+    var rect = sectionEl.getBoundingClientRect();
+    var h = sectionEl.offsetHeight;
+    return clamp(-rect.top / (h - vh), 0, 1);
+  }
+
+  /* ── Dot nav active state ──────────────────────────── */
+  var dotLinks = document.querySelectorAll('.dot-nav a');
+  var sectionIds = ['chaos', 'scores', 'narrative', 'rankings', 'chat', 'kicker'];
+
+  function updateDotNav() {
+    var current = '';
+    sectionIds.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var rect = el.getBoundingClientRect();
+      if (rect.top <= vh * 0.5 && rect.bottom > vh * 0.3) {
+        current = id;
+      }
+    });
+    dotLinks.forEach(function(link) {
+      link.classList.toggle('active', link.getAttribute('data-section') === current);
+    });
+  }
+
+  /* ── Narrative mention highlighting ────────────────── */
+  var mentionEls = document.querySelectorAll('.mention');
+
+  var teamKeyMap = {
+    kenobi: 'KEN-OBI', mhjtime: 'MHJTIME', rashee: 'RASHEE',
+    sleeping: 'SLEEPING', legion: 'LEGION', boonist: 'BOONIST',
+    noble: 'NOBLE', kittler: 'KITTLER', grayskull: 'GRAYSKULL',
+    burden: 'BURDEN', father: 'FATHER TIME', chudders: 'CHUDDERS'
+  };
+
+  function highlightNarrativeBg() {
+    var narrativeSection = document.getElementById('narrative');
+    var nRect = narrativeSection.getBoundingClientRect();
+    var isInView = nRect.top < vh && nRect.bottom > 0;
+
+    narrativeBg.classList.toggle('visible', isInView);
+    if (!isInView) return;
+
+    var activeTeams = {};
+    mentionEls.forEach(function(mel) {
+      var mRect = mel.getBoundingClientRect();
+      if (mRect.top > vh * 0.2 && mRect.bottom < vh * 0.8) {
+        activeTeams[mel.getAttribute('data-team')] = true;
+      }
+    });
+
+    bgNames.forEach(function(bg) {
+      var isActive = false;
+      Object.keys(activeTeams).forEach(function(key) {
+        if (teamKeyMap[key] === bg.team.short) isActive = true;
+      });
+      bg.el.style.opacity = isActive ? '0.15' : '0.04';
+    });
+  }
+
+  /* ── Main scroll handler ───────────────────────────── */
+  var ticking = false;
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function() {
+      ticking = false;
+
+      /* Section 1: Chaos Cloud */
+      var chaosSection = document.getElementById('chaos');
+      var p1 = getSectionProgress(chaosSection);
+
+      chaosEls.forEach(function(item) {
+        var spreadFactor = p1 * (isMobile ? 0.3 : 0.5);
+        var dirX = item.baseX - 0.5;
+        var dirY = item.baseY - 0.5;
+        var newX = item.baseX + dirX * spreadFactor;
+        var newY = item.baseY + dirY * spreadFactor;
+        var fadeOut = p1 > 0.7 ? 1 - (p1 - 0.7) / 0.3 : 1;
+
+        item.el.style.left = (newX * 100) + '%';
+        item.el.style.top = (newY * 100) + '%';
+        item.el.style.opacity = (item.baseOpacity * fadeOut).toFixed(3);
+      });
+
+      var cue = document.querySelector('.scroll-cue');
+      if (cue) cue.style.opacity = clamp(1 - p1 * 5, 0, 1).toFixed(3);
+
+      /* Section 2: Scores */
+      var scoresSection = document.getElementById('scores');
+      var p2 = getSectionProgress(scoresSection);
+
+      scoreEls.forEach(function(item, i) {
+        var team = teams[i];
+        var scoreNorm = (team.score - minScore) / (maxScore - minScore);
+        var delay = (1 - scoreNorm) * 0.3;
+        var fadeIn = clamp((p2 - delay) / 0.2, 0, 1);
+        var fadeOut = p2 > 0.7 ? 1 - (p2 - 0.7) / 0.3 : 1;
+
+        item.numEl.style.opacity = (fadeIn * fadeOut).toFixed(3);
+        item.labelEl.style.opacity = (fadeIn * fadeOut * 0.6).toFixed(3);
+
+        var scale = lerp(0.8, 1, fadeIn);
+        item.numEl.style.transform = 'translate(-50%, -50%) scale(' + scale.toFixed(3) + ')';
+      });
+
+      /* Section 3: Narrative highlighting */
+      highlightNarrativeBg();
+
+      /* Section 4: Rankings resolve */
+      var rankingsSection = document.getElementById('rankings');
+      var p4 = getSectionProgress(rankingsSection);
+
+      var resolveT = clamp((p4 - 0.15) / 0.55, 0, 1);
+      var eased = resolveT < 0.5
+        ? 2 * resolveT * resolveT
+        : 1 - Math.pow(-2 * resolveT + 2, 2) / 2;
+
+      var detailT = clamp((p4 - 0.65) / 0.2, 0, 1);
+
+      rankEls.forEach(function(item) {
+        var x = lerp(item.chaosX, item.finalX, eased);
+        var y = lerp(item.chaosY, item.finalY, eased);
+        var size = lerp(item.chaosSize, item.finalSize, eased);
+
+        item.el.style.left = (x * 100) + '%';
+        item.el.style.top = (y * 100) + '%';
+        item.el.style.fontSize = size.toFixed(1) + 'px';
+
+        var opacity = lerp(rankOpacity(item.team.rank), 0.95, eased);
+        item.el.style.opacity = opacity.toFixed(3);
+
+        item.numSpan.style.opacity = detailT.toFixed(3);
+        item.recSpan.style.opacity = detailT.toFixed(3);
+        item.moveSpan.style.opacity = detailT.toFixed(3);
+
+        var glowReduce = lerp(1, 0.3, eased);
+        var glow = Math.round(lerp(2, 14, 1 - (item.team.rank - 1) / 11) * glowReduce);
+        item.nameSpan.style.textShadow = '0 0 ' + glow + 'px ' + item.team.color + '40';
+      });
+
+      /* Section 5: Chat quotes */
+      chatEls.forEach(function(item) {
+        var elRect = item.el.getBoundingClientRect();
+        if (elRect.top < vh * 0.85 && elRect.bottom > 0) {
+          var t = clamp(1 - elRect.top / (vh * 0.85), 0, 1);
+          item.el.style.opacity = (t * item.finalOpacity).toFixed(3);
+        }
+      });
+
+      /* Section 6: Kicker */
+      var kickerEl = document.querySelector('.kicker-text');
+      var kRect = kickerEl.getBoundingClientRect();
+      if (kRect.top < vh * 0.7 && kRect.bottom > vh * 0.2) {
+        kickerEl.classList.add('visible');
+      }
+
+      /* Dot nav */
+      updateDotNav();
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+})();
+</script>
+</body>
+</html>

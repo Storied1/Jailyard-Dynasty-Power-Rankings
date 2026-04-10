@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Jailyard Dynasty // Multi-Viz Scroll</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & ROOT
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0c0c0c;
+  --bg-elevated: #141414;
+  --bg-card: #1a1a1a;
+  --fg: #e8e4de;
+  --fg-dim: #9a9590;
+  --fg-faint: #5a5652;
+  --accent: #c9a84c;
+  --accent-dim: rgba(201, 168, 76, 0.15);
+  --accent-glow: rgba(201, 168, 76, 0.35);
+  --blue: #4dabf7;
+  --blue-dim: rgba(77, 171, 247, 0.15);
+  --muted: #7a7568;
+  --border: rgba(201, 168, 76, 0.12);
+  --border-gold: rgba(201, 168, 76, 0.25);
+  --good: #4ade80;
+  --bad: #f87171;
+  --warn: #fbbf24;
+  --headline: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL PROGRESS
+   ═══════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #e8c860);
+  z-index: 9999;
+  transition: width 0.05s linear;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════ */
+.site-header {
+  text-align: center;
+  padding: 5rem 2rem 3.5rem;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.site-header .kicker {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.site-header h1 {
+  font-family: var(--headline);
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 0.5rem;
+}
+
+.site-header h1 span {
+  color: var(--accent);
+}
+
+.site-header .byline {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  letter-spacing: 0.05em;
+}
+
+.site-header .byline span {
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN LAYOUT — SPLIT PANEL
+   ═══════════════════════════════════════════════════════════ */
+.split-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ── Viz Panel (sticky left) ─────────────────────────── */
+.viz-panel {
+  width: 45%;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid var(--border-gold);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.viz-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.viz-layer.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Step Indicator Dots ─────────────────────────────── */
+.step-dots {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+  z-index: 10;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-faint);
+  transition: background 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.step-dot.active {
+  background: var(--accent);
+  transform: scale(1.4);
+}
+
+/* ── Narrative Panel (scrolling right) ──────────────── */
+.narrative-panel {
+  width: 55%;
+  padding: 0;
+}
+
+.scroll-section {
+  min-height: 100vh;
+  padding: 6rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.scroll-section .section-kicker {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.scroll-section h2 {
+  font-family: var(--headline);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.scroll-section p {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: var(--fg-dim);
+  margin-bottom: 1.2rem;
+  max-width: 540px;
+}
+
+.scroll-section p strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.scroll-section p .gold {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.scroll-section p .data {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  color: var(--blue);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIZ 1: HORIZONTAL BAR CHART
+   ═══════════════════════════════════════════════════════════ */
+.bar-chart {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bar-chart .viz-title {
+  font-family: var(--headline);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-dim);
+  margin-bottom: 0.8rem;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+}
+
+.bar-rank {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--fg-faint);
+  width: 18px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bar-name {
+  font-family: var(--headline);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fg-dim);
+  width: 100px;
+  flex-shrink: 0;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  flex: 1;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--blue);
+  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 0%;
+}
+
+.bar-fill.bar-gold {
+  background: linear-gradient(90deg, var(--accent), #e8c860);
+}
+
+.bar-score {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+  width: 36px;
+  flex-shrink: 0;
+  text-align: left;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIZ 2: MATCHUP BRACKET
+   ═══════════════════════════════════════════════════════════ */
+.matchup-bracket {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.matchup-bracket .viz-title {
+  font-family: var(--headline);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-dim);
+  margin-bottom: 0.4rem;
+}
+
+.matchup-pair {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.matchup-pair::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.matchup-team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.matchup-team-name {
+  font-family: var(--headline);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fg);
+  flex: 1;
+}
+
+.matchup-team-bar {
+  width: 120px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.matchup-team-bar .fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 0%;
+}
+
+.matchup-team-score {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.matchup-team.winner .matchup-team-name { color: var(--fg); }
+.matchup-team.winner .fill { background: var(--blue); }
+.matchup-team.winner .matchup-team-score { color: var(--blue); }
+
+.matchup-team.loser .matchup-team-name { color: var(--fg-faint); }
+.matchup-team.loser .fill { background: rgba(255, 255, 255, 0.08); }
+.matchup-team.loser .matchup-team-score { color: var(--fg-faint); }
+
+.matchup-vs {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--fg-faint);
+  text-align: center;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIZ 3: SPARKLINE GRID
+   ═══════════════════════════════════════════════════════════ */
+.sparkline-grid {
+  width: 100%;
+  max-width: 440px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.sparkline-grid .viz-title {
+  font-family: var(--headline);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-dim);
+  margin-bottom: 0.2rem;
+  grid-column: 1 / -1;
+}
+
+.spark-cell {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.spark-cell.hot {
+  border-color: var(--accent-glow);
+}
+
+.spark-cell.cold {
+  border-color: rgba(248, 113, 113, 0.15);
+}
+
+.spark-name {
+  font-family: var(--headline);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-dim);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.spark-cell.hot .spark-name { color: var(--accent); }
+.spark-cell.cold .spark-name { color: var(--bad); }
+
+.spark-svg {
+  width: 100%;
+  height: 30px;
+}
+
+.spark-svg polyline {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.spark-record {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--fg-faint);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIZ 4: HEAD-TO-HEAD CARD
+   ═══════════════════════════════════════════════════════════ */
+.h2h-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-gold);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.h2h-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.h2h-team-block {
+  text-align: center;
+  flex: 1;
+}
+
+.h2h-team-initials {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--headline);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.4rem;
+}
+
+.h2h-team-name {
+  font-family: var(--headline);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.h2h-team-record {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+}
+
+.h2h-vs {
+  font-family: var(--headline);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--fg-faint);
+  flex-shrink: 0;
+}
+
+.h2h-stats {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.h2h-stat-row {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.h2h-stat-row:last-child { border-bottom: none; }
+
+.h2h-stat-val {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 500;
+  width: 60px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.h2h-stat-val.lead { color: var(--accent); font-weight: 600; }
+.h2h-stat-val.trail { color: var(--fg-faint); }
+
+.h2h-stat-label {
+  flex: 1;
+  text-align: center;
+  font-family: var(--headline);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-dim);
+}
+
+.h2h-elo-chart {
+  padding: 1rem 1.5rem 1.2rem;
+  border-top: 1px solid var(--border);
+}
+
+.h2h-elo-title {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-bottom: 0.5rem;
+}
+
+.h2h-elo-svg {
+  width: 100%;
+  height: 80px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIZ 5: TIER LIST
+   ═══════════════════════════════════════════════════════════ */
+.tier-list {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tier-list .viz-title {
+  font-family: var(--headline);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-dim);
+  margin-bottom: 0.2rem;
+}
+
+.tier-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.tier-label {
+  font-family: var(--headline);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.tier-contender .tier-label {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.tier-bubble .tier-label {
+  color: var(--warn);
+  background: rgba(251, 191, 36, 0.08);
+}
+.tier-rebuild .tier-label {
+  color: var(--fg-dim);
+  background: rgba(255, 255, 255, 0.03);
+}
+.tier-eliminated .tier-label {
+  color: var(--bad);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.tier-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0.6rem 1rem;
+}
+
+.tier-pill {
+  font-family: var(--headline);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.tier-contender .tier-pill {
+  color: var(--accent);
+  border-color: var(--accent-glow);
+  background: var(--accent-dim);
+}
+.tier-bubble .tier-pill {
+  color: var(--warn);
+  border-color: rgba(251, 191, 36, 0.25);
+  background: rgba(251, 191, 36, 0.06);
+}
+.tier-rebuild .tier-pill {
+  color: var(--fg-dim);
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+.tier-eliminated .tier-pill {
+  color: var(--bad);
+  border-color: rgba(248, 113, 113, 0.2);
+  background: rgba(248, 113, 113, 0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--fg-faint);
+  border-top: 1px solid var(--border);
+}
+
+footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE / RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .split-container {
+    flex-direction: column;
+  }
+
+  .viz-panel {
+    width: 100%;
+    height: 45vh;
+    position: sticky;
+    top: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border-gold);
+    z-index: 10;
+  }
+
+  .viz-layer {
+    padding: 1.2rem;
+  }
+
+  .narrative-panel {
+    width: 100%;
+  }
+
+  .scroll-section {
+    min-height: 80vh;
+    padding: 3rem 1.5rem;
+  }
+
+  .scroll-section h2 {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+
+  .scroll-section p {
+    font-size: 0.95rem;
+  }
+
+  .bar-chart { max-width: 100%; }
+  .matchup-bracket { max-width: 100%; }
+  .sparkline-grid { max-width: 100%; grid-template-columns: repeat(3, 1fr); }
+  .h2h-card { max-width: 100%; }
+  .tier-list { max-width: 100%; }
+
+  .bar-name { width: 72px; font-size: 0.72rem; }
+  .bar-score { width: 30px; font-size: 0.65rem; }
+
+  .step-dots { bottom: 1rem; }
+}
+
+@media (max-width: 500px) {
+  .sparkline-grid { grid-template-columns: repeat(2, 1fr); }
+  .scroll-section { padding: 2.5rem 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="kicker">The Jailyard Dynasty &mdash; Week 9, 2025</div>
+  <h1>The Week That <span>Broke</span> the Algorithm</h1>
+  <div class="byline">By The Jailyard Staff &bull; <span>Nov 4, 2025</span></div>
+</header>
+
+<!-- Split Layout -->
+<div class="split-container">
+
+  <!-- VIZ PANEL (Sticky Left) -->
+  <div class="viz-panel" id="vizPanel">
+    <!-- VIZ 1: Horizontal Bar Chart -->
+    <div class="viz-layer active" id="viz-rankings">
+      <div class="bar-chart" id="barChart"></div>
+    </div>
+    <!-- VIZ 2: Matchup Bracket -->
+    <div class="viz-layer" id="viz-matchups">
+      <div class="matchup-bracket" id="matchupBracket"></div>
+    </div>
+    <!-- VIZ 3: Sparkline Grid -->
+    <div class="viz-layer" id="viz-momentum">
+      <div class="sparkline-grid" id="sparklineGrid"></div>
+    </div>
+    <!-- VIZ 4: H2H Card -->
+    <div class="viz-layer" id="viz-rivalry">
+      <div class="h2h-card" id="h2hCard"></div>
+    </div>
+    <!-- VIZ 5: Tier List -->
+    <div class="viz-layer" id="viz-verdict">
+      <div class="tier-list" id="tierList"></div>
+    </div>
+    <!-- Step Indicator Dots -->
+    <div class="step-dots" id="stepDots"></div>
+  </div>
+
+  <!-- NARRATIVE PANEL (Scrolling Right) -->
+  <div class="narrative-panel">
+
+    <!-- Section 1: The Rankings -->
+    <section class="scroll-section" data-step="0" id="section-rankings">
+      <div class="section-kicker">Section I</div>
+      <h2>The Rankings</h2>
+      <p>
+        There is a new king in the Jailyard, and his name is <strong class="gold">General Ken-obi</strong>.
+        After nine weeks of jockeying, backstabbing, and one truly absurd group chat meltdown,
+        Ken-obi finally took the throne with a <span class="data">165-point</span> eruption
+        that made the rest of the league look like they were playing a different sport.
+      </p>
+      <p>
+        CeeDee Lamb went nuclear. Nico Collins did CeeDee Lamb things. And the rest of the roster
+        filled in the margins like a team that knows exactly what it is. The bars tell the story:
+        that gold bar at the top isn't just leading &mdash; it's <em>lapping</em> the field.
+      </p>
+      <p>
+        <strong>MHJTIME</strong> posted <span class="data">148</span> and somehow it feels like a quiet week.
+        <strong>Rasheeing</strong> keeps doing Rasheeing things at <span class="data">142</span>.
+        And at the bottom, <strong>Father Time</strong> scored <span class="data">85 points</span>,
+        which is the kind of number that makes you check if your lineup actually submitted.
+      </p>
+    </section>
+
+    <!-- Section 2: The Matchups -->
+    <section class="scroll-section" data-step="1" id="section-matchups">
+      <div class="section-kicker">Section II</div>
+      <h2>The Matchups</h2>
+      <p>
+        Six games. Six stories. But only one that anyone will actually remember.
+      </p>
+      <p>
+        <strong class="gold">Ken-obi vs. Father Time</strong> wasn't a matchup &mdash; it was a wellness check.
+        An <span class="data">80-point</span> margin of victory. The group chat sent condolence GIFs
+        before halftime was over. Father Time didn't just lose; he became a cautionary tale,
+        the kind of score that gets screenshotted and pinned to the channel for posterity.
+      </p>
+      <p>
+        The real drama was <strong>Kittler vs. Sleeping Giants</strong>. Kittler, who'd been coasting
+        on vibes and the memory of a Week 3 explosion, finally ran into a team with actual depth.
+        The Giants won by <span class="data">3 points</span> &mdash; a margin so thin it felt like the fantasy gods
+        were personally invested in the narrative. Kittler drops to 6th. The Giants rise to 4th.
+        The group chat is still arguing about it.
+      </p>
+      <p>
+        <strong>MHJTIME handled Boonist Monks</strong> like a professional handles a speed bump.
+        <strong>Legion edged Burden of Proof</strong> in a game that was more tense than either fanbase deserved.
+        Routine chaos. Standard Jailyard procedure.
+      </p>
+    </section>
+
+    <!-- Section 3: The Momentum -->
+    <section class="scroll-section" data-step="2" id="section-momentum">
+      <div class="section-kicker">Section III</div>
+      <h2>The Momentum</h2>
+      <p>
+        Forget the standings for a second. The sparklines tell a different story &mdash; the story
+        of <em>trajectory</em>. Where a team is going matters more than where it's been.
+      </p>
+      <p>
+        <strong class="gold">Ken-obi's line is pointed at the sky.</strong> Three straight weeks of
+        ascending scores, culminating in that <span class="data">165</span> monster. When a sparkline
+        looks like a hockey stick, you don't bet against it. You just get out of the way.
+      </p>
+      <p>
+        The <strong>Sleeping Giants</strong> are the other team trending gold &mdash; four of their
+        last five weeks have been upward ticks, the kind of quiet momentum that doesn't make
+        headlines until you look up and they're in 4th place. Meanwhile, <strong>Kittler's</strong>
+        line looks like a stock chart after bad earnings. Three straight declines. The group chat
+        has started calling it "The Kittler Correction."
+      </p>
+      <p>
+        <strong>Father Time</strong> doesn't have a sparkline so much as a flatline.
+        Gray and going nowhere. <strong>Boonist Monks</strong> are down there too, their line
+        doing that thing where it dips just enough each week to be depressing but not enough
+        to be dramatic. The worst kind of bad: boring bad.
+      </p>
+    </section>
+
+    <!-- Section 4: The Rivalry -->
+    <section class="scroll-section" data-step="3" id="section-rivalry">
+      <div class="section-kicker">Section IV</div>
+      <h2>The Rivalry</h2>
+      <p>
+        Every dynasty league has one. The matchup that makes both managers check the schedule
+        in August. The game that turns the group chat into a war room. In the Jailyard,
+        it's <strong class="gold">Ken-obi vs. Kittler</strong> &mdash; and it's not particularly close.
+      </p>
+      <p>
+        The numbers paint the picture: <span class="data">5-3</span> all-time in Ken-obi's favor,
+        including a <span class="data">3-0</span> sweep this season that has Kittler questioning
+        every roster construction decision he's made since 2022. The average margin?
+        <span class="data">18.4 points</span>. That's not a rivalry. That's a recurring nightmare
+        dressed up in competitive clothing.
+      </p>
+      <p>
+        But the Elo chart shows the truth beneath the numbers. These two have been trading
+        positioning for three years. Kittler was the higher-rated team entering 2025.
+        Ken-obi's surge has rewritten the hierarchy. The lines crossed in Week 5 and haven't
+        looked back since. Kittler watches Ken-obi's line climb and wonders if the universe
+        has a sense of humor. It does. The punchline is always a loss.
+      </p>
+    </section>
+
+    <!-- Section 5: The Verdict -->
+    <section class="scroll-section" data-step="4" id="section-verdict">
+      <div class="section-kicker">Section V</div>
+      <h2>The Verdict</h2>
+      <p>
+        Nine weeks in, the picture is clear. The Jailyard has stratified into exactly four tiers,
+        and moving between them requires either a miracle or a catastrophe &mdash; depending on
+        which direction you're going.
+      </p>
+      <p>
+        The <strong class="gold">Contenders</strong> are Ken-obi, MHJTIME, and Rasheeing. These three
+        have separated from the pack like the peloton's breakaway group. You can make a case for any
+        of them winning it all. You cannot make a case for anyone else.
+      </p>
+      <p>
+        The <strong>Playoff Bubble</strong> is where the anxiety lives. Sleeping Giants, Legion, Kittler,
+        and Ghastly are all within a game of each other, and the schedule maker put them against
+        each other down the stretch. Someone's getting in. Someone's heart is getting broken.
+        The group chat will be insufferable either way.
+      </p>
+      <p>
+        Below that: <strong>Rebuilding</strong>. Chudders and Noble are playing for 2026 draft positioning
+        and the quiet dignity of spoiler games. And then there's the <strong style="color: var(--bad);">bottom</strong>.
+        Burden, Boonist, and Father Time. The playoff math doesn't work. The trades should've
+        happened two weeks ago. The only question is whether they'll play kingmaker or simply
+        fade into the offseason like a browser tab you forgot to close.
+      </p>
+    </section>
+
+  </div>
+</div>
+
+<footer>
+  <a href="../">The Jailyard Dynasty</a> &bull; V4 Multi-Viz Scroll Mockup &bull; 2025
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════════
+  // DATA
+  // ═══════════════════════════════════════════════════════
+
+  var teams = [
+    { name: 'General Ken-obi',       abbr: 'Ken-obi',       rank: 1,  score: 165, record: '7-2', last5: [128, 135, 142, 158, 165], trend: 'hot',  tier: 'contender' },
+    { name: 'MHJTIME',               abbr: 'MHJTIME',       rank: 2,  score: 148, record: '6-3', last5: [145, 152, 138, 141, 148], trend: 'warm', tier: 'contender' },
+    { name: 'Rasheeing Is Believing', abbr: 'Rasheeing',     rank: 3,  score: 142, record: '6-3', last5: [138, 141, 145, 139, 142], trend: 'warm', tier: 'contender' },
+    { name: 'Sleeping Giants',       abbr: 'Sleep. Giants',  rank: 4,  score: 138, record: '5-4', last5: [110, 118, 132, 135, 138], trend: 'hot',  tier: 'bubble' },
+    { name: 'Legion',                abbr: 'Legion',         rank: 5,  score: 130, record: '5-4', last5: [142, 138, 125, 128, 130], trend: 'cool', tier: 'bubble' },
+    { name: 'Kittler on the Roof',   abbr: 'Kittler',        rank: 6,  score: 135, record: '5-4', last5: [155, 148, 140, 138, 135], trend: 'cold', tier: 'bubble' },
+    { name: 'Ghastly Encounters',    abbr: 'Ghastly',        rank: 7,  score: 125, record: '5-4', last5: [118, 122, 128, 120, 125], trend: 'warm', tier: 'bubble' },
+    { name: 'Chudders',              abbr: 'Chudders',       rank: 8,  score: 108, record: '4-5', last5: [112, 115, 108, 110, 108], trend: 'cool', tier: 'rebuild' },
+    { name: 'Noble FFT',             abbr: 'Noble',          rank: 9,  score: 120, record: '4-5', last5: [125, 118, 122, 115, 120], trend: 'cool', tier: 'rebuild' },
+    { name: 'Burden of Proof',       abbr: 'Burden',         rank: 10, score: 115, record: '3-6', last5: [120, 112, 108, 118, 115], trend: 'cool', tier: 'eliminated' },
+    { name: 'Boonist Monks',         abbr: 'Boonist',        rank: 11, score: 100, record: '3-6', last5: [108, 105, 102, 98, 100],  trend: 'cold', tier: 'eliminated' },
+    { name: 'Father Time',           abbr: 'Father Time',    rank: 12, score: 85,  record: '2-7', last5: [95, 92, 88, 90, 85],      trend: 'cold', tier: 'eliminated' }
+  ];
+
+  var matchups = [
+    { home: 'Ken-obi',       homeScore: 165, away: 'Father Time',   awayScore: 85  },
+    { home: 'MHJTIME',       homeScore: 148, away: 'Boonist',       awayScore: 100 },
+    { home: 'Sleep. Giants',  homeScore: 138, away: 'Kittler',       awayScore: 135 },
+    { home: 'Rasheeing',     homeScore: 142, away: 'Ghastly',       awayScore: 125 },
+    { home: 'Legion',        homeScore: 130, away: 'Burden',        awayScore: 115 },
+    { home: 'Chudders',      homeScore: 108, away: 'Noble',         awayScore: 120 }
+  ];
+
+  var maxScore = 180;
+  var vizIds = ['viz-rankings', 'viz-matchups', 'viz-momentum', 'viz-rivalry', 'viz-verdict'];
+  var currentStep = -1;
+
+  // ═══════════════════════════════════════════════════════
+  // SAFE DOM HELPERS
+  // ═══════════════════════════════════════════════════════
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function(key) {
+        if (key === 'textContent') { node.textContent = attrs[key]; }
+        else if (key === 'className') { node.className = attrs[key]; }
+        else if (key.indexOf('style_') === 0) { node.style[key.slice(6)] = attrs[key]; }
+        else { node.setAttribute(key, attrs[key]); }
+      });
+    }
+    if (children) {
+      children.forEach(function(child) {
+        if (typeof child === 'string') { node.appendChild(document.createTextNode(child)); }
+        else if (child) { node.appendChild(child); }
+      });
+    }
+    return node;
+  }
+
+  function svgEl(tag, attrs) {
+    var node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function(key) {
+        node.setAttribute(key, attrs[key]);
+      });
+    }
+    return node;
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // BUILD VIZ 1: Horizontal Bar Chart
+  // ═══════════════════════════════════════════════════════
+
+  function buildBarChart() {
+    var container = document.getElementById('barChart');
+    container.appendChild(el('div', { className: 'viz-title', textContent: 'Power Rankings \u2014 Week 9' }));
+
+    teams.forEach(function(t) {
+      var pct = (t.score / maxScore * 100).toFixed(1);
+      var fillCls = 'bar-fill' + (t.rank === 1 ? ' bar-gold' : '');
+
+      var fill = el('div', { className: fillCls, 'data-width': pct });
+      var track = el('div', { className: 'bar-track' }, [fill]);
+
+      container.appendChild(el('div', { className: 'bar-row' }, [
+        el('span', { className: 'bar-rank', textContent: String(t.rank) }),
+        el('span', { className: 'bar-name', textContent: t.abbr }),
+        track,
+        el('span', { className: 'bar-score', textContent: String(t.score) })
+      ]));
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // BUILD VIZ 2: Matchup Bracket
+  // ═══════════════════════════════════════════════════════
+
+  function buildMatchupBracket() {
+    var container = document.getElementById('matchupBracket');
+    container.appendChild(el('div', { className: 'viz-title', textContent: 'Week 9 Matchups' }));
+
+    matchups.forEach(function(m) {
+      var homeWin = m.homeScore > m.awayScore;
+      var homePct = (m.homeScore / maxScore * 100).toFixed(1);
+      var awayPct = (m.awayScore / maxScore * 100).toFixed(1);
+
+      function teamRow(name, score, pct, isWinner) {
+        var fill = el('div', { className: 'fill', 'data-width': pct });
+        var bar = el('div', { className: 'matchup-team-bar' }, [fill]);
+        return el('div', { className: 'matchup-team ' + (isWinner ? 'winner' : 'loser') }, [
+          el('span', { className: 'matchup-team-name', textContent: name }),
+          bar,
+          el('span', { className: 'matchup-team-score', textContent: String(score) })
+        ]);
+      }
+
+      var pair = el('div', { className: 'matchup-pair' }, [
+        teamRow(m.home, m.homeScore, homePct, homeWin),
+        el('div', { className: 'matchup-vs', textContent: 'vs' }),
+        teamRow(m.away, m.awayScore, awayPct, !homeWin)
+      ]);
+      container.appendChild(pair);
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // BUILD VIZ 3: Sparkline Grid
+  // ═══════════════════════════════════════════════════════
+
+  function buildSparklineGrid() {
+    var container = document.getElementById('sparklineGrid');
+    container.appendChild(el('div', { className: 'viz-title', textContent: '5-Week Momentum' }));
+
+    teams.forEach(function(t) {
+      var trendClass = (t.trend === 'hot') ? 'hot' : (t.trend === 'cold') ? 'cold' : '';
+      var strokeColor = (t.trend === 'hot') ? '#c9a84c' : (t.trend === 'cold') ? '#f87171' : (t.trend === 'warm') ? '#4dabf7' : '#7a7568';
+
+      var pts = t.last5;
+      var minVal = Math.min.apply(null, pts) - 5;
+      var maxVal = Math.max.apply(null, pts) + 5;
+      var range = maxVal - minVal || 1;
+      var svgW = 80;
+      var svgH = 30;
+      var padding = 3;
+
+      var points = pts.map(function(v, i) {
+        var x = padding + (i / (pts.length - 1)) * (svgW - padding * 2);
+        var y = svgH - padding - ((v - minVal) / range) * (svgH - padding * 2);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+
+      var svg = svgEl('svg', { class: 'spark-svg', viewBox: '0 0 ' + svgW + ' ' + svgH, preserveAspectRatio: 'none' });
+      svg.appendChild(svgEl('polyline', { points: points, stroke: strokeColor }));
+
+      var cell = el('div', { className: 'spark-cell ' + trendClass }, [
+        el('span', { className: 'spark-name', textContent: t.abbr }),
+        undefined, // placeholder for SVG
+        el('span', { className: 'spark-record', textContent: t.record })
+      ]);
+      // Insert SVG before the record span
+      cell.insertBefore(svg, cell.lastChild);
+      container.appendChild(cell);
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // BUILD VIZ 4: Head-to-Head Card
+  // ═══════════════════════════════════════════════════════
+
+  function buildH2HCard() {
+    var container = document.getElementById('h2hCard');
+
+    // Ken-obi Elo trajectory (approximate): Weeks 1-9
+    var kenobiElo = [1020, 1035, 1045, 1040, 1058, 1065, 1072, 1085, 1105];
+    var kittlerElo = [1040, 1055, 1075, 1068, 1060, 1052, 1048, 1042, 1035];
+
+    // Build team blocks
+    function teamBlock(initials, bgStyle, name, record) {
+      var avatar = el('div', { className: 'h2h-team-initials' });
+      avatar.style.background = bgStyle;
+      avatar.textContent = initials;
+      return el('div', { className: 'h2h-team-block' }, [
+        avatar,
+        el('div', { className: 'h2h-team-name', textContent: name }),
+        el('div', { className: 'h2h-team-record', textContent: record })
+      ]);
+    }
+
+    var header = el('div', { className: 'h2h-header' }, [
+      teamBlock('GK', 'linear-gradient(135deg, #c9a84c, #e8c860)', 'Ken-obi', '7-2 \u2022 1st'),
+      el('div', { className: 'h2h-vs', textContent: 'VS' }),
+      teamBlock('KR', 'linear-gradient(135deg, #4dabf7, #74c0fc)', 'Kittler', '5-4 \u2022 6th')
+    ]);
+
+    // Stat rows
+    var statData = [
+      { left: '5', label: 'All-Time Record', right: '3', leftLead: true },
+      { left: '3', label: '2025 Season', right: '0', leftLead: true },
+      { left: '148.2', label: 'Avg Score vs', right: '129.8', leftLead: true },
+      { left: '+18.4', label: 'Avg Margin', right: '\u2014', leftLead: true }
+    ];
+
+    var statsDiv = el('div', { className: 'h2h-stats' });
+    statData.forEach(function(s) {
+      statsDiv.appendChild(el('div', { className: 'h2h-stat-row' }, [
+        el('span', { className: 'h2h-stat-val ' + (s.leftLead ? 'lead' : 'trail'), textContent: s.left }),
+        el('span', { className: 'h2h-stat-label', textContent: s.label }),
+        el('span', { className: 'h2h-stat-val ' + (s.leftLead ? 'trail' : 'lead'), textContent: s.right })
+      ]));
+    });
+
+    // Build Elo SVG
+    var svgW = 360;
+    var svgH = 70;
+    var pad = 8;
+    var allVals = kenobiElo.concat(kittlerElo);
+    var eloMin = Math.min.apply(null, allVals) - 10;
+    var eloMax = Math.max.apply(null, allVals) + 10;
+    var eloRange = eloMax - eloMin;
+
+    function eloPoints(data) {
+      return data.map(function(v, i) {
+        var x = pad + (i / (data.length - 1)) * (svgW - pad * 2);
+        var y = svgH - pad - ((v - eloMin) / eloRange) * (svgH - pad * 2);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+    }
+
+    var svg = svgEl('svg', { class: 'h2h-elo-svg', viewBox: '0 0 ' + svgW + ' ' + svgH, preserveAspectRatio: 'none' });
+
+    // Week dots
+    for (var i = 0; i < 9; i++) {
+      var dx = pad + (i / 8) * (svgW - pad * 2);
+      svg.appendChild(svgEl('circle', { cx: dx.toFixed(1), cy: String(svgH - 2), r: '1.5', fill: 'rgba(255,255,255,0.15)' }));
+    }
+
+    svg.appendChild(svgEl('polyline', { points: eloPoints(kenobiElo), fill: 'none', stroke: '#c9a84c', 'stroke-width': '2.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    svg.appendChild(svgEl('polyline', { points: eloPoints(kittlerElo), fill: 'none', stroke: '#4dabf7', 'stroke-width': '2.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+
+    var eloChart = el('div', { className: 'h2h-elo-chart' }, [
+      el('div', { className: 'h2h-elo-title', textContent: 'Elo Rating \u2014 2025 Season' })
+    ]);
+    eloChart.appendChild(svg);
+
+    container.appendChild(header);
+    container.appendChild(statsDiv);
+    container.appendChild(eloChart);
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // BUILD VIZ 5: Tier List
+  // ═══════════════════════════════════════════════════════
+
+  function buildTierList() {
+    var container = document.getElementById('tierList');
+    container.appendChild(el('div', { className: 'viz-title', textContent: 'Week 9 Tier List' }));
+
+    var tiers = [
+      { key: 'contender',  label: 'Contenders',     cls: 'tier-contender' },
+      { key: 'bubble',     label: 'Playoff Bubble',  cls: 'tier-bubble' },
+      { key: 'rebuild',    label: 'Rebuilding',       cls: 'tier-rebuild' },
+      { key: 'eliminated', label: 'Eliminated',       cls: 'tier-eliminated' }
+    ];
+
+    tiers.forEach(function(tier) {
+      var tierTeams = teams.filter(function(t) { return t.tier === tier.key; });
+
+      var pillsDiv = el('div', { className: 'tier-pills' });
+      tierTeams.forEach(function(t) {
+        pillsDiv.appendChild(el('span', { className: 'tier-pill', textContent: t.abbr }));
+      });
+
+      container.appendChild(el('div', { className: 'tier-group ' + tier.cls }, [
+        el('div', { className: 'tier-label', textContent: tier.label }),
+        pillsDiv
+      ]));
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // BUILD STEP DOTS
+  // ═══════════════════════════════════════════════════════
+
+  function buildStepDots() {
+    var container = document.getElementById('stepDots');
+    for (var i = 0; i < 5; i++) {
+      var dot = el('div', { className: 'step-dot' + (i === 0 ? ' active' : ''), 'data-step': String(i) });
+      container.appendChild(dot);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // BUILD ALL VISUALIZATIONS
+  // ═══════════════════════════════════════════════════════
+
+  buildBarChart();
+  buildMatchupBracket();
+  buildSparklineGrid();
+  buildH2HCard();
+  buildTierList();
+  buildStepDots();
+
+  // ═══════════════════════════════════════════════════════
+  // ANIMATE BARS ON VIZ ACTIVATION
+  // ═══════════════════════════════════════════════════════
+
+  function animateBars(vizId) {
+    var layer = document.getElementById(vizId);
+    if (!layer) return;
+
+    var fills = layer.querySelectorAll('[data-width]');
+    fills.forEach(function(fill) {
+      fill.style.width = '0%';
+    });
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        fills.forEach(function(fill, i) {
+          setTimeout(function() {
+            fill.style.width = fill.dataset.width + '%';
+          }, i * 40);
+        });
+      });
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // SCROLL-DRIVEN VIZ SWITCHING
+  // ═══════════════════════════════════════════════════════
+
+  var dots = document.querySelectorAll('.step-dot');
+
+  function activateStep(step) {
+    if (step === currentStep) return;
+    currentStep = step;
+
+    vizIds.forEach(function(id, i) {
+      var vizEl = document.getElementById(id);
+      if (i === step) {
+        vizEl.classList.add('active');
+        if (id === 'viz-rankings' || id === 'viz-matchups') {
+          animateBars(id);
+        }
+      } else {
+        vizEl.classList.remove('active');
+      }
+    });
+
+    dots.forEach(function(dot, i) {
+      dot.classList.toggle('active', i === step);
+    });
+  }
+
+  // Initial state
+  activateStep(0);
+
+  // IntersectionObserver for scroll steps
+  var sections = document.querySelectorAll('.scroll-section');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var step = parseInt(entry.target.dataset.step, 10);
+        activateStep(step);
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: '-30% 0px -30% 0px',
+    threshold: 0
+  });
+
+  sections.forEach(function(section) {
+    observer.observe(section);
+  });
+
+  // Dot click to scroll to section
+  document.getElementById('stepDots').addEventListener('click', function(e) {
+    var dot = e.target.closest('.step-dot');
+    if (!dot) return;
+    var step = parseInt(dot.dataset.step, 10);
+    var target = document.querySelector('.scroll-section[data-step="' + step + '"]');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // SCROLL PROGRESS BAR
+  // ═══════════════════════════════════════════════════════
+
+  var progressBar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }, { passive: true });
+
+})();
+</script>
+
+</body>
+</html>
