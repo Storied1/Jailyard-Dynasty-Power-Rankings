@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jailyard Dynasty — Week 6: The Shift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,900&family=Inter:wght@400;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── Register custom properties for smooth interpolation ── */
+@property --phase {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --bg-r { syntax: '<number>'; inherits: true; initial-value: 250; }
+@property --bg-g { syntax: '<number>'; inherits: true; initial-value: 248; }
+@property --bg-b { syntax: '<number>'; inherits: true; initial-value: 242; }
+@property --fg-r { syntax: '<number>'; inherits: true; initial-value: 26; }
+@property --fg-g { syntax: '<number>'; inherits: true; initial-value: 26; }
+@property --fg-b { syntax: '<number>'; inherits: true; initial-value: 26; }
+@property --accent-r { syntax: '<number>'; inherits: true; initial-value: 201; }
+@property --accent-g { syntax: '<number>'; inherits: true; initial-value: 168; }
+@property --accent-b { syntax: '<number>'; inherits: true; initial-value: 76; }
+@property --muted-a { syntax: '<number>'; inherits: true; initial-value: 0.45; }
+@property --line-h { syntax: '<number>'; inherits: true; initial-value: 1.8; }
+@property --letter-sp { syntax: '<number>'; inherits: true; initial-value: 0; }
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:rgb(var(--bg-r),var(--bg-g),var(--bg-b));
+  color:rgb(var(--fg-r),var(--fg-g),var(--fg-b));
+  font-family:'Lora','Playfair Display',Georgia,serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  transition:background 0.05s linear, color 0.05s linear;
+  line-height:var(--line-h);
+}
+
+/* ── STATE A: Warm Magazine (phase 0) ── */
+/* ── STATE B: Dark War Room (phase 1) ── */
+/* JS interpolates --phase 0→1 based on scroll position */
+/* All colors derived from registered properties */
+
+:root{
+  --accent2:rgb(var(--accent-r),var(--accent-g),var(--accent-b));
+  --bg:rgb(var(--bg-r),var(--bg-g),var(--bg-b));
+  --fg:rgb(var(--fg-r),var(--fg-g),var(--fg-b));
+}
+
+/* ── SECTIONS ── */
+.section{
+  padding:clamp(3rem,8vw,6rem) clamp(1.5rem,6vw,4rem);
+  max-width:780px;
+  margin:0 auto;
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity 1s ease, transform 1s ease;
+}
+.section.vis{opacity:1;transform:none}
+
+/* ── HEADINGS — morph from serif to sans ── */
+.h-serif,.h-morph{
+  font-family:'Playfair Display',Georgia,serif;
+  font-weight:900;
+  line-height:1.1;
+  letter-spacing:-0.01em;
+  transition:font-family 0.3s ease, letter-spacing 0.3s ease;
+}
+/* At phase > 0.5, JS adds .shifted class */
+.shifted .h-morph{
+  font-family:'Inter',system-ui,sans-serif;
+  font-weight:800;
+  letter-spacing:-0.03em;
+}
+
+.h1{font-size:clamp(2.5rem,7vw,5rem)}
+.h2{font-size:clamp(1.8rem,4.5vw,3rem)}
+.h3{font-size:clamp(1.3rem,3vw,2rem)}
+
+/* ── BODY TEXT ── */
+.prose{
+  font-size:clamp(1rem,2vw,1.2rem);
+  max-width:60ch;
+}
+.prose strong{font-weight:700}
+
+/* ── DROP CAP (fades out as phase increases) ── */
+.drop-cap::first-letter{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:3.5em;
+  float:left;
+  line-height:0.8;
+  margin:0.05em 0.15em 0 0;
+  color:rgb(var(--accent-r),var(--accent-g),var(--accent-b));
+  transition:opacity 0.5s ease;
+}
+.shifted .drop-cap::first-letter{
+  font-family:'Inter',sans-serif;
+  font-size:2.5em;
+}
+
+/* ── PULL QUOTE ── */
+.pull-quote{
+  font-family:'Playfair Display',Georgia,serif;
+  font-style:italic;
+  font-size:clamp(1.5rem,4vw,2.5rem);
+  color:rgb(var(--accent-r),var(--accent-g),var(--accent-b));
+  border-left:3px solid rgb(var(--accent-r),var(--accent-g),var(--accent-b));
+  padding-left:1.5rem;
+  margin:2rem 0;
+  line-height:1.35;
+  max-width:30ch;
+  transition:all 0.3s ease;
+}
+.shifted .pull-quote{
+  font-family:'Inter',sans-serif;
+  font-style:normal;
+  font-weight:800;
+  border-left-width:4px;
+}
+
+/* ── LABEL ── */
+.label{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:0.7rem;
+  font-weight:700;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  opacity:var(--muted-a);
+}
+
+/* ── STANDINGS ── */
+.standings{
+  width:100%;
+  border-collapse:collapse;
+  font-family:'Inter',sans-serif;
+  font-size:clamp(0.8rem,1.6vw,0.95rem);
+  margin:1.5rem 0;
+}
+.standings th{
+  text-align:left;
+  padding:0.5em 0.6em;
+  font-size:0.65rem;
+  font-weight:700;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  opacity:0.4;
+  border-bottom:1px solid rgba(var(--fg-r),var(--fg-g),var(--fg-b),0.15);
+}
+.standings td{
+  padding:0.5em 0.6em;
+  border-bottom:1px solid rgba(var(--fg-r),var(--fg-g),var(--fg-b),0.08);
+}
+.standings .tn{font-weight:700}
+.standings .up{color:#22c55e;font-weight:600}
+.standings .dn{color:#ff3b3b;font-weight:600}
+.standings .fl{opacity:0.3}
+.standings .rk{
+  font-weight:900;
+  color:rgb(var(--accent-r),var(--accent-g),var(--accent-b));
+}
+
+/* ── MATCHUP CARD ── */
+.match{
+  border:1px solid rgba(var(--fg-r),var(--fg-g),var(--fg-b),0.12);
+  border-radius:6px;
+  padding:1.2rem 1.5rem;
+  margin:1rem 0;
+  transition:border-color 0.3s ease, background 0.3s ease;
+}
+.match.upset{border-color:rgb(var(--accent-r),var(--accent-g),var(--accent-b));border-width:2px}
+.match-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:0.5rem}
+.match-team{font-weight:700;font-size:clamp(0.95rem,2vw,1.15rem)}
+.match-team.loser{opacity:0.4}
+.match-score{
+  font-family:'Playfair Display',serif;
+  font-weight:900;
+  font-size:clamp(1.3rem,3vw,1.8rem);
+  margin:0.5rem 0 0.3rem;
+  transition:font-family 0.3s ease;
+}
+.shifted .match-score{font-family:'Inter',sans-serif}
+.match-detail{font-size:0.85rem;opacity:0.5}
+.match .upset-label{
+  display:inline-block;
+  font-size:0.65rem;
+  font-weight:800;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:rgb(var(--accent-r),var(--accent-g),var(--accent-b));
+  border:1px solid rgb(var(--accent-r),var(--accent-g),var(--accent-b));
+  padding:0.15em 0.5em;
+  margin-top:0.3rem;
+}
+
+/* ── DIVIDER ── */
+.rule{
+  border:none;
+  height:1px;
+  background:rgba(var(--fg-r),var(--fg-g),var(--fg-b),0.1);
+  margin:3rem 0;
+}
+
+/* ── PHASE INDICATOR (subtle) ── */
+.phase-bar{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:3px;
+  z-index:100;
+  background:linear-gradient(90deg,
+    rgb(201,168,76) 0%,
+    rgb(201,168,76) calc(var(--phase,0) * 100%),
+    rgb(255,59,59) calc(var(--phase,0) * 100%),
+    rgb(255,59,59) 100%
+  );
+  opacity:0.6;
+  transition:opacity 0.3s;
+}
+
+/* ── SPACING ── */
+.mt-1{margin-top:0.5rem}.mt-2{margin-top:1rem}.mt-3{margin-top:2rem}.mt-4{margin-top:3rem}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .section{padding:2rem 1.25rem}
+  .standings{font-size:0.75rem}
+}
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  .section{opacity:1;transform:none;transition:none}
+  body{transition:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Phase progress bar -->
+<div class="phase-bar" id="phaseBar"></div>
+
+<!-- ═══ ACT I: THE CALM (phase 0–0.2) ═══ -->
+
+<div class="section" id="opener">
+  <p class="label">Jailyard Dynasty &middot; Season 2025 &middot; Week 6</p>
+  <h1 class="h1 h-morph mt-2">The Week That Changed Everything</h1>
+  <hr class="rule">
+  <p class="prose drop-cap">Three teams sat at 5-1 entering Sunday. The defending champion held the top spot. The models had their predictions. The standings looked stable, settled, almost boring in their predictability. It was, by every measure, supposed to be a routine week in the Jailyard Dynasty.</p>
+  <p class="prose mt-2">It was not a routine week.</p>
+</div>
+
+<div class="section">
+  <h2 class="h2 h-morph">The Setup</h2>
+  <p class="prose mt-2">Kittler on the Roof — the 2024 champion, runner-up in 2022 and 2023 — sat at #1 in the power rankings with a 4-1 record. Below them, a traffic jam: Legion of Bouz, Sleeping Giants, Rasheeing the Scene, and General Ken-obi all at 4-1. The Boonist Monks lurked at 3-2 with the league's highest points-for.</p>
+  <p class="prose mt-2">At the bottom, Burden of Etienne-y Woody and Father Time both sat at 0-5, sinking toward the toilet bowl with a combined record of zero wins in ten games.</p>
+  <p class="pull-quote mt-3">The standings looked stable.<br>Almost boring.</p>
+  <p class="prose mt-2">Then Sunday happened.</p>
+</div>
+
+<!-- ═══ ACT II: THE ESCALATION (phase 0.2–0.6) ═══ -->
+
+<div class="section">
+  <h2 class="h2 h-morph">The First Crack</h2>
+  <div class="match upset">
+    <div class="match-head">
+      <span class="match-team">Noble FFT</span>
+      <span class="match-team loser">Ghastly Grayskull Gang</span>
+    </div>
+    <div class="match-score">151.88 — 121.30</div>
+    <div class="match-detail">Bijan Robinson: 32.8 pts &middot; Caleb Williams: 19.88</div>
+    <span class="upset-label">Upset &middot; +30.58</span>
+  </div>
+  <p class="prose mt-2">Bijan Robinson put up 32.8 points — the highest individual score of the week. Noble FFT had been sitting at 2-3, mired in the middle of the pack. Ghastly Grayskull had the better record, the better roster on paper, the better odds. None of it mattered when Robinson decided to run through the entire Atlanta schedule.</p>
+</div>
+
+<div class="section">
+  <h2 class="h2 h-morph">The Dethroning</h2>
+  <div class="match upset">
+    <div class="match-head">
+      <span class="match-team">MHJTIME</span>
+      <span class="match-team loser">Kittler on the Roof</span>
+    </div>
+    <div class="match-score">140.94 — 107.74</div>
+    <div class="match-detail">Rico Dowdle: 30.9 &middot; Jayden Daniels: 22.64 &middot; Ja'Marr Chase: 20.1</div>
+    <span class="upset-label">Upset &middot; +33.20</span>
+  </div>
+  <p class="prose mt-2">This is the one that rewrote the standings. Kittler — the defending champion, the team that had been #1 all season — scored 107.74. Below the league average of 128.7. Against a MHJTIME squad whose trio of Dowdle, Daniels, and Chase combined for 73.64 points. Three players. Nearly seventy-four points.</p>
+  <p class="pull-quote mt-3">The throne isn't just empty.<br>It's in pieces.</p>
+</div>
+
+<div class="section">
+  <h2 class="h2 h-morph">The Avalanche</h2>
+  <div class="match upset">
+    <div class="match-head">
+      <span class="match-team">The Boonist Monks</span>
+      <span class="match-team loser">Rasheeing the Scene</span>
+    </div>
+    <div class="match-score">150.46 — 109.10</div>
+    <div class="match-detail">George Pickens: 27.3 &middot; Jaxon Smith-Njigba: 26.2 &middot; Flacco: 18.76</div>
+    <span class="upset-label">Upset &middot; +41.36</span>
+  </div>
+  <p class="prose mt-2">Pickens and Smith-Njigba combined for 53.5 from the wide receiver room alone. Rasheeing the Scene's Josh Allen — normally a cheat code — managed only 15.4. The Boonist Monks climbed two spots. Rasheeing fell two. The whole middle of the standings liquefied.</p>
+</div>
+
+<!-- ═══ ACT III: THE BREAKING POINT (phase 0.6–0.8) ═══ -->
+
+<div class="section">
+  <h2 class="h2 h-morph">The Blowout</h2>
+  <div class="match upset" style="border-width:3px">
+    <div class="match-head">
+      <span class="match-team">General Ken-obi</span>
+      <span class="match-team loser">Burden of Etienne-y Woody</span>
+    </div>
+    <div class="match-score">164.94 — 99.20</div>
+    <div class="match-detail">LA Rams DEF: 27.0 &middot; Drake London: 26.8 &middot; Drake Maye: 26.24</div>
+    <span class="upset-label">Blowout &middot; +65.74</span>
+  </div>
+  <p class="prose mt-2">Sixty-five points. The largest margin of the entire 2025 season. The Rams defense — a defense! — scored 27.0 points by themselves, more than Burden's top individual performer. Ken-obi's Elo climbed to <strong>1700.2</strong>. A career peak. Two-time champion. Five-and-one. The trajectory says: title contender.</p>
+  <p class="prose mt-2">Burden fell to 0-6. Their sixth consecutive loss. Next week they play Father Time — also 0-6. Someone gets their first win. Someone extends the misery.</p>
+  <p class="pull-quote mt-3">Four of six games.<br>Upsets.</p>
+</div>
+
+<!-- ═══ ACT IV: THE NEW ORDER (phase 0.8–1.0) ═══ -->
+
+<div class="section">
+  <h2 class="h2 h-morph">The New Order</h2>
+  <p class="prose mt-2">When the dust settled, three teams shared 5-1 records at the top. One of them — Ken-obi — had risen from 5th to 2nd. One — Kittler — had dropped from 1st to 5th. The entire top half of the standings reshuffled.</p>
+  <table class="standings mt-3">
+    <thead><tr><th>#</th><th>Team</th><th>Rec</th><th>PF</th><th>Wk6</th><th>+/-</th></tr></thead>
+    <tbody>
+      <tr><td class="rk">1</td><td class="tn">The Legion of Bouz</td><td>5-1</td><td>935.7</td><td>165.90</td><td class="up">+1</td></tr>
+      <tr><td class="rk">2</td><td class="tn">General Ken-obi</td><td>5-1</td><td>871.2</td><td>164.94</td><td class="up">+3</td></tr>
+      <tr><td class="rk">3</td><td class="tn">Sleeping Giants</td><td>5-1</td><td>857.0</td><td>129.82</td><td class="fl">—</td></tr>
+      <tr><td class="rk">4</td><td class="tn">The Boonist Monks</td><td>4-2</td><td>912.9</td><td>150.46</td><td class="up">+2</td></tr>
+      <tr><td class="rk">5</td><td class="tn">Kittler on the Roof</td><td>4-2</td><td>877.9</td><td>107.74</td><td class="dn">-4</td></tr>
+      <tr><td class="rk">6</td><td class="tn">Rasheeing the Scene</td><td>4-2</td><td>816.0</td><td>109.10</td><td class="dn">-2</td></tr>
+      <tr><td class="rk">7</td><td class="tn">MHJTIME</td><td>3-3</td><td>891.9</td><td>140.94</td><td class="fl">—</td></tr>
+      <tr><td class="rk">8</td><td class="tn">Noble FFT</td><td>3-3</td><td>819.0</td><td>151.88</td><td class="up">+1</td></tr>
+      <tr><td class="rk">9</td><td class="tn">Ghastly Grayskull Gang</td><td>2-4</td><td>818.3</td><td>121.30</td><td class="dn">-1</td></tr>
+      <tr><td class="rk">10</td><td class="tn">Chudders Football Team</td><td>1-5</td><td>727.9</td><td>95.26</td><td class="fl">—</td></tr>
+      <tr><td class="rk">11</td><td class="tn">Burden of Etienne-y Woody</td><td>0-6</td><td>732.7</td><td>99.20</td><td class="fl">—</td></tr>
+      <tr><td class="rk">12</td><td class="tn">Father Time</td><td>0-6</td><td>712.7</td><td>107.66</td><td class="fl">—</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2 class="h2 h-morph">What Comes Next</h2>
+  <p class="prose mt-2">Week 7 delivers the matchup the season has been building toward: <strong>The Legion of Bouz vs General Ken-obi.</strong> #1 vs #2. Both 5-1. Both scored 164+ this week. Elo: 1604 vs 1700. One former champion vs a two-time champion. One of them walks out of Week 7 with sole possession of first place.</p>
+  <p class="prose mt-2">At the other end: Burden of Etienne-y Woody vs Father Time. 0-6 vs 0-6. Someone's losing streak ends. Someone's doesn't. The toilet bowl matinee nobody asked for but everyone will watch.</p>
+  <p class="pull-quote mt-3">The models broke this week.<br>Next week, they might not matter at all.</p>
+</div>
+
+<div class="section" style="min-height:40vh;display:flex;flex-direction:column;justify-content:center">
+  <p class="label" style="text-align:center">Jailyard Dynasty &middot; Week 6 &middot; 2025</p>
+</div>
+
+<script>
+(function(){
+  // ── Section reveal ──
+  var secs = document.querySelectorAll('.section');
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting) e.target.classList.add('vis');
+    });
+  },{threshold:0.1});
+  secs.forEach(function(s){obs.observe(s)});
+
+  // ── Phase interpolation on scroll ──
+  // State A (phase 0): warm cream bg, dark text, gold accent, serif
+  // State B (phase 1): near-black bg, light text, red accent, sans
+  var stateA = {bgR:250,bgG:248,bgB:242, fgR:26,fgG:26,fgB:26, acR:201,acG:168,acB:76, muted:0.45, lineH:1.8};
+  var stateB = {bgR:10,bgG:10,bgB:10,  fgR:224,fgG:224,fgB:224, acR:255,acG:59,acB:59, muted:0.55, lineH:1.45};
+
+  function lerp(a,b,t){return a + (b - a) * t}
+
+  function updatePhase(){
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var t = Math.min(1, Math.max(0, scrollTop / docHeight));
+    // Ease the transition: slow start, faster in the middle, slow end
+    var eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+    var root = document.documentElement;
+    root.style.setProperty('--bg-r', lerp(stateA.bgR, stateB.bgR, eased));
+    root.style.setProperty('--bg-g', lerp(stateA.bgG, stateB.bgG, eased));
+    root.style.setProperty('--bg-b', lerp(stateA.bgB, stateB.bgB, eased));
+    root.style.setProperty('--fg-r', lerp(stateA.fgR, stateB.fgR, eased));
+    root.style.setProperty('--fg-g', lerp(stateA.fgG, stateB.fgG, eased));
+    root.style.setProperty('--fg-b', lerp(stateA.fgB, stateB.fgB, eased));
+    root.style.setProperty('--accent-r', lerp(stateA.acR, stateB.acR, eased));
+    root.style.setProperty('--accent-g', lerp(stateA.acG, stateB.acG, eased));
+    root.style.setProperty('--accent-b', lerp(stateA.acB, stateB.acB, eased));
+    root.style.setProperty('--muted-a', lerp(stateA.muted, stateB.muted, eased));
+    root.style.setProperty('--line-h', lerp(stateA.lineH, stateB.lineH, eased));
+    root.style.setProperty('--phase', eased);
+
+    // Update phase bar
+    var bar = document.getElementById('phaseBar');
+    if(bar) bar.style.setProperty('--phase', eased);
+
+    // Toggle shifted class at midpoint
+    if(eased > 0.5){
+      document.body.classList.add('shifted');
+    } else {
+      document.body.classList.remove('shifted');
+    }
+  }
+
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(!ticking){
+      requestAnimationFrame(function(){
+        updatePhase();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+  updatePhase(); // initial
+})();
+</script>
+</body>
+</html>

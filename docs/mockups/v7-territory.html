@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE TERRITORY | The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   THE TERRITORY — Risk-style dynasty power map
+   Week 9 | 2025 Season | The Jailyard Dynasty
+   ═══════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --fg: #e8ecf0;
+  --muted: #7a8194;
+  --accent: #8b5cf6;
+  --accent2: #ec4899;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+  --gold: #f59e0b;
+  --good: #22c55e;
+  --bad: #ef4444;
+}
+
+html {
+  font-family: 'Barlow Condensed', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── MAP VIEWPORT ───────────────────────────────────────── */
+.territory-viewport {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  min-height: 600px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+/* SVG noise texture overlay */
+.territory-viewport::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Vignette */
+.territory-viewport::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ── MAP CANVAS ─────────────────────────────────────────── */
+#territoryCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* ── HEADER OVERLAY ──────────────────────────────────────── */
+.map-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.map-header > * { pointer-events: auto; }
+
+.map-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--fg);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+
+.map-title span {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-top: 0.3rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.map-week {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gold);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(245,158,11,0.2);
+  text-shadow: 0 0 12px rgba(245,158,11,0.3);
+}
+
+/* ── LEGEND ──────────────────────────────────────────────── */
+.map-legend {
+  position: absolute;
+  bottom: 5.5rem;
+  left: 2rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  pointer-events: none;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.legend-border {
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+}
+
+/* ── TOOLTIP / LAND DEED ─────────────────────────────────── */
+.land-deed {
+  position: fixed;
+  z-index: 100;
+  width: 320px;
+  background: rgba(12,10,8,0.96);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 4px;
+  padding: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px) scale(0.97);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(245,158,11,0.08);
+  font-family: 'Newsreader', serif;
+}
+
+.land-deed.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.deed-header {
+  padding: 0.8rem 1rem 0.6rem;
+  border-bottom: 1px solid rgba(245,158,11,0.15);
+  background: linear-gradient(135deg, rgba(245,158,11,0.06), transparent);
+}
+
+.deed-header .deed-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.3rem;
+}
+
+.deed-header .deed-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--fg);
+  line-height: 1.1;
+}
+
+.deed-header .deed-owner {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 0.15rem;
+}
+
+.deed-body {
+  padding: 0.7rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.deed-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.deed-stat .stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.deed-stat .stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.deed-stat .stat-value.good { color: var(--good); }
+.deed-stat .stat-value.bad { color: var(--bad); }
+
+.deed-blurb {
+  padding: 0.6rem 1rem 0.8rem;
+  border-top: 1px solid rgba(245,158,11,0.1);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #b8b0a4;
+  font-style: italic;
+}
+
+.deed-rank-badge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: var(--gold);
+  color: #0a0a0a;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  box-shadow: 0 2px 10px rgba(245,158,11,0.4);
+}
+
+/* ── BATTLE MARKERS ──────────────────────────────────────── */
+@keyframes battle-glow {
+  0%, 100% { box-shadow: 0 0 16px rgba(245,158,11,0.2); }
+  50% { box-shadow: 0 0 24px rgba(245,158,11,0.5); }
+}
+
+/* ── TIMELINE SCRUBBER ───────────────────────────────────── */
+.timeline-rail {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  height: 4rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.7), transparent);
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+  gap: 0.5rem;
+}
+
+.timeline-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  min-width: 40px;
+}
+
+.timeline-track {
+  flex: 1;
+  position: relative;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border);
+  transform: translateY(-50%);
+}
+
+.timeline-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  transform: translateY(-50%);
+  transition: width 0.3s ease;
+}
+
+.timeline-nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  z-index: 1;
+}
+
+.timeline-node {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.timeline-node:hover {
+  transform: scale(1.3);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.timeline-node.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #0a0a0a;
+  box-shadow: 0 0 12px rgba(245,158,11,0.4);
+}
+
+.timeline-node.future {
+  border-color: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.1);
+  cursor: default;
+  pointer-events: none;
+}
+
+.timeline-node::before {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  opacity: 0;
+  color: var(--fg);
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.timeline-node:hover::before,
+.timeline-node.active::before {
+  opacity: 1;
+}
+
+/* ── SCROLL CTA ──────────────────────────────────────────── */
+.scroll-cta {
+  position: absolute;
+  bottom: 5rem;
+  right: 2rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  animation: scroll-bounce 2.5s ease-in-out infinite;
+}
+
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(6px); opacity: 1; }
+}
+
+.scroll-cta svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--muted);
+  fill: none;
+  stroke-width: 2;
+}
+
+/* ── EDITORIAL SECTION ───────────────────────────────────── */
+.editorial {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4rem 2rem 6rem;
+}
+
+.editorial-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.editorial-header h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--fg), var(--gold));
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.editorial-header p {
+  font-family: 'Newsreader', serif;
+  font-size: 1rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+}
+
+.rankings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rank-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.rank-card:hover {
+  border-color: rgba(245,158,11,0.2);
+  transform: translateX(4px);
+}
+
+.rank-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.rank-num.top3 { color: var(--gold); }
+.rank-num.mid { color: var(--muted); }
+.rank-num.bottom { color: var(--bad); }
+
+.rank-info {
+  flex: 1;
+}
+
+.rank-info .rank-team-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.rank-info .rank-record {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
+.rank-info .rank-blurb {
+  font-family: 'Newsreader', serif;
+  font-size: 0.9rem;
+  color: #b0b4bc;
+  margin-top: 0.4rem;
+  line-height: 1.5;
+}
+
+.rank-movement {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.rank-movement.up { color: var(--good); background: rgba(34,197,94,0.1); }
+.rank-movement.down { color: var(--bad); background: rgba(239,68,68,0.1); }
+.rank-movement.steady { color: var(--muted); background: rgba(255,255,255,0.03); }
+
+/* ── TERRITORY SIZE INDICATOR ─────────────────────────────── */
+.rank-territory {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.territory-bar {
+  height: 4px;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.territory-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+/* ── MOBILE ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .map-header { padding: 1rem; }
+  .map-title { font-size: 1.3rem; }
+  .map-title span { font-size: 0.55rem; }
+  .map-week { font-size: 0.7rem; padding: 0.35rem 0.7rem; }
+  .map-legend { bottom: 5rem; left: 1rem; }
+  .timeline-rail { padding: 0 1rem; }
+  .timeline-node { width: 16px; height: 16px; font-size: 0; }
+  .editorial { padding: 3rem 1rem 4rem; }
+  .editorial-header h2 { font-size: 1.6rem; }
+  .rank-card { padding: 0.9rem; }
+  .rank-num { font-size: 1.5rem; min-width: 2rem; }
+
+  .land-deed {
+    width: calc(100vw - 2rem);
+    max-width: 320px;
+    left: 1rem !important;
+    right: 1rem !important;
+    bottom: 5rem !important;
+    top: auto !important;
+  }
+
+  .scroll-cta { right: 1rem; }
+}
+
+@media (max-width: 480px) {
+  .territory-viewport { min-height: 500px; }
+  .map-legend { display: none; }
+  .timeline-node { width: 12px; height: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAP VIEWPORT — Full-screen territory visualization
+     ═══════════════════════════════════════════════════════════ -->
+<section class="territory-viewport" id="territoryViewport">
+  <canvas id="territoryCanvas"></canvas>
+
+  <!-- Header -->
+  <div class="map-header">
+    <div class="map-title">
+      THE TERRITORY
+      <span>THE JAILYARD DYNASTY &mdash; 2025</span>
+    </div>
+    <div class="map-week" id="weekLabel">WEEK 9</div>
+  </div>
+
+  <!-- Legend -->
+  <div class="map-legend" id="mapLegend"></div>
+
+  <!-- Scroll CTA -->
+  <div class="scroll-cta">
+    SCROLL FOR RANKINGS
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+
+  <!-- Tooltip -->
+  <div class="land-deed" id="landDeed">
+    <div class="deed-rank-badge" id="deedRank"></div>
+    <div class="deed-header">
+      <div class="deed-label">TERRITORIAL CLAIM</div>
+      <div class="deed-name" id="deedName"></div>
+      <div class="deed-owner" id="deedOwner"></div>
+    </div>
+    <div class="deed-body">
+      <div class="deed-stat">
+        <span class="stat-label">Record</span>
+        <span class="stat-value" id="deedRecord"></span>
+      </div>
+      <div class="deed-stat">
+        <span class="stat-label">This Week</span>
+        <span class="stat-value" id="deedScore"></span>
+      </div>
+      <div class="deed-stat">
+        <span class="stat-label">Territory</span>
+        <span class="stat-value" id="deedTerritory"></span>
+      </div>
+      <div class="deed-stat">
+        <span class="stat-label">Streak</span>
+        <span class="stat-value" id="deedStreak"></span>
+      </div>
+    </div>
+    <div class="deed-blurb" id="deedBlurb"></div>
+  </div>
+
+  <!-- Timeline scrubber -->
+  <div class="timeline-rail">
+    <span class="timeline-label">WK 1</span>
+    <div class="timeline-track" id="timelineTrack">
+      <div class="timeline-line"></div>
+      <div class="timeline-fill" id="timelineFill"></div>
+      <div class="timeline-nodes" id="timelineNodes"></div>
+    </div>
+    <span class="timeline-label">WK 18</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     EDITORIAL — Power Rankings below the map
+     ═══════════════════════════════════════════════════════════ -->
+<section class="editorial" id="editorial">
+  <div class="editorial-header">
+    <h2>Power Rankings</h2>
+    <p>Week 9 &mdash; Who controls the land?</p>
+  </div>
+  <div class="rankings-list" id="rankingsList"></div>
+</section>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════════════
+  // DATA — Real Week 9 standings from Sleeper API
+  // ═══════════════════════════════════════════════════════════
+
+  var TEAMS = [
+    {
+      name: 'General Ken-obi', owner: 'bLaker24', initials: 'GK',
+      rank: 1, record: '7-2', wins: 7, losses: 2,
+      pf: 1348.0, weekPts: 154.86, streak: 'W2',
+      elo: 1700.2, movement: 1,
+      color: '#6366f1',
+      blurb: 'The empire. 154 points this week, including a 62-point annihilation of Kittler. The map reflects reality: Ken-obi controls the center of the known world.'
+    },
+    {
+      name: 'MHJTIME', owner: 'rango_', initials: 'MH',
+      rank: 2, record: '6-3', wins: 6, losses: 3,
+      pf: 1411.5, weekPts: 144.48, streak: 'W5',
+      elo: 1585.7, movement: 1,
+      color: '#a855f7',
+      blurb: 'Five straight wins. The points leader. MHJTIME is expanding territory like a mid-game RISK surge when everyone else is fighting over Australia.'
+    },
+    {
+      name: 'Rasheeing the Scene', owner: 'ToreroGaucho', initials: 'RS',
+      rank: 3, record: '7-2', wins: 7, losses: 2,
+      pf: 1278.8, weekPts: 146.92, streak: 'W3',
+      elo: 1626.0, movement: 1,
+      color: '#f43f5e',
+      blurb: 'Three straight. Same record as Ken-obi but fewer points. The rival empire pushing against the border, waiting for one slip.'
+    },
+    {
+      name: 'Sleeping Giants', owner: 'zbcowan', initials: 'SG',
+      rank: 4, record: '7-2', wins: 7, losses: 2,
+      pf: 1280.2, weekPts: 136.8, streak: 'W1',
+      elo: 1561.1, movement: 1,
+      color: '#0ea5e9',
+      blurb: 'A 2-point squeaker over Grayskull. The name is ironic now: the Giants are fully awake, holding a 7-2 fortress on the northern frontier.'
+    },
+    {
+      name: 'The Legion of Bouz', owner: 'KidBouzie', initials: 'LB',
+      rank: 5, record: '6-3', wins: 6, losses: 3,
+      pf: 1369.4, weekPts: 135.2, streak: 'L2',
+      elo: 1604.3, movement: -4,
+      color: '#f97316',
+      blurb: 'Two straight losses. The defending power fell from #1 to #5 in one week. Territory shrinking fast. This is what decline looks like on a map.'
+    },
+    {
+      name: 'The Boonist Monks', owner: 'GauchoTrain', initials: 'BM',
+      rank: 6, record: '5-4', wins: 5, losses: 4,
+      pf: 1345.0, weekPts: 130.36, streak: 'L1',
+      elo: 1599.6, movement: 0,
+      color: '#14b8a6',
+      blurb: 'Middling. Not expanding, not collapsing. The Monks hold a modest province and pray for a late-season run while Lamar carries the franchise.'
+    },
+    {
+      name: 'Noble FFT', owner: 'kevobucks', initials: 'NF',
+      rank: 7, record: '5-4', wins: 5, losses: 4,
+      pf: 1239.0, weekPts: 134.3, streak: 'L1',
+      elo: 1454.8, movement: 0,
+      color: '#eab308',
+      blurb: 'A 2-point loss to Burden. Noble FFT is that buffer state between empires: technically alive but one bad week from irrelevance.'
+    },
+    {
+      name: 'Kittler on the Roof', owner: 'bchodos', initials: 'KR',
+      rank: 8, record: '4-5', wins: 4, losses: 5,
+      pf: 1202.7, weekPts: 92.38, streak: 'L4',
+      elo: 1488.2, movement: 0,
+      color: '#ec4899',
+      blurb: '92 points. A four-game losing streak. The defending champ from 2024 is watching their territory evaporate game by game. This is how dynasties fall.'
+    },
+    {
+      name: 'Ghastly Grayskull Gang', owner: 'GrayskullXX', initials: 'GG',
+      rank: 9, record: '2-7', wins: 2, losses: 7,
+      pf: 1180.8, weekPts: 134.76, streak: 'L5',
+      elo: 1324.5, movement: 0,
+      color: '#64748b',
+      blurb: 'Lost by 2. Five-game slide. Grayskull is now a ruin on the map, their flag barely visible in the wasteland. Brock Bowers alone cannot conquer.'
+    },
+    {
+      name: 'Burden of Etienne-y Woody', owner: 'kharlow', initials: 'BW',
+      rank: 10, record: '2-7', wins: 2, losses: 7,
+      pf: 1115.9, weekPts: 136.44, streak: 'W1',
+      elo: 1323.5, movement: 1,
+      color: '#22c55e',
+      blurb: 'A win! Finally! The 2-point upset over Noble feels like a peasant revolt. Still a tiny speck on the map, but at least the flag is planted.'
+    },
+    {
+      name: 'Father Time', owner: 'Redrumsregrub', initials: 'FT',
+      rank: 11, record: '2-7', wins: 2, losses: 7,
+      pf: 1111.9, weekPts: 137.52, streak: 'W2',
+      elo: 1329.9, movement: -1,
+      color: '#78716c',
+      blurb: 'Two straight wins but it is too late. Father Time is the league equivalent of a city-state: a proud little patch with no army to defend it.'
+    },
+    {
+      name: 'Chudders Football Team', owner: 'Chudders', initials: 'CF',
+      rank: 12, record: '1-8', wins: 1, losses: 8,
+      pf: 1080.8, weekPts: 120.9, streak: 'L4',
+      elo: 1402.1, movement: 0,
+      color: '#a3a3a3',
+      blurb: 'One win. Eight losses. The island. Chudders holds a sliver of coast that nobody even bothers to invade. At least the view is nice.'
+    }
+  ];
+
+  // Week 9 matchups
+  var MATCHUPS = [
+    { team1: 'Sleeping Giants', team2: 'Ghastly Grayskull Gang', score1: 136.8, score2: 134.76, winner: 'Sleeping Giants' },
+    { team1: 'Burden of Etienne-y Woody', team2: 'Noble FFT', score1: 136.44, score2: 134.3, winner: 'Burden of Etienne-y Woody' },
+    { team1: 'The Legion of Bouz', team2: 'Rasheeing the Scene', score1: 135.2, score2: 146.92, winner: 'Rasheeing the Scene' },
+    { team1: 'The Boonist Monks', team2: 'General Ken-obi', score1: 130.36, score2: 154.86, winner: 'General Ken-obi' },
+    { team1: 'Chudders Football Team', team2: 'Father Time', score1: 120.9, score2: 137.52, winner: 'Father Time' },
+    { team1: 'Kittler on the Roof', team2: 'General Ken-obi', score1: 92.38, score2: 154.86, winner: 'General Ken-obi' }
+  ];
+
+  // Historical territory weights by week (simulated progression)
+  var WEEK_DATA = {
+    1: [1,1,1,1,1,1,1,1,1,1,1,1],
+    2: [1.1,1.2,1.0,1.3,0.9,1.1,0.8,1.0,0.9,0.8,1.1,0.8],
+    3: [1.2,1.1,0.9,1.0,1.4,1.2,0.8,0.9,1.0,0.7,0.9,0.9],
+    4: [1.1,1.0,1.0,0.9,1.6,1.1,0.9,1.2,1.0,0.6,0.8,0.8],
+    5: [1.3,1.3,1.0,1.0,1.4,1.0,0.9,1.2,0.8,0.5,0.8,0.8],
+    6: [1.2,1.2,1.1,1.0,1.5,1.0,1.0,1.1,0.7,0.5,0.9,0.8],
+    7: [1.3,1.4,1.0,1.0,1.5,1.0,1.0,0.9,0.6,0.5,1.0,0.8],
+    8: [1.5,1.3,1.1,1.1,1.4,1.0,1.0,0.7,0.5,0.4,0.6,0.9],
+    9: null
+  };
+
+  // ═══════════════════════════════════════════════════════════
+  // TERRITORY WEIGHT COMPUTATION
+  // ═══════════════════════════════════════════════════════════
+
+  function computeTerritoryWeights(teams) {
+    var maxWins = Math.max.apply(null, teams.map(function(t) { return t.wins; }));
+    var maxPF = Math.max.apply(null, teams.map(function(t) { return t.pf; }));
+    var maxWeek = Math.max.apply(null, teams.map(function(t) { return t.weekPts; }));
+
+    var weights = teams.map(function(t) {
+      var winPct = maxWins > 0 ? t.wins / maxWins : 0;
+      var pfPct = maxPF > 0 ? t.pf / maxPF : 0;
+      var weekPct = maxWeek > 0 ? t.weekPts / maxWeek : 0;
+      return 0.6 * winPct + 0.25 * pfPct + 0.15 * weekPct;
+    });
+
+    var sum = weights.reduce(function(a, b) { return a + b; }, 0);
+    return weights.map(function(w) { return (w / sum) * 12; });
+  }
+
+  var currentWeights = computeTerritoryWeights(TEAMS);
+  WEEK_DATA[9] = currentWeights;
+
+  // ═══════════════════════════════════════════════════════════
+  // VORONOI-STYLE TERRITORY MAP
+  // Weighted Voronoi via distance-divided-by-weight, with
+  // Lloyd relaxation for organic-looking regions
+  // ═══════════════════════════════════════════════════════════
+
+  var canvas = document.getElementById('territoryCanvas');
+  var ctx = canvas.getContext('2d');
+  var W, H, dpr;
+  var teamCentroids = [];
+  var hoveredTeam = -1;
+  var currentWeek = 9;
+  var animFrame;
+  var borderGlowPhase = 0;
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    W = canvas.parentElement.clientWidth;
+    H = canvas.parentElement.clientHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function placeSeeds(weights) {
+    var seeds = [];
+    var cx = W / 2;
+    var cy = H / 2;
+    var maxR = Math.min(W, H) * 0.38;
+
+    var indexed = weights.map(function(w, i) { return { w: w, i: i }; });
+    indexed.sort(function(a, b) { return b.w - a.w; });
+
+    for (var k = 0; k < indexed.length; k++) {
+      var angle, r;
+      if (k === 0) {
+        seeds[indexed[k].i] = { x: cx, y: cy };
+      } else if (k <= 3) {
+        angle = (k - 1) * (2 * Math.PI / 3) - Math.PI / 2;
+        r = maxR * 0.35;
+        seeds[indexed[k].i] = { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
+      } else if (k <= 7) {
+        angle = (k - 4) * (2 * Math.PI / 4) + Math.PI / 4;
+        r = maxR * 0.65;
+        seeds[indexed[k].i] = { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
+      } else {
+        angle = (k - 8) * (2 * Math.PI / 4);
+        r = maxR * 0.92;
+        seeds[indexed[k].i] = { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
+      }
+    }
+    return seeds;
+  }
+
+  var CELL_SIZE = 6;
+
+  function computeOwnership(seeds, weights) {
+    var cols = Math.ceil(W / CELL_SIZE);
+    var rows = Math.ceil(H / CELL_SIZE);
+    var grid = new Int8Array(cols * rows);
+    var cells = [];
+    for (var t = 0; t < 12; t++) cells[t] = [];
+
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var px = (c + 0.5) * CELL_SIZE;
+        var py = (r + 0.5) * CELL_SIZE;
+        var bestDist = Infinity;
+        var bestTeam = 0;
+
+        for (var t = 0; t < seeds.length; t++) {
+          var dx = px - seeds[t].x;
+          var dy = py - seeds[t].y;
+          var dist = Math.sqrt(dx * dx + dy * dy) / Math.max(weights[t], 0.15);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestTeam = t;
+          }
+        }
+
+        var idx = r * cols + c;
+        grid[idx] = bestTeam;
+        cells[bestTeam].push({ x: px, y: py, c: c, r: r });
+      }
+    }
+
+    return { grid: grid, cols: cols, rows: rows, cells: cells };
+  }
+
+  function lloydRelax(seeds, ownership, weights, iterations) {
+    for (var iter = 0; iter < iterations; iter++) {
+      for (var t = 0; t < 12; t++) {
+        if (ownership.cells[t].length === 0) continue;
+        var sx = 0, sy = 0;
+        for (var j = 0; j < ownership.cells[t].length; j++) {
+          sx += ownership.cells[t][j].x;
+          sy += ownership.cells[t][j].y;
+        }
+        var blend = 0.3 + weights[t] * 0.05;
+        seeds[t].x += (sx / ownership.cells[t].length - seeds[t].x) * blend;
+        seeds[t].y += (sy / ownership.cells[t].length - seeds[t].y) * blend;
+      }
+      ownership = computeOwnership(seeds, weights);
+    }
+    return { seeds: seeds, ownership: ownership };
+  }
+
+  function findBorders(ownership) {
+    var borders = [];
+    var g = ownership.grid;
+    var cols = ownership.cols;
+    var rows = ownership.rows;
+
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var idx = r * cols + c;
+        var team = g[idx];
+        var isBorder = false;
+        var neighborTeams = {};
+
+        if (c > 0 && g[idx - 1] !== team) { isBorder = true; neighborTeams[g[idx - 1]] = true; }
+        if (c < cols - 1 && g[idx + 1] !== team) { isBorder = true; neighborTeams[g[idx + 1]] = true; }
+        if (r > 0 && g[idx - cols] !== team) { isBorder = true; neighborTeams[g[idx - cols]] = true; }
+        if (r < rows - 1 && g[idx + cols] !== team) { isBorder = true; neighborTeams[g[idx + cols]] = true; }
+
+        if (isBorder) {
+          borders.push({
+            x: (c + 0.5) * CELL_SIZE,
+            y: (r + 0.5) * CELL_SIZE,
+            team: team,
+            neighbors: Object.keys(neighborTeams).map(Number)
+          });
+        }
+      }
+    }
+    return borders;
+  }
+
+  function didPlay(t1idx, t2idx) {
+    var n1 = TEAMS[t1idx].name;
+    var n2 = TEAMS[t2idx].name;
+    for (var m = 0; m < MATCHUPS.length; m++) {
+      if ((MATCHUPS[m].team1 === n1 && MATCHUPS[m].team2 === n2) ||
+          (MATCHUPS[m].team1 === n2 && MATCHUPS[m].team2 === n1)) {
+        return MATCHUPS[m];
+      }
+    }
+    return null;
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // RENDERING
+  // ═══════════════════════════════════════════════════════════
+
+  var mapData = null;
+  var borders = [];
+  var expandTeams = {};
+  var contractTeams = {};
+
+  TEAMS.forEach(function(t, i) {
+    if (t.streak.charAt(0) === 'W') expandTeams[i] = true;
+    else contractTeams[i] = true;
+  });
+
+  function buildMap(weights) {
+    resize();
+    var seeds = placeSeeds(weights);
+    var ownership = computeOwnership(seeds, weights);
+    var result = lloydRelax(seeds, ownership, weights, 8);
+    mapData = result;
+    teamCentroids = result.seeds;
+    borders = findBorders(result.ownership);
+  }
+
+  function hexToRgb(hex) {
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    return { r: r, g: g, b: b };
+  }
+
+  function draw() {
+    borderGlowPhase += 0.015;
+    ctx.clearRect(0, 0, W, H);
+
+    if (!mapData) return;
+
+    var ownership = mapData.ownership;
+    var pulseAmt = Math.sin(borderGlowPhase * 2) * 0.5 + 0.5;
+
+    // Draw territory fills
+    for (var t = 0; t < 12; t++) {
+      var cells = ownership.cells[t];
+      if (cells.length === 0) continue;
+
+      var rgb = hexToRgb(TEAMS[t].color);
+      var alpha = t === hoveredTeam ? 0.75 : 0.5;
+
+      if (expandTeams[t]) {
+        alpha += pulseAmt * 0.12;
+      }
+
+      ctx.fillStyle = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + alpha + ')';
+
+      for (var j = 0; j < cells.length; j++) {
+        ctx.fillRect(
+          cells[j].x - CELL_SIZE / 2,
+          cells[j].y - CELL_SIZE / 2,
+          CELL_SIZE,
+          CELL_SIZE
+        );
+      }
+    }
+
+    // Draw borders
+    for (var b = 0; b < borders.length; b++) {
+      var bdr = borders[b];
+      var isMatchupBorder = false;
+
+      for (var n = 0; n < bdr.neighbors.length; n++) {
+        var matchup = didPlay(bdr.team, bdr.neighbors[n]);
+        if (matchup) {
+          isMatchupBorder = true;
+          break;
+        }
+      }
+
+      if (isMatchupBorder) {
+        var glowAlpha = 0.4 + pulseAmt * 0.5;
+        ctx.fillStyle = 'rgba(245,158,11,' + glowAlpha + ')';
+        ctx.fillRect(bdr.x - CELL_SIZE / 2, bdr.y - CELL_SIZE / 2, CELL_SIZE, CELL_SIZE);
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.fillRect(bdr.x - CELL_SIZE / 2, bdr.y - CELL_SIZE / 2, CELL_SIZE, CELL_SIZE);
+      }
+    }
+
+    // Draw team labels at centroids
+    for (var t2 = 0; t2 < 12; t2++) {
+      var seed = teamCentroids[t2];
+      if (!seed) continue;
+
+      var cellCount = ownership.cells[t2].length;
+      var totalCells = ownership.grid.length;
+      var pct = cellCount / totalCells;
+
+      if (pct < 0.02) continue;
+
+      var fontSize = Math.max(9, Math.min(18, pct * 200));
+
+      // Flag icon
+      ctx.save();
+      ctx.font = Math.round(fontSize * 1.3) + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.fillText('\u2691', seed.x, seed.y - fontSize * 0.9);
+      ctx.restore();
+
+      // Team name
+      ctx.save();
+      ctx.font = '700 ' + Math.round(fontSize) + 'px "Barlow Condensed", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Text shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillText(TEAMS[t2].name, seed.x + 1, seed.y + 1);
+
+      var labelAlpha = t2 === hoveredTeam ? 1 : 0.85;
+      ctx.fillStyle = 'rgba(232,236,240,' + labelAlpha + ')';
+      ctx.fillText(TEAMS[t2].name, seed.x, seed.y);
+
+      // Record
+      ctx.font = '500 ' + Math.round(fontSize * 0.6) + 'px "JetBrains Mono", monospace';
+      ctx.fillStyle = 'rgba(232,236,240,0.5)';
+      ctx.fillText(TEAMS[t2].record, seed.x, seed.y + fontSize * 0.8);
+      ctx.restore();
+    }
+
+    // Draw battle markers at midpoints between matched teams
+    for (var m = 0; m < MATCHUPS.length; m++) {
+      var match = MATCHUPS[m];
+      var t1 = -1, t2b = -1;
+      for (var i = 0; i < TEAMS.length; i++) {
+        if (TEAMS[i].name === match.team1) t1 = i;
+        if (TEAMS[i].name === match.team2) t2b = i;
+      }
+      if (t1 === -1 || t2b === -1) continue;
+
+      var mx = (teamCentroids[t1].x + teamCentroids[t2b].x) / 2;
+      var my = (teamCentroids[t1].y + teamCentroids[t2b].y) / 2;
+
+      // Swords icon
+      ctx.save();
+      ctx.font = '16px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(245,158,11,' + (0.6 + pulseAmt * 0.4) + ')';
+      ctx.fillText('\u2694', mx, my);
+
+      // Score
+      var s1 = match.score1.toFixed(1);
+      var s2 = match.score2.toFixed(1);
+      ctx.font = '500 8px "JetBrains Mono", monospace';
+
+      if (match.winner === match.team1) {
+        ctx.fillStyle = 'rgba(34,197,94,0.9)';
+        ctx.fillText(s1, mx - 14, my + 13);
+        ctx.fillStyle = 'rgba(239,68,68,0.7)';
+        ctx.fillText(s2, mx + 14, my + 13);
+      } else {
+        ctx.fillStyle = 'rgba(239,68,68,0.7)';
+        ctx.fillText(s1, mx - 14, my + 13);
+        ctx.fillStyle = 'rgba(34,197,94,0.9)';
+        ctx.fillText(s2, mx + 14, my + 13);
+      }
+
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.fillText('-', mx, my + 13);
+
+      ctx.restore();
+    }
+
+    animFrame = requestAnimationFrame(draw);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // INTERACTION — Hover/click detection
+  // ═══════════════════════════════════════════════════════════
+
+  var deed = document.getElementById('landDeed');
+  var tooltipLocked = false;
+
+  function getTeamAtPoint(px, py) {
+    if (!mapData) return -1;
+    var col = Math.floor(px / CELL_SIZE);
+    var row = Math.floor(py / CELL_SIZE);
+    var cols = mapData.ownership.cols;
+    var rows = mapData.ownership.rows;
+    if (col < 0 || col >= cols || row < 0 || row >= rows) return -1;
+    return mapData.ownership.grid[row * cols + col];
+  }
+
+  function showDeed(teamIdx, mouseX, mouseY) {
+    if (teamIdx < 0 || teamIdx >= TEAMS.length) return;
+    var t = TEAMS[teamIdx];
+
+    document.getElementById('deedRank').textContent = '#' + t.rank;
+    document.getElementById('deedName').textContent = t.name;
+    document.getElementById('deedOwner').textContent = 'Governed by ' + t.owner;
+    document.getElementById('deedRecord').textContent = t.record;
+
+    var scoreEl = document.getElementById('deedScore');
+    scoreEl.textContent = t.weekPts.toFixed(1);
+    scoreEl.className = 'stat-value' + (t.weekPts > 140 ? ' good' : t.weekPts < 110 ? ' bad' : '');
+
+    var cellCount = mapData ? mapData.ownership.cells[teamIdx].length : 0;
+    var totalCells = mapData ? mapData.ownership.grid.length : 1;
+    var pctVal = ((cellCount / totalCells) * 100).toFixed(1);
+    document.getElementById('deedTerritory').textContent = pctVal + '%';
+
+    var streakEl = document.getElementById('deedStreak');
+    streakEl.textContent = t.streak;
+    streakEl.className = 'stat-value' + (t.streak.charAt(0) === 'W' ? ' good' : ' bad');
+
+    document.getElementById('deedBlurb').textContent = t.blurb;
+
+    // Position deed
+    var deedW = 320;
+    var deedH = deed.offsetHeight || 260;
+    var x = mouseX + 20;
+    var y = mouseY - 20;
+
+    if (x + deedW > W - 20) x = mouseX - deedW - 20;
+    if (y + deedH > H - 80) y = H - 80 - deedH;
+    if (y < 60) y = 60;
+
+    deed.style.left = x + 'px';
+    deed.style.top = y + 'px';
+    deed.classList.add('visible');
+  }
+
+  function hideDeed() {
+    if (!tooltipLocked) {
+      deed.classList.remove('visible');
+      hoveredTeam = -1;
+    }
+  }
+
+  canvas.addEventListener('mousemove', function(e) {
+    if (tooltipLocked) return;
+    var rect = canvas.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var team = getTeamAtPoint(mx, my);
+
+    if (team >= 0 && team !== hoveredTeam) {
+      hoveredTeam = team;
+      showDeed(team, mx, my);
+    } else if (team < 0) {
+      hideDeed();
+    }
+  });
+
+  canvas.addEventListener('mouseleave', function() {
+    if (!tooltipLocked) hideDeed();
+  });
+
+  canvas.addEventListener('click', function(e) {
+    var rect = canvas.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var team = getTeamAtPoint(mx, my);
+
+    if (team >= 0) {
+      if (hoveredTeam === team && tooltipLocked) {
+        tooltipLocked = false;
+        hideDeed();
+      } else {
+        hoveredTeam = team;
+        tooltipLocked = true;
+        showDeed(team, mx, my);
+      }
+    } else {
+      tooltipLocked = false;
+      hideDeed();
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      tooltipLocked = false;
+      hideDeed();
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // TIMELINE SCRUBBER
+  // ═══════════════════════════════════════════════════════════
+
+  function buildTimeline() {
+    var nodesEl = document.getElementById('timelineNodes');
+    var frag = document.createDocumentFragment();
+
+    for (var w = 1; w <= 18; w++) {
+      var node = document.createElement('div');
+      node.className = 'timeline-node';
+      if (w === currentWeek) node.className += ' active';
+      if (w > 9) node.className += ' future';
+      node.textContent = String(w);
+      node.setAttribute('data-label', 'Week ' + w);
+      node.setAttribute('data-week', String(w));
+
+      if (w <= 9) {
+        node.addEventListener('click', (function(week) {
+          return function() { switchWeek(week); };
+        })(w));
+      }
+
+      frag.appendChild(node);
+    }
+
+    nodesEl.appendChild(frag);
+    updateTimelineFill();
+  }
+
+  function updateTimelineFill() {
+    var pct = ((currentWeek - 1) / 17) * 100;
+    document.getElementById('timelineFill').style.width = pct + '%';
+
+    var nodes = document.querySelectorAll('.timeline-node');
+    nodes.forEach(function(n) {
+      var w = parseInt(n.getAttribute('data-week'), 10);
+      n.classList.toggle('active', w === currentWeek);
+    });
+
+    document.getElementById('weekLabel').textContent = 'WEEK ' + currentWeek;
+  }
+
+  function switchWeek(week) {
+    if (week === currentWeek) return;
+    currentWeek = week;
+
+    var weights;
+    if (WEEK_DATA[week]) {
+      weights = WEEK_DATA[week];
+    } else {
+      weights = [1,1,1,1,1,1,1,1,1,1,1,1];
+    }
+
+    var sum = weights.reduce(function(a, b) { return a + b; }, 0);
+    weights = weights.map(function(w) { return (w / sum) * 12; });
+
+    cancelAnimationFrame(animFrame);
+    buildMap(weights);
+    draw();
+    updateTimelineFill();
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // LEGEND
+  // ═══════════════════════════════════════════════════════════
+
+  function buildLegend() {
+    var legend = document.getElementById('mapLegend');
+    var frag = document.createDocumentFragment();
+
+    var highlights = [0, 1, 2, 11];
+    highlights.forEach(function(idx) {
+      var t = TEAMS[idx];
+      var item = document.createElement('div');
+      item.className = 'legend-item';
+
+      var swatch = document.createElement('div');
+      swatch.className = 'legend-swatch';
+      swatch.style.background = t.color;
+      item.appendChild(swatch);
+
+      var label = document.createElement('span');
+      label.textContent = t.name + ' (' + t.record + ')';
+      item.appendChild(label);
+
+      frag.appendChild(item);
+    });
+
+    // Border legend
+    var borderItem = document.createElement('div');
+    borderItem.className = 'legend-item';
+    var borderSwatch = document.createElement('div');
+    borderSwatch.className = 'legend-border';
+    borderSwatch.style.background = 'rgba(245,158,11,0.7)';
+    borderItem.appendChild(borderSwatch);
+    var borderLabel = document.createElement('span');
+    borderLabel.textContent = 'Active matchup border';
+    borderItem.appendChild(borderLabel);
+    frag.appendChild(borderItem);
+
+    var swordsItem = document.createElement('div');
+    swordsItem.className = 'legend-item';
+    var swordsIcon = document.createElement('span');
+    swordsIcon.style.fontSize = '12px';
+    swordsIcon.textContent = '\u2694';
+    swordsItem.appendChild(swordsIcon);
+    var swordsLabel = document.createElement('span');
+    swordsLabel.textContent = "Battle (this week's score)";
+    swordsItem.appendChild(swordsLabel);
+    frag.appendChild(swordsItem);
+
+    legend.appendChild(frag);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // EDITORIAL RANKINGS
+  // ═══════════════════════════════════════════════════════════
+
+  function buildRankings() {
+    var list = document.getElementById('rankingsList');
+    var frag = document.createDocumentFragment();
+
+    TEAMS.forEach(function(t, i) {
+      var movementCls, movementText;
+      if (t.movement > 0) {
+        movementCls = 'up';
+        movementText = '\u2191' + t.movement;
+      } else if (t.movement < 0) {
+        movementCls = 'down';
+        movementText = '\u2193' + Math.abs(t.movement);
+      } else {
+        movementCls = 'steady';
+        movementText = '\u2014';
+      }
+
+      var rankCls = t.rank <= 3 ? 'top3' : t.rank >= 10 ? 'bottom' : 'mid';
+
+      var cellCount = mapData ? mapData.ownership.cells[i].length : 0;
+      var totalCells = mapData ? mapData.ownership.grid.length : 1;
+      var pctVal = ((cellCount / totalCells) * 100);
+
+      var card = document.createElement('div');
+      card.className = 'rank-card';
+
+      var numEl = document.createElement('div');
+      numEl.className = 'rank-num ' + rankCls;
+      numEl.textContent = String(t.rank);
+      card.appendChild(numEl);
+
+      var info = document.createElement('div');
+      info.className = 'rank-info';
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'rank-team-name';
+      nameEl.style.color = t.color;
+      nameEl.textContent = t.name;
+      info.appendChild(nameEl);
+
+      var recEl = document.createElement('div');
+      recEl.className = 'rank-record';
+      recEl.textContent = t.record + ' \u00B7 ' + t.weekPts.toFixed(1) + ' pts \u00B7 ' + t.streak;
+      info.appendChild(recEl);
+
+      var terrDiv = document.createElement('div');
+      terrDiv.className = 'rank-territory';
+
+      var bar = document.createElement('div');
+      bar.className = 'territory-bar';
+      bar.style.width = (pctVal * 4) + 'px';
+      bar.style.background = t.color;
+      terrDiv.appendChild(bar);
+
+      var pctSpan = document.createElement('span');
+      pctSpan.className = 'territory-pct';
+      pctSpan.textContent = pctVal.toFixed(1) + '% of map';
+      terrDiv.appendChild(pctSpan);
+
+      info.appendChild(terrDiv);
+
+      var blurbEl = document.createElement('div');
+      blurbEl.className = 'rank-blurb';
+      blurbEl.textContent = t.blurb;
+      info.appendChild(blurbEl);
+
+      card.appendChild(info);
+
+      var moveEl = document.createElement('div');
+      moveEl.className = 'rank-movement ' + movementCls;
+      moveEl.textContent = movementText;
+      card.appendChild(moveEl);
+
+      frag.appendChild(card);
+    });
+
+    list.appendChild(frag);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════════════════
+
+  function init() {
+    buildMap(currentWeights);
+    buildTimeline();
+    buildLegend();
+    draw();
+
+    requestAnimationFrame(function() {
+      buildRankings();
+    });
+  }
+
+  var resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      cancelAnimationFrame(animFrame);
+
+      // Clear and rebuild rankings
+      var list = document.getElementById('rankingsList');
+      while (list.firstChild) list.removeChild(list.firstChild);
+
+      buildMap(WEEK_DATA[currentWeek] || currentWeights);
+      draw();
+      buildRankings();
+    }, 200);
+  });
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(init);
+  } else {
+    window.addEventListener('load', init);
+  }
+
+})();
+</script>
+</body>
+</html>

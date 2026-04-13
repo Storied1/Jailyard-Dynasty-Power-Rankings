@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jailyard Dynasty — Week 06 Field Conditions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Lora:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky-top: #050912;
+  --sky-bot: #0a1a2a;
+  --field-dark: #0e3a1f;
+  --field-mid: #12481f;
+  --field-stripe: #1a5a2e;
+  --chalk: #f4f5ec;
+  --chalk-dim: rgba(244,245,236,0.55);
+  --goalpost: #f7c631;
+  --side: #0a0d14;
+  --fg: #e9ecef;
+  --muted: #8a94a6;
+  --accent: #f4f5ec;
+  --accent2: #f7c631;
+  --good: #47e08a;
+  --bad: #ff6b5a;
+  --warn: #ffd166;
+  --upset: #ff3b30;
+  --card: rgba(8,14,22,0.78);
+  --border: rgba(244,245,236,0.14);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: radial-gradient(ellipse at 50% 0%, #14243a 0%, var(--sky-top) 55%, #030509 100%);
+  color: var(--fg);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.sky {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(circle at 50% 60%, rgba(80,150,220,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.02) 0%, transparent 30%);
+}
+.sky::after {
+  content:""; position:absolute; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, #fff, transparent),
+    radial-gradient(1px 1px at 25% 8%, #fff8, transparent),
+    radial-gradient(1px 1px at 40% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 60% 6%, #fffa, transparent),
+    radial-gradient(1px 1px at 75% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 88% 11%, #fff9, transparent),
+    radial-gradient(1px 1px at 15% 30%, #fff7, transparent),
+    radial-gradient(1px 1px at 50% 28%, #fff, transparent),
+    radial-gradient(1px 1px at 82% 32%, #fff8, transparent),
+    radial-gradient(1px 1px at 93% 24%, #fff6, transparent);
+  opacity: 0.9;
+}
+
+/* ============ HEADER ============ */
+header.hud {
+  position: relative; z-index: 5;
+  padding: 22px 32px 14px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(0,0,0,0.55), transparent);
+  backdrop-filter: blur(6px);
+}
+.hud-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 24px; flex-wrap: wrap;
+}
+.brand {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  font-size: clamp(20px, 3vw, 34px);
+  line-height: 1;
+  text-transform: uppercase;
+}
+.brand .sub {
+  display: block;
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.brand em {
+  color: var(--accent2);
+  font-style: normal;
+}
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 10px;
+  font-size: 11px;
+  max-width: 560px;
+}
+.dash-cell {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.35);
+}
+.dash-cell .label {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.dash-cell .val {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.dash-cell .val.gold { color: var(--accent2); }
+
+/* ============ FIELD STAGE ============ */
+.stage {
+  position: relative;
+  z-index: 2;
+  perspective: 1400px;
+  perspective-origin: 50% 10%;
+  padding: 60px 24px 40px;
+  min-height: 780px;
+}
+.field {
+  position: relative;
+  width: min(92vw, 1080px);
+  height: 720px;
+  margin: 0 auto;
+  transform-style: preserve-3d;
+  transform: rotateX(54deg) translateZ(0);
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--field-dark) 0%,
+      var(--field-dark) 10%,
+      var(--field-stripe) 10%,
+      var(--field-stripe) 20%
+    );
+  border: 2px solid var(--chalk-dim);
+  box-shadow:
+    0 0 60px rgba(0,0,0,0.7),
+    inset 0 0 120px rgba(0,0,0,0.45);
+}
+/* yard lines every 10 */
+.yl {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--chalk);
+  opacity: 0.85;
+}
+.yl::after {
+  content: attr(data-y);
+  position: absolute;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--chalk);
+  opacity: 0.75;
+  writing-mode: horizontal-tb;
+}
+.yl::before {
+  content: attr(data-y);
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--chalk);
+  opacity: 0.75;
+}
+/* hash marks row */
+.hash {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--chalk-dim) 0 8px,
+    transparent 8px 24px
+  );
+  opacity: 0.4;
+}
+/* end zones */
+.ez {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, rgba(247,198,49,0.15), rgba(247,198,49,0.05));
+  border-right: 2px solid var(--chalk);
+}
+.ez.right {
+  right: 0;
+  left: auto;
+  background: linear-gradient(-90deg, rgba(11,30,58,0.45), rgba(11,30,58,0.15));
+  border-right: none;
+  border-left: 2px solid var(--chalk);
+}
+.ez .label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 36px;
+  letter-spacing: 0.12em;
+  color: var(--chalk);
+  text-shadow: 0 0 14px rgba(0,0,0,0.6);
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  opacity: 0.92;
+}
+.ez.right .label {
+  transform: rotate(90deg);
+  color: var(--accent2);
+}
+/* goalposts */
+.gp {
+  position: absolute;
+  width: 14px;
+  height: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--goalpost);
+  box-shadow: 0 0 12px rgba(247,198,49,0.6);
+}
+.gp.left { left: 2px; }
+.gp.right { right: 2px; }
+.gp::before, .gp::after {
+  content: ""; position: absolute; background: var(--goalpost);
+}
+.gp::before { top: 0; left: -40px; width: 94px; height: 4px; }
+.gp::after { top: -30px; left: 4px; width: 4px; height: 30px; }
+
+/* team markers — positioned by rank along yard lines */
+.team {
+  position: absolute;
+  transform-style: preserve-3d;
+  transform: rotateX(-54deg) translateZ(2px);
+  width: 88px;
+  text-align: center;
+  pointer-events: auto;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.55));
+}
+.team .formation {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  margin: 0 auto 4px;
+  width: 58px;
+}
+.team .formation span {
+  display: block;
+  font-size: 8px;
+  font-weight: 900;
+  color: var(--chalk);
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+}
+.team .chip {
+  display: inline-block;
+  padding: 3px 6px 3px;
+  border-radius: 3px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #0b0d12;
+  background: var(--jersey);
+  border: 1.5px solid rgba(0,0,0,0.6);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+}
+.team .meta {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 9px;
+  color: var(--chalk);
+  margin-top: 2px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+  line-height: 1.15;
+  letter-spacing: 0.03em;
+}
+.team .meta .score {
+  color: var(--accent2);
+  font-weight: 900;
+  font-size: 10px;
+}
+.team .rank-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  background: #0b0d12;
+  border: 1.5px solid var(--chalk);
+  color: var(--chalk);
+  font-weight: 900;
+  font-size: 9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* telestration arrows — drawn as rotated bars with triangle tip */
+.arrow {
+  position: absolute;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.arrow .body {
+  position: absolute;
+  height: 2px;
+  background: var(--arrow, var(--accent2));
+  border-radius: 1px;
+  top: 0;
+  box-shadow: 0 0 8px rgba(0,0,0,0.7);
+}
+.arrow .body::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: -4px;
+  border: 5px solid transparent;
+  border-left-color: var(--arrow, var(--accent2));
+}
+.arrow .lbl {
+  position: absolute;
+  top: -14px;
+  left: 4px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: var(--arrow, var(--accent2));
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+  text-transform: uppercase;
+}
+
+/* matchup pair circles */
+.pair-ring {
+  position: absolute;
+  border: 2px dashed rgba(247,198,49,0.75);
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.pair-ring .tag {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  border: 1px solid var(--accent2);
+  color: var(--accent2);
+  font-weight: 900;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.pair-ring.upset { border-color: var(--upset); }
+.pair-ring.upset .tag { border-color: var(--upset); color: var(--upset); background: rgba(20,0,0,0.85); }
+
+/* UPSET callouts */
+.upset-callout {
+  position: absolute;
+  transform-style: preserve-3d;
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #fff;
+  background: var(--upset);
+  padding: 3px 7px;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+  white-space: nowrap;
+  transform: skewX(-8deg);
+  pointer-events: none;
+}
+
+/* ============ SIDELINE PANELS ============ */
+.sidelines {
+  position: relative;
+  z-index: 4;
+  margin: -20px auto 28px;
+  max-width: 1080px;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent2);
+  border-radius: 2px;
+  padding: 10px 12px;
+  backdrop-filter: blur(8px);
+}
+.panel .label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 4px;
+}
+.panel .headline {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--accent);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.panel .sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.panel.upset-panel { border-left-color: var(--upset); }
+.panel.good-panel { border-left-color: var(--good); }
+
+/* Week 7 strip */
+.w7 {
+  position: relative;
+  z-index: 4;
+  max-width: 1080px;
+  margin: 0 auto 28px;
+  padding: 16px 20px;
+  background: linear-gradient(90deg, rgba(247,198,49,0.12), rgba(247,198,49,0.02));
+  border: 1px solid var(--accent2);
+  border-left: 4px solid var(--accent2);
+  border-radius: 3px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+}
+.w7 .tag {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--accent2);
+  text-transform: uppercase;
+  border-right: 1px solid rgba(247,198,49,0.3);
+  padding-right: 18px;
+  line-height: 1.2;
+}
+.w7 .marquee {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--accent);
+}
+.w7 .marquee b {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  color: var(--accent2);
+}
+.w7 .elo {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+  line-height: 1.3;
+}
+.w7 .elo b { color: var(--accent); font-weight: 800; }
+
+/* All Week 7 matchups row */
+.w7-grid {
+  max-width: 1080px;
+  margin: 0 auto 60px;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  font-size: 11px;
+}
+.w7-grid .mu {
+  border: 1px solid var(--border);
+  background: rgba(8,14,22,0.6);
+  padding: 8px 10px;
+  border-radius: 2px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: var(--chalk-dim);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.w7-grid .mu b { color: var(--accent); font-weight: 800; }
+.w7-grid .mu .rk { color: var(--muted); font-size: 9px; font-weight: 700; }
+
+/* footer */
+footer {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  padding: 30px 20px 50px;
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  max-width: 1080px;
+  margin: 0 auto;
+}
+footer b { color: var(--accent2); font-style: normal; font-weight: 900; font-family: 'Inter',sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
+
+/* vignette */
+.vignette {
+  position: fixed; inset: 0; pointer-events: none; z-index: 3;
+  background: radial-gradient(ellipse at 50% 55%, transparent 40%, rgba(0,0,0,0.55) 100%);
+}
+
+@media (max-width: 780px) {
+  .field { height: 560px; transform: rotateX(48deg); }
+  .dashboard { grid-template-columns: repeat(2, 1fr); }
+  .sidelines { grid-template-columns: repeat(2, 1fr); }
+  .w7 { grid-template-columns: 1fr; text-align: center; }
+  .w7 .tag { border-right: none; padding-right: 0; padding-bottom: 8px; border-bottom: 1px solid rgba(247,198,49,0.3); }
+  .w7 .elo { text-align: center; }
+  .w7-grid { grid-template-columns: 1fr; }
+  .team { width: 70px; }
+  .ez .label { font-size: 22px; }
+  .yl::after, .yl::before { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+<div class="sky"></div>
+
+<header class="hud">
+  <div class="hud-top">
+    <div class="brand">
+      Jailyard Dynasty<br>
+      <em>Week 06 — Field Conditions</em>
+      <span class="sub">Aerial coach-cam view · 6 of 14 games played · Upset Sunday</span>
+    </div>
+    <div class="dashboard">
+      <div class="dash-cell"><div class="label">Weather</div><div class="val">CHAOS · 58°F</div></div>
+      <div class="dash-cell"><div class="label">Kick</div><div class="val">1:00 ET</div></div>
+      <div class="dash-cell"><div class="label">Attendance</div><div class="val gold">12</div></div>
+      <div class="dash-cell"><div class="label">Upsets</div><div class="val gold">4 / 6</div></div>
+      <div class="dash-cell"><div class="label">High</div><div class="val">Legion 165.90</div></div>
+      <div class="dash-cell"><div class="label">Low</div><div class="val">Chudders 95.26</div></div>
+      <div class="dash-cell"><div class="label">Avg PF</div><div class="val">128.7</div></div>
+      <div class="dash-cell"><div class="label">Season Avg</div><div class="val">138.5</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="stage" aria-label="Field view">
+  <div class="field" id="field">
+    <!-- end zones -->
+    <div class="ez left"><div class="label">JAILYARD</div></div>
+    <div class="ez right"><div class="label">WEEK 06</div></div>
+    <div class="gp left"></div>
+    <div class="gp right"></div>
+
+    <!-- yard lines (10% through 90%, labeled 10..50..10) -->
+    <div class="yl" style="left:20%" data-y="10"></div>
+    <div class="yl" style="left:28%" data-y="20"></div>
+    <div class="yl" style="left:36%" data-y="30"></div>
+    <div class="yl" style="left:44%" data-y="40"></div>
+    <div class="yl" style="left:50%" data-y="50"></div>
+    <div class="yl" style="left:56%" data-y="40"></div>
+    <div class="yl" style="left:64%" data-y="30"></div>
+    <div class="yl" style="left:72%" data-y="20"></div>
+    <div class="yl" style="left:80%" data-y="10"></div>
+
+    <div class="hash" style="top:35%"></div>
+    <div class="hash" style="top:65%"></div>
+
+    <!-- Matchup pair rings (upset calls) -->
+    <div class="pair-ring upset" style="left:77%;top:62%;width:120px;height:100px;"><div class="tag">UPSET · +30.58</div></div>
+    <div class="pair-ring upset" style="left:39%;top:14%;width:150px;height:110px;"><div class="tag">UPSET · +33.20</div></div>
+    <div class="pair-ring" style="left:66%;top:8%;width:130px;height:100px;"><div class="tag">SG +34.56</div></div>
+    <div class="pair-ring upset" style="left:45%;top:62%;width:150px;height:110px;"><div class="tag">UPSET · +41.36</div></div>
+    <div class="pair-ring" style="left:7%;top:38%;width:170px;height:120px;"><div class="tag">LB +58.24 · WK HIGH</div></div>
+    <div class="pair-ring" style="left:18%;top:6%;width:180px;height:120px;"><div class="tag">GK +65.74 · BLOWOUT</div></div>
+
+    <!-- ============ TEAMS ============ -->
+
+    <!-- #1 Legion of Bouz — opponent 5 yard line (goal line) — x ~ 86% -->
+    <div class="team" style="left:86%;top:32%;--jersey:#d4af37;">
+      <span class="rank-badge">1</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">LB · KidBouzie</span>
+      <span class="meta">5-1 · <span class="score">165.90</span><br>GOAL LINE</span>
+    </div>
+
+    <!-- #2 Ken-obi — red zone, opp 20 — x ~ 72% -->
+    <div class="team" style="left:72%;top:20%;--jersey:#4ea8ff;">
+      <span class="rank-badge">2</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">GK · bLaker24</span>
+      <span class="meta">5-1 · <span class="score">164.94</span><br>RED ZONE</span>
+    </div>
+
+    <!-- #3 Sleeping Giants — opp 35 — x ~ 63% -->
+    <div class="team" style="left:63%;top:52%;--jersey:#9b6bff;">
+      <span class="rank-badge">3</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">SG · zbcowan</span>
+      <span class="meta">5-1 · <span class="score">129.82</span><br>OPP 35</span>
+    </div>
+
+    <!-- #4 Boonist Monks — midfield / 50 — x ~ 50% -->
+    <div class="team" style="left:50%;top:42%;--jersey:#ff9e5e;">
+      <span class="rank-badge">4</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">BM · Gaucho</span>
+      <span class="meta">4-2 · <span class="score">150.46</span><br>MIDFIELD</span>
+    </div>
+
+    <!-- #5 Kittler — own 45 (fell back from 50) — x ~ 45% -->
+    <div class="team" style="left:45%;top:8%;--jersey:#ff6b5a;">
+      <span class="rank-badge">5</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">KR · bchodos</span>
+      <span class="meta">4-2 · <span class="score">107.74</span><br>OWN 45</span>
+    </div>
+
+    <!-- #6 Rasheeing — own 40 — x ~ 40% -->
+    <div class="team" style="left:40%;top:72%;--jersey:#47e08a;">
+      <span class="rank-badge">6</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">RS · Torero</span>
+      <span class="meta">4-2 · <span class="score">109.10</span><br>OWN 40</span>
+    </div>
+
+    <!-- #7 MHJTIME — own 35 — x ~ 35% -->
+    <div class="team" style="left:36%;top:30%;--jersey:#e83b8a;">
+      <span class="rank-badge">7</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">MH · rango_</span>
+      <span class="meta">3-3 · <span class="score">140.94</span><br>OWN 35</span>
+    </div>
+
+    <!-- #8 Noble FFT — own 30 — x ~ 32% -->
+    <div class="team" style="left:32%;top:70%;--jersey:#5fd4ff;">
+      <span class="rank-badge">8</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">NF · kevo</span>
+      <span class="meta">3-3 · <span class="score">151.88</span><br>OWN 30</span>
+    </div>
+
+    <!-- #9 Ghastly — own 20 — x ~ 26% -->
+    <div class="team" style="left:26%;top:14%;--jersey:#98a8c0;">
+      <span class="rank-badge">9</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">GG · Grayskull</span>
+      <span class="meta">2-4 · <span class="score">121.30</span><br>OWN 20</span>
+    </div>
+
+    <!-- #10 Chudders — own 15 — x ~ 22% -->
+    <div class="team" style="left:22%;top:58%;--jersey:#d66a3a;">
+      <span class="rank-badge">10</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">CF · Chudders</span>
+      <span class="meta">1-5 · <span class="score">95.26</span><br>OWN 15</span>
+    </div>
+
+    <!-- #11 Burden of Etienne — own 5 — x ~ 16% -->
+    <div class="team" style="left:16%;top:26%;--jersey:#8a6d2f;">
+      <span class="rank-badge">11</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">BE · kharlow</span>
+      <span class="meta">0-6 · <span class="score">99.20</span><br>OWN 5</span>
+    </div>
+
+    <!-- #12 Father Time — own end zone (safety pending) — x ~ 6% -->
+    <div class="team" style="left:6%;top:55%;--jersey:#6b6b6b;">
+      <span class="rank-badge">12</span>
+      <div class="formation"><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span><span>X</span></div>
+      <span class="chip">FT · Redrum</span>
+      <span class="meta">0-6 · <span class="score">107.66</span><br>SAFETY PENDING</span>
+    </div>
+
+    <!-- arrows — telestration -->
+    <!-- Ken-obi +3 upward (fielded as moving toward goal) -->
+    <div class="arrow" style="left:58%;top:24%;--arrow:#47e08a;">
+      <div class="body" style="width:90px; transform: rotate(-8deg);"></div>
+      <div class="lbl" style="transform:rotate(-8deg);">KEN-OBI +3</div>
+    </div>
+    <!-- Kittler -4 downward (busted play) -->
+    <div class="arrow" style="left:39%;top:12%;--arrow:#ff3b30;">
+      <div class="body" style="width:70px; transform: rotate(170deg);"></div>
+      <div class="lbl" style="top:6px; left:-70px;">BUSTED PLAY · KITTLER −4</div>
+    </div>
+    <!-- Boonist +2 -->
+    <div class="arrow" style="left:44%;top:46%;--arrow:#47e08a;">
+      <div class="body" style="width:60px; transform: rotate(-4deg);"></div>
+      <div class="lbl" style="transform:rotate(-4deg);">MONKS +2</div>
+    </div>
+    <!-- Legion +1 -->
+    <div class="arrow" style="left:80%;top:34%;--arrow:#f7c631;">
+      <div class="body" style="width:50px; transform: rotate(-6deg);"></div>
+      <div class="lbl" style="transform:rotate(-6deg);">LEGION +1</div>
+    </div>
+    <!-- Rasheeing -2 -->
+    <div class="arrow" style="left:38%;top:70%;--arrow:#ff6b5a;">
+      <div class="body" style="width:55px; transform: rotate(174deg);"></div>
+      <div class="lbl" style="top:6px; left:-52px;">RS −2</div>
+    </div>
+    <!-- Noble +1 -->
+    <div class="arrow" style="left:34%;top:66%;--arrow:#5fd4ff;">
+      <div class="body" style="width:55px; transform: rotate(-6deg);"></div>
+      <div class="lbl" style="transform:rotate(-6deg);">NOBLE +1</div>
+    </div>
+    <!-- Ghastly -1 -->
+    <div class="arrow" style="left:23%;top:18%;--arrow:#ff6b5a;">
+      <div class="body" style="width:40px; transform: rotate(172deg);"></div>
+      <div class="lbl" style="top:6px; left:-36px;">GG −1</div>
+    </div>
+
+    <!-- UPSET callouts -->
+    <div class="upset-callout" style="left:78%;top:52%;">⚡ UPSET</div>
+    <div class="upset-callout" style="left:40%;top:4%;">⚡ UPSET</div>
+    <div class="upset-callout" style="left:46%;top:52%;">⚡ UPSET</div>
+    <div class="upset-callout" style="left:30%;top:80%;">⚡ UPSET</div>
+  </div>
+</section>
+
+<section class="sidelines" aria-label="Sideline scoreboards">
+  <div class="panel good-panel">
+    <div class="label">Week High</div>
+    <div class="headline">Legion 165.90</div>
+    <div class="sub">Mahomes 30.48 · Skattebo 30.0 · CMC 20.6</div>
+  </div>
+  <div class="panel">
+    <div class="label">Top Performer</div>
+    <div class="headline">Bijan Robinson 32.8</div>
+    <div class="sub">RB, ATL — carried Noble FFT in an upset</div>
+  </div>
+  <div class="panel upset-panel">
+    <div class="label">Biggest Blowout</div>
+    <div class="headline">Ken-obi +65.74</div>
+    <div class="sub">164.94 vs Burden of Etienne-y 99.20</div>
+  </div>
+  <div class="panel">
+    <div class="label">Low Scorer</div>
+    <div class="headline">Chudders 95.26</div>
+    <div class="sub">Herbert 18.76 was the ceiling. Oof.</div>
+  </div>
+</section>
+
+<section class="w7" aria-label="Week 7 marquee">
+  <div class="tag">Week 7<br>Marquee</div>
+  <div class="marquee">
+    <b>#1 Legion of Bouz</b> vs <b>#2 General Ken-obi</b> — both 5-1, both posted ~165 in Week 6. The undefeated-by-standards title contender meets the reigning 2-time champ at peak Elo.
+  </div>
+  <div class="elo">
+    <b>LB</b> · 1604 Elo<br>
+    <b>GK</b> · 1700 Elo<br>
+    <span style="color:var(--accent2)">Δ +96 GK</span>
+  </div>
+</section>
+
+<section class="w7-grid">
+  <div class="mu"><span><span class="rk">#4</span> <b>Boonist Monks</b></span><span>vs</span><span><b>Noble FFT</b> <span class="rk">#8</span></span></div>
+  <div class="mu"><span><span class="rk">#5</span> <b>Kittler</b></span><span>vs</span><span><b>Sleeping Giants</b> <span class="rk">#3</span></span></div>
+  <div class="mu"><span><span class="rk">#11</span> <b>Burden</b></span><span>vs</span><span><b>Father Time</b> <span class="rk">#12</span></span></div>
+  <div class="mu"><span><span class="rk">#6</span> <b>Rasheeing</b></span><span>vs</span><span><b>Ghastly GSG</b> <span class="rk">#9</span></span></div>
+  <div class="mu"><span><span class="rk">#10</span> <b>Chudders</b></span><span>vs</span><span><b>MHJTIME</b> <span class="rk">#7</span></span></div>
+  <div class="mu" style="border-color:var(--accent2);background:rgba(247,198,49,0.08);"><span><span class="rk">#1</span> <b>Legion</b></span><span>vs</span><span><b>Ken-obi</b> <span class="rk">#2</span></span></div>
+</section>
+
+<footer>
+  <b>End of broadcast</b><br>
+  "4 of 6 games were upsets. Kittler fell from 1 to 5. Legion and Ken-obi on collision course."<br>
+  Jailyard Dynasty · Est. 2022 · 6 of 14 weeks played · Attendance: 12
+</footer>
+
+<div class="vignette"></div>
+
+<script>
+(function(){
+  // Subtle camera parallax on scroll: adjust perspective-origin Y
+  // Gives the impression of the drone climbing as you scroll
+  const stage = document.querySelector('.stage');
+  const field = document.getElementById('field');
+  if (!stage || !field) return;
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      const r = stage.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      // progress 0..1 as stage crosses viewport
+      const p = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));
+      // camera tilt: 48deg -> 58deg
+      const tilt = 48 + p * 10;
+      // perspective-origin Y: 10% -> 40%
+      const poy = 10 + p * 30;
+      stage.style.perspectiveOrigin = '50% ' + poy + '%';
+      field.style.transform = 'rotateX(' + tilt.toFixed(2) + 'deg)';
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+</body>
+</html>

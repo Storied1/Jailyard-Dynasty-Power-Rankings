@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Issue #9 — THE 62-POINT DEMOLITION | The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Barlow+Condensed:wght@700;900&family=Newsreader:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   THE JAILYARD DYNASTY — ISSUE #9
+   A comic-book weekly column. Pure CSS Grid panels.
+   ═══════════════════════════════════════════════════════ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --page-bg: #0a0a0a;
+  --panel-bg: #111;
+  --panel-border: #e8d44d;
+  --white: #f5f5f0;
+  --black: #0a0a0a;
+  --narration-bg: #ffd700;
+  --narration-text: #1a1a0a;
+  --speech-bg: #fff;
+  --speech-text: #111;
+  --thought-bg: #e8e8e8;
+  --thought-text: #222;
+  --impact-red: #ff2a2a;
+  --impact-gold: #ffd700;
+  --hero-glow: #8b5cf6;
+  --muted: #555;
+  --rain-color: rgba(100, 140, 200, 0.25);
+  --halftone-color: rgba(255, 255, 255, 0.03);
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--page-bg);
+}
+
+body {
+  background: var(--page-bg);
+  color: var(--white);
+  font-family: 'Newsreader', Georgia, serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Issue header ── */
+.issue-header {
+  text-align: center;
+  padding: 1.5rem 1rem 0.5rem;
+  border-bottom: 3px solid var(--panel-border);
+  margin: 0 auto;
+  max-width: 1100px;
+}
+.issue-header .issue-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--panel-border);
+  margin-bottom: 0.2rem;
+}
+.issue-header .issue-title {
+  font-family: 'Bangers', cursive;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: var(--white);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMIC PAGE — The Grid
+   ═══════════════════════════════════════════════════════ */
+.comic-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: auto;
+  grid-template-areas:
+    "splash   splash   splash   splash   splash   splash"
+    "hero     hero     narr     narr     narr     narr"
+    "confront confront confront confront confront confront"
+    "chat1    chat1    stand    stand    stand    stand"
+    "fallen   fallen   fallen   chat2    chat2    chat2"
+    "kicker   kicker   kicker   kicker   kicker   kicker";
+  gap: 6px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6px;
+}
+
+/* ── Base panel ── */
+.panel {
+  position: relative;
+  border: 3px solid var(--panel-border);
+  background: var(--panel-bg);
+  overflow: hidden;
+  opacity: 0.12;
+  transform: scale(0.96) translateY(8px);
+  filter: brightness(0.4);
+  transition: opacity 0.55s cubic-bezier(0.23, 1, 0.32, 1),
+              transform 0.55s cubic-bezier(0.23, 1, 0.32, 1),
+              filter 0.55s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.panel.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  filter: brightness(1);
+}
+
+/* Staggered panel reveal */
+.panel:nth-child(2) { transition-delay: 0.07s; }
+.panel:nth-child(3) { transition-delay: 0.14s; }
+.panel:nth-child(4) { transition-delay: 0.1s; }
+.panel:nth-child(5) { transition-delay: 0.12s; }
+.panel:nth-child(6) { transition-delay: 0.08s; }
+.panel:nth-child(7) { transition-delay: 0.15s; }
+.panel:nth-child(8) { transition-delay: 0.05s; }
+.panel:nth-child(9) { transition-delay: 0.1s; }
+
+/* ── Slight panel rotations for comic energy ── */
+.panel--splash   { transform-origin: center center; }
+.panel--hero     { transform: scale(0.96) translateY(8px) rotate(-0.6deg); }
+.panel--hero.visible { transform: scale(1) translateY(0) rotate(-0.6deg); }
+.panel--narr     { transform: scale(0.96) translateY(8px) rotate(0.4deg); }
+.panel--narr.visible { transform: scale(1) translateY(0) rotate(0.4deg); }
+.panel--confront { transform: scale(0.96) translateY(8px) rotate(0.3deg); }
+.panel--confront.visible { transform: scale(1) translateY(0) rotate(0.3deg); }
+.panel--chat1    { transform: scale(0.96) translateY(8px) rotate(-0.8deg); }
+.panel--chat1.visible { transform: scale(1) translateY(0) rotate(-0.8deg); }
+.panel--stand    { transform: scale(0.96) translateY(8px) rotate(0.5deg); }
+.panel--stand.visible { transform: scale(1) translateY(0) rotate(0.5deg); }
+.panel--fallen   { transform: scale(0.96) translateY(8px) rotate(-0.4deg); }
+.panel--fallen.visible { transform: scale(1) translateY(0) rotate(-0.4deg); }
+.panel--chat2    { transform: scale(0.96) translateY(8px) rotate(1.2deg); }
+.panel--chat2.visible { transform: scale(1) translateY(0) rotate(1.2deg); }
+.panel--kicker   { transform-origin: center center; }
+
+/* ── Grid area assignments ── */
+.panel--splash   { grid-area: splash; }
+.panel--hero     { grid-area: hero; }
+.panel--narr     { grid-area: narr; }
+.panel--confront { grid-area: confront; }
+.panel--chat1    { grid-area: chat1; }
+.panel--stand    { grid-area: stand; }
+.panel--fallen   { grid-area: fallen; }
+.panel--chat2    { grid-area: chat2; }
+.panel--kicker   { grid-area: kicker; }
+
+/* ═══════════════════════════════════════════════════════
+   PANEL 1 — THE SPLASH PAGE
+   ═══════════════════════════════════════════════════════ */
+.panel--splash {
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  /* Motion lines radiating outward */
+  background:
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      transparent 0deg 8deg,
+      rgba(255, 215, 0, 0.04) 8deg 10deg
+    ),
+    radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%),
+    var(--panel-bg);
+}
+.splash-content {
+  position: relative;
+  z-index: 2;
+}
+.splash-week {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--panel-border);
+  margin-bottom: 0.5rem;
+}
+.splash-title {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(3rem, 10vw, 7rem);
+  line-height: 0.95;
+  color: var(--white);
+  text-shadow:
+    4px 4px 0 var(--black),
+    -1px -1px 0 var(--panel-border),
+    0 0 40px rgba(255, 42, 42, 0.3);
+  letter-spacing: 0.04em;
+}
+.splash-title em {
+  font-style: normal;
+  color: var(--impact-red);
+  position: relative;
+  display: inline-block;
+}
+/* Speed lines behind "62-POINT" */
+.splash-title em::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  right: -20%;
+  height: 120%;
+  transform: translateY(-50%);
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 6px,
+    rgba(255, 42, 42, 0.08) 6px,
+    rgba(255, 42, 42, 0.08) 8px
+  );
+  z-index: -1;
+}
+.splash-subtitle {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  color: rgba(245, 245, 240, 0.6);
+  margin-top: 0.8rem;
+}
+/* Diagonal motion lines across splash */
+.panel--splash::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -30deg,
+    transparent,
+    transparent 18px,
+    rgba(255, 215, 0, 0.025) 18px,
+    rgba(255, 215, 0, 0.025) 20px
+  );
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANEL 2 — THE HERO SHOT
+   ═══════════════════════════════════════════════════════ */
+.panel--hero {
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* Halftone dots */
+  background:
+    radial-gradient(circle, var(--halftone-color) 1px, transparent 1px),
+    radial-gradient(circle, var(--halftone-color) 1px, transparent 1px),
+    var(--panel-bg);
+  background-size: 8px 8px, 8px 8px;
+  background-position: 0 0, 4px 4px;
+}
+.hero-name {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  letter-spacing: 0.06em;
+  color: var(--white);
+  text-shadow: 3px 3px 0 var(--black);
+  text-align: center;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  writing-mode: horizontal-tb; /* Vertical on desktop via media query */
+}
+/* Impact burst behind score */
+.hero-burst {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 180px;
+}
+.hero-burst-shape {
+  position: absolute;
+  inset: 0;
+  /* Starburst via clip-path */
+  background: var(--impact-gold);
+  clip-path: polygon(
+    50% 0%, 61% 15%, 78% 5%, 76% 24%, 95% 25%, 85% 40%,
+    100% 50%, 85% 60%, 95% 75%, 76% 76%, 78% 95%, 61% 85%,
+    50% 100%, 39% 85%, 22% 95%, 24% 76%, 5% 75%, 15% 60%,
+    0% 50%, 15% 40%, 5% 25%, 24% 24%, 22% 5%, 39% 15%
+  );
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+}
+.hero-score {
+  position: relative;
+  z-index: 2;
+  font-family: 'Bangers', cursive;
+  font-size: clamp(2.8rem, 6vw, 4rem);
+  color: var(--black);
+  text-shadow: none;
+  letter-spacing: 0.02em;
+}
+.hero-record {
+  margin-top: 1rem;
+  padding: 0.3rem 0.8rem;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--panel-border);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--impact-gold);
+  letter-spacing: 0.1em;
+}
+.hero-caption {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: var(--narration-bg);
+  color: var(--narration-text);
+  font-family: 'Newsreader', serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANEL 3 — THE NARRATION
+   ═══════════════════════════════════════════════════════ */
+.panel--narr {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+  /* Subtle halftone */
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px),
+    var(--panel-bg);
+  background-size: 6px 6px;
+}
+.narration-box {
+  background: var(--narration-bg);
+  color: var(--narration-text);
+  padding: 1.2rem 1.5rem;
+  font-family: 'Newsreader', serif;
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  line-height: 1.55;
+  position: relative;
+  border: 2px solid #c4a800;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+.narration-box::before {
+  content: 'NARRATOR';
+  position: absolute;
+  top: -0.65rem;
+  left: 1rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: var(--narration-bg);
+  padding: 0 0.4rem;
+  color: rgba(26, 26, 10, 0.6);
+}
+.narration-accent {
+  display: block;
+  margin-top: 1rem;
+  font-style: italic;
+  color: rgba(26, 26, 10, 0.7);
+  font-size: 0.95em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANEL 4 — THE CONFRONTATION
+   ═══════════════════════════════════════════════════════ */
+.panel--confront {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  /* Motion lines — horizontal speed */
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 4px,
+      rgba(255, 255, 255, 0.015) 4px,
+      rgba(255, 255, 255, 0.015) 5px
+    ),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 42, 42, 0.06) 0%, transparent 60%),
+    var(--panel-bg);
+}
+.confrontation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 4vw, 3rem);
+  width: 100%;
+}
+.conf-team {
+  text-align: center;
+  flex: 1;
+  max-width: 300px;
+}
+.conf-name {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-shadow: 2px 2px 0 var(--black);
+}
+.conf-name--winner { color: var(--impact-gold); }
+.conf-name--loser { color: var(--muted); }
+.conf-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-top: 0.4rem;
+}
+.conf-score--winner {
+  color: var(--impact-red);
+  text-shadow: 0 0 20px rgba(255, 42, 42, 0.4);
+}
+.conf-score--loser { color: rgba(85, 85, 85, 0.7); }
+
+/* VS lightning bolt */
+.conf-vs {
+  position: relative;
+  font-family: 'Bangers', cursive;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  color: var(--impact-gold);
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  flex-shrink: 0;
+}
+.conf-vs::before,
+.conf-vs::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: clamp(20px, 4vw, 60px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--impact-gold), transparent);
+}
+.conf-vs::before { right: 100%; margin-right: 8px; transform: scaleX(-1); }
+.conf-vs::after { left: 100%; margin-left: 8px; }
+/* Motion lines showing direction of beatdown */
+.panel--confront::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -15deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 42, 42, 0.03) 10px,
+    rgba(255, 42, 42, 0.03) 12px
+  );
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SPEECH & THOUGHT BUBBLES
+   ═══════════════════════════════════════════════════════ */
+/* Panel with dark bg and burst lines */
+.panel--chat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background:
+    repeating-conic-gradient(
+      from 0deg at 50% 60%,
+      transparent 0deg 12deg,
+      rgba(255, 255, 255, 0.015) 12deg 14deg
+    ),
+    var(--panel-bg);
+}
+
+/* Speech bubble */
+.speech-bubble {
+  position: relative;
+  background: var(--speech-bg);
+  color: var(--speech-text);
+  padding: 1.2rem 1.6rem;
+  border-radius: 20px;
+  font-family: 'Bangers', cursive;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  letter-spacing: 0.03em;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+}
+/* Speech tail — pointing down-left */
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -18px;
+  left: 25%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 20px 12px 0 0;
+  border-color: var(--speech-bg) transparent transparent transparent;
+}
+.speech-attribution {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  letter-spacing: 0.05em;
+}
+
+/* Thought bubble — cloud shape */
+.thought-bubble {
+  position: relative;
+  background: var(--thought-bg);
+  color: var(--thought-text);
+  padding: 1.2rem 1.6rem;
+  border-radius: 30px;
+  font-family: 'Bangers', cursive;
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  letter-spacing: 0.03em;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+}
+/* Cloud trail dots */
+.thought-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 30%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--thought-bg);
+}
+.thought-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -22px;
+  left: 24%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--thought-bg);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANEL 6 — THE STANDINGS (newspaper clipping)
+   ═══════════════════════════════════════════════════════ */
+.panel--stand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  /* Pinned-to-wall bg */
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px),
+    var(--panel-bg);
+  background-size: 10px 10px;
+}
+.newspaper-clip {
+  background: #f2ead8;
+  color: #1a1a0a;
+  padding: 1.2rem 1.5rem;
+  transform: rotate(1.5deg);
+  box-shadow: 4px 6px 20px rgba(0, 0, 0, 0.6);
+  max-width: 360px;
+  width: 100%;
+  position: relative;
+  border: 1px solid #c4b78a;
+}
+/* Push-pin */
+.newspaper-clip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #e44, #a22);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  z-index: 2;
+}
+.clip-header {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid #1a1a0a;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+.clip-rankings {
+  list-style: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.85;
+}
+.clip-rankings li {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed rgba(26, 26, 10, 0.2);
+  padding: 0.1rem 0;
+}
+.clip-rank { color: rgba(26, 26, 10, 0.5); font-weight: 700; }
+.clip-team { flex: 1; margin-left: 0.5rem; }
+.clip-record { color: rgba(26, 26, 10, 0.6); }
+
+/* ═══════════════════════════════════════════════════════
+   PANEL 7 — THE FALLEN
+   ═══════════════════════════════════════════════════════ */
+.panel--fallen {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  background: linear-gradient(180deg, #0a0a14 0%, #0d0d1a 100%);
+}
+/* Rain lines */
+.panel--fallen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    115deg,
+    transparent,
+    transparent 5px,
+    var(--rain-color) 5px,
+    var(--rain-color) 6px
+  );
+  pointer-events: none;
+}
+.fallen-name {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: rgba(245, 245, 240, 0.15);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.06em;
+  position: relative;
+  z-index: 1;
+}
+.fallen-record {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(3rem, 7vw, 5rem);
+  color: var(--impact-red);
+  text-shadow: 0 0 30px rgba(255, 42, 42, 0.3);
+  letter-spacing: 0.1em;
+  position: relative;
+  z-index: 1;
+  margin: 0.5rem 0 1rem;
+  /* Dripping text effect via repeated drop-shadows */
+  filter: url(#drip-filter);
+}
+.fallen-narration {
+  position: relative;
+  z-index: 1;
+  background: var(--narration-bg);
+  color: var(--narration-text);
+  padding: 0.8rem 1.2rem;
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: clamp(0.85rem, 1.8vw, 1rem);
+  line-height: 1.5;
+  max-width: 400px;
+  border: 2px solid #c4a800;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANEL 9 — THE KICKER
+   ═══════════════════════════════════════════════════════ */
+.panel--kicker {
+  background: var(--black);
+  border-color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-height: 140px;
+}
+.kicker-text {
+  font-family: 'Newsreader', serif;
+  font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+  font-weight: 700;
+  color: var(--white);
+  text-align: center;
+  max-width: 700px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   END CREDITS / FOOTER
+   ═══════════════════════════════════════════════════════ */
+.issue-footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-top: 3px solid var(--panel-border);
+}
+.issue-footer .next-issue {
+  font-family: 'Bangers', cursive;
+  font-size: 1.3rem;
+  color: var(--panel-border);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+.issue-footer .next-tease {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: rgba(245, 245, 240, 0.4);
+}
+.issue-footer .colophon {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(245, 245, 240, 0.2);
+  margin-top: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — Single column on mobile
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .comic-page {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "splash"
+      "hero"
+      "narr"
+      "confront"
+      "chat1"
+      "stand"
+      "fallen"
+      "chat2"
+      "kicker";
+    gap: 4px;
+    padding: 4px;
+  }
+
+  /* Remove rotations on mobile for cleaner stacking */
+  .panel--hero,
+  .panel--hero.visible,
+  .panel--narr,
+  .panel--narr.visible,
+  .panel--confront,
+  .panel--confront.visible,
+  .panel--chat1,
+  .panel--chat1.visible,
+  .panel--stand,
+  .panel--stand.visible,
+  .panel--fallen,
+  .panel--fallen.visible,
+  .panel--chat2,
+  .panel--chat2.visible {
+    transform: none;
+  }
+  .panel.visible {
+    transform: none;
+  }
+
+  .panel--splash { min-height: 220px; padding: 2rem 1rem; }
+  .panel--hero { min-height: 280px; }
+  .panel--confront { min-height: 180px; }
+  .panel--fallen { min-height: 250px; }
+
+  .confrontation { flex-direction: column; gap: 0.5rem; }
+  .conf-vs::before,
+  .conf-vs::after { display: none; }
+
+  .hero-burst { width: 140px; height: 140px; }
+
+  .newspaper-clip { transform: rotate(0deg); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SOUND EFFECT TEXT — Floating impact words
+   ═══════════════════════════════════════════════════════ */
+.sfx {
+  font-family: 'Bangers', cursive;
+  color: var(--impact-red);
+  text-shadow: 2px 2px 0 var(--black), 0 0 10px rgba(255, 42, 42, 0.3);
+  position: absolute;
+  pointer-events: none;
+  letter-spacing: 0.06em;
+  z-index: 3;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ISSUE NAV — Previous / Next arrows
+   ═══════════════════════════════════════════════════════ */
+.issue-nav {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.8rem 1rem;
+}
+.issue-nav a {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--panel-border);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.issue-nav a:hover { color: var(--white); }
+.issue-nav .disabled { color: rgba(245,245,240,0.15); pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- SVG filter for dripping text effect -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="drip-filter">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="0.5" result="dilated"/>
+      <feGaussianBlur in="dilated" stdDeviation="1" result="blurred"/>
+      <feMerge>
+        <feMergeNode in="blurred"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
+
+<!-- Issue navigation -->
+<nav class="issue-nav">
+  <a href="#" class="disabled">&larr; ISSUE #8</a>
+  <a href="#" class="disabled">ISSUE #10 &rarr;</a>
+</nav>
+
+<!-- Issue header -->
+<header class="issue-header">
+  <div class="issue-tag">The Jailyard Dynasty &bull; 2025 Season &bull; Volume 1</div>
+  <div class="issue-title">ISSUE #9</div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  THE COMIC PAGE                                    -->
+<!-- ═══════════════════════════════════════════════════ -->
+<main class="comic-page">
+
+  <!-- PANEL 1 — THE SPLASH -->
+  <section class="panel panel--splash" aria-label="Splash page">
+    <div class="splash-content">
+      <div class="splash-week">Week 9</div>
+      <h1 class="splash-title">THE <em>62-POINT</em><br>DEMOLITION</h1>
+      <p class="splash-subtitle">In which a general lays waste to everything in his path</p>
+    </div>
+    <span class="sfx" style="top:12%;right:8%;font-size:clamp(1.2rem,3vw,2rem);transform:rotate(12deg);color:var(--impact-gold);">BOOM!</span>
+    <span class="sfx" style="bottom:15%;left:6%;font-size:clamp(0.9rem,2vw,1.4rem);transform:rotate(-8deg);opacity:0.5;">CRACK!</span>
+  </section>
+
+  <!-- PANEL 2 — THE HERO SHOT -->
+  <section class="panel panel--hero" aria-label="Hero: Gen. Ken-obi">
+    <div class="hero-name">GEN.<br>KEN-OBI</div>
+    <div class="hero-burst">
+      <div class="hero-burst-shape"></div>
+      <div class="hero-score">165.2</div>
+    </div>
+    <div class="hero-record">7 - 2</div>
+    <div class="hero-caption">WEEK HIGH</div>
+    <span class="sfx" style="top:8%;right:8%;font-size:1.6rem;transform:rotate(15deg);">KAPOW!</span>
+  </section>
+
+  <!-- PANEL 3 — THE NARRATION -->
+  <section class="panel panel--narr" aria-label="Narration">
+    <div class="narration-box">
+      Three teams at 7-2. The pack below them doesn't know whether to be hopeful or terrified. Gen. Ken-obi just dropped 165 on Father Time like it was personal, and the group chat went from smack talk to eulogy in about four minutes.
+      <span class="narration-accent">Somewhere, a waiver wire is screaming.</span>
+    </div>
+  </section>
+
+  <!-- PANEL 4 — THE CONFRONTATION -->
+  <section class="panel panel--confront" aria-label="Matchup: Ken-obi vs Father Time">
+    <div class="confrontation">
+      <div class="conf-team">
+        <div class="conf-name conf-name--winner">KEN-OBI</div>
+        <div class="conf-score conf-score--winner">165.2</div>
+      </div>
+      <div class="conf-vs">&#9889;</div>
+      <div class="conf-team">
+        <div class="conf-name conf-name--loser">FATHER TIME</div>
+        <div class="conf-score conf-score--loser">103.1</div>
+      </div>
+    </div>
+    <span class="sfx" style="top:10%;left:50%;transform:translateX(-50%) rotate(-5deg);font-size:clamp(1.5rem,3vw,2.2rem);color:var(--impact-gold);">WHAM!</span>
+  </section>
+
+  <!-- PANEL 5 — CHAT BUBBLE #1 -->
+  <section class="panel panel--chat panel--chat1" aria-label="Chat quote">
+    <div class="speech-bubble">
+      "This league is rigged"
+      <span class="speech-attribution">-- @zbcowan</span>
+    </div>
+  </section>
+
+  <!-- PANEL 6 — THE STANDINGS -->
+  <section class="panel panel--stand" aria-label="Power rankings">
+    <div class="newspaper-clip">
+      <div class="clip-header">Power Rankings &mdash; Week 9</div>
+      <ol class="clip-rankings">
+        <li><span class="clip-rank">1.</span><span class="clip-team">Gen. Ken-obi</span><span class="clip-record">7-2</span></li>
+        <li><span class="clip-rank">2.</span><span class="clip-team">Legion</span><span class="clip-record">7-2</span></li>
+        <li><span class="clip-rank">3.</span><span class="clip-team">Puk City</span><span class="clip-record">7-2</span></li>
+        <li><span class="clip-rank">4.</span><span class="clip-team">Blue Bombers</span><span class="clip-record">6-3</span></li>
+        <li><span class="clip-rank">5.</span><span class="clip-team">Kid Bouzie</span><span class="clip-record">5-4</span></li>
+        <li><span class="clip-rank">6.</span><span class="clip-team">Kittler</span><span class="clip-record">5-4</span></li>
+        <li><span class="clip-rank">7.</span><span class="clip-team">Empire</span><span class="clip-record">5-4</span></li>
+        <li><span class="clip-rank">8.</span><span class="clip-team">Loud Boyz</span><span class="clip-record">4-5</span></li>
+        <li><span class="clip-rank">9.</span><span class="clip-team">BIG Squad</span><span class="clip-record">4-5</span></li>
+        <li><span class="clip-rank">10.</span><span class="clip-team">Drip Bayless</span><span class="clip-record">3-6</span></li>
+        <li><span class="clip-rank">11.</span><span class="clip-team">Toon Squad</span><span class="clip-record">2-7</span></li>
+        <li><span class="clip-rank">12.</span><span class="clip-team">Father Time</span><span class="clip-record">2-7</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- PANEL 7 — THE FALLEN -->
+  <section class="panel panel--fallen" aria-label="The fallen: Father Time">
+    <div class="fallen-name">FATHER TIME</div>
+    <div class="fallen-record">2 - 7</div>
+    <div class="fallen-narration">
+      Every dynasty has an end. This one ended somewhere around Week 4. The roster is bleeding, the bench is a graveyard, and the schedule ahead reads like a hit list.
+    </div>
+    <span class="sfx" style="bottom:8%;right:10%;font-size:1rem;transform:rotate(6deg);color:rgba(100,140,200,0.3);">drip... drip...</span>
+  </section>
+
+  <!-- PANEL 8 — CHAT BUBBLE #2 (thought bubble) -->
+  <section class="panel panel--chat panel--chat2" aria-label="Chat thought">
+    <div class="thought-bubble">
+      "ok respect. that was a clinic."
+      <span class="speech-attribution">-- @KidBouzie</span>
+    </div>
+  </section>
+
+  <!-- PANEL 9 — THE KICKER -->
+  <section class="panel panel--kicker" aria-label="Closing line">
+    <p class="kicker-text">Nine weeks in. The cliff below them is real.</p>
+  </section>
+
+</main>
+
+<!-- Issue footer -->
+<footer class="issue-footer">
+  <div class="next-issue">NEXT ISSUE: WEEK 10</div>
+  <div class="next-tease">The trade deadline approaches. Alliances will shatter.</div>
+  <div class="colophon">THE JAILYARD DYNASTY &bull; EST. 2022 &bull; ALL DATA VIA SLEEPER API</div>
+</footer>
+
+<script>
+(function() {
+  /* ── Panel scroll-reveal ── */
+  var panels = document.querySelectorAll('.panel');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  panels.forEach(function(panel) {
+    observer.observe(panel);
+  });
+
+  /* ── Parallax-lite: SFX text floats slightly on scroll ── */
+  var sfxElements = document.querySelectorAll('.sfx');
+  var ticking = false;
+
+  function updateSfx() {
+    var scrollY = window.scrollY;
+    sfxElements.forEach(function(el, i) {
+      var speed = (i % 2 === 0) ? 0.03 : -0.02;
+      var offset = scrollY * speed;
+      el.style.transform = el.style.transform.replace(
+        /translateY\([^)]*\)/,
+        ''
+      ) + ' translateY(' + offset + 'px)';
+    });
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(updateSfx);
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>

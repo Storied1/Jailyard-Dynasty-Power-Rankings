@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jailyard Dynasty — League Passport</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-deep: #0f1a2e;
+  --cream: #f5f0e1;
+  --cream-dark: #e8e0cc;
+  --ink: #1a4b8f;
+  --red: #c0392b;
+  --green: #27ae60;
+  --gold: #c9a84c;
+  --gold-dim: #a8863a;
+  --purple-wm: rgba(100, 70, 140, 0.08);
+  --fg: #2c2416;
+  --fg-muted: #6b5e4f;
+  --accent2: #1a4b8f;
+  --page-shadow: rgba(0,0,0,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Libre Baskerville', 'Georgia', serif;
+  background: #0a0e17;
+  color: var(--fg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  gap: 0;
+}
+
+.passport-cover {
+  width: min(460px, 95vw);
+  aspect-ratio: 3/4;
+  background: linear-gradient(170deg, #243656 0%, var(--navy) 40%, var(--navy-deep) 100%);
+  border-radius: 8px;
+  border: 3px solid var(--gold-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  padding: 3rem 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 4px 6px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.passport-cover::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1.5px solid var(--gold-dim);
+  border-radius: 4px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.cover-seal svg { width: 120px; height: 120px; }
+
+.cover-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 0.2em;
+  text-shadow: 1px 2px 0 rgba(0,0,0,0.6), 0 0 1px var(--gold-dim);
+  text-transform: uppercase;
+}
+
+.cover-subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(0.55rem, 1.8vw, 0.7rem);
+  color: var(--gold-dim);
+  text-align: center;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.cover-league-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.15em;
+  opacity: 0.5;
+  margin-top: 1rem;
+}
+
+.passport-page {
+  width: min(460px, 95vw);
+  min-height: 520px;
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  padding: 2rem 1.8rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 2px 2px 8px var(--page-shadow);
+}
+
+.passport-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.passport-page > * { position: relative; z-index: 1; }
+
+.page-number {
+  position: absolute;
+  bottom: 0.8rem;
+  right: 1.2rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--fg-muted);
+  opacity: 0.6;
+  z-index: 2;
+}
+
+.passport-id-footer {
+  position: absolute;
+  bottom: 0.8rem;
+  left: 1.2rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--fg-muted);
+  opacity: 0.4;
+  z-index: 2;
+}
+
+.personal-data h2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem 1rem;
+  font-size: 0.8rem;
+}
+
+.data-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  align-self: end;
+}
+
+.data-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--fg);
+  border-bottom: 1px solid var(--cream-dark);
+  padding-bottom: 0.2rem;
+}
+
+.league-photo {
+  width: 100px;
+  height: 120px;
+  border: 2px solid var(--ink);
+  background: var(--cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem auto 0;
+}
+
+.league-photo svg { width: 60px; height: 70px; opacity: 0.35; }
+
+.issue-stamp {
+  position: absolute;
+  bottom: 3rem;
+  right: 1.5rem;
+  border: 3px solid var(--red);
+  border-radius: 50%;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-12deg);
+  opacity: 0.7;
+}
+
+.issue-stamp span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.visa-page { position: relative; }
+
+.visa-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 6rem;
+  font-weight: 700;
+  color: var(--purple-wm);
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+.visa-header {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.visa-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  margin-bottom: 0.8rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+}
+
+.visa-field { color: var(--fg-muted); }
+.visa-field strong { color: var(--fg); font-weight: 600; }
+
+.stamp-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+  min-height: 60px;
+}
+
+.stamp {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stamp-win {
+  color: var(--green);
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  width: 62px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.stamp-loss {
+  color: var(--red);
+  border: 2px solid var(--red);
+  border-radius: 4px;
+  padding: 0.35rem 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.stamp-label { font-size: 0.4rem; opacity: 0.8; }
+.stamp-week { font-size: 0.65rem; }
+
+.week6-stamp {
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+  display: inline-block;
+  margin: 0.6rem 0;
+  letter-spacing: 0.05em;
+}
+
+.immigration-note {
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  color: var(--ink);
+  opacity: 0.7;
+  margin-top: 0.6rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--cream-dark);
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.clearance-badge {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  padding: 0.2rem 0.4rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  z-index: 2;
+}
+
+.transit-log h2, .itinerary h2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.crossing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px dashed var(--cream-dark);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--fg);
+  line-height: 1.5;
+}
+
+.crossing-teams { font-weight: 600; }
+.crossing-score { color: var(--fg-muted); }
+.crossing-tag {
+  font-size: 0.5rem;
+  font-weight: 700;
+  padding: 0.1rem 0.3rem;
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+}
+.tag-upset { background: var(--red); color: #fff; }
+.tag-cleared { background: var(--green); color: #fff; }
+
+.itinerary-match {
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--cream-dark);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--fg);
+}
+
+.itinerary-match .seeds {
+  font-size: 0.55rem;
+  color: var(--fg-muted);
+}
+
+.priority-boarding {
+  border: 2px solid var(--gold);
+  background: rgba(201, 168, 76, 0.08);
+  padding: 0.5rem 0.6rem;
+  border-radius: 4px;
+  margin-top: 0.3rem;
+}
+
+.priority-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.awards-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--ink);
+}
+
+.awards-section h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.award-item {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--fg);
+  padding: 0.25rem 0;
+  line-height: 1.4;
+}
+
+.award-item strong { color: var(--ink); }
+
+@media (max-width: 480px) {
+  body { padding: 1rem 0.5rem; }
+  .passport-page, .passport-cover { width: 98vw; padding: 1.5rem 1.2rem 2rem; }
+  .stamp-win { width: 52px; height: 52px; font-size: 0.45rem; }
+  .stamp-loss { font-size: 0.45rem; }
+  .visa-watermark { font-size: 4rem; }
+  .cover-title { font-size: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="passport-cover">
+  <div class="cover-seal">
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="55" fill="none" stroke="#c9a84c" stroke-width="2"/>
+      <circle cx="60" cy="60" r="48" fill="none" stroke="#c9a84c" stroke-width="1" opacity="0.6"/>
+      <circle cx="60" cy="60" r="42" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
+      <text x="60" y="36" text-anchor="middle" fill="#c9a84c" font-family="'IBM Plex Mono',monospace" font-size="6" font-weight="700" letter-spacing="0.15em">FANTASY FOOTBALL</text>
+      <text x="60" y="58" text-anchor="middle" fill="#c9a84c" font-family="'Libre Baskerville',serif" font-size="14" font-weight="700">JD</text>
+      <text x="60" y="74" text-anchor="middle" fill="#c9a84c" font-family="'IBM Plex Mono',monospace" font-size="5" letter-spacing="0.1em">12 FRANCHISES</text>
+      <text x="60" y="86" text-anchor="middle" fill="#c9a84c" font-family="'IBM Plex Mono',monospace" font-size="5" letter-spacing="0.1em">DYNASTY LEAGUE</text>
+      <path d="M20 60 L12 60 M100 60 L108 60 M60 20 L60 12 M60 100 L60 108" stroke="#c9a84c" stroke-width="1" opacity="0.5"/>
+    </svg>
+  </div>
+  <div class="cover-title">Jailyard<br>Dynasty</div>
+  <div class="cover-subtitle">Fantasy Football League &mdash; Est. 2022</div>
+  <div class="cover-league-id">PASSPORT NO. JD-2025-SZN</div>
+</div>
+
+<!-- INSIDE FRONT — PERSONAL DATA -->
+<div class="passport-page personal-data">
+  <h2>Personal Data</h2>
+  <div class="data-grid">
+    <span class="data-label">League Name</span>
+    <span class="data-value">The Jailyard Dynasty</span>
+    <span class="data-label">Type</span>
+    <span class="data-value">Dynasty / Keeper</span>
+    <span class="data-label">Platform</span>
+    <span class="data-value">Sleeper</span>
+    <span class="data-label">Franchises</span>
+    <span class="data-value">12</span>
+    <span class="data-label">Established</span>
+    <span class="data-value">2022</span>
+    <span class="data-label">Season</span>
+    <span class="data-value">2025 (Weeks 1-6 of 14)</span>
+    <span class="data-label">Avg PPG</span>
+    <span class="data-value">138.5</span>
+    <span class="data-label">Wk 6 Avg</span>
+    <span class="data-value">128.7</span>
+  </div>
+  <div class="league-photo">
+    <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="22" rx="14" ry="16" fill="#999"/>
+      <ellipse cx="30" cy="65" rx="24" ry="20" fill="#999"/>
+    </svg>
+  </div>
+  <div class="issue-stamp">
+    <span>Issued<br>Season<br>2025<br>Week 06</span>
+  </div>
+  <span class="passport-id-footer">JD-2025-SZN</span>
+  <span class="page-number">i</span>
+</div>
+
+<!-- 12 TEAM VISA PAGES + TRANSIT LOG + ITINERARY generated by JS below -->
+<script>
+(function(){
+  /* ====== DATA ====== */
+  var teams = [
+    { name: "The Legion of Bouz", short: "LB", owner: "KidBouzie", rank: 1, wins: 5, losses: 1, pf: 935.7, wk6: 165.90, elo: 1604, streak: "W1", titles: 1, roast: "Mahomes and ARSB deserve a tight end with a pulse.", results: ["W","W","W","W","L","W"] },
+    { name: "General Ken-obi", short: "GK", owner: "bLaker24", rank: 2, wins: 5, losses: 1, pf: 871.2, wk6: 164.94, elo: 1700, streak: "W2", titles: 2, roast: "We\u2019re all just hoping you oversleep on waiver day.", results: ["W","W","L","W","W","W"] },
+    { name: "Sleeping Giants", short: "SG", owner: "zbcowan", rank: 3, wins: 5, losses: 1, pf: 857.0, wk6: 129.82, elo: 1561, streak: "W4", titles: 0, roast: "Your WRs peaked when Fortnite did.", results: ["L","W","W","W","W","W"] },
+    { name: "The Boonist Monks", short: "BM", owner: "GauchoTrain", rank: 4, wins: 4, losses: 2, pf: 912.9, wk6: 150.46, elo: 1599, streak: "W1", titles: 0, roast: "Your team could win it all or retire it all.", results: ["W","L","W","W","L","W"] },
+    { name: "Kittler on the Roof", short: "KR", owner: "bchodos", rank: 5, wins: 4, losses: 2, pf: 877.9, wk6: 107.74, elo: 1488, streak: "L1", titles: 1, roast: "Your floor is nice but your ceiling might be drywall.", results: ["W","W","L","W","W","L"] },
+    { name: "Rasheeing the Scene", short: "RS", owner: "ToreroGaucho", rank: 6, wins: 4, losses: 2, pf: 816.0, wk6: 109.10, elo: 1626, streak: "L1", titles: 0, roast: "Your WR room is a meme waiting to happen.", results: ["W","W","L","W","W","L"] },
+    { name: "MHJTIME", short: "MH", owner: "rango_", rank: 7, wins: 3, losses: 3, pf: 891.9, wk6: 140.94, elo: 1586, streak: "W2", titles: 0, roast: "If you ever find two real running backs, the rest of us are toast.", results: ["L","W","L","W","L","W"] },
+    { name: "Noble FFT", short: "NF", owner: "kevobucks", rank: 8, wins: 3, losses: 3, pf: 819.0, wk6: 151.88, elo: 1455, streak: "W1", titles: 0, roast: "Bijan and Breece are gods, your tight ends are mortals.", results: ["W","L","W","L","L","W"] },
+    { name: "Ghastly Grayskull Gang", short: "GG", owner: "GrayskullXX", rank: 9, wins: 2, losses: 4, pf: 818.3, wk6: 121.30, elo: 1324, streak: "L2", titles: 0, roast: "Your pick stash is bigger than your WR room.", results: ["W","L","L","W","L","L"] },
+    { name: "Chudders Football Team", short: "CF", owner: "Chudders", rank: 10, wins: 1, losses: 5, pf: 727.9, wk6: 95.26, elo: 1402, streak: "L1", titles: 0, roast: "Two firsts in two years and Gibbs. You\u2019re that guy bench-pressing next to the trophy case.", results: ["L","L","L","L","W","L"] },
+    { name: "Burden of Etienne-y Woody", short: "BE", owner: "kharlow", rank: 11, wins: 0, losses: 6, pf: 732.7, wk6: 99.20, elo: 1324, streak: "L6", titles: 0, roast: "Justin Jefferson can only carry you so far.", results: ["L","L","L","L","L","L"] },
+    { name: "Father Time", short: "FT", owner: "Redrumsregrub", rank: 12, wins: 0, losses: 6, pf: 712.7, wk6: 107.66, elo: 1330, streak: "L6", titles: 0, roast: "Your WRs are wagyu beef; your RBs are ramen noodles.", results: ["L","L","L","L","L","L"] }
+  ];
+
+  function seededRand(seed) {
+    var s = seed;
+    return function() { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  }
+
+  function el(tag, cls, txt) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (txt) e.textContent = txt;
+    return e;
+  }
+
+  var body = document.body;
+
+  /* ====== 12 TEAM PAGES ====== */
+  teams.forEach(function(team, idx) {
+    var page = el('div', 'passport-page visa-page');
+    var rng = seededRand(idx * 137 + 42);
+
+    // Watermark
+    var wm = el('div', 'visa-watermark', team.short);
+    page.appendChild(wm);
+
+    // Clearance badge
+    var badge = el('div', 'clearance-badge', 'CLEARANCE LVL: ' + team.rank);
+    page.appendChild(badge);
+
+    // Header
+    var header = el('div', 'visa-header', 'VISA RECORD \u2014 ' + team.name.toUpperCase());
+    page.appendChild(header);
+
+    // Fields row
+    var fields = el('div', 'visa-fields');
+    var f1 = el('span', 'visa-field');
+    f1.textContent = 'TRAVELER: ';
+    var f1b = el('strong', null, team.owner);
+    f1.appendChild(f1b);
+    fields.appendChild(f1);
+
+    var f2 = el('span', 'visa-field');
+    f2.textContent = 'ENTRIES: ';
+    f2.appendChild(el('strong', null, String(team.wins)));
+    f2.appendChild(document.createTextNode(' / DENIALS: '));
+    f2.appendChild(el('strong', null, String(team.losses)));
+    fields.appendChild(f2);
+
+    var f3 = el('span', 'visa-field');
+    f3.textContent = 'PF: ';
+    f3.appendChild(el('strong', null, team.pf.toFixed(1)));
+    fields.appendChild(f3);
+
+    var f4 = el('span', 'visa-field');
+    f4.textContent = 'ELO: ';
+    f4.appendChild(el('strong', null, String(team.elo)));
+    fields.appendChild(f4);
+
+    if (team.titles > 0) {
+      var f5 = el('span', 'visa-field');
+      f5.textContent = 'TITLES: ';
+      f5.appendChild(el('strong', null, String(team.titles)));
+      fields.appendChild(f5);
+    }
+
+    var f6 = el('span', 'visa-field');
+    f6.textContent = 'STREAK: ';
+    f6.appendChild(el('strong', null, team.streak));
+    fields.appendChild(f6);
+
+    page.appendChild(fields);
+
+    // Stamps grid
+    var stampGrid = el('div', 'stamp-grid');
+    team.results.forEach(function(result, wk) {
+      var rotation = (rng() * 16 - 8).toFixed(1);
+      var stamp;
+      if (result === 'W') {
+        stamp = el('div', 'stamp stamp-win');
+        stamp.appendChild(el('span', 'stamp-label', 'ENTRY\nGRANTED'));
+        stamp.firstChild.style.whiteSpace = 'pre-line';
+        stamp.appendChild(el('span', 'stamp-week', 'WK ' + (wk + 1)));
+      } else {
+        stamp = el('div', 'stamp stamp-loss');
+        stamp.appendChild(el('span', 'stamp-label', 'ENTRY\nDENIED'));
+        stamp.firstChild.style.whiteSpace = 'pre-line';
+        stamp.appendChild(el('span', 'stamp-week', 'WK ' + (wk + 1)));
+      }
+      stamp.style.transform = 'rotate(' + rotation + 'deg)';
+      stampGrid.appendChild(stamp);
+    });
+    page.appendChild(stampGrid);
+
+    // Week 6 score stamp
+    var wk6 = el('div', 'week6-stamp', 'WEEK 06 \u2014 ' + team.wk6.toFixed(2) + ' PTS');
+    wk6.style.transform = 'rotate(' + (rng() * 6 - 3).toFixed(1) + 'deg)';
+    page.appendChild(wk6);
+
+    // Immigration note
+    var note = el('div', 'immigration-note', '\u201C' + team.roast + '\u201D');
+    page.appendChild(note);
+
+    // Page number & footer
+    page.appendChild(el('span', 'page-number', String(idx + 2)));
+    page.appendChild(el('span', 'passport-id-footer', 'JD-2025-SZN'));
+
+    body.appendChild(page);
+  });
+
+  /* ====== TRANSIT LOG ====== */
+  var matchups = [
+    { w: "Noble FFT", ws: 151.88, l: "Ghastly Grayskull Gang", ls: 121.30, margin: 30.58, upset: true },
+    { w: "MHJTIME", ws: 140.94, l: "Kittler on the Roof", ls: 107.74, margin: 33.20, upset: true },
+    { w: "Sleeping Giants", ws: 129.82, l: "Chudders Football Team", ls: 95.26, margin: 34.56, upset: false },
+    { w: "The Boonist Monks", ws: 150.46, l: "Rasheeing the Scene", ls: 109.10, margin: 41.36, upset: true },
+    { w: "The Legion of Bouz", ws: 165.90, l: "Father Time", ls: 107.66, margin: 58.24, upset: false },
+    { w: "General Ken-obi", ws: 164.94, l: "Burden of Etienne-y Woody", ls: 99.20, margin: 65.74, upset: false }
+  ];
+
+  var transitPage = el('div', 'passport-page transit-log');
+  var th = el('h2', null, 'Transit Log \u2014 Week 06 Border Crossings');
+  transitPage.appendChild(th);
+
+  matchups.forEach(function(m) {
+    var row = el('div', 'crossing');
+    row.appendChild(el('span', 'crossing-teams', m.w + ' \u2192 ' + m.l));
+    row.appendChild(el('span', 'crossing-score', m.ws.toFixed(2) + ' \u2013 ' + m.ls.toFixed(2) + ', margin ' + m.margin.toFixed(2)));
+    row.appendChild(el('span', 'crossing-tag ' + (m.upset ? 'tag-upset' : 'tag-cleared'), m.upset ? 'UPSET' : 'CLEARED'));
+    transitPage.appendChild(row);
+  });
+
+  // Awards
+  var awardsDiv = el('div', 'awards-section');
+  awardsDiv.appendChild(el('h3', null, 'Week 06 Dispatch Notes'));
+
+  var awards = [
+    ['High Scorer:', ' The Legion of Bouz \u2014 165.90'],
+    ['Low Scorer:', ' Chudders Football Team \u2014 95.26'],
+    ['Top Performer:', ' Bijan Robinson (RB, ATL) \u2014 32.8 pts (Noble FFT)'],
+    ['Biggest Blowout:', ' General Ken-obi 164.94 vs Burden 99.20, +65.74'],
+    ['Upset Count:', ' 4 of 6 \u2014 wildest week of the season']
+  ];
+  awards.forEach(function(a) {
+    var item = el('div', 'award-item');
+    item.appendChild(el('strong', null, a[0]));
+    item.appendChild(document.createTextNode(a[1]));
+    awardsDiv.appendChild(item);
+  });
+  transitPage.appendChild(awardsDiv);
+  transitPage.appendChild(el('span', 'passport-id-footer', 'JD-2025-SZN'));
+  transitPage.appendChild(el('span', 'page-number', '14'));
+  body.appendChild(transitPage);
+
+  /* ====== UPCOMING ITINERARY ====== */
+  var wk7 = [
+    { t1: "#4 The Boonist Monks", t2: "#8 Noble FFT", marquee: false, note: "" },
+    { t1: "#5 Kittler on the Roof", t2: "#3 Sleeping Giants", marquee: false, note: "" },
+    { t1: "#11 Burden of Etienne-y Woody", t2: "#12 Father Time", marquee: false, note: "Toilet Bowl Matinee \u2014 both 0-6" },
+    { t1: "#1 The Legion of Bouz", t2: "#2 General Ken-obi", marquee: true, note: "" },
+    { t1: "#6 Rasheeing the Scene", t2: "#9 Ghastly Grayskull Gang", marquee: false, note: "" },
+    { t1: "#10 Chudders Football Team", t2: "#7 MHJTIME", marquee: false, note: "" }
+  ];
+
+  var itinPage = el('div', 'passport-page itinerary');
+  itinPage.appendChild(el('h2', null, 'Upcoming Itinerary \u2014 Week 07'));
+
+  wk7.forEach(function(m) {
+    if (m.marquee) {
+      var row = el('div', 'itinerary-match priority-boarding');
+      row.appendChild(el('div', 'priority-label', 'PRIORITY BOARDING'));
+      row.appendChild(el('div', null, m.t1 + ' vs ' + m.t2));
+      itinPage.appendChild(row);
+    } else {
+      var row2 = el('div', 'itinerary-match');
+      row2.textContent = m.t1 + ' vs ' + m.t2;
+      if (m.note) {
+        row2.appendChild(document.createTextNode(' '));
+        row2.appendChild(el('span', 'seeds', '(' + m.note + ')'));
+      }
+      itinPage.appendChild(row2);
+    }
+  });
+
+  var closing = el('div', 'immigration-note');
+  closing.style.marginTop = '1.5rem';
+  closing.textContent = '\u201CBoth 5-1 squads. One leaves customs with a #1 stamp. The other gets sent to secondary screening.\u201D';
+  itinPage.appendChild(closing);
+
+  itinPage.appendChild(el('span', 'passport-id-footer', 'JD-2025-SZN'));
+  itinPage.appendChild(el('span', 'page-number', '15'));
+  body.appendChild(itinPage);
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jailyard Dynasty — Week 6: The Case File</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --fg: #f5f5f5;
+  --muted: #888888;
+  --accent: #cc0000;
+  --accent2: #cc0000;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.12);
+  --glass: rgba(255,255,255,0.06);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+.serif { font-family: 'Playfair Display', serif; }
+.typewriter { font-family: 'Special Elite', cursive; }
+
+/* Venetian blind overlay */
+.venetian {
+  position: relative;
+}
+.venetian::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    75deg,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,0) 18px,
+    rgba(0,0,0,0.45) 18px,
+    rgba(0,0,0,0.45) 32px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  position: relative;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(to top, var(--bg), transparent);
+  z-index: 3;
+}
+
+.hero-headline {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: clamp(3rem, 10vw, 7rem);
+  line-height: 1.05;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  position: relative;
+  z-index: 3;
+  max-width: 900px;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.8);
+}
+
+.hero-subtitle {
+  font-family: 'Special Elite', cursive;
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: var(--muted);
+  margin-top: 1.5rem;
+  position: relative;
+  z-index: 3;
+  letter-spacing: 0.03em;
+}
+.hero-subtitle .red-period {
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.hero-meta {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 2rem;
+  position: relative;
+  z-index: 3;
+  opacity: 0.6;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ===== SMOKE SVG ===== */
+.smoke-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.08;
+}
+
+/* ===== SECTIONS ===== */
+.section {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.section-label {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  color: var(--fg);
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  line-height: 1.1;
+}
+
+/* ===== NARRATION ===== */
+.narration {
+  font-family: 'Special Elite', cursive;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 2;
+  color: #cccccc;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.narration p {
+  margin-bottom: 1.5rem;
+  text-indent: 2em;
+}
+.narration p:first-child {
+  text-indent: 0;
+}
+.narration .red {
+  color: var(--accent);
+  font-weight: bold;
+}
+.narration em {
+  font-style: italic;
+  color: var(--fg);
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+}
+.divider-thick {
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--muted), transparent);
+}
+
+/* ===== THE SUSPECTS (LINEUP) ===== */
+.lineup {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.suspect {
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  gap: 1rem;
+  transition: background 0.2s;
+}
+.suspect:hover {
+  background: var(--glass);
+}
+
+.suspect-rank {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 1.8rem;
+  color: var(--muted);
+  text-align: center;
+  opacity: 0.5;
+}
+.suspect:nth-child(-n+3) .suspect-rank {
+  color: var(--fg);
+  opacity: 0.8;
+}
+
+.suspect-info h3 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--fg);
+  margin-bottom: 0.15rem;
+}
+
+.suspect-record {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.suspect-note {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.8rem;
+  color: #aaa;
+  line-height: 1.5;
+  max-width: 280px;
+  margin-top: 0.35rem;
+}
+
+.suspect-pts {
+  font-family: 'Special Elite', cursive;
+  font-size: 1rem;
+  color: var(--muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.suspect-movement {
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 0.2rem;
+}
+.suspect-movement.up { color: var(--fg); }
+.suspect-movement.down { color: var(--accent); }
+.suspect-movement.flat { color: var(--muted); }
+
+/* ===== CRIME SCENES (MATCHUPS) ===== */
+.crime-scenes {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.crime-card {
+  background: var(--card);
+  border: 2px dashed var(--border);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.crime-card .chalk-label {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.5;
+  margin-bottom: 0.75rem;
+}
+
+.crime-matchup {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.crime-team {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.crime-winner {
+  color: var(--fg);
+}
+.crime-loser {
+  color: var(--muted);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.crime-score {
+  font-family: 'Special Elite', cursive;
+  font-size: 1rem;
+  color: var(--muted);
+}
+.crime-score strong {
+  color: var(--fg);
+}
+
+.crime-margin {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+  opacity: 0.7;
+}
+
+.upset-stamp {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  transform: rotate(-8deg);
+  border: 2px solid var(--accent);
+  padding: 0.1em 0.5em;
+  opacity: 0.85;
+}
+
+/* ===== EVIDENCE (AWARDS) ===== */
+.evidence-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.evidence-item {
+  padding: 1.25rem;
+  border-left: 3px solid var(--border);
+}
+.evidence-item.highlight {
+  border-left-color: var(--accent);
+}
+
+.evidence-label {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.evidence-value {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--fg);
+}
+
+.evidence-detail {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+
+/* ===== NEXT CASE (WEEK 7) ===== */
+.next-matchups {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.next-match {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.95rem;
+  color: var(--muted);
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.next-match:last-child { border-bottom: none; }
+.next-match .vs { color: var(--fg); opacity: 0.4; margin: 0 0.3em; }
+.next-match.marquee {
+  color: var(--fg);
+  font-size: 1.1rem;
+  padding: 1rem 0;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 3rem;
+  text-align: center;
+}
+
+.footer-text {
+  font-family: 'Special Elite', cursive;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.footer-ash {
+  margin: 1.5rem auto 0;
+  opacity: 0.3;
+}
+
+.footer-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  color: var(--muted);
+  opacity: 0.3;
+  margin-top: 2rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ===== FULL-WIDTH VENETIAN BREAK ===== */
+.venetian-break {
+  width: 100%;
+  height: 120px;
+  position: relative;
+  background: linear-gradient(135deg, #111 0%, #1a1a1a 50%, #0f0f0f 100%);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .suspect {
+    grid-template-columns: 36px 1fr;
+    gap: 0.75rem;
+  }
+  .suspect-pts {
+    grid-column: 2;
+    text-align: left;
+    font-size: 0.85rem;
+  }
+  .suspect-note {
+    max-width: 100%;
+  }
+  .crime-matchup {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .hero-headline {
+    font-size: clamp(2.4rem, 8vw, 4rem);
+  }
+  .smoke-container {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- SMOKE SVG (static, gaussian blur, low opacity) -->
+<div class="smoke-container">
+<svg width="300" height="1200" viewBox="0 0 300 1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="smokeBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18"/>
+    </filter>
+  </defs>
+  <path d="M150,1200 C130,1050 180,950 140,800 C100,650 190,580 160,420 C130,260 170,150 155,0"
+        fill="none" stroke="#f5f5f5" stroke-width="60" filter="url(#smokeBlur)" opacity="0.12"/>
+  <path d="M200,1200 C220,1000 160,900 200,750 C240,600 170,500 210,350 C250,200 190,100 205,0"
+        fill="none" stroke="#f5f5f5" stroke-width="40" filter="url(#smokeBlur)" opacity="0.08"/>
+</svg>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero venetian">
+  <div class="hero-meta">Jailyard Dynasty &mdash; Case File #006</div>
+  <h1 class="hero-headline">The Week the Crown Fell</h1>
+  <p class="hero-subtitle">A detective's account of Week 6 in the Jailyard<span class="red-period">.</span></p>
+</section>
+
+<!-- ===== OPENING NARRATION ===== -->
+<div class="section">
+  <div class="narration">
+    <p>I'd seen bad weeks before. I'd seen teams collapse like cheap suits in a rainstorm. But Week 6 &mdash; Week 6 was something else entirely.</p>
+    <p>Four upsets out of six games. The defending champion, Kittler on the Roof, put up a measly <em>107.74 points</em> and got dragged from the top of the standings down to number five. Fell from #1 to #5 like a body off a fire escape. Meanwhile two squads &mdash; Legion of Bouz and General Ken-obi &mdash; both lit up the scoreboard north of 164, both sitting pretty at <em>5-1</em>, on a collision course for Week 7. The kind of matchup that makes the whole league hold its breath.</p>
+    <p>The league average was <em>128.7 points</em>. A quiet number. But averages lie. This was a week of extremes &mdash; of 165-point eruptions and 95-point flatlines. The kind of week that separates the guilty from the merely suspicious.</p>
+    <p>I poured myself another drink and opened the case file.</p>
+  </div>
+</div>
+
+<div class="divider divider-thick"></div>
+<div class="venetian-break venetian"></div>
+
+<!-- ===== THE SUSPECTS ===== -->
+<div class="section">
+  <div class="section-label">Exhibit A</div>
+  <h2 class="section-title">The Suspects</h2>
+
+  <div class="lineup">
+
+    <div class="suspect">
+      <div class="suspect-rank">1</div>
+      <div class="suspect-info">
+        <h3>The Legion of Bouz</h3>
+        <div class="suspect-record">5-1 &middot; 935.7 PF &middot; Elo 1604 &middot; 1 Title</div>
+        <div class="suspect-note">Mahomes and St. Brown &mdash; they've got the firepower. But that tight end room? It's got a pulse like a hospital flatline.</div>
+      </div>
+      <div class="suspect-pts">
+        165.90
+        <span class="suspect-movement up">&uarr;1</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">2</div>
+      <div class="suspect-info">
+        <h3>General Ken-obi</h3>
+        <div class="suspect-record">5-1 &middot; 871.2 PF &middot; Elo 1700 &middot; 2 Titles</div>
+        <div class="suspect-note">The two-time champ. Elo at career peak. We're all just hoping he oversleeps on waiver day.</div>
+      </div>
+      <div class="suspect-pts">
+        164.94
+        <span class="suspect-movement up">&uarr;3</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">3</div>
+      <div class="suspect-info">
+        <h3>Sleeping Giants</h3>
+        <div class="suspect-record">5-1 &middot; 857.0 PF &middot; Elo 1561 &middot; 0 Titles</div>
+        <div class="suspect-note">Four-game win streak. Quiet and deadly. The WRs peaked when Fortnite did, but Josh Jacobs keeps hitting.</div>
+      </div>
+      <div class="suspect-pts">
+        129.82
+        <span class="suspect-movement flat">&mdash;</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">4</div>
+      <div class="suspect-info">
+        <h3>The Boonist Monks</h3>
+        <div class="suspect-record">4-2 &middot; 912.9 PF &middot; Elo 1599 &middot; 0 Titles</div>
+        <div class="suspect-note">Could win it all or retire it all. Pickens went off for 27.3 and JSN backed him with 26.2. That's a statement.</div>
+      </div>
+      <div class="suspect-pts">
+        150.46
+        <span class="suspect-movement up">&uarr;2</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">5</div>
+      <div class="suspect-info">
+        <h3>Kittler on the Roof</h3>
+        <div class="suspect-record">4-2 &middot; 877.9 PF &middot; Elo 1488 &middot; 1 Title</div>
+        <div class="suspect-note">The defending champ, found face-down in the standings. 107.74 doesn't cut it when MHJTIME is swinging 140.</div>
+      </div>
+      <div class="suspect-pts">
+        107.74
+        <span class="suspect-movement down">&darr;4</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">6</div>
+      <div class="suspect-info">
+        <h3>Rasheeing the Scene</h3>
+        <div class="suspect-record">4-2 &middot; 816.0 PF &middot; Elo 1626 &middot; 0 Titles</div>
+        <div class="suspect-note">De'Von Achane went for 30 flat and it still wasn't enough. That WR room is a meme waiting to happen.</div>
+      </div>
+      <div class="suspect-pts">
+        109.10
+        <span class="suspect-movement down">&darr;2</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">7</div>
+      <div class="suspect-info">
+        <h3>MHJTIME</h3>
+        <div class="suspect-record">3-3 &middot; 891.9 PF &middot; Elo 1586 &middot; 0 Titles</div>
+        <div class="suspect-note">Dowdle dropped 30.9, Daniels added 22.64, Chase chipped in 20.1. The muscle behind the Kittler takedown.</div>
+      </div>
+      <div class="suspect-pts">
+        140.94
+        <span class="suspect-movement flat">&mdash;</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">8</div>
+      <div class="suspect-info">
+        <h3>Noble FFT</h3>
+        <div class="suspect-record">3-3 &middot; 819.0 PF &middot; Elo 1455 &middot; 0 Titles</div>
+        <div class="suspect-note">Bijan Robinson. 32.8 points. The kind of number that makes other teams sick to their stomachs.</div>
+      </div>
+      <div class="suspect-pts">
+        151.88
+        <span class="suspect-movement up">&uarr;1</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">9</div>
+      <div class="suspect-info">
+        <h3>Ghastly Grayskull Gang</h3>
+        <div class="suspect-record">2-4 &middot; 818.3 PF &middot; Elo 1324 &middot; 0 Titles</div>
+        <div class="suspect-note">Pick stash bigger than the WR room. D'Andre Swift ran for 24.5, but the supporting cast couldn't finish the job.</div>
+      </div>
+      <div class="suspect-pts">
+        121.30
+        <span class="suspect-movement down">&darr;1</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">10</div>
+      <div class="suspect-info">
+        <h3>Chudders Football Team</h3>
+        <div class="suspect-record">1-5 &middot; 727.9 PF &middot; Elo 1402 &middot; 0 Titles</div>
+        <div class="suspect-note">95.26 points. Week-low. Bench-pressing next to the trophy case, still waiting for the weights to mean something.</div>
+      </div>
+      <div class="suspect-pts">
+        95.26
+        <span class="suspect-movement flat">&mdash;</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">11</div>
+      <div class="suspect-info">
+        <h3>Burden of Etienne-y Woody</h3>
+        <div class="suspect-record">0-6 &middot; 732.7 PF &middot; Elo 1324 &middot; 0 Titles</div>
+        <div class="suspect-note">0-6. Six-game skid. Justin Jefferson can only carry you so far when the whole operation's in freefall.</div>
+      </div>
+      <div class="suspect-pts">
+        99.20
+        <span class="suspect-movement flat">&mdash;</span>
+      </div>
+    </div>
+
+    <div class="suspect">
+      <div class="suspect-rank">12</div>
+      <div class="suspect-info">
+        <h3>Father Time</h3>
+        <div class="suspect-record">0-6 &middot; 712.7 PF &middot; Elo 1330 &middot; 0 Titles</div>
+        <div class="suspect-note">WRs are wagyu beef. RBs are ramen noodles. Lost by 58.24 this week. Hard to survive when the legs don't move.</div>
+      </div>
+      <div class="suspect-pts">
+        107.66
+        <span class="suspect-movement flat">&mdash;</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider divider-thick"></div>
+<div class="venetian-break venetian"></div>
+
+<!-- ===== THE CRIME SCENES ===== -->
+<div class="section">
+  <div class="section-label">Exhibit B</div>
+  <h2 class="section-title">The Crime Scenes</h2>
+
+  <div class="narration" style="margin-bottom:2.5rem;">
+    <p>Six matchups. Four upsets. The chalk got it wrong more often than right. Here's how the bodies fell.</p>
+  </div>
+
+  <div class="crime-scenes">
+
+    <div class="crime-card">
+      <div class="chalk-label">Matchup 1 &mdash; Game of the Week</div>
+      <div class="crime-matchup">
+        <span class="crime-team crime-winner">The Legion of Bouz</span>
+        <span class="crime-score"><strong>165.90</strong> &ndash; 107.66</span>
+        <span class="crime-team crime-loser">Father Time</span>
+      </div>
+      <div class="crime-margin">Margin: +58.24 &middot; Week high score &middot; Mahomes 30.48, Skattebo 30.0</div>
+    </div>
+
+    <div class="crime-card">
+      <div class="chalk-label">Matchup 2 &mdash; The Biggest Blowout</div>
+      <div class="crime-matchup">
+        <span class="crime-team crime-winner">General Ken-obi</span>
+        <span class="crime-score"><strong>164.94</strong> &ndash; 99.20</span>
+        <span class="crime-team crime-loser">Burden of Etienne-y Woody</span>
+      </div>
+      <div class="crime-margin">Margin: +65.74 &middot; Biggest blowout of the week &middot; LAR DEF 27.0, Drake London 26.8</div>
+    </div>
+
+    <div class="crime-card">
+      <span class="upset-stamp">Upset</span>
+      <div class="chalk-label">Matchup 3</div>
+      <div class="crime-matchup">
+        <span class="crime-team crime-winner">Noble FFT</span>
+        <span class="crime-score"><strong>151.88</strong> &ndash; 121.30</span>
+        <span class="crime-team crime-loser">Ghastly Grayskull Gang</span>
+      </div>
+      <div class="crime-margin">Margin: +30.58 &middot; Bijan Robinson 32.8 pts did the heavy lifting</div>
+    </div>
+
+    <div class="crime-card">
+      <span class="upset-stamp">Upset</span>
+      <div class="chalk-label">Matchup 4 &mdash; The Dethroning</div>
+      <div class="crime-matchup">
+        <span class="crime-team crime-winner">MHJTIME</span>
+        <span class="crime-score"><strong>140.94</strong> &ndash; 107.74</span>
+        <span class="crime-team crime-loser">Kittler on the Roof</span>
+      </div>
+      <div class="crime-margin">Margin: +33.20 &middot; Kittler fell from #1 to #5 &middot; Dowdle 30.9, Daniels 22.64</div>
+    </div>
+
+    <div class="crime-card">
+      <span class="upset-stamp">Upset</span>
+      <div class="chalk-label">Matchup 5</div>
+      <div class="crime-matchup">
+        <span class="crime-team crime-winner">The Boonist Monks</span>
+        <span class="crime-score"><strong>150.46</strong> &ndash; 109.10</span>
+        <span class="crime-team crime-loser">Rasheeing the Scene</span>
+      </div>
+      <div class="crime-margin">Margin: +41.36 &middot; Pickens 27.3 + JSN 26.2 outgunned Achane's 30.0</div>
+    </div>
+
+    <div class="crime-card">
+      <div class="chalk-label">Matchup 6</div>
+      <div class="crime-matchup">
+        <span class="crime-team crime-winner">Sleeping Giants</span>
+        <span class="crime-score"><strong>129.82</strong> &ndash; 95.26</span>
+        <span class="crime-team crime-loser">Chudders Football Team</span>
+      </div>
+      <div class="crime-margin">Margin: +34.56 &middot; Jacobs 29.5, Hurts 21.62 &middot; Chudders' week-low 95.26</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider divider-thick"></div>
+
+<!-- ===== THE EVIDENCE (AWARDS) ===== -->
+<div class="section">
+  <div class="section-label">Exhibit C</div>
+  <h2 class="section-title">The Evidence</h2>
+
+  <div class="narration" style="margin-bottom:2rem;">
+    <p>The heaviest hitter? A kid named Bijan Robinson. 32.8 points for Noble FFT. The kind of number that makes other teams stare at their own rosters and feel something close to shame. Rico Dowdle wasn't far behind at 30.9 &mdash; the engine behind MHJTIME's takedown of the champ.</p>
+  </div>
+
+  <div class="evidence-grid">
+
+    <div class="evidence-item highlight">
+      <div class="evidence-label">Top Performer</div>
+      <div class="evidence-value">Bijan Robinson &mdash; 32.8 pts</div>
+      <div class="evidence-detail">RB, Atlanta &middot; Noble FFT &middot; Week-high individual score</div>
+    </div>
+
+    <div class="evidence-item">
+      <div class="evidence-label">High-Scoring Team</div>
+      <div class="evidence-value">The Legion of Bouz &mdash; 165.90</div>
+      <div class="evidence-detail">Mahomes 30.48, Skattebo 30.0, McCaffrey 20.6</div>
+    </div>
+
+    <div class="evidence-item">
+      <div class="evidence-label">Low Scorer</div>
+      <div class="evidence-value">Chudders Football Team &mdash; 95.26</div>
+      <div class="evidence-detail">Herbert 18.76 led a team that couldn't get out of its own way</div>
+    </div>
+
+    <div class="evidence-item">
+      <div class="evidence-label">Biggest Blowout</div>
+      <div class="evidence-value">Ken-obi 164.94 vs Burden 99.20</div>
+      <div class="evidence-detail">+65.74 margin &middot; Not a game. A sentencing.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider divider-thick"></div>
+<div class="venetian-break venetian"></div>
+
+<!-- ===== THE NEXT CASE ===== -->
+<div class="section">
+  <div class="section-label">Exhibit D</div>
+  <h2 class="section-title">The Next Case</h2>
+
+  <div class="narration" style="margin-bottom:2rem;">
+    <p>Week 7. The marquee says it all: <em>Legion of Bouz versus General Ken-obi.</em> Two heavyweights. One ring. No witnesses needed. Both 5-1. Both scored north of 164 this week. The two-time champ at an Elo of 1700 against the squad that just hung 165.90 on the board. This is the fight the whole league's been circling on the calendar.</p>
+    <p>And in the basement? Burden and Father Time. Both 0-6. Both on six-game losing streaks. The toilet bowl matinee. Somebody's gotta win &mdash; or do they?</p>
+  </div>
+
+  <div class="next-matchups">
+    <div class="next-match marquee">
+      <strong>#1 The Legion of Bouz</strong> <span class="vs">vs</span> <strong>#2 General Ken-obi</strong>
+    </div>
+    <div class="next-match">#4 The Boonist Monks <span class="vs">vs</span> #8 Noble FFT</div>
+    <div class="next-match">#5 Kittler on the Roof <span class="vs">vs</span> #3 Sleeping Giants</div>
+    <div class="next-match">#6 Rasheeing the Scene <span class="vs">vs</span> #9 Ghastly Grayskull Gang</div>
+    <div class="next-match">#10 Chudders Football Team <span class="vs">vs</span> #7 MHJTIME</div>
+    <div class="next-match">#11 Burden of Etienne-y Woody <span class="vs">vs</span> #12 Father Time</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <!-- Cigarette ash SVG -->
+  <svg class="footer-ash" width="60" height="20" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="10" rx="28" ry="8" fill="none" stroke="#888" stroke-width="0.5" opacity="0.4"/>
+    <ellipse cx="28" cy="11" rx="18" ry="5" fill="#555" opacity="0.3"/>
+    <ellipse cx="34" cy="9" rx="10" ry="3" fill="#777" opacity="0.2"/>
+  </svg>
+  <p class="footer-text">Case closed. For now.</p>
+  <p class="footer-meta">Jailyard Dynasty &middot; Season 2025 &middot; Week 6 &middot; v10-noir</p>
+</footer>
+
+</body>
+</html>

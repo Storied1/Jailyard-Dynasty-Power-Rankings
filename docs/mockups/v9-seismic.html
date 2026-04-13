@@ -1,0 +1,1150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEISMIC LOG — WK06 / S2025 / JAILYARD DYNASTY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e0a;
+  --bg2:#060806;
+  --fg:#d8ffe6;
+  --muted:#4a6a54;
+  --dim:#2a3a30;
+  --grid:rgba(0,255,107,0.06);
+  --grid-strong:rgba(0,255,107,0.12);
+  --trace:#00ff6b;
+  --trace-dim:#00b84d;
+  --accent:#00ff6b;
+  --accent2:#ffaa00;
+  --spike:#ff4466;
+  --warn:#ff4466;
+  --good:#00ff6b;
+  --card:rgba(0,255,107,0.03);
+  --border:rgba(0,255,107,0.18);
+  --border-strong:rgba(0,255,107,0.35);
+  --glass:rgba(10,14,10,0.8);
+  --paper:rgba(0,255,107,0.015);
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--mono);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{
+  background:
+    radial-gradient(1200px 600px at 50% -10%,rgba(0,255,107,0.04),transparent 70%),
+    radial-gradient(800px 500px at 10% 120%,rgba(255,170,0,0.025),transparent 70%),
+    var(--bg);
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+/* grid paper overlay — static repeating SVG, not animated */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'><g fill='none' stroke='%2300ff6b' stroke-width='0.4' opacity='0.08'><path d='M0 0H50M0 10H50M0 20H50M0 30H50M0 40H50'/><path d='M0 0V50M10 0V50M20 0V50M30 0V50M40 0V50'/></g><g fill='none' stroke='%2300ff6b' stroke-width='0.8' opacity='0.14'><path d='M0 0H50M0 50H50'/><path d='M0 0V50M50 0V50'/></g></svg>");
+  background-size:50px 50px;
+  opacity:0.55;
+  z-index:0;
+  mix-blend-mode:screen;
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(10,14,10,0.5) 0%,transparent 6%,transparent 94%,rgba(10,14,10,0.6) 100%);
+  z-index:1;
+}
+.wrap{position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:28px 32px 80px}
+
+/* ====== HEADER / STATION ID ====== */
+.station{
+  border:1px solid var(--border-strong);
+  background:var(--glass);
+  backdrop-filter:blur(6px);
+  padding:22px 26px 18px;
+  margin-bottom:32px;
+  position:relative;
+}
+.station::before{
+  content:"REC";
+  position:absolute;
+  top:10px;
+  right:14px;
+  color:var(--spike);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.2em;
+  padding:2px 8px;
+  border:1px solid var(--spike);
+  background:rgba(255,68,102,0.08);
+}
+.station::after{
+  content:"";
+  position:absolute;
+  top:13px;
+  right:52px;
+  width:7px;
+  height:7px;
+  background:var(--spike);
+  border-radius:50%;
+  box-shadow:0 0 6px var(--spike);
+}
+.station-tag{
+  font-size:10px;
+  letter-spacing:0.3em;
+  color:var(--muted);
+  margin-bottom:6px;
+  text-transform:uppercase;
+}
+.station h1{
+  font-size:clamp(22px,3.6vw,38px);
+  font-weight:700;
+  margin:0 0 10px;
+  color:var(--accent);
+  letter-spacing:0.02em;
+  text-shadow:0 0 18px rgba(0,255,107,0.35);
+}
+.station h1 .slash{color:var(--muted);font-weight:300;margin:0 6px}
+.station .meta{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px 22px;
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px dashed var(--border);
+  font-size:11px;
+}
+.meta-item{display:flex;flex-direction:column}
+.meta-item .k{color:var(--muted);font-size:9px;letter-spacing:0.18em;text-transform:uppercase}
+.meta-item .v{color:var(--fg);font-weight:500}
+.meta-item .v.amber{color:var(--accent2)}
+.meta-item .v.spike{color:var(--spike)}
+
+/* ====== SECTION HEADINGS ====== */
+.section-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:36px 0 14px;
+  font-size:11px;
+  letter-spacing:0.25em;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+.section-head::before{
+  content:"";
+  width:10px;
+  height:10px;
+  border:1px solid var(--accent);
+  background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
+}
+.section-head .id{color:var(--accent2)}
+.section-head .line{
+  flex:1;
+  height:1px;
+  background:linear-gradient(90deg,var(--border-strong),transparent);
+}
+
+/* ====== CHANNEL ROW (EKG) ====== */
+.channels{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0;
+}
+.channel{
+  display:grid;
+  grid-template-columns:240px 1fr 90px;
+  align-items:stretch;
+  border-bottom:1px dashed var(--border);
+  min-height:86px;
+  position:relative;
+}
+.channel:last-child{border-bottom:none}
+.ch-label{
+  padding:14px 16px;
+  border-right:1px dashed var(--border);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:3px;
+  background:linear-gradient(90deg,rgba(0,255,107,0.04),transparent);
+}
+.ch-rank{
+  font-size:10px;
+  color:var(--accent2);
+  letter-spacing:0.15em;
+  font-weight:600;
+}
+.ch-rank .num{
+  display:inline-block;
+  min-width:22px;
+  text-align:right;
+  padding-right:6px;
+  margin-right:6px;
+  border-right:1px solid var(--dim);
+  color:var(--fg);
+  font-size:13px;
+  font-weight:700;
+}
+.ch-name{
+  font-size:13px;
+  font-weight:600;
+  color:var(--fg);
+  letter-spacing:0.01em;
+}
+.ch-owner{
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.ch-meta-line{
+  font-size:9px;
+  color:var(--muted);
+  margin-top:2px;
+  display:flex;
+  gap:8px;
+}
+.ch-meta-line .rec{color:var(--trace-dim)}
+.ch-meta-line .elo{color:var(--accent2)}
+
+.ch-trace{
+  position:relative;
+  padding:6px 10px;
+  overflow:hidden;
+}
+.ch-trace svg{
+  display:block;
+  width:100%;
+  height:74px;
+  overflow:visible;
+}
+.baseline{stroke:var(--dim);stroke-width:1;stroke-dasharray:2 4}
+.trace-path{
+  fill:none;
+  stroke:var(--trace);
+  stroke-width:1.6;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+  filter:drop-shadow(0 0 4px rgba(0,255,107,0.5));
+  stroke-dasharray:var(--len,2000);
+  stroke-dashoffset:var(--len,2000);
+  animation:draw 1.4s cubic-bezier(0.25,0.8,0.3,1) forwards;
+  animation-play-state:paused;
+}
+.channel.in-view .trace-path{animation-play-state:running}
+@supports (animation-timeline:view()){
+  .trace-path{
+    animation-timeline:view();
+    animation-range:entry 0% cover 35%;
+    animation-play-state:running;
+  }
+}
+@keyframes draw{
+  to{stroke-dashoffset:0}
+}
+.spike-dot{
+  fill:var(--spike);
+  stroke:var(--spike);
+  stroke-width:0.5;
+  opacity:0;
+  animation:dotIn 0.3s ease-out 1.2s forwards;
+}
+.channel.in-view .spike-dot{animation-play-state:running}
+@supports (animation-timeline:view()){
+  .spike-dot{
+    animation-timeline:view();
+    animation-range:entry 20% cover 45%;
+  }
+}
+@keyframes dotIn{
+  from{opacity:0;r:0}
+  to{opacity:1}
+}
+.trace-label{
+  font-family:var(--mono);
+  font-size:8px;
+  fill:var(--muted);
+  letter-spacing:0.08em;
+}
+.spike-label{
+  font-family:var(--mono);
+  font-size:8px;
+  fill:var(--accent2);
+  font-weight:600;
+  letter-spacing:0.05em;
+}
+.anomaly-bar{
+  stroke:var(--spike);
+  stroke-width:1;
+  stroke-dasharray:3 2;
+  opacity:0.65;
+}
+.anomaly-text{
+  font-family:var(--mono);
+  font-size:8px;
+  fill:var(--spike);
+  font-weight:700;
+  letter-spacing:0.12em;
+}
+.avg-line{
+  stroke:var(--accent2);
+  stroke-width:0.6;
+  stroke-dasharray:1 3;
+  opacity:0.55;
+}
+
+.ch-score{
+  padding:14px 14px;
+  border-left:1px dashed var(--border);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-end;
+  background:linear-gradient(270deg,rgba(0,255,107,0.04),transparent);
+}
+.ch-score .mag-label{font-size:8px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase}
+.ch-score .mag{
+  font-size:19px;
+  font-weight:700;
+  color:var(--accent);
+  text-shadow:0 0 10px rgba(0,255,107,0.4);
+  letter-spacing:0.02em;
+}
+.ch-score .delta{font-size:9px;color:var(--muted);margin-top:2px}
+.ch-score .delta.up{color:var(--good)}
+.ch-score .delta.dn{color:var(--spike)}
+
+.channel.upset .ch-label{border-left:2px solid var(--spike)}
+.channel.upset .ch-score .mag{color:var(--spike);text-shadow:0 0 10px rgba(255,68,102,0.4)}
+
+/* ====== MASTER TRACE ====== */
+.master{
+  border:1px solid var(--border-strong);
+  background:var(--paper);
+  padding:18px 22px 22px;
+  margin-top:16px;
+}
+.master-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.master-head .t{
+  font-size:11px;
+  letter-spacing:0.2em;
+  color:var(--accent2);
+  text-transform:uppercase;
+}
+.master-head .sub{font-size:10px;color:var(--muted);letter-spacing:0.1em}
+.master svg{width:100%;height:190px;overflow:visible;display:block}
+.master-path{
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:1.8;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+  filter:drop-shadow(0 0 6px rgba(0,255,107,0.5));
+  stroke-dasharray:var(--len,3000);
+  stroke-dashoffset:var(--len,3000);
+  animation:draw 2.2s cubic-bezier(0.25,0.8,0.3,1) forwards;
+  animation-play-state:paused;
+}
+.master.in-view .master-path{animation-play-state:running}
+@supports (animation-timeline:view()){
+  .master-path{
+    animation-timeline:view();
+    animation-range:entry 0% cover 40%;
+    animation-play-state:running;
+  }
+}
+.master-fill{
+  fill:url(#masterGrad);
+  opacity:0;
+  animation:fadeIn 1.4s ease-out 1.4s forwards;
+  animation-play-state:paused;
+}
+.master.in-view .master-fill{animation-play-state:running}
+@supports (animation-timeline:view()){
+  .master-fill{
+    animation-timeline:view();
+    animation-range:entry 20% cover 55%;
+  }
+}
+@keyframes fadeIn{to{opacity:0.25}}
+.grid-h{stroke:var(--grid-strong);stroke-width:0.5}
+.grid-label{font-family:var(--mono);font-size:9px;fill:var(--muted);letter-spacing:0.1em}
+.avg-master{stroke:var(--accent2);stroke-width:0.8;stroke-dasharray:4 3;opacity:0.7}
+.extreme-dot{fill:var(--spike);stroke:var(--bg);stroke-width:1}
+.extreme-dot.hi{fill:var(--accent)}
+
+/* ====== REPORT GRID ====== */
+.report-grid{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:22px;
+  margin-top:30px;
+}
+.panel{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:18px 22px;
+  position:relative;
+}
+.panel::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;
+  width:24px;height:1px;
+  background:var(--accent);
+  box-shadow:0 0 6px var(--accent);
+}
+.panel h3{
+  margin:0 0 14px;
+  font-size:10px;
+  letter-spacing:0.25em;
+  color:var(--accent2);
+  text-transform:uppercase;
+  font-weight:600;
+}
+.panel h3::before{
+  content:"// ";
+  color:var(--muted);
+}
+.logline{
+  display:grid;
+  grid-template-columns:80px 1fr auto;
+  gap:12px;
+  padding:8px 0;
+  border-bottom:1px dashed var(--dim);
+  font-size:11px;
+  align-items:baseline;
+}
+.logline:last-child{border-bottom:none}
+.logline .ts{color:var(--muted);font-size:9px;letter-spacing:0.08em}
+.logline .msg{color:var(--fg)}
+.logline .msg b{color:var(--accent);font-weight:600}
+.logline .tag{
+  font-size:9px;
+  padding:1px 6px;
+  border:1px solid var(--border);
+  color:var(--accent2);
+  letter-spacing:0.1em;
+}
+.logline.spike .tag{color:var(--spike);border-color:var(--spike)}
+
+.award{
+  padding:10px 0;
+  border-bottom:1px dashed var(--dim);
+}
+.award:last-child{border-bottom:none}
+.award .k{font-size:9px;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;display:block;margin-bottom:3px}
+.award .v{font-size:13px;color:var(--fg);font-weight:500}
+.award .v .hilite{color:var(--accent);font-weight:700}
+.award .v .amber{color:var(--accent2);font-weight:700}
+.award .v .spike{color:var(--spike);font-weight:700}
+.award .sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ====== NEXT EPOCH (WEEK 7) ====== */
+.epoch{
+  margin-top:30px;
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:20px 24px;
+}
+.epoch h3{
+  margin:0 0 14px;
+  font-size:11px;
+  letter-spacing:0.25em;
+  color:var(--accent2);
+  text-transform:uppercase;
+}
+.match-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:10px 18px;
+}
+.match{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  padding:10px 12px;
+  border:1px dashed var(--dim);
+  align-items:center;
+  font-size:11px;
+  position:relative;
+}
+.match.marquee{border:1px solid var(--spike);background:rgba(255,68,102,0.04)}
+.match.toilet{border:1px dashed var(--accent2);background:rgba(255,170,0,0.03)}
+.match .seed{font-size:9px;color:var(--muted);letter-spacing:0.1em;min-width:54px}
+.match .teams{color:var(--fg);font-size:11px;line-height:1.35}
+.match .teams b{color:var(--accent);font-weight:600}
+.match .tag{
+  font-size:8px;
+  padding:2px 6px;
+  border:1px solid var(--border);
+  color:var(--accent2);
+  letter-spacing:0.1em;
+}
+.match.marquee .tag{color:var(--spike);border-color:var(--spike)}
+.match.toilet .tag{color:var(--accent2);border-color:var(--accent2)}
+.match .flag{
+  font-size:8px;
+  color:var(--muted);
+  letter-spacing:0.08em;
+  margin-top:3px;
+}
+
+/* ====== FOOTER ====== */
+.footer{
+  margin-top:36px;
+  padding-top:18px;
+  border-top:1px dashed var(--border);
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+}
+.footer .sig{color:var(--accent)}
+
+@media (max-width:760px){
+  .wrap{padding:18px 14px 60px}
+  .station h1{font-size:22px}
+  .channel{grid-template-columns:130px 1fr 68px;min-height:72px}
+  .ch-label{padding:8px 10px}
+  .ch-name{font-size:11px}
+  .ch-owner{display:none}
+  .ch-score{padding:8px 8px}
+  .ch-score .mag{font-size:15px}
+  .ch-trace svg{height:60px}
+  .report-grid{grid-template-columns:1fr}
+  .master svg{height:150px}
+}
+
+/* reduced motion — skip animations, show completed state */
+@media (prefers-reduced-motion:reduce){
+  .trace-path,.master-path{
+    stroke-dashoffset:0 !important;
+    animation:none !important;
+  }
+  .master-fill{opacity:0.25 !important;animation:none !important}
+  .spike-dot{opacity:1 !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ STATION HEADER ============ -->
+  <header class="station">
+    <div class="station-tag">JAILYARD TELEMETRY // OSCILLOSCOPIC RECORD</div>
+    <h1>SEISMIC LOG<span class="slash">/</span>WEEK 06<span class="slash">/</span>SEASON 2025<span class="slash">/</span>JYD</h1>
+    <div class="meta">
+      <div class="meta-item"><span class="k">Channels</span><span class="v">12 ACTIVE</span></div>
+      <div class="meta-item"><span class="k">Epochs logged</span><span class="v">06 / 14</span></div>
+      <div class="meta-item"><span class="k">Avg magnitude</span><span class="v amber">128.70</span></div>
+      <div class="meta-item"><span class="k">Season avg PPG</span><span class="v">138.50</span></div>
+      <div class="meta-item"><span class="k">Anomalies</span><span class="v spike">04 / 06</span></div>
+      <div class="meta-item"><span class="k">Peak event</span><span class="v">LB 165.90</span></div>
+      <div class="meta-item"><span class="k">Nadir event</span><span class="v">CF 095.26</span></div>
+      <div class="meta-item"><span class="k">Station ID</span><span class="v">JYD-W06-2025</span></div>
+    </div>
+  </header>
+
+  <!-- ============ CHANNEL TRACES ============ -->
+  <div class="section-head">
+    <span class="id">[01]</span> CHANNEL TRACES<span class="line"></span>
+    <span>SORTED BY POWER RANK</span>
+  </div>
+
+  <div class="channels">
+
+    <!-- CH01 LEGION OF BOUZ -->
+    <div class="channel">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">01</span>CH01</div>
+        <div class="ch-name">The Legion of Bouz</div>
+        <div class="ch-owner">KIDBOUZIE</div>
+        <div class="ch-meta-line"><span class="rec">5-1 W1</span><span class="elo">ELO 1604</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- Legion: 4 major spikes: Mahomes 30.48, Skattebo 30.0, CMC 20.6, Waddle 13.32, SEA 11 -->
+          <path class="trace-path" style="--len:1680" d="M0 55 L30 54 L55 52 L75 50 L92 53 L108 48 L125 8 L142 38 L158 44 L175 42 L195 46 L215 10 L232 38 L250 44 L272 48 L290 50 L310 48 L330 28 L350 42 L370 46 L395 48 L418 46 L440 36 L460 44 L482 46 L505 38 L525 44 L548 46 L572 48 L600 50"/>
+          <circle class="spike-dot" cx="125" cy="8" r="3"/>
+          <circle class="spike-dot" cx="215" cy="10" r="3"/>
+          <circle class="spike-dot" cx="330" cy="28" r="2.5"/>
+          <text class="spike-label" x="125" y="4" text-anchor="middle">MAHOMES 30.48</text>
+          <text class="spike-label" x="215" y="6" text-anchor="middle">SKATTEBO 30.0</text>
+          <text class="trace-label" x="598" y="68" text-anchor="end">t → 15 SLOTS</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">165.90</span>
+        <span class="delta up">▲ +1 PEAK</span>
+      </div>
+    </div>
+
+    <!-- CH02 GENERAL KEN-OBI -->
+    <div class="channel">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">02</span>CH02</div>
+        <div class="ch-name">General Ken-obi</div>
+        <div class="ch-owner">bLAKER24</div>
+        <div class="ch-meta-line"><span class="rec">5-1 W2</span><span class="elo">ELO 1700</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- Ken-obi: LAR DEF 27, London 26.8, Maye 26.24, R.White 16.1, J.Williams 15.6 -->
+          <path class="trace-path" style="--len:1680" d="M0 55 L28 54 L52 50 L72 46 L88 12 L108 38 L128 44 L146 42 L168 44 L188 14 L212 38 L236 44 L258 16 L280 38 L302 42 L322 44 L344 46 L366 42 L388 32 L408 42 L430 44 L452 42 L472 34 L495 42 L518 44 L540 46 L562 48 L582 50 L600 50"/>
+          <circle class="spike-dot" cx="88" cy="12" r="3"/>
+          <circle class="spike-dot" cx="188" cy="14" r="3"/>
+          <circle class="spike-dot" cx="258" cy="16" r="2.8"/>
+          <text class="spike-label" x="88" y="8" text-anchor="middle">LAR DEF 27.0</text>
+          <text class="spike-label" x="188" y="10" text-anchor="middle">LONDON 26.8</text>
+          <text class="spike-label" x="258" y="11" text-anchor="middle">MAYE 26.24</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">164.94</span>
+        <span class="delta up">▲ +3</span>
+      </div>
+    </div>
+
+    <!-- CH03 SLEEPING GIANTS -->
+    <div class="channel">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">03</span>CH03</div>
+        <div class="ch-name">Sleeping Giants</div>
+        <div class="ch-owner">ZBCOWAN</div>
+        <div class="ch-meta-line"><span class="rec">5-1 W4</span><span class="elo">ELO 1561</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- SG: Jacobs 29.5, Hurts 21.62, Kyren 15.7, Henry 13.5, Aubrey 9.0 -->
+          <path class="trace-path" style="--len:1620" d="M0 55 L30 54 L60 52 L88 50 L110 10 L135 38 L158 44 L180 46 L202 24 L226 42 L248 46 L270 44 L292 34 L316 44 L338 44 L360 36 L382 44 L405 48 L428 48 L450 44 L472 46 L495 48 L518 48 L540 50 L562 50 L582 52 L600 52"/>
+          <circle class="spike-dot" cx="110" cy="10" r="3"/>
+          <circle class="spike-dot" cx="202" cy="24" r="2.5"/>
+          <text class="spike-label" x="110" y="6" text-anchor="middle">JACOBS 29.5</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">129.82</span>
+        <span class="delta">— HOLD</span>
+      </div>
+    </div>
+
+    <!-- CH04 BOONIST MONKS — UPSET WIN -->
+    <div class="channel upset">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">04</span>CH04</div>
+        <div class="ch-name">The Boonist Monks</div>
+        <div class="ch-owner">GAUCHOTRAIN</div>
+        <div class="ch-meta-line"><span class="rec">4-2 W1</span><span class="elo">ELO 1599</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- BM: Pickens 27.3, JSN 26.2, Flacco 18.76, M.Crosby 16.0, Ferguson 10.8 -->
+          <path class="trace-path" style="--len:1660" d="M0 55 L28 54 L54 52 L78 50 L102 48 L128 14 L154 40 L178 44 L202 46 L226 16 L252 40 L278 44 L302 44 L326 30 L350 42 L374 44 L398 36 L422 44 L446 46 L470 46 L492 48 L516 48 L538 50 L560 50 L582 52 L600 52"/>
+          <circle class="spike-dot" cx="128" cy="14" r="3"/>
+          <circle class="spike-dot" cx="226" cy="16" r="3"/>
+          <text class="spike-label" x="128" y="10" text-anchor="middle">PICKENS 27.3</text>
+          <text class="spike-label" x="226" y="12" text-anchor="middle">JSN 26.2</text>
+          <!-- ANOMALY BAR: upset win -->
+          <line class="anomaly-bar" x1="548" y1="0" x2="548" y2="70"/>
+          <text class="anomaly-text" x="544" y="10" text-anchor="end">ANOMALY DETECTED</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">150.46</span>
+        <span class="delta up">▲ +2</span>
+      </div>
+    </div>
+
+    <!-- CH05 KITTLER — UPSET LOSS -->
+    <div class="channel upset">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">05</span>CH05</div>
+        <div class="ch-name">Kittler on the Roof</div>
+        <div class="ch-owner">BCHODOS</div>
+        <div class="ch-meta-line"><span class="rec">4-2 L1</span><span class="elo">ELO 1488</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- KR: JT 21.7, Baker 18.64, Kraft 11.3, Bonitto 9.5, Cooper 9.5 -->
+          <path class="trace-path" style="--len:1600" d="M0 55 L32 54 L62 52 L92 50 L118 22 L142 42 L168 44 L192 46 L216 30 L240 44 L264 46 L288 44 L312 36 L336 46 L360 46 L384 38 L408 46 L432 46 L456 46 L480 48 L504 48 L528 50 L552 50 L576 52 L600 52"/>
+          <circle class="spike-dot" cx="118" cy="22" r="2.8"/>
+          <circle class="spike-dot" cx="216" cy="30" r="2.4"/>
+          <text class="spike-label" x="118" y="18" text-anchor="middle">TAYLOR 21.7</text>
+          <text class="spike-label" x="216" y="26" text-anchor="middle">BAKER 18.64</text>
+          <line class="anomaly-bar" x1="548" y1="0" x2="548" y2="70"/>
+          <text class="anomaly-text" x="544" y="10" text-anchor="end">ANOMALY: FELL FROM #1</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">107.74</span>
+        <span class="delta dn">▼ -4</span>
+      </div>
+    </div>
+
+    <!-- CH06 RASHEEING — UPSET LOSS -->
+    <div class="channel upset">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">06</span>CH06</div>
+        <div class="ch-name">Rasheeing the Scene</div>
+        <div class="ch-owner">TOREROGAUCHO</div>
+        <div class="ch-meta-line"><span class="rec">4-2 L1</span><span class="elo">ELO 1626</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- RS: Achane 30.0, Dicker 18.4, Allen 15.4, Landry 9.0, Wagner 8.5 -->
+          <path class="trace-path" style="--len:1620" d="M0 55 L30 54 L58 52 L84 50 L110 10 L138 40 L164 44 L190 46 L216 24 L242 44 L266 46 L290 44 L314 36 L338 46 L362 48 L386 48 L410 48 L434 50 L458 50 L482 50 L506 50 L530 50 L554 52 L578 52 L600 52"/>
+          <circle class="spike-dot" cx="110" cy="10" r="3"/>
+          <text class="spike-label" x="110" y="6" text-anchor="middle">ACHANE 30.0</text>
+          <line class="anomaly-bar" x1="548" y1="0" x2="548" y2="70"/>
+          <text class="anomaly-text" x="544" y="10" text-anchor="end">ANOMALY DETECTED</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">109.10</span>
+        <span class="delta dn">▼ -2</span>
+      </div>
+    </div>
+
+    <!-- CH07 MHJTIME — UPSET WIN -->
+    <div class="channel upset">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">07</span>CH07</div>
+        <div class="ch-name">MHJTIME</div>
+        <div class="ch-owner">RANGO_</div>
+        <div class="ch-meta-line"><span class="rec">3-3 W2</span><span class="elo">ELO 1586</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- MH: Dowdle 30.9, Daniels 22.64, Chase 20.1, McBride 17.2, LV DEF 17.0 -->
+          <path class="trace-path" style="--len:1640" d="M0 55 L28 54 L54 52 L80 48 L104 8 L130 38 L156 44 L182 46 L208 20 L234 42 L258 46 L284 26 L310 42 L334 44 L358 34 L382 44 L406 34 L430 44 L454 46 L478 46 L502 48 L526 50 L550 50 L574 50 L600 52"/>
+          <circle class="spike-dot" cx="104" cy="8" r="3"/>
+          <circle class="spike-dot" cx="208" cy="20" r="2.6"/>
+          <text class="spike-label" x="104" y="4" text-anchor="middle">DOWDLE 30.9</text>
+          <text class="spike-label" x="208" y="16" text-anchor="middle">DANIELS 22.64</text>
+          <line class="anomaly-bar" x1="548" y1="0" x2="548" y2="70"/>
+          <text class="anomaly-text" x="544" y="10" text-anchor="end">ANOMALY DETECTED</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">140.94</span>
+        <span class="delta">— HOLD</span>
+      </div>
+    </div>
+
+    <!-- CH08 NOBLE FFT — UPSET WIN (Bijan's day) -->
+    <div class="channel upset">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">08</span>CH08</div>
+        <div class="ch-name">Noble FFT</div>
+        <div class="ch-owner">KEVOBUCKS</div>
+        <div class="ch-meta-line"><span class="rec">3-3 W1</span><span class="elo">ELO 1455</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- NF: Bijan 32.8 (TOP), Caleb 19.88, WanDale 17.4, Warren 15.3, Oluokun 12.5 -->
+          <path class="trace-path" style="--len:1640" d="M0 55 L30 54 L58 52 L86 50 L112 4 L140 38 L166 44 L192 46 L218 26 L244 42 L268 46 L294 30 L318 44 L342 44 L366 36 L390 44 L414 40 L438 46 L462 48 L486 48 L510 48 L534 50 L558 50 L582 52 L600 52"/>
+          <circle class="spike-dot" cx="112" cy="4" r="3.5"/>
+          <circle class="spike-dot" cx="218" cy="26" r="2.4"/>
+          <text class="spike-label" x="112" y="-1" text-anchor="middle">BIJAN 32.8 ◆ TOP PERF</text>
+          <line class="anomaly-bar" x1="548" y1="0" x2="548" y2="70"/>
+          <text class="anomaly-text" x="544" y="10" text-anchor="end">ANOMALY DETECTED</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">151.88</span>
+        <span class="delta up">▲ +1</span>
+      </div>
+    </div>
+
+    <!-- CH09 GHASTLY -->
+    <div class="channel">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">09</span>CH09</div>
+        <div class="ch-name">Ghastly Grayskull Gang</div>
+        <div class="ch-owner">GRAYSKULLXX</div>
+        <div class="ch-meta-line"><span class="rec">2-4 L2</span><span class="elo">ELO 1324</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- GG: Swift 24.5, Metcalf 17.5, Burns 17.0, PIT 14.0, Tonges 9.8 -->
+          <path class="trace-path" style="--len:1600" d="M0 55 L34 54 L64 52 L94 50 L120 18 L146 42 L172 44 L198 30 L224 44 L250 46 L276 32 L302 44 L328 38 L354 46 L378 46 L402 46 L426 48 L450 48 L474 48 L498 50 L522 50 L546 52 L572 52 L600 52"/>
+          <circle class="spike-dot" cx="120" cy="18" r="2.8"/>
+          <text class="spike-label" x="120" y="14" text-anchor="middle">SWIFT 24.5</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">121.30</span>
+        <span class="delta dn">▼ -1</span>
+      </div>
+    </div>
+
+    <!-- CH10 CHUDDERS — LOW SCORER -->
+    <div class="channel">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">10</span>CH10</div>
+        <div class="ch-name">Chudders Football Team</div>
+        <div class="ch-owner">CHUDDERS</div>
+        <div class="ch-meta-line"><span class="rec">1-5 L1</span><span class="elo">ELO 1402</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- CF: Herbert 18.76, Verse 17.5, Jeanty 15.6, Spillane 7.5, Gibbs 7.0 — FLAT WEEK -->
+          <path class="trace-path" style="--len:1560" d="M0 55 L36 54 L68 52 L100 50 L128 30 L156 46 L184 48 L212 32 L240 46 L268 48 L296 34 L324 48 L352 48 L380 50 L408 50 L436 52 L462 52 L488 52 L514 52 L538 52 L562 54 L586 54 L600 54"/>
+          <circle class="spike-dot" cx="128" cy="30" r="2.4"/>
+          <text class="spike-label" x="128" y="26" text-anchor="middle">HERBERT 18.76</text>
+          <text class="trace-label" x="300" y="68" text-anchor="middle">FLAT CADENCE — NO TRUE SPIKE</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">95.26</span>
+        <span class="delta">NADIR</span>
+      </div>
+    </div>
+
+    <!-- CH11 BURDEN -->
+    <div class="channel">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">11</span>CH11</div>
+        <div class="ch-name">Burden of Etienne-y Woody</div>
+        <div class="ch-owner">KHARLOW</div>
+        <div class="ch-meta-line"><span class="rec">0-6 L6</span><span class="elo">ELO 1324</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- BE: Byron Young 21.0, Bourne 16.7, DEN DEF 15.0, Tua 9.6, Tykee 7.5 -->
+          <path class="trace-path" style="--len:1580" d="M0 55 L34 54 L64 52 L94 50 L120 22 L146 44 L172 46 L198 32 L224 46 L250 48 L276 34 L302 48 L328 50 L354 50 L378 50 L402 50 L426 52 L450 52 L474 52 L498 54 L522 54 L546 54 L572 54 L600 55"/>
+          <circle class="spike-dot" cx="120" cy="22" r="2.6"/>
+          <text class="spike-label" x="120" y="18" text-anchor="middle">B.YOUNG 21.0</text>
+          <text class="trace-label" x="300" y="68" text-anchor="middle">STREAK: L6 — ZERO RECOVERY</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">99.20</span>
+        <span class="delta">— 0-6</span>
+      </div>
+    </div>
+
+    <!-- CH12 FATHER TIME -->
+    <div class="channel">
+      <div class="ch-label">
+        <div class="ch-rank"><span class="num">12</span>CH12</div>
+        <div class="ch-name">Father Time</div>
+        <div class="ch-owner">REDRUMSREGRUB</div>
+        <div class="ch-meta-line"><span class="rec">0-6 L6</span><span class="elo">ELO 1330</span></div>
+      </div>
+      <div class="ch-trace">
+        <svg viewBox="0 0 600 74" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="55" x2="600" y2="55"/>
+          <line class="avg-line" x1="0" y1="38" x2="600" y2="38"/>
+          <!-- FT: McConkey 19.5, McMillan 16.4, Nix 13.36, Hutchinson 9.0, Engram 7.4 -->
+          <path class="trace-path" style="--len:1580" d="M0 55 L32 54 L62 52 L92 50 L118 24 L144 44 L172 46 L198 32 L226 46 L252 48 L278 38 L306 48 L332 48 L358 50 L384 50 L410 50 L434 52 L458 52 L484 52 L508 52 L532 54 L558 54 L582 54 L600 55"/>
+          <circle class="spike-dot" cx="118" cy="24" r="2.5"/>
+          <text class="spike-label" x="118" y="20" text-anchor="middle">McCONKEY 19.5</text>
+          <text class="trace-label" x="300" y="68" text-anchor="middle">STREAK: L6 — BASEMENT CHANNEL</text>
+        </svg>
+      </div>
+      <div class="ch-score">
+        <span class="mag-label">MAG</span>
+        <span class="mag">107.66</span>
+        <span class="delta">— 0-6</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ MASTER TRACE ============ -->
+  <div class="section-head">
+    <span class="id">[02]</span> MASTER TRACE<span class="line"></span>
+    <span>12-CHANNEL AGGREGATE</span>
+  </div>
+
+  <div class="master">
+    <div class="master-head">
+      <div class="t">LEAGUE-WIDE MAGNITUDE DISTRIBUTION — WEEK 06</div>
+      <div class="sub">LOW 095.26 · AVG 128.70 · HI 165.90</div>
+    </div>
+    <svg viewBox="0 0 1000 190" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="masterGrad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#00ff6b" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#00ff6b" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- horizontal gridlines at magnitude markers -->
+      <line class="grid-h" x1="0" y1="30"  x2="1000" y2="30"/>
+      <line class="grid-h" x1="0" y1="70"  x2="1000" y2="70"/>
+      <line class="grid-h" x1="0" y1="110" x2="1000" y2="110"/>
+      <line class="grid-h" x1="0" y1="150" x2="1000" y2="150"/>
+      <text class="grid-label" x="6" y="26">180</text>
+      <text class="grid-label" x="6" y="66">150</text>
+      <text class="grid-label" x="6" y="106">120</text>
+      <text class="grid-label" x="6" y="146">90</text>
+      <!-- avg line @ 128.7  →  y ≈ 88 -->
+      <line class="avg-master" x1="40" y1="88" x2="1000" y2="88"/>
+      <text class="grid-label" x="1000" y="84" text-anchor="end" style="fill:#ffaa00">AVG 128.70</text>
+
+      <!-- master trace: 12 teams in rank order @ their week6 mag
+           x step 80, x0=40
+           magnitudes (px y where 180→30, 90→150 → y = 210 - mag) -->
+      <!-- LB 165.90 → 44 | GK 164.94 → 45 | SG 129.82 → 80 | BM 150.46 → 60
+           KR 107.74 → 102 | RS 109.10 → 101 | MH 140.94 → 69 | NF 151.88 → 58
+           GG 121.30 → 89 | CF 95.26 → 115 | BE 99.20 → 111 | FT 107.66 → 102
+           (after  offset to fit viewbox nicely) -->
+      <!-- filled area first so stroke draws on top -->
+      <path class="master-fill" d="M40 44 L120 45 L200 80 L280 60 L360 102 L440 101 L520 69 L600 58 L680 89 L760 115 L840 111 L920 102 L1000 102 L1000 180 L40 180 Z"/>
+      <path class="master-path" style="--len:2800" d="M40 44 L120 45 L200 80 L280 60 L360 102 L440 101 L520 69 L600 58 L680 89 L760 115 L840 111 L920 102"/>
+
+      <!-- extreme dots -->
+      <circle class="extreme-dot hi" cx="40" cy="44" r="4"/>
+      <circle class="extreme-dot" cx="760" cy="115" r="4"/>
+
+      <!-- x-axis labels (team initials) -->
+      <g style="font-family:'IBM Plex Mono',monospace;font-size:9px;fill:#4a6a54;letter-spacing:0.08em">
+        <text x="40"  y="175" text-anchor="middle">LB</text>
+        <text x="120" y="175" text-anchor="middle">GK</text>
+        <text x="200" y="175" text-anchor="middle">SG</text>
+        <text x="280" y="175" text-anchor="middle">BM</text>
+        <text x="360" y="175" text-anchor="middle">KR</text>
+        <text x="440" y="175" text-anchor="middle">RS</text>
+        <text x="520" y="175" text-anchor="middle">MH</text>
+        <text x="600" y="175" text-anchor="middle">NF</text>
+        <text x="680" y="175" text-anchor="middle">GG</text>
+        <text x="760" y="175" text-anchor="middle">CF</text>
+        <text x="840" y="175" text-anchor="middle">BE</text>
+        <text x="920" y="175" text-anchor="middle">FT</text>
+      </g>
+      <!-- annotations on extremes -->
+      <text class="spike-label" x="40" y="36" text-anchor="start">HI 165.90</text>
+      <text style="font-family:'IBM Plex Mono',monospace;font-size:9px;fill:#ff4466;font-weight:700" x="760" y="130" text-anchor="middle">LO 95.26</text>
+    </svg>
+  </div>
+
+  <!-- ============ READING REPORT ============ -->
+  <div class="section-head">
+    <span class="id">[03]</span> READING STATION REPORT<span class="line"></span>
+    <span>WK06 LOG ENTRIES</span>
+  </div>
+
+  <div class="report-grid">
+    <div class="panel">
+      <h3>INCIDENT LOG — SIX EVENTS RECORDED</h3>
+      <div class="logline spike">
+        <span class="ts">T+06:01</span>
+        <span class="msg"><b>Noble FFT</b> 151.88 def Ghastly Grayskull Gang 121.30 · margin 30.58</span>
+        <span class="tag">UPSET</span>
+      </div>
+      <div class="logline spike">
+        <span class="ts">T+06:02</span>
+        <span class="msg"><b>MHJTIME</b> 140.94 def Kittler on the Roof 107.74 · margin 33.20 · KR falls from #1</span>
+        <span class="tag">UPSET</span>
+      </div>
+      <div class="logline">
+        <span class="ts">T+06:03</span>
+        <span class="msg"><b>Sleeping Giants</b> 129.82 def Chudders FT 95.26 · margin 34.56</span>
+        <span class="tag">HOLD</span>
+      </div>
+      <div class="logline spike">
+        <span class="ts">T+06:04</span>
+        <span class="msg"><b>The Boonist Monks</b> 150.46 def Rasheeing the Scene 109.10 · margin 41.36</span>
+        <span class="tag">UPSET</span>
+      </div>
+      <div class="logline">
+        <span class="ts">T+06:05</span>
+        <span class="msg"><b>The Legion of Bouz</b> 165.90 def Father Time 107.66 · margin 58.24 · week high</span>
+        <span class="tag">PEAK</span>
+      </div>
+      <div class="logline">
+        <span class="ts">T+06:06</span>
+        <span class="msg"><b>General Ken-obi</b> 164.94 def Burden of Etienne-y Woody 99.20 · margin 65.74</span>
+        <span class="tag">BLOWOUT</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>WK06 AWARDS // ANOMALY SUMMARY</h3>
+      <div class="award">
+        <span class="k">HIGH SCORER</span>
+        <span class="v"><span class="hilite">The Legion of Bouz</span> · 165.90</span>
+        <span class="sub">Mahomes 30.48 + Skattebo 30.0 + CMC 20.6</span>
+      </div>
+      <div class="award">
+        <span class="k">LOW SCORER</span>
+        <span class="v"><span class="spike">Chudders Football Team</span> · 95.26</span>
+        <span class="sub">Flat cadence · Gibbs 7.0 · Spillane 7.5</span>
+      </div>
+      <div class="award">
+        <span class="k">TOP PERFORMER</span>
+        <span class="v"><span class="amber">Bijan Robinson</span> · 32.8 pts · RB ATL</span>
+        <span class="sub">Noble FFT · individual peak of the epoch</span>
+      </div>
+      <div class="award">
+        <span class="k">BIGGEST BLOWOUT</span>
+        <span class="v"><span class="hilite">Ken-obi 164.94</span> <span style="color:var(--muted)">vs</span> <span class="spike">BE 99.20</span> · +65.74</span>
+        <span class="sub">Max magnitude delta recorded W06</span>
+      </div>
+      <div class="award">
+        <span class="k">ANOMALY RATE</span>
+        <span class="v"><span class="spike">04 / 06</span> games flagged UPSET</span>
+        <span class="sub">Highest reading of Season 2025</span>
+      </div>
+      <div class="award">
+        <span class="k">ELO PEAK</span>
+        <span class="v"><span class="amber">General Ken-obi</span> · 1700</span>
+        <span class="sub">Career high · 2-time champ trajectory</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ NEXT EPOCH ============ -->
+  <div class="section-head">
+    <span class="id">[04]</span> NEXT EPOCH<span class="line"></span>
+    <span>WK07 PROJECTED CHANNELS</span>
+  </div>
+
+  <div class="epoch">
+    <h3>// WEEK 07 MATCHUPS — 6 PAIRED CHANNELS</h3>
+    <div class="match-grid">
+      <div class="match marquee">
+        <span class="seed">#1 · #2</span>
+        <div>
+          <div class="teams"><b>The Legion of Bouz</b> vs <b>General Ken-obi</b></div>
+          <div class="flag">MARQUEE · BOTH 5-1 · ~165 MAG CARRYOVER</div>
+        </div>
+        <span class="tag">MARQUEE</span>
+      </div>
+      <div class="match">
+        <span class="seed">#4 · #8</span>
+        <div>
+          <div class="teams">The Boonist Monks vs Noble FFT</div>
+          <div class="flag">BIJAN TAILWIND · BM ON W1 STREAK</div>
+        </div>
+        <span class="tag">STD</span>
+      </div>
+      <div class="match">
+        <span class="seed">#5 · #3</span>
+        <div>
+          <div class="teams">Kittler on the Roof vs Sleeping Giants</div>
+          <div class="flag">KR BOUNCE-BACK WATCH · SG ON W4</div>
+        </div>
+        <span class="tag">STD</span>
+      </div>
+      <div class="match">
+        <span class="seed">#6 · #9</span>
+        <div>
+          <div class="teams">Rasheeing the Scene vs Ghastly Grayskull Gang</div>
+          <div class="flag">BOTH BLEEDING · RS L1 · GG L2</div>
+        </div>
+        <span class="tag">STD</span>
+      </div>
+      <div class="match">
+        <span class="seed">#10 · #7</span>
+        <div>
+          <div class="teams">Chudders Football Team vs MHJTIME</div>
+          <div class="flag">MH RIDING W2 · CF CEILING TEST</div>
+        </div>
+        <span class="tag">STD</span>
+      </div>
+      <div class="match toilet">
+        <span class="seed">#11 · #12</span>
+        <div>
+          <div class="teams">Burden of Etienne-y Woody vs Father Time</div>
+          <div class="flag">TOILET BOWL MATINEE · BOTH 0-6 ON L6</div>
+        </div>
+        <span class="tag">TOILET</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div>STATION JYD · W06 / S2025 · LOG CLOSED</div>
+    <div>12 CHANNELS · 06 EPOCHS · 04 ANOMALIES</div>
+    <div class="sig">◆ SEISMIC TELEMETRY — JAILYARD DYNASTY ◆</div>
+  </footer>
+
+</div>
+
+<script>
+// Fallback reveal for browsers without animation-timeline: view()
+// (Firefox, older Safari). Uses IntersectionObserver → adds .in-view to the
+// channel or master container, which unpauses the CSS animation.
+(function(){
+  if (CSS && CSS.supports && CSS.supports('animation-timeline','view()')) return;
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        e.target.classList.add('in-view');
+        io.unobserve(e.target);
+      }
+    });
+  },{root:null,rootMargin:'0px 0px -10% 0px',threshold:0.15});
+
+  document.querySelectorAll('.channel, .master').forEach(function(el){ io.observe(el); });
+
+  // For each trace-path, set --len to its real length so the draw animation
+  // reveals crisply regardless of SVG viewBox scaling.
+  document.querySelectorAll('path.trace-path, path.master-path').forEach(function(p){
+    try {
+      var L = p.getTotalLength();
+      if (L && isFinite(L)) p.style.setProperty('--len', L.toFixed(1));
+    } catch (_){ /* noop */ }
+  });
+})();
+</script>
+</body>
+</html>

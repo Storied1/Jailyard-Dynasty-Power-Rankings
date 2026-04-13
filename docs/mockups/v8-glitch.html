@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE GLITCH | Week 9 | The Jailyard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&family=Newsreader:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   THE GLITCH — CSS
+   Visual corruption as power ranking.
+   ═══════════════════════════════════════════════════ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --fg: #e8e4de;
+  --gold: #c9a84c;
+  --gold-dim: rgba(201, 168, 76, 0.3);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Barlow Condensed', sans-serif;
+  --serif: 'Newsreader', serif;
+  --scan-opacity: 0.04;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--serif);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Global scanlines overlay ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, var(--scan-opacity)) 2px,
+    rgba(0, 0, 0, var(--scan-opacity)) 4px
+  );
+}
+
+/* ── Boot flash ── */
+.boot-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bootSequence 2.2s ease-out forwards;
+}
+
+.boot-flash .rgb-split {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: rgbFlash 0.12s ease-out 0.8s forwards;
+}
+.boot-flash .rgb-split .r {
+  position: absolute; inset: 0;
+  background: #ff0000;
+  mix-blend-mode: screen;
+  transform: translateX(-15px);
+}
+.boot-flash .rgb-split .g {
+  position: absolute; inset: 0;
+  background: #00ff00;
+  mix-blend-mode: screen;
+}
+.boot-flash .rgb-split .b {
+  position: absolute; inset: 0;
+  background: #0000ff;
+  mix-blend-mode: screen;
+  transform: translateX(15px);
+}
+
+@keyframes bootSequence {
+  0% { opacity: 1; }
+  40% { opacity: 1; }
+  45% { opacity: 0; }
+  47% { opacity: 1; }
+  50% { opacity: 0; }
+  52% { opacity: 0.5; }
+  55% { opacity: 0; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+@keyframes rgbFlash {
+  0% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  padding: 6rem 2rem 4rem;
+  position: relative;
+}
+
+.header .week-label {
+  font-family: var(--mono);
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.header h1 {
+  font-family: var(--sans);
+  font-weight: 900;
+  font-size: clamp(4rem, 12vw, 10rem);
+  line-height: 0.9;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.header .subtitle {
+  font-family: var(--mono);
+  font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+  color: rgba(232, 228, 222, 0.4);
+  margin-top: 1.5rem;
+  letter-spacing: 0.15em;
+}
+
+/* ── Section titles ── */
+.section-title {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin-bottom: 2rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--gold);
+}
+
+/* ── Essay ── */
+.essay-section {
+  max-width: 740px;
+  margin: 0 auto 5rem;
+  padding: 0 2rem;
+}
+
+.essay-section p {
+  font-family: var(--serif);
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  line-height: 1.75;
+  color: rgba(232, 228, 222, 0.85);
+  margin-bottom: 1.5rem;
+}
+
+/* Inline team name glitch */
+.team-inline {
+  position: relative;
+  display: inline;
+  font-weight: 700;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.team-inline::before,
+.team-inline::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.team-inline::before {
+  color: #ff0000;
+  mix-blend-mode: screen;
+  clip-path: inset(0 0 50% 0);
+}
+
+.team-inline::after {
+  color: #0000ff;
+  mix-blend-mode: screen;
+  clip-path: inset(50% 0 0 0);
+}
+
+/* Glitch intensity levels for inline mentions */
+.glitch-0::before, .glitch-0::after { display: none; }
+
+.glitch-1::before { transform: translate(-1px, 0); opacity: 0.4; }
+.glitch-1::after { transform: translate(1px, 0); opacity: 0.4; }
+
+.glitch-2::before { transform: translate(-2px, 0); opacity: 0.5; }
+.glitch-2::after { transform: translate(2px, 0); opacity: 0.5; }
+
+.glitch-3::before { transform: translate(-3px, 1px); opacity: 0.6; }
+.glitch-3::after { transform: translate(3px, -1px); opacity: 0.6; }
+
+.glitch-4::before { transform: translate(-5px, 1px); opacity: 0.7; }
+.glitch-4::after { transform: translate(5px, -1px); opacity: 0.7; }
+
+.glitch-5::before { transform: translate(-8px, 2px); opacity: 0.8; }
+.glitch-5::after { transform: translate(8px, -2px); opacity: 0.8; }
+
+/* ══════════════════════════════════════════════════
+   POWER RANKINGS — The corruption gradient
+   ══════════════════════════════════════════════════ */
+.rankings-section {
+  max-width: 860px;
+  margin: 0 auto 6rem;
+  padding: 0 1.5rem;
+}
+
+.rank-entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.4rem 1.8rem;
+  margin-bottom: 2px;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 3px solid transparent;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+
+.rank-entry:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Rank number */
+.rank-num {
+  font-family: var(--sans);
+  font-weight: 900;
+  font-size: 2.2rem;
+  line-height: 1;
+  color: var(--fg);
+  text-align: center;
+}
+
+/* Team info */
+.rank-info .team-name {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.2rem;
+  position: relative;
+}
+
+.rank-info .blurb {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: rgba(232, 228, 222, 0.6);
+  line-height: 1.5;
+}
+
+/* Record */
+.rank-record {
+  font-family: var(--mono);
+  font-size: 1rem;
+  color: rgba(232, 228, 222, 0.5);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rank-record .record-main {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.rank-record .elo {
+  font-size: 0.75rem;
+  color: rgba(232, 228, 222, 0.3);
+}
+
+/* ── Chromatic aberration on rank entries ── */
+.rank-entry .team-name {
+  position: relative;
+}
+
+.rank-entry .team-name::before,
+.rank-entry .team-name::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.rank-entry .team-name::before {
+  color: #ff0000;
+  mix-blend-mode: screen;
+}
+
+.rank-entry .team-name::after {
+  color: #0000ff;
+  mix-blend-mode: screen;
+}
+
+/* Corruption levels — mapped to rank */
+
+/* #1 — Pristine */
+.corruption-0 { border-left-color: var(--gold); }
+.corruption-0 .rank-num { color: var(--gold); }
+.corruption-0 .team-name::before,
+.corruption-0 .team-name::after { display: none; }
+
+/* #2 — Barely there */
+.corruption-1 .team-name::before { transform: translate(-0.5px, 0); opacity: 0.2; }
+.corruption-1 .team-name::after { transform: translate(0.5px, 0); opacity: 0.2; }
+
+/* #3 — Slight offset */
+.corruption-2 .team-name::before { transform: translate(-1px, 0); opacity: 0.3; }
+.corruption-2 .team-name::after { transform: translate(1px, 0); opacity: 0.3; }
+
+/* #4 — Noticeable */
+.corruption-3 .team-name::before { transform: translate(-2px, 0.5px); opacity: 0.4; }
+.corruption-3 .team-name::after { transform: translate(2px, -0.5px); opacity: 0.4; }
+
+/* #5 */
+.corruption-4 .team-name::before { transform: translate(-3px, 1px); opacity: 0.5; }
+.corruption-4 .team-name::after { transform: translate(3px, -1px); opacity: 0.5; }
+
+/* #6 */
+.corruption-5 { border-left-color: rgba(255, 0, 255, 0.2); }
+.corruption-5 .team-name::before { transform: translate(-3px, 1px); opacity: 0.55; }
+.corruption-5 .team-name::after { transform: translate(3px, -1px); opacity: 0.55; }
+
+/* #7 */
+.corruption-6 { border-left-color: rgba(255, 0, 255, 0.3); }
+.corruption-6 .team-name::before { transform: translate(-4px, 1px); opacity: 0.6; }
+.corruption-6 .team-name::after { transform: translate(4px, -1px); opacity: 0.6; }
+
+/* #8 — Heavy */
+.corruption-7 { border-left-color: rgba(255, 0, 0, 0.3); }
+.corruption-7 .team-name::before { transform: translate(-5px, 1.5px); opacity: 0.65; }
+.corruption-7 .team-name::after { transform: translate(5px, -1.5px); opacity: 0.65; }
+
+/* #9 */
+.corruption-8 { border-left-color: rgba(255, 0, 0, 0.4); }
+.corruption-8 .team-name::before { transform: translate(-6px, 2px); opacity: 0.7; }
+.corruption-8 .team-name::after { transform: translate(6px, -2px); opacity: 0.7; }
+
+/* #10 */
+.corruption-9 { border-left-color: rgba(255, 0, 0, 0.5); }
+.corruption-9 .team-name::before { transform: translate(-7px, 2px); opacity: 0.75; }
+.corruption-9 .team-name::after { transform: translate(7px, -2px); opacity: 0.75; }
+
+/* #11 */
+.corruption-10 { border-left-color: rgba(255, 0, 0, 0.6); }
+.corruption-10 .team-name::before { transform: translate(-8px, 2px); opacity: 0.8; }
+.corruption-10 .team-name::after { transform: translate(8px, -2px); opacity: 0.8; }
+
+/* #12 — Maximum corruption */
+.corruption-11 { border-left-color: rgba(255, 0, 0, 0.8); }
+.corruption-11 .team-name::before { transform: translate(-10px, 3px); opacity: 0.85; }
+.corruption-11 .team-name::after { transform: translate(10px, -3px); opacity: 0.85; }
+
+/* VHS tracking line — drifts over heavily corrupted entries */
+.vhs-tracking {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(0, 255, 255, 0.12) 40%,
+    rgba(255, 0, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0.06) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+  animation: vhsDrift 4s linear infinite;
+}
+
+@keyframes vhsDrift {
+  0% { top: -3px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: calc(100% + 3px); opacity: 0; }
+}
+
+/* Scan line displacement slices */
+.displace-slice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: inherit;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   CHAT TRANSMISSIONS
+   ══════════════════════════════════════════════════ */
+.chat-section {
+  max-width: 740px;
+  margin: 0 auto 6rem;
+  padding: 0 2rem;
+}
+
+.transmission {
+  position: relative;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.transmission::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 255, 255, 0.015) 3px,
+    rgba(0, 255, 255, 0.015) 6px
+  );
+  pointer-events: none;
+}
+
+.transmission .signal-tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(0, 255, 255, 0.4);
+  margin-bottom: 0.8rem;
+}
+
+.transmission .signal-tag .signal-strength {
+  color: rgba(255, 0, 0, 0.6);
+}
+
+.transmission .sender {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: rgba(232, 228, 222, 0.5);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.transmission .message {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: rgba(232, 228, 222, 0.7);
+}
+
+.transmission .corrupted-char {
+  color: rgba(0, 255, 255, 0.6);
+  font-weight: 700;
+}
+
+/* Transmission scan line */
+.transmission .scan-drift {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(0, 255, 255, 0.15),
+    transparent
+  );
+  animation: scanDrift 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanDrift {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* ── Noise canvas (behind everything) ── */
+#noise-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 4rem 2rem 3rem;
+  position: relative;
+}
+
+.footer .gold-line {
+  width: 120px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto 1.5rem;
+}
+
+.footer .recovery {
+  font-family: var(--mono);
+  font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+  letter-spacing: 0.15em;
+  color: var(--gold);
+}
+
+.footer .copyright {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: rgba(232, 228, 222, 0.2);
+  margin-top: 1.5rem;
+  letter-spacing: 0.1em;
+}
+
+/* ── Horizontal displacement animation ── */
+@keyframes hDisplace {
+  0%, 94%, 100% { transform: translateX(0); }
+  95% { transform: translateX(-4px); }
+  97% { transform: translateX(6px); }
+}
+
+/* ── Random jitter for heavy corruption ── */
+@keyframes jitter {
+  0%, 90%, 100% { transform: translate(0, 0); }
+  92% { transform: translate(-3px, 1px); }
+  94% { transform: translate(2px, -1px); }
+  96% { transform: translate(-5px, 0); }
+  98% { transform: translate(4px, 1px); }
+}
+
+/* ── Color bleed for worst teams ── */
+.color-bleed {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ── Movement indicators ── */
+.movement {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+.movement.up { color: #4ade80; }
+.movement.down { color: #f87171; }
+.movement.steady { color: rgba(232, 228, 222, 0.3); }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .rank-entry {
+    grid-template-columns: 40px 1fr;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+  }
+  .rank-record {
+    grid-column: 1 / -1;
+    text-align: left;
+    padding-left: 52px;
+  }
+  .header h1 { font-size: clamp(3rem, 15vw, 5rem); }
+}
+</style>
+</head>
+<body>
+
+<!-- Boot flash -->
+<div class="boot-flash" id="bootFlash">
+  <div class="rgb-split">
+    <div class="r"></div>
+    <div class="g"></div>
+    <div class="b"></div>
+  </div>
+</div>
+
+<!-- Noise canvas -->
+<canvas id="noise-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════ -->
+<header class="header">
+  <div class="week-label">The Jailyard Dynasty &mdash; 2025 Season</div>
+  <h1>WEEK 9</h1>
+  <div class="subtitle">SIGNAL INTEGRITY: DEGRADED &nbsp;&bull;&nbsp; CORRUPTION INDEX: 11 OF 12 CHANNELS COMPROMISED</div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     ESSAY
+     ═══════════════════════════════════════════ -->
+<section class="essay-section">
+  <h2 class="section-title">Transmission Log</h2>
+  <p>
+    Nine weeks in, and the signal is finally separating from the noise. <span class="team-inline glitch-0" data-text="General Ken-obi">General Ken-obi</span> dropped 154.86 points this week&mdash;the highest score of the round&mdash;and did it with the casual dominance of a franchise that knows exactly what it is. Drake London went nuclear (34.3 points), Sam LaPorta added another 18.7, and the 62.48-point margin over <span class="team-inline glitch-4" data-text="Kittler on the Roof">Kittler on the Roof</span> was the kind of violence that makes other GMs check the waiver wire at 2 AM. Three teams share the 7-2 summit, but Ken-obi owns the power score, the highest Elo in league history (1700.2), and two championship rings. The transmission is clean. Everyone else is dealing with interference.
+  </p>
+  <p>
+    <span class="team-inline glitch-1" data-text="MHJTIME">MHJTIME</span> quietly extended the longest active win streak in the league to five games, fueled by Rico Dowdle's breakout (27.1) and the ever-reliable Ja'Marr Chase. Meanwhile, <span class="team-inline glitch-2" data-text="Rasheeing the Scene">Rasheeing the Scene</span> handed <span class="team-inline glitch-3" data-text="The Legion of Bouz">The Legion of Bouz</span> their second straight loss, and the defending regular-season juggernaut has gone radio silent in the group chat. At the bottom, <span class="team-inline glitch-5" data-text="Chudders Football Team">Chudders Football Team</span> is barely generating a signal&mdash;1-8, fading into static, the rebuild entering its "trust the process" phase where "process" is just another word for "pain." The data doesn't lie. The corruption IS the ranking. Scroll down if you dare.
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     POWER RANKINGS
+     ═══════════════════════════════════════════ -->
+<section class="rankings-section">
+  <h2 class="section-title">Power Rankings</h2>
+
+  <!-- #1 — Ken-obi: PRISTINE -->
+  <div class="rank-entry corruption-0" data-rank="1" data-corruption="0">
+    <div class="rank-num">1</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="General Ken-obi">General Ken-obi<span class="movement up">&uarr;1</span></div>
+      <div class="blurb">Drake London 34.3, LaPorta 18.7, 62-point annihilation of Kittler. Peak Elo: 1700.2. Two rings, zero static. The only clean signal on the board.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">7-2</div>
+      <div class="elo">ELO 1700</div>
+    </div>
+  </div>
+
+  <!-- #2 — MHJTIME -->
+  <div class="rank-entry corruption-1" data-rank="2" data-corruption="1">
+    <div class="rank-num">2</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="MHJTIME">MHJTIME<span class="movement up">&uarr;1</span></div>
+      <div class="blurb">Five-game win streak. Rico Dowdle breakout (27.1). Marvin Harrison cooking. The team nobody wants to face in December.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">6-3</div>
+      <div class="elo">ELO 1586</div>
+    </div>
+  </div>
+
+  <!-- #3 — Rasheeing the Scene -->
+  <div class="rank-entry corruption-2" data-rank="3" data-corruption="2">
+    <div class="rank-num">3</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="Rasheeing the Scene">Rasheeing the Scene<span class="movement up">&uarr;1</span></div>
+      <div class="blurb">Josh Allen 28.82 and a Legion takedown. Three straight wins with the second-highest Elo in the league. The thrill ride is trending up.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">7-2</div>
+      <div class="elo">ELO 1626</div>
+    </div>
+  </div>
+
+  <!-- #4 — Sleeping Giants -->
+  <div class="rank-entry corruption-3" data-rank="4" data-corruption="3">
+    <div class="rank-num">4</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="Sleeping Giants">Sleeping Giants<span class="movement up">&uarr;1</span></div>
+      <div class="blurb">Survived Grayskull by 2.04 points. Darnold 28.2, Jacobs 18.0. The aging core keeps grinding. Peak Elo 1672 feels like a lifetime ago.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">7-2</div>
+      <div class="elo">ELO 1561</div>
+    </div>
+  </div>
+
+  <!-- #5 — Legion of Bouz -->
+  <div class="rank-entry corruption-4" data-rank="5" data-corruption="4">
+    <div class="rank-num">5</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="The Legion of Bouz">The Legion of Bouz<span class="movement down">&darr;4</span></div>
+      <div class="blurb">Two straight losses. CMC still elite (31.8) but the supporting cast is fraying. Gone silent in the chat. The former #1 is generating interference.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">6-3</div>
+      <div class="elo">ELO 1604</div>
+    </div>
+  </div>
+
+  <!-- #6 — Boonist Monks -->
+  <div class="rank-entry corruption-5" data-rank="6" data-corruption="5">
+    <div class="rank-num">6</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="The Boonist Monks">The Boonist Monks<span class="movement steady">&mdash;</span></div>
+      <div class="blurb">Lamar 25.56 wasn't enough. Lost to the MHJTIME buzzsaw. 46 messages in the chat this week&mdash;most active talker, least active winner.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">5-4</div>
+      <div class="elo">ELO 1600</div>
+    </div>
+  </div>
+
+  <!-- #7 — Noble FFT -->
+  <div class="rank-entry corruption-6" data-rank="7" data-corruption="6">
+    <div class="rank-num">7</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="Noble FFT">Noble FFT<span class="movement steady">&mdash;</span></div>
+      <div class="blurb">Caleb Williams 37.7 and Tee Higgins 29.6 in a LOSS. Lost by 2.14 despite your best output in weeks. The cruelest margin of the season.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">5-4</div>
+      <div class="elo">ELO 1455</div>
+    </div>
+  </div>
+
+  <!-- #8 — Kittler on the Roof -->
+  <div class="rank-entry corruption-7" data-rank="8" data-corruption="7">
+    <div class="rank-num">8</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="Kittler on the Roof">Kittler on the Roof<span class="movement steady">&mdash;</span></div>
+      <div class="blurb">92.38 points. Four-game losing streak. Former champion in freefall&mdash;went completely silent in the chat. Peak Elo 1690 is ancient history now.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">4-5</div>
+      <div class="elo">ELO 1488</div>
+    </div>
+  </div>
+
+  <!-- #9 — Grayskull -->
+  <div class="rank-entry corruption-8" data-rank="9" data-corruption="8">
+    <div class="rank-num">9</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="Ghastly Grayskull Gang">Ghastly Grayskull Gang<span class="movement steady">&mdash;</span></div>
+      <div class="blurb">Bowers went off (37.3) and they STILL lost by 2 points. Five-game skid. The signal is barely registering.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">2-7</div>
+      <div class="elo">ELO 1325</div>
+    </div>
+  </div>
+
+  <!-- #10 — Burden -->
+  <div class="rank-entry corruption-9" data-rank="10" data-corruption="9">
+    <div class="rank-num">10</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="Burden of Etienne-y Woody">Burden of Etienne-y Woody<span class="movement up">&uarr;1</span></div>
+      <div class="blurb">Snapped a losing streak with 136.44 behind Jaxson Dart (27.24) and Monangai (21.3). A flicker of life in the static. Don't call it a comeback yet.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">2-7</div>
+      <div class="elo">ELO 1324</div>
+    </div>
+  </div>
+
+  <!-- #11 — Father Time -->
+  <div class="rank-entry corruption-10" data-rank="11" data-corruption="10">
+    <div class="rank-num">11</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="Father Time">Father Time<span class="movement down">&darr;1</span></div>
+      <div class="blurb">Won by 16.62 but can't climb out of the 2-7 hole. Davante Adams 20.5, Ravens D 19.0. Winning games that don't matter&mdash;the cruelest frequency.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">2-7</div>
+      <div class="elo">ELO 1330</div>
+    </div>
+  </div>
+
+  <!-- #12 — Chudders: MAXIMUM CORRUPTION -->
+  <div class="rank-entry corruption-11" data-rank="12" data-corruption="11">
+    <div class="rank-num">12</div>
+    <div class="rank-info">
+      <div class="team-name" data-text="Chudders Football Team">Chudders Football Team<span class="movement steady">&mdash;</span></div>
+      <div class="blurb">1-8. Four-game losing streak. Herbert 28.7 and Jeanty 17.4 disappearing into the void. The rebuild is transmitting on a dead channel.</div>
+    </div>
+    <div class="rank-record">
+      <div class="record-main">1-8</div>
+      <div class="elo">ELO 1402</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CHAT — CORRUPTED TRANSMISSIONS
+     ═══════════════════════════════════════════ -->
+<section class="chat-section">
+  <h2 class="section-title">Intercepted Transmissions</h2>
+
+  <div class="transmission" data-corruption="3">
+    <div class="scan-drift"></div>
+    <div class="signal-tag">SIGNAL <span class="signal-strength">/// DEGRADED</span> &mdash; GC-WEEK9-001</div>
+    <div class="sender">Brent Boone &mdash; The Boonist Monks</div>
+    <div class="message" data-original="We're not changing rules like that midseason">"We're not changing rules like that <span class="corrupted-char">m</span>i<span class="corrupted-char">d</span>season"</div>
+  </div>
+
+  <div class="transmission" data-corruption="4">
+    <div class="scan-drift"></div>
+    <div class="signal-tag">SIGNAL <span class="signal-strength">/// WEAK</span> &mdash; GC-WEEK9-002</div>
+    <div class="sender">Sacko &mdash; Burden of Etienne-y Woody</div>
+    <div class="message" data-original="Just as THUNTER was about to set the league on fire... I hate fantasy football">"Just as THUNTER was about to set the league on <span class="corrupted-char">f</span>ire... I hate fantasy footba<span class="corrupted-char">l</span>l"</div>
+  </div>
+
+  <div class="transmission" data-corruption="2">
+    <div class="scan-drift"></div>
+    <div class="signal-tag">SIGNAL <span class="signal-strength">/// INTERMITTENT</span> &mdash; GC-WEEK9-003</div>
+    <div class="sender">Neo &mdash; General Ken-obi</div>
+    <div class="message" data-original="Maybe playing 2 ways as a rookie wasn't a good call">"Maybe playing 2 ways as a rookie wasn't a good call"</div>
+  </div>
+
+  <div class="transmission" data-corruption="5">
+    <div class="scan-drift"></div>
+    <div class="signal-tag">SIGNAL <span class="signal-strength">/// CRITICAL</span> &mdash; GC-WEEK9-004</div>
+    <div class="sender">[ MULTIPLE SOURCES ] &mdash; The Legion of Bouz / Kittler on the Roof</div>
+    <div class="message" data-original="[SIGNAL LOST]">[<span class="corrupted-char">S</span>IGNAL <span class="corrupted-char">L</span>O<span class="corrupted-char">S</span>T] &mdash; Both owners went completely silent after their losses. The chat saw nothing. Radio dark.</div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER — Signal recovered
+     ═══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="gold-line"></div>
+  <div class="recovery">Signal recovered. Week 10 incoming.</div>
+  <div class="copyright">&copy; 2022&ndash;2026 The Jailyard Dynasty League</div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════
+  // NOISE CANVAS — subtle background static
+  // ═══════════════════════════════════════════════════
+  var noiseCanvas = document.getElementById('noise-canvas');
+  var noiseCtx = noiseCanvas.getContext('2d');
+
+  function resizeNoise() {
+    // Use lower res for performance — scale up with CSS
+    noiseCanvas.width = Math.floor(window.innerWidth / 4);
+    noiseCanvas.height = Math.floor(window.innerHeight / 4);
+  }
+  resizeNoise();
+  window.addEventListener('resize', resizeNoise);
+
+  function drawNoise() {
+    var w = noiseCanvas.width;
+    var h = noiseCanvas.height;
+    var imageData = noiseCtx.createImageData(w, h);
+    var data = imageData.data;
+    for (var i = 0; i < data.length; i += 4) {
+      var v = Math.random() * 255;
+      data[i] = v;
+      data[i + 1] = v;
+      data[i + 2] = v;
+      data[i + 3] = 255;
+    }
+    noiseCtx.putImageData(imageData, 0, 0);
+  }
+
+  // Redraw noise at ~8fps for subtle movement
+  var noiseInterval = setInterval(drawNoise, 125);
+  drawNoise();
+
+  // ═══════════════════════════════════════════════════
+  // REMOVE BOOT FLASH after animation
+  // ═══════════════════════════════════════════════════
+  var bootFlash = document.getElementById('bootFlash');
+  bootFlash.addEventListener('animationend', function() {
+    bootFlash.remove();
+  });
+
+  // ═══════════════════════════════════════════════════
+  // TEXT CORRUPTION ENGINE
+  // Replaces random characters with corruption glyphs
+  // Intensity scales with data-corruption attribute
+  // ═══════════════════════════════════════════════════
+  var CORRUPTION_CHARS = ['\u2588', '\u2593', '\u2592', '\u2591', '\u2580', '\u2584', '\u258C', '\u2590', '\u25A0', '\u25A1'];
+  var COLOR_CHARS = ['#ff0000', '#00ffff', '#ff00ff', '#ffff00', '#00ff00'];
+
+  // Collect all corruptible text nodes in blurb elements
+  var rankEntries = document.querySelectorAll('.rank-entry');
+
+  rankEntries.forEach(function(entry) {
+    var corruption = parseInt(entry.dataset.corruption) || 0;
+    if (corruption < 4) return; // Only corrupt ranks 5+ (corruption 4+)
+
+    var blurb = entry.querySelector('.blurb');
+    if (!blurb) return;
+
+    var originalText = blurb.textContent;
+    var corruptionRate = (corruption - 3) / 11; // 0 to ~0.73
+    var swapCount = Math.floor(originalText.length * corruptionRate * 0.08); // Max ~6% of chars
+
+    setInterval(function() {
+      var chars = originalText.split('');
+      for (var i = 0; i < swapCount; i++) {
+        var idx = Math.floor(Math.random() * chars.length);
+        if (chars[idx] !== ' ') {
+          chars[idx] = CORRUPTION_CHARS[Math.floor(Math.random() * CORRUPTION_CHARS.length)];
+        }
+      }
+      blurb.textContent = chars.join('');
+    }, 600 + Math.random() * 400);
+  });
+
+  // ═══════════════════════════════════════════════════
+  // RANK NUMBER JITTER — heavy corruption entries
+  // ═══════════════════════════════════════════════════
+  rankEntries.forEach(function(entry) {
+    var corruption = parseInt(entry.dataset.corruption) || 0;
+    if (corruption < 6) return;
+
+    var rankNum = entry.querySelector('.rank-num');
+    var originalNum = rankNum.textContent;
+    var intensity = (corruption - 5) / 6; // 0 to 1
+
+    setInterval(function() {
+      if (Math.random() < intensity * 0.3) {
+        // Briefly show wrong number or corruption glyph
+        var glitchOptions = [
+          CORRUPTION_CHARS[Math.floor(Math.random() * CORRUPTION_CHARS.length)],
+          String(parseInt(originalNum) + Math.floor(Math.random() * 3) - 1),
+          '?',
+          '#'
+        ];
+        rankNum.textContent = glitchOptions[Math.floor(Math.random() * glitchOptions.length)];
+        rankNum.style.color = COLOR_CHARS[Math.floor(Math.random() * COLOR_CHARS.length)];
+
+        setTimeout(function() {
+          rankNum.textContent = originalNum;
+          rankNum.style.color = '';
+        }, 80 + Math.random() * 120);
+      }
+    }, 800);
+  });
+
+  // ═══════════════════════════════════════════════════
+  // VHS TRACKING LINES — appear on heavy corruption
+  // ═══════════════════════════════════════════════════
+  rankEntries.forEach(function(entry) {
+    var corruption = parseInt(entry.dataset.corruption) || 0;
+    if (corruption < 5) return;
+
+    var vhsLine = document.createElement('div');
+    vhsLine.className = 'vhs-tracking';
+    vhsLine.style.animationDuration = (6 - corruption * 0.3) + 's';
+    vhsLine.style.opacity = (corruption / 11) * 0.8;
+    entry.appendChild(vhsLine);
+  });
+
+  // ═══════════════════════════════════════════════════
+  // HORIZONTAL DISPLACEMENT — scan-line style jitter
+  // Randomly shifts horizontal slices of heavy entries
+  // ═══════════════════════════════════════════════════
+  rankEntries.forEach(function(entry) {
+    var corruption = parseInt(entry.dataset.corruption) || 0;
+    if (corruption < 7) return;
+
+    var maxOffset = (corruption - 6) * 3; // 3px to 15px
+
+    setInterval(function() {
+      if (Math.random() < (corruption - 6) * 0.08) {
+        var offset = (Math.random() - 0.5) * 2 * maxOffset;
+        entry.style.transform = 'translateX(' + offset + 'px)';
+
+        setTimeout(function() {
+          entry.style.transform = '';
+        }, 50 + Math.random() * 80);
+      }
+    }, 500);
+  });
+
+  // ═══════════════════════════════════════════════════
+  // COLOR BLEED — random color flash on worst entries
+  // ═══════════════════════════════════════════════════
+  rankEntries.forEach(function(entry) {
+    var corruption = parseInt(entry.dataset.corruption) || 0;
+    if (corruption < 9) return;
+
+    setInterval(function() {
+      if (Math.random() < 0.15) {
+        var color = COLOR_CHARS[Math.floor(Math.random() * COLOR_CHARS.length)];
+        entry.style.boxShadow = 'inset 0 0 30px ' + color.replace(')', ',0.08)').replace('#', 'rgba(');
+        // Convert hex to rgba for box-shadow
+        var r = parseInt(color.slice(1, 3), 16);
+        var g = parseInt(color.slice(3, 5), 16);
+        var b = parseInt(color.slice(5, 7), 16);
+        entry.style.boxShadow = 'inset 0 0 40px rgba(' + r + ',' + g + ',' + b + ',0.06)';
+
+        setTimeout(function() {
+          entry.style.boxShadow = '';
+        }, 100);
+      }
+    }, 700);
+  });
+
+  // ═══════════════════════════════════════════════════
+  // CHAT TRANSMISSION CORRUPTION
+  // Randomly swaps chars in chat messages
+  // ═══════════════════════════════════════════════════
+  var transmissions = document.querySelectorAll('.transmission');
+
+  transmissions.forEach(function(tx) {
+    var corruption = parseInt(tx.dataset.corruption) || 0;
+    if (corruption < 2) return;
+
+    var msg = tx.querySelector('.message');
+    if (!msg) return;
+    var original = msg.dataset.original || msg.textContent;
+    var swapRate = corruption * 0.02;
+
+    setInterval(function() {
+      var chars = original.split('');
+      var swapCount = Math.floor(chars.length * swapRate);
+      for (var i = 0; i < swapCount; i++) {
+        var idx = Math.floor(Math.random() * chars.length);
+        if (chars[idx] !== ' ' && chars[idx] !== '"') {
+          if (Math.random() < 0.5) {
+            chars[idx] = CORRUPTION_CHARS[Math.floor(Math.random() * CORRUPTION_CHARS.length)];
+          } else {
+            // Random ASCII
+            chars[idx] = String.fromCharCode(33 + Math.floor(Math.random() * 93));
+          }
+        }
+      }
+      msg.textContent = chars.join('');
+    }, 800 + Math.random() * 400);
+  });
+
+  // ═══════════════════════════════════════════════════
+  // FULL-PAGE GLITCH FLASH — rare, dramatic
+  // Every 8-15 seconds, a brief full-page RGB split
+  // ═══════════════════════════════════════════════════
+  function pageGlitch() {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;pointer-events:none;mix-blend-mode:screen;';
+
+    // Pick a random corruption color
+    var colors = ['rgba(255,0,0,0.04)', 'rgba(0,0,255,0.04)', 'rgba(0,255,255,0.03)'];
+    var color = colors[Math.floor(Math.random() * colors.length)];
+    overlay.style.background = color;
+
+    // Random offset
+    var offsetX = (Math.random() - 0.5) * 10;
+    overlay.style.transform = 'translateX(' + offsetX + 'px)';
+
+    document.body.appendChild(overlay);
+    setTimeout(function() { overlay.remove(); }, 60 + Math.random() * 80);
+
+    // Schedule next flash
+    setTimeout(pageGlitch, 8000 + Math.random() * 7000);
+  }
+  setTimeout(pageGlitch, 4000);
+
+  // ═══════════════════════════════════════════════════
+  // BUFFER OVERFLOW — fake data leak on #12 entry
+  // ═══════════════════════════════════════════════════
+  var worstEntry = document.querySelector('.corruption-11');
+  if (worstEntry) {
+    var overflowChars = '0123456789ABCDEF';
+    var bufferEl = document.createElement('div');
+    bufferEl.style.cssText = [
+      'position:absolute;bottom:2px;left:0;right:0;',
+      'font-family:var(--mono);font-size:0.55rem;',
+      'color:rgba(0,255,0,0.15);letter-spacing:0.05em;',
+      'overflow:hidden;white-space:nowrap;height:1em;',
+      'pointer-events:none;'
+    ].join('');
+    worstEntry.appendChild(bufferEl);
+
+    setInterval(function() {
+      var hex = '';
+      for (var i = 0; i < 80; i++) {
+        hex += overflowChars[Math.floor(Math.random() * 16)];
+        if (i % 8 === 7) hex += ' ';
+      }
+      bufferEl.textContent = '0x' + hex;
+    }, 200);
+  }
+
+  // ═══════════════════════════════════════════════════
+  // HEADER GLITCH — subtle chromatic split on hover
+  // ═══════════════════════════════════════════════════
+  var h1 = document.querySelector('.header h1');
+  if (h1) {
+    var h1Text = h1.textContent;
+    h1.setAttribute('data-text', h1Text);
+    h1.style.position = 'relative';
+
+    // Add subtle permanent split on header
+    var stylePatch = document.createElement('style');
+    stylePatch.textContent = [
+      '.header h1::before {',
+      '  content: attr(data-text);',
+      '  position: absolute; top: 0; left: 0;',
+      '  color: #ff0000; mix-blend-mode: screen;',
+      '  transform: translate(-2px, 1px);',
+      '  opacity: 0.3;',
+      '  clip-path: inset(0 0 50% 0);',
+      '}',
+      '.header h1::after {',
+      '  content: attr(data-text);',
+      '  position: absolute; top: 0; left: 0;',
+      '  color: #0000ff; mix-blend-mode: screen;',
+      '  transform: translate(2px, -1px);',
+      '  opacity: 0.3;',
+      '  clip-path: inset(50% 0 0 0);',
+      '}'
+    ].join('\n');
+    document.head.appendChild(stylePatch);
+  }
+
+  // ═══════════════════════════════════════════════════
+  // SCROLL-TRIGGERED INTENSITY
+  // Corruption animations only run when visible
+  // ═══════════════════════════════════════════════════
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+        } else {
+          e.target.classList.remove('in-view');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    rankEntries.forEach(function(entry) { observer.observe(entry); });
+  }
+
+  // ═══════════════════════════════════════════════════
+  // RECORD FLICKER — Elo numbers jitter on bad teams
+  // ═══════════════════════════════════════════════════
+  rankEntries.forEach(function(entry) {
+    var corruption = parseInt(entry.dataset.corruption) || 0;
+    if (corruption < 8) return;
+
+    var eloEl = entry.querySelector('.elo');
+    if (!eloEl) return;
+    var originalElo = eloEl.textContent;
+
+    setInterval(function() {
+      if (Math.random() < 0.2) {
+        var eloNum = parseInt(originalElo.replace(/\D/g, ''));
+        var jittered = eloNum + Math.floor((Math.random() - 0.5) * 40);
+        eloEl.textContent = 'ELO ' + jittered;
+        eloEl.style.color = 'rgba(255, 0, 0, 0.5)';
+
+        setTimeout(function() {
+          eloEl.textContent = originalElo;
+          eloEl.style.color = '';
+        }, 100);
+      }
+    }, 900);
+  });
+
+})();
+</script>
+</body>
+</html>

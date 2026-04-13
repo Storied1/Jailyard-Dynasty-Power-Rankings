@@ -1,0 +1,1397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jailyard Dynasty — Drawer 06 — Power Rankings 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Crimson+Text:ital,wght@0,400;0,700;1,400&family=Stardos+Stencil:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5e8c8;
+  --cream-shadow: #e8d8a8;
+  --cream-deep: #d9c89a;
+  --ink: #1a1510;
+  --ink-faded: #3a2f22;
+  --ink-light: #6a5a42;
+  --wood: #3a2a1c;
+  --wood-dark: #241710;
+  --wood-light: #55382a;
+  --wood-highlight: #7a5338;
+  --stamp-red: #8a1a1f;
+  --stamp-red-faded: rgba(138, 26, 31, 0.72);
+  --stamp-teal: #2a6b7d;
+  --stamp-teal-faded: rgba(42, 107, 125, 0.78);
+  --brass: #b8893b;
+  --brass-dark: #6b4d1c;
+  --accent: var(--stamp-red);
+  --accent2: var(--stamp-teal);
+  --paper-edge: rgba(60, 45, 20, 0.35);
+  --rule-line: rgba(40, 30, 15, 0.35);
+  --good: #3e6b2a;
+  --bad: var(--stamp-red);
+  --warn: #a86a1e;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--wood);
+  background-image:
+    radial-gradient(ellipse at 30% 10%, rgba(120, 75, 40, 0.35), transparent 60%),
+    radial-gradient(ellipse at 70% 90%, rgba(20, 12, 6, 0.6), transparent 55%),
+    repeating-linear-gradient(92deg,
+      rgba(90, 55, 28, 0.20) 0px,
+      rgba(90, 55, 28, 0.20) 1px,
+      transparent 1px, transparent 3px),
+    repeating-linear-gradient(88deg,
+      rgba(25, 14, 6, 0.35) 0px,
+      rgba(25, 14, 6, 0.35) 2px,
+      transparent 2px, transparent 9px),
+    linear-gradient(180deg, #4a3220, #2b1c0f);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  padding: 36px 24px 80px;
+}
+
+/* SVG filter injected once for paper noise */
+.paper-noise {
+  position: relative;
+  isolation: isolate;
+}
+.paper-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.28;
+  background-image:
+    radial-gradient(ellipse at 20% 30%, rgba(120, 88, 32, 0.18), transparent 50%),
+    radial-gradient(ellipse at 80% 75%, rgba(90, 58, 20, 0.14), transparent 55%),
+    radial-gradient(circle at 65% 25%, rgba(150, 110, 50, 0.08) 0 1px, transparent 2px),
+    radial-gradient(circle at 12% 70%, rgba(60, 40, 15, 0.09) 0 1px, transparent 2px),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.05 0 0 0 0 0.02 0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: auto, auto, 9px 9px, 13px 13px, 260px 260px;
+  border-radius: inherit;
+}
+
+/* PAGE WRAPPER */
+.wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* DRAWER FRONT (HERO) */
+.drawer {
+  position: relative;
+  background:
+    linear-gradient(175deg,
+      #7a4f2c 0%,
+      #5e3a20 12%,
+      #4a2d17 35%,
+      #3a2212 65%,
+      #28160a 100%);
+  background-blend-mode: multiply;
+  border: 3px solid #1a0e06;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow:
+    inset 0 2px 0 rgba(180, 120, 60, 0.45),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 60px rgba(0, 0, 0, 0.55),
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 4px 0 #120803;
+  padding: 36px 48px 44px;
+  overflow: hidden;
+}
+.drawer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(93deg,
+      rgba(155, 100, 45, 0.14) 0 1px,
+      transparent 1px 3px),
+    repeating-linear-gradient(89deg,
+      rgba(20, 10, 4, 0.28) 0 2px,
+      transparent 2px 14px),
+    radial-gradient(ellipse at 18% 20%, rgba(190, 130, 55, 0.12), transparent 60%),
+    radial-gradient(ellipse at 78% 70%, rgba(0, 0, 0, 0.4), transparent 50%);
+}
+.drawer::after {
+  content: "";
+  position: absolute;
+  left: 8px; right: 8px; top: 8px; bottom: 8px;
+  border: 1px solid rgba(200, 150, 80, 0.22);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.drawer-brass {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 20px;
+  background: linear-gradient(180deg, #e6b760 0%, #b8893b 45%, #6b4d1c 100%);
+  border: 1.5px solid #3a2608;
+  border-radius: 10px 10px 4px 4px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 160, 0.6),
+    inset 0 -3px 4px rgba(0, 0, 0, 0.4),
+    0 3px 6px rgba(0, 0, 0, 0.55);
+}
+.drawer-brass::before,
+.drawer-brass::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #3a2608 0 2px, #1a0e03 2px 100%);
+}
+.drawer-brass::before { left: 10px; }
+.drawer-brass::after { right: 10px; }
+
+.drawer-label {
+  position: relative;
+  margin-top: 26px;
+  text-align: center;
+  z-index: 2;
+}
+.drawer-label .stencil {
+  font-family: "Stardos Stencil", "IBM Plex Mono", monospace;
+  font-weight: 700;
+  color: #f2d9a2;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.7),
+    0 0 8px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.14em;
+  font-size: clamp(18px, 2.4vw, 26px);
+  line-height: 1.2;
+  opacity: 0.82;
+}
+.drawer-label .stencil .sub {
+  display: block;
+  font-size: clamp(11px, 1.3vw, 14px);
+  letter-spacing: 0.3em;
+  opacity: 0.7;
+  margin-top: 6px;
+}
+.drawer-label .stencil .plate {
+  display: inline-block;
+  border: 2px solid rgba(242, 217, 162, 0.5);
+  padding: 6px 16px 4px;
+  background: rgba(20, 10, 4, 0.35);
+  margin-top: 10px;
+}
+
+/* Stamp overlay on drawer */
+.week-stamp {
+  position: absolute;
+  top: 70px;
+  right: 56px;
+  transform: rotate(-7deg);
+  padding: 10px 18px 8px;
+  border: 3px double var(--stamp-red);
+  color: var(--stamp-red);
+  font-family: "Stardos Stencil", "Special Elite", monospace;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.2em;
+  background: transparent;
+  opacity: 0.78;
+  filter: blur(0.3px);
+  text-shadow: 0 0 1px rgba(138, 26, 31, 0.5);
+  pointer-events: none;
+}
+.week-stamp .small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  margin-top: 2px;
+}
+
+/* FANNED CARDS UNDER THE DRAWER */
+.card-fan {
+  position: relative;
+  height: 360px;
+  margin: -28px auto 36px;
+  max-width: 920px;
+  perspective: 1400px;
+}
+.card-fan .fc {
+  position: absolute;
+  left: 50%;
+  top: 30px;
+  width: 220px;
+  height: 300px;
+  margin-left: -110px;
+  background: var(--cream);
+  border: 1px solid var(--paper-edge);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.5) inset,
+    0 18px 32px rgba(0, 0, 0, 0.55),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  padding: 16px 14px 20px;
+  font-size: 10.5px;
+  transform-origin: 50% 110%;
+  transition: transform 0.4s ease;
+}
+.card-fan .fc:nth-child(1) { transform: rotate(-11deg) translateX(-260px) translateY(18px); z-index: 1; }
+.card-fan .fc:nth-child(2) { transform: rotate(-7deg)  translateX(-155px) translateY(6px);  z-index: 2; }
+.card-fan .fc:nth-child(3) { transform: rotate(-3deg)  translateX(-56px)  translateY(-2px); z-index: 3; }
+.card-fan .fc:nth-child(4) { transform: rotate(2deg)   translateX(48px)   translateY(-4px); z-index: 4; }
+.card-fan .fc:nth-child(5) { transform: rotate(6deg)   translateX(148px)  translateY(4px);  z-index: 3; }
+.card-fan .fc:nth-child(6) { transform: rotate(10deg)  translateX(254px)  translateY(16px); z-index: 2; }
+.card-fan .fc:hover { z-index: 20; transform: translateY(-14px) rotate(0deg) scale(1.04); }
+
+.fc .call {
+  font-family: "Special Elite", "IBM Plex Mono", monospace;
+  color: var(--ink-faded);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  border-bottom: 1px dashed var(--rule-line);
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+.fc .title {
+  font-family: "Crimson Text", "Georgia", serif;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.15;
+  margin-bottom: 3px;
+}
+.fc .owner {
+  font-style: italic;
+  color: var(--ink-light);
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+.fc .stat-row {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--rule-line);
+  border-bottom: 1px solid var(--rule-line);
+  padding: 3px 0;
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+.fc .subj {
+  font-size: 9.5px;
+  color: var(--ink-faded);
+  margin-bottom: 4px;
+}
+.fc .subj b { font-family: "Crimson Text", serif; letter-spacing: 0.04em; text-transform: uppercase; font-size: 8.5px; color: var(--ink-light); font-weight: 700; }
+
+.fc .punch {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #0a0805 0 45%, #2b1e10 60%, transparent 72%);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+/* Inline mini stamps used on fan + grid cards */
+.stamp {
+  display: inline-block;
+  font-family: "Stardos Stencil", "Special Elite", monospace;
+  font-weight: 700;
+  color: var(--stamp-red);
+  border: 2px solid var(--stamp-red);
+  padding: 2px 6px 1px;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.78;
+  background: transparent;
+}
+.stamp.teal { color: var(--stamp-teal); border-color: var(--stamp-teal); opacity: 0.82; }
+.stamp.big { font-size: 11px; padding: 3px 9px 2px; letter-spacing: 0.18em; }
+.stamp.rot-a { transform: rotate(-5deg); }
+.stamp.rot-b { transform: rotate(3deg); }
+.stamp.rot-c { transform: rotate(-2deg); }
+.stamp.rot-d { transform: rotate(6deg); }
+.stamp.faint { opacity: 0.55; }
+
+.fc .stamps {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* SECTION HEAD */
+.section-head {
+  margin: 48px 0 18px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  color: var(--cream);
+}
+.section-head h2 {
+  font-family: "Crimson Text", Georgia, serif;
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(22px, 2.6vw, 32px);
+  margin: 0;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+.section-head .rule {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(245, 232, 200, 0.4), rgba(245, 232, 200, 0.05));
+}
+.section-head .sig {
+  font-family: "Special Elite", monospace;
+  font-size: 11px;
+  color: rgba(245, 232, 200, 0.65);
+  letter-spacing: 0.12em;
+}
+
+/* FULL CATALOG GRID */
+.catalog {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px 24px;
+}
+@media (max-width: 960px) {
+  .catalog { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 620px) {
+  .catalog { grid-template-columns: 1fr; }
+}
+
+.card {
+  position: relative;
+  background: var(--cream);
+  background-image:
+    radial-gradient(ellipse at 15% 20%, rgba(200, 160, 90, 0.22), transparent 55%),
+    radial-gradient(ellipse at 85% 80%, rgba(180, 140, 70, 0.18), transparent 60%),
+    linear-gradient(180deg, #f8ecca, #ecdcad);
+  border: 1px solid var(--paper-edge);
+  border-radius: 3px;
+  padding: 18px 20px 46px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 0 0 1px rgba(120, 90, 40, 0.08) inset,
+    0 14px 24px rgba(0, 0, 0, 0.45),
+    0 3px 6px rgba(0, 0, 0, 0.35);
+  transform: rotate(var(--tilt, 0deg)) translateZ(0);
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s;
+  min-height: 300px;
+}
+.card:hover {
+  transform: rotate(0deg) translateY(-10px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 4px 10px rgba(0, 0, 0, 0.4);
+  z-index: 5;
+}
+.card:nth-child(odd)  { --tilt: -0.8deg; }
+.card:nth-child(even) { --tilt: 0.6deg; }
+.card:nth-child(3n)   { --tilt: -0.4deg; }
+.card:nth-child(4n)   { --tilt: 1.1deg; }
+.card:nth-child(5n)   { --tilt: -1.2deg; }
+.card:nth-child(7n)   { --tilt: 0.3deg; }
+
+.card .call {
+  font-family: "Special Elite", "IBM Plex Mono", monospace;
+  color: var(--ink-faded);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  border-bottom: 1.5px dashed var(--rule-line);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.card .call .rank-badge {
+  font-family: "Crimson Text", Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--stamp-red);
+}
+.card .name {
+  font-family: "Crimson Text", Georgia, serif;
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 0 0 2px;
+  letter-spacing: 0.005em;
+}
+.card .owner {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ink-light);
+  margin-bottom: 10px;
+}
+.card .stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-top: 1.5px solid var(--rule-line);
+  border-bottom: 1.5px solid var(--rule-line);
+  padding: 6px 0;
+  margin-bottom: 10px;
+}
+.card .stats .s {
+  text-align: center;
+  font-size: 10px;
+  color: var(--ink-light);
+  border-right: 1px dashed var(--rule-line);
+  padding: 0 4px;
+}
+.card .stats .s:last-child { border-right: 0; }
+.card .stats .s b {
+  display: block;
+  font-family: "Crimson Text", Georgia, serif;
+  font-size: 15px;
+  color: var(--ink);
+  font-weight: 700;
+}
+.card .subj {
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--ink-faded);
+  margin-bottom: 7px;
+}
+.card .subj .lbl {
+  font-family: "Crimson Text", Georgia, serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 9px;
+  color: var(--ink-light);
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.card .stamps {
+  position: absolute;
+  left: 18px;
+  right: 90px;
+  bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+}
+.card .datestamp {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  border: 2px solid var(--stamp-teal);
+  color: var(--stamp-teal);
+  padding: 5px 8px 3px;
+  font-family: "Stardos Stencil", "Special Elite", monospace;
+  font-weight: 700;
+  font-size: 8.5px;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+  text-align: center;
+  opacity: 0.78;
+  transform: rotate(2deg);
+  background: transparent;
+}
+.card .datestamp .mid {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  margin: 1px 0;
+}
+
+.card .punch-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3px;
+  display: flex;
+  justify-content: space-around;
+  pointer-events: none;
+}
+.card .punch-row .p {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #0a0805 0 45%, #2b1e10 55%, transparent 72%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Mini color strip on left edge indicating tier */
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+  background: var(--tier-col, var(--ink-light));
+  opacity: 0.65;
+  border-right: 1px solid var(--paper-edge);
+}
+.card.tier-contender { --tier-col: #2a6b7d; }
+.card.tier-frisky    { --tier-col: #a86a1e; }
+.card.tier-trust     { --tier-col: #3e6b2a; }
+.card.tier-fraud     { --tier-col: #8a1a1f; }
+
+/* TWO-COLUMN LAYOUT FOR CIRCULATION + ACQUISITIONS */
+.row {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 28px;
+  margin-top: 48px;
+}
+@media (max-width: 960px) {
+  .row { grid-template-columns: 1fr; }
+}
+
+.paper {
+  background: var(--cream);
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(220, 180, 100, 0.22), transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(160, 120, 60, 0.18), transparent 55%),
+    linear-gradient(180deg, #f8edc8, #ebdbab);
+  border: 1px solid var(--paper-edge);
+  border-radius: 3px;
+  padding: 26px 30px 30px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 14px 28px rgba(0, 0, 0, 0.5),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+  position: relative;
+  transform: rotate(-0.3deg);
+}
+.paper.tilt-r { transform: rotate(0.5deg); }
+
+.paper h3 {
+  font-family: "Crimson Text", Georgia, serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--ink);
+  margin: 0 0 4px;
+  letter-spacing: 0.01em;
+}
+.paper .sub {
+  font-family: "Special Elite", monospace;
+  font-size: 10.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.08em;
+  border-bottom: 1.5px dashed var(--rule-line);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+/* Acquisitions list */
+.acq {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.acq li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0 10px;
+  border-bottom: 1px dashed var(--rule-line);
+  font-size: 12px;
+}
+.acq li:last-child { border-bottom: 0; }
+.acq .num {
+  font-family: "Crimson Text", serif;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--ink-light);
+  font-size: 14px;
+  width: 24px;
+  text-align: right;
+}
+.acq .line {
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--ink-faded);
+  line-height: 1.4;
+}
+.acq .line b { color: var(--ink); font-weight: 700; }
+.acq .line .loser { color: var(--ink-light); }
+.acq .mk { text-align: right; min-width: 86px; }
+
+/* CIRCULATION NOTICE */
+.notice {
+  border: 2px solid var(--ink-faded);
+  padding: 22px 24px 22px;
+  background:
+    repeating-linear-gradient(0deg,
+      transparent 0 22px,
+      rgba(40, 30, 15, 0.09) 22px 23px);
+  position: relative;
+}
+.notice .hdr {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  border-bottom: 1.5px solid var(--ink-faded);
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+.notice .hdr h4 {
+  font-family: "Stardos Stencil", monospace;
+  font-weight: 700;
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+.notice .hdr .num {
+  font-family: "Special Elite", monospace;
+  font-size: 10px;
+  color: var(--ink-light);
+  letter-spacing: 0.08em;
+}
+.notice p {
+  margin: 0 0 10px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.55;
+}
+.notice p em {
+  background: rgba(138, 26, 31, 0.07);
+  box-shadow: 0 1px 0 rgba(138, 26, 31, 0.3);
+  padding: 0 2px;
+  font-style: normal;
+  color: var(--ink);
+}
+.notice .sign {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px dashed var(--rule-line);
+  padding-top: 12px;
+}
+.notice .sign .sig {
+  font-family: "Crimson Text", serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink-faded);
+  padding: 0 14px 2px 4px;
+}
+.notice .sign .role {
+  font-family: "Special Elite", monospace;
+  font-size: 9.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Stamp badge floating on notice */
+.notice .stamp-float {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  transform: rotate(7deg);
+  opacity: 0.7;
+}
+
+/* WEEK 7 MARQUEE CARD ROW */
+.marquee {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+}
+.marquee .slip {
+  background: var(--cream);
+  background-image:
+    linear-gradient(180deg, #f8edc8, #e6d49a);
+  border: 1px dashed var(--ink-faded);
+  border-radius: 2px;
+  padding: 18px 22px 16px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.5) inset,
+    0 10px 20px rgba(0,0,0,0.4);
+  position: relative;
+  transform: rotate(-0.4deg);
+}
+.marquee .slip.alt { transform: rotate(0.3deg); }
+.marquee .slip h5 {
+  font-family: "Special Elite", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--ink-light);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+.marquee .slip .matchup {
+  font-family: "Crimson Text", Georgia, serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.marquee .slip .vs {
+  color: var(--stamp-red);
+  font-style: italic;
+  padding: 0 6px;
+}
+.marquee .slip .tag {
+  margin-top: 6px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--ink-faded);
+}
+.marquee .slip .hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px dashed var(--rule-line);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+.marquee .slip .hdr .call {
+  font-family: "Special Elite", monospace;
+  font-size: 9.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.06em;
+}
+.marquee-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+@media (max-width: 900px) {
+  .marquee-list { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .marquee-list { grid-template-columns: 1fr; }
+}
+
+.marquee .featured {
+  background: var(--cream);
+  background-image:
+    radial-gradient(ellipse at 25% 20%, rgba(220, 160, 60, 0.2), transparent 60%),
+    linear-gradient(180deg, #faedc2, #e7d198);
+  border: 2px solid var(--ink-faded);
+  padding: 26px 30px;
+  position: relative;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.5) inset,
+    0 16px 32px rgba(0, 0, 0, 0.55);
+  transform: rotate(-0.6deg);
+}
+.marquee .featured .label {
+  font-family: "Stardos Stencil", monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--stamp-red);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.marquee .featured .title {
+  font-family: "Crimson Text", serif;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.marquee .featured .deck {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: var(--ink-faded);
+  margin-bottom: 12px;
+}
+.marquee .featured .stat-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--ink-light);
+  border-top: 1px dashed var(--rule-line);
+  padding-top: 10px;
+}
+.marquee .featured .stat-line b { color: var(--ink); }
+.marquee .featured .stamp-float {
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  transform: rotate(5deg);
+}
+
+/* FOOTER */
+.foot {
+  margin-top: 50px;
+  text-align: center;
+  color: rgba(245, 232, 200, 0.45);
+  font-family: "Special Elite", monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.foot .line {
+  display: inline-block;
+  padding: 6px 14px;
+  border-top: 1px solid rgba(245, 232, 200, 0.18);
+  border-bottom: 1px solid rgba(245, 232, 200, 0.18);
+}
+
+/* Accessibility: respect reduced motion (already no infinite, but disable the transition) */
+@media (prefers-reduced-motion: reduce) {
+  .card, .card-fan .fc, .marquee .slip { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ========== DRAWER HERO ========== -->
+  <header class="drawer paper-noise">
+    <div class="drawer-brass" aria-hidden="true"></div>
+
+    <div class="drawer-label">
+      <div class="stencil">
+        JAILYARD DYNASTY &nbsp;·&nbsp; CATALOG OF TEAMS
+        <span class="sub">DRAWER 06 &nbsp;·&nbsp; POWER RANKINGS &nbsp;·&nbsp; SEASON MMXXV</span>
+        <span class="plate">CLASS 796.332 &nbsp; / &nbsp; SHELF LB-GK-SG</span>
+      </div>
+    </div>
+
+    <div class="week-stamp" aria-hidden="true">
+      WEEK&nbsp;VI
+      <span class="small">10 · OCT · 2025</span>
+    </div>
+  </header>
+
+  <!-- ========== FANNED CARDS (first 6) ========== -->
+  <section class="card-fan" aria-label="Top six power rankings, fanned">
+    <!-- 1 LB -->
+    <div class="fc">
+      <div class="call">796.332 / LB · 01 / 2025</div>
+      <div class="title">The Legion of Bouz</div>
+      <div class="owner">— KidBouzie</div>
+      <div class="stat-row"><span>5–1</span><span><b>165.90</b></span></div>
+      <div class="subj"><b>Subj:</b> Mahomes 30.5 · Skattebo 30.0</div>
+      <div class="subj"><b>See:</b> vs. Gen. Ken-obi, Wk 7</div>
+      <div class="stamps">
+        <span class="stamp rot-a">WK 6 HI</span>
+        <span class="stamp teal rot-b">#1</span>
+      </div>
+      <div class="punch"></div>
+    </div>
+    <!-- 2 GK -->
+    <div class="fc">
+      <div class="call">796.332 / GK · 02 / 2025</div>
+      <div class="title">General Ken-obi</div>
+      <div class="owner">— bLaker24</div>
+      <div class="stat-row"><span>5–1</span><span><b>164.94</b></span></div>
+      <div class="subj"><b>Subj:</b> Drake London 26.8 · LAR D 27.0</div>
+      <div class="subj"><b>See:</b> vs. Legion of Bouz, Wk 7</div>
+      <div class="stamps">
+        <span class="stamp rot-b">BLOWOUT</span>
+        <span class="stamp teal rot-a">ELO 1700</span>
+      </div>
+      <div class="punch"></div>
+    </div>
+    <!-- 3 SG -->
+    <div class="fc">
+      <div class="call">796.332 / SG · 03 / 2025</div>
+      <div class="title">Sleeping Giants</div>
+      <div class="owner">— zbcowan</div>
+      <div class="stat-row"><span>5–1</span><span><b>129.82</b></span></div>
+      <div class="subj"><b>Subj:</b> Jacobs 29.5 · Hurts 21.6</div>
+      <div class="subj"><b>See:</b> vs. Kittler, Wk 7</div>
+      <div class="stamps">
+        <span class="stamp teal rot-a">W4 STREAK</span>
+      </div>
+      <div class="punch"></div>
+    </div>
+    <!-- 4 BM -->
+    <div class="fc">
+      <div class="call">796.332 / BM · 04 / 2025</div>
+      <div class="title">The Boonist Monks</div>
+      <div class="owner">— GauchoTrain</div>
+      <div class="stat-row"><span>4–2</span><span><b>150.46</b></span></div>
+      <div class="subj"><b>Subj:</b> Pickens 27.3 · JSN 26.2</div>
+      <div class="subj"><b>See:</b> vs. Noble FFT, Wk 7</div>
+      <div class="stamps">
+        <span class="stamp rot-c">UPSET WIN</span>
+        <span class="stamp teal rot-b">+2</span>
+      </div>
+      <div class="punch"></div>
+    </div>
+    <!-- 5 KR -->
+    <div class="fc">
+      <div class="call">796.332 / KR · 05 / 2025</div>
+      <div class="title">Kittler on the Roof</div>
+      <div class="owner">— bchodos</div>
+      <div class="stat-row"><span>4–2</span><span><b>107.74</b></span></div>
+      <div class="subj"><b>Subj:</b> JT 21.7 · Baker 18.6</div>
+      <div class="subj"><b>See:</b> vs. Sleeping Giants, Wk 7</div>
+      <div class="stamps">
+        <span class="stamp rot-a">FELL FROM #1</span>
+      </div>
+      <div class="punch"></div>
+    </div>
+    <!-- 6 RS -->
+    <div class="fc">
+      <div class="call">796.332 / RS · 06 / 2025</div>
+      <div class="title">Rasheeing the Scene</div>
+      <div class="owner">— ToreroGaucho</div>
+      <div class="stat-row"><span>4–2</span><span><b>109.10</b></span></div>
+      <div class="subj"><b>Subj:</b> Achane 30.0 · Allen 15.4</div>
+      <div class="subj"><b>See:</b> vs. Grayskull, Wk 7</div>
+      <div class="stamps">
+        <span class="stamp rot-d">UPSET OF</span>
+      </div>
+      <div class="punch"></div>
+    </div>
+  </section>
+
+  <!-- ========== FULL CATALOG ========== -->
+  <div class="section-head">
+    <h2>Full Catalog Index</h2>
+    <span class="rule"></span>
+    <span class="sig">12 CARDS · DRAWER 06 · WK 6</span>
+  </div>
+
+  <section class="catalog" aria-label="Full power rankings catalog">
+
+    <!-- 1 LB -->
+    <article class="card tier-frisky paper-noise">
+      <div class="call"><span>796.332 / LB / 2025</span><span class="rank-badge">No. 01</span></div>
+      <h3 class="name">The Legion of Bouz</h3>
+      <div class="owner">catalogued by KidBouzie &nbsp;·&nbsp; Tier: Frisky</div>
+      <div class="stats">
+        <div class="s">REC<b>5–1</b></div>
+        <div class="s">PF<b>935.7</b></div>
+        <div class="s">WK 6<b>165.90</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>Mahomes 30.48 · Skattebo 30.0 · CMC 20.6 · Waddle 13.32 · SEA D 11.0</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. General Ken-obi <em>(marquee)</em></div>
+      <div class="subj"><span class="lbl">Streak</span>W1 · Elo 1604 · Movement +1</div>
+      <div class="stamps">
+        <span class="stamp big rot-a">WEEK HIGH SCORER</span>
+        <span class="stamp rot-b">1 RING</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 2 GK -->
+    <article class="card tier-contender paper-noise">
+      <div class="call"><span>796.332 / GK / 2025</span><span class="rank-badge">No. 02</span></div>
+      <h3 class="name">General Ken-obi</h3>
+      <div class="owner">catalogued by bLaker24 &nbsp;·&nbsp; Tier: Contender</div>
+      <div class="stats">
+        <div class="s">REC<b>5–1</b></div>
+        <div class="s">PF<b>871.2</b></div>
+        <div class="s">WK 6<b>164.94</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>LAR D 27.0 · D. London 26.8 · D. Maye 26.24 · Rachaad 16.1 · Jameson 15.6</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. The Legion of Bouz <em>(marquee)</em></div>
+      <div class="subj"><span class="lbl">Streak</span>W2 · Elo <b>1700</b> · Movement +3</div>
+      <div class="stamps">
+        <span class="stamp big rot-c">BIGGEST BLOWOUT</span>
+        <span class="stamp rot-a">2× CHAMP</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 3 SG -->
+    <article class="card tier-frisky paper-noise">
+      <div class="call"><span>796.332 / SG / 2025</span><span class="rank-badge">No. 03</span></div>
+      <h3 class="name">Sleeping Giants</h3>
+      <div class="owner">catalogued by zbcowan &nbsp;·&nbsp; Tier: Frisky</div>
+      <div class="stats">
+        <div class="s">REC<b>5–1</b></div>
+        <div class="s">PF<b>857.0</b></div>
+        <div class="s">WK 6<b>129.82</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>J. Jacobs 29.5 · Hurts 21.62 · K. Williams 15.7 · Henry 13.5 · Aubrey 9.0</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. Kittler on the Roof</div>
+      <div class="subj"><span class="lbl">Streak</span>W4 · Elo 1561 · Movement 0</div>
+      <div class="stamps">
+        <span class="stamp teal rot-b big">W4 STREAK</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 4 BM -->
+    <article class="card tier-frisky paper-noise">
+      <div class="call"><span>796.332 / BM / 2025</span><span class="rank-badge">No. 04</span></div>
+      <h3 class="name">The Boonist Monks</h3>
+      <div class="owner">catalogued by GauchoTrain &nbsp;·&nbsp; Tier: Frisky</div>
+      <div class="stats">
+        <div class="s">REC<b>4–2</b></div>
+        <div class="s">PF<b>912.9</b></div>
+        <div class="s">WK 6<b>150.46</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>Pickens 27.3 · JSN 26.2 · Flacco 18.76 · Crosby 16.0 · Ferguson 10.8</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. Noble FFT</div>
+      <div class="subj"><span class="lbl">Streak</span>W1 · Elo 1599 · Movement +2</div>
+      <div class="stamps">
+        <span class="stamp rot-c big">UPSET WINNER</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 5 KR -->
+    <article class="card tier-contender paper-noise">
+      <div class="call"><span>796.332 / KR / 2025</span><span class="rank-badge">No. 05</span></div>
+      <h3 class="name">Kittler on the Roof</h3>
+      <div class="owner">catalogued by bchodos &nbsp;·&nbsp; Tier: Contender</div>
+      <div class="stats">
+        <div class="s">REC<b>4–2</b></div>
+        <div class="s">PF<b>877.9</b></div>
+        <div class="s">WK 6<b>107.74</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>J. Taylor 21.7 · Baker 18.64 · Kraft 11.3 · Bonitto 9.5 · Cooper 9.5</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. Sleeping Giants</div>
+      <div class="subj"><span class="lbl">Streak</span>L1 · Elo 1488 · Movement <b>−4</b></div>
+      <div class="stamps">
+        <span class="stamp rot-a big">FELL FROM #1</span>
+        <span class="stamp rot-b faint">DEF. CHAMP</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 6 RS -->
+    <article class="card tier-frisky paper-noise">
+      <div class="call"><span>796.332 / RS / 2025</span><span class="rank-badge">No. 06</span></div>
+      <h3 class="name">Rasheeing the Scene</h3>
+      <div class="owner">catalogued by ToreroGaucho &nbsp;·&nbsp; Tier: Frisky</div>
+      <div class="stats">
+        <div class="s">REC<b>4–2</b></div>
+        <div class="s">PF<b>816.0</b></div>
+        <div class="s">WK 6<b>109.10</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>Achane 30.0 · Dicker 18.4 · Allen 15.4 · Landry 9.0 · Wagner 8.5</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. Ghastly Grayskull Gang</div>
+      <div class="subj"><span class="lbl">Streak</span>L1 · Elo 1626 · Movement −2</div>
+      <div class="stamps">
+        <span class="stamp rot-b">UPSET OF</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 7 MH -->
+    <article class="card tier-contender paper-noise">
+      <div class="call"><span>796.332 / MH / 2025</span><span class="rank-badge">No. 07</span></div>
+      <h3 class="name">MHJTIME</h3>
+      <div class="owner">catalogued by rango_ &nbsp;·&nbsp; Tier: Contender</div>
+      <div class="stats">
+        <div class="s">REC<b>3–3</b></div>
+        <div class="s">PF<b>891.9</b></div>
+        <div class="s">WK 6<b>140.94</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>R. Dowdle 30.9 · J. Daniels 22.64 · Chase 20.1 · McBride 17.2 · LV D 17.0</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. Chudders FT</div>
+      <div class="subj"><span class="lbl">Streak</span>W2 · Elo 1586 · Movement 0</div>
+      <div class="stamps">
+        <span class="stamp rot-c big">FELLED THE KING</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 8 NF -->
+    <article class="card tier-frisky paper-noise">
+      <div class="call"><span>796.332 / NF / 2025</span><span class="rank-badge">No. 08</span></div>
+      <h3 class="name">Noble FFT</h3>
+      <div class="owner">catalogued by kevobucks &nbsp;·&nbsp; Tier: Frisky</div>
+      <div class="stats">
+        <div class="s">REC<b>3–3</b></div>
+        <div class="s">PF<b>819.0</b></div>
+        <div class="s">WK 6<b>151.88</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>Bijan 32.8 · C. Williams 19.88 · Wan'Dale 17.4 · Warren 15.3 · Oluokun 12.5</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. The Boonist Monks</div>
+      <div class="subj"><span class="lbl">Streak</span>W1 · Elo 1455 · Movement +1</div>
+      <div class="stamps">
+        <span class="stamp rot-a big">BIJAN 32.8</span>
+        <span class="stamp rot-b">UPSET WIN</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 9 GG -->
+    <article class="card tier-frisky paper-noise">
+      <div class="call"><span>796.332 / GG / 2025</span><span class="rank-badge">No. 09</span></div>
+      <h3 class="name">Ghastly Grayskull Gang</h3>
+      <div class="owner">catalogued by GrayskullXX &nbsp;·&nbsp; Tier: Frisky</div>
+      <div class="stats">
+        <div class="s">REC<b>2–4</b></div>
+        <div class="s">PF<b>818.3</b></div>
+        <div class="s">WK 6<b>121.30</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>Swift 24.5 · Metcalf 17.5 · Burns 17.0 · PIT D 14.0 · Tonges 9.8</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. Rasheeing the Scene</div>
+      <div class="subj"><span class="lbl">Streak</span>L2 · Elo 1324 · Movement −1</div>
+      <div class="stamps">
+        <span class="stamp rot-c">UPSET OF</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 10 CF -->
+    <article class="card tier-trust paper-noise">
+      <div class="call"><span>796.332 / CF / 2025</span><span class="rank-badge">No. 10</span></div>
+      <h3 class="name">Chudders Football Team</h3>
+      <div class="owner">catalogued by Chudders &nbsp;·&nbsp; Tier: Trust the Process</div>
+      <div class="stats">
+        <div class="s">REC<b>1–5</b></div>
+        <div class="s">PF<b>727.9</b></div>
+        <div class="s">WK 6<b>95.26</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>Herbert 18.76 · Verse 17.5 · Jeanty 15.6 · Spillane 7.5 · Gibbs 7.0</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. MHJTIME</div>
+      <div class="subj"><span class="lbl">Streak</span>L1 · Elo 1402 · Movement 0</div>
+      <div class="stamps">
+        <span class="stamp rot-a big">WK 6 LOW</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 11 BE -->
+    <article class="card tier-fraud paper-noise">
+      <div class="call"><span>796.332 / BE / 2025</span><span class="rank-badge">No. 11</span></div>
+      <h3 class="name">Burden of Etienne-y Woody</h3>
+      <div class="owner">catalogued by kharlow &nbsp;·&nbsp; Tier: Fraud</div>
+      <div class="stats">
+        <div class="s">REC<b>0–6</b></div>
+        <div class="s">PF<b>732.7</b></div>
+        <div class="s">WK 6<b>99.20</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>B. Young 21.0 · Bourne 16.7 · DEN D 15.0 · Tua 9.6 · T. Smith 7.5</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. Father Time <em>(toilet-bowl matinee)</em></div>
+      <div class="subj"><span class="lbl">Streak</span>L6 · Elo 1324 · Movement 0</div>
+      <div class="stamps">
+        <span class="stamp rot-b big">0–6 STREAK</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+    <!-- 12 FT -->
+    <article class="card tier-frisky paper-noise">
+      <div class="call"><span>796.332 / FT / 2025</span><span class="rank-badge">No. 12</span></div>
+      <h3 class="name">Father Time</h3>
+      <div class="owner">catalogued by Redrumsregrub &nbsp;·&nbsp; Tier: Frisky</div>
+      <div class="stats">
+        <div class="s">REC<b>0–6</b></div>
+        <div class="s">PF<b>712.7</b></div>
+        <div class="s">WK 6<b>107.66</b></div>
+      </div>
+      <div class="subj"><span class="lbl">Top Perf.</span>McConkey 19.5 · McMillan 16.4 · Nix 13.36 · Hutchinson 9.0 · Engram 7.4</div>
+      <div class="subj"><span class="lbl">Cross-ref</span>Wk 7 vs. Burden of Etienne-y Woody</div>
+      <div class="subj"><span class="lbl">Streak</span>L6 · Elo 1330 · Movement 0</div>
+      <div class="stamps">
+        <span class="stamp rot-d big">0–6 STREAK</span>
+      </div>
+      <div class="datestamp">RECEIVED<span class="mid">WK&nbsp;6</span>2025</div>
+      <div class="punch-row"><span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span></div>
+    </article>
+
+  </section>
+
+  <!-- ========== LATEST ACQUISITIONS + CIRCULATION NOTICE ========== -->
+  <div class="row">
+    <!-- Acquisitions -->
+    <section class="paper paper-noise">
+      <h3>Latest Acquisitions</h3>
+      <div class="sub">Week 6 · Season MMXXV · 6 new records · <b>4 marked UPSET</b></div>
+      <ol class="acq">
+        <li>
+          <div class="num">01.</div>
+          <div class="line"><b>Noble FFT 151.88</b> def. <span class="loser">Ghastly Grayskull Gang 121.30</span><br>
+            <span style="color:var(--ink-light);font-size:10.5px;">margin 30.58 · Bijan Robinson 32.8 pts</span>
+          </div>
+          <div class="mk"><span class="stamp rot-a">UPSET</span></div>
+        </li>
+        <li>
+          <div class="num">02.</div>
+          <div class="line"><b>MHJTIME 140.94</b> def. <span class="loser">Kittler on the Roof 107.74</span><br>
+            <span style="color:var(--ink-light);font-size:10.5px;">margin 33.20 · Kittler fell from #1</span>
+          </div>
+          <div class="mk"><span class="stamp rot-c">UPSET</span></div>
+        </li>
+        <li>
+          <div class="num">03.</div>
+          <div class="line"><b>Sleeping Giants 129.82</b> def. <span class="loser">Chudders FT 95.26</span><br>
+            <span style="color:var(--ink-light);font-size:10.5px;">margin 34.56 · Jacobs 29.5</span>
+          </div>
+          <div class="mk"><span class="stamp teal rot-b">CHALK</span></div>
+        </li>
+        <li>
+          <div class="num">04.</div>
+          <div class="line"><b>The Boonist Monks 150.46</b> def. <span class="loser">Rasheeing the Scene 109.10</span><br>
+            <span style="color:var(--ink-light);font-size:10.5px;">margin 41.36 · Pickens 27.3 · JSN 26.2</span>
+          </div>
+          <div class="mk"><span class="stamp rot-a">UPSET</span></div>
+        </li>
+        <li>
+          <div class="num">05.</div>
+          <div class="line"><b>The Legion of Bouz 165.90</b> def. <span class="loser">Father Time 107.66</span><br>
+            <span style="color:var(--ink-light);font-size:10.5px;">margin 58.24 · <b>week high score</b></span>
+          </div>
+          <div class="mk"><span class="stamp teal rot-a">WK HIGH</span></div>
+        </li>
+        <li>
+          <div class="num">06.</div>
+          <div class="line"><b>General Ken-obi 164.94</b> def. <span class="loser">Burden of Etienne-y Woody 99.20</span><br>
+            <span style="color:var(--ink-light);font-size:10.5px;">margin 65.74 · <b>biggest blowout</b></span>
+          </div>
+          <div class="mk"><span class="stamp teal rot-c">BLOWOUT</span></div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Circulation notice -->
+    <section class="paper tilt-r paper-noise">
+      <div class="notice">
+        <div class="hdr">
+          <h4>Circulation Desk Notice</h4>
+          <div class="num">FORM 06-A · RESERVED</div>
+        </div>
+        <p>The item <em>DRAWER 06 / LB vs GK</em> has been <b>reserved</b> by every patron in the league. Both parties hold 5–1 records. Both scored within a single point of each other in Week 6 (165.90 and 164.94). Ken-obi enters at <b>Elo 1700</b> — the highest of his career — and walks the two-time-champion aisle.</p>
+        <p>The Legion of Bouz arrive with Mahomes (30.48), Skattebo (30.0) and a freshly minted league-high 165.90. One card must be returned late.</p>
+        <p style="font-family:'Special Elite',monospace;font-size:10.5px;color:var(--ink-light);">— Please return all other rankings cards to their proper slot before consulting this match. No food or drink in the stacks. Late returns will be stamped <b>OVERDUE</b>.</p>
+        <div class="sign">
+          <div>
+            <div class="sig">J. the Archivist</div>
+            <div class="role">Head Librarian · Jailyard Branch</div>
+          </div>
+          <div style="font-family:'Special Elite',monospace;font-size:10px;color:var(--ink-light);text-align:right;">
+            FILED<br>10 · OCT · 2025
+          </div>
+        </div>
+        <div class="stamp-float"><span class="stamp big">RESERVED</span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ========== WEEK 7 MARQUEE RESERVATION CARD ========== -->
+  <div class="section-head">
+    <h2>On Reserve — Week VII</h2>
+    <span class="rule"></span>
+    <span class="sig">6 NEW CALL SLIPS</span>
+  </div>
+
+  <section class="marquee">
+    <div class="featured paper-noise">
+      <div class="label">★ Featured Reservation ★</div>
+      <div class="title">The Legion of Bouz &nbsp;<span style="color:var(--stamp-red);font-style:italic;">vs.</span>&nbsp; General Ken-obi</div>
+      <div class="deck">Two 5–1 teams. Two 165-point Week 6s. One drawer can only hold one #1 card.</div>
+      <div class="stat-line">
+        <span><b>KidBouzie</b> · 5–1 · 935.7 PF · Elo 1604</span>
+        <span><b>bLaker24</b> · 5–1 · 871.2 PF · Elo <b>1700</b></span>
+        <span>Call No. <b>796.332 / LB-GK / WK 7</b></span>
+      </div>
+      <div class="stamp-float"><span class="stamp big">MARQUEE</span></div>
+    </div>
+
+    <div class="marquee-list">
+      <div class="slip paper-noise">
+        <div class="hdr"><h5>Call Slip</h5><span class="call">796.332 / BM-NF</span></div>
+        <div class="matchup">The Boonist Monks <span class="vs">vs.</span> Noble FFT</div>
+        <div class="tag">#4 (4–2) · Pickens + JSN &nbsp;  ·  &nbsp;#8 (3–3) · Bijan 32.8</div>
+      </div>
+      <div class="slip alt paper-noise">
+        <div class="hdr"><h5>Call Slip</h5><span class="call">796.332 / KR-SG</span></div>
+        <div class="matchup">Kittler on the Roof <span class="vs">vs.</span> Sleeping Giants</div>
+        <div class="tag">Former #1 (4–2) looking to rebound · #3 (5–1) on W4</div>
+      </div>
+      <div class="slip paper-noise">
+        <div class="hdr"><h5>Call Slip</h5><span class="call">796.332 / BE-FT</span></div>
+        <div class="matchup">Burden of Etienne-y Woody <span class="vs">vs.</span> Father Time</div>
+        <div class="tag">0–6 vs 0–6 · <em style="color:var(--stamp-red);font-style:italic;">toilet-bowl matinee</em> · L6 vs L6</div>
+      </div>
+      <div class="slip alt paper-noise">
+        <div class="hdr"><h5>Call Slip</h5><span class="call">796.332 / RS-GG</span></div>
+        <div class="matchup">Rasheeing the Scene <span class="vs">vs.</span> Ghastly Grayskull Gang</div>
+        <div class="tag">#6 (4–2) · Achane 30.0 · #9 (2–4) · Swift 24.5</div>
+      </div>
+      <div class="slip paper-noise">
+        <div class="hdr"><h5>Call Slip</h5><span class="call">796.332 / CF-MH</span></div>
+        <div class="matchup">Chudders Football Team <span class="vs">vs.</span> MHJTIME</div>
+        <div class="tag">#10 (1–5) · Gibbs 7.0 · #7 (3–3) · Dowdle 30.9</div>
+      </div>
+      <div class="slip alt paper-noise" style="opacity:.78;">
+        <div class="hdr"><h5>Closing Note</h5><span class="call">NOTE 06-B</span></div>
+        <div class="matchup" style="font-size:15px;line-height:1.35;">4 of 6 Week 6 matchups were upsets. Consult the card catalog carefully.</div>
+        <div class="tag">League avg PPG 138.5 · Wk 6 avg 128.7 · 6 of 14 weeks played</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="line">Jailyard Dynasty Branch Library &nbsp;·&nbsp; Est. MMXXII &nbsp;·&nbsp; Drawer 06 filed 10 Oct 2025 &nbsp;·&nbsp; Please re-shelve after use</div>
+  </footer>
+
+</div>
+
+<script>
+// Minimal, polite progressive enhancement:
+// feature-detect View Transitions API for card hover "pick up" effect.
+// No infinite animations. No auto-running anything.
+(function () {
+  // Light scroll reveal using IntersectionObserver (one-time .visible toggle).
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        e.target.style.opacity = '1';
+        e.target.style.transform = (e.target.style.transform || '') + '';
+        io.unobserve(e.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.04 });
+
+  var targets = document.querySelectorAll('.catalog .card, .marquee .slip, .marquee .featured, .paper');
+  targets.forEach(function (t) {
+    t.style.opacity = '0.001';
+    io.observe(t);
+  });
+})();
+</script>
+</body>
+</html>

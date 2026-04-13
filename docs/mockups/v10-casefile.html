@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case No. 06 — The Fall of the Defending Champion | Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #111111;
+  --fg: #F5DEB3;
+  --muted: #a89a7a;
+  --accent: #F5DEB3;
+  --accent2: #E63946;
+  --card: rgba(245, 222, 179, 0.06);
+  --border: rgba(245, 222, 179, 0.15);
+  --glass: rgba(245, 222, 179, 0.03);
+  --good: #4ade80;
+  --bad: #E63946;
+  --warn: #fbbf24;
+  --manila: #d4c5a0;
+  --polaroid-border: #e8dcc8;
+  --stamp-red: #E63946;
+  --string-red: #E63946;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* SVG grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ===== HEADER / CASE FILE COVER ===== */
+.case-header {
+  text-align: center;
+  padding: 60px 24px 40px;
+  border-bottom: 2px solid var(--border);
+  position: relative;
+}
+
+.case-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 4px;
+  background: var(--accent2);
+}
+
+.case-stamp {
+  display: inline-block;
+  border: 3px solid var(--accent2);
+  color: var(--accent2);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 6px 18px;
+  transform: rotate(-3deg);
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.case-number {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(14px, 2.5vw, 18px);
+  color: var(--muted);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.case-title {
+  font-size: clamp(28px, 5vw, 48px);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  color: var(--fg);
+}
+
+.case-title em {
+  color: var(--accent2);
+  font-style: normal;
+}
+
+.case-subtitle {
+  font-size: clamp(14px, 2vw, 18px);
+  color: var(--muted);
+  font-weight: 300;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.case-meta {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ===== RED STRING CONNECTOR LINE ===== */
+.string-line {
+  width: 3px;
+  background: var(--string-red);
+  margin: 0 auto;
+  position: relative;
+  opacity: 0.6;
+}
+
+.string-line::before,
+.string-line::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--string-red);
+}
+
+.string-line::before { top: -5px; }
+.string-line::after { bottom: -5px; }
+
+.string-short { height: 40px; }
+.string-medium { height: 60px; }
+.string-long { height: 80px; }
+
+/* ===== SECTION HEADERS ===== */
+.section-header {
+  text-align: center;
+  padding: 40px 24px 30px;
+}
+
+.section-label {
+  display: inline-block;
+  background: var(--accent2);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: clamp(22px, 4vw, 30px);
+  color: var(--fg);
+}
+
+.section-subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 8px;
+  font-weight: 300;
+}
+
+/* ===== TIMELINE ===== */
+.timeline {
+  position: relative;
+  padding: 20px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--string-red);
+  opacity: 0.4;
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  position: relative;
+  width: 45%;
+  padding: 20px;
+  margin-bottom: 40px;
+}
+
+.timeline-item:nth-child(odd) {
+  margin-left: 5%;
+}
+
+.timeline-item:nth-child(even) {
+  margin-left: 50%;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  top: 30px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent2);
+  z-index: 2;
+}
+
+.timeline-item:nth-child(odd)::before {
+  right: -32px;
+}
+
+.timeline-item:nth-child(even)::before {
+  left: -32px;
+}
+
+.case-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent2);
+  padding: 20px;
+  position: relative;
+}
+
+.case-box-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 8px;
+}
+
+.case-box-week {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--fg);
+  margin-bottom: 6px;
+}
+
+.case-box-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.case-box-text strong {
+  color: var(--fg);
+}
+
+/* ===== PULL QUOTE ===== */
+.pull-quote {
+  text-align: center;
+  padding: 30px 40px;
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.pull-quote p {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(18px, 3vw, 22px);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--fg);
+}
+
+.pull-quote .attribution {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+/* ===== INCIDENT REPORTS (MATCHUP CARDS) ===== */
+.incidents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  padding: 0 24px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.incident-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 0;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.incident-card:hover {
+  transform: translateY(-3px);
+}
+
+.incident-card.prime-suspect {
+  grid-column: 1 / -1;
+  max-width: 600px;
+  margin: 0 auto;
+  border-color: var(--accent2);
+  border-width: 2px;
+}
+
+.incident-card.prime-suspect .incident-header {
+  background: rgba(230, 57, 70, 0.15);
+}
+
+.incident-header {
+  background: rgba(245, 222, 179, 0.05);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.incident-number {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.incident-tag {
+  display: inline-block;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+}
+
+.tag-upset {
+  background: var(--accent2);
+  color: #fff;
+}
+
+.tag-closed {
+  background: rgba(245, 222, 179, 0.12);
+  color: var(--muted);
+}
+
+.tag-prime {
+  background: var(--accent2);
+  color: #fff;
+  font-size: 10px;
+  padding: 4px 12px;
+}
+
+.incident-body {
+  padding: 16px;
+}
+
+.incident-matchup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.incident-team {
+  flex: 1;
+}
+
+.incident-team-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.incident-team-record {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.incident-score {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--fg);
+}
+
+.incident-score.winner {
+  color: var(--good);
+}
+
+.incident-score.loser {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.incident-vs {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.incident-margin {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.incident-margin strong {
+  color: var(--accent2);
+}
+
+/* ===== PERSONS OF INTEREST ===== */
+.poi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 0 24px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.poi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 16px;
+  text-align: center;
+  position: relative;
+}
+
+.poi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent2);
+}
+
+.poi-pts {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--accent2);
+  margin-bottom: 4px;
+}
+
+.poi-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--fg);
+  margin-bottom: 2px;
+}
+
+.poi-pos {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.poi-team {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ===== EVIDENCE BOARD (STANDINGS TABLE) ===== */
+.evidence-board {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+
+.manila-envelope {
+  background: linear-gradient(135deg, rgba(212, 197, 160, 0.08) 0%, rgba(212, 197, 160, 0.03) 100%);
+  border: 1px solid rgba(212, 197, 160, 0.2);
+  padding: 24px;
+  position: relative;
+}
+
+.manila-envelope::before {
+  content: 'CLASSIFIED';
+  position: absolute;
+  top: -12px;
+  left: 24px;
+  background: var(--bg);
+  padding: 2px 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--accent2);
+  border: 1px solid var(--accent2);
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.standings-table th {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+}
+
+.standings-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(245, 222, 179, 0.06);
+  color: var(--fg);
+}
+
+.standings-table tr:hover td {
+  background: rgba(245, 222, 179, 0.04);
+}
+
+.standings-table .rank-cell {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 16px;
+  width: 40px;
+}
+
+.standings-table .team-cell {
+  font-weight: 600;
+}
+
+.standings-table .owner-cell {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.standings-table .mvmt-up {
+  color: var(--good);
+  font-weight: 600;
+}
+
+.standings-table .mvmt-down {
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+.standings-table .streak-w {
+  color: var(--good);
+}
+
+.standings-table .streak-l {
+  color: var(--accent2);
+}
+
+.standings-table .elo-cell {
+  font-weight: 600;
+}
+
+.standings-table .mvmt-none {
+  color: var(--muted);
+}
+
+/* ===== NEXT CASE BRIEFING ===== */
+.next-briefing {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+.briefing-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 30px;
+  text-align: center;
+  position: relative;
+}
+
+.briefing-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent2);
+}
+
+.marquee-matchup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.marquee-team {
+  text-align: center;
+}
+
+.marquee-team-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.marquee-team-record {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.marquee-team-rank {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent2);
+  font-weight: 700;
+}
+
+.marquee-vs {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--accent2);
+  font-weight: 900;
+}
+
+.red-string-connector {
+  width: 80px;
+  height: 3px;
+  background: var(--accent2);
+  position: relative;
+  opacity: 0.7;
+}
+
+.red-string-connector::before,
+.red-string-connector::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent2);
+}
+
+.red-string-connector::before { left: -4px; }
+.red-string-connector::after { right: -4px; }
+
+.other-matchups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+  text-align: left;
+}
+
+.other-matchup {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 10px 14px;
+  background: rgba(245, 222, 179, 0.03);
+  border: 1px solid rgba(245, 222, 179, 0.08);
+}
+
+.other-matchup strong {
+  color: var(--fg);
+}
+
+.other-matchup .matchup-note {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--accent2);
+  display: block;
+  margin-top: 2px;
+}
+
+/* ===== FOOTER ===== */
+.case-footer {
+  text-align: center;
+  padding: 30px 24px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* ===== POLAROID STYLES ===== */
+.polaroid-frame {
+  background: var(--polaroid-border);
+  padding: 12px 12px 40px 12px;
+  box-shadow: 4px 4px 16px rgba(0,0,0,0.5), 1px 1px 4px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.polaroid-inner {
+  background: var(--bg);
+  padding: 16px;
+  min-height: 100px;
+}
+
+.polaroid-caption {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  right: 12px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Scattered polaroid rotations */
+.polaroid-tilt-left { transform: rotate(-2deg); }
+.polaroid-tilt-right { transform: rotate(1.5deg); }
+.polaroid-tilt-more { transform: rotate(-3.5deg); }
+
+/* ===== POLAROID GALLERY ===== */
+.polaroid-gallery {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 0 24px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.polaroid-gallery .polaroid-frame {
+  width: 220px;
+  padding: 10px 10px 36px 10px;
+}
+
+.polaroid-stat {
+  text-align: center;
+}
+
+.polaroid-stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--accent2);
+}
+
+.polaroid-stat-label {
+  font-size: 13px;
+  color: var(--fg);
+  margin-top: 4px;
+}
+
+.polaroid-stat-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .timeline::before {
+    left: 20px;
+  }
+
+  .timeline-item {
+    width: calc(100% - 50px);
+    margin-left: 50px !important;
+  }
+
+  .timeline-item::before {
+    left: -38px !important;
+    right: auto !important;
+  }
+
+  .incidents-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .incident-card.prime-suspect {
+    max-width: 100%;
+  }
+
+  .poi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .standings-table {
+    font-size: 11px;
+  }
+
+  .standings-table th,
+  .standings-table td {
+    padding: 8px 4px;
+  }
+
+  .marquee-matchup {
+    gap: 16px;
+  }
+
+  .polaroid-gallery {
+    gap: 16px;
+  }
+
+  .polaroid-gallery .polaroid-frame {
+    width: 160px;
+  }
+
+  .other-matchups {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .case-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .poi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .standings-table .hide-mobile {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== CASE FILE HEADER ===== -->
+<header class="case-header">
+  <div class="case-stamp">ACTIVE INVESTIGATION</div>
+  <div class="case-number">Jailyard Dynasty &mdash; Season 2025</div>
+  <h1 class="case-title">Case No. 06:<br><em>The Fall of the Defending Champion</em></h1>
+  <p class="case-subtitle">Kittler on the Roof — once the undisputed #1 — drops to fifth after a 33-point dismantling at the hands of MHJTIME. Four upsets. Total chaos. The case files are open.</p>
+  <div class="case-meta">
+    <span>Week 6 &mdash; Season 2025</span>
+    <span>6 of 14 weeks played</span>
+    <span>League avg: 128.7 pts</span>
+  </div>
+</header>
+
+<div class="string-line string-medium"></div>
+
+<!-- ===== KEY STATS POLAROIDS ===== -->
+<div class="polaroid-gallery">
+  <div class="polaroid-frame polaroid-tilt-left">
+    <div class="polaroid-inner">
+      <div class="polaroid-stat">
+        <div class="polaroid-stat-number">4/6</div>
+        <div class="polaroid-stat-label">Games Were Upsets</div>
+        <div class="polaroid-stat-sub">Wildest week of the season</div>
+      </div>
+    </div>
+    <div class="polaroid-caption">EXHIBIT A</div>
+  </div>
+  <div class="polaroid-frame polaroid-tilt-right">
+    <div class="polaroid-inner">
+      <div class="polaroid-stat">
+        <div class="polaroid-stat-number">165.9</div>
+        <div class="polaroid-stat-label">Week High &mdash; Legion</div>
+        <div class="polaroid-stat-sub">Mahomes 30.48 + Skattebo 30.0</div>
+      </div>
+    </div>
+    <div class="polaroid-caption">EXHIBIT B</div>
+  </div>
+  <div class="polaroid-frame polaroid-tilt-more">
+    <div class="polaroid-inner">
+      <div class="polaroid-stat">
+        <div class="polaroid-stat-number">+65.74</div>
+        <div class="polaroid-stat-label">Biggest Blowout</div>
+        <div class="polaroid-stat-sub">Ken-obi 164.94 vs Burden 99.20</div>
+      </div>
+    </div>
+    <div class="polaroid-caption">EXHIBIT C</div>
+  </div>
+</div>
+
+<div class="string-line string-short"></div>
+
+<!-- ===== TIMELINE: SEASON SO FAR ===== -->
+<div class="section-header">
+  <div class="section-label">Case Timeline</div>
+  <h2 class="section-title">The Season So Far</h2>
+  <p class="section-subtitle">Six weeks of evidence, traced from opening day to present</p>
+</div>
+
+<div class="container">
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="case-box">
+        <div class="case-box-label">Week 1 &mdash; Incident Report</div>
+        <div class="case-box-week">Opening Statement</div>
+        <div class="case-box-text">The season opens. <strong>Kittler on the Roof</strong> begins the defense of their title. Preseason contenders are set: Ken-obi (#2 Elo) and Kittler look like the class of the field. Legion of Bouz enters at preseason #9 &mdash; nobody's suspect list.</div>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="case-box">
+        <div class="case-box-label">Weeks 2-3 &mdash; Surveillance</div>
+        <div class="case-box-week">The Quiet Rise</div>
+        <div class="case-box-text"><strong>Legion of Bouz</strong> starts stringing wins together. From preseason #9 to a winning record &mdash; Mahomes and the supporting cast look legitimate. Meanwhile, <strong>Burden</strong> and <strong>Father Time</strong> begin their descent toward 0-6.</div>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="case-box">
+        <div class="case-box-label">Weeks 4-5 &mdash; Escalation</div>
+        <div class="case-box-week">Cracks in the Foundation</div>
+        <div class="case-box-text"><strong>Kittler</strong> holds the #1 spot but the margins are thinning. <strong>Sleeping Giants</strong> ride a 4-game win streak. <strong>Ken-obi's</strong> Elo starts climbing toward the historic 1700 mark. The top of the table is congested.</div>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="case-box" style="border-left-color: var(--accent2); border-left-width: 6px;">
+        <div class="case-box-label" style="font-size: 11px;">Week 6 &mdash; The Crime Scene</div>
+        <div class="case-box-week" style="color: var(--accent2);">The Fall</div>
+        <div class="case-box-text"><strong>MHJTIME 140.94</strong> demolishes <strong>Kittler 107.74</strong>. The defending champion drops from #1 to #5 in a single week. Four of six matchups are upsets. <strong>Legion</strong> seizes #1 with 165.9. <strong>Ken-obi</strong> hits Elo 1700. Everything changed.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pull-quote">
+  <p>&ldquo;Four upsets in six games. The defending champion dethroned. A preseason #9 now sitting on the throne. Week 6 wasn&rsquo;t just chaos &mdash; it was a reckoning.&rdquo;</p>
+  <div class="attribution">&mdash; Case File Summary, Week 6</div>
+</div>
+
+<div class="string-line string-medium"></div>
+
+<!-- ===== INCIDENT REPORTS (MATCHUPS) ===== -->
+<div class="section-header">
+  <div class="section-label">Incident Reports</div>
+  <h2 class="section-title">Week 6 Matchups</h2>
+  <p class="section-subtitle">Six matchups. Four upsets. One prime suspect.</p>
+</div>
+
+<!-- PRIME SUSPECT CARD -->
+<div class="incidents-grid">
+  <div class="incident-card prime-suspect">
+    <div class="incident-header">
+      <span class="incident-number">Incident #6 &mdash; Biggest Blowout</span>
+      <span class="incident-tag tag-prime">PRIME SUSPECT</span>
+    </div>
+    <div class="incident-body">
+      <div class="incident-matchup">
+        <div class="incident-team" style="text-align: left;">
+          <div class="incident-team-name">General Ken-obi</div>
+          <div class="incident-team-record">5-1 &bull; Elo 1700 &bull; W2</div>
+        </div>
+        <div style="text-align: center;">
+          <div class="incident-score winner">164.94</div>
+          <div class="incident-vs">vs</div>
+          <div class="incident-score loser">99.20</div>
+        </div>
+        <div class="incident-team" style="text-align: right;">
+          <div class="incident-team-name">Burden of Etienne-y Woody</div>
+          <div class="incident-team-record">0-6 &bull; Elo 1324 &bull; L6</div>
+        </div>
+      </div>
+      <div class="incident-margin">Margin: <strong>+65.74 points</strong> &mdash; Season&rsquo;s most lopsided result. Ken-obi&rsquo;s Elo peaks at 1700.</div>
+    </div>
+  </div>
+</div>
+
+<!-- OTHER MATCHUPS -->
+<div class="incidents-grid">
+  <div class="incident-card">
+    <div class="incident-header">
+      <span class="incident-number">Incident #2</span>
+      <span class="incident-tag tag-upset">COLD CASE</span>
+    </div>
+    <div class="incident-body">
+      <div class="incident-matchup">
+        <div class="incident-team">
+          <div class="incident-team-name">MHJTIME</div>
+          <div class="incident-team-record">3-3 &bull; Elo 1586</div>
+        </div>
+        <div style="text-align: center;">
+          <div class="incident-score winner">140.94</div>
+          <div class="incident-vs">vs</div>
+          <div class="incident-score loser">107.74</div>
+        </div>
+        <div class="incident-team" style="text-align: right;">
+          <div class="incident-team-name">Kittler on the Roof</div>
+          <div class="incident-team-record">4-2 &bull; Elo 1488</div>
+        </div>
+      </div>
+      <div class="incident-margin">Margin: <strong>+33.20</strong> &mdash; Kittler falls from #1 to #5. Defending champ dethroned.</div>
+    </div>
+  </div>
+
+  <div class="incident-card">
+    <div class="incident-header">
+      <span class="incident-number">Incident #4</span>
+      <span class="incident-tag tag-upset">UNSOLVED</span>
+    </div>
+    <div class="incident-body">
+      <div class="incident-matchup">
+        <div class="incident-team">
+          <div class="incident-team-name">The Boonist Monks</div>
+          <div class="incident-team-record">4-2 &bull; Elo 1599</div>
+        </div>
+        <div style="text-align: center;">
+          <div class="incident-score winner">150.46</div>
+          <div class="incident-vs">vs</div>
+          <div class="incident-score loser">109.10</div>
+        </div>
+        <div class="incident-team" style="text-align: right;">
+          <div class="incident-team-name">Rasheeing the Scene</div>
+          <div class="incident-team-record">4-2 &bull; Elo 1626</div>
+        </div>
+      </div>
+      <div class="incident-margin">Margin: <strong>+41.36</strong> &mdash; Pickens (27.3) and JSN (26.2) combine for 53.5. Case closed for Rasheeing.</div>
+    </div>
+  </div>
+
+  <div class="incident-card">
+    <div class="incident-header">
+      <span class="incident-number">Incident #1</span>
+      <span class="incident-tag tag-upset">COLD CASE</span>
+    </div>
+    <div class="incident-body">
+      <div class="incident-matchup">
+        <div class="incident-team">
+          <div class="incident-team-name">Noble FFT</div>
+          <div class="incident-team-record">3-3 &bull; Elo 1455</div>
+        </div>
+        <div style="text-align: center;">
+          <div class="incident-score winner">151.88</div>
+          <div class="incident-vs">vs</div>
+          <div class="incident-score loser">121.30</div>
+        </div>
+        <div class="incident-team" style="text-align: right;">
+          <div class="incident-team-name">Ghastly Grayskull Gang</div>
+          <div class="incident-team-record">2-4 &bull; Elo 1324</div>
+        </div>
+      </div>
+      <div class="incident-margin">Margin: <strong>+30.58</strong> &mdash; Bijan Robinson (32.8 pts) leads the charge.</div>
+    </div>
+  </div>
+
+  <div class="incident-card">
+    <div class="incident-header">
+      <span class="incident-number">Incident #5</span>
+      <span class="incident-tag tag-closed">CASE CLOSED</span>
+    </div>
+    <div class="incident-body">
+      <div class="incident-matchup">
+        <div class="incident-team">
+          <div class="incident-team-name">The Legion of Bouz</div>
+          <div class="incident-team-record">5-1 &bull; Elo 1604</div>
+        </div>
+        <div style="text-align: center;">
+          <div class="incident-score winner">165.90</div>
+          <div class="incident-vs">vs</div>
+          <div class="incident-score loser">107.66</div>
+        </div>
+        <div class="incident-team" style="text-align: right;">
+          <div class="incident-team-name">Father Time</div>
+          <div class="incident-team-record">0-6 &bull; Elo 1330</div>
+        </div>
+      </div>
+      <div class="incident-margin">Margin: <strong>+58.24</strong> &mdash; Week high scorer. Mahomes (30.48) + Skattebo (30.0) = unstoppable.</div>
+    </div>
+  </div>
+
+  <div class="incident-card">
+    <div class="incident-header">
+      <span class="incident-number">Incident #3</span>
+      <span class="incident-tag tag-closed">CASE CLOSED</span>
+    </div>
+    <div class="incident-body">
+      <div class="incident-matchup">
+        <div class="incident-team">
+          <div class="incident-team-name">Sleeping Giants</div>
+          <div class="incident-team-record">5-1 &bull; Elo 1561</div>
+        </div>
+        <div style="text-align: center;">
+          <div class="incident-score winner">129.82</div>
+          <div class="incident-vs">vs</div>
+          <div class="incident-score loser">95.26</div>
+        </div>
+        <div class="incident-team" style="text-align: right;">
+          <div class="incident-team-name">Chudders Football Team</div>
+          <div class="incident-team-record">1-5 &bull; Elo 1402</div>
+        </div>
+      </div>
+      <div class="incident-margin">Margin: <strong>+34.56</strong> &mdash; Giants extend their win streak to 4. Jacobs (29.5) delivers.</div>
+    </div>
+  </div>
+
+  <div class="incident-card">
+    <div class="incident-header">
+      <span class="incident-number">Incident #6b</span>
+      <span class="incident-tag tag-upset">UNSOLVED</span>
+    </div>
+    <div class="incident-body">
+      <div class="incident-matchup">
+        <div class="incident-team">
+          <div class="incident-team-name">Boonist Monks</div>
+          <div class="incident-team-record">4-2 &bull; +2 this week</div>
+        </div>
+        <div style="text-align: center; padding: 8px 0;">
+          <div style="font-size: 11px; color: var(--accent2); letter-spacing: 2px; text-transform: uppercase; font-weight: 700;">Red String Connection</div>
+        </div>
+        <div class="incident-team" style="text-align: right;">
+          <div class="incident-team-name">Kittler on the Roof</div>
+          <div class="incident-team-record">4-2 &bull; -4 this week</div>
+        </div>
+      </div>
+      <div class="incident-margin">Monks rise +2, Kittler falls -4. <strong>Mirror trajectories</strong> &mdash; the hunter becomes the hunted.</div>
+    </div>
+  </div>
+</div>
+
+<div class="string-line string-medium"></div>
+
+<!-- ===== PERSONS OF INTEREST ===== -->
+<div class="section-header">
+  <div class="section-label">Persons of Interest</div>
+  <h2 class="section-title">Top Performers</h2>
+  <p class="section-subtitle">The individuals responsible for Week 6&rsquo;s carnage</p>
+</div>
+
+<div class="poi-grid">
+  <div class="poi-card">
+    <div class="poi-pts">32.8</div>
+    <div class="poi-name">Bijan Robinson</div>
+    <div class="poi-pos">RB &mdash; ATL</div>
+    <div class="poi-team">Noble FFT</div>
+  </div>
+  <div class="poi-card">
+    <div class="poi-pts">30.9</div>
+    <div class="poi-name">Rico Dowdle</div>
+    <div class="poi-pos">RB &mdash; DAL</div>
+    <div class="poi-team">MHJTIME</div>
+  </div>
+  <div class="poi-card">
+    <div class="poi-pts">30.48</div>
+    <div class="poi-name">Patrick Mahomes</div>
+    <div class="poi-pos">QB &mdash; KC</div>
+    <div class="poi-team">Legion of Bouz</div>
+  </div>
+  <div class="poi-card">
+    <div class="poi-pts">30.0</div>
+    <div class="poi-name">Cam Skattebo</div>
+    <div class="poi-pos">RB &mdash; ARI</div>
+    <div class="poi-team">Legion of Bouz</div>
+  </div>
+  <div class="poi-card">
+    <div class="poi-pts">30.0</div>
+    <div class="poi-name">De&rsquo;Von Achane</div>
+    <div class="poi-pos">RB &mdash; MIA</div>
+    <div class="poi-team">Rasheeing the Scene</div>
+  </div>
+</div>
+
+<div class="string-line string-medium"></div>
+
+<!-- ===== EVIDENCE BOARD (STANDINGS) ===== -->
+<div class="section-header">
+  <div class="section-label">Evidence Board</div>
+  <h2 class="section-title">Current Standings</h2>
+  <p class="section-subtitle">Official league standings after Week 6 &mdash; for the record</p>
+</div>
+
+<div class="evidence-board">
+  <div class="manila-envelope">
+    <table class="standings-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Team</th>
+          <th>Owner</th>
+          <th>Rec</th>
+          <th>PF</th>
+          <th class="hide-mobile">Wk6</th>
+          <th>Mvmt</th>
+          <th>Streak</th>
+          <th class="hide-mobile">Elo</th>
+          <th class="hide-mobile">Titles</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="rank-cell">1</td>
+          <td class="team-cell">The Legion of Bouz</td>
+          <td class="owner-cell">KidBouzie</td>
+          <td>5-1</td>
+          <td>935.7</td>
+          <td class="hide-mobile">165.90</td>
+          <td class="mvmt-up">+1</td>
+          <td class="streak-w">W1</td>
+          <td class="hide-mobile elo-cell">1604</td>
+          <td class="hide-mobile">1</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">2</td>
+          <td class="team-cell">General Ken-obi</td>
+          <td class="owner-cell">bLaker24</td>
+          <td>5-1</td>
+          <td>871.2</td>
+          <td class="hide-mobile">164.94</td>
+          <td class="mvmt-up">+3</td>
+          <td class="streak-w">W2</td>
+          <td class="hide-mobile elo-cell">1700</td>
+          <td class="hide-mobile">2</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">3</td>
+          <td class="team-cell">Sleeping Giants</td>
+          <td class="owner-cell">zbcowan</td>
+          <td>5-1</td>
+          <td>857.0</td>
+          <td class="hide-mobile">129.82</td>
+          <td class="mvmt-none">&mdash;</td>
+          <td class="streak-w">W4</td>
+          <td class="hide-mobile elo-cell">1561</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">4</td>
+          <td class="team-cell">The Boonist Monks</td>
+          <td class="owner-cell">GauchoTrain</td>
+          <td>4-2</td>
+          <td>912.9</td>
+          <td class="hide-mobile">150.46</td>
+          <td class="mvmt-up">+2</td>
+          <td class="streak-w">W1</td>
+          <td class="hide-mobile elo-cell">1599</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">5</td>
+          <td class="team-cell">Kittler on the Roof</td>
+          <td class="owner-cell">bchodos</td>
+          <td>4-2</td>
+          <td>877.9</td>
+          <td class="hide-mobile">107.74</td>
+          <td class="mvmt-down">-4</td>
+          <td class="streak-l">L1</td>
+          <td class="hide-mobile elo-cell">1488</td>
+          <td class="hide-mobile">1</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">6</td>
+          <td class="team-cell">Rasheeing the Scene</td>
+          <td class="owner-cell">ToreroGaucho</td>
+          <td>4-2</td>
+          <td>816.0</td>
+          <td class="hide-mobile">109.10</td>
+          <td class="mvmt-down">-2</td>
+          <td class="streak-l">L1</td>
+          <td class="hide-mobile elo-cell">1626</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">7</td>
+          <td class="team-cell">MHJTIME</td>
+          <td class="owner-cell">rango_</td>
+          <td>3-3</td>
+          <td>891.9</td>
+          <td class="hide-mobile">140.94</td>
+          <td class="mvmt-none">&mdash;</td>
+          <td class="streak-w">W2</td>
+          <td class="hide-mobile elo-cell">1586</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">8</td>
+          <td class="team-cell">Noble FFT</td>
+          <td class="owner-cell">kevobucks</td>
+          <td>3-3</td>
+          <td>819.0</td>
+          <td class="hide-mobile">151.88</td>
+          <td class="mvmt-up">+1</td>
+          <td class="streak-w">W1</td>
+          <td class="hide-mobile elo-cell">1455</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">9</td>
+          <td class="team-cell">Ghastly Grayskull Gang</td>
+          <td class="owner-cell">GrayskullXX</td>
+          <td>2-4</td>
+          <td>818.3</td>
+          <td class="hide-mobile">121.30</td>
+          <td class="mvmt-down">-1</td>
+          <td class="streak-l">L2</td>
+          <td class="hide-mobile elo-cell">1324</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">10</td>
+          <td class="team-cell">Chudders Football Team</td>
+          <td class="owner-cell">Chudders</td>
+          <td>1-5</td>
+          <td>727.9</td>
+          <td class="hide-mobile">95.26</td>
+          <td class="mvmt-none">&mdash;</td>
+          <td class="streak-l">L1</td>
+          <td class="hide-mobile elo-cell">1402</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">11</td>
+          <td class="team-cell">Burden of Etienne-y Woody</td>
+          <td class="owner-cell">kharlow</td>
+          <td>0-6</td>
+          <td>732.7</td>
+          <td class="hide-mobile">99.20</td>
+          <td class="mvmt-none">&mdash;</td>
+          <td class="streak-l">L6</td>
+          <td class="hide-mobile elo-cell">1324</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+        <tr>
+          <td class="rank-cell">12</td>
+          <td class="team-cell">Father Time</td>
+          <td class="owner-cell">Redrumsregrub</td>
+          <td>0-6</td>
+          <td>712.7</td>
+          <td class="hide-mobile">107.66</td>
+          <td class="mvmt-none">&mdash;</td>
+          <td class="streak-l">L6</td>
+          <td class="hide-mobile elo-cell">1330</td>
+          <td class="hide-mobile">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="string-line string-medium"></div>
+
+<!-- ===== NEXT CASE BRIEFING ===== -->
+<div class="section-header">
+  <div class="section-label">Next Case Briefing</div>
+  <h2 class="section-title">Week 7 Preview</h2>
+  <p class="section-subtitle">The investigation continues</p>
+</div>
+
+<div class="next-briefing">
+  <div class="briefing-box">
+    <div style="font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent2); font-weight: 700; margin-bottom: 16px;">Marquee Matchup</div>
+    <div class="marquee-matchup">
+      <div class="marquee-team">
+        <div class="marquee-team-rank">#1 Seed</div>
+        <div class="marquee-team-name">The Legion of Bouz</div>
+        <div class="marquee-team-record">5-1 &bull; 935.7 PF &bull; Elo 1604</div>
+      </div>
+      <div>
+        <div class="red-string-connector"></div>
+        <div class="marquee-vs" style="margin-top: 6px;">VS</div>
+      </div>
+      <div class="marquee-team">
+        <div class="marquee-team-rank">#2 Seed</div>
+        <div class="marquee-team-name">General Ken-obi</div>
+        <div class="marquee-team-record">5-1 &bull; 871.2 PF &bull; Elo 1700</div>
+      </div>
+    </div>
+    <p style="color: var(--muted); font-size: 14px; max-width: 500px; margin: 12px auto 0; line-height: 1.6;">The new #1 vs the 2-time champion with the league&rsquo;s highest Elo. Both scored 164+ in Week 6. This is the case that could define the season.</p>
+
+    <div class="other-matchups">
+      <div class="other-matchup">
+        <strong>#4 Boonist Monks</strong> vs #8 Noble FFT
+      </div>
+      <div class="other-matchup">
+        <strong>#5 Kittler on the Roof</strong> vs #3 Sleeping Giants
+        <span class="matchup-note">Can Kittler stop the bleeding?</span>
+      </div>
+      <div class="other-matchup">
+        #11 Burden vs #12 Father Time
+        <span class="matchup-note">Toilet bowl matinee &mdash; both 0-6</span>
+      </div>
+      <div class="other-matchup">
+        <strong>#6 Rasheeing the Scene</strong> vs #9 Ghastly Grayskull
+      </div>
+      <div class="other-matchup">
+        #10 Chudders FT vs <strong>#7 MHJTIME</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="case-footer">
+  <p>Jailyard Dynasty &mdash; Season 2025 &mdash; Case No. 06 &mdash; All data sourced from Sleeper API</p>
+  <p style="margin-top: 6px; opacity: 0.6;">This case file remains open. The investigation continues Week 7.</p>
+</footer>
+
+</body>
+</html>

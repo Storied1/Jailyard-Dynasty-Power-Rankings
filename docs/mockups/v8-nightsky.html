@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Night Sky — The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,300;1,6..72,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+  background:#000005;
+  color:#c8cdd5;
+  font-family:'Newsreader',Georgia,serif;
+  overflow-x:hidden;
+  cursor:default;
+}
+
+/* ── Canvas fills viewport, fixed behind everything ── */
+#sky-canvas{
+  position:fixed;
+  top:0;left:0;
+  width:100vw;height:100vh;
+  z-index:0;
+}
+
+/* ── Horizon gradient at bottom ── */
+.horizon{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  height:30vh;
+  background:linear-gradient(to top,
+    rgba(8,15,35,0.7) 0%,
+    rgba(4,8,20,0.3) 40%,
+    transparent 100%
+  );
+  z-index:1;
+  pointer-events:none;
+}
+
+/* ── Moon ── */
+.moon{
+  position:fixed;
+  top:60px;right:60px;
+  z-index:5;
+  pointer-events:none;
+}
+.moon svg{filter:drop-shadow(0 0 20px rgba(200,210,230,0.3))}
+
+/* ── Scroll container ── */
+.scroll-container{
+  position:relative;
+  z-index:10;
+  pointer-events:none;
+}
+.scroll-container *{pointer-events:auto}
+
+/* ── Title ── */
+.sky-title{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:2rem;
+}
+.sky-title h1{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(2.5rem,8vw,6rem);
+  font-weight:300;
+  color:rgba(220,225,240,0.85);
+  letter-spacing:0.08em;
+  text-shadow:0 0 60px rgba(140,160,255,0.15);
+  line-height:1.1;
+}
+.sky-title .subtitle{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.65rem,1.5vw,0.85rem);
+  color:rgba(160,170,200,0.5);
+  letter-spacing:0.25em;
+  text-transform:uppercase;
+  margin-top:1.2rem;
+}
+.sky-title .week-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.7rem,1.2vw,0.8rem);
+  color:rgba(139,92,246,0.7);
+  letter-spacing:0.15em;
+  margin-top:0.6rem;
+}
+.scroll-hint{
+  position:absolute;
+  bottom:3rem;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+  color:rgba(160,170,200,0.3);
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  animation:hint-fade 3s ease-in-out infinite alternate;
+}
+@keyframes hint-fade{0%{opacity:0.2}100%{opacity:0.5}}
+
+/* ── Sky panels — essay text floating among stars ── */
+.sky-panel{
+  min-height:80vh;
+  display:flex;
+  align-items:center;
+  padding:4rem 2rem;
+  position:relative;
+}
+.sky-panel .panel-text{
+  max-width:680px;
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(1.15rem,2.5vw,1.65rem);
+  font-weight:300;
+  line-height:1.75;
+  color:rgba(210,215,230,0.55);
+  text-shadow:0 0 40px rgba(100,120,200,0.08);
+  opacity:0;
+  transform:translateY(30px);
+  transition:opacity 1.2s ease,transform 1.2s ease;
+}
+.sky-panel .panel-text.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+/* Alternating positions */
+.sky-panel:nth-child(odd) .panel-text{margin-left:8%}
+.sky-panel:nth-child(even) .panel-text{margin-left:auto;margin-right:8%;text-align:right}
+.sky-panel:nth-child(3n) .panel-text{margin-left:15%}
+.sky-panel:nth-child(4n) .panel-text{margin-left:auto;margin-right:15%}
+
+/* ── Star tooltip ── */
+.star-tooltip{
+  position:fixed;
+  z-index:200;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity 0.3s ease,transform 0.3s ease;
+  background:rgba(5,8,18,0.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(100,120,180,0.2);
+  border-radius:12px;
+  padding:1rem 1.2rem;
+  min-width:240px;
+  max-width:320px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.6);
+}
+.star-tooltip.active{
+  opacity:1;
+  transform:translateY(0);
+}
+.star-tooltip .tt-name{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:1.1rem;
+  font-weight:600;
+  margin-bottom:0.1rem;
+}
+.star-tooltip .tt-owner{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;
+  color:rgba(160,170,200,0.5);
+  letter-spacing:0.08em;
+  margin-bottom:0.6rem;
+}
+.star-tooltip .tt-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.3rem 1rem;
+  margin-bottom:0.6rem;
+}
+.star-tooltip .tt-stat{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+}
+.star-tooltip .tt-stat-label{color:rgba(160,170,200,0.4);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.06em}
+.star-tooltip .tt-stat-value{color:rgba(210,215,230,0.85)}
+.star-tooltip .tt-blurb{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:0.82rem;
+  line-height:1.5;
+  color:rgba(180,190,210,0.6);
+  font-style:italic;
+  border-top:1px solid rgba(100,120,180,0.12);
+  padding-top:0.5rem;
+  margin-top:0.3rem;
+}
+
+/* ── Constellation tooltip ── */
+.constellation-tooltip{
+  position:fixed;
+  z-index:200;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.3s ease;
+  background:rgba(5,8,18,0.88);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(100,120,180,0.15);
+  border-radius:8px;
+  padding:0.7rem 1rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  color:rgba(210,215,230,0.7);
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  white-space:nowrap;
+}
+.constellation-tooltip.active{opacity:1}
+.constellation-tooltip .ct-name{
+  font-weight:500;
+  color:rgba(220,225,240,0.85);
+  font-size:0.78rem;
+  margin-bottom:0.2rem;
+}
+
+/* ── Rankings section ── */
+.rankings-section{
+  position:relative;
+  z-index:10;
+  padding:4rem 2rem 6rem;
+}
+.rankings-header{
+  text-align:center;
+  margin-bottom:3rem;
+}
+.rankings-header h2{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(1.8rem,4vw,2.8rem);
+  font-weight:300;
+  color:rgba(210,215,230,0.6);
+  letter-spacing:0.06em;
+}
+.rankings-header .rh-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+  color:rgba(160,170,200,0.35);
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  margin-top:0.5rem;
+}
+
+.ranking-card{
+  max-width:700px;
+  margin:0 auto 2rem;
+  padding:1.5rem 2rem;
+  background:rgba(8,12,25,0.4);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(100,120,180,0.08);
+  border-radius:16px;
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity 0.8s ease,transform 0.8s ease;
+}
+.ranking-card.visible{opacity:1;transform:translateY(0)}
+.ranking-card .rc-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  margin-bottom:0.8rem;
+}
+.rc-rank{
+  font-family:'JetBrains Mono',monospace;
+  font-size:2rem;
+  font-weight:500;
+  min-width:2.5rem;
+  text-align:center;
+}
+.rc-team-info{flex:1}
+.rc-team-name{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:1.2rem;
+  font-weight:600;
+}
+.rc-meta{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;
+  color:rgba(160,170,200,0.5);
+  margin-top:0.15rem;
+}
+.rc-movement{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.75rem;
+  padding:0.2rem 0.5rem;
+  border-radius:999px;
+  background:rgba(255,255,255,0.04);
+}
+.rc-movement.up{color:#4ade80}
+.rc-movement.down{color:#f87171}
+.rc-movement.steady{color:rgba(160,170,200,0.4)}
+.rc-blurb{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:0.92rem;
+  line-height:1.65;
+  color:rgba(180,190,210,0.55);
+}
+
+/* ── Shooting star text ── */
+.shooting-text{
+  position:fixed;
+  z-index:50;
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(0.8rem,1.4vw,1rem);
+  font-style:italic;
+  color:rgba(220,225,240,0.6);
+  white-space:nowrap;
+  pointer-events:none;
+  text-shadow:0 0 12px rgba(200,210,255,0.3),0 0 30px rgba(140,160,255,0.15);
+  opacity:0;
+}
+
+/* ── Legend ── */
+.legend{
+  position:fixed;
+  bottom:1.5rem;left:1.5rem;
+  z-index:100;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;
+  color:rgba(160,170,200,0.25);
+  letter-spacing:0.06em;
+  line-height:1.8;
+}
+
+/* ── Nav pill ── */
+.nav-pill{
+  position:fixed;
+  top:1.2rem;left:50%;
+  transform:translateX(-50%);
+  z-index:100;
+  display:flex;
+  gap:0.3rem;
+  padding:0.3rem;
+  background:rgba(5,8,18,0.6);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(100,120,180,0.1);
+  border-radius:999px;
+}
+.nav-pill a{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;
+  color:rgba(160,170,200,0.45);
+  text-decoration:none;
+  padding:0.35rem 0.8rem;
+  border-radius:999px;
+  transition:all 0.25s ease;
+  letter-spacing:0.04em;
+}
+.nav-pill a:hover,.nav-pill a.active{
+  color:rgba(220,225,240,0.85);
+  background:rgba(100,120,180,0.1);
+}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  .moon{top:20px;right:20px}
+  .moon svg{width:40px;height:40px}
+  .sky-panel .panel-text{margin-left:5%!important;margin-right:5%!important;text-align:left!important}
+  .legend{display:none}
+  .nav-pill{top:auto;bottom:1rem;left:1rem;right:1rem;transform:none;justify-content:center;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .star-tooltip{max-width:280px;left:1rem!important;right:1rem!important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="sky-canvas"></canvas>
+<div class="horizon"></div>
+
+<!-- Moon — half moon for mid-season (weeks 5-9) -->
+<div class="moon">
+  <svg width="56" height="56" viewBox="0 0 56 56">
+    <defs>
+      <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(200,210,230,0.15)"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+    </defs>
+    <circle cx="28" cy="28" r="26" fill="url(#moonGlow)"/>
+    <clipPath id="moonClip">
+      <rect x="0" y="0" width="28" height="56"/>
+    </clipPath>
+    <circle cx="28" cy="28" r="16" fill="rgba(200,210,230,0.85)" clip-path="url(#moonClip)"/>
+    <circle cx="28" cy="28" r="16" fill="none" stroke="rgba(200,210,230,0.15)" stroke-width="0.5"/>
+    <!-- Moon label -->
+    <text x="28" y="52" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="4.5" fill="rgba(160,170,200,0.3)" letter-spacing="0.08em">MID-SEASON</text>
+  </svg>
+</div>
+
+<!-- Nav -->
+<nav class="nav-pill">
+  <a href="#sky" class="active">Sky</a>
+  <a href="#essay">Essay</a>
+  <a href="#rankings">Rankings</a>
+</nav>
+
+<!-- Star tooltip (reused) -->
+<div class="star-tooltip" id="starTooltip">
+  <div class="tt-name" id="ttName"></div>
+  <div class="tt-owner" id="ttOwner"></div>
+  <div class="tt-stats">
+    <div class="tt-stat"><div class="tt-stat-label">Magnitude</div><div class="tt-stat-value" id="ttRank"></div></div>
+    <div class="tt-stat"><div class="tt-stat-label">Record</div><div class="tt-stat-value" id="ttRecord"></div></div>
+    <div class="tt-stat"><div class="tt-stat-label">This Week</div><div class="tt-stat-value" id="ttScore"></div></div>
+    <div class="tt-stat"><div class="tt-stat-label">Elo</div><div class="tt-stat-value" id="ttElo"></div></div>
+    <div class="tt-stat"><div class="tt-stat-label">Spectral Class</div><div class="tt-stat-value" id="ttTier"></div></div>
+    <div class="tt-stat"><div class="tt-stat-label">Streak</div><div class="tt-stat-value" id="ttStreak"></div></div>
+  </div>
+  <div class="tt-blurb" id="ttBlurb"></div>
+</div>
+
+<!-- Constellation tooltip -->
+<div class="constellation-tooltip" id="constTooltip">
+  <div class="ct-name" id="ctName"></div>
+  <div id="ctStats"></div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  Star size = power rank<br>
+  Star brightness = weekly score<br>
+  Lines = rivalries (4+ games H2H)<br>
+  Hover/tap a star to inspect
+</div>
+
+<!-- Scroll container -->
+<div class="scroll-container">
+  <!-- Title screen -->
+  <section class="sky-title" id="sky">
+    <h1>The Night Sky</h1>
+    <div class="subtitle">The Jailyard Dynasty League</div>
+    <div class="week-label">Week 6 &mdash; 2025 Season</div>
+    <div class="scroll-hint">scroll to read the stars</div>
+  </section>
+
+  <!-- Essay panels -->
+  <section id="essay">
+    <div class="sky-panel">
+      <div class="panel-text">Kittler on the Roof held the number one ranking for exactly seven days. One week. That&rsquo;s how long the defending champion sat on the throne before MHJTIME walked in and dropped 140.94 on the crown.</div>
+    </div>
+    <div class="sky-panel">
+      <div class="panel-text">Rico Dowdle went for 30.9. Ja&rsquo;Marr Chase added 20.1. Jayden Daniels orchestrated with 22.64. And Kittler&rsquo;s 107.74 sent the defending champion tumbling from first to fifth in the most dramatic single-week fall the power rankings have recorded.</div>
+    </div>
+    <div class="sky-panel">
+      <div class="panel-text">Last week, five teams shared a penthouse at 4-1 and we called it unprecedented parity. This week, three of them separated at 5-1, and both of the other two dropped out of the top four entirely.</div>
+    </div>
+    <div class="sky-panel">
+      <div class="panel-text">The Legion of Bouz reclaimed the number one spot with 165.9 &mdash; Mahomes and Cam Skattebo each eclipsed 30 points &mdash; while General Ken-obi stormed from fifth to second behind a 164.94 demolition that featured the week&rsquo;s most absurd stat line: the Rams defense scored 27.0 points.</div>
+    </div>
+    <div class="sky-panel">
+      <div class="panel-text">The group chat turned into a trade bazaar. Brent opened the market with a casual &ldquo;Hit me up if in need of.&rdquo; Karim countered with &ldquo;2/3 top QBs come at me.&rdquo; And then Ben delivered the line of the week: &ldquo;If you want some old serviceable WR3/4s with championship pedigree instead of Zach&rsquo;s 2nd place also rans, let me know.&rdquo;</div>
+    </div>
+    <div class="sky-panel">
+      <div class="panel-text">Circle next week in permanent marker: The Legion of Bouz versus General Ken-obi. First versus second. Both 5-1. Two former champions with three titles between them. Mahomes versus Maye. The Jailyard doesn&rsquo;t do regular-season Super Bowls &mdash; until it does.</div>
+    </div>
+  </section>
+
+  <!-- Rankings -->
+  <section class="rankings-section" id="rankings">
+    <div class="rankings-header">
+      <h2>Star Chart</h2>
+      <div class="rh-sub">Week 6 Power Rankings &mdash; ordered by magnitude</div>
+    </div>
+    <div id="rankingCards"></div>
+  </section>
+
+  <!-- Spacer so bottom content is reachable -->
+  <div style="height:20vh"></div>
+</div>
+
+<script>
+/* NOTE: All innerHTML usage below uses ONLY hardcoded trusted data from
+   the league's own JSON files. No user-supplied input is interpolated. */
+(function(){
+  'use strict';
+
+  /* ══════════════════════════════════════════════════════════════
+     DATA — Week 6, 2025 Season
+     ══════════════════════════════════════════════════════════════ */
+  var teams = [
+    {name:"The Legion of Bouz",owner:"KidBouzie",record:"5-1",rank:1,prevRank:2,movement:"up_1",score:165.9,elo:1604.3,tier:"Frisky",streak:"W1",pf:935.7,color:"#a78bfa",championships:1,blurb:"Mahomes went for 30.48. Cam Skattebo added 30.0. Two players north of 30, and your 165.9 was the week\u2019s highest score."},
+    {name:"General Ken-obi",owner:"bLaker24",record:"5-1",rank:2,prevRank:5,movement:"up_3",score:164.94,elo:1700.2,tier:"Contender",streak:"W2",pf:871.2,color:"#60a5fa",championships:2,blurb:"The Rams defense scored 27.0 points. Drake London went off for 26.8. Your Elo hit its all-time peak at 1700.2."},
+    {name:"Sleeping Giants",owner:"zbcowan",record:"5-1",rank:3,prevRank:3,movement:"steady",score:129.82,elo:1561.1,tier:"Frisky",streak:"W4",pf:857.0,color:"#34d399",championships:0,blurb:"Four straight wins. Josh Jacobs bulldozed for 29.5. The franchise with the league\u2019s best all-time record at 39-17 is quietly building."},
+    {name:"The Boonist Monks",owner:"GauchoTrain",record:"4-2",rank:4,prevRank:6,movement:"up_2",score:150.46,elo:1599.6,tier:"Frisky",streak:"W1",pf:912.9,color:"#fbbf24",championships:0,blurb:"Pickens went nuclear \u2014 27.3 points. JSN added 26.2. That\u2019s 53.5 combined from your top two receivers."},
+    {name:"Kittler on the Roof",owner:"bchodos",record:"4-2",rank:5,prevRank:1,movement:"down_4",score:107.74,elo:1488.2,tier:"Contender",streak:"L1",pf:877.9,color:"#fb923c",championships:1,blurb:"From the summit to the middle of the pack in seven days. Your Elo cratered 28.7 points, the steepest drop this week."},
+    {name:"Rasheeing the Scene",owner:"ToreroGaucho",record:"4-2",rank:6,prevRank:4,movement:"down_2",score:109.1,elo:1626.0,tier:"Frisky",streak:"L1",pf:816.0,color:"#f472b6",championships:0,blurb:"De\u2019Von Achane dropped 30.0 points and you still lost by 41.36. Josh Allen managed only 15.4."},
+    {name:"MHJTIME",owner:"rango_",record:"3-3",rank:7,prevRank:7,movement:"steady",score:140.94,elo:1585.7,tier:"Contender",streak:"W2",pf:891.9,color:"#c084fc",championships:0,blurb:"Two weeks ago this column was writing your eulogy. Now you\u2019ve won two straight by a combined 64.76 points."},
+    {name:"Noble FFT",owner:"kevobucks",record:"3-3",rank:8,prevRank:9,movement:"up_1",score:151.88,elo:1454.8,tier:"Frisky",streak:"W1",pf:819.0,color:"#2dd4bf",championships:0,blurb:"Bijan Robinson. Thirty-two point eight. The week\u2019s top performer finally delivered the game the preseason promised."},
+    {name:"Ghastly Grayskull Gang",owner:"GrayskullXX",record:"2-4",rank:9,prevRank:8,movement:"down_1",score:121.3,elo:1324.5,tier:"Frisky",streak:"L2",pf:818.3,color:"#94a3b8",championships:0,blurb:"Back-to-back losses. Your scoring ceiling capped at 121.3 \u2014 your second-lowest output of the season."},
+    {name:"Chudders Football Team",owner:"Chudders",record:"1-5",rank:10,prevRank:10,movement:"steady",score:95.26,elo:1402.1,tier:"Trust the Process",streak:"L1",pf:727.9,color:"#78716c",championships:0,blurb:"Matt accidentally dropped Haskins on the app. 95.26 was the lowest score in the league this week."},
+    {name:"Burden of Etienne-y Woody",owner:"kharlow",record:"0-6",rank:11,prevRank:11,movement:"steady",score:99.2,elo:1323.5,tier:"Fraud",streak:"L6",pf:732.7,color:"#ef4444",championships:0,blurb:"Six weeks. Zero wins. Ken-obi\u2019s 164.94 steamrolled your 99.2 by 65.74 in the biggest blowout of the week."},
+    {name:"Father Time",owner:"Redrumsregrub",record:"0-6",rank:12,prevRank:12,movement:"steady",score:107.66,elo:1329.9,tier:"Frisky",streak:"L6",pf:712.7,color:"#a1a1aa",championships:0,blurb:"The lowest-scoring team in the league absorbed a 58.24-point loss to the highest-scoring team."}
+  ];
+
+  /* Rivalries — teams with 4+ H2H games, forming constellations */
+  var rivalries = [
+    {a:"Kittler on the Roof",b:"MHJTIME",h2h:"4-2",name:"The Dethroning",games:6,lastScore:"107.74-140.94"},
+    {a:"Noble FFT",b:"Ghastly Grayskull Gang",h2h:"4-2",name:"The Gatekeepers",games:6,lastScore:"151.88-121.3"},
+    {a:"Sleeping Giants",b:"Chudders Football Team",h2h:"5-0",name:"The Restraining Order",games:5,lastScore:"129.82-95.26"},
+    {a:"The Boonist Monks",b:"Rasheeing the Scene",h2h:"3-2",name:"The Gaucho Derby",games:5,lastScore:"150.46-109.1"},
+    {a:"The Legion of Bouz",b:"Father Time",h2h:"3-2",name:"The Old Guard",games:5,lastScore:"165.9-107.66"},
+    {a:"General Ken-obi",b:"Burden of Etienne-y Woody",h2h:"3-2",name:"The Mismatch",games:5,lastScore:"164.94-99.2"}
+  ];
+
+  /* Shooting star quotes */
+  var chatQuotes = [
+    "\u201cHit me up if in need of.\u201d \u2014 Brent",
+    "\u201c2/3 top QBs come at me.\u201d \u2014 Karim",
+    "\u201cZach got served by Ben.\u201d \u2014 Brent",
+    "\u201cChampionship pedigree > 2nd place also rans\u201d \u2014 Ben",
+    "\u201cComin for blood this year with my zombie wr corps\u201d \u2014 Zach",
+    "\u201cThere\u2019s absolutely no way I meant to drop Haskins\u201d \u2014 Matt",
+    "\u201cContent is content. Production is production.\u201d \u2014 Brent",
+    "\u201cThese young giants are catching fire!\u201d \u2014 Zach",
+    "\u201cWhat a great sight to wake up to\u201d \u2014 Zach",
+    "\u201cToo soon?\u201d \u2014 Ben",
+    "\u201cThe Jailyard doesn\u2019t do regular-season Super Bowls\u201d",
+    "\u201cThe Lock of the Week has busted three straight\u201d",
+    "\u201cBoth 5-1. Something\u2019s got to give.\u201d"
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     CANVAS — stars, team stars, constellation lines
+     ══════════════════════════════════════════════════════════════ */
+  var canvas = document.getElementById('sky-canvas');
+  var ctx = canvas.getContext('2d');
+  var W, H, dpr;
+  var bgStars = [];
+  var teamStarPositions = [];
+  var mouseX = -1000, mouseY = -1000;
+  var hoveredTeam = null;
+  var hoveredRivalry = null;
+  var animFrame;
+  var time = 0;
+
+  function resize(){
+    dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    generateBgStars();
+    positionTeamStars();
+  }
+
+  function generateBgStars(){
+    bgStars = [];
+    var count = Math.min(600, Math.floor(W * H / 2800));
+    for(var i=0;i<count;i++){
+      bgStars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.2 + 0.3,
+        baseOpacity: Math.random() * 0.7 + 0.3,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        twinklePhase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  function positionTeamStars(){
+    teamStarPositions = [];
+    var marginX = W * 0.12;
+    var marginTop = H * 0.08;
+    var marginBot = H * 0.12;
+    var usableW = W - marginX * 2;
+    var usableH = H - marginTop - marginBot;
+
+    /* Seeded random for consistent layout */
+    var seed = 42;
+    function seededRandom(){seed=(seed*16807)%2147483647;return(seed-1)/2147483646}
+
+    teams.forEach(function(t, i){
+      /* Y based on rank — rank 1 at top, rank 12 at bottom */
+      var rankFrac = (t.rank - 1) / 11;
+      var baseY = marginTop + rankFrac * usableH;
+      /* Add horizontal spread with some randomness */
+      var baseX = marginX + seededRandom() * usableW;
+      /* Jitter */
+      baseY += (seededRandom() - 0.5) * usableH * 0.06;
+      baseX = Math.max(marginX, Math.min(W - marginX, baseX));
+
+      /* Star size: rank 1 gets biggest */
+      var maxR = Math.min(W, H) * 0.022;
+      var minR = maxR * 0.35;
+      var starR = maxR - (t.rank - 1) * (maxR - minR) / 11;
+
+      /* Brightness: based on this week's score (95-166 range) */
+      var minScore = 90, maxScore = 170;
+      var scoreFrac = Math.max(0, Math.min(1, (t.score - minScore) / (maxScore - minScore)));
+      var brightness = 0.4 + scoreFrac * 0.6;
+
+      teamStarPositions.push({
+        x: baseX,
+        y: baseY,
+        r: starR,
+        brightness: brightness,
+        team: t,
+        pulsePhase: seededRandom() * Math.PI * 2,
+        hover: false
+      });
+    });
+  }
+
+  function getTeamStarByName(name){
+    for(var i=0;i<teamStarPositions.length;i++){
+      if(teamStarPositions[i].team.name === name) return teamStarPositions[i];
+    }
+    return null;
+  }
+
+  /* ── Drawing ── */
+  function drawBgStars(){
+    for(var i=0;i<bgStars.length;i++){
+      var s = bgStars[i];
+      var twinkle = Math.sin(time * s.twinkleSpeed + s.twinklePhase);
+      var opacity = s.baseOpacity + twinkle * 0.2;
+      opacity = Math.max(0.1, Math.min(1, opacity));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(220,225,240,' + opacity + ')';
+      ctx.fill();
+    }
+  }
+
+  function drawConstellations(){
+    rivalries.forEach(function(r){
+      var s1 = getTeamStarByName(r.a);
+      var s2 = getTeamStarByName(r.b);
+      if(!s1 || !s2) return;
+
+      var isHovered = (hoveredRivalry === r);
+      var opacity = isHovered ? 0.5 : 0.12;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(s1.x, s1.y);
+      ctx.lineTo(s2.x, s2.y);
+      ctx.strokeStyle = 'rgba(180,190,220,' + opacity + ')';
+      ctx.lineWidth = isHovered ? 1.5 : 0.8;
+      ctx.setLineDash(isHovered ? [] : [6, 8]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      /* Constellation name at midpoint */
+      if(isHovered){
+        var mx = (s1.x + s2.x) / 2;
+        var my = (s1.y + s2.y) / 2;
+        ctx.font = '500 10px "JetBrains Mono",monospace';
+        ctx.fillStyle = 'rgba(180,190,220,0.6)';
+        ctx.textAlign = 'center';
+        ctx.fillText(r.name, mx, my - 8);
+      }
+      ctx.restore();
+    });
+  }
+
+  function drawTeamStars(){
+    teamStarPositions.forEach(function(s){
+      var t = s.team;
+      var pulse = Math.sin(time * 0.03 + s.pulsePhase) * 0.12;
+      var isHovered = s.hover;
+      var glowR = s.r * (isHovered ? 5 : 3);
+      var b = s.brightness + pulse;
+      b = Math.max(0.3, Math.min(1, b));
+      if(isHovered) b = 1;
+
+      /* Outer glow */
+      var grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
+      grad.addColorStop(0, hexToRgba(t.color, b * (isHovered ? 0.5 : 0.25)));
+      grad.addColorStop(0.4, hexToRgba(t.color, b * 0.08));
+      grad.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, glowR, 0, Math.PI*2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      /* Core star */
+      var coreGrad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
+      coreGrad.addColorStop(0, hexToRgba('#ffffff', b));
+      coreGrad.addColorStop(0.5, hexToRgba(t.color, b * 0.9));
+      coreGrad.addColorStop(1, hexToRgba(t.color, b * 0.3));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r * (isHovered ? 1.3 : 1), 0, Math.PI*2);
+      ctx.fillStyle = coreGrad;
+      ctx.fill();
+
+      /* 4-point star diffraction spikes */
+      if(s.r > 4 || isHovered){
+        var spikeLen = s.r * (isHovered ? 4 : 2.5);
+        ctx.save();
+        ctx.globalAlpha = b * (isHovered ? 0.5 : 0.2);
+        ctx.strokeStyle = t.color;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(s.x - spikeLen, s.y);
+        ctx.lineTo(s.x + spikeLen, s.y);
+        ctx.moveTo(s.x, s.y - spikeLen);
+        ctx.lineTo(s.x, s.y + spikeLen);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      /* North Star label for #1 */
+      if(t.rank === 1){
+        ctx.save();
+        ctx.font = '300 9px "JetBrains Mono",monospace';
+        ctx.fillStyle = 'rgba(200,210,230,0.3)';
+        ctx.textAlign = 'center';
+        ctx.fillText('\u2605 POLARIS', s.x, s.y - s.r * 3 - 4);
+        ctx.restore();
+      }
+
+      /* Team name label (always show, dimmer when not hovered) */
+      ctx.save();
+      ctx.font = (isHovered ? '500' : '300') + ' ' + (isHovered ? '11' : '9') + 'px "JetBrains Mono",monospace';
+      ctx.fillStyle = isHovered ? 'rgba(220,225,240,0.85)' : 'rgba(180,190,210,0.3)';
+      ctx.textAlign = 'center';
+      ctx.fillText(t.name, s.x, s.y + s.r + (isHovered ? 18 : 14));
+      ctx.restore();
+    });
+  }
+
+  function hexToRgba(hex, alpha){
+    var r = parseInt(hex.slice(1,3),16);
+    var g = parseInt(hex.slice(3,5),16);
+    var b = parseInt(hex.slice(5,7),16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+
+  /* ── Hit testing ── */
+  function hitTestTeamStar(mx, my){
+    for(var i=0;i<teamStarPositions.length;i++){
+      var s = teamStarPositions[i];
+      var hitR = Math.max(s.r * 2.5, 20);
+      var dx = mx - s.x, dy = my - s.y;
+      if(dx*dx + dy*dy < hitR*hitR) return s;
+    }
+    return null;
+  }
+
+  function hitTestRivalry(mx, my){
+    var bestDist = 15;
+    var best = null;
+    rivalries.forEach(function(r){
+      var s1 = getTeamStarByName(r.a);
+      var s2 = getTeamStarByName(r.b);
+      if(!s1 || !s2) return;
+      var d = distToSegment(mx, my, s1.x, s1.y, s2.x, s2.y);
+      if(d < bestDist){bestDist = d; best = r}
+    });
+    return best;
+  }
+
+  function distToSegment(px,py,x1,y1,x2,y2){
+    var dx = x2-x1, dy = y2-y1;
+    var lenSq = dx*dx+dy*dy;
+    if(lenSq===0) return Math.sqrt((px-x1)*(px-x1)+(py-y1)*(py-y1));
+    var t = Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/lenSq));
+    var cx = x1+t*dx, cy = y1+t*dy;
+    return Math.sqrt((px-cx)*(px-cx)+(py-cy)*(py-cy));
+  }
+
+  /* ── Tooltips ── */
+  var starTooltip = document.getElementById('starTooltip');
+  var constTooltip = document.getElementById('constTooltip');
+
+  function showStarTooltip(s, mx, my){
+    var t = s.team;
+    document.getElementById('ttName').textContent = t.name;
+    document.getElementById('ttName').style.color = t.color;
+    document.getElementById('ttOwner').textContent = t.owner;
+    document.getElementById('ttRank').textContent = '#' + t.rank + (t.rank===1?' (North Star)':'');
+    document.getElementById('ttRecord').textContent = t.record;
+    document.getElementById('ttScore').textContent = t.score.toFixed(2);
+    document.getElementById('ttElo').textContent = t.elo.toFixed(1);
+    document.getElementById('ttTier').textContent = t.tier;
+    document.getElementById('ttStreak').textContent = t.streak;
+    document.getElementById('ttBlurb').textContent = t.blurb;
+
+    var left = mx + 20;
+    var top = my - 20;
+    if(left + 320 > W) left = mx - 340;
+    if(top + 250 > H) top = H - 260;
+    if(top < 10) top = 10;
+    starTooltip.style.left = left + 'px';
+    starTooltip.style.top = top + 'px';
+    starTooltip.classList.add('active');
+  }
+
+  function hideStarTooltip(){
+    starTooltip.classList.remove('active');
+  }
+
+  function showConstTooltip(r, mx, my){
+    document.getElementById('ctName').textContent = r.name;
+    document.getElementById('ctStats').textContent = r.a + ' vs ' + r.b + ' \u2014 H2H: ' + r.h2h + ' (' + r.games + ' games) \u2014 Last: ' + r.lastScore;
+    constTooltip.style.left = (mx + 15) + 'px';
+    constTooltip.style.top = (my - 40) + 'px';
+    constTooltip.classList.add('active');
+  }
+
+  function hideConstTooltip(){
+    constTooltip.classList.remove('active');
+  }
+
+  /* ── Shooting stars ── */
+  var shootingStars = [];
+  var lastShootingTime = 0;
+  var shootingInterval = 6000;
+
+  function spawnShootingStar(){
+    var quote = chatQuotes[Math.floor(Math.random() * chatQuotes.length)];
+    var el = document.createElement('div');
+    el.className = 'shooting-text';
+    el.textContent = quote;
+    document.body.appendChild(el);
+
+    var startX = -300;
+    var startY = Math.random() * H * 0.7 + H * 0.05;
+    var speed = 2.5 + Math.random() * 1.5;
+    var angle = -0.08 + Math.random() * 0.16;
+
+    shootingStars.push({
+      el: el,
+      x: startX,
+      y: startY,
+      speed: speed,
+      angle: angle,
+      opacity: 0,
+      phase: 0,
+      life: 0
+    });
+  }
+
+  function updateShootingStars(dt){
+    for(var i = shootingStars.length-1; i>=0; i--){
+      var s = shootingStars[i];
+      s.life += dt;
+      s.x += s.speed * (dt/16);
+      s.y += s.angle * s.speed * (dt/16);
+
+      if(s.life < 400){
+        s.opacity = s.life / 400;
+      } else if(s.x > W + 100){
+        s.opacity -= 0.05;
+      } else {
+        s.opacity = Math.min(1, s.opacity + 0.02);
+      }
+
+      if(s.opacity <= 0 || s.x > W + 500){
+        s.el.remove();
+        shootingStars.splice(i, 1);
+        continue;
+      }
+
+      s.el.style.left = s.x + 'px';
+      s.el.style.top = s.y + 'px';
+      s.el.style.opacity = s.opacity * 0.7;
+    }
+  }
+
+  /* ── Animation loop ── */
+  var lastTime = performance.now();
+
+  function draw(now){
+    var dt = now - lastTime;
+    lastTime = now;
+    time++;
+
+    ctx.clearRect(0, 0, W, H);
+    drawBgStars();
+    drawConstellations();
+    drawTeamStars();
+
+    /* Shooting stars */
+    if(now - lastShootingTime > shootingInterval + Math.random() * 3000){
+      spawnShootingStar();
+      lastShootingTime = now;
+    }
+    updateShootingStars(dt);
+
+    animFrame = requestAnimationFrame(draw);
+  }
+
+  /* ── Events ── */
+  function onPointerMove(e){
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    var hit = hitTestTeamStar(mouseX, mouseY);
+
+    teamStarPositions.forEach(function(s){s.hover = false});
+
+    if(hit){
+      hit.hover = true;
+      hoveredTeam = hit;
+      showStarTooltip(hit, mouseX, mouseY);
+      canvas.style.cursor = 'pointer';
+      hoveredRivalry = null;
+      hideConstTooltip();
+    } else {
+      hoveredTeam = null;
+      hideStarTooltip();
+
+      var rHit = hitTestRivalry(mouseX, mouseY);
+      if(rHit){
+        hoveredRivalry = rHit;
+        showConstTooltip(rHit, mouseX, mouseY);
+        canvas.style.cursor = 'pointer';
+      } else {
+        hoveredRivalry = null;
+        hideConstTooltip();
+        canvas.style.cursor = 'default';
+      }
+    }
+  }
+
+  canvas.addEventListener('mousemove', onPointerMove);
+  canvas.addEventListener('touchstart', function(e){
+    var touch = e.touches[0];
+    onPointerMove({clientX: touch.clientX, clientY: touch.clientY});
+  }, {passive:true});
+
+  /* ── Scroll: panel visibility ── */
+  var panelObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+      }
+    });
+  }, {threshold: 0.15});
+
+  document.querySelectorAll('.panel-text, .ranking-card').forEach(function(el){
+    panelObserver.observe(el);
+  });
+
+  /* ── Nav pill active state ── */
+  var navLinks = document.querySelectorAll('.nav-pill a');
+  var sections = ['sky','essay','rankings'];
+  var sectionObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.id;
+        navLinks.forEach(function(a){
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, {threshold: 0.3});
+
+  sections.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) sectionObserver.observe(el);
+  });
+
+  /* ── Build ranking cards (trusted data only, no user input) ── */
+  var cardsContainer = document.getElementById('rankingCards');
+  teams.forEach(function(t){
+    var mov = parseMovement(t.movement);
+    var card = document.createElement('div');
+    card.className = 'ranking-card';
+
+    /* Build card using DOM methods */
+    var header = document.createElement('div');
+    header.className = 'rc-header';
+
+    var rankEl = document.createElement('div');
+    rankEl.className = 'rc-rank';
+    rankEl.style.color = t.color;
+    rankEl.textContent = t.rank;
+
+    var infoEl = document.createElement('div');
+    infoEl.className = 'rc-team-info';
+    var nameEl = document.createElement('div');
+    nameEl.className = 'rc-team-name';
+    nameEl.style.color = t.color;
+    nameEl.textContent = t.name;
+    var metaEl = document.createElement('div');
+    metaEl.className = 'rc-meta';
+    metaEl.textContent = t.owner + ' \u00b7 ' + t.record + ' \u00b7 ' + t.score.toFixed(2) + ' pts \u00b7 Elo ' + t.elo.toFixed(1);
+    infoEl.appendChild(nameEl);
+    infoEl.appendChild(metaEl);
+
+    var movEl = document.createElement('div');
+    movEl.className = 'rc-movement ' + mov.cls;
+    movEl.textContent = mov.text;
+
+    header.appendChild(rankEl);
+    header.appendChild(infoEl);
+    header.appendChild(movEl);
+
+    var blurbEl = document.createElement('div');
+    blurbEl.className = 'rc-blurb';
+    blurbEl.textContent = t.blurb;
+
+    card.appendChild(header);
+    card.appendChild(blurbEl);
+    cardsContainer.appendChild(card);
+    panelObserver.observe(card);
+  });
+
+  function parseMovement(m){
+    if(m === 'steady') return {cls:'steady',text:'\u2014'};
+    var parts = m.split('_');
+    if(parts[0]==='up') return {cls:'up',text:'\u2191'+parts[1]};
+    return {cls:'down',text:'\u2193'+parts[1]};
+  }
+
+  /* ── Init ── */
+  window.addEventListener('resize', resize);
+  resize();
+  animFrame = requestAnimationFrame(draw);
+
+  /* Spawn first shooting star after 2s */
+  setTimeout(function(){
+    spawnShootingStar();
+    lastShootingTime = performance.now();
+  }, 2000);
+
+})();
+</script>
+</body>
+</html>

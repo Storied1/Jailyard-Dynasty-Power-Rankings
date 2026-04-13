@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>JAILYARD WK6 — RANSOM ZINE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Rozha+One&family=Bungee+Inline&family=Special+Elite&family=Fraunces:opsz,wght@9..144,700&family=Permanent+Marker&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#eeece2;
+  --paper2:#e5e1d1;
+  --ink:#121010;
+  --red:#c1272d;
+  --yellow:#f5d547;
+  --cyan:#2cc8ef;
+  --pink:#e54187;
+  --accent:#c1272d;
+  --accent2:#f5d547;
+  --muted:#5a5650;
+  --border:#121010;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#2a2824;color:var(--ink);font-family:"Special Elite",monospace}
+body{
+  min-height:100vh;
+  padding:28px 18px 80px;
+  background:
+    radial-gradient(ellipse at 20% 10%, #3a3830 0%, #201e1a 80%);
+}
+.page{
+  position:relative;
+  max-width:980px;
+  margin:0 auto;
+  background:var(--paper);
+  padding:44px 36px 68px;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.2),
+    0 30px 70px rgba(0,0,0,.55),
+    inset 0 0 160px rgba(80,70,40,.18);
+  transform:rotate(-.55deg);
+  filter:contrast(1.12) brightness(.97) saturate(1.05);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(120,100,60,.10) 0, transparent 40%),
+    radial-gradient(circle at 88% 72%, rgba(60,40,20,.12) 0, transparent 45%),
+    radial-gradient(circle at 55% 48%, rgba(200,180,140,.06) 0, transparent 60%);
+}
+.page::before,.page::after{
+  content:"";position:absolute;left:0;right:0;height:22px;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 10% 50%, rgba(0,0,0,.28) 0, transparent 60%),
+    radial-gradient(ellipse at 40% 50%, rgba(0,0,0,.18) 0, transparent 60%),
+    radial-gradient(ellipse at 78% 50%, rgba(0,0,0,.28) 0, transparent 60%);
+  mix-blend-mode:multiply;
+  filter:blur(1px);
+}
+.page::before{top:-6px}
+.page::after{bottom:-6px;transform:scaleY(-1)}
+
+.grain{
+  position:absolute;inset:0;pointer-events:none;opacity:.38;mix-blend-mode:multiply;
+}
+
+.rn{display:inline-block}
+.rn span{
+  display:inline-block;
+  padding:2px 6px 1px;
+  margin:0 1px;
+  line-height:.95;
+  background:transparent;
+  border:1px solid transparent;
+  transform-origin:center;
+  vertical-align:baseline;
+  position:relative;
+  text-shadow:0 1px 0 rgba(0,0,0,.08);
+}
+.rn span.sp{padding:0 5px;background:transparent!important;border-color:transparent!important;transform:none!important}
+
+.rn span.f0{font-family:"Anton",sans-serif;font-weight:400;letter-spacing:.02em}
+.rn span.f1{font-family:"Rozha One",serif}
+.rn span.f2{font-family:"Bungee Inline",cursive}
+.rn span.f3{font-family:"Special Elite",monospace}
+.rn span.f4{font-family:"Fraunces",serif;font-weight:700}
+.rn span.f5{font-family:"Permanent Marker",cursive}
+.rn span.f6{font-family:"Archivo Black",sans-serif}
+
+.rn span.b0{background:transparent;color:var(--ink)}
+.rn span.b1{background:var(--yellow);color:var(--ink);border-color:#000}
+.rn span.b2{background:var(--ink);color:var(--paper)}
+.rn span.b3{background:var(--red);color:var(--paper);border-color:#000}
+.rn span.b4{background:var(--cyan);color:var(--ink);border-color:#000}
+.rn span.b5{background:var(--pink);color:var(--ink);border-color:#000}
+.rn span.b6{background:var(--paper2);color:var(--ink);border-color:#000}
+
+.r-xxl{font-size:clamp(42px,8vw,110px);line-height:.92}
+.r-xl{font-size:clamp(30px,4.6vw,62px);line-height:.95}
+.r-l{font-size:clamp(22px,2.8vw,36px);line-height:1}
+.r-m{font-size:clamp(16px,1.6vw,22px);line-height:1.05}
+.r-s{font-size:14px;line-height:1.1}
+
+h1,h2,h3,h4{margin:0;font-weight:inherit}
+
+header.masthead{margin-bottom:14px}
+.stamp-row{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
+  font-family:"Special Elite",monospace;font-size:12px;color:#2a2a28;
+  border-bottom:2px dashed #0003;padding-bottom:10px;margin-bottom:16px;
+  text-transform:uppercase;letter-spacing:.08em;
+}
+.stamp-row .stamp{
+  border:2px solid var(--ink);padding:4px 10px;transform:rotate(-4deg);
+  color:var(--red);font-weight:700;font-family:"Archivo Black",sans-serif;
+  background:rgba(255,255,255,.2);
+}
+.stamp-row .stamp.b{transform:rotate(3deg);color:var(--ink);border-style:double;border-width:4px}
+
+.h1-wrap{padding:6px 0 10px;margin:4px 0 8px;border-bottom:3px solid var(--ink)}
+.subhead{
+  font-family:"Special Elite",monospace;font-size:14px;letter-spacing:.04em;
+  padding:10px 0 0;color:var(--ink);
+}
+
+.standings{margin-top:26px}
+.sect-title{margin:28px 0 14px;padding:10px 0 10px;border-top:4px double var(--ink);border-bottom:4px double var(--ink)}
+.standings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 22px}
+.team{
+  position:relative;
+  background:rgba(255,255,255,.35);
+  border:2px solid var(--ink);
+  padding:14px 14px 12px 84px;
+  transform:rotate(var(--rot,0deg));
+  box-shadow:3px 3px 0 rgba(0,0,0,.25);
+}
+.team:nth-child(odd){--rot:-.8deg;background:rgba(255,255,0,.08)}
+.team:nth-child(even){--rot:.6deg;background:rgba(255,255,255,.45)}
+.team:nth-child(3n){--rot:-.35deg}
+.team:nth-child(5n){--rot:1.1deg;background:rgba(44,200,239,.08)}
+.team:nth-child(7n){--rot:-1.2deg;background:rgba(229,65,135,.07)}
+.team .rnk{
+  position:absolute;left:-6px;top:-14px;
+  font-family:"Bungee Inline",cursive;font-size:68px;line-height:.8;
+  color:var(--ink);
+  background:var(--yellow);
+  padding:6px 10px 0;
+  border:3px solid var(--ink);
+  transform:rotate(-6deg);
+  box-shadow:3px 3px 0 rgba(0,0,0,.35);
+}
+.team.champ .rnk{background:var(--red);color:var(--paper)}
+.team .owner{
+  font-family:"Special Elite",monospace;font-size:12px;color:#2a2a26;
+  letter-spacing:.05em;text-transform:uppercase;margin-top:4px;
+}
+.team .rec{
+  display:inline-block;
+  font-family:"Special Elite",monospace;font-size:13px;
+  background:var(--paper2);border:1px dashed var(--ink);
+  padding:2px 8px;margin-top:6px;letter-spacing:.08em;
+}
+.team .score{
+  font-family:"Archivo Black",sans-serif;font-size:38px;line-height:.95;
+  color:var(--ink);margin-top:6px;display:inline-block;
+  letter-spacing:-.02em;position:relative;
+  text-shadow:1px 1px 0 rgba(193,39,45,.35);
+}
+.team .score .lbl{
+  display:block;font-family:"Special Elite",monospace;font-size:10px;
+  color:var(--muted);letter-spacing:.12em;text-transform:uppercase;
+  text-shadow:none;
+}
+.team.hi .score{color:var(--red)}
+.team.lo .score{color:#4a3a3a;opacity:.85}
+.team .mvmt{
+  float:right;
+  font-family:"Anton",sans-serif;font-size:22px;
+  border:2px solid var(--ink);padding:2px 8px 0;
+  transform:rotate(3deg);
+  background:var(--paper);
+}
+.team .mvmt.up{background:var(--cyan)}
+.team .mvmt.dn{background:var(--red);color:var(--paper)}
+.team .mvmt.flat{background:var(--paper2)}
+.team .streak{
+  float:right;
+  font-family:"Permanent Marker",cursive;font-size:15px;
+  margin-right:8px;margin-top:4px;color:var(--ink);
+}
+.team .top{
+  margin-top:8px;padding-top:8px;border-top:1px dotted #0006;
+  font-family:"Special Elite",monospace;font-size:11px;color:#33302a;
+  letter-spacing:.02em;line-height:1.35;
+}
+.team .top b{color:var(--red)}
+
+.team.torn::before{
+  content:"";position:absolute;left:-3px;right:-3px;bottom:-10px;height:14px;
+  background:var(--paper);
+  clip-path:polygon(0 0,4% 80%,8% 20%,13% 90%,18% 30%,23% 85%,28% 20%,34% 90%,40% 30%,46% 85%,52% 15%,58% 90%,64% 25%,70% 85%,76% 20%,82% 90%,88% 30%,94% 85%,100% 20%,100% 0);
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.25));
+}
+
+.demand{
+  margin:34px 0 8px;
+  border:6px solid var(--red);
+  padding:18px 20px 22px;
+  background:repeating-linear-gradient(135deg,rgba(193,39,45,.04) 0 10px,transparent 10px 20px),var(--paper);
+  transform:rotate(.4deg);
+  position:relative;
+  box-shadow:5px 5px 0 rgba(0,0,0,.35);
+}
+.demand::before{content:"";position:absolute;inset:4px;border:2px dashed #0009;pointer-events:none}
+.demand .redact{
+  display:inline-block;background:var(--ink);color:var(--ink);
+  padding:1px 24px;margin:0 3px;border-radius:1px;user-select:none;
+}
+.demand .lede{
+  font-family:"Special Elite",monospace;font-size:15px;line-height:1.5;
+  margin:12px 0 16px;color:var(--ink);
+}
+.upsets{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-top:8px;
+  font-family:"Anton",sans-serif;font-size:15px;letter-spacing:.02em;
+}
+.upsets .u{
+  background:var(--paper);border:2px solid var(--ink);padding:6px 10px;
+  transform:rotate(var(--rr,-.6deg));position:relative;
+}
+.upsets .u:nth-child(2){--rr:.8deg;background:var(--yellow)}
+.upsets .u:nth-child(3){--rr:-.4deg}
+.upsets .u:nth-child(4){--rr:.5deg;background:var(--cyan)}
+.upsets .u .mrg{float:right;font-family:"Archivo Black",sans-serif;color:var(--red);font-size:14px}
+.upsets .u .vs{color:var(--muted);font-family:"Special Elite",monospace;font-size:11px;display:block;margin-top:2px}
+
+.wanted-wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:18px}
+.wanted{
+  background:var(--paper2);border:4px double var(--ink);
+  padding:10px 8px 14px;text-align:center;
+  transform:rotate(var(--wr,-1deg));
+  box-shadow:3px 3px 0 rgba(0,0,0,.3);
+  position:relative;
+}
+.wanted:nth-child(1){--wr:-1.2deg}
+.wanted:nth-child(2){--wr:.9deg}
+.wanted:nth-child(3){--wr:-.4deg}
+.wanted:nth-child(4){--wr:1.3deg}
+.wanted:nth-child(5){--wr:-.7deg}
+.wanted .stencil{
+  font-family:"Bungee Inline",cursive;font-size:22px;color:var(--ink);
+  background:var(--yellow);border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);
+  padding:4px 0 2px;letter-spacing:.08em;margin:-10px -8px 8px;
+}
+.wanted .nm{
+  font-family:"Archivo Black",sans-serif;font-size:14px;color:var(--ink);
+  line-height:1.1;margin:6px 0 4px;
+}
+.wanted .pts{font-family:"Bungee Inline",cursive;font-size:28px;color:var(--red);line-height:1}
+.wanted .team-tag{
+  font-family:"Special Elite",monospace;font-size:9px;color:var(--muted);
+  letter-spacing:.12em;text-transform:uppercase;margin-top:6px;
+}
+.wanted .pos{
+  display:inline-block;font-family:"Special Elite",monospace;font-size:10px;
+  border:1px solid var(--ink);padding:1px 5px;margin-bottom:4px;
+}
+.wanted .reward{margin-top:6px;font-family:"Permanent Marker",cursive;font-size:11px;color:var(--red)}
+
+/* week 7 slate — pasted bulletin */
+.slate{
+  margin:30px 0 8px;
+  background:var(--paper2);
+  border:3px dashed var(--ink);
+  padding:18px 22px 22px;
+  transform:rotate(.25deg);
+  position:relative;
+  box-shadow:4px 4px 0 rgba(0,0,0,.25);
+}
+.slate .slate-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px 16px;margin-top:10px;
+}
+.slate .game{
+  background:var(--paper);border:2px solid var(--ink);padding:10px 12px;
+  transform:rotate(var(--sg,-.5deg));
+  font-family:"Special Elite",monospace;font-size:12px;line-height:1.35;
+  position:relative;
+}
+.slate .game:nth-child(2){--sg:.8deg;background:var(--yellow)}
+.slate .game:nth-child(3){--sg:-.7deg}
+.slate .game:nth-child(4){--sg:.6deg;background:var(--cyan)}
+.slate .game:nth-child(5){--sg:-1.1deg}
+.slate .game:nth-child(6){--sg:.9deg;background:var(--pink)}
+.slate .game .ttl{
+  font-family:"Archivo Black",sans-serif;font-size:13px;color:var(--ink);
+  display:block;margin-bottom:4px;letter-spacing:.02em;
+}
+.slate .game.marquee{grid-column:span 3;border-width:4px;background:var(--yellow);transform:rotate(-.4deg)}
+.slate .game.marquee .ttl{font-family:"Bungee Inline",cursive;font-size:20px;color:var(--red);letter-spacing:.04em}
+
+/* little evidence tags */
+.evidence{
+  margin:26px 0 8px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+}
+.evidence .tag{
+  background:var(--paper);border:2px solid var(--ink);padding:10px 12px 12px;
+  transform:rotate(var(--er,-.7deg));
+  box-shadow:3px 3px 0 rgba(0,0,0,.22);
+  position:relative;
+}
+.evidence .tag:nth-child(1){--er:-.9deg}
+.evidence .tag:nth-child(2){--er:.6deg;background:var(--yellow)}
+.evidence .tag:nth-child(3){--er:-.3deg}
+.evidence .tag .lab{
+  display:inline-block;font-family:"Archivo Black",sans-serif;font-size:10px;
+  background:var(--ink);color:var(--paper);padding:2px 8px;
+  letter-spacing:.08em;margin-bottom:6px;
+}
+.evidence .tag .big{
+  font-family:"Bungee Inline",cursive;font-size:26px;color:var(--red);
+  line-height:1;margin:2px 0 4px;
+}
+.evidence .tag .cap{
+  font-family:"Special Elite",monospace;font-size:11px;color:#33302a;line-height:1.4;
+}
+
+/* the blotter — stats, pasted like telegrams */
+.blotter{
+  margin:30px 0 8px;
+  border:3px solid var(--ink);
+  background:var(--paper);
+  padding:16px 20px 22px;
+  position:relative;
+  transform:rotate(-.2deg);
+  box-shadow:4px 4px 0 rgba(0,0,0,.22);
+}
+.blotter-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:10px;
+}
+.blotter .stat{
+  border:2px solid var(--ink);padding:8px 10px 10px;
+  background:var(--paper2);
+  transform:rotate(var(--br,-.6deg));
+  position:relative;
+}
+.blotter .stat:nth-child(1){--br:-.8deg;background:var(--yellow)}
+.blotter .stat:nth-child(2){--br:.6deg}
+.blotter .stat:nth-child(3){--br:-.4deg;background:var(--cyan)}
+.blotter .stat:nth-child(4){--br:.9deg}
+.blotter .stat:nth-child(5){--br:-1deg}
+.blotter .stat:nth-child(6){--br:.7deg;background:var(--pink)}
+.blotter .stat:nth-child(7){--br:-.3deg}
+.blotter .stat:nth-child(8){--br:.5deg;background:var(--yellow)}
+.blotter .stat .k{
+  font-family:"Special Elite",monospace;font-size:10px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);display:block;
+}
+.blotter .stat .v{
+  font-family:"Archivo Black",sans-serif;font-size:20px;color:var(--ink);line-height:1.05;
+}
+.blotter .stat .u{
+  font-family:"Special Elite",monospace;font-size:10px;color:#403a32;display:block;margin-top:3px;
+}
+
+/* bulletin board — owner voice snippets taped up */
+.bulletin{
+  margin:30px 0 8px;
+  background:repeating-linear-gradient(0deg,#d9c999 0 2px,#e5d6a5 2px 4px);
+  border:6px solid #6b4a26;
+  padding:22px 22px 26px;
+  position:relative;
+  transform:rotate(.3deg);
+  box-shadow:5px 5px 0 rgba(0,0,0,.3);
+}
+.bulletin::before{
+  content:"";position:absolute;inset:6px;border:1px dashed #0006;pointer-events:none;
+}
+.bulletin-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:16px 20px;margin-top:10px;
+}
+.note{
+  position:relative;
+  background:var(--paper);
+  border:1px solid var(--ink);
+  padding:14px 16px 16px;
+  font-family:"Special Elite",monospace;font-size:13px;line-height:1.5;color:var(--ink);
+  box-shadow:3px 3px 0 rgba(0,0,0,.32);
+  transform:rotate(var(--nr,-.8deg));
+}
+.note:nth-child(odd){--nr:-1deg}
+.note:nth-child(even){--nr:.9deg;background:var(--paper2)}
+.note:nth-child(3){--nr:-.4deg;background:#fef5d1}
+.note:nth-child(4){--nr:.6deg}
+.note:nth-child(5){--nr:-1.1deg;background:#e0f6ff}
+.note:nth-child(6){--nr:.4deg;background:#fde8ee}
+.note::before{
+  content:"";position:absolute;left:50%;top:-12px;transform:translateX(-50%) rotate(-8deg);
+  width:46px;height:14px;background:rgba(245,213,71,.6);
+  border:1px solid rgba(0,0,0,.2);mix-blend-mode:multiply;
+}
+.note .name{
+  display:block;font-family:"Archivo Black",sans-serif;font-size:11px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:6px;
+}
+.note .q{font-style:italic}
+.note .tag2{
+  display:inline-block;margin-top:8px;font-family:"Permanent Marker",cursive;
+  font-size:11px;color:var(--muted);
+}
+
+.manifesto{
+  margin:30px 0 8px;background:var(--paper);
+  border:3px solid var(--ink);padding:22px 24px;
+  font-family:"Special Elite",monospace;font-size:15px;line-height:1.65;
+  column-count:2;column-gap:28px;column-rule:1px dashed #0007;
+  transform:rotate(-.3deg);
+  box-shadow:4px 4px 0 rgba(0,0,0,.25);
+}
+.manifesto p{margin:0 0 12px;text-indent:1em}
+.manifesto .drop{
+  float:left;font-family:"Rozha One",serif;font-size:58px;line-height:.8;
+  padding:6px 8px 0 0;color:var(--red);
+}
+.manifesto .strike{position:relative;display:inline-block}
+.manifesto .strike::after{
+  content:"X";position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-52%) rotate(-10deg);
+  font-family:"Permanent Marker",cursive;font-size:38px;color:var(--red);
+  opacity:.9;pointer-events:none;line-height:.8;
+}
+.manifesto .yel{background:var(--yellow);padding:0 3px}
+.manifesto .cy{background:var(--cyan);padding:0 3px}
+.manifesto .pk{background:var(--pink);padding:0 3px}
+.manifesto .blk{background:var(--ink);color:var(--paper);padding:0 6px}
+
+.footer{margin-top:34px;padding-top:18px;border-top:4px double var(--ink);text-align:center}
+.sig{
+  font-family:"Special Elite",monospace;font-size:11px;color:var(--muted);
+  letter-spacing:.12em;text-transform:uppercase;margin-top:10px;
+}
+
+.tape{
+  position:absolute;width:82px;height:22px;
+  background:rgba(245,213,71,.55);
+  border:1px solid rgba(0,0,0,.15);
+  box-shadow:0 1px 0 rgba(0,0,0,.08);
+  mix-blend-mode:multiply;
+}
+
+@media (max-width:760px){
+  .standings-grid{grid-template-columns:1fr}
+  .wanted-wrap{grid-template-columns:1fr 1fr}
+  .manifesto{column-count:1}
+  .upsets{grid-template-columns:1fr}
+  .page{padding:30px 18px 56px}
+  .team{padding-left:70px}
+  .team .rnk{font-size:52px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="speckle" x="0" y="0">
+    <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="1" seed="4"/>
+    <feColorMatrix values="0 0 0 0 .08  0 0 0 0 .06  0 0 0 0 .04  0 0 0 .85 0"/>
+  </filter>
+</svg>
+
+<article class="page" id="page">
+
+  <svg class="grain" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" filter="url(#speckle)"/>
+  </svg>
+
+  <div class="tape" style="left:60px;top:-8px;transform:rotate(-12deg)"></div>
+  <div class="tape" style="right:80px;top:-6px;transform:rotate(8deg)"></div>
+
+  <header class="masthead">
+    <div class="stamp-row">
+      <span class="stamp">ISSUE // VI</span>
+      <span>// DATE STAMP: OCT 20 2025 // PHOTOCOPIED AT KINKO'S AT 2AM //</span>
+      <span class="stamp b">DO NOT REPRINT</span>
+    </div>
+
+    <div class="h1-wrap">
+      <div class="rn r-xxl" data-text="JAILYARD WEEK 6:"></div>
+      <div class="rn r-xxl" data-text="SOMEBODY IS GOING"></div>
+      <div class="rn r-xxl" data-text="TO GET SCORED ON"></div>
+    </div>
+
+    <div class="subhead">
+      A PHOTOCOPIED RANKINGS ZINE — FROM THE DESK OF THE LEAGUE THAT NEVER SHUTS UP.
+      &nbsp;&nbsp;//&nbsp;&nbsp; 6 OF 14 WKS PLAYED &nbsp;&nbsp;//&nbsp;&nbsp; LG AVG PPG 138.5 &nbsp;&nbsp;//&nbsp;&nbsp; WK6 AVG 128.7
+    </div>
+  </header>
+
+  <section class="standings">
+    <div class="sect-title">
+      <div class="rn r-xl" data-text="THE STANDINGS (DEAL WITH IT)"></div>
+    </div>
+
+    <div class="standings-grid">
+
+      <div class="team champ torn">
+        <div class="rnk">1</div>
+        <div class="mvmt up">+1</div>
+        <div class="streak">W1</div>
+        <div class="rn r-l" data-text="THE LEGION OF BOUZ"></div>
+        <div class="owner">Owner: KidBouzie &nbsp;// Elo 1604 // Titles: 1</div>
+        <div class="rec">5-1 &nbsp;·&nbsp; PF 935.7</div><br/>
+        <div class="score hi">165.90<span class="lbl">Wk6 — High Scorer</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> Mahomes 30.48 · Skattebo 30.0 · CMC 20.6 · Waddle 13.3 · SEA DEF 11.0
+        </div>
+      </div>
+
+      <div class="team champ">
+        <div class="rnk">2</div>
+        <div class="mvmt up">+3</div>
+        <div class="streak">W2</div>
+        <div class="rn r-l" data-text="GENERAL KEN-OBI"></div>
+        <div class="owner">Owner: bLaker24 &nbsp;// Elo 1700 // Titles: 2</div>
+        <div class="rec">5-1 &nbsp;·&nbsp; PF 871.2</div><br/>
+        <div class="score hi">164.94<span class="lbl">Wk6 — Biggest Blowout +65.74</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> LAR DEF 27.0 · D.London 26.8 · D.Maye 26.24 · R.White 16.1 · J.Williams 15.6
+        </div>
+      </div>
+
+      <div class="team torn">
+        <div class="rnk">3</div>
+        <div class="mvmt flat">—</div>
+        <div class="streak">W4</div>
+        <div class="rn r-l" data-text="SLEEPING GIANTS"></div>
+        <div class="owner">Owner: zbcowan &nbsp;// Elo 1561</div>
+        <div class="rec">5-1 &nbsp;·&nbsp; PF 857.0</div><br/>
+        <div class="score">129.82<span class="lbl">Wk6 Points</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> J.Jacobs 29.5 · J.Hurts 21.62 · K.Williams 15.7 · D.Henry 13.5 · Aubrey 9.0
+        </div>
+      </div>
+
+      <div class="team">
+        <div class="rnk">4</div>
+        <div class="mvmt up">+2</div>
+        <div class="streak">W1</div>
+        <div class="rn r-l" data-text="THE BOONIST MONKS"></div>
+        <div class="owner">Owner: GauchoTrain &nbsp;// Elo 1599</div>
+        <div class="rec">4-2 &nbsp;·&nbsp; PF 912.9</div><br/>
+        <div class="score">150.46<span class="lbl">Wk6 Points — UPSET WIN</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> G.Pickens 27.3 · JSN 26.2 · J.Flacco 18.76 · M.Crosby 16.0 · J.Ferguson 10.8
+        </div>
+      </div>
+
+      <div class="team torn">
+        <div class="rnk">5</div>
+        <div class="mvmt dn">-4</div>
+        <div class="streak">L1</div>
+        <div class="rn r-l" data-text="KITTLER ON THE ROOF"></div>
+        <div class="owner">Owner: bchodos &nbsp;// Elo 1488 // Titles: 1</div>
+        <div class="rec">4-2 &nbsp;·&nbsp; PF 877.9</div><br/>
+        <div class="score lo">107.74<span class="lbl">Wk6 — FELL FROM #1</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> J.Taylor 21.7 · B.Mayfield 18.64 · T.Kraft 11.3 · N.Bonitto 9.5 · E.Cooper 9.5
+        </div>
+      </div>
+
+      <div class="team">
+        <div class="rnk">6</div>
+        <div class="mvmt dn">-2</div>
+        <div class="streak">L1</div>
+        <div class="rn r-l" data-text="RASHEEING THE SCENE"></div>
+        <div class="owner">Owner: ToreroGaucho &nbsp;// Elo 1626</div>
+        <div class="rec">4-2 &nbsp;·&nbsp; PF 816.0</div><br/>
+        <div class="score lo">109.10<span class="lbl">Wk6 — Upset L</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> Achane 30.0 · Dicker 18.4 · J.Allen 15.4 · H.Landry 9.0 · B.Wagner 8.5
+        </div>
+      </div>
+
+      <div class="team torn">
+        <div class="rnk">7</div>
+        <div class="mvmt flat">—</div>
+        <div class="streak">W2</div>
+        <div class="rn r-l" data-text="MHJTIME"></div>
+        <div class="owner">Owner: rango_ &nbsp;// Elo 1586</div>
+        <div class="rec">3-3 &nbsp;·&nbsp; PF 891.9</div><br/>
+        <div class="score">140.94<span class="lbl">Wk6 — Toppled the Champ</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> R.Dowdle 30.9 · J.Daniels 22.64 · Chase 20.1 · T.McBride 17.2 · LV DEF 17.0
+        </div>
+      </div>
+
+      <div class="team">
+        <div class="rnk">8</div>
+        <div class="mvmt up">+1</div>
+        <div class="streak">W1</div>
+        <div class="rn r-l" data-text="NOBLE FFT"></div>
+        <div class="owner">Owner: kevobucks &nbsp;// Elo 1455</div>
+        <div class="rec">3-3 &nbsp;·&nbsp; PF 819.0</div><br/>
+        <div class="score">151.88<span class="lbl">Wk6 — UPSET BY 30+</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> Bijan 32.8 · C.Williams 19.88 · W.Robinson 17.4 · T.Warren 15.3 · Oluokun 12.5
+        </div>
+      </div>
+
+      <div class="team torn">
+        <div class="rnk">9</div>
+        <div class="mvmt dn">-1</div>
+        <div class="streak">L2</div>
+        <div class="rn r-l" data-text="GHASTLY GRAYSKULL GANG"></div>
+        <div class="owner">Owner: GrayskullXX &nbsp;// Elo 1324</div>
+        <div class="rec">2-4 &nbsp;·&nbsp; PF 818.3</div><br/>
+        <div class="score lo">121.30<span class="lbl">Wk6 Points</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> D.Swift 24.5 · DK Metcalf 17.5 · B.Burns 17.0 · PIT DEF 14.0 · J.Tonges 9.8
+        </div>
+      </div>
+
+      <div class="team">
+        <div class="rnk">10</div>
+        <div class="mvmt flat">—</div>
+        <div class="streak">L1</div>
+        <div class="rn r-l" data-text="CHUDDERS FOOTBALL TEAM"></div>
+        <div class="owner">Owner: Chudders &nbsp;// Elo 1402</div>
+        <div class="rec">1-5 &nbsp;·&nbsp; PF 727.9</div><br/>
+        <div class="score lo">95.26<span class="lbl">Wk6 — Low Scorer</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> J.Herbert 18.76 · J.Verse 17.5 · A.Jeanty 15.6 · R.Spillane 7.5 · Gibbs 7.0
+        </div>
+      </div>
+
+      <div class="team torn">
+        <div class="rnk">11</div>
+        <div class="mvmt flat">—</div>
+        <div class="streak">L6</div>
+        <div class="rn r-l" data-text="BURDEN OF ETIENNE-Y WOODY"></div>
+        <div class="owner">Owner: kharlow &nbsp;// Elo 1324</div>
+        <div class="rec">0-6 &nbsp;·&nbsp; PF 732.7</div><br/>
+        <div class="score lo">99.20<span class="lbl">Wk6 — Blown out by 65</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> B.Young 21.0 · K.Bourne 16.7 · DEN DEF 15.0 · Tua 9.6 · T.Smith 7.5
+        </div>
+      </div>
+
+      <div class="team">
+        <div class="rnk">12</div>
+        <div class="mvmt flat">—</div>
+        <div class="streak">L6</div>
+        <div class="rn r-l" data-text="FATHER TIME"></div>
+        <div class="owner">Owner: Redrumsregrub &nbsp;// Elo 1330</div>
+        <div class="rec">0-6 &nbsp;·&nbsp; PF 712.7</div><br/>
+        <div class="score lo">107.66<span class="lbl">Wk6 — Buried by Legion</span></div>
+        <div class="top">
+          <b>WK6 MUGSHOTS:</b> L.McConkey 19.5 · T.McMillan 16.4 · B.Nix 13.36 · A.Hutchinson 9.0 · E.Engram 7.4
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="demand">
+    <div class="rn r-xl" data-text="UPSET!!!"></div>
+    <p class="lede">
+      TO WHOM IT MAY CONCERN&nbsp;— &nbsp;FOUR (4) OF SIX (6) GAMES THIS WEEK WERE UPSETS.
+      THE TOP OF THE TABLE HAS BEEN RANSACKED. IF YOU EVER WANT TO SEE YOUR
+      <span class="redact">XXXXXX</span> AGAIN, WE SUGGEST YOU CHECK THE WAIVER WIRE
+      <span class="redact">XXXXXXXXXX</span> IMMEDIATELY. NO COPS. NO BACKSIES. NO WHINING IN THE GROUP CHAT.
+    </p>
+    <div class="upsets">
+      <div class="u">MHJTIME 140.94 def KITTLER 107.74 <span class="mrg">+33.20</span><span class="vs">WK6 — DEFENDING CHAMP FELL FROM #1 TO #5</span></div>
+      <div class="u">BOONIST MONKS 150.46 def RASHEEING 109.10 <span class="mrg">+41.36</span><span class="vs">WK6 — PICKENS 27.3 &amp; JSN 26.2 DID IT</span></div>
+      <div class="u">NOBLE FFT 151.88 def GRAYSKULL 121.30 <span class="mrg">+30.58</span><span class="vs">WK6 — BIJAN DROPPED 32.8 ON THEM</span></div>
+      <div class="u">(AND 2 CHALK WINS IF U COUNT 'EM)<span class="mrg">LEGION · KEN-OBI</span><span class="vs">WK6 — LEGION 165.9 · KEN-OBI 164.94. BOTH 5-1.</span></div>
+    </div>
+  </section>
+
+  <div class="sect-title">
+    <div class="rn r-xl" data-text="MOST WANTED — WEEK 6"></div>
+  </div>
+
+  <div class="wanted-wrap">
+    <div class="wanted">
+      <div class="stencil">WANTED</div>
+      <div class="pos">RB / ATL</div>
+      <div class="nm">BIJAN ROBINSON</div>
+      <div class="pts">32.8</div>
+      <div class="team-tag">for Noble FFT</div>
+      <div class="reward">REWARD: 1 upset</div>
+    </div>
+    <div class="wanted">
+      <div class="stencil">WANTED</div>
+      <div class="pos">QB / KC</div>
+      <div class="nm">PATRICK MAHOMES</div>
+      <div class="pts">30.48</div>
+      <div class="team-tag">for Legion of Bouz</div>
+      <div class="reward">REWARD: week high</div>
+    </div>
+    <div class="wanted">
+      <div class="stencil">WANTED</div>
+      <div class="pos">RB / DAL</div>
+      <div class="nm">RICO DOWDLE</div>
+      <div class="pts">30.9</div>
+      <div class="team-tag">for MHJTIME</div>
+      <div class="reward">REWARD: dethroned champ</div>
+    </div>
+    <div class="wanted">
+      <div class="stencil">WANTED</div>
+      <div class="pos">RB / NYG</div>
+      <div class="nm">CAM SKATTEBO</div>
+      <div class="pts">30.0</div>
+      <div class="team-tag">for Legion of Bouz</div>
+      <div class="reward">REWARD: co-conspirator</div>
+    </div>
+    <div class="wanted">
+      <div class="stencil">WANTED</div>
+      <div class="pos">RB / MIA</div>
+      <div class="nm">DE'VON ACHANE</div>
+      <div class="pts">30.0</div>
+      <div class="team-tag">for Rasheeing</div>
+      <div class="reward">REWARD: lost anyway</div>
+    </div>
+  </div>
+
+  <div class="sect-title">
+    <div class="rn r-xl" data-text="EVIDENCE LOCKER"></div>
+  </div>
+
+  <div class="evidence">
+    <div class="tag">
+      <span class="lab">EXHIBIT A</span>
+      <div class="big">+65.74</div>
+      <div class="cap">
+        <b>GENERAL KEN-OBI 164.94</b> vs Burden of Etienne-y Woody 99.20.
+        Biggest blowout of Week 6. LAR DEF piled on 27.0 alone. Kharlow's team is on a 6-game losing streak and the math isn't getting prettier.
+      </div>
+    </div>
+    <div class="tag">
+      <span class="lab">EXHIBIT B</span>
+      <div class="big">107.74</div>
+      <div class="cap">
+        <b>KITTLER ON THE ROOF</b>, defending champion, scored this number on the week he was ranked #1.
+        J.Taylor (21.7) and Mayfield (18.64) showed up. Nobody else did. W1 → L1. #1 → #5. The drop of the season so far.
+      </div>
+    </div>
+    <div class="tag">
+      <span class="lab">EXHIBIT C</span>
+      <div class="big">32.8</div>
+      <div class="cap">
+        <b>BIJAN ROBINSON</b>, RB, Atlanta. For Noble FFT. Kevobucks walked into Week 6 at 2-3, walked out at 3-3,
+        and beat Ghastly Grayskull Gang by 30.58 because one man decided the football was personal.
+      </div>
+    </div>
+  </div>
+
+  <div class="sect-title">
+    <div class="rn r-xl" data-text="THE BLOTTER — WEEK 6 BY THE NUMBERS"></div>
+  </div>
+
+  <section class="blotter">
+    <div class="rn r-l" data-text="STATS THEY DON'T WANT YOU TO SEE"></div>
+    <div class="blotter-grid">
+      <div class="stat"><span class="k">Week High</span><span class="v">165.90</span><span class="u">Legion of Bouz</span></div>
+      <div class="stat"><span class="k">Week Low</span><span class="v">95.26</span><span class="u">Chudders FT</span></div>
+      <div class="stat"><span class="k">Week Avg</span><span class="v">128.7</span><span class="u">10 under season avg</span></div>
+      <div class="stat"><span class="k">Season Avg</span><span class="v">138.5</span><span class="u">through 6 of 14 wks</span></div>
+      <div class="stat"><span class="k">Upsets</span><span class="v">4 / 6</span><span class="u">upset sunday confirmed</span></div>
+      <div class="stat"><span class="k">Top Elo</span><span class="v">1700</span><span class="u">General Ken-obi</span></div>
+      <div class="stat"><span class="k">Biggest Blowout</span><span class="v">+65.74</span><span class="u">Ken-obi / Burden</span></div>
+      <div class="stat"><span class="k">Closest Top Game</span><span class="v">0.96</span><span class="u">Legion − Ken-obi gap</span></div>
+    </div>
+  </section>
+
+  <div class="sect-title">
+    <div class="rn r-xl" data-text="BULLETIN BOARD — VOICES FROM THE CHAT"></div>
+  </div>
+
+  <section class="bulletin">
+    <div class="rn r-l" data-text="NOTES LEFT PINNED"></div>
+    <div class="bulletin-grid">
+
+      <div class="note">
+        <span class="name">bchodos — Kittler on the Roof</span>
+        <span class="q">"107 points. 107. I had Jonathan Taylor go for 21 and somehow still got shoved into a locker. If anybody needs me I'll be in the film room, possibly crying."</span>
+        <span class="tag2">— from #1 to #5, W1 to L1, via MHJTIME</span>
+      </div>
+
+      <div class="note">
+        <span class="name">rango_ — MHJTIME</span>
+        <span class="q">"Rico Dowdle? RICO DOWDLE. 30.9. For MHJTIME. You cannot make this up. The champ had a floor, we found the trapdoor underneath."</span>
+        <span class="tag2">— def Kittler 140.94 − 107.74</span>
+      </div>
+
+      <div class="note">
+        <span class="name">kevobucks — Noble FFT</span>
+        <span class="q">"Bijan put up 32.8 and I walked into the living room and just screamed at the TV for ten minutes. My team is 3-3 now. I am emotionally 6-0."</span>
+        <span class="tag2">— upset Grayskull by 30.58</span>
+      </div>
+
+      <div class="note">
+        <span class="name">bLaker24 — General Ken-obi</span>
+        <span class="q">"Elo's at 1700. I'm 5-1. Legion is 5-1. Next week is going to be a problem for everybody in this league and specifically for one (1) of us."</span>
+        <span class="tag2">— Titles: 2, climbing</span>
+      </div>
+
+      <div class="note">
+        <span class="name">KidBouzie — Legion of Bouz</span>
+        <span class="q">"Mahomes 30.48, Skattebo 30. You can't script it better. Ken-obi wants smoke? Bring the whole lighter factory."</span>
+        <span class="tag2">— 165.9, Week 6 high score</span>
+      </div>
+
+      <div class="note">
+        <span class="name">Group Chat (unsigned, 2:47am)</span>
+        <span class="q">"if burden and father time tie next week i'm calling the commissioner and the FBI"</span>
+        <span class="tag2">— toilet bowl matinee incoming</span>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="sect-title">
+    <div class="rn r-xl" data-text="WEEK 7 SLATE — YOU WERE WARNED"></div>
+  </div>
+
+  <section class="slate">
+    <div class="rn r-l" data-text="THE UPCOMING FELONIES"></div>
+    <div class="slate-grid">
+
+      <div class="game marquee">
+        <span class="ttl">#1 LEGION OF BOUZ  vs  #2 GENERAL KEN-OBI</span>
+        The marquee. Both 5-1. Both scored ~165 in Week 6. Mahomes vs. Drake Maye's breakout.
+        Titles on the line? No. Bragging rights forever? Absolutely. Ken-obi at Elo 1700. Legion at +1 and W1. Bring bail money.
+      </div>
+
+      <div class="game">
+        <span class="ttl">#4 BOONIST MONKS  vs  #8 NOBLE FFT</span>
+        The two biggest W6 upset winners collide. Pickens+JSN vs. Bijan. Whoever wins this looks frisky. Whoever loses looks fraudulent.
+      </div>
+
+      <div class="game">
+        <span class="ttl">#5 KITTLER ON THE ROOF  vs  #3 SLEEPING GIANTS</span>
+        Kittler's revenge tour starts here against a 5-1 team riding a 4-game win streak. If Kittler can't right the ship vs. Giants, the champ window cracks open.
+      </div>
+
+      <div class="game">
+        <span class="ttl">#6 RASHEEING THE SCENE  vs  #9 GRAYSKULL GANG</span>
+        Rasheeing dropped two in a row but has Elo 1626 — still the 3rd-strongest under the hood. A get-right game. In theory. Theory has had a bad week.
+      </div>
+
+      <div class="game">
+        <span class="ttl">#10 CHUDDERS FT  vs  #7 MHJTIME</span>
+        Chudders 1-5, low scorer of W6 (95.26). MHJTIME toppled the champ and is rolling. Spread: don't bother.
+      </div>
+
+      <div class="game">
+        <span class="ttl">#11 BURDEN  vs  #12 FATHER TIME</span>
+        TOILET BOWL MATINEE. Both 0-6. Both on L6. Somebody has to win. The league is taking bets on who doesn't.
+      </div>
+
+    </div>
+  </section>
+
+  <div class="sect-title">
+    <div class="rn r-xl" data-text="THE MANIFESTO (TYPED IN ANGER)"></div>
+  </div>
+
+  <article class="manifesto">
+    <p>
+      <span class="drop">W</span>EEK 6 was a HOSTAGE situation and nobody paid the ransom. The defending
+      <span class="yel">CHAMPION</span>, KITTLER ON THE ROOF, walked in at #1 and walked out at #5 after
+      putting up a whole <b>107.74</b> — a number so bad it feels like a <span class="strike">typo</span>.
+      MHJTIME did not play fair. They never do. They sent RICO DOWDLE (30.9) and JAYDEN DANIELS (22.64)
+      and a LAS VEGAS defense (17.0) and told the champ to please leave the building.
+    </p>
+    <p>
+      Meanwhile the BOONIST MONKS rose two spots on the back of PICKENS and SMITH-NJIGBA, two (2) WRs
+      who combined for <b>53.5</b> because football is not a fair sport and neither is this leauge.
+      FOUR of six games were <span class="pk">UPSETS</span>. The top five got shuffled like a deck of
+      soggy cards. NOBLE FFT, 2-3 coming in, dropped <b>151.88</b> because BIJAN ROBINSON decided to
+      go ahead and score <b>32.8</b> just to keep this newsletter inntresting.
+    </p>
+    <p>
+      Up top the two undefeated-by-standards teams — THE LEGION OF BOUZ (165.9) and
+      GENERAL KEN-OBI (164.94) — looked at each other across the bracket and agreed, silently,
+      wordlessly, to SETTLE IT NEXT WEEK. Ken-obi has Elo <span class="cy">1700</span>, the peak of
+      his fantasy football career. Legion has Mahomes doing Mahomes things. Week 7 is going to be a
+      <span class="blk">MASSACRE</span> one way or the other.
+    </p>
+    <p>
+      Down in the basement, BURDEN OF ETIENNE-Y WOODY and FATHER TIME continue their 0-6 death
+      spiral, both on L6 streaks, both about to face each other in what the commissioner has
+      dubiously marketed as the "TOILET BOWL MATINEE." Please do not watch it. Please do. We
+      can't decide. Bring bail money.
+    </p>
+  </article>
+
+  <div class="sect-title">
+    <div class="rn r-xl" data-text="ERRATA & CORRECTIONS"></div>
+  </div>
+
+  <section class="demand" style="border-color:var(--ink);border-style:dashed;background:var(--paper)">
+    <div class="rn r-l" data-text="WHERE WE MAY HAVE LIED"></div>
+    <p class="lede">
+      In last week's issue (W5) we implied KITTLER ON THE ROOF was "the unbeatable defending champion."
+      <span class="strike">THIS HAS BEEN RETRACTED</span>. Kittler is 4-2, on an L1, and ranked #5.
+      We regret the error. We do not regret the bit.
+    </p>
+    <p class="lede">
+      Also: we said RASHEEING THE SCENE was "the stealth best team under the hood" at Elo 1626.
+      <b>THIS REMAINS TRUE.</b> They are also 4-2, on an L1, and lost to the Boonist Monks by 41.
+      Elo and vibes have officially divorced.
+    </p>
+    <p class="lede">
+      Finally: the phrase "TOILET BOWL MATINEE" was introduced in this issue (W6) and is already
+      being overused. Send complaints to <span class="redact">XXXXXXXX</span> c/o THE LEAGUE THAT NEVER SHUTS UP.
+      All complaints will be photocopied, crumpled, and re-pasted into next week's front page.
+    </p>
+  </section>
+
+  <footer class="footer">
+    <div class="rn r-xl" data-text="BURN AFTER READING"></div>
+    <div class="rn r-l" data-text="NEXT WK: #1 LEGION VS #2 KEN-OBI"></div>
+    <div class="sig">
+      — FROM THE DESK OF THE LEAGUE THAT NEVER SHUTS UP — &nbsp;·&nbsp;
+      BRING BAIL MONEY &nbsp;·&nbsp; THIS NEWSLETTER WILL SELF-DESTRUCT &nbsp;·&nbsp; NO REFUNDS
+    </div>
+  </footer>
+
+</article>
+
+<script>
+/* Fixed-seed deterministic ransom-letter renderer.
+   Uses DOM createElement (no innerHTML) so character data
+   cannot be reinterpreted as markup. Same text in, same
+   layout out on every reload — zero flicker. */
+(function(){
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = a ^ a >>> 15;
+      t = Math.imul(t | 1, t);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function hash(str){
+    var h = 2166136261 >>> 0;
+    for (var i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  var nodes = document.querySelectorAll('.rn[data-text]');
+  for (var n=0; n<nodes.length; n++){
+    var el = nodes[n];
+    var txt = el.getAttribute('data-text') || '';
+    var rand = mulberry32(hash(txt + '|' + n));
+    // clear any existing children safely
+    while (el.firstChild) el.removeChild(el.firstChild);
+    for (var i=0; i<txt.length; i++){
+      var ch = txt.charAt(i);
+      var span = document.createElement('span');
+      if (ch === ' '){
+        span.className = 'sp';
+        span.appendChild(document.createTextNode('\u00A0'));
+        el.appendChild(span);
+        continue;
+      }
+      var fontIdx = Math.floor(rand()*7);
+      var bgIdx   = Math.floor(rand()*7);
+      var rot     = (rand()*14 - 7).toFixed(2);
+      var ty      = (rand()*8 - 4).toFixed(1);
+      var sc      = (0.82 + rand()*0.45).toFixed(2);
+      span.className = 'f'+fontIdx+' b'+bgIdx;
+      span.style.transform = 'translateY('+ty+'px) rotate('+rot+'deg) scale('+sc+')';
+      span.appendChild(document.createTextNode(ch));
+      el.appendChild(span);
+    }
+  }
+})();
+</script>
+</body>
+</html>

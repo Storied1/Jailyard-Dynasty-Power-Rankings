@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE DRAFT - Week 6 | The Jailyard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,300;1,6..72,400&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;
+  --fg:#d4d4d4;
+  --fg-bright:#f0f0f0;
+  --cursor:#d4a017;
+  --strike:#6b3a3a;
+  --strike-text:#7a5555;
+  --nah:#c0845e;
+  --muted:#555;
+  --accent:#8b5cf6;
+  --accent2:#ec4899;
+  --draft-font:'JetBrains Mono',monospace;
+  --final-font:'Newsreader',Georgia,serif;
+  --handwriting:'Caveat',cursive;
+  --rank-good:#2d6a4f;
+  --rank-bad:#6b2c2c;
+}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--draft-font);
+  line-height:1.7;
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:default;
+}
+
+/* ── Page wrapper ── */
+#page{
+  max-width:760px;
+  margin:0 auto;
+  padding:3rem 1.5rem 6rem;
+  position:relative;
+}
+
+/* ── Cursor ── */
+#cursor{
+  display:inline-block;
+  width:0.6em;
+  height:1.15em;
+  background:var(--cursor);
+  vertical-align:text-bottom;
+  margin-left:1px;
+  animation:blink 1s step-end infinite;
+  border-radius:1px;
+}
+#cursor.typing{animation:none;opacity:1}
+#cursor.hidden{display:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── Content area ── */
+#content{
+  min-height:60vh;
+  font-size:1rem;
+  letter-spacing:-0.01em;
+  word-spacing:0.02em;
+}
+
+/* ── Headline ── */
+.headline{
+  font-size:clamp(1.6rem,4vw,2.4rem);
+  font-weight:700;
+  color:var(--fg-bright);
+  line-height:1.25;
+  margin-bottom:1.5rem;
+  letter-spacing:-0.03em;
+}
+
+/* ── Section headers ── */
+.section-header{
+  font-size:1.1rem;
+  font-weight:700;
+  color:var(--accent);
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  margin-top:2.5rem;
+  margin-bottom:1rem;
+  border-bottom:1px solid #222;
+  padding-bottom:0.3rem;
+}
+
+/* ── Essay paragraphs ── */
+.essay-para{
+  margin-bottom:1.2rem;
+  text-indent:0;
+}
+
+/* ── Strikethrough (the magic) ── */
+.struck{
+  text-decoration:line-through;
+  text-decoration-color:var(--strike);
+  color:var(--strike-text);
+  opacity:0.7;
+  font-style:italic;
+  position:relative;
+}
+
+/* ── "nah" annotation ── */
+.nah{
+  font-family:var(--handwriting);
+  color:var(--nah);
+  font-size:0.85em;
+  font-style:italic;
+  margin:0 0.3em;
+  opacity:0;
+  display:inline-block;
+  transition:opacity 0.4s ease;
+}
+.nah.visible{opacity:1}
+
+/* ── Delete flash (whole sentence highlight before delete) ── */
+.delete-highlight{
+  background:rgba(180,60,60,0.15);
+  border-radius:2px;
+  transition:background 0.3s;
+}
+
+/* ── Ranking entry ── */
+.rank-entry{
+  margin-bottom:1.8rem;
+  padding-left:0;
+}
+.rank-number{
+  font-size:1.3rem;
+  font-weight:700;
+  color:var(--accent2);
+  margin-right:0.4em;
+}
+.rank-team{
+  font-weight:700;
+  color:var(--fg-bright);
+}
+.rank-record{
+  color:var(--muted);
+  font-weight:300;
+  margin-left:0.5em;
+}
+.rank-movement{
+  font-size:0.8em;
+  margin-left:0.5em;
+  font-weight:700;
+}
+.rank-movement.up{color:#2d9c5e}
+.rank-movement.down{color:#c0392b}
+.rank-movement.steady{color:var(--muted)}
+.rank-blurb{
+  margin-top:0.4rem;
+  color:var(--fg);
+  font-size:0.92rem;
+  line-height:1.65;
+}
+
+/* ── Confessional ── */
+.confessional{
+  margin:1.5rem 0;
+  padding:1rem 1.2rem;
+  border-left:3px solid var(--accent);
+  background:rgba(139,92,246,0.04);
+  border-radius:0 6px 6px 0;
+}
+.confessional-team{
+  font-weight:700;
+  color:var(--accent);
+  font-size:0.85rem;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  margin-bottom:0.3rem;
+}
+.confessional-text{
+  font-style:italic;
+  color:var(--fg);
+  font-size:0.92rem;
+  line-height:1.65;
+}
+
+/* ── Mailbag ── */
+.mailbag-q{
+  font-weight:700;
+  color:var(--fg-bright);
+  margin-bottom:0.3rem;
+}
+.mailbag-a{
+  color:var(--fg);
+  margin-bottom:1.5rem;
+  font-size:0.92rem;
+  line-height:1.65;
+}
+
+/* ── Font transition: draft -> final ── */
+.finalized{
+  font-family:var(--final-font);
+  letter-spacing:0;
+  transition:font-family 0.8s ease, letter-spacing 0.8s ease;
+}
+.finalized .headline{
+  font-family:var(--final-font);
+}
+
+/* ── Controls bar ── */
+#controls{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0.7rem 1.5rem;
+  background:rgba(0,0,0,0.9);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-top:1px solid #1a1a1a;
+  font-family:var(--draft-font);
+  font-size:0.8rem;
+  gap:1rem;
+}
+#controls.hidden{display:none}
+
+.ctrl-group{display:flex;align-items:center;gap:0.6rem}
+
+.ctrl-btn{
+  padding:0.35rem 0.8rem;
+  border:1px solid #333;
+  border-radius:4px;
+  background:#111;
+  color:var(--fg);
+  font-family:var(--draft-font);
+  font-size:0.78rem;
+  cursor:pointer;
+  transition:all 0.2s;
+  white-space:nowrap;
+}
+.ctrl-btn:hover{border-color:var(--accent);color:var(--fg-bright)}
+.ctrl-btn.active{border-color:var(--accent);background:rgba(139,92,246,0.15);color:var(--fg-bright)}
+.ctrl-btn.skip{
+  border-color:var(--cursor);
+  color:var(--cursor);
+  font-weight:700;
+}
+.ctrl-btn.skip:hover{background:rgba(212,160,23,0.15)}
+
+#word-count{
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+  min-width:5em;
+  text-align:right;
+}
+
+#final-wc{
+  text-align:center;
+  padding:2rem 1rem 1rem;
+  font-family:var(--draft-font);
+  font-size:0.8rem;
+  color:var(--muted);
+  letter-spacing:0.05em;
+}
+#final-wc.hidden{display:none}
+#final-wc .wc-line{margin-bottom:0.3rem}
+#final-wc .wc-label{
+  font-size:0.7rem;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  color:#444;
+}
+
+#progress-label{
+  color:var(--muted);
+  font-size:0.75rem;
+}
+
+/* ── Progress bar ── */
+#progress-bar-wrap{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:2px;
+  background:#111;
+  z-index:101;
+}
+#progress-bar{
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width 0.3s ease;
+}
+
+/* ── Splash screen ── */
+#splash{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:opacity 0.6s ease;
+}
+#splash.fade{opacity:0;pointer-events:none}
+#splash h1{
+  font-family:var(--draft-font);
+  font-size:clamp(2rem,6vw,4rem);
+  font-weight:700;
+  letter-spacing:-0.04em;
+  color:var(--fg-bright);
+  margin-bottom:0.5rem;
+}
+#splash .sub{
+  font-family:var(--draft-font);
+  font-size:clamp(0.8rem,2vw,1rem);
+  color:var(--muted);
+  margin-bottom:2.5rem;
+  text-align:center;
+  line-height:1.6;
+}
+#splash .start-btn{
+  padding:0.8rem 2.5rem;
+  border:2px solid var(--cursor);
+  border-radius:6px;
+  background:transparent;
+  color:var(--cursor);
+  font-family:var(--draft-font);
+  font-size:1rem;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:0.04em;
+  transition:all 0.3s;
+}
+#splash .start-btn:hover{
+  background:rgba(212,160,23,0.12);
+  transform:translateY(-1px);
+}
+#splash .hint{
+  margin-top:1rem;
+  font-size:0.75rem;
+  color:#444;
+}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  #page{padding:2rem 1rem 5rem}
+  .headline{font-size:clamp(1.3rem,5vw,1.8rem)}
+  #content{font-size:0.9rem}
+  .rank-blurb,.confessional-text,.mailbag-a{font-size:0.85rem}
+  #controls{padding:0.5rem 0.8rem;font-size:0.72rem;flex-wrap:wrap;justify-content:center}
+  .ctrl-btn{padding:0.3rem 0.6rem;font-size:0.72rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Splash screen -->
+<div id="splash">
+  <h1>THE DRAFT</h1>
+  <div class="sub">
+    Watch the weekly column get written. In real time.<br>
+    Every pause. Every revision. Every word the writer almost said.
+  </div>
+  <button class="start-btn" id="startBtn">Begin Writing</button>
+  <div class="hint">or press Enter</div>
+</div>
+
+<!-- Progress bar -->
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<!-- Main content -->
+<div id="page">
+  <div id="content"></div>
+</div>
+
+<!-- Controls -->
+<div id="controls" class="hidden">
+  <div class="ctrl-group">
+    <button class="ctrl-btn skip" id="skipBtn" title="Press S or double-tap">SKIP</button>
+    <span id="progress-label"></span>
+  </div>
+  <div class="ctrl-group">
+    <button class="ctrl-btn active" data-speed="1">1x</button>
+    <button class="ctrl-btn" data-speed="3">3x</button>
+    <button class="ctrl-btn" data-speed="10">10x</button>
+  </div>
+  <div id="word-count">0 words</div>
+</div>
+
+<!-- Final word count (shown after typing completes) -->
+<div id="final-wc" class="hidden"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ═══════════════════════════════════════════════════════
+  // CONFIGURATION
+  // ═══════════════════════════════════════════════════════
+  var BASE_CHAR_DELAY = 28;     // ms per char at 1x (~60 WPM)
+  var FAST_MULT = 0.6;          // confident text speed multiplier
+  var SLOW_MULT = 2.0;          // data/stats speed multiplier
+  var PAUSE_SHORT = 600;        // thinking pause (ms at 1x)
+  var PAUSE_MEDIUM = 1200;
+  var PAUSE_LONG = 2200;
+  var PAUSE_DRAMATIC = 3500;
+  var BACKSPACE_DELAY = 40;     // ms per backspace char
+  var NAH_DISPLAY_MS = 1200;    // how long "nah" shows before replacement text
+  var DELETE_HIGHLIGHT_MS = 800; // highlight duration before wiping a sentence
+  var SECTION_PAUSE = 2000;     // pause between major sections
+
+  // ═══════════════════════════════════════════════════════
+  // CONTENT SCRIPT (the "writing session")
+  // ═══════════════════════════════════════════════════════
+  // Each instruction is an object:
+  //   {type:'type', text:'...'}                           - type out text
+  //   {type:'type', text:'...', speed:'fast'|'slow'}      - speed variant
+  //   {type:'pause', ms: N}                               - writer thinks
+  //   {type:'strike', text:'bad text', replace:'good text'} - strikethrough + replace
+  //   {type:'nah', text:'sentence to delete', replace:'better sentence'} - highlight, "nah", delete, retype
+  //   {type:'backspace', count:N}                         - delete N chars then continue
+  //   {type:'newline'}                                    - line break
+  //   {type:'section', tag:'div', cls:'classname'}        - open a new container
+  //   {type:'closeSection'}                               - close current container
+  //   {type:'finalize'}                                   - transition section to final font
+
+  var script = [
+    // ── PHASE 1: THE HEADLINE ──
+    {type:'section', tag:'div', cls:'headline'},
+    {type:'type', text:'Week 6:', speed:'fast'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'type', text:' The Week'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'backspace', count:8},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' Kittler Held the Throne for'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'backspace', count:27},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' One Week at the Top and Nobody Survived It', speed:'fast'},
+    {type:'pause', ms: PAUSE_LONG},
+    {type:'backspace', count:43},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'type', text:' The Seven-Day Reign', speed:'fast'},
+    {type:'closeSection'},
+    {type:'finalize'},
+    {type:'pause', ms: SECTION_PAUSE},
+
+    // ── PHASE 2: THE ESSAY ──
+    {type:'section', tag:'div', cls:'section-header'},
+    {type:'type', text:'THE COLUMN', speed:'fast'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_SHORT},
+
+    // Essay paragraph 1
+    {type:'section', tag:'p', cls:'essay-para'},
+    {type:'type', text:'Kittler on the Roof held the number one ranking for exactly seven days.', speed:'fast'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+
+    {type:'section', tag:'p', cls:'essay-para'},
+    {type:'strike', text:'One week. That\'s it.', replace:'One week. That\'s how long the defending champion sat on the throne before MHJTIME'},
+    {type:'type', text:' \u2014 the same 1-3 team getting eulogized a fortnight ago \u2014 walked in and dropped '},
+    {type:'type', text:'140.94', speed:'slow'},
+    {type:'type', text:' on the crown.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' Rico Dowdle went for '},
+    {type:'type', text:'30.9', speed:'slow'},
+    {type:'type', text:'. Ja\'Marr Chase added '},
+    {type:'type', text:'20.1', speed:'slow'},
+    {type:'type', text:'. Jayden Daniels orchestrated with '},
+    {type:'type', text:'22.64', speed:'slow'},
+    {type:'type', text:'.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' And Kittler\'s 107.74 \u2014 a score that would\'ve lost to eight of the twelve teams this week \u2014 sent the defending champion tumbling from first to fifth in the most dramatic single-week fall the power rankings have recorded.'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'nah', text:' It was brutal.', replace:' It was a prestige-TV collapse: the slow build to the top, the one-week reign, the sudden freefall while the credits roll.'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_LONG},
+
+    // Essay paragraph 2
+    {type:'section', tag:'p', cls:'essay-para'},
+    {type:'type', text:'Last week, five teams shared a penthouse at 4-1 and we called it unprecedented parity. This week, three of them separated at 5-1, and both of the other two dropped out of the top four entirely.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' So who filled the vacuum at the top?'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'type', text:' The Legion of Bouz reclaimed the number one spot with '},
+    {type:'type', text:'165.9', speed:'slow'},
+    {type:'type', text:' \u2014 Mahomes and Cam Skattebo each eclipsed 30 points \u2014 '},
+    {type:'type', text:'while General Ken-obi stormed from fifth to second behind a '},
+    {type:'type', text:'164.94', speed:'slow'},
+    {type:'type', text:' demolition of Burden that featured the week\'s most absurd stat line: '},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'strike', text:'a defense scored 27', replace:'the Rams defense scored 27.0 points. A defense. Twenty-seven.'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+
+    // Essay paragraph 3 - trade bazaar
+    {type:'section', tag:'p', cls:'essay-para'},
+    {type:'type', text:'Meanwhile, the group chat turned into a trade bazaar.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' Brent opened the market with a casual "Hit me up if in need of."'},
+    {type:'type', text:' Karim countered with "2/3 top QBs come at me."'},
+    {type:'type', text:' Harlow pitched "2 of the top 3 RBs on the Chiefs."'},
+    {type:'type', text:' Zach offered "Buncha old serviceable WR3/4s here."'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' And then Ben delivered the line of the week: "If you want some old serviceable WR3/4s with championship pedigree instead of Zach\'s 2nd place also rans, let me know."', speed:'fast'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'strike', text:'Brent said Zach got owned.', replace:'Brent\'s verdict \u2014 "Zach got served by Ben" \u2014 was the only punctuation that moment needed.'},
+    {type:'type', text:' The trade deadline hasn\'t arrived, but the desperation has.'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_LONG},
+
+    // Essay paragraph 4
+    {type:'section', tag:'p', cls:'essay-para'},
+    {type:'type', text:'But forget the bottom of the standings for a second. Circle next week in permanent marker: '},
+    {type:'type', text:'The Legion of Bouz versus General Ken-obi.', speed:'fast'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' First versus second. Both 5-1. Two former champions with three titles between them. Mahomes versus Maye.'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'nah', text:' This is the biggest game of the year.', replace:' The Jailyard doesn\'t do regular-season Super Bowls \u2014 until it does.'},
+    {type:'closeSection'},
+    {type:'finalize'},
+    {type:'pause', ms: SECTION_PAUSE},
+
+    // ── PHASE 3: POWER RANKINGS ──
+    {type:'section', tag:'div', cls:'section-header'},
+    {type:'type', text:'POWER RANKINGS', speed:'fast'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_LONG},
+
+    // #1
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#1.</span>', speed:'fast', html:true},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:'<span class="rank-team">The Legion of Bouz</span><span class="rank-record">(5-1)</span><span class="rank-movement up">\u2191 1</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'Mahomes went for 30.48. Cam Skattebo added 30.0. Two players north of 30, and you didn\'t even need ARSB to carry the scoring this time.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' Your 165.9 was the week\'s highest score for the second time in four weeks.'},
+    {type:'strike', text:' The preseason said you were stuck.', replace:' Remember when the preseason said "since winning the inaugural title in 2022, you\'ve been stuck in the middle"? At 5-1 with the most points in the Jailyard, the middle is a rearview mirror.'},
+    {type:'type', text:' The Voltron receivers assembled. Now they need to survive the franchise that everyone measures themselves against.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+
+    // #2
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#2.</span>', speed:'fast', html:true},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:'<span class="rank-team">General Ken-obi</span><span class="rank-record">(5-1)</span><span class="rank-movement up">\u2191 3</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'The Rams defense scored 27.0 points. Let that sink in. Your best player this week was a team defense, and you still hung 164.94 on Burden in a 65.74-point blowout \u2014 the biggest margin of the entire week.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' Your Elo hit its all-time peak at 1700.2 \u2014 the highest rating in Jailyard history.'},
+    {type:'type', text:' Next week\'s matchup against the Legion is circled on every calendar in the league.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+
+    // #3
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#3.</span>', speed:'fast', html:true},
+    {type:'type', text:'<span class="rank-team">Sleeping Giants</span><span class="rank-record">(5-1)</span><span class="rank-movement steady">\u2014</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'Four straight wins. Josh Jacobs bulldozed for 29.5, Jalen Hurts added 21.62. The all-time series against Chudders is now 5-0 \u2014 at this point it\'s less of a stat and more of a restraining order.'},
+    {type:'type', text:' The preseason ranked you eleventh. You\'re third. The zombies are alive.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_SHORT},
+
+    // #4
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#4.</span>', speed:'fast', html:true},
+    {type:'type', text:'<span class="rank-team">The Boonist Monks</span><span class="rank-record">(4-2)</span><span class="rank-movement up">\u2191 2</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'George Pickens went nuclear \u2014 27.3 points. Jaxon Smith-Njigba added 26.2. That\'s 53.5 combined from your top two receivers in a 150.46-point performance.'},
+    {type:'type', text:' Your Elo jumped 25.9 points, the biggest gain of any team this week.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_SHORT},
+
+    // #5
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#5.</span>', speed:'fast', html:true},
+    {type:'type', text:'<span class="rank-team">Kittler on the Roof</span><span class="rank-record">(4-2)</span><span class="rank-movement down">\u2193 4</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'From the summit to the middle of the pack in seven days.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'strike', text:' Your WRs were bad.', replace:' Your WR room combined for fewer points than Rico Dowdle scored by himself.'},
+    {type:'type', text:' Your Elo cratered 28.7 points, the steepest drop in the league this week.'},
+    {type:'nah', text:' The defending champ is in trouble.', replace:' Runner-up in 2022, runner-up in 2023, champion in 2024, and now the fifth-ranked team in Week 6. Consistency is still the brand \u2014 it\'s just being consistently humbled right now.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_SHORT},
+
+    // #6-8 (faster, less drama)
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#6.</span><span class="rank-team">Rasheeing the Scene</span><span class="rank-record">(4-2)</span><span class="rank-movement down">\u2193 2</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'De\'Von Achane dropped 30.0 points and you still lost by 41.36. Read that again. Your kicker was your second-highest scorer at 18.4. When that happens, the problem isn\'t Achane \u2014 it\'s everyone who isn\'t Achane.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#7.</span><span class="rank-team">MHJTIME</span><span class="rank-record">(3-3)</span><span class="rank-movement steady">\u2014</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'Two weeks ago this column was writing your eulogy. Now you\'ve won two straight by a combined 64.76 points. Rico Dowdle followed last week\'s 31.9 with 30.9 \u2014 the running back nobody had on preseason rosters is suddenly your most reliable weapon.'},
+    {type:'type', text:' The "what if" franchise just became the "what now" franchise.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#8.</span><span class="rank-team">Noble FFT</span><span class="rank-record">(3-3)</span><span class="rank-movement up">\u2191 1</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'Bijan Robinson. Thirty-two point eight. The week\'s top performer finally delivered the kind of game the preseason promised.'},
+    {type:'type', text:' One 32-point game from Bijan doesn\'t erase five weeks of the supporting cast treating production like a suggestion.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'pause', ms: PAUSE_SHORT},
+
+    // #9-11
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#9.</span><span class="rank-team">Ghastly Grayskull Gang</span><span class="rank-record">(2-4)</span><span class="rank-movement down">\u2193 1</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'Back-to-back losses. When a defensive end is outscoring most of your offensive starters, the blueprint needs revising. Oscar was active in the chat this week \u2014 mostly roasting other teams \u2014 but at 2-4, the jokes are starting to land on the wrong side.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#10.</span><span class="rank-team">Chudders Football Team</span><span class="rank-record">(1-5)</span><span class="rank-movement steady">\u2014</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'Matt accidentally dropped Haskins on the Sleeper app this week. "There\'s absolutely no way in my right mind I meant to drop Haskins." The league\'s reaction? Zach: "Mwahahahaha what a great sight that was to wake up to."'},
+    {type:'strike', text:' Tough break.', replace:' The rebuild is still the plan, the war chest is still enormous, and 2026 is still the target. But the lumps aren\'t just landing \u2014 they\'re leaving marks.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#11.</span><span class="rank-team">Burden of Etienne-y Woody</span><span class="rank-record">(0-6)</span><span class="rank-movement steady">\u2014</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'Six weeks. Zero wins. When your IDP linebacker outscores your quarterback by more than double, the roster construction isn\'t broken \u2014 it\'s demolished. Next week brings Father Time \u2014 also 0-6. Someone will get their first win. Do whatever it takes.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'pause', ms: PAUSE_DRAMATIC},
+
+    // #12 - the big pause
+    {type:'section', tag:'div', cls:'rank-entry'},
+    {type:'type', text:'<span class="rank-number">#12.</span>', speed:'fast', html:true},
+    {type:'pause', ms: PAUSE_LONG},
+    {type:'type', text:'<span class="rank-team">Father Time</span><span class="rank-record">(0-6)</span><span class="rank-movement steady">\u2014</span>', speed:'fast', html:true},
+    {type:'newline'},
+    {type:'section', tag:'div', cls:'rank-blurb'},
+    {type:'type', text:'The lowest-scoring team in the league just absorbed a 58.24-point loss to the highest-scoring team.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' Ladd McConkey\'s 19.5 and Tetairoa McMillan\'s 16.4 provided flickers \u2014 '},
+    {type:'strike', text:'the wagyu WRs showed up', replace:'the wagyu beef WRs at least showed up to the grill'},
+    {type:'type', text:' \u2014 but Bo Nix\'s 13.36 at quarterback wasn\'t close to enough.'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'nah', text:' Next week matters.', replace:' Next week brings Burden in the 0-6 Bowl. Somebody will get win number one. Somebody will go to 0-7. The chat will probably ignore both outcomes entirely \u2014 and honestly, can you blame them?'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+    {type:'finalize'},
+    {type:'pause', ms: SECTION_PAUSE},
+
+    // ── PHASE 3.5: CONFESSIONALS ──
+    {type:'section', tag:'div', cls:'section-header'},
+    {type:'type', text:'CONFESSIONALS', speed:'fast'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+
+    {type:'section', tag:'div', cls:'confessional'},
+    {type:'section', tag:'div', cls:'confessional-team'},
+    {type:'type', text:'KITTLER ON THE ROOF', speed:'fast'},
+    {type:'closeSection'},
+    {type:'section', tag:'div', cls:'confessional-text'},
+    {type:'type', text:'I was number one for exactly one week. One glorious, deceiving week. Then MHJTIME showed up with Rico Dowdle\'s 30.9 and knocked me all the way to fifth.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' The chat hasn\'t said a word to me about it. Somehow that\'s worse.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'pause', ms: PAUSE_SHORT},
+
+    {type:'section', tag:'div', cls:'confessional'},
+    {type:'section', tag:'div', cls:'confessional-team'},
+    {type:'type', text:'MHJTIME', speed:'fast'},
+    {type:'closeSection'},
+    {type:'section', tag:'div', cls:'confessional-text'},
+    {type:'type', text:'Three weeks ago this column called my season a \'what if\' story headed for the toilet bowl.'},
+    {type:'type', text:' I screenshot\'d that paragraph. I printed it out. It\'s on my desk right now, next to my two-game winning streak and the scoreboard that says 140.94 against the number one team.'},
+    {type:'type', text:' The \'what if\' franchise just became the \'what now\' franchise.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'pause', ms: PAUSE_SHORT},
+
+    {type:'section', tag:'div', cls:'confessional'},
+    {type:'section', tag:'div', cls:'confessional-team'},
+    {type:'type', text:'GENERAL KEN-OBI', speed:'fast'},
+    {type:'closeSection'},
+    {type:'section', tag:'div', cls:'confessional-text'},
+    {type:'type', text:'I don\'t say much in the group chat. I don\'t need to. The Rams defense scored 27 for me. We put up 164.94 and won by 65.74.'},
+    {type:'type', text:' My Elo just hit its all-time peak.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' I haven\'t typed a single word in the chat about it. I\'m just loading the lineup.'},
+    {type:'closeSection'},
+    {type:'closeSection'},
+
+    {type:'finalize'},
+    {type:'pause', ms: SECTION_PAUSE},
+
+    // ── PHASE 4: MAILBAG ──
+    {type:'section', tag:'div', cls:'section-header'},
+    {type:'type', text:'MAILBAG', speed:'fast'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+
+    {type:'section', tag:'div', cls:'mailbag-q'},
+    {type:'type', text:'Dear Commish: The Lock of the Week has now busted three weeks in a row. Is it cursed?'},
+    {type:'closeSection'},
+    {type:'section', tag:'div', cls:'mailbag-a'},
+    {type:'type', text:'Three straight Lock losses. At this point the Lock isn\'t a prediction \u2014 it\'s a hex.'},
+    {type:'strike', text:' Still profitable though.', replace:' The cumulative record is 18-12, which is still respectable, but the Lock specifically is 0-3 over the last three weeks.'},
+    {type:'type', text:' We\'re not retiring it \u2014 we\'re just warning you: whatever the Lock picks next week, bet the other side.'},
+    {type:'closeSection'},
+
+    {type:'pause', ms: PAUSE_SHORT},
+
+    {type:'section', tag:'div', cls:'mailbag-q'},
+    {type:'type', text:'From the group chat: Legion of Bouz versus General Ken-obi next week. Both 5-1. Who ya got?'},
+    {type:'closeSection'},
+    {type:'section', tag:'div', cls:'mailbag-a'},
+    {type:'type', text:'The matchup has everything: two former champions with matching trophy cases, Mahomes versus Maye, the league\'s highest scorer versus the league\'s highest Elo.'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'type', text:' Something\'s got to give \u2014 and we\'re not dumb enough to make it the Lock.'},
+    {type:'closeSection'},
+
+    {type:'finalize'},
+    {type:'pause', ms: SECTION_PAUSE},
+
+    // ── PHASE 5: THE KICKER ──
+    {type:'section', tag:'div', cls:'section-header'},
+    {type:'type', text:'THINGS I BELIEVE BUT CAN\'T PROVE', speed:'fast'},
+    {type:'closeSection'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+
+    {type:'section', tag:'p', cls:'essay-para'},
+    {type:'type', text:'MHJTIME will make the playoffs.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' The Lock of the Week will hit next week specifically because we\'ve acknowledged the curse.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' Kittler won\'t drop below sixth all season.'},
+    {type:'pause', ms: PAUSE_SHORT},
+    {type:'type', text:' The Burden-Father Time game next week will be the lowest-scoring game of the year.'},
+    {type:'pause', ms: PAUSE_MEDIUM},
+    {type:'type', text:' And someone in the group chat already screenshot\'d this column\'s Lock prediction, ready to roast us when it inevitably busts again.', speed:'slow'},
+    {type:'closeSection'},
+    {type:'finalize'},
+    {type:'pause', ms: PAUSE_DRAMATIC},
+
+    // ── END ──
+    {type:'done'}
+  ];
+
+  // ═══════════════════════════════════════════════════════
+  // ENGINE
+  // ═══════════════════════════════════════════════════════
+  var contentEl = document.getElementById('content');
+  var cursorEl = document.createElement('span');
+  cursorEl.id = 'cursor';
+  var wordCountEl = document.getElementById('word-count');
+  var progressBar = document.getElementById('progress-bar');
+  var progressLabel = document.getElementById('progress-label');
+  var controlsEl = document.getElementById('controls');
+  var splashEl = document.getElementById('splash');
+
+  var speedMultiplier = 1;
+  var totalSteps = script.length;
+  var currentStep = 0;
+  var wordCount = 0;
+  var running = false;
+  var skipped = false;
+  var abortController = null;
+  var sectionStack = [];
+  var currentTextTarget = contentEl;
+
+  // Track sections for finalize
+  var unfinalizedSections = [];
+
+  function getActiveTarget() {
+    return sectionStack.length > 0 ? sectionStack[sectionStack.length - 1] : contentEl;
+  }
+
+  function placeCursor() {
+    // Remove cursor from wherever it is
+    if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+    // Place at end of current target
+    var target = getActiveTarget();
+    target.appendChild(cursorEl);
+    // Auto-scroll to cursor
+    cursorEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function updateWordCount() {
+    wordCountEl.textContent = wordCount + ' words';
+  }
+
+  function updateProgress() {
+    var pct = Math.min(100, (currentStep / totalSteps) * 100);
+    progressBar.style.width = pct + '%';
+    var sections = ['HEADLINE', 'COLUMN', 'RANKINGS', 'CONFESSIONALS', 'MAILBAG', 'KICKER'];
+    var sectionIndex = Math.min(sections.length - 1, Math.floor((currentStep / totalSteps) * sections.length));
+    progressLabel.textContent = sections[sectionIndex];
+  }
+
+  function countWords(text) {
+    var stripped = text.replace(/<[^>]+>/g, '').trim();
+    if (!stripped) return 0;
+    return stripped.split(/\s+/).filter(function(w){return w.length > 0}).length;
+  }
+
+  function delay(ms) {
+    if (skipped) return Promise.resolve();
+    var adjusted = Math.max(5, ms / speedMultiplier);
+    return new Promise(function(resolve) {
+      var t = setTimeout(resolve, adjusted);
+      if (abortController) {
+        abortController.signal.addEventListener('abort', function() {
+          clearTimeout(t);
+          resolve();
+        });
+      }
+    });
+  }
+
+  // Type text character by character
+  async function typeText(text, speed, isHtml) {
+    var target = getActiveTarget();
+    cursorEl.classList.add('typing');
+
+    if (isHtml) {
+      // For HTML spans (rank numbers etc), insert as a block
+      if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+      target.insertAdjacentHTML('beforeend', text);
+      wordCount += countWords(text);
+      updateWordCount();
+      placeCursor();
+      await delay(50);
+      cursorEl.classList.remove('typing');
+      return;
+    }
+
+    var charDelay = BASE_CHAR_DELAY;
+    if (speed === 'fast') charDelay *= FAST_MULT;
+    else if (speed === 'slow') charDelay *= SLOW_MULT;
+
+    // Remove cursor, we'll append it after each char
+    if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+
+    // Create a text node we'll build up
+    var textNode = document.createTextNode('');
+    target.appendChild(textNode);
+
+    for (var i = 0; i < text.length; i++) {
+      if (skipped) {
+        textNode.textContent += text.substring(i);
+        break;
+      }
+      textNode.textContent += text[i];
+
+      // Add slight variation to timing
+      var variation = (Math.random() - 0.5) * charDelay * 0.6;
+      var thisDelay = Math.max(5, (charDelay + variation) / speedMultiplier);
+
+      // Extra pause after punctuation
+      if (text[i] === '.' || text[i] === '!' || text[i] === '?') thisDelay += 120 / speedMultiplier;
+      else if (text[i] === ',') thisDelay += 60 / speedMultiplier;
+      else if (text[i] === '\u2014') thisDelay += 80 / speedMultiplier;
+
+      if (!skipped) await new Promise(function(r){setTimeout(r, thisDelay)});
+    }
+
+    wordCount += countWords(text);
+    updateWordCount();
+    placeCursor();
+    cursorEl.classList.remove('typing');
+  }
+
+  // Backspace N characters
+  async function backspace(count) {
+    var target = getActiveTarget();
+    cursorEl.classList.add('typing');
+
+    // Find the last text node
+    if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+    var lastTextNode = null;
+    for (var i = target.childNodes.length - 1; i >= 0; i--) {
+      if (target.childNodes[i].nodeType === Node.TEXT_NODE && target.childNodes[i].textContent.length > 0) {
+        lastTextNode = target.childNodes[i];
+        break;
+      }
+    }
+
+    if (lastTextNode) {
+      var removed = 0;
+      while (removed < count && lastTextNode.textContent.length > 0) {
+        if (skipped) {
+          var remaining = count - removed;
+          lastTextNode.textContent = lastTextNode.textContent.substring(0, Math.max(0, lastTextNode.textContent.length - remaining));
+          break;
+        }
+        lastTextNode.textContent = lastTextNode.textContent.substring(0, lastTextNode.textContent.length - 1);
+        removed++;
+        await delay(BACKSPACE_DELAY);
+      }
+      // Recount words after backspace
+      wordCount = countWords(contentEl.textContent);
+      updateWordCount();
+    }
+
+    placeCursor();
+    cursorEl.classList.remove('typing');
+  }
+
+  // Strikethrough: type bad text, pause, wrap in <span class="struck">, then type replacement
+  async function strikethrough(badText, goodText) {
+    // Type the bad text first
+    await typeText(badText, 'fast');
+
+    if (!skipped) await delay(PAUSE_SHORT);
+
+    // Now wrap that text in a struck span
+    var target = getActiveTarget();
+    if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+
+    // Find and wrap the last text node containing our bad text
+    var lastTextNode = null;
+    for (var i = target.childNodes.length - 1; i >= 0; i--) {
+      if (target.childNodes[i].nodeType === Node.TEXT_NODE && target.childNodes[i].textContent.indexOf(badText) !== -1) {
+        lastTextNode = target.childNodes[i];
+        break;
+      }
+    }
+
+    if (lastTextNode) {
+      var struckSpan = document.createElement('span');
+      struckSpan.className = 'struck';
+      struckSpan.textContent = badText;
+      // Replace the text with the struck span
+      var before = lastTextNode.textContent.substring(0, lastTextNode.textContent.lastIndexOf(badText));
+      lastTextNode.textContent = before;
+      lastTextNode.parentNode.insertBefore(struckSpan, lastTextNode.nextSibling);
+    }
+
+    placeCursor();
+
+    if (!skipped) await delay(PAUSE_SHORT);
+
+    // Now type the replacement
+    await typeText(goodText);
+  }
+
+  // "Nah" delete: type sentence, highlight, show "nah", delete, type replacement
+  async function nahDelete(badText, goodText) {
+    // Type the bad text
+    await typeText(badText);
+
+    if (!skipped) await delay(PAUSE_SHORT);
+
+    var target = getActiveTarget();
+    if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+
+    // Find and wrap in highlight
+    var lastTextNode = null;
+    for (var i = target.childNodes.length - 1; i >= 0; i--) {
+      if (target.childNodes[i].nodeType === Node.TEXT_NODE && target.childNodes[i].textContent.indexOf(badText) !== -1) {
+        lastTextNode = target.childNodes[i];
+        break;
+      }
+    }
+
+    if (lastTextNode) {
+      // Highlight the text
+      var highlightSpan = document.createElement('span');
+      highlightSpan.className = 'delete-highlight';
+      highlightSpan.textContent = badText;
+      var before = lastTextNode.textContent.substring(0, lastTextNode.textContent.lastIndexOf(badText));
+      lastTextNode.textContent = before;
+      lastTextNode.parentNode.insertBefore(highlightSpan, lastTextNode.nextSibling);
+
+      placeCursor();
+
+      if (!skipped) await delay(DELETE_HIGHLIGHT_MS);
+
+      // Show "nah" annotation
+      var nahSpan = document.createElement('span');
+      nahSpan.className = 'nah';
+      nahSpan.textContent = 'nah';
+      highlightSpan.parentNode.insertBefore(nahSpan, highlightSpan.nextSibling);
+      // Trigger fade in
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          nahSpan.classList.add('visible');
+        });
+      });
+
+      if (!skipped) await delay(NAH_DISPLAY_MS);
+
+      // Remove highlight and nah
+      highlightSpan.parentNode.removeChild(highlightSpan);
+      nahSpan.parentNode.removeChild(nahSpan);
+    }
+
+    // Recount after deletion
+    wordCount = countWords(contentEl.textContent);
+    updateWordCount();
+
+    placeCursor();
+
+    if (!skipped) await delay(PAUSE_SHORT);
+
+    // Type replacement
+    await typeText(goodText);
+  }
+
+  // Open a section container
+  function openSection(tag, cls) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    var target = getActiveTarget();
+    if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+    target.appendChild(el);
+    sectionStack.push(el);
+    unfinalizedSections.push(el);
+    placeCursor();
+  }
+
+  // Close the current section
+  function closeSection() {
+    if (sectionStack.length > 0) {
+      if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+      sectionStack.pop();
+      placeCursor();
+    }
+  }
+
+  // Finalize: transition recent sections to published font
+  function finalizeRecent() {
+    unfinalizedSections.forEach(function(el) {
+      el.classList.add('finalized');
+    });
+    unfinalizedSections = [];
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // SKIP: instant reveal
+  // ═══════════════════════════════════════════════════════
+  function skipToEnd() {
+    if (skipped) return;
+    skipped = true;
+
+    // Abort any pending delays so the engine loop can fast-forward
+    if (abortController) abortController.abort();
+  }
+
+  // Called after the main loop completes (whether normally or via skip)
+  function finalizeAll() {
+    // Clean up any lingering animation artifacts
+    contentEl.querySelectorAll('.delete-highlight').forEach(function(el){el.remove()});
+    contentEl.querySelectorAll('.nah:not(.struck)').forEach(function(el){el.remove()});
+    // Finalize all sections to published font
+    contentEl.querySelectorAll('*').forEach(function(el){el.classList.add('finalized')});
+    cursorEl.classList.add('hidden');
+    controlsEl.classList.add('hidden');
+    progressBar.style.width = '100%';
+    wordCount = countWords(contentEl.textContent);
+    updateWordCount();
+
+    // Show persistent final word count (all values computed, no user input)
+    var finalWc = document.getElementById('final-wc');
+    var strikeCount = contentEl.querySelectorAll('.struck').length;
+    var wcLine = document.createElement('div');
+    wcLine.className = 'wc-line';
+    wcLine.textContent = wordCount + ' words';
+    var wcLabel = document.createElement('div');
+    wcLabel.className = 'wc-label';
+    wcLabel.textContent = strikeCount + ' revision' + (strikeCount !== 1 ? 's' : '') + ' visible';
+    finalWc.appendChild(wcLine);
+    finalWc.appendChild(wcLabel);
+    finalWc.classList.remove('hidden');
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // MAIN LOOP
+  // ═══════════════════════════════════════════════════════
+  async function runScript() {
+    running = true;
+    controlsEl.classList.remove('hidden');
+    placeCursor();
+
+    for (var i = 0; i < script.length; i++) {
+      currentStep = i;
+      updateProgress();
+
+      var step = script[i];
+      abortController = new AbortController();
+
+      // When skipped, handle each step type instantly without animation
+      if (skipped) {
+        switch (step.type) {
+          case 'type':
+            // Render text/html instantly
+            var skipTarget = getActiveTarget();
+            if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+            if (step.html) {
+              skipTarget.insertAdjacentHTML('beforeend', step.text);
+            } else {
+              skipTarget.appendChild(document.createTextNode(step.text));
+            }
+            break;
+          case 'pause': break; // skip pauses
+          case 'backspace':
+            // Instant backspace
+            var bsTarget = getActiveTarget();
+            if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+            var bsNode = null;
+            for (var bi = bsTarget.childNodes.length - 1; bi >= 0; bi--) {
+              if (bsTarget.childNodes[bi].nodeType === Node.TEXT_NODE && bsTarget.childNodes[bi].textContent.length > 0) {
+                bsNode = bsTarget.childNodes[bi];
+                break;
+              }
+            }
+            if (bsNode) {
+              bsNode.textContent = bsNode.textContent.substring(0, Math.max(0, bsNode.textContent.length - step.count));
+            }
+            break;
+          case 'strike':
+            // Show strikethrough + replacement instantly
+            var stTarget = getActiveTarget();
+            if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+            var struckSpan = document.createElement('span');
+            struckSpan.className = 'struck';
+            struckSpan.textContent = step.text;
+            stTarget.appendChild(struckSpan);
+            stTarget.appendChild(document.createTextNode(step.replace));
+            break;
+          case 'nah':
+            // Skip the bad text, just show the replacement
+            var nahTarget = getActiveTarget();
+            if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+            nahTarget.appendChild(document.createTextNode(step.replace));
+            break;
+          case 'newline':
+            var nlTarget = getActiveTarget();
+            if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+            nlTarget.appendChild(document.createElement('br'));
+            break;
+          case 'section':
+            openSection(step.tag, step.cls);
+            break;
+          case 'closeSection':
+            closeSection();
+            break;
+          case 'finalize':
+            finalizeRecent();
+            break;
+          case 'done': break;
+        }
+        continue;
+      }
+
+      switch (step.type) {
+        case 'type':
+          await typeText(step.text, step.speed, step.html);
+          break;
+        case 'pause':
+          await delay(step.ms);
+          break;
+        case 'backspace':
+          await backspace(step.count);
+          break;
+        case 'strike':
+          await strikethrough(step.text, step.replace);
+          break;
+        case 'nah':
+          await nahDelete(step.text, step.replace);
+          break;
+        case 'newline':
+          var brTarget = getActiveTarget();
+          if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+          brTarget.appendChild(document.createElement('br'));
+          placeCursor();
+          break;
+        case 'section':
+          openSection(step.tag, step.cls);
+          break;
+        case 'closeSection':
+          closeSection();
+          break;
+        case 'finalize':
+          finalizeRecent();
+          break;
+        case 'done':
+          if (!skipped) await delay(1000);
+          break;
+      }
+    }
+
+    finalizeAll();
+    running = false;
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // CONTROLS
+  // ═══════════════════════════════════════════════════════
+
+  // Speed buttons
+  document.querySelectorAll('[data-speed]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      speedMultiplier = parseFloat(this.dataset.speed);
+      document.querySelectorAll('[data-speed]').forEach(function(b){b.classList.remove('active')});
+      this.classList.add('active');
+    });
+  });
+
+  // Skip button
+  document.getElementById('skipBtn').addEventListener('click', skipToEnd);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (!running) return;
+    if (e.key === 's' || e.key === 'S') skipToEnd();
+    if (e.key === '1') { speedMultiplier = 1; syncSpeedButtons(); }
+    if (e.key === '3') { speedMultiplier = 3; syncSpeedButtons(); }
+    if (e.key === '0') { speedMultiplier = 10; syncSpeedButtons(); }
+  });
+
+  function syncSpeedButtons() {
+    document.querySelectorAll('[data-speed]').forEach(function(b) {
+      b.classList.toggle('active', parseFloat(b.dataset.speed) === speedMultiplier);
+    });
+  }
+
+  // Double-tap to skip (mobile)
+  var lastTap = 0;
+  document.addEventListener('touchend', function(e) {
+    var now = Date.now();
+    if (now - lastTap < 350 && running) {
+      e.preventDefault();
+      skipToEnd();
+    }
+    lastTap = now;
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // SPLASH & START
+  // ═══════════════════════════════════════════════════════
+  function startDraft() {
+    splashEl.classList.add('fade');
+    setTimeout(function() {
+      splashEl.style.display = 'none';
+      runScript();
+    }, 600);
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startDraft);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && splashEl.style.display !== 'none') {
+      startDraft();
+    }
+  });
+
+  // Keyboard shortcut to start from splash
+  splashEl.addEventListener('click', function(e) {
+    if (e.target === splashEl) startDraft();
+  });
+
+})();
+</script>
+</body>
+</html>

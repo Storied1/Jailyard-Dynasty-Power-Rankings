@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jailyard Dynasty — Week 6: The Fracture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── RESET + BASE ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{
+  scroll-behavior:smooth;
+  --phase:0; /* 0 = pre-fracture, 1 = post-fracture */
+}
+body{
+  background:#0a0a0a;
+  color:#e8e4dc;
+  font-family:'Inter',system-ui,sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── CSS CUSTOM PROPERTIES (interpolated by scroll via JS) ── */
+:root{
+  --bg:#0a0a0a;
+  --fg:#e8e4dc;
+  --muted:#666;
+  --accent:#c9a84c;
+  --accent2:#c9a84c;
+  --danger:#ff3b3b;
+  --heading-font:'Playfair Display',Georgia,serif;
+  --body-font:'Inter',system-ui,sans-serif;
+  --card:#141414;
+  --border:#222;
+}
+
+/* ── SCROLL CONTAINER ── */
+.scroll-container{
+  position:relative;
+}
+
+/* ── BEAT: full-viewport narrative section ── */
+.beat{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:clamp(2rem,8vw,6rem);
+  position:relative;
+  opacity:0;
+  transform:translateY(40px);
+  transition:opacity 1.2s cubic-bezier(.16,1,.3,1), transform 1.2s cubic-bezier(.16,1,.3,1);
+}
+.beat.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ── TYPOGRAPHY ── */
+.headline{
+  font-family:var(--heading-font);
+  font-weight:900;
+  line-height:1.05;
+  letter-spacing:-0.02em;
+}
+.headline--mega{
+  font-size:clamp(3rem,12vw,9rem);
+  color:#fff;
+}
+.headline--large{
+  font-size:clamp(2rem,6vw,4.5rem);
+  color:#fff;
+}
+.headline--medium{
+  font-size:clamp(1.5rem,4vw,3rem);
+}
+.subtitle{
+  font-family:var(--body-font);
+  font-size:clamp(1rem,2.5vw,1.5rem);
+  font-weight:400;
+  color:var(--muted);
+  margin-top:1rem;
+  max-width:40ch;
+  text-align:center;
+  line-height:1.6;
+}
+.number{
+  font-family:var(--heading-font);
+  font-weight:900;
+  font-size:clamp(5rem,20vw,14rem);
+  color:#fff;
+  line-height:1;
+  letter-spacing:-0.03em;
+}
+.number--accent{
+  color:var(--accent);
+}
+.prose{
+  font-family:var(--body-font);
+  font-size:clamp(1rem,2vw,1.25rem);
+  line-height:1.8;
+  max-width:60ch;
+  color:var(--fg);
+}
+.prose strong{color:#fff;font-weight:700}
+.pull-quote{
+  font-family:var(--heading-font);
+  font-style:italic;
+  font-size:clamp(1.5rem,4vw,2.5rem);
+  color:var(--accent);
+  max-width:30ch;
+  text-align:center;
+  line-height:1.3;
+}
+.label{
+  font-family:var(--body-font);
+  font-size:0.75rem;
+  font-weight:700;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.upset-tag{
+  display:inline-block;
+  background:var(--danger);
+  color:#fff;
+  font-family:var(--body-font);
+  font-weight:800;
+  font-size:clamp(1rem,3vw,1.5rem);
+  padding:0.3em 0.8em;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  transform:rotate(-2deg);
+  opacity:0;
+  transition:opacity 0.6s ease, transform 0.6s ease;
+}
+.beat.visible .upset-tag{
+  opacity:1;
+  transform:rotate(-2deg) scale(1);
+}
+
+/* ── STANDINGS TABLE ── */
+.standings-wrapper{
+  position:relative;
+  width:100%;
+  max-width:700px;
+  margin:0 auto;
+}
+.standings{
+  width:100%;
+  border-collapse:collapse;
+  font-family:var(--body-font);
+  font-size:clamp(0.8rem,1.8vw,1rem);
+}
+.standings th{
+  text-align:left;
+  padding:0.6em 0.8em;
+  font-weight:700;
+  font-size:0.7rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border-bottom:1px solid var(--border);
+}
+.standings td{
+  padding:0.6em 0.8em;
+  border-bottom:1px solid #1a1a1a;
+  transition:transform 0.8s cubic-bezier(.16,1,.3,1), opacity 0.8s ease;
+}
+.standings tr{
+  transition:transform 0.8s cubic-bezier(.16,1,.3,1);
+}
+.standings .team-name{
+  font-weight:700;
+  color:#fff;
+}
+.standings .movement{font-weight:600}
+.standings .movement.up{color:#22c55e}
+.standings .movement.down{color:var(--danger)}
+.standings .movement.flat{color:var(--muted)}
+.standings .rank-cell{
+  font-family:var(--heading-font);
+  font-weight:900;
+  font-size:1.1em;
+  color:var(--accent);
+  width:2.5em;
+}
+
+/* ── MATCHUP CARD ── */
+.matchup{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:clamp(1.5rem,3vw,2.5rem);
+  max-width:500px;
+  width:100%;
+  position:relative;
+}
+.matchup-teams{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:1rem;
+  margin-bottom:1rem;
+}
+.matchup-team{
+  font-family:var(--heading-font);
+  font-weight:700;
+  font-size:clamp(1rem,2.5vw,1.4rem);
+  color:#fff;
+}
+.matchup-team.loser{color:var(--muted)}
+.matchup-score{
+  text-align:center;
+  font-family:var(--heading-font);
+  font-weight:900;
+  font-size:clamp(1.5rem,4vw,2.5rem);
+  color:#fff;
+  margin:0.5rem 0;
+}
+.matchup-margin{
+  text-align:center;
+  font-size:0.9rem;
+  color:var(--muted);
+}
+.matchup.upset{border-color:var(--danger);border-width:2px}
+.matchup .upset-stamp{
+  position:absolute;
+  top:-0.5em;right:1em;
+  background:var(--danger);
+  color:#fff;
+  font-weight:800;
+  font-size:0.75rem;
+  padding:0.3em 0.7em;
+  letter-spacing:0.1em;
+  transform:rotate(3deg);
+}
+
+/* ── THE FRACTURE EFFECT ── */
+.fracture-zone{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:4rem 2rem;
+}
+.crack-overlay{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  z-index:1000;
+  opacity:0;
+  transition:opacity 0.3s ease;
+}
+.crack-overlay.active{opacity:1}
+.crack-overlay svg{width:100%;height:100%}
+
+/* Post-fracture styling changes */
+.post-fracture .headline{
+  font-family:'Inter',system-ui,sans-serif;
+  font-weight:800;
+  letter-spacing:-0.03em;
+}
+.post-fracture .accent-shift{
+  color:var(--danger);
+}
+.post-fracture .standings .rank-cell{
+  color:var(--danger);
+}
+.post-fracture .pull-quote{
+  color:var(--danger);
+  font-family:'Inter',system-ui,sans-serif;
+  font-style:normal;
+  font-weight:800;
+}
+
+/* ── WEEK 7 PREVIEW ── */
+.marquee-card{
+  background:linear-gradient(135deg,#1a1008 0%,#0a0a0a 50%,#0a0812 100%);
+  border:2px solid var(--accent);
+  border-radius:12px;
+  padding:clamp(2rem,4vw,3rem);
+  max-width:600px;
+  width:100%;
+  text-align:center;
+}
+.post-fracture .marquee-card{
+  border-color:var(--danger);
+  background:linear-gradient(135deg,#1a0808 0%,#0a0a0a 50%,#120a0a 100%);
+}
+.vs{
+  font-family:var(--heading-font);
+  font-style:italic;
+  font-size:clamp(1rem,2vw,1.3rem);
+  color:var(--muted);
+  margin:0.5rem 0;
+}
+
+/* ── UTILITY ── */
+.text-center{text-align:center}
+.mt-1{margin-top:0.5rem}
+.mt-2{margin-top:1rem}
+.mt-3{margin-top:2rem}
+.mt-4{margin-top:3rem}
+.gap-stack>*+*{margin-top:1.5rem}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .beat{padding:clamp(1.5rem,6vw,3rem) 1.25rem}
+  .standings{font-size:0.75rem}
+  .standings th,.standings td{padding:0.4em 0.5em}
+  .matchup{padding:1.2rem}
+}
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  .beat{opacity:1;transform:none;transition:none}
+  .upset-tag{opacity:1;transition:none}
+}
+</style>
+</head>
+<body>
+<div class="scroll-container" id="app">
+
+<!-- ═══ BEAT 1: THE HOOK ═══ -->
+<section class="beat" data-beat="hook">
+  <p class="label">Jailyard Dynasty &middot; Season 2025</p>
+  <h1 class="headline headline--large text-center mt-2" style="color:var(--fg)">Nobody saw Week 6 coming.</h1>
+</section>
+
+<!-- ═══ BEAT 2: THE NUMBER ═══ -->
+<section class="beat" data-beat="high-score">
+  <p class="label">Week High Score</p>
+  <div class="number number--accent">165.90</div>
+  <p class="subtitle">The Legion of Bouz didn't just win.<br>They announced something.</p>
+  <p class="prose mt-3 text-center" style="max-width:50ch">Patrick Mahomes threw for 30.48. Cam Skattebo added 30.0 on the ground. Christian McCaffrey chipped 20.6. Three players. Nearly a hundred fantasy points. Against Father Time's 107.66, it wasn't even a contest — it was a statement.</p>
+</section>
+
+<!-- ═══ BEAT 3: THE BEFORE (STANDINGS) ═══ -->
+<section class="beat" data-beat="before-standings" style="min-height:auto;padding-top:6rem;padding-bottom:2rem">
+  <p class="label">Entering Week 6 — The Old Order</p>
+  <h2 class="headline headline--medium text-center mt-2" style="color:var(--accent)">Power Rankings</h2>
+  <p class="subtitle" style="margin-bottom:2rem">This was the world before Sunday.</p>
+  <div class="standings-wrapper">
+    <table class="standings" id="standings-before">
+      <thead><tr><th>#</th><th>Team</th><th>Rec</th><th>PF</th><th>Wk6</th><th>+/-</th></tr></thead>
+      <tbody>
+        <tr data-rank="5" data-after="1"><td class="rank-cell">1</td><td class="team-name">Kittler on the Roof</td><td>4-1</td><td>877.9</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="1" data-after="2"><td class="rank-cell">2</td><td class="team-name">The Legion of Bouz</td><td>4-1</td><td>935.7</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="3" data-after="3"><td class="rank-cell">3</td><td class="team-name">Sleeping Giants</td><td>4-1</td><td>857.0</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="6" data-after="4"><td class="rank-cell">4</td><td class="team-name">Rasheeing the Scene</td><td>4-1</td><td>816.0</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="2" data-after="5"><td class="rank-cell">5</td><td class="team-name">General Ken-obi</td><td>4-1</td><td>871.2</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="4" data-after="6"><td class="rank-cell">6</td><td class="team-name">The Boonist Monks</td><td>3-2</td><td>912.9</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="7" data-after="7"><td class="rank-cell">7</td><td class="team-name">MHJTIME</td><td>2-3</td><td>891.9</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="8" data-after="8"><td class="rank-cell">8</td><td class="team-name">Noble FFT</td><td>2-3</td><td>819.0</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="9" data-after="9"><td class="rank-cell">9</td><td class="team-name">Ghastly Grayskull Gang</td><td>2-3</td><td>818.3</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="10" data-after="10"><td class="rank-cell">10</td><td class="team-name">Chudders Football Team</td><td>1-4</td><td>727.9</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="11" data-after="11"><td class="rank-cell">11</td><td class="team-name">Burden of Etienne-y Woody</td><td>0-5</td><td>732.7</td><td>—</td><td class="movement flat">—</td></tr>
+        <tr data-rank="12" data-after="12"><td class="rank-cell">12</td><td class="team-name">Father Time</td><td>0-5</td><td>712.7</td><td>—</td><td class="movement flat">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ BEAT 4: UPSET 1 ═══ -->
+<section class="beat" data-beat="upset-1">
+  <p class="label">Matchup 1</p>
+  <div class="matchup upset">
+    <span class="upset-stamp">UPSET</span>
+    <div class="matchup-teams">
+      <span class="matchup-team">Noble FFT</span>
+      <span class="matchup-team loser">Ghastly Grayskull</span>
+    </div>
+    <div class="matchup-score">151.88 — 121.30</div>
+    <div class="matchup-margin">+30.58 &middot; Bijan Robinson: 32.8 pts</div>
+  </div>
+  <p class="prose mt-3 text-center" style="max-width:45ch">Bijan Robinson dropped 32.8 points — the highest individual performance of the week. Noble FFT wasn't supposed to win. They didn't care.</p>
+</section>
+
+<!-- ═══ BEAT 5: UPSET 2 — THE BIG ONE ═══ -->
+<section class="beat" data-beat="upset-2">
+  <p class="label">Matchup 2 — The Dethroning</p>
+  <div class="matchup upset">
+    <span class="upset-stamp">UPSET</span>
+    <div class="matchup-teams">
+      <span class="matchup-team">MHJTIME</span>
+      <span class="matchup-team loser">Kittler on the Roof</span>
+    </div>
+    <div class="matchup-score">140.94 — 107.74</div>
+    <div class="matchup-margin">+33.20 &middot; Rico Dowdle: 30.9, Ja'Marr Chase: 20.1</div>
+  </div>
+  <p class="prose mt-3 text-center" style="max-width:45ch">The defending champion. The #1 power ranking. Gone in one Sunday. Kittler scored 107.74 — their lowest total of the season — and MHJTIME's receivers tore the ceiling off. <strong>The throne is empty.</strong></p>
+</section>
+
+<!-- ═══ BEAT 6: UPSET 3 ═══ -->
+<section class="beat" data-beat="upset-3">
+  <p class="label">Matchup 3</p>
+  <div class="matchup upset">
+    <span class="upset-stamp">UPSET</span>
+    <div class="matchup-teams">
+      <span class="matchup-team">The Boonist Monks</span>
+      <span class="matchup-team loser">Rasheeing the Scene</span>
+    </div>
+    <div class="matchup-score">150.46 — 109.10</div>
+    <div class="matchup-margin">+41.36 &middot; George Pickens: 27.3, JSN: 26.2</div>
+  </div>
+  <p class="prose mt-3 text-center" style="max-width:45ch">Pickens and Jaxon Smith-Njigba combined for 53.5 from the receiver room alone. Joe Flacco — yes, Joe Flacco — added 18.76. Rasheeing's Josh Allen managed 15.4. The math wasn't close.</p>
+</section>
+
+<!-- ═══ BEAT 7: UPSET 4 + FRACTURE TRIGGER ═══ -->
+<section class="beat fracture-zone" data-beat="upset-4" id="fracture-trigger">
+  <p class="label">Matchup 4 — The Biggest Blowout of the Season</p>
+  <div class="matchup upset" style="border-width:3px">
+    <span class="upset-stamp">BLOWOUT</span>
+    <div class="matchup-teams">
+      <span class="matchup-team">General Ken-obi</span>
+      <span class="matchup-team loser">Burden of Etienne-y Woody</span>
+    </div>
+    <div class="matchup-score">164.94 — 99.20</div>
+    <div class="matchup-margin">+65.74 &middot; LA Rams DEF: 27.0, Drake London: 26.8, Drake Maye: 26.24</div>
+  </div>
+  <p class="prose mt-3 text-center" style="max-width:45ch">Sixty-five points. The largest margin of the season. Ken-obi's Elo climbed to <strong>1700.2</strong> — a career peak. Two-time champion trajectory confirmed.</p>
+  <div class="mt-4 text-center">
+    <span class="upset-tag" style="font-size:clamp(1.5rem,5vw,3rem);padding:0.4em 1em;transform:rotate(-1deg)">4 of 6 games. Upsets.</span>
+  </div>
+  <p class="pull-quote mt-4">The week the standings<br>broke apart.</p>
+</section>
+
+<!-- ═══ CRACK OVERLAY (fixed, activated by JS) ═══ -->
+<div class="crack-overlay" id="crackOverlay">
+  <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="crack-glow">
+        <feGaussianBlur stdDeviation="2" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <!-- Main fracture lines -->
+    <path d="M500,0 L485,120 L510,200 L475,350 L520,500 L490,650 L505,800 L480,1000" fill="none" stroke="rgba(255,59,59,0.8)" stroke-width="2" filter="url(#crack-glow)" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.4s" begin="indefinite" fill="freeze" id="crack1"/>
+    </path>
+    <path d="M485,120 L350,200 L280,260 L200,350" fill="none" stroke="rgba(255,59,59,0.6)" stroke-width="1.5" filter="url(#crack-glow)" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="crack1.begin+0.1s" fill="freeze"/>
+    </path>
+    <path d="M510,200 L620,280 L700,320 L800,350" fill="none" stroke="rgba(255,59,59,0.6)" stroke-width="1.5" filter="url(#crack-glow)" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="crack1.begin+0.15s" fill="freeze"/>
+    </path>
+    <path d="M475,350 L380,400 L300,480 L200,500" fill="none" stroke="rgba(255,59,59,0.5)" stroke-width="1" filter="url(#crack-glow)" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="crack1.begin+0.2s" fill="freeze"/>
+    </path>
+    <path d="M520,500 L600,520 L680,580 L750,600 L850,650" fill="none" stroke="rgba(255,59,59,0.5)" stroke-width="1" filter="url(#crack-glow)" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="crack1.begin+0.25s" fill="freeze"/>
+    </path>
+    <path d="M490,650 L420,700 L350,750 L250,800" fill="none" stroke="rgba(255,59,59,0.4)" stroke-width="1" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="crack1.begin+0.3s" fill="freeze"/>
+    </path>
+    <!-- Hairline micro-fractures -->
+    <path d="M350,200 L320,150 L280,100" fill="none" stroke="rgba(255,59,59,0.3)" stroke-width="0.5" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.2s" begin="crack1.begin+0.35s" fill="freeze"/>
+    </path>
+    <path d="M700,320 L740,280 L780,200" fill="none" stroke="rgba(255,59,59,0.3)" stroke-width="0.5" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.2s" begin="crack1.begin+0.35s" fill="freeze"/>
+    </path>
+    <path d="M600,520 L640,480 L680,420" fill="none" stroke="rgba(255,59,59,0.3)" stroke-width="0.5" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="0.2s" begin="crack1.begin+0.4s" fill="freeze"/>
+    </path>
+  </svg>
+</div>
+
+<!-- ═══ BEAT 8: THE AFTERMATH — NEW ORDER ═══ -->
+<section class="beat" data-beat="aftermath" style="min-height:auto;padding-top:6rem;padding-bottom:3rem">
+  <p class="label" style="color:var(--danger)">After the Fracture — The New Order</p>
+  <h2 class="headline headline--medium text-center mt-2 accent-shift" style="font-family:'Inter',sans-serif;font-weight:800;letter-spacing:-0.03em">Week 6 Power Rankings</h2>
+  <p class="subtitle" style="margin-bottom:2rem;color:var(--danger)">Four upsets. New hierarchy.</p>
+  <div class="standings-wrapper">
+    <table class="standings" id="standings-after">
+      <thead><tr><th>#</th><th>Team</th><th>Rec</th><th>PF</th><th>Wk6</th><th>+/-</th></tr></thead>
+      <tbody>
+        <tr><td class="rank-cell" style="color:var(--danger)">1</td><td class="team-name">The Legion of Bouz</td><td>5-1</td><td>935.7</td><td>165.90</td><td class="movement up">+1</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">2</td><td class="team-name">General Ken-obi</td><td>5-1</td><td>871.2</td><td>164.94</td><td class="movement up">+3</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">3</td><td class="team-name">Sleeping Giants</td><td>5-1</td><td>857.0</td><td>129.82</td><td class="movement flat">—</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">4</td><td class="team-name">The Boonist Monks</td><td>4-2</td><td>912.9</td><td>150.46</td><td class="movement up">+2</td></tr>
+        <tr style="background:rgba(255,59,59,0.08)"><td class="rank-cell" style="color:var(--danger)">5</td><td class="team-name" style="color:var(--danger)">Kittler on the Roof</td><td>4-2</td><td>877.9</td><td>107.74</td><td class="movement down">-4</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">6</td><td class="team-name">Rasheeing the Scene</td><td>4-2</td><td>816.0</td><td>109.10</td><td class="movement down">-2</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">7</td><td class="team-name">MHJTIME</td><td>3-3</td><td>891.9</td><td>140.94</td><td class="movement flat">—</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">8</td><td class="team-name">Noble FFT</td><td>3-3</td><td>819.0</td><td>151.88</td><td class="movement up">+1</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">9</td><td class="team-name">Ghastly Grayskull Gang</td><td>2-4</td><td>818.3</td><td>121.30</td><td class="movement down">-1</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">10</td><td class="team-name">Chudders Football Team</td><td>1-5</td><td>727.9</td><td>95.26</td><td class="movement flat">—</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">11</td><td class="team-name">Burden of Etienne-y Woody</td><td>0-6</td><td>732.7</td><td>99.20</td><td class="movement flat">—</td></tr>
+        <tr><td class="rank-cell" style="color:var(--danger)">12</td><td class="team-name">Father Time</td><td>0-6</td><td>712.7</td><td>107.66</td><td class="movement flat">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ BEAT 9: THE PERFORMANCE ═══ -->
+<section class="beat" data-beat="bijan">
+  <p class="label" style="color:var(--danger)">Top Performer</p>
+  <div class="number" style="color:var(--danger)">32.8</div>
+  <h3 class="headline headline--medium text-center mt-2" style="font-family:'Inter',sans-serif;font-weight:800;color:#fff">Bijan Robinson</h3>
+  <p class="subtitle">RB &middot; Atlanta Falcons &middot; Noble FFT</p>
+  <p class="prose mt-3 text-center" style="max-width:45ch">The week's single highest individual score. Robinson carried Noble FFT to an upset win they had no business getting. 32.8 points from one man. Sometimes that's all it takes.</p>
+</section>
+
+<!-- ═══ BEAT 10: THE NON-UPSETS (QUICK) ═══ -->
+<section class="beat" data-beat="chalk" style="min-height:80vh">
+  <p class="label" style="color:var(--muted)">The Two That Went to Script</p>
+  <div class="gap-stack" style="max-width:500px;width:100%">
+    <div class="matchup">
+      <div class="matchup-teams">
+        <span class="matchup-team">Sleeping Giants</span>
+        <span class="matchup-team loser">Chudders FT</span>
+      </div>
+      <div class="matchup-score">129.82 — 95.26</div>
+      <div class="matchup-margin">+34.56 &middot; Josh Jacobs: 29.5</div>
+    </div>
+    <div class="matchup">
+      <div class="matchup-teams">
+        <span class="matchup-team">Legion of Bouz</span>
+        <span class="matchup-team loser">Father Time</span>
+      </div>
+      <div class="matchup-score">165.90 — 107.66</div>
+      <div class="matchup-margin">+58.24 &middot; Mahomes: 30.48, Skattebo: 30.0</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BEAT 11: WEEK 7 PREVIEW ═══ -->
+<section class="beat" data-beat="week7">
+  <p class="label" style="color:var(--danger)">Next Week</p>
+  <h2 class="headline headline--large text-center" style="font-family:'Inter',sans-serif;font-weight:900;color:#fff">The Collision</h2>
+  <div class="marquee-card mt-3" style="border-color:var(--danger)">
+    <p class="label" style="color:var(--danger)">Week 7 &middot; Marquee Matchup</p>
+    <h3 class="headline headline--medium mt-2" style="font-family:'Inter',sans-serif;font-weight:800;color:#fff">The Legion of Bouz</h3>
+    <p class="vs">vs</p>
+    <h3 class="headline headline--medium" style="font-family:'Inter',sans-serif;font-weight:800;color:#fff">General Ken-obi</h3>
+    <div class="mt-2" style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap">
+      <div><span class="label">Record</span><br><strong style="color:#fff">5-1 vs 5-1</strong></div>
+      <div><span class="label">Elo</span><br><strong style="color:#fff">1604 vs 1700</strong></div>
+      <div><span class="label">Titles</span><br><strong style="color:#fff">1 vs 2</strong></div>
+    </div>
+    <p class="prose mt-3 text-center" style="max-width:40ch;margin-left:auto;margin-right:auto">Both 5-1. Both top-two scorers this week. Both former champions. One of them walks out of Week 7 with sole possession of first place.</p>
+  </div>
+</section>
+
+<!-- ═══ BEAT 12: THE CLOSE ═══ -->
+<section class="beat" data-beat="close" style="min-height:60vh">
+  <p class="pull-quote" style="color:var(--danger);font-family:'Inter',sans-serif;font-style:normal;font-weight:800;max-width:20ch;font-size:clamp(1.5rem,5vw,3rem)">Week 7:<br>The collision nobody can look away from.</p>
+  <p class="label mt-4" style="color:var(--muted)">Jailyard Dynasty &middot; Season 2025 &middot; Week 6</p>
+</section>
+
+</div><!-- /scroll-container -->
+
+<script>
+(function(){
+  // ── Scroll-triggered beat reveals ──
+  var beats = document.querySelectorAll('.beat');
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+      }
+    });
+  },{threshold:0.15,rootMargin:'0px 0px -50px 0px'});
+  beats.forEach(function(b){observer.observe(b)});
+
+  // ── The Fracture ──
+  var fractureTrigger = document.getElementById('fracture-trigger');
+  var crackOverlay = document.getElementById('crackOverlay');
+  var fractured = false;
+
+  var fractureObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting && !fractured){
+        fractured = true;
+        // Activate crack overlay
+        crackOverlay.classList.add('active');
+        // Trigger SVG animations
+        var anim = document.getElementById('crack1');
+        if(anim && anim.beginElement) anim.beginElement();
+        // After cracks spread, add post-fracture class
+        setTimeout(function(){
+          document.body.classList.add('post-fracture');
+        },600);
+        // Fade out cracks after they've made their point
+        setTimeout(function(){
+          crackOverlay.style.transition = 'opacity 2s ease';
+          crackOverlay.style.opacity = '0';
+        },3000);
+        setTimeout(function(){
+          crackOverlay.classList.remove('active');
+          crackOverlay.style.opacity = '';
+        },5000);
+      }
+    });
+  },{threshold:0.6});
+  fractureObserver.observe(fractureTrigger);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 06 Power Rankings — Aurora Stack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #020617;
+  --fg: #F1F5F9;
+  --muted: #94A3B8;
+  --accent: #22D3EE;
+  --accent2: #A855F7;
+  --card: rgba(15, 23, 42, 0.65);
+  --border: rgba(255, 255, 255, 0.08);
+  --glass: rgba(255, 255, 255, 0.04);
+  --good: #34D399;
+  --bad: #F87171;
+  --warn: #FBBF24;
+  --divider: rgba(255, 255, 255, 0.5);
+  --glow-cyan: rgba(34, 211, 238, 0.15);
+  --glow-purple: rgba(168, 85, 247, 0.15);
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* === AURORA BACKGROUND === */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.3;
+}
+
+.aurora-blob-1 {
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(ellipse, var(--accent) 0%, transparent 70%);
+  top: -200px;
+  left: -100px;
+}
+
+.aurora-blob-2 {
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse, var(--accent2) 0%, transparent 70%);
+  top: 300px;
+  right: -200px;
+}
+
+.aurora-blob-3 {
+  width: 900px;
+  height: 700px;
+  background: radial-gradient(ellipse, var(--accent) 0%, var(--accent2) 30%, transparent 70%);
+  top: 900px;
+  left: -300px;
+}
+
+.aurora-blob-4 {
+  width: 600px;
+  height: 500px;
+  background: radial-gradient(ellipse, var(--accent2) 0%, transparent 70%);
+  top: 1600px;
+  right: -150px;
+}
+
+.aurora-blob-5 {
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(ellipse, var(--accent) 0%, var(--accent2) 40%, transparent 70%);
+  top: 2400px;
+  left: -200px;
+}
+
+.aurora-blob-6 {
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse, var(--accent2) 0%, transparent 70%);
+  top: 3200px;
+  right: -100px;
+}
+
+/* === LAYOUT === */
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--divider);
+  margin: 48px 0;
+  opacity: 0.5;
+}
+
+/* === GLASS PANEL === */
+.glass-panel {
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+}
+
+.glass-panel.glow-cyan {
+  box-shadow: 0 0 40px var(--glow-cyan), inset 0 1px 0 rgba(34, 211, 238, 0.1);
+}
+
+.glass-panel.glow-purple {
+  box-shadow: 0 0 40px var(--glow-purple), inset 0 1px 0 rgba(168, 85, 247, 0.1);
+}
+
+.glass-panel.glow-mixed {
+  box-shadow: 0 0 30px var(--glow-cyan), 0 0 60px var(--glow-purple);
+}
+
+/* === SVG ICONS === */
+.icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 4px;
+  fill: white;
+}
+
+.icon-sm {
+  width: 14px;
+  height: 14px;
+}
+
+.icon-lg {
+  width: 20px;
+  height: 20px;
+}
+
+/* === HERO === */
+.hero {
+  padding: 100px 0 60px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-swoosh {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 300px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, transparent 100%);
+  filter: blur(80px);
+  opacity: 0.2;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.hero-title {
+  font-size: clamp(28px, 5vw, 36px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: var(--fg);
+  position: relative;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--muted);
+  margin-top: 16px;
+  font-weight: 400;
+  position: relative;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 32px;
+  position: relative;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.hero-stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* === STANDINGS TABLE === */
+.standings-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.standings-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.standings-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.standings-table th:first-child {
+  width: 40px;
+  text-align: center;
+}
+
+.standings-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.standings-table tr:last-child td {
+  border-bottom: none;
+}
+
+.standings-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.rank-cell {
+  text-align: center;
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.rank-cell.top3 {
+  color: var(--accent);
+}
+
+.team-name {
+  font-weight: 600;
+}
+
+.owner-name {
+  color: var(--muted);
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+.record {
+  font-weight: 600;
+}
+
+.pts {
+  font-variant-numeric: tabular-nums;
+}
+
+.movement {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.movement.up {
+  color: var(--good);
+}
+
+.movement.down {
+  color: var(--bad);
+}
+
+.movement.flat {
+  color: var(--muted);
+}
+
+.streak {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.streak.win {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--good);
+}
+
+.streak.loss {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--bad);
+}
+
+/* === MATCHUP CARDS === */
+.matchups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.matchup-card {
+  background: var(--card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.matchup-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(168, 85, 247, 0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.matchup-card.upset::before {
+  background: linear-gradient(135deg, var(--accent2) 0%, rgba(168, 85, 247, 0.4) 100%);
+}
+
+.matchup-card.upset {
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.2);
+}
+
+.matchup-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.2);
+  color: var(--accent2);
+  margin-bottom: 12px;
+}
+
+.matchup-teams {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.matchup-team {
+  flex: 1;
+}
+
+.matchup-team-name {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.matchup-team-name.winner {
+  color: var(--fg);
+}
+
+.matchup-team-name.loser {
+  color: var(--muted);
+}
+
+.matchup-score {
+  font-size: 22px;
+  font-weight: 800;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.matchup-score.winner {
+  color: var(--accent);
+}
+
+.matchup-score.loser {
+  color: var(--muted);
+}
+
+.matchup-vs {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+
+.matchup-team.right {
+  text-align: right;
+}
+
+.matchup-margin {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.matchup-margin strong {
+  color: var(--fg);
+}
+
+/* === AWARDS === */
+.awards-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.award-tile {
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.award-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  border-radius: 12px;
+}
+
+.award-tile.cyan-grad::before {
+  background: linear-gradient(135deg, var(--accent), transparent);
+}
+
+.award-tile.purple-grad::before {
+  background: linear-gradient(135deg, var(--accent2), transparent);
+}
+
+.award-tile.mixed-grad::before {
+  background: linear-gradient(135deg, var(--accent), var(--accent2), transparent);
+}
+
+.award-tile.warm-grad::before {
+  background: linear-gradient(135deg, var(--accent2), var(--accent), transparent);
+}
+
+.award-tile {
+  background: var(--card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+}
+
+.award-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.award-value {
+  font-size: 18px;
+  font-weight: 800;
+  position: relative;
+  line-height: 1.3;
+}
+
+.award-detail {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+  position: relative;
+}
+
+.award-value .accent-cyan {
+  color: var(--accent);
+}
+
+.award-value .accent-purple {
+  color: var(--accent2);
+}
+
+/* === WEEK 7 PREVIEW === */
+.preview-marquee {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  padding: 32px;
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.preview-marquee-swoosh {
+  position: absolute;
+  top: -50%;
+  left: -20%;
+  width: 140%;
+  height: 200%;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(168, 85, 247, 0.08), transparent);
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.preview-marquee-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.preview-marquee-teams {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  position: relative;
+}
+
+.preview-marquee-team {
+  text-align: center;
+}
+
+.preview-marquee-rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.preview-marquee-name {
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 900;
+}
+
+.preview-marquee-record {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.preview-vs-badge {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--accent2);
+  background: rgba(168, 85, 247, 0.15);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.preview-marquee-note {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 16px;
+  font-style: italic;
+  position: relative;
+}
+
+.preview-other {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.preview-tile {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-tile-team {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.preview-tile-vs {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  margin: 0 12px;
+}
+
+.preview-tile-note {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* === SECTION TITLES === */
+.section-title {
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title .accent {
+  color: var(--accent);
+}
+
+/* === FOOTER === */
+.footer {
+  text-align: center;
+  padding: 48px 0 32px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .page-wrapper {
+    padding: 0 16px;
+  }
+
+  .glass-panel {
+    padding: 20px;
+  }
+
+  .hero {
+    padding: 60px 0 40px;
+  }
+
+  .hero-stats {
+    gap: 24px;
+  }
+
+  .hero-stat-value {
+    font-size: 22px;
+  }
+
+  .matchups-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .awards-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .preview-marquee-teams {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .preview-other {
+    grid-template-columns: 1fr;
+  }
+
+  .standings-table th:nth-child(6),
+  .standings-table td:nth-child(6),
+  .standings-table th:nth-child(7),
+  .standings-table td:nth-child(7) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .awards-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .standings-table th:nth-child(4),
+  .standings-table td:nth-child(4) {
+    display: none;
+  }
+}
+
+/* === SCROLL ANIMATIONS === */
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- Aurora Background Blobs -->
+<div class="aurora-bg">
+  <div class="aurora-blob aurora-blob-1"></div>
+  <div class="aurora-blob aurora-blob-2"></div>
+  <div class="aurora-blob aurora-blob-3"></div>
+  <div class="aurora-blob aurora-blob-4"></div>
+  <div class="aurora-blob aurora-blob-5"></div>
+  <div class="aurora-blob aurora-blob-6"></div>
+</div>
+
+<div class="page-wrapper">
+
+  <!-- ===== HERO ===== -->
+  <section class="hero fade-in">
+    <div class="hero-swoosh"></div>
+    <div class="hero-label">The Jailyard Dynasty &middot; Season 2025</div>
+    <h1 class="hero-title">WEEK 06 POWER RANKINGS</h1>
+    <p class="hero-subtitle">4 of 6 games were upsets. The wildest week of the season so far.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value">165.9</div>
+        <div class="hero-stat-label">Week High</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">128.7</div>
+        <div class="hero-stat-label">Avg Score</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">4/6</div>
+        <div class="hero-stat-label">Upsets</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== STANDINGS ===== -->
+  <section class="fade-in">
+    <h2 class="section-title">
+      <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
+      <span>Standings</span>
+    </h2>
+    <div class="glass-panel glow-cyan">
+      <div class="table-wrapper">
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team</th>
+              <th>Rec</th>
+              <th>PF</th>
+              <th>Wk6</th>
+              <th>Mvmt</th>
+              <th>Streak</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rank-cell top3">1</td>
+              <td><span class="team-name">The Legion of Bouz</span><span class="owner-name">KidBouzie</span></td>
+              <td class="record">5-1</td>
+              <td class="pts">935.7</td>
+              <td class="pts">165.90</td>
+              <td class="movement up"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z" fill="#34D399"/></svg>+1</td>
+              <td><span class="streak win">W1</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell top3">2</td>
+              <td><span class="team-name">General Ken-obi</span><span class="owner-name">bLaker24</span></td>
+              <td class="record">5-1</td>
+              <td class="pts">871.2</td>
+              <td class="pts">164.94</td>
+              <td class="movement up"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z" fill="#34D399"/></svg>+3</td>
+              <td><span class="streak win">W2</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell top3">3</td>
+              <td><span class="team-name">Sleeping Giants</span><span class="owner-name">zbcowan</span></td>
+              <td class="record">5-1</td>
+              <td class="pts">857.0</td>
+              <td class="pts">129.82</td>
+              <td class="movement flat">&mdash;</td>
+              <td><span class="streak win">W4</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">4</td>
+              <td><span class="team-name">The Boonist Monks</span><span class="owner-name">GauchoTrain</span></td>
+              <td class="record">4-2</td>
+              <td class="pts">912.9</td>
+              <td class="pts">150.46</td>
+              <td class="movement up"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z" fill="#34D399"/></svg>+2</td>
+              <td><span class="streak win">W1</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">5</td>
+              <td><span class="team-name">Kittler on the Roof</span><span class="owner-name">bchodos</span></td>
+              <td class="record">4-2</td>
+              <td class="pts">877.9</td>
+              <td class="pts">107.74</td>
+              <td class="movement down"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 20l8-8h-5V4H9v8H4z" fill="#F87171"/></svg>-4</td>
+              <td><span class="streak loss">L1</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">6</td>
+              <td><span class="team-name">Rasheeing the Scene</span><span class="owner-name">ToreroGaucho</span></td>
+              <td class="record">4-2</td>
+              <td class="pts">816.0</td>
+              <td class="pts">109.10</td>
+              <td class="movement down"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 20l8-8h-5V4H9v8H4z" fill="#F87171"/></svg>-2</td>
+              <td><span class="streak loss">L1</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">7</td>
+              <td><span class="team-name">MHJTIME</span><span class="owner-name">rango_</span></td>
+              <td class="record">3-3</td>
+              <td class="pts">891.9</td>
+              <td class="pts">140.94</td>
+              <td class="movement flat">&mdash;</td>
+              <td><span class="streak win">W2</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">8</td>
+              <td><span class="team-name">Noble FFT</span><span class="owner-name">kevobucks</span></td>
+              <td class="record">3-3</td>
+              <td class="pts">819.0</td>
+              <td class="pts">151.88</td>
+              <td class="movement up"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z" fill="#34D399"/></svg>+1</td>
+              <td><span class="streak win">W1</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">9</td>
+              <td><span class="team-name">Ghastly Grayskull Gang</span><span class="owner-name">GrayskullXX</span></td>
+              <td class="record">2-4</td>
+              <td class="pts">818.3</td>
+              <td class="pts">121.30</td>
+              <td class="movement down"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 20l8-8h-5V4H9v8H4z" fill="#F87171"/></svg>-1</td>
+              <td><span class="streak loss">L2</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">10</td>
+              <td><span class="team-name">Chudders Football Team</span><span class="owner-name">Chudders</span></td>
+              <td class="record">1-5</td>
+              <td class="pts">727.9</td>
+              <td class="pts">95.26</td>
+              <td class="movement flat">&mdash;</td>
+              <td><span class="streak loss">L1</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">11</td>
+              <td><span class="team-name">Burden of Etienne-y Woody</span><span class="owner-name">kharlow</span></td>
+              <td class="record">0-6</td>
+              <td class="pts">732.7</td>
+              <td class="pts">99.20</td>
+              <td class="movement flat">&mdash;</td>
+              <td><span class="streak loss">L6</span></td>
+            </tr>
+            <tr>
+              <td class="rank-cell">12</td>
+              <td><span class="team-name">Father Time</span><span class="owner-name">Redrumsregrub</span></td>
+              <td class="record">0-6</td>
+              <td class="pts">712.7</td>
+              <td class="pts">107.66</td>
+              <td class="movement flat">&mdash;</td>
+              <td><span class="streak loss">L6</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== MATCHUP RESULTS ===== -->
+  <section class="fade-in">
+    <h2 class="section-title">
+      <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32C9.56 5.7 8.7 8.1 9.24 10.42c.02.1.04.2.04.31 0 .37-.17.7-.44.9-.31.23-.71.28-1.08.13-.17-.07-.28-.18-.37-.33C6.07 9.6 6.23 7.58 7.19 6.07c-1.37 1.03-2.19 2.7-2.19 4.48 0 3.37 2.72 6.12 6.08 6.12 3.37 0 6.09-2.75 6.09-6.12 0-1.2-.36-2.32-.99-3.26l-.52.01z" fill="white"/></svg>
+      <span>Week 6 <span class="accent">Results</span></span>
+    </h2>
+    <div class="matchups-grid">
+
+      <!-- Matchup 1: Noble FFT def Ghastly (UPSET) -->
+      <div class="matchup-card upset">
+        <div class="matchup-badge">Upset</div>
+        <div class="matchup-teams">
+          <div class="matchup-team">
+            <div class="matchup-team-name winner">Noble FFT</div>
+            <div class="matchup-score winner">151.88</div>
+          </div>
+          <div class="matchup-vs">VS</div>
+          <div class="matchup-team right">
+            <div class="matchup-team-name loser">Ghastly Grayskull Gang</div>
+            <div class="matchup-score loser">121.30</div>
+          </div>
+        </div>
+        <div class="matchup-margin"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32C9.56 5.7 8.7 8.1 9.24 10.42c.02.1.04.2.04.31 0 .37-.17.7-.44.9-.31.23-.71.28-1.08.13-.17-.07-.28-.18-.37-.33C6.07 9.6 6.23 7.58 7.19 6.07c-1.37 1.03-2.19 2.7-2.19 4.48 0 3.37 2.72 6.12 6.08 6.12 3.37 0 6.09-2.75 6.09-6.12 0-1.2-.36-2.32-.99-3.26l-.52.01z" fill="white"/></svg> Bijan Robinson: <strong>32.8 pts</strong> &middot; Margin: +30.58</div>
+      </div>
+
+      <!-- Matchup 2: MHJTIME def Kittler (UPSET) -->
+      <div class="matchup-card upset">
+        <div class="matchup-badge">Upset &middot; Kittler falls from #1</div>
+        <div class="matchup-teams">
+          <div class="matchup-team">
+            <div class="matchup-team-name winner">MHJTIME</div>
+            <div class="matchup-score winner">140.94</div>
+          </div>
+          <div class="matchup-vs">VS</div>
+          <div class="matchup-team right">
+            <div class="matchup-team-name loser">Kittler on the Roof</div>
+            <div class="matchup-score loser">107.74</div>
+          </div>
+        </div>
+        <div class="matchup-margin">Rico Dowdle: <strong>30.9 pts</strong> &middot; Margin: +33.20</div>
+      </div>
+
+      <!-- Matchup 3: Sleeping Giants def Chudders -->
+      <div class="matchup-card">
+        <div class="matchup-teams">
+          <div class="matchup-team">
+            <div class="matchup-team-name winner">Sleeping Giants</div>
+            <div class="matchup-score winner">129.82</div>
+          </div>
+          <div class="matchup-vs">VS</div>
+          <div class="matchup-team right">
+            <div class="matchup-team-name loser">Chudders FT</div>
+            <div class="matchup-score loser">95.26</div>
+          </div>
+        </div>
+        <div class="matchup-margin">Josh Jacobs: <strong>29.5 pts</strong> &middot; Margin: +34.56</div>
+      </div>
+
+      <!-- Matchup 4: Boonist Monks def Rasheeing (UPSET) -->
+      <div class="matchup-card upset">
+        <div class="matchup-badge">Upset</div>
+        <div class="matchup-teams">
+          <div class="matchup-team">
+            <div class="matchup-team-name winner">The Boonist Monks</div>
+            <div class="matchup-score winner">150.46</div>
+          </div>
+          <div class="matchup-vs">VS</div>
+          <div class="matchup-team right">
+            <div class="matchup-team-name loser">Rasheeing the Scene</div>
+            <div class="matchup-score loser">109.10</div>
+          </div>
+        </div>
+        <div class="matchup-margin">George Pickens: <strong>27.3 pts</strong> &middot; Margin: +41.36</div>
+      </div>
+
+      <!-- Matchup 5: Legion def Father Time (WEEK HIGH) -->
+      <div class="matchup-card">
+        <div class="matchup-teams">
+          <div class="matchup-team">
+            <div class="matchup-team-name winner">The Legion of Bouz</div>
+            <div class="matchup-score winner">165.90</div>
+          </div>
+          <div class="matchup-vs">VS</div>
+          <div class="matchup-team right">
+            <div class="matchup-team-name loser">Father Time</div>
+            <div class="matchup-score loser">107.66</div>
+          </div>
+        </div>
+        <div class="matchup-margin"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" fill="white"/></svg> Week high score &middot; Margin: +58.24</div>
+      </div>
+
+      <!-- Matchup 6: Ken-obi def Burden (BIGGEST BLOWOUT) -->
+      <div class="matchup-card">
+        <div class="matchup-teams">
+          <div class="matchup-team">
+            <div class="matchup-team-name winner">General Ken-obi</div>
+            <div class="matchup-score winner">164.94</div>
+          </div>
+          <div class="matchup-vs">VS</div>
+          <div class="matchup-team right">
+            <div class="matchup-team-name loser">Burden of Etienne-y Woody</div>
+            <div class="matchup-score loser">99.20</div>
+          </div>
+        </div>
+        <div class="matchup-margin"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32C9.56 5.7 8.7 8.1 9.24 10.42c.02.1.04.2.04.31 0 .37-.17.7-.44.9-.31.23-.71.28-1.08.13-.17-.07-.28-.18-.37-.33C6.07 9.6 6.23 7.58 7.19 6.07c-1.37 1.03-2.19 2.7-2.19 4.48 0 3.37 2.72 6.12 6.08 6.12 3.37 0 6.09-2.75 6.09-6.12 0-1.2-.36-2.32-.99-3.26l-.52.01z" fill="white"/></svg> Biggest blowout &middot; Margin: <strong>+65.74</strong></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== AWARDS ===== -->
+  <section class="fade-in">
+    <h2 class="section-title">
+      <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" fill="white"/></svg>
+      <span>Week 6 <span class="accent">Awards</span></span>
+    </h2>
+    <div class="awards-strip">
+
+      <div class="award-tile cyan-grad">
+        <div class="award-label">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32C9.56 5.7 8.7 8.1 9.24 10.42c.02.1.04.2.04.31 0 .37-.17.7-.44.9-.31.23-.71.28-1.08.13-.17-.07-.28-.18-.37-.33C6.07 9.6 6.23 7.58 7.19 6.07c-1.37 1.03-2.19 2.7-2.19 4.48 0 3.37 2.72 6.12 6.08 6.12 3.37 0 6.09-2.75 6.09-6.12 0-1.2-.36-2.32-.99-3.26l-.52.01z" fill="white"/></svg>
+          High Scorer
+        </div>
+        <div class="award-value">The Legion of Bouz</div>
+        <div class="award-detail"><span class="accent-cyan">165.9 pts</span> &middot; KidBouzie</div>
+      </div>
+
+      <div class="award-tile purple-grad">
+        <div class="award-label">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="white"/></svg>
+          Low Scorer
+        </div>
+        <div class="award-value">Chudders Football Team</div>
+        <div class="award-detail"><span class="accent-purple">95.26 pts</span> &middot; Chudders</div>
+      </div>
+
+      <div class="award-tile mixed-grad">
+        <div class="award-label">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z" fill="white"/></svg>
+          Top Performer
+        </div>
+        <div class="award-value">Bijan Robinson</div>
+        <div class="award-detail"><span class="accent-cyan">32.8 pts</span> &middot; RB, ATL &middot; Noble FFT</div>
+      </div>
+
+      <div class="award-tile warm-grad">
+        <div class="award-label">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32C9.56 5.7 8.7 8.1 9.24 10.42c.02.1.04.2.04.31 0 .37-.17.7-.44.9-.31.23-.71.28-1.08.13-.17-.07-.28-.18-.37-.33C6.07 9.6 6.23 7.58 7.19 6.07c-1.37 1.03-2.19 2.7-2.19 4.48 0 3.37 2.72 6.12 6.08 6.12 3.37 0 6.09-2.75 6.09-6.12 0-1.2-.36-2.32-.99-3.26l-.52.01z" fill="white"/></svg>
+          Biggest Blowout
+        </div>
+        <div class="award-value">General Ken-obi</div>
+        <div class="award-detail"><span class="accent-purple">+65.74</span> &middot; 164.94 vs 99.20</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== WEEK 7 PREVIEW ===== -->
+  <section class="fade-in">
+    <h2 class="section-title">
+      <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z" fill="white"/></svg>
+      <span>Week 7 <span class="accent">Preview</span></span>
+    </h2>
+
+    <!-- Marquee: #1 vs #2 -->
+    <div class="preview-marquee glow-mixed">
+      <div class="preview-marquee-swoosh"></div>
+      <div class="preview-marquee-label">Marquee Matchup</div>
+      <div class="preview-marquee-teams">
+        <div class="preview-marquee-team">
+          <div class="preview-marquee-rank">#1</div>
+          <div class="preview-marquee-name">The Legion of Bouz</div>
+          <div class="preview-marquee-record">5-1 &middot; 935.7 PF</div>
+        </div>
+        <div class="preview-vs-badge">VS</div>
+        <div class="preview-marquee-team">
+          <div class="preview-marquee-rank">#2</div>
+          <div class="preview-marquee-name">General Ken-obi</div>
+          <div class="preview-marquee-record">5-1 &middot; 871.2 PF</div>
+        </div>
+      </div>
+      <div class="preview-marquee-note">Undefeated-by-standards title vs reigning 2-time champ. Both scored ~165 in Week 6.</div>
+    </div>
+
+    <!-- Other matchups -->
+    <div class="preview-other">
+      <div class="preview-tile">
+        <div>
+          <div class="preview-tile-team">#4 The Boonist Monks</div>
+        </div>
+        <div class="preview-tile-vs">vs</div>
+        <div>
+          <div class="preview-tile-team">#8 Noble FFT</div>
+        </div>
+      </div>
+      <div class="preview-tile">
+        <div>
+          <div class="preview-tile-team">#5 Kittler on the Roof</div>
+        </div>
+        <div class="preview-tile-vs">vs</div>
+        <div>
+          <div class="preview-tile-team">#3 Sleeping Giants</div>
+        </div>
+      </div>
+      <div class="preview-tile">
+        <div>
+          <div class="preview-tile-team">#11 Burden of Etienne-y Woody</div>
+          <div class="preview-tile-note">Toilet bowl matinee -- both 0-6</div>
+        </div>
+        <div class="preview-tile-vs">vs</div>
+        <div>
+          <div class="preview-tile-team">#12 Father Time</div>
+        </div>
+      </div>
+      <div class="preview-tile">
+        <div>
+          <div class="preview-tile-team">#6 Rasheeing the Scene</div>
+        </div>
+        <div class="preview-tile-vs">vs</div>
+        <div>
+          <div class="preview-tile-team">#9 Ghastly Grayskull Gang</div>
+        </div>
+      </div>
+      <div class="preview-tile">
+        <div>
+          <div class="preview-tile-team">#10 Chudders FT</div>
+        </div>
+        <div class="preview-tile-vs">vs</div>
+        <div>
+          <div class="preview-tile-team">#7 MHJTIME</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <p>The Jailyard Dynasty &middot; Est. 2022 &middot; Season 2025, Week 6</p>
+    <p style="margin-top: 6px; font-size: 11px;">Aurora Stack &middot; v10</p>
+  </footer>
+
+</div>
+
+<script>
+(function() {
+  // Intersection Observer for scroll-triggered fade-in
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+</script>
+</body>
+</html>

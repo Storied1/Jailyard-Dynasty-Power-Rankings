@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEEK 06 — Guerilla Editorial | Jailyard Dynasty</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #E6E6FA;
+  --fg: #000000;
+  --accent: #FF0000;
+  --accent2: #FFFF00;
+  --white: #FFFFFF;
+  --muted: #444444;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Oswald', 'Arial Narrow', sans-serif;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* SVG Filters for textures */
+.svg-filters { position: absolute; width: 0; height: 0; }
+
+/* Xerox noise texture overlay */
+.xerox-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.06;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Newsprint dot pattern */
+.newsprint {
+  background-image: radial-gradient(circle, var(--fg) 0.8px, transparent 0.8px);
+  background-size: 4px 4px;
+}
+
+/* Kruger-style text banner */
+.kruger-banner {
+  background: var(--accent);
+  color: var(--white);
+  font-family: var(--serif);
+  font-weight: 900;
+  font-style: italic;
+  padding: 0.6rem 2rem;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  position: relative;
+}
+
+.kruger-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.15) 0.5px, transparent 0.5px);
+  background-size: 3px 3px;
+  pointer-events: none;
+}
+
+.kruger-banner.yellow {
+  background: var(--accent2);
+  color: var(--fg);
+}
+
+/* Divider slash */
+.slash-divider {
+  text-align: center;
+  padding: 1.5rem 0;
+  position: relative;
+}
+
+.slash-divider::before {
+  content: '///////////////';
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+}
+
+/* Ink bleed border utility */
+.ink-border {
+  border: 3px solid var(--fg);
+  box-shadow: 2px 2px 0 var(--fg), -1px -1px 0 rgba(0,0,0,0.1);
+}
+
+/* ============ HERO ============ */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.hero-yellow-block {
+  position: absolute;
+  top: -5%;
+  right: -5%;
+  width: 55%;
+  height: 70%;
+  background: var(--accent2);
+  transform: rotate(-3deg);
+  z-index: 1;
+  filter: url(#ink-bleed);
+}
+
+.hero-red-block {
+  position: absolute;
+  bottom: -8%;
+  left: -8%;
+  width: 50%;
+  height: 55%;
+  background: var(--accent);
+  transform: rotate(2deg);
+  z-index: 1;
+  filter: url(#ink-bleed);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.hero-week {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(6rem, 18vw, 16rem);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--fg);
+  text-shadow: 4px 4px 0 var(--accent), -2px -2px 0 var(--accent2);
+}
+
+.hero-sub {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 3vw, 2.4rem);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin-top: 0.5rem;
+  color: var(--fg);
+}
+
+.hero-tagline {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 3.5vw, 3rem);
+  font-style: italic;
+  margin-top: 1.5rem;
+  color: var(--accent);
+  max-width: 700px;
+}
+
+.hero-date {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+  margin-top: 1.5rem;
+  color: var(--muted);
+}
+
+/* Hero halftone dot screen */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: radial-gradient(circle, var(--fg) 1.2px, transparent 1.2px);
+  background-size: 8px 8px;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Hero diagonal stripe accent */
+.hero-stripe {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--fg) 0px,
+    var(--fg) 3px,
+    transparent 3px,
+    transparent 12px
+  );
+  z-index: 5;
+  opacity: 0.15;
+}
+
+/* Kruger-style text bar across hero */
+.hero-kruger-bar {
+  position: absolute;
+  bottom: 80px;
+  left: -30px;
+  right: -30px;
+  background: var(--accent);
+  color: var(--white);
+  font-family: var(--serif);
+  font-weight: 900;
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+  padding: 0.7rem 2rem;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(-1.5deg);
+  z-index: 4;
+  letter-spacing: 0.05em;
+}
+
+/* ============ PULL QUOTE ============ */
+.pull-quote {
+  position: relative;
+  padding: 4rem 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.pull-quote-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-2deg);
+  width: 110%;
+  height: 80%;
+  background: var(--accent);
+  z-index: 0;
+}
+
+.pull-quote-text {
+  position: relative;
+  z-index: 1;
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(3rem, 10vw, 9rem);
+  color: var(--white);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.pull-quote-sub {
+  position: relative;
+  z-index: 1;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(1rem, 2.5vw, 1.8rem);
+  color: var(--accent2);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-top: 0.5rem;
+}
+
+/* ============ STANDINGS ============ */
+.standings-section {
+  position: relative;
+  padding: 3rem 2rem;
+  overflow: hidden;
+}
+
+.section-title {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.section-title .red { color: var(--accent); }
+
+.standings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  position: relative;
+  z-index: 2;
+  border: 3px solid var(--fg);
+}
+
+.standings-header, .standings-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 70px 80px 90px;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--fg);
+}
+
+.standings-header {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.standings-row {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.95rem;
+  background: var(--bg);
+  transition: background 0.15s;
+}
+
+.standings-row:nth-child(even) {
+  background: rgba(0,0,0,0.04);
+}
+
+.standings-row .rank {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 1.4rem;
+}
+
+.standings-row .team-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.standings-row .team-name .owner {
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: block;
+}
+
+.standings-row.highlight-rise {
+  background: rgba(255,255,0,0.25);
+}
+
+.standings-row.highlight-fall {
+  background: rgba(255,0,0,0.15);
+}
+
+.standings-row .mvmt-up { color: #008800; font-weight: 700; }
+.standings-row .mvmt-down { color: var(--accent); font-weight: 700; }
+
+/* SVG annotation arrows overlaying standings */
+.standings-annotations {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.annotation-arrow {
+  stroke: var(--accent);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.annotation-circle {
+  stroke: var(--accent2);
+  stroke-width: 3;
+  fill: none;
+  stroke-dasharray: 8 4;
+}
+
+.annotation-text {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  fill: var(--accent);
+  text-transform: uppercase;
+}
+
+/* ============ MATCHUPS ============ */
+.matchups-section {
+  position: relative;
+  padding: 3rem 2rem 4rem;
+  overflow: hidden;
+}
+
+.matchups-yellow-block {
+  position: absolute;
+  top: 10%;
+  right: -5%;
+  width: 40%;
+  height: 50%;
+  background: var(--accent2);
+  transform: rotate(4deg);
+  z-index: 0;
+  opacity: 0.7;
+}
+
+.matchups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.matchup-card {
+  background: var(--white);
+  border: 3px solid var(--fg);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.matchup-card:nth-child(2) { transform: rotate(-1.5deg); }
+.matchup-card:nth-child(4) { transform: rotate(1deg); }
+.matchup-card:nth-child(5) { transform: rotate(-0.8deg); }
+
+.matchup-card.upset {
+  border-color: var(--accent);
+  border-width: 4px;
+}
+
+.upset-stamp {
+  position: absolute;
+  top: 10px;
+  right: -15px;
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 2.2rem;
+  color: var(--accent);
+  transform: rotate(12deg);
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: 2px 2px 0 rgba(255,0,0,0.2);
+  z-index: 5;
+}
+
+.matchup-winner {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+}
+
+.matchup-score {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 2rem;
+  color: var(--fg);
+  margin: 0.3rem 0;
+}
+
+.matchup-loser {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.matchup-loser-score {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--muted);
+}
+
+.matchup-margin {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 0.5rem;
+  color: var(--muted);
+}
+
+.matchup-red-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: var(--accent);
+}
+
+.matchup-card.upset .matchup-red-overlay {
+  height: 40%;
+  opacity: 0.08;
+}
+
+/* Halftone dots on upset cards */
+.matchup-card.upset::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: radial-gradient(circle, var(--accent) 0.6px, transparent 0.6px);
+  background-size: 6px 6px;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============ EDITORIAL ============ */
+.editorial-section {
+  position: relative;
+  padding: 3rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.editorial-section .drop-cap::first-letter {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 4.5rem;
+  float: left;
+  line-height: 0.8;
+  margin-right: 0.15em;
+  margin-top: 0.05em;
+  color: var(--accent);
+}
+
+.editorial-text {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--fg);
+}
+
+.editorial-text strong {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ============ AWARDS ============ */
+.awards-section {
+  position: relative;
+  padding: 3rem 2rem;
+  overflow: hidden;
+}
+
+.awards-halftone-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: radial-gradient(circle, var(--fg) 1px, transparent 1px);
+  background-size: 5px 5px;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.awards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.award-card {
+  background: var(--fg);
+  color: var(--bg);
+  padding: 1.5rem;
+  position: relative;
+  border: none;
+}
+
+.award-card::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 40%;
+  height: 100%;
+  background: var(--accent2);
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.award-label {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent2);
+  margin-bottom: 0.5rem;
+}
+
+.award-name {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 1.4rem;
+  line-height: 1.1;
+}
+
+.award-detail {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  opacity: 0.8;
+}
+
+/* ============ TOP PERFORMERS ============ */
+.performers-section {
+  padding: 2rem 2rem 3rem;
+  position: relative;
+}
+
+.performers-strip {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.performer-chip {
+  flex-shrink: 0;
+  background: var(--white);
+  border: 2px solid var(--fg);
+  padding: 0.8rem 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.performer-chip .pts {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin-left: 0.3rem;
+}
+
+/* ============ NEXT WEEK ============ */
+.next-week {
+  position: relative;
+  padding: 5rem 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.next-week-red-block {
+  position: absolute;
+  top: -10%;
+  left: -5%;
+  width: 60%;
+  height: 120%;
+  background: var(--accent);
+  transform: rotate(-3deg);
+  z-index: 0;
+}
+
+.next-week-yellow-block {
+  position: absolute;
+  bottom: -15%;
+  right: -8%;
+  width: 55%;
+  height: 100%;
+  background: var(--accent2);
+  transform: rotate(2deg);
+  z-index: 0;
+}
+
+.next-week-content {
+  position: relative;
+  z-index: 2;
+}
+
+.next-week-label {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+  color: var(--fg);
+  margin-bottom: 1rem;
+}
+
+.next-week-matchup {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(2.5rem, 8vw, 7rem);
+  line-height: 0.95;
+  color: var(--fg);
+  text-shadow: 3px 3px 0 var(--accent2);
+}
+
+.next-week-vs {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  color: var(--accent);
+  display: block;
+  margin: 0.3rem 0;
+}
+
+.next-week-sub {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--muted);
+  margin-top: 1.5rem;
+}
+
+/* ============ FOOTER ============ */
+.footer {
+  padding: 2rem;
+  text-align: center;
+  border-top: 3px solid var(--fg);
+}
+
+.footer-text {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+/* ============ CRUDE HAND-DRAWN SVG ELEMENTS ============ */
+.crude-arrow {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ============ STAT RIBBON ============ */
+.stat-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  border-top: 3px solid var(--fg);
+  border-bottom: 3px solid var(--fg);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-ribbon-item {
+  flex: 1 1 auto;
+  min-width: 150px;
+  padding: 1.2rem 1.5rem;
+  text-align: center;
+  border-right: 2px solid var(--fg);
+  position: relative;
+}
+
+.stat-ribbon-item:last-child { border-right: none; }
+
+.stat-ribbon-item:nth-child(odd)::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--accent2);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.stat-ribbon-item:nth-child(even)::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--accent);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.stat-ribbon-num {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 2rem;
+  color: var(--fg);
+  position: relative;
+  z-index: 1;
+}
+
+.stat-ribbon-label {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+}
+
+/* ============ STANDINGS COLOR BLOCK ============ */
+.standings-section .color-clash-block {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.standings-red-block {
+  top: 15%;
+  left: -8%;
+  width: 35%;
+  height: 40%;
+  background: var(--accent);
+  transform: rotate(-4deg);
+  opacity: 0.12;
+}
+
+.standings-yellow-block {
+  bottom: 5%;
+  right: -5%;
+  width: 30%;
+  height: 45%;
+  background: var(--accent2);
+  transform: rotate(3deg);
+  opacity: 0.2;
+}
+
+/* ============ MATCHUPS RED BLOCK LEFT ============ */
+.matchups-red-block {
+  position: absolute;
+  bottom: 5%;
+  left: -8%;
+  width: 35%;
+  height: 40%;
+  background: var(--accent);
+  transform: rotate(-2deg);
+  z-index: 0;
+  opacity: 0.15;
+}
+
+/* ============ KEY STORY CALLOUTS ============ */
+.story-callouts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 2rem;
+  position: relative;
+}
+
+.story-callout {
+  position: relative;
+  padding: 1.2rem;
+  border-left: 5px solid var(--accent);
+  background: var(--white);
+}
+
+.story-callout.yellow-accent {
+  border-left-color: var(--accent2);
+}
+
+.story-callout-title {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+
+.story-callout.yellow-accent .story-callout-title {
+  color: var(--muted);
+}
+
+.story-callout-text {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--fg);
+}
+
+.story-callout-stat {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 1.6rem;
+  color: var(--fg);
+  margin-bottom: 0.2rem;
+}
+
+/* ============ WEEK 7 PREVIEW MATCHUPS ============ */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.8rem;
+  padding: 0 2rem 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.preview-card {
+  background: var(--white);
+  border: 2px solid var(--fg);
+  padding: 0.8rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.preview-card.marquee {
+  border-color: var(--accent);
+  border-width: 3px;
+  background: var(--fg);
+  color: var(--white);
+}
+
+.preview-card .vs-text {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 0.7rem;
+  color: var(--accent);
+  margin: 0.2rem 0;
+}
+
+.preview-card.marquee .vs-text {
+  color: var(--accent2);
+}
+
+.preview-card .preview-note {
+  font-weight: 400;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: none;
+  margin-top: 0.3rem;
+}
+
+.preview-card.marquee .preview-note {
+  color: rgba(255,255,255,0.6);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 600px) {
+  .hero { min-height: 80vh; padding: 1.5rem; }
+  .hero-kruger-bar { font-size: 0.9rem; padding: 0.5rem 1rem; }
+  .standings-header, .standings-row {
+    grid-template-columns: 35px 1fr 55px 65px 75px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  .standings-row .rank { font-size: 1.1rem; }
+  .matchups-grid { grid-template-columns: 1fr; }
+  .matchup-card:nth-child(2),
+  .matchup-card:nth-child(4),
+  .matchup-card:nth-child(5) { transform: none; }
+  .awards-grid { grid-template-columns: 1fr; }
+  .performers-strip { gap: 0.5rem; }
+  .pull-quote { padding: 2.5rem 1rem; }
+  .editorial-section { padding: 2rem 1.5rem; }
+  .stat-ribbon-item { min-width: 100px; padding: 0.8rem 1rem; }
+  .stat-ribbon-num { font-size: 1.5rem; }
+  .story-callouts { grid-template-columns: 1fr; }
+  .preview-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- SVG Filters -->
+<svg class="svg-filters" aria-hidden="true">
+  <defs>
+    <filter id="ink-bleed">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    <filter id="rough-edge">
+      <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+    </filter>
+  </defs>
+</svg>
+
+<!-- Xerox Texture Overlay -->
+<div class="xerox-overlay" aria-hidden="true"></div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-yellow-block" aria-hidden="true"></div>
+  <div class="hero-red-block" aria-hidden="true"></div>
+  <div class="hero-content">
+    <div class="hero-week">WEEK 06</div>
+    <div class="hero-sub">Jailyard Dynasty Power Rankings</div>
+    <div class="hero-tagline">"The Week the Rankings Burned"</div>
+    <div class="hero-date">Season 2025 &bull; 6 of 14 Weeks Played</div>
+  </div>
+  <!-- Kruger-style text bar -->
+  <div class="hero-kruger-bar">The defending champion fell. Four upsets in six games. Nobody is safe.</div>
+  <!-- Diagonal stripe at bottom -->
+  <div class="hero-stripe" aria-hidden="true"></div>
+  <!-- Crude hand-drawn arrow pointing down -->
+  <svg class="crude-arrow" style="bottom: 80px; left: 50%; transform: translateX(-50%);" width="60" height="80" viewBox="0 0 60 80" aria-hidden="true">
+    <path d="M30 5 C28 20, 32 35, 30 55 C28 60, 25 62, 18 70 M30 55 C32 60, 35 62, 42 70 M30 5 C31 8, 29 12, 30 15" stroke="#FF0000" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>
+</section>
+
+<!-- ============ STAT RIBBON ============ -->
+<div class="stat-ribbon">
+  <div class="stat-ribbon-item">
+    <div class="stat-ribbon-num">4/6</div>
+    <div class="stat-ribbon-label">Games Were Upsets</div>
+  </div>
+  <div class="stat-ribbon-item">
+    <div class="stat-ribbon-num">165.9</div>
+    <div class="stat-ribbon-label">Week High Score</div>
+  </div>
+  <div class="stat-ribbon-item">
+    <div class="stat-ribbon-num">128.7</div>
+    <div class="stat-ribbon-label">League Avg PPG</div>
+  </div>
+  <div class="stat-ribbon-item">
+    <div class="stat-ribbon-num">+65.74</div>
+    <div class="stat-ribbon-label">Biggest Blowout</div>
+  </div>
+  <div class="stat-ribbon-item">
+    <div class="stat-ribbon-num">1700</div>
+    <div class="stat-ribbon-label">Ken-obi Peak Elo</div>
+  </div>
+</div>
+
+<!-- ============ PULL QUOTE ============ -->
+<section class="pull-quote">
+  <div class="pull-quote-bg" aria-hidden="true"></div>
+  <div class="pull-quote-text">4 of 6<br>Upsets</div>
+  <div class="pull-quote-sub">Wildest week of the season</div>
+</section>
+
+<!-- Kruger banner between pull-quote and standings -->
+<div style="text-align: center; padding: 0.8rem 2rem; position: relative; overflow: hidden;">
+  <span class="kruger-banner" style="font-size: clamp(0.9rem, 2vw, 1.4rem); transform: rotate(-1deg); display: inline-block;">The top of the table shuffled. The vibes shifted.</span>
+</div>
+
+<!-- ============ STANDINGS ============ -->
+<section class="standings-section">
+  <!-- Clashing color blocks behind standings -->
+  <div class="color-clash-block standings-red-block" aria-hidden="true"></div>
+  <div class="color-clash-block standings-yellow-block" aria-hidden="true"></div>
+  <h2 class="section-title">Power <span class="red">Rankings</span></h2>
+  <div class="standings-grid">
+    <div class="standings-header">
+      <span>#</span>
+      <span>Team</span>
+      <span>Rec</span>
+      <span>PF</span>
+      <span>Wk6</span>
+    </div>
+    <div class="standings-row highlight-rise">
+      <span class="rank">1</span>
+      <span class="team-name">The Legion of Bouz<span class="owner">KidBouzie</span></span>
+      <span>5-1</span>
+      <span>935.7</span>
+      <span>165.90</span>
+    </div>
+    <div class="standings-row highlight-rise">
+      <span class="rank">2</span>
+      <span class="team-name">General Ken-obi<span class="owner">bLaker24</span></span>
+      <span>5-1</span>
+      <span>871.2</span>
+      <span>164.94</span>
+    </div>
+    <div class="standings-row">
+      <span class="rank">3</span>
+      <span class="team-name">Sleeping Giants<span class="owner">zbcowan</span></span>
+      <span>5-1</span>
+      <span>857.0</span>
+      <span>129.82</span>
+    </div>
+    <div class="standings-row highlight-rise">
+      <span class="rank">4</span>
+      <span class="team-name">The Boonist Monks<span class="owner">GauchoTrain</span></span>
+      <span>4-2</span>
+      <span>912.9</span>
+      <span>150.46</span>
+    </div>
+    <div class="standings-row highlight-fall">
+      <span class="rank">5</span>
+      <span class="team-name">Kittler on the Roof<span class="owner">bchodos</span></span>
+      <span>4-2</span>
+      <span>877.9</span>
+      <span>107.74</span>
+    </div>
+    <div class="standings-row highlight-fall">
+      <span class="rank">6</span>
+      <span class="team-name">Rasheeing the Scene<span class="owner">ToreroGaucho</span></span>
+      <span>4-2</span>
+      <span>816.0</span>
+      <span>109.10</span>
+    </div>
+    <div class="standings-row">
+      <span class="rank">7</span>
+      <span class="team-name">MHJTIME<span class="owner">rango_</span></span>
+      <span>3-3</span>
+      <span>891.9</span>
+      <span>140.94</span>
+    </div>
+    <div class="standings-row highlight-rise">
+      <span class="rank">8</span>
+      <span class="team-name">Noble FFT<span class="owner">kevobucks</span></span>
+      <span>3-3</span>
+      <span>819.0</span>
+      <span>151.88</span>
+    </div>
+    <div class="standings-row highlight-fall">
+      <span class="rank">9</span>
+      <span class="team-name">Ghastly Grayskull Gang<span class="owner">GrayskullXX</span></span>
+      <span>2-4</span>
+      <span>818.3</span>
+      <span>121.30</span>
+    </div>
+    <div class="standings-row">
+      <span class="rank">10</span>
+      <span class="team-name">Chudders Football Team<span class="owner">Chudders</span></span>
+      <span>1-5</span>
+      <span>727.9</span>
+      <span>95.26</span>
+    </div>
+    <div class="standings-row">
+      <span class="rank">11</span>
+      <span class="team-name">Burden of Etienne-y Woody<span class="owner">kharlow</span></span>
+      <span>0-6</span>
+      <span>732.7</span>
+      <span>99.20</span>
+    </div>
+    <div class="standings-row">
+      <span class="rank">12</span>
+      <span class="team-name">Father Time<span class="owner">Redrumsregrub</span></span>
+      <span>0-6</span>
+      <span>712.7</span>
+      <span>107.66</span>
+    </div>
+  </div>
+
+  <!-- Crude SVG annotations over the standings -->
+  <svg class="standings-annotations" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true">
+    <!-- Circle around Kittler's row (rank 5) -->
+    <ellipse class="annotation-circle" cx="400" cy="285" rx="380" ry="22" />
+    <text class="annotation-text" x="680" y="270" transform="rotate(-8, 680, 270)">FELL FROM #1!</text>
+
+    <!-- Arrow pointing at Legion (rank 1) -->
+    <path class="annotation-arrow" d="M720 80 C700 70, 680 65, 650 70" />
+    <path class="annotation-arrow" d="M650 70 L660 60 M650 70 L660 80" />
+    <text class="annotation-text" x="670" y="60" style="font-size:11px">WEEK HIGH: 165.9</text>
+
+    <!-- Arrow to Ken-obi -->
+    <path class="annotation-arrow" d="M720 130 C700 125, 685 120, 660 125" />
+    <path class="annotation-arrow" d="M660 125 L668 117 M660 125 L668 133" />
+    <text class="annotation-text" x="670" y="115" style="font-size:11px; fill:#FF0000">ELO: 1700 PEAK</text>
+
+    <!-- Circle around 0-6 teams -->
+    <ellipse class="annotation-circle" cx="400" cy="530" rx="380" ry="42" style="stroke: #FF0000;" />
+    <text class="annotation-text" x="600" y="565" style="font-size:12px">TOILET BOWL NEXT WEEK</text>
+
+    <!-- Crude arrow swooping from Kittler down -->
+    <path d="M200 260 C180 290, 160 310, 170 330 C175 340, 190 345, 200 340" stroke="#FF0000" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="6 3"/>
+    <text x="130" y="340" style="font-family: 'Oswald', sans-serif; font-size:11px; fill:#FF0000; font-weight:700">-4 SPOTS</text>
+
+    <!-- Crude X marks over cellar teams -->
+    <path d="M60 500 L120 560 M120 500 L60 560" stroke="#FF0000" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4"/>
+
+    <!-- Big crude underline beneath top 3 -->
+    <path d="M40 180 C200 185, 400 178, 760 183" stroke="#FFFF00" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.6"/>
+  </svg>
+
+  <!-- Crude hand-drawn arrow pointing at key movement -->
+  <svg class="crude-arrow" style="top: 15%; right: 20px;" width="50" height="100" viewBox="0 0 50 100" aria-hidden="true">
+    <path d="M25 5 C20 25, 30 45, 25 70 C23 80, 18 85, 12 92 M25 70 C27 80, 32 85, 38 92" stroke="#FF0000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </svg>
+</section>
+
+<!-- Yellow Kruger bar after standings -->
+<div style="text-align: center; padding: 0.8rem 2rem;">
+  <span class="kruger-banner yellow" style="font-size: clamp(0.9rem, 2vw, 1.3rem); transform: rotate(0.8deg); display: inline-block;">Three teams at 5-1. One of them used to be first.</span>
+</div>
+
+<!-- ============ MATCHUPS ============ -->
+<section class="matchups-section">
+  <h2 class="section-title">Week 6 <span class="red">Results</span></h2>
+  <div class="matchups-yellow-block" aria-hidden="true"></div>
+  <div class="matchups-red-block" aria-hidden="true"></div>
+
+  <div class="matchups-grid">
+    <!-- Matchup 1: Noble FFT def Ghastly — UPSET -->
+    <div class="matchup-card upset">
+      <div class="upset-stamp">UPSET</div>
+      <div class="matchup-winner">Noble FFT</div>
+      <div class="matchup-score">151.88</div>
+      <div class="matchup-loser">Ghastly Grayskull Gang</div>
+      <div class="matchup-loser-score">121.30</div>
+      <div class="matchup-margin">Margin +30.58</div>
+      <div class="matchup-red-overlay" aria-hidden="true"></div>
+    </div>
+
+    <!-- Matchup 2: MHJTIME def Kittler — UPSET -->
+    <div class="matchup-card upset">
+      <div class="upset-stamp">UPSET</div>
+      <div class="matchup-winner">MHJTIME</div>
+      <div class="matchup-score">140.94</div>
+      <div class="matchup-loser">Kittler on the Roof</div>
+      <div class="matchup-loser-score">107.74</div>
+      <div class="matchup-margin">Margin +33.20 &bull; Kittler fell from #1</div>
+      <div class="matchup-red-overlay" aria-hidden="true"></div>
+    </div>
+
+    <!-- Matchup 3: Sleeping Giants def Chudders -->
+    <div class="matchup-card">
+      <div class="matchup-winner">Sleeping Giants</div>
+      <div class="matchup-score">129.82</div>
+      <div class="matchup-loser">Chudders Football Team</div>
+      <div class="matchup-loser-score">95.26</div>
+      <div class="matchup-margin">Margin +34.56</div>
+      <div class="matchup-red-overlay" aria-hidden="true"></div>
+    </div>
+
+    <!-- Matchup 4: Boonist Monks def Rasheeing — UPSET -->
+    <div class="matchup-card upset">
+      <div class="upset-stamp">UPSET</div>
+      <div class="matchup-winner">The Boonist Monks</div>
+      <div class="matchup-score">150.46</div>
+      <div class="matchup-loser">Rasheeing the Scene</div>
+      <div class="matchup-loser-score">109.10</div>
+      <div class="matchup-margin">Margin +41.36</div>
+      <div class="matchup-red-overlay" aria-hidden="true"></div>
+    </div>
+
+    <!-- Matchup 5: Legion def Father Time -->
+    <div class="matchup-card">
+      <div class="matchup-winner">The Legion of Bouz</div>
+      <div class="matchup-score">165.90</div>
+      <div class="matchup-loser">Father Time</div>
+      <div class="matchup-loser-score">107.66</div>
+      <div class="matchup-margin">Margin +58.24 &bull; Week High</div>
+      <div class="matchup-red-overlay" aria-hidden="true"></div>
+    </div>
+
+    <!-- Matchup 6: Ken-obi def Burden — UPSET -->
+    <div class="matchup-card upset">
+      <div class="upset-stamp">UPSET</div>
+      <div class="matchup-winner">General Ken-obi</div>
+      <div class="matchup-score">164.94</div>
+      <div class="matchup-loser">Burden of Etienne-y Woody</div>
+      <div class="matchup-loser-score">99.20</div>
+      <div class="matchup-margin">Margin +65.74 &bull; Biggest Blowout</div>
+      <div class="matchup-red-overlay" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STORY CALLOUTS ============ -->
+<div class="story-callouts">
+  <div class="story-callout">
+    <div class="story-callout-title">Kittler's Fall</div>
+    <div class="story-callout-stat">#1 &rarr; #5</div>
+    <div class="story-callout-text">Defending champ scored 107.74 against MHJTIME's 140.94. Rico Dowdle (30.9) and Ja'Marr Chase (20.1) ended the reign.</div>
+  </div>
+  <div class="story-callout yellow-accent">
+    <div class="story-callout-title">Legion &amp; Ken-obi Collision Course</div>
+    <div class="story-callout-stat">5-1 vs 5-1</div>
+    <div class="story-callout-text">Both scored ~165 this week. Both sit atop the standings. They meet next week in the marquee matchup of the season.</div>
+  </div>
+  <div class="story-callout">
+    <div class="story-callout-title">Bijan's Day</div>
+    <div class="story-callout-stat">32.8 pts</div>
+    <div class="story-callout-text">Bijan Robinson dragged Noble FFT to a 30-point upset. The man is the franchise. Period.</div>
+  </div>
+  <div class="story-callout yellow-accent">
+    <div class="story-callout-title">The Cellar</div>
+    <div class="story-callout-stat">0-6 vs 0-6</div>
+    <div class="story-callout-text">Burden and Father Time meet next week. Both on 6-game losing streaks. The Toilet Bowl Matinee. Someone's winless run ends.</div>
+  </div>
+</div>
+
+<div class="slash-divider" aria-hidden="true"></div>
+
+<!-- ============ EDITORIAL ============ -->
+<section class="editorial-section">
+  <h2 class="section-title" style="font-size: clamp(1.8rem, 4vw, 3rem);">The <span class="red">Breakdown</span></h2>
+  <p class="editorial-text drop-cap">Chaos doesn't knock. Four of six matchups ended in upsets, the defending champion cratered from first to fifth, and two teams at the top of the standings put up nearly identical 165-point explosions on the same afternoon. The Legion of Bouz rode Patrick Mahomes (30.48) and Cam Skattebo (30.0) to the week's highest score. Meanwhile, General Ken-obi's LAR DEF (27.0) and Drake London (26.8) quietly assembled an equally devastating 164.94. Both sit at 5-1 now. Both collide next week.</p>
+  <p class="editorial-text" style="margin-top:1rem;">Kittler on the Roof's 107.74 was a season low for a team that entered the week ranked first. MHJTIME's Rico Dowdle (30.9) and Ja'Marr Chase (20.1) gutted them. Down in the cellar, Burden and Father Time both locked in their sixth straight loss. They play each other next week in what can only be called the <strong>Toilet Bowl Matinee</strong> — someone's winless streak ends, but nobody wins.</p>
+  <p class="editorial-text" style="margin-top:1rem;">The real headline: <strong>Bijan Robinson's 32.8-point eruption</strong> dragged Noble FFT to a 30-point upset win. The man is carrying that franchise on his deltoids. League average this week: 128.7. Only four teams cleared it. The standings shuffled. The vibes shifted. And next week, #1 meets #2.</p>
+</section>
+
+<!-- Kruger-style banner -->
+<div style="text-align: center; padding: 1.5rem 2rem; position: relative;">
+  <span class="kruger-banner" style="font-size: clamp(1.2rem, 3vw, 2rem);">Your rankings mean nothing here</span>
+</div>
+
+<!-- ============ AWARDS ============ -->
+<section class="awards-section">
+  <div class="awards-halftone-bg" aria-hidden="true"></div>
+  <h2 class="section-title">Week 6 <span class="red">Awards</span></h2>
+  <div class="awards-grid">
+    <div class="award-card">
+      <div class="award-label">High Scorer</div>
+      <div class="award-name">The Legion of Bouz</div>
+      <div class="award-detail">165.90 points</div>
+    </div>
+    <div class="award-card">
+      <div class="award-label">Low Scorer</div>
+      <div class="award-name">Chudders Football Team</div>
+      <div class="award-detail">95.26 points</div>
+    </div>
+    <div class="award-card">
+      <div class="award-label">Top Performer</div>
+      <div class="award-name">Bijan Robinson</div>
+      <div class="award-detail">RB, ATL &mdash; 32.8 pts (Noble FFT)</div>
+    </div>
+    <div class="award-card">
+      <div class="award-label">Biggest Blowout</div>
+      <div class="award-name">General Ken-obi</div>
+      <div class="award-detail">164.94 vs 99.20 (+65.74)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOP PERFORMERS ============ -->
+<section class="performers-section">
+  <h2 class="section-title" style="font-size: clamp(1.5rem, 3.5vw, 2.5rem);">Top <span class="red">Performers</span></h2>
+  <div class="performers-strip">
+    <div class="performer-chip">Bijan Robinson<span class="pts">32.8</span></div>
+    <div class="performer-chip">Rico Dowdle<span class="pts">30.9</span></div>
+    <div class="performer-chip">Mahomes<span class="pts">30.48</span></div>
+    <div class="performer-chip">Skattebo<span class="pts">30.0</span></div>
+    <div class="performer-chip">De'Von Achane<span class="pts">30.0</span></div>
+    <div class="performer-chip">Josh Jacobs<span class="pts">29.5</span></div>
+    <div class="performer-chip">George Pickens<span class="pts">27.3</span></div>
+    <div class="performer-chip">LAR DEF<span class="pts">27.0</span></div>
+    <div class="performer-chip">Drake London<span class="pts">26.8</span></div>
+    <div class="performer-chip">Drake Maye<span class="pts">26.24</span></div>
+    <div class="performer-chip">JSN<span class="pts">26.2</span></div>
+    <div class="performer-chip">D'Andre Swift<span class="pts">24.5</span></div>
+  </div>
+</section>
+
+<!-- ============ WEEK 7 PREVIEW ============ -->
+<div class="slash-divider" aria-hidden="true"></div>
+<div style="padding: 1.5rem 2rem 0.5rem;">
+  <h2 class="section-title" style="font-size: clamp(1.5rem, 3.5vw, 2.5rem);">Week 7 <span class="red">Preview</span></h2>
+</div>
+<div class="preview-grid">
+  <div class="preview-card marquee">
+    <div>#1 The Legion of Bouz</div>
+    <div class="vs-text">VS</div>
+    <div>#2 General Ken-obi</div>
+    <div class="preview-note">Marquee: 5-1 vs 5-1. Crown on the line.</div>
+  </div>
+  <div class="preview-card">
+    <div>#4 The Boonist Monks</div>
+    <div class="vs-text">VS</div>
+    <div>#8 Noble FFT</div>
+  </div>
+  <div class="preview-card">
+    <div>#5 Kittler on the Roof</div>
+    <div class="vs-text">VS</div>
+    <div>#3 Sleeping Giants</div>
+  </div>
+  <div class="preview-card">
+    <div>#6 Rasheeing the Scene</div>
+    <div class="vs-text">VS</div>
+    <div>#9 Ghastly Grayskull Gang</div>
+  </div>
+  <div class="preview-card">
+    <div>#10 Chudders Football Team</div>
+    <div class="vs-text">VS</div>
+    <div>#7 MHJTIME</div>
+  </div>
+  <div class="preview-card">
+    <div>#11 Burden of Etienne-y Woody</div>
+    <div class="vs-text">VS</div>
+    <div>#12 Father Time</div>
+    <div class="preview-note">Toilet Bowl Matinee. Both 0-6.</div>
+  </div>
+</div>
+
+<!-- ============ NEXT WEEK BILLBOARD ============ -->
+<section class="next-week">
+  <div class="next-week-red-block" aria-hidden="true"></div>
+  <div class="next-week-yellow-block" aria-hidden="true"></div>
+  <div class="next-week-content">
+    <div class="next-week-label">Next Week &mdash; The Marquee</div>
+    <div class="next-week-matchup">
+      #1 Legion
+      <span class="next-week-vs">VS</span>
+      #2 Ken-obi
+    </div>
+    <div class="next-week-sub">Both 5-1 &bull; Both scored ~165 this week &bull; Crown on the line</div>
+  </div>
+  <!-- Crude circle drawn around the matchup -->
+  <svg style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:3; pointer-events:none;" width="500" height="300" viewBox="0 0 500 300" aria-hidden="true">
+    <ellipse cx="250" cy="150" rx="230" ry="120" stroke="#FF0000" stroke-width="3" fill="none" stroke-dasharray="12 6" style="filter: url(#rough-edge);" />
+  </svg>
+</section>
+
+<!-- Kruger-style yellow banner before footer -->
+<div style="text-align: center; padding: 1rem 2rem;">
+  <span class="kruger-banner yellow" style="font-size: clamp(1rem, 2.5vw, 1.6rem);">You thought your roster was safe?</span>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-text">Jailyard Dynasty &bull; Est. 2022 &bull; 12 Teams &bull; Season 2025 &bull; Week 6</div>
+  <div style="margin-top: 0.5rem;">
+    <span style="font-family: var(--sans); font-weight:400; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; color: var(--muted);">Guerilla Editorial &mdash; Issue 06</span>
+  </div>
+</footer>
+
+<!-- Crude SVG scribble marks scattered at page edges for zine feel -->
+<svg style="position:fixed; top:20px; left:15px; z-index:9998; pointer-events:none; opacity:0.12;" width="40" height="120" viewBox="0 0 40 120" aria-hidden="true">
+  <path d="M5 5 C10 30, 25 50, 15 80 C10 95, 20 110, 30 115" stroke="#FF0000" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M20 10 C25 25, 10 40, 20 60" stroke="#FF0000" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>
+<svg style="position:fixed; top:40%; right:10px; z-index:9998; pointer-events:none; opacity:0.1;" width="30" height="80" viewBox="0 0 30 80" aria-hidden="true">
+  <circle cx="15" cy="15" r="10" stroke="#FFFF00" stroke-width="2" fill="none"/>
+  <path d="M10 35 L20 55 L5 65 L25 80" stroke="#FFFF00" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>
+
+</body>
+</html>

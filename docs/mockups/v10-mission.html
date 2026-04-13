@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MISSION CONTROL — Jailyard Dynasty — Week 06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --room: #0a0f14;
+  --phosphor: #00ff41;
+  --phosphor-dim: #00cc33;
+  --phosphor-glow: rgba(0, 255, 65, 0.08);
+  --amber: #ff8800;
+  --amber-dim: #cc6e00;
+  --sysblue: #4488ff;
+  --sysblue-dim: #3366cc;
+  --label: #ffffff;
+  --panel-bg: #1a1a2e;
+  --panel-bg-dark: #12121f;
+  --panel-border: #333333;
+  --good: #00ff41;
+  --bad: #ff4444;
+  --warn: #ff8800;
+  --muted: #667788;
+  --accent2: #4488ff;
+  --desk: #0d1117;
+  --scanline-opacity: 0.04;
+  --room-glow: radial-gradient(ellipse at 50% 30%, rgba(0, 255, 65, 0.02) 0%, transparent 60%);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--room);
+  background-image: var(--room-glow);
+  color: var(--label);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── ROOM AMBIENT ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(0, 255, 65, 0.015) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 40%, rgba(68, 136, 255, 0.01) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 80%, rgba(255, 136, 0, 0.008) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ── HEADER STRIP ── */
+.header-strip {
+  background: linear-gradient(180deg, #111827 0%, #0e1219 50%, #0d1117 100%);
+  border-bottom: 2px solid var(--phosphor);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: relative;
+}
+
+.header-strip::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, var(--phosphor-dim) 30%, var(--phosphor) 50%, var(--phosphor-dim) 70%, transparent 95%);
+  opacity: 0.3;
+}
+
+.mission-patch {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.header-center {
+  flex: 1;
+  min-width: 200px;
+}
+
+.header-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(10px, 2vw, 14px);
+  letter-spacing: 2px;
+  color: var(--phosphor);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.header-subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+}
+
+.header-systems {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.system-indicator {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.system-indicator .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.system-indicator .dot.on { background: var(--phosphor); box-shadow: 0 0 4px var(--phosphor-glow); }
+.system-indicator .dot.warn { background: var(--amber); }
+.system-indicator .sys-label { color: var(--muted); }
+.system-indicator .sys-value { color: var(--phosphor); }
+
+.header-title .status-nominal {
+  color: var(--phosphor);
+  background: rgba(0, 255, 65, 0.1);
+  padding: 2px 8px;
+  border: 1px solid var(--phosphor);
+  border-radius: 2px;
+}
+
+.header-title .status-anomaly {
+  color: var(--amber);
+  background: rgba(255, 136, 0, 0.1);
+  padding: 2px 8px;
+  border: 1px solid var(--amber);
+  border-radius: 2px;
+}
+
+.met-counter {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(12px, 2.5vw, 18px);
+  color: var(--amber);
+  letter-spacing: 3px;
+  white-space: nowrap;
+}
+
+.met-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* ── CONTROL ROOM GRID ── */
+.control-room {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 8px;
+  padding: 12px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── PANEL BASE ── */
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid var(--panel-border);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.panel-header .indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.panel-header .indicator.green { background: var(--phosphor); }
+.panel-header .indicator.amber { background: var(--amber); }
+.panel-header .indicator.blue { background: var(--sysblue); }
+
+.panel-header .panel-id {
+  color: var(--muted);
+  font-size: 9px;
+  margin-left: auto;
+}
+
+.panel-body {
+  padding: 10px 12px;
+  position: relative;
+}
+
+/* ── CRT EFFECT ── */
+.crt-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 4px
+  );
+  z-index: 2;
+}
+
+.crt-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.15) 100%);
+  z-index: 3;
+}
+
+.crt-text {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--phosphor);
+}
+
+/* ── SCREEN BEZEL ── */
+.panel.crt-screen {
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.3),
+    0 0 1px rgba(0, 255, 65, 0.1);
+}
+
+.panel.crt-screen .panel-body {
+  background: linear-gradient(135deg, var(--panel-bg-dark) 0%, var(--panel-bg) 50%, var(--panel-bg-dark) 100%);
+}
+
+/* ── PANEL BEZEL DETAILS ── */
+.panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+.panel-footer .pf-status { color: var(--phosphor); }
+.panel-footer .pf-warn { color: var(--amber); }
+
+/* ── GREEN BORDER PANELS ── */
+.panel.green-border { border-color: rgba(0, 255, 65, 0.3); }
+.panel.amber-border { border-color: rgba(255, 136, 0, 0.3); }
+.panel.blue-border { border-color: rgba(68, 136, 255, 0.3); }
+
+/* ── MAIN DISPLAY ── */
+.main-display {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+.main-display .panel-header { color: var(--phosphor); }
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(9px, 1.3vw, 12px);
+  color: var(--phosphor);
+}
+
+.standings-table th {
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+  font-size: clamp(8px, 1.1vw, 10px);
+  color: rgba(0, 255, 65, 0.6);
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.standings-table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.05);
+  white-space: nowrap;
+}
+
+.standings-table tr:nth-child(3) td {
+  border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+}
+
+.standings-table tr:nth-child(6) td {
+  border-bottom: 1px solid rgba(255, 136, 0, 0.2);
+}
+
+.standings-table .rank-col { color: rgba(0, 255, 65, 0.4); }
+.standings-table .team-col { font-weight: 600; }
+.standings-table .pts-col { color: var(--amber); }
+.standings-table .elo-col { color: var(--sysblue); }
+
+.standings-table .mvmt-up { color: var(--good); }
+.standings-table .mvmt-down { color: var(--bad); }
+.standings-table .mvmt-flat { color: var(--muted); }
+
+/* ── TELEMETRY PANEL ── */
+.telemetry-panel {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+
+.telemetry-panel .panel-header { color: var(--sysblue); }
+
+.telemetry-readout {
+  margin-bottom: 8px;
+}
+
+.telemetry-readout:last-child { margin-bottom: 0; }
+
+.telem-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--label);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.telem-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+.telem-bar-track {
+  height: 10px;
+  background: rgba(68, 136, 255, 0.1);
+  border: 1px solid rgba(68, 136, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.telem-bar-fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 0.3s;
+}
+
+.telem-bar-fill.nominal { background: var(--sysblue); }
+.telem-bar-fill.peak { background: var(--phosphor); }
+
+.telem-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--phosphor);
+  position: absolute;
+  right: 4px;
+  top: 0;
+  line-height: 10px;
+}
+
+/* ── SITUATION DISPLAY ── */
+.situation-display {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+
+.situation-display .panel-header { color: var(--amber); }
+
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 136, 0, 0.08);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(9px, 1.2vw, 11px);
+}
+
+.event-row:last-child { border-bottom: none; }
+
+.event-id {
+  color: var(--muted);
+  font-size: 9px;
+  flex-shrink: 0;
+  width: 42px;
+}
+
+.event-teams {
+  color: var(--label);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-score {
+  color: var(--amber);
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.event-flag {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.event-flag.upset {
+  color: var(--bad);
+  background: rgba(255, 68, 68, 0.15);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.event-flag.nominal {
+  color: var(--phosphor);
+  background: rgba(0, 255, 65, 0.1);
+  border: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+.event-flag.blowout {
+  color: var(--amber);
+  background: rgba(255, 136, 0, 0.15);
+  border: 1px solid rgba(255, 136, 0, 0.3);
+}
+
+/* ── TRACKING DISPLAY ── */
+.tracking-display {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+}
+
+.tracking-display .panel-header { color: var(--phosphor); }
+
+.elo-track-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+}
+
+.elo-team {
+  width: 28px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.elo-bar-container {
+  flex: 1;
+  height: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.elo-bar-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.elo-bar {
+  height: 100%;
+  border-radius: 1px;
+  position: absolute;
+}
+
+.elo-bar.positive {
+  left: 50%;
+  background: var(--good);
+}
+
+.elo-bar.negative {
+  right: 50%;
+  background: var(--bad);
+}
+
+.elo-delta {
+  width: 48px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.elo-delta.pos { color: var(--good); }
+.elo-delta.neg { color: var(--bad); }
+
+/* ── MISSION BRIEFING ── */
+.mission-briefing {
+  grid-column: 1 / 2;
+  grid-row: 3 / 4;
+}
+
+.mission-briefing .panel-header { color: var(--sysblue); }
+
+.briefing-item {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(68, 136, 255, 0.08);
+}
+
+.briefing-item:last-child { border-bottom: none; }
+
+.briefing-mission {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.briefing-matchup {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(10px, 1.3vw, 12px);
+  color: var(--label);
+  margin-bottom: 3px;
+}
+
+.briefing-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.briefing-status.go {
+  color: var(--phosphor);
+  background: rgba(0, 255, 65, 0.12);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+}
+
+.briefing-status.caution {
+  color: var(--amber);
+  background: rgba(255, 136, 0, 0.12);
+  border: 1px solid rgba(255, 136, 0, 0.3);
+}
+
+.briefing-status.scrub {
+  color: var(--bad);
+  background: rgba(255, 68, 68, 0.12);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.briefing-status.launch {
+  color: var(--sysblue);
+  background: rgba(68, 136, 255, 0.15);
+  border: 1px solid rgba(68, 136, 255, 0.4);
+}
+
+.briefing-marquee {
+  background: rgba(68, 136, 255, 0.05);
+  border: 1px solid rgba(68, 136, 255, 0.2);
+  border-radius: 3px;
+  padding: 8px 10px;
+}
+
+/* ── COMMS LOG ── */
+.comms-log {
+  grid-column: 2 / 3;
+  grid-row: 3 / 4;
+}
+
+.comms-log .panel-header { color: var(--amber); }
+
+.comm-entry {
+  padding: 4px 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(9px, 1.1vw, 10px);
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.05);
+}
+
+.comm-entry:last-child { border-bottom: none; }
+
+.comm-controller {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.comm-message {
+  color: var(--phosphor);
+}
+
+/* ── CONSOLE DESK ── */
+.console-desk {
+  height: 24px;
+  background: linear-gradient(180deg, #1a1f2e 0%, #0d1117 60%, #080c10 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.console-desk::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(68, 136, 255, 0.2), transparent);
+}
+
+.desk-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  text-align: center;
+  padding-top: 6px;
+  letter-spacing: 2px;
+}
+
+/* ── TIER SEPARATORS IN STANDINGS ── */
+.standings-table .tier-break td {
+  border-bottom: 1px dashed rgba(255, 136, 0, 0.2);
+  position: relative;
+}
+
+/* ── PANEL HOVER ── */
+.panel:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.panel.green-border:hover { border-color: rgba(0, 255, 65, 0.5); }
+.panel.amber-border:hover { border-color: rgba(255, 136, 0, 0.5); }
+.panel.blue-border:hover { border-color: rgba(68, 136, 255, 0.5); }
+
+/* ── COMMS LOG GREEN TEXT ── */
+.comms-log .comm-message {
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.1);
+}
+
+/* ── STANDINGS ROW HOVER ── */
+.standings-table tbody tr:hover td {
+  background: rgba(0, 255, 65, 0.03);
+}
+
+/* ── MARQUEE MATCHUP GLOW ── */
+.briefing-marquee {
+  position: relative;
+}
+
+.briefing-marquee::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, rgba(68, 136, 255, 0.08), transparent);
+  z-index: -1;
+}
+
+/* ── EVENT FLAG ALIGNMENT ── */
+.event-row {
+  min-height: 28px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .control-room {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .main-display,
+  .telemetry-panel,
+  .situation-display,
+  .tracking-display,
+  .mission-briefing,
+  .comms-log {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 500px) {
+  .header-strip { padding: 8px 10px; }
+  .control-room { padding: 6px; gap: 6px; }
+  .panel-body { padding: 8px; }
+  .standings-table { font-size: 8px; }
+  .standings-table th { font-size: 7px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER STRIP ══ -->
+<header class="header-strip">
+  <svg class="mission-patch" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="28" cy="28" r="26" fill="#0a0f14" stroke="#4488ff" stroke-width="1.5"/>
+    <circle cx="28" cy="28" r="22" fill="none" stroke="#00ff41" stroke-width="0.5" stroke-dasharray="2 3"/>
+    <circle cx="28" cy="28" r="18" fill="none" stroke="#333" stroke-width="0.3"/>
+    <!-- Orbit path -->
+    <ellipse cx="28" cy="28" rx="14" ry="6" fill="none" stroke="#4488ff" stroke-width="0.4" transform="rotate(-20 28 28)"/>
+    <circle cx="38" cy="24" r="2" fill="#ff8800"/>
+    <!-- Text labels -->
+    <text x="28" y="23" text-anchor="middle" fill="#ffffff" font-family="'IBM Plex Mono', monospace" font-size="5.5" font-weight="700" letter-spacing="0.5">JAILYARD</text>
+    <text x="28" y="29" text-anchor="middle" fill="#4488ff" font-family="'IBM Plex Mono', monospace" font-size="4.5" letter-spacing="1.2">DYNASTY</text>
+    <text x="28" y="36" text-anchor="middle" fill="#00ff41" font-family="'IBM Plex Mono', monospace" font-size="5" font-weight="600">JD-2025</text>
+    <!-- Corner indicators -->
+    <circle cx="10" cy="12" r="1.2" fill="#ff8800"/>
+    <circle cx="46" cy="12" r="1.2" fill="#00ff41"/>
+    <circle cx="10" cy="44" r="1.2" fill="#4488ff"/>
+    <circle cx="46" cy="44" r="1.2" fill="#ff4444"/>
+    <!-- Season ring text -->
+    <text x="28" y="49" text-anchor="middle" fill="#667788" font-family="'IBM Plex Mono', monospace" font-size="3.5" letter-spacing="2">SEASON 2025</text>
+  </svg>
+  <div class="header-center">
+    <div class="header-title">
+      MISSION CONTROL &mdash; JAILYARD DYNASTY &mdash; WEEK 06 &mdash; STATUS: <span class="status-anomaly">4 ANOMALIES</span>
+    </div>
+    <div class="header-subtitle">
+      12 TEAMS &bull; 6 OF 14 WEEKS COMPLETE &bull; LEAGUE AVG 128.7 PPG &bull; 4 UPSETS RECORDED
+    </div>
+    <div class="header-systems">
+      <span class="system-indicator"><span class="dot on"></span><span class="sys-label">SLEEPER:</span><span class="sys-value">ONLINE</span></span>
+      <span class="system-indicator"><span class="dot on"></span><span class="sys-label">ELO:</span><span class="sys-value">TRACKING</span></span>
+      <span class="system-indicator"><span class="dot warn"></span><span class="sys-label">ANOMALY:</span><span class="sys-value">66.7%</span></span>
+      <span class="system-indicator"><span class="dot on"></span><span class="sys-label">TELEMETRY:</span><span class="sys-value">NOMINAL</span></span>
+    </div>
+  </div>
+  <div style="text-align: right;">
+    <div class="met-counter">T+06:00:00</div>
+    <div class="met-label">MISSION ELAPSED TIME</div>
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--sysblue); letter-spacing: 1px; margin-top: 2px;">WEEK 06 / 14</div>
+  </div>
+</header>
+
+<!-- ══ CONTROL ROOM GRID ══ -->
+<div class="control-room">
+
+  <!-- ── MAIN DISPLAY: STANDINGS ── -->
+  <div class="panel green-border crt-screen main-display">
+    <div class="panel-header">
+      <span class="indicator green"></span>
+      MAIN DISPLAY &mdash; LEAGUE STANDINGS
+      <span class="panel-id">DSP-01</span>
+    </div>
+    <div class="panel-body">
+      <div class="crt-overlay"></div>
+      <div class="crt-vignette"></div>
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>RNK</th>
+            <th>TEAM</th>
+            <th>OWNER</th>
+            <th>REC</th>
+            <th>PF</th>
+            <th>WK6</th>
+            <th>MVMT</th>
+            <th>STK</th>
+            <th>ELO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rank-col">01</td>
+            <td class="team-col">LEGION OF BOUZ</td>
+            <td>KidBouzie</td>
+            <td>5-1</td>
+            <td>935.7</td>
+            <td class="pts-col">165.90</td>
+            <td class="mvmt-up">+1</td>
+            <td>W1</td>
+            <td class="elo-col">1604</td>
+          </tr>
+          <tr>
+            <td class="rank-col">02</td>
+            <td class="team-col">GENERAL KEN-OBI</td>
+            <td>bLaker24</td>
+            <td>5-1</td>
+            <td>871.2</td>
+            <td class="pts-col">164.94</td>
+            <td class="mvmt-up">+3</td>
+            <td>W2</td>
+            <td class="elo-col">1700</td>
+          </tr>
+          <tr>
+            <td class="rank-col">03</td>
+            <td class="team-col">SLEEPING GIANTS</td>
+            <td>zbcowan</td>
+            <td>5-1</td>
+            <td>857.0</td>
+            <td class="pts-col">129.82</td>
+            <td class="mvmt-flat">&mdash;</td>
+            <td>W4</td>
+            <td class="elo-col">1561</td>
+          </tr>
+          <tr class="tier-break">
+            <td class="rank-col">04</td>
+            <td class="team-col">BOONIST MONKS</td>
+            <td>GauchoTrain</td>
+            <td>4-2</td>
+            <td>912.9</td>
+            <td class="pts-col">150.46</td>
+            <td class="mvmt-up">+2</td>
+            <td>W1</td>
+            <td class="elo-col">1599</td>
+          </tr>
+          <tr>
+            <td class="rank-col">05</td>
+            <td class="team-col">KITTLER ON THE ROOF</td>
+            <td>bchodos</td>
+            <td>4-2</td>
+            <td>877.9</td>
+            <td class="pts-col">107.74</td>
+            <td class="mvmt-down">-4</td>
+            <td>L1</td>
+            <td class="elo-col">1488</td>
+          </tr>
+          <tr>
+            <td class="rank-col">06</td>
+            <td class="team-col">RASHEEING THE SCENE</td>
+            <td>ToreroGaucho</td>
+            <td>4-2</td>
+            <td>816.0</td>
+            <td class="pts-col">109.10</td>
+            <td class="mvmt-down">-2</td>
+            <td>L1</td>
+            <td class="elo-col">1626</td>
+          </tr>
+          <tr class="tier-break">
+            <td class="rank-col">07</td>
+            <td class="team-col">MHJTIME</td>
+            <td>rango_</td>
+            <td>3-3</td>
+            <td>891.9</td>
+            <td class="pts-col">140.94</td>
+            <td class="mvmt-flat">&mdash;</td>
+            <td>W2</td>
+            <td class="elo-col">1586</td>
+          </tr>
+          <tr>
+            <td class="rank-col">08</td>
+            <td class="team-col">NOBLE FFT</td>
+            <td>kevobucks</td>
+            <td>3-3</td>
+            <td>819.0</td>
+            <td class="pts-col">151.88</td>
+            <td class="mvmt-up">+1</td>
+            <td>W1</td>
+            <td class="elo-col">1455</td>
+          </tr>
+          <tr>
+            <td class="rank-col">09</td>
+            <td class="team-col">GHASTLY GRAYSKULL</td>
+            <td>GrayskullXX</td>
+            <td>2-4</td>
+            <td>818.3</td>
+            <td class="pts-col">121.30</td>
+            <td class="mvmt-down">-1</td>
+            <td>L2</td>
+            <td class="elo-col">1324</td>
+          </tr>
+          <tr>
+            <td class="rank-col">10</td>
+            <td class="team-col">CHUDDERS FT</td>
+            <td>Chudders</td>
+            <td>1-5</td>
+            <td>727.9</td>
+            <td class="pts-col">95.26</td>
+            <td class="mvmt-flat">&mdash;</td>
+            <td>L1</td>
+            <td class="elo-col">1402</td>
+          </tr>
+          <tr>
+            <td class="rank-col">11</td>
+            <td class="team-col">BURDEN OF E. WOODY</td>
+            <td>kharlow</td>
+            <td>0-6</td>
+            <td>732.7</td>
+            <td class="pts-col">99.20</td>
+            <td class="mvmt-flat">&mdash;</td>
+            <td>L6</td>
+            <td class="elo-col">1324</td>
+          </tr>
+          <tr>
+            <td class="rank-col">12</td>
+            <td class="team-col">FATHER TIME</td>
+            <td>Redrumsregrub</td>
+            <td>0-6</td>
+            <td>712.7</td>
+            <td class="pts-col">107.66</td>
+            <td class="mvmt-flat">&mdash;</td>
+            <td>L6</td>
+            <td class="elo-col">1330</td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Awards strip below standings -->
+      <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(0, 255, 65, 0.15);">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(0, 255, 65, 0.5); letter-spacing: 1.5px; margin-bottom: 6px;">WEEK 06 AWARDS</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px;">
+            <span style="color: var(--amber);">HIGH SCORER:</span>
+            <span style="color: var(--phosphor);"> LEGION OF BOUZ &mdash; 165.90</span>
+          </div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px;">
+            <span style="color: var(--amber);">LOW SCORER:</span>
+            <span style="color: var(--bad);"> CHUDDERS FT &mdash; 95.26</span>
+          </div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px;">
+            <span style="color: var(--amber);">TOP PERFORMER:</span>
+            <span style="color: var(--phosphor);"> BIJAN ROBINSON (RB) &mdash; 32.8 PTS</span>
+          </div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px;">
+            <span style="color: var(--amber);">BIGGEST BLOWOUT:</span>
+            <span style="color: var(--phosphor);"> KEN-OBI 164.94 vs BURDEN 99.20 (+65.74)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <span>12 TEAMS &bull; SORTED BY RANK</span>
+      <span class="pf-status">REFRESH: T+06:00:00</span>
+    </div>
+  </div>
+
+  <!-- ── TELEMETRY PANEL ── -->
+  <div class="panel blue-border telemetry-panel">
+    <div class="panel-header">
+      <span class="indicator blue"></span>
+      TELEMETRY &mdash; TOP PERFORMERS
+      <span class="panel-id">TEL-02</span>
+    </div>
+    <div class="panel-body">
+      <div class="telemetry-readout">
+        <div class="telem-name">BIJAN ROBINSON</div>
+        <div class="telem-meta">RB &bull; Noble FFT &bull; WEEK HIGH</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill peak" style="width: 100%;"></div>
+          <span class="telem-value">32.8</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">RICO DOWDLE</div>
+        <div class="telem-meta">RB &bull; MHJTIME</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 94%;"></div>
+          <span class="telem-value">30.9</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">PATRICK MAHOMES</div>
+        <div class="telem-meta">QB &bull; Legion of Bouz</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 93%;"></div>
+          <span class="telem-value">30.48</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">CAM SKATTEBO</div>
+        <div class="telem-meta">RB &bull; Legion of Bouz</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 91%;"></div>
+          <span class="telem-value">30.0</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">DE'VON ACHANE</div>
+        <div class="telem-meta">RB &bull; Rasheeing the Scene</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 91%;"></div>
+          <span class="telem-value">30.0</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">JOSH JACOBS</div>
+        <div class="telem-meta">RB &bull; Sleeping Giants</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 90%;"></div>
+          <span class="telem-value">29.5</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">GEORGE PICKENS</div>
+        <div class="telem-meta">WR &bull; Boonist Monks</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 83%;"></div>
+          <span class="telem-value">27.3</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">LAR DEF</div>
+        <div class="telem-meta">DEF &bull; General Ken-obi</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 82%;"></div>
+          <span class="telem-value">27.0</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">DRAKE LONDON</div>
+        <div class="telem-meta">WR &bull; General Ken-obi</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 82%;"></div>
+          <span class="telem-value">26.8</span>
+        </div>
+      </div>
+      <div class="telemetry-readout">
+        <div class="telem-name">JAXON SMITH-NJIGBA</div>
+        <div class="telem-meta">WR &bull; Boonist Monks</div>
+        <div class="telem-bar-track">
+          <div class="telem-bar-fill nominal" style="width: 80%;"></div>
+          <span class="telem-value">26.2</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <span>TOP 10 &bull; WEEK 06</span>
+      <span class="pf-status">ALL NOMINAL</span>
+    </div>
+  </div>
+
+  <!-- ── SITUATION DISPLAY ── -->
+  <div class="panel amber-border situation-display">
+    <div class="panel-header">
+      <span class="indicator amber"></span>
+      SITUATION DISPLAY &mdash; WEEK 06 EVENTS
+      <span class="panel-id">SIT-03</span>
+    </div>
+    <div class="panel-body">
+      <div class="event-row">
+        <span class="event-id">EVT-01</span>
+        <span class="event-teams">LEGION OF BOUZ vs FATHER TIME</span>
+        <span class="event-score">165.90 / 107.66</span>
+        <span class="event-flag blowout">+58.24 WEEK HIGH</span>
+      </div>
+      <div class="event-row">
+        <span class="event-id">EVT-02</span>
+        <span class="event-teams">GENERAL KEN-OBI vs BURDEN OF E. WOODY</span>
+        <span class="event-score">164.94 / 99.20</span>
+        <span class="event-flag blowout">+65.74 BLOWOUT</span>
+      </div>
+      <div class="event-row">
+        <span class="event-id">EVT-03</span>
+        <span class="event-teams">NOBLE FFT vs GHASTLY GRAYSKULL</span>
+        <span class="event-score">151.88 / 121.30</span>
+        <span class="event-flag upset">UPSET &bull; ANOMALY</span>
+      </div>
+      <div class="event-row">
+        <span class="event-id">EVT-04</span>
+        <span class="event-teams">BOONIST MONKS vs RASHEEING THE SCENE</span>
+        <span class="event-score">150.46 / 109.10</span>
+        <span class="event-flag upset">UPSET &bull; ANOMALY</span>
+      </div>
+      <div class="event-row">
+        <span class="event-id">EVT-05</span>
+        <span class="event-teams">MHJTIME vs KITTLER ON THE ROOF</span>
+        <span class="event-score">140.94 / 107.74</span>
+        <span class="event-flag upset">UPSET &bull; ANOMALY</span>
+      </div>
+      <div class="event-row">
+        <span class="event-id">EVT-06</span>
+        <span class="event-teams">SLEEPING GIANTS vs CHUDDERS FT</span>
+        <span class="event-score">129.82 / 95.26</span>
+        <span class="event-flag nominal">NOMINAL</span>
+      </div>
+      <div style="margin-top: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--amber); letter-spacing: 1px;">
+        ANOMALY RATE: 66.7% &mdash; 4/6 UPSETS &mdash; WILDEST WEEK OF SEASON
+      </div>
+    </div>
+    <div class="panel-footer">
+      <span>6 EVENTS LOGGED</span>
+      <span class="pf-warn">4 ANOMALY FLAGS</span>
+    </div>
+  </div>
+
+  <!-- ── TRACKING DISPLAY: ELO MOVEMENT ── -->
+  <div class="panel green-border crt-screen tracking-display">
+    <div class="panel-header">
+      <span class="indicator green"></span>
+      TRACKING &mdash; ELO DELTA
+      <span class="panel-id">TRK-04</span>
+    </div>
+    <div class="panel-body">
+      <div class="crt-overlay"></div>
+      <div class="crt-vignette"></div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--phosphor);">MH</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar positive" style="width: 24%;"></div>
+        </div>
+        <span class="elo-delta pos">+28.6</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--phosphor);">BM</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar positive" style="width: 22%;"></div>
+        </div>
+        <span class="elo-delta pos">+25.9</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--phosphor);">NF</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar positive" style="width: 20%;"></div>
+        </div>
+        <span class="elo-delta pos">+23.4</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--phosphor);">GK</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar positive" style="width: 16%;"></div>
+        </div>
+        <span class="elo-delta pos">+18.7</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--phosphor);">LB</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar positive" style="width: 14%;"></div>
+        </div>
+        <span class="elo-delta pos">+16.2</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--phosphor);">SG</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar positive" style="width: 10%;"></div>
+        </div>
+        <span class="elo-delta pos">+12.1</span>
+      </div>
+      <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 4px 0;"></div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--bad);">FT</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar negative" style="width: 14%;"></div>
+        </div>
+        <span class="elo-delta neg">-16.2</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--bad);">CF</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar negative" style="width: 10%;"></div>
+        </div>
+        <span class="elo-delta neg">-12.1</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--bad);">BE</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar negative" style="width: 16%;"></div>
+        </div>
+        <span class="elo-delta neg">-18.7</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--bad);">GG</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar negative" style="width: 20%;"></div>
+        </div>
+        <span class="elo-delta neg">-23.4</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--bad);">RS</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar negative" style="width: 22%;"></div>
+        </div>
+        <span class="elo-delta neg">-25.9</span>
+      </div>
+      <div class="elo-track-row">
+        <span class="elo-team" style="color: var(--bad);">KR</span>
+        <div class="elo-bar-container">
+          <div class="elo-bar-center"></div>
+          <div class="elo-bar negative" style="width: 24%;"></div>
+        </div>
+        <span class="elo-delta neg">-28.7</span>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <span>ELO DELTAS &bull; WEEK 06</span>
+      <span class="pf-status">6 GAINERS / 6 LOSERS</span>
+    </div>
+  </div>
+
+  <!-- ── MISSION BRIEFING: WEEK 7 ── -->
+  <div class="panel blue-border mission-briefing">
+    <div class="panel-header">
+      <span class="indicator blue"></span>
+      MISSION BRIEFING &mdash; WEEK 07 UPCOMING
+      <span class="panel-id">BRF-05</span>
+    </div>
+    <div class="panel-body">
+      <div class="briefing-item briefing-marquee">
+        <div class="briefing-mission">MISSION: COLLISION &mdash; MARQUEE</div>
+        <div class="briefing-matchup">#1 THE LEGION OF BOUZ vs #2 GENERAL KEN-OBI</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); margin-bottom: 4px;">
+          5-1 vs 5-1 &bull; 935.7 PF vs 871.2 PF &bull; Elo 1604 vs 1700
+        </div>
+        <span class="briefing-status launch">GO FOR LAUNCH</span>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-mission">MISSION: INTERCEPTION</div>
+        <div class="briefing-matchup">#5 KITTLER ON THE ROOF vs #3 SLEEPING GIANTS</div>
+        <span class="briefing-status caution">CAUTION &mdash; KITTLER IN FREEFALL</span>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-mission">MISSION: RECALIBRATION</div>
+        <div class="briefing-matchup">#4 BOONIST MONKS vs #8 NOBLE FFT</div>
+        <span class="briefing-status go">GO</span>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-mission">MISSION: CONTAINMENT</div>
+        <div class="briefing-matchup">#6 RASHEEING THE SCENE vs #9 GHASTLY GRAYSKULL</div>
+        <span class="briefing-status go">GO</span>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-mission">MISSION: RECOVERY</div>
+        <div class="briefing-matchup">#10 CHUDDERS FT vs #7 MHJTIME</div>
+        <span class="briefing-status caution">CAUTION &mdash; CHUDDERS 1-5</span>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-mission">MISSION: SALVAGE</div>
+        <div class="briefing-matchup">#11 BURDEN OF E. WOODY vs #12 FATHER TIME</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); margin-bottom: 4px;">
+          0-6 vs 0-6 &bull; TOILET BOWL MATINEE &bull; COMBINED L12
+        </div>
+        <span class="briefing-status scrub">SCRUB ADVISORY</span>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <span>6 MISSIONS QUEUED</span>
+      <span class="pf-status">1 MARQUEE &bull; 1 SCRUB</span>
+    </div>
+  </div>
+
+  <!-- ── COMMS LOG ── -->
+  <div class="panel amber-border crt-screen comms-log">
+    <div class="panel-header">
+      <span class="indicator amber"></span>
+      COMMS LOG &mdash; FLIGHT CONTROLLERS
+      <span class="panel-id">COM-06</span>
+    </div>
+    <div class="panel-body">
+      <div class="crt-overlay"></div>
+      <div class="crt-vignette"></div>
+      <div class="comm-entry">
+        <span class="comm-controller">FLIGHT:</span>
+        <span class="comm-message"> Week 6 anomaly rate 66.7%. Four upsets detected. Recommending full review.</span>
+      </div>
+      <div class="comm-entry">
+        <span class="comm-controller">FIDO:</span>
+        <span class="comm-message"> Legion trajectory nominal at 935.7 PF cumulative. Week high 165.90. Mahomes and Skattebo dual-burn confirmed.</span>
+      </div>
+      <div class="comm-entry">
+        <span class="comm-controller">GNC:</span>
+        <span class="comm-message"> Ken-obi Elo at 1700 — career peak. All systems go. LAR DEF 27.0 is an outlier event.</span>
+      </div>
+      <div class="comm-entry">
+        <span class="comm-controller">CAPCOM:</span>
+        <span class="comm-message"> Kittler, we have a problem. Elo drop 28.7. Fell from #1 to #5. 107.74 against MHJTIME — system underperformance.</span>
+      </div>
+      <div class="comm-entry">
+        <span class="comm-controller">RETRO:</span>
+        <span class="comm-message"> Bijan Robinson 32.8 — highest individual telemetry reading this week. Noble FFT upset confirmed.</span>
+      </div>
+      <div class="comm-entry">
+        <span class="comm-controller">EECOM:</span>
+        <span class="comm-message"> Burden and Father Time both at 0-6. Combined Elo 2654. Recommend salvage mission designation.</span>
+      </div>
+      <div class="comm-entry">
+        <span class="comm-controller">SURGEON:</span>
+        <span class="comm-message"> Boonist Monks recovery confirmed. Pickens 27.3, JSN 26.2 — dual payload delivery on Rasheeing upset.</span>
+      </div>
+      <div class="comm-entry">
+        <span class="comm-controller">FLIGHT:</span>
+        <span class="comm-message"> Week 7 marquee: Legion vs Ken-obi. Both 5-1. Go/No-Go poll complete. All stations GO. Godspeed.</span>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <span>8 TRANSMISSIONS</span>
+      <span class="pf-status">CHANNEL OPEN</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ LEAGUE SEASON PROGRESS BAR ══ -->
+<div style="max-width: 1400px; margin: 0 auto; padding: 0 12px 8px;">
+  <div style="background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 4px; padding: 8px 14px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1.5px;">SEASON PROGRESS</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--phosphor);">WEEK 06 / 14 &mdash; 42.9% COMPLETE</span>
+    </div>
+    <div style="height: 6px; background: rgba(0, 255, 65, 0.08); border: 1px solid rgba(0, 255, 65, 0.15); border-radius: 3px; overflow: hidden;">
+      <div style="width: 42.9%; height: 100%; background: linear-gradient(90deg, var(--phosphor-dim), var(--phosphor)); border-radius: 2px;"></div>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: var(--muted);">WK 01</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: var(--muted);">WK 07</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: var(--muted);">WK 14</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEAM ROSTER TELEMETRY ══ -->
+<div style="max-width: 1400px; margin: 0 auto; padding: 0 12px 8px;">
+  <div class="panel green-border crt-screen">
+    <div class="panel-header">
+      <span class="indicator green"></span>
+      ROSTER TELEMETRY &mdash; TOP SCORER PER TEAM
+      <span class="panel-id">RST-07</span>
+    </div>
+    <div class="panel-body" style="padding: 8px 12px;">
+      <div class="crt-overlay"></div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 4px 20px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">LB</span>
+          <span style="color: var(--label);">Mahomes 30.48, Skattebo 30.0, McCaffrey 20.6</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">GK</span>
+          <span style="color: var(--label);">LAR DEF 27.0, London 26.8, Maye 26.24</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">SG</span>
+          <span style="color: var(--label);">Jacobs 29.5, Hurts 21.62, K. Williams 15.7</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">BM</span>
+          <span style="color: var(--label);">Pickens 27.3, JSN 26.2, Flacco 18.76</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">KR</span>
+          <span style="color: var(--label);">Taylor 21.7, Mayfield 18.64, Kraft 11.3</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">RS</span>
+          <span style="color: var(--label);">Achane 30.0, Dicker K 18.4, Allen 15.4</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">MH</span>
+          <span style="color: var(--label);">Dowdle 30.9, Daniels 22.64, Chase 20.1</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">NF</span>
+          <span style="color: var(--label);">B. Robinson 32.8, C. Williams 19.88, W. Robinson 17.4</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">GG</span>
+          <span style="color: var(--label);">Swift 24.5, Metcalf 17.5, Burns 17.0</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">CF</span>
+          <span style="color: var(--label);">Herbert 18.76, Verse 17.5, Jeanty 15.6</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">BE</span>
+          <span style="color: var(--label);">B. Young 21.0, Bourne 16.7, DEN DEF 15.0</span>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(0,255,65,0.05);">
+          <span style="color: var(--phosphor);">FT</span>
+          <span style="color: var(--label);">McConkey 19.5, McMillan 16.4, Nix 13.36</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <span>12 TEAMS &bull; TOP 3 PER ROSTER</span>
+      <span class="pf-status">WEEK 06 DATA</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONSOLE DESK ══ -->
+<div class="console-desk">
+  <div class="desk-label">JAILYARD DYNASTY POWER RANKINGS &mdash; SEASON 2025 &mdash; MISSION CONTROL v10</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NATIONAL FANTASY WEATHER SERVICE — JAILYARD DISTRICT — WEEK 06 ADVISORY</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1923;
+  --fg: #ffffff;
+  --muted: #999999;
+  --accent: #ffcc00;
+  --accent2: #ff4444;
+  --cold: #4488ff;
+  --good: #00cc66;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.12);
+  --glass: rgba(255,255,255,0.06);
+  --warn: #ffcc00;
+  --bad: #ff4444;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Roboto Condensed',Arial,sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+/* Warning bar */
+.warning-bar{
+  background:var(--accent);
+  color:#000;
+  text-align:center;
+  padding:6px 12px;
+  font-weight:700;
+  font-size:clamp(11px,1.4vw,14px);
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+/* NWS Header */
+.nws-header{
+  background:linear-gradient(180deg,#1a2a3a 0%,var(--bg) 100%);
+  border-bottom:2px solid var(--border);
+  padding:16px 24px;
+  text-align:center;
+}
+.nws-header h1{
+  font-size:clamp(16px,2.5vw,28px);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  font-weight:700;
+  margin-bottom:4px;
+}
+.nws-header .sub{
+  font-size:clamp(11px,1.2vw,14px);
+  color:var(--muted);
+  letter-spacing:1px;
+}
+.nws-header .issued{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:6px;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+/* Layout */
+.main-layout{
+  display:grid;
+  grid-template-columns:1fr 380px;
+  gap:0;
+  max-width:1400px;
+  margin:0 auto;
+}
+@media(max-width:900px){
+  .main-layout{grid-template-columns:1fr}
+}
+
+/* Map area */
+.map-area{
+  padding:20px;
+  position:relative;
+  min-height:500px;
+}
+.map-title{
+  font-size:13px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:12px;
+  font-weight:700;
+}
+.map-title span{color:var(--accent)}
+.map-container{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/10;
+  background:radial-gradient(ellipse at 40% 40%,rgba(30,60,90,0.5) 0%,transparent 60%),
+             radial-gradient(ellipse at 70% 70%,rgba(20,40,60,0.4) 0%,transparent 50%),
+             var(--bg);
+  border:1px solid var(--border);
+  border-radius:4px;
+  overflow:hidden;
+}
+
+/* SVG weather map */
+.weather-svg{width:100%;height:100%}
+
+/* Station labels */
+.station{cursor:default}
+.station-name{
+  font-family:'Roboto Condensed',sans-serif;
+  font-weight:700;
+  font-size:10px;
+  fill:var(--fg);
+  text-anchor:middle;
+}
+.station-data{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  fill:var(--muted);
+  text-anchor:middle;
+}
+.pressure-h{
+  font-family:'Roboto Condensed',sans-serif;
+  font-weight:700;
+  font-size:24px;
+  fill:var(--bad);
+}
+.pressure-l{
+  font-family:'Roboto Condensed',sans-serif;
+  font-weight:700;
+  font-size:24px;
+  fill:var(--cold);
+}
+.isobar{
+  fill:none;
+  stroke:rgba(255,255,255,0.12);
+  stroke-width:0.8;
+}
+
+/* Sidebar */
+.sidebar{
+  border-left:1px solid var(--border);
+  padding:0;
+  overflow-y:auto;
+  max-height:calc(100vh - 100px);
+}
+@media(max-width:900px){
+  .sidebar{border-left:none;border-top:1px solid var(--border);max-height:none}
+}
+.panel{
+  border-bottom:1px solid var(--border);
+  padding:16px 20px;
+}
+.panel-header{
+  font-size:12px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--accent);
+  font-weight:700;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.panel-header .icon{font-size:14px}
+
+/* Current conditions */
+.conditions-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.cond-item{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:10px 8px;
+  text-align:center;
+}
+.cond-label{
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:4px;
+}
+.cond-value{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:18px;
+  font-weight:600;
+}
+.cond-value.high{color:var(--bad)}
+.cond-value.low{color:var(--cold)}
+.cond-value.avg{color:var(--fg)}
+
+/* Severe alerts */
+.alert-item{
+  background:rgba(255,204,0,0.06);
+  border-left:3px solid var(--accent);
+  padding:8px 12px;
+  margin-bottom:6px;
+  border-radius:0 3px 3px 0;
+}
+.alert-matchup{
+  font-size:12px;
+  font-weight:700;
+}
+.alert-detail{
+  font-size:11px;
+  color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;
+  margin-top:2px;
+}
+.alert-winner{color:var(--good)}
+.alert-loser{color:var(--bad)}
+
+/* Storm tracker */
+.storm-track{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:12px;
+}
+.storm-title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--bad);
+  margin-bottom:4px;
+}
+.storm-detail{
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.5;
+}
+.storm-detail strong{color:var(--fg)}
+
+/* Outlook */
+.outlook-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 0;
+  border-bottom:1px solid var(--border);
+  font-size:12px;
+}
+.outlook-item:last-child{border-bottom:none}
+.outlook-icon{
+  font-size:18px;
+  width:28px;
+  text-align:center;
+  flex-shrink:0;
+}
+.outlook-teams{flex:1}
+.outlook-tag{
+  font-size:10px;
+  padding:2px 6px;
+  border-radius:2px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  flex-shrink:0;
+}
+.tag-marquee{background:var(--accent);color:#000}
+.tag-toilet{background:var(--bad);color:#fff}
+.tag-clear{background:rgba(0,204,102,0.2);color:var(--good)}
+.tag-storm{background:rgba(68,136,255,0.2);color:var(--cold)}
+
+/* Record highs */
+.record-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:5px 0;
+  border-bottom:1px solid var(--border);
+  font-size:12px;
+}
+.record-item:last-child{border-bottom:none}
+.record-player{color:var(--fg)}
+.record-pts{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  color:var(--accent);
+}
+.record-team{
+  font-size:10px;
+  color:var(--muted);
+}
+
+/* Standings strip */
+.standings-strip{
+  padding:16px 20px;
+  border-top:1px solid var(--border);
+  background:var(--card);
+}
+.standings-title{
+  font-size:12px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--accent);
+  font-weight:700;
+  margin-bottom:10px;
+}
+.standings-row{
+  display:grid;
+  grid-template-columns:24px 1fr 60px 60px 60px 50px;
+  gap:4px;
+  padding:4px 0;
+  font-size:11px;
+  border-bottom:1px solid var(--border);
+  align-items:center;
+}
+.standings-row:last-child{border-bottom:none}
+.standings-row.hdr{
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  font-weight:700;
+}
+.standings-rank{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  text-align:center;
+}
+.standings-team{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.standings-rec,.standings-pf,.standings-wk,.standings-streak{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  text-align:right;
+}
+.streak-w{color:var(--good)}
+.streak-l{color:var(--bad)}
+.mvmt-up{color:var(--good)}
+.mvmt-dn{color:var(--bad)}
+.mvmt-flat{color:var(--muted)}
+
+/* Map legend */
+.map-legend{
+  display:flex;
+  gap:16px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  color:var(--muted);
+}
+.legend-swatch{
+  width:14px;
+  height:14px;
+  border-radius:2px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  font-weight:700;
+}
+
+/* Footer */
+.nws-footer{
+  text-align:center;
+  padding:20px;
+  font-size:11px;
+  color:var(--muted);
+  border-top:1px solid var(--border);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+/* Radar overlay effect */
+.radar-zone{
+  fill:rgba(255,204,0,0.06);
+  stroke:rgba(255,204,0,0.2);
+  stroke-width:1;
+  stroke-dasharray:6,3;
+}
+
+/* Frontal symbols along paths */
+.front-warm{stroke:var(--bad);stroke-width:2;fill:none}
+.front-cold{stroke:var(--cold);stroke-width:2;fill:none}
+.front-marker-warm{fill:var(--bad)}
+.front-marker-cold{fill:var(--cold)}
+
+/* Scroll animations */
+.fade-in{opacity:0;transform:translateY(12px);transition:opacity 0.5s ease,transform 0.5s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="warning-bar">
+  &#9888; SEVERE WEATHER ADVISORY &#9888; WEEK 06 — 4 OF 6 GAMES CLASSIFIED AS UPSETS — WILDEST WEEK OF THE SEASON — EXERCISE CAUTION
+</div>
+
+<header class="nws-header">
+  <h1>National Fantasy Weather Service</h1>
+  <div class="sub">JAILYARD DYNASTY DISTRICT &mdash; WEEK 06 FORECAST ADVISORY &mdash; 2025 SEASON</div>
+  <div class="issued">ISSUED: WEEK 06 // VALID THROUGH: WEEK 07 // LEAGUE AVG BAROMETRIC PRESSURE: 128.7 PTS</div>
+</header>
+
+<div class="main-layout">
+  <!-- Map Area -->
+  <div class="map-area">
+    <div class="map-title">SYNOPTIC CHART &mdash; <span>WEEK 06 PRESSURE ANALYSIS</span></div>
+    <div class="map-container">
+      <svg class="weather-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background grid (isobars) -->
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="800" height="500" fill="url(#grid)"/>
+
+        <!-- Radar overlay for upset zone -->
+        <ellipse class="radar-zone" cx="400" cy="250" rx="280" ry="180"/>
+
+        <!-- Isobar rings around high-pressure systems -->
+        <!-- Sleeping Giants W4 (strongest high) -->
+        <circle class="isobar" cx="200" cy="120" r="45"/>
+        <circle class="isobar" cx="200" cy="120" r="65"/>
+        <circle class="isobar" cx="200" cy="120" r="85"/>
+        <!-- Legion W1 -->
+        <circle class="isobar" cx="600" cy="100" r="40"/>
+        <circle class="isobar" cx="600" cy="100" r="58"/>
+        <!-- Ken-obi W2 -->
+        <circle class="isobar" cx="400" cy="90" r="42"/>
+        <circle class="isobar" cx="400" cy="90" r="60"/>
+        <!-- MHJTIME W2 -->
+        <circle class="isobar" cx="130" cy="280" r="38"/>
+        <circle class="isobar" cx="130" cy="280" r="55"/>
+
+        <!-- Low-pressure isobars (irregular) -->
+        <!-- Burden L6 -->
+        <ellipse class="isobar" cx="650" cy="400" rx="50" ry="40" style="stroke:rgba(68,136,255,0.2)"/>
+        <ellipse class="isobar" cx="650" cy="400" rx="70" ry="55" style="stroke:rgba(68,136,255,0.15)"/>
+        <!-- Father Time L6 -->
+        <ellipse class="isobar" cx="500" cy="420" rx="45" ry="35" style="stroke:rgba(68,136,255,0.2)"/>
+        <ellipse class="isobar" cx="500" cy="420" rx="63" ry="50" style="stroke:rgba(68,136,255,0.15)"/>
+
+        <!-- FRONTAL BOUNDARIES (matchup lines) -->
+        <!-- Matchup 1: Noble FFT 151.88 def Ghastly 121.30 - UPSET -->
+        <line class="front-warm" x1="350" y1="300" x2="560" y2="300" stroke-dasharray="0"/>
+        <circle class="front-marker-warm" cx="400" cy="296" r="4"/>
+        <circle class="front-marker-warm" cx="440" cy="296" r="4"/>
+        <circle class="front-marker-warm" cx="480" cy="296" r="4"/>
+        <text x="455" y="290" font-size="16" fill="#ffcc00" text-anchor="middle" font-weight="700">&#9888;</text>
+
+        <!-- Matchup 2: MHJTIME 140.94 def Kittler 107.74 - UPSET -->
+        <line class="front-warm" x1="130" y1="280" x2="300" y2="200" stroke-dasharray="0"/>
+        <circle class="front-marker-warm" cx="175" cy="260" r="4"/>
+        <circle class="front-marker-warm" cx="215" cy="240" r="4"/>
+        <text x="215" y="225" font-size="16" fill="#ffcc00" text-anchor="middle" font-weight="700">&#9888;</text>
+
+        <!-- Matchup 3: Sleeping Giants 129.82 def Chudders 95.26 -->
+        <line class="front-warm" x1="200" y1="120" x2="320" y2="390"/>
+        <circle class="front-marker-warm" cx="230" cy="190" r="4"/>
+        <circle class="front-marker-warm" cx="255" cy="250" r="4"/>
+        <circle class="front-marker-warm" cx="280" cy="310" r="4"/>
+
+        <!-- Matchup 4: Boonist Monks 150.46 def Rasheeing 109.10 - UPSET -->
+        <line class="front-warm" x1="450" y1="190" x2="680" y2="230"/>
+        <circle class="front-marker-warm" cx="500" cy="198" r="4"/>
+        <circle class="front-marker-warm" cx="550" cy="206" r="4"/>
+        <circle class="front-marker-warm" cx="600" cy="214" r="4"/>
+        <text x="565" y="190" font-size="16" fill="#ffcc00" text-anchor="middle" font-weight="700">&#9888;</text>
+
+        <!-- Matchup 5: Legion 165.90 def Father Time 107.66 -->
+        <line class="front-warm" x1="600" y1="100" x2="500" y2="420"/>
+        <circle class="front-marker-warm" cx="575" cy="180" r="4"/>
+        <circle class="front-marker-warm" cx="555" cy="250" r="4"/>
+        <circle class="front-marker-warm" cx="535" cy="320" r="4"/>
+
+        <!-- Matchup 6: Ken-obi 164.94 def Burden 99.20 -->
+        <line class="front-warm" x1="400" y1="90" x2="650" y2="400"/>
+        <circle class="front-marker-warm" cx="440" cy="152" r="4"/>
+        <circle class="front-marker-warm" cx="490" cy="228" r="4"/>
+        <circle class="front-marker-warm" cx="540" cy="304" r="4"/>
+
+        <!-- HIGH PRESSURE markers -->
+        <!-- Sleeping Giants (W4, strongest) -->
+        <text class="pressure-h" x="200" y="115" text-anchor="middle">H</text>
+        <!-- Legion (W1, high scorer) -->
+        <text class="pressure-h" x="600" y="95" text-anchor="middle">H</text>
+        <!-- Ken-obi (W2) -->
+        <text class="pressure-h" x="400" y="85" text-anchor="middle">H</text>
+        <!-- MHJTIME (W2) -->
+        <text class="pressure-h" x="130" y="275" text-anchor="middle">H</text>
+        <!-- Boonist Monks (W1) -->
+        <text x="450" y="185" font-size="18" fill="#ff4444" font-weight="700" text-anchor="middle" font-family="Roboto Condensed,sans-serif">H</text>
+        <!-- Noble FFT (W1) -->
+        <text x="350" y="295" font-size="18" fill="#ff4444" font-weight="700" text-anchor="middle" font-family="Roboto Condensed,sans-serif">H</text>
+
+        <!-- LOW PRESSURE markers -->
+        <!-- Burden (L6) -->
+        <text class="pressure-l" x="650" y="395" text-anchor="middle">L</text>
+        <!-- Father Time (L6) -->
+        <text class="pressure-l" x="500" y="415" text-anchor="middle">L</text>
+        <!-- Ghastly (L2) -->
+        <text x="560" y="295" font-size="18" fill="#4488ff" font-weight="700" text-anchor="middle" font-family="Roboto Condensed,sans-serif">L</text>
+        <!-- Kittler (L1, falling) -->
+        <text x="300" y="195" font-size="18" fill="#4488ff" font-weight="700" text-anchor="middle" font-family="Roboto Condensed,sans-serif">L</text>
+        <!-- Rasheeing (L1) -->
+        <text x="680" y="225" font-size="16" fill="#4488ff" font-weight="700" text-anchor="middle" font-family="Roboto Condensed,sans-serif">L</text>
+        <!-- Chudders (L1) -->
+        <text x="320" y="385" font-size="16" fill="#4488ff" font-weight="700" text-anchor="middle" font-family="Roboto Condensed,sans-serif">L</text>
+
+        <!-- Station labels -->
+        <!-- Legion of Bouz 5-1 165.90 -->
+        <g class="station">
+          <text class="station-name" x="600" y="118">LEGION</text>
+          <text class="station-data" x="600" y="128">5-1 | 165.90</text>
+        </g>
+        <!-- Ken-obi 5-1 164.94 -->
+        <g class="station">
+          <text class="station-name" x="400" y="108">KEN-OBI</text>
+          <text class="station-data" x="400" y="118">5-1 | 164.94</text>
+        </g>
+        <!-- Sleeping Giants 5-1 129.82 -->
+        <g class="station">
+          <text class="station-name" x="200" y="140">GIANTS</text>
+          <text class="station-data" x="200" y="150">5-1 | 129.82</text>
+        </g>
+        <!-- Boonist Monks 4-2 150.46 -->
+        <g class="station">
+          <text class="station-name" x="450" y="205">MONKS</text>
+          <text class="station-data" x="450" y="215">4-2 | 150.46</text>
+        </g>
+        <!-- Kittler 4-2 107.74 -->
+        <g class="station">
+          <text class="station-name" x="300" y="215">KITTLER</text>
+          <text class="station-data" x="300" y="225">4-2 | 107.74</text>
+        </g>
+        <!-- Rasheeing 4-2 109.10 -->
+        <g class="station">
+          <text class="station-name" x="680" y="248">RASHEEING</text>
+          <text class="station-data" x="680" y="258">4-2 | 109.10</text>
+        </g>
+        <!-- MHJTIME 3-3 140.94 -->
+        <g class="station">
+          <text class="station-name" x="130" y="300">MHJTIME</text>
+          <text class="station-data" x="130" y="310">3-3 | 140.94</text>
+        </g>
+        <!-- Noble FFT 3-3 151.88 -->
+        <g class="station">
+          <text class="station-name" x="350" y="320">NOBLE FFT</text>
+          <text class="station-data" x="350" y="330">3-3 | 151.88</text>
+        </g>
+        <!-- Ghastly 2-4 121.30 -->
+        <g class="station">
+          <text class="station-name" x="560" y="318">GHASTLY</text>
+          <text class="station-data" x="560" y="328">2-4 | 121.30</text>
+        </g>
+        <!-- Chudders 1-5 95.26 -->
+        <g class="station">
+          <text class="station-name" x="320" y="405">CHUDDERS</text>
+          <text class="station-data" x="320" y="415">1-5 | 95.26</text>
+        </g>
+        <!-- Burden 0-6 99.20 -->
+        <g class="station">
+          <text class="station-name" x="650" y="420">BURDEN</text>
+          <text class="station-data" x="650" y="430">0-6 | 99.20</text>
+        </g>
+        <!-- Father Time 0-6 107.66 -->
+        <g class="station">
+          <text class="station-name" x="500" y="440">FATHER TIME</text>
+          <text class="station-data" x="500" y="450">0-6 | 107.66</text>
+        </g>
+
+        <!-- Severe weather text overlay -->
+        <text x="400" y="475" text-anchor="middle" font-size="9" fill="rgba(255,204,0,0.4)" font-family="IBM Plex Mono,monospace" letter-spacing="4">
+          &#9888; UPSET DETECTION RADAR OVERLAY ACTIVE &#9888;
+        </text>
+      </svg>
+    </div>
+
+    <div class="map-legend">
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:var(--bad);color:#fff;font-size:9px">H</div>
+        High Pressure (Win)
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:var(--cold);color:#fff;font-size:9px">L</div>
+        Low Pressure (Loss)
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:rgba(255,204,0,0.2);color:var(--accent)">&#9888;</div>
+        Upset / Severe
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:transparent;border:1px solid rgba(255,255,255,0.12)">&nbsp;</div>
+        Isobar (Streak Intensity)
+      </div>
+      <div class="legend-item">
+        <svg width="30" height="14"><line x1="0" y1="7" x2="30" y2="7" stroke="#ff4444" stroke-width="2"/><circle cx="10" cy="5" r="3" fill="#ff4444"/><circle cx="20" cy="5" r="3" fill="#ff4444"/></svg>
+        Warm Front (Winner)
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Panels -->
+  <div class="sidebar">
+
+    <!-- Current Conditions -->
+    <div class="panel fade-in">
+      <div class="panel-header"><span class="icon">&#127777;</span> CURRENT CONDITIONS</div>
+      <div class="conditions-grid">
+        <div class="cond-item">
+          <div class="cond-label">League Avg</div>
+          <div class="cond-value avg mono">128.7</div>
+        </div>
+        <div class="cond-item">
+          <div class="cond-label">Week High</div>
+          <div class="cond-value high mono">165.9</div>
+        </div>
+        <div class="cond-item">
+          <div class="cond-label">Week Low</div>
+          <div class="cond-value low mono">95.26</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Severe Weather Alerts -->
+    <div class="panel fade-in">
+      <div class="panel-header"><span class="icon">&#9888;</span> SEVERE WEATHER ALERTS</div>
+      <div class="alert-item">
+        <div class="alert-matchup">
+          <span class="alert-winner">Noble FFT 151.88</span> def
+          <span class="alert-loser"> Ghastly 121.30</span>
+        </div>
+        <div class="alert-detail">UPSET WARNING // Margin: +30.58 // Bijan Robinson 32.8 pts</div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-matchup">
+          <span class="alert-winner">MHJTIME 140.94</span> def
+          <span class="alert-loser"> Kittler 107.74</span>
+        </div>
+        <div class="alert-detail">UPSET WARNING // Margin: +33.20 // Kittler fell #1 &rarr; #5</div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-matchup">
+          <span class="alert-winner">Boonist Monks 150.46</span> def
+          <span class="alert-loser"> Rasheeing 109.10</span>
+        </div>
+        <div class="alert-detail">UPSET WARNING // Margin: +41.36 // Pickens 27.3, JSN 26.2</div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-matchup">
+          <span class="alert-winner">Ken-obi 164.94</span> def
+          <span class="alert-loser"> Burden 99.20</span>
+        </div>
+        <div class="alert-detail">BLOWOUT // Margin: +65.74 // Biggest blowout of the week</div>
+      </div>
+    </div>
+
+    <!-- Storm Tracker -->
+    <div class="panel fade-in">
+      <div class="panel-header"><span class="icon">&#127786;</span> STORM TRACKER</div>
+      <div class="storm-track">
+        <div class="storm-title">RAPID PRESSURE DROP: KITTLER ON THE ROOF</div>
+        <div class="storm-detail">
+          Defending champion experienced <strong>catastrophic barometric collapse</strong> &mdash;
+          fell from <strong>#1 to #5</strong> in a single week. Scored just <strong>107.74</strong>
+          against MHJTIME&rsquo;s <strong>140.94</strong>. Jonathan Taylor&rsquo;s 21.7 pts was
+          the only real production. Pressure system now classified as <strong>L1 (first loss)</strong>.
+          The 4-2 record still holds, but the Elo rating (1488) tells the real story.
+        </div>
+      </div>
+    </div>
+
+    <!-- Record Highs -->
+    <div class="panel fade-in">
+      <div class="panel-header"><span class="icon">&#127790;</span> RECORD HIGHS &mdash; TOP PERFORMERS</div>
+      <div class="record-item">
+        <div>
+          <span class="record-player">Bijan Robinson</span>
+          <span class="record-team"> &mdash; Noble FFT</span>
+        </div>
+        <span class="record-pts mono">32.80</span>
+      </div>
+      <div class="record-item">
+        <div>
+          <span class="record-player">Rico Dowdle</span>
+          <span class="record-team"> &mdash; MHJTIME</span>
+        </div>
+        <span class="record-pts mono">30.90</span>
+      </div>
+      <div class="record-item">
+        <div>
+          <span class="record-player">Patrick Mahomes</span>
+          <span class="record-team"> &mdash; Legion</span>
+        </div>
+        <span class="record-pts mono">30.48</span>
+      </div>
+      <div class="record-item">
+        <div>
+          <span class="record-player">De'Von Achane</span>
+          <span class="record-team"> &mdash; Rasheeing</span>
+        </div>
+        <span class="record-pts mono">30.00</span>
+      </div>
+      <div class="record-item">
+        <div>
+          <span class="record-player">Cam Skattebo</span>
+          <span class="record-team"> &mdash; Legion</span>
+        </div>
+        <span class="record-pts mono">30.00</span>
+      </div>
+      <div class="record-item">
+        <div>
+          <span class="record-player">Josh Jacobs</span>
+          <span class="record-team"> &mdash; Giants</span>
+        </div>
+        <span class="record-pts mono">29.50</span>
+      </div>
+    </div>
+
+    <!-- 7-Day Outlook -->
+    <div class="panel fade-in">
+      <div class="panel-header"><span class="icon">&#128197;</span> 7-DAY OUTLOOK &mdash; WEEK 07 MATCHUPS</div>
+      <div class="outlook-item">
+        <div class="outlook-icon">&#9889;</div>
+        <div class="outlook-teams"><strong>#1 Legion</strong> vs <strong>#2 Ken-obi</strong></div>
+        <span class="outlook-tag tag-marquee">MARQUEE</span>
+      </div>
+      <div class="outlook-item">
+        <div class="outlook-icon">&#9928;</div>
+        <div class="outlook-teams"><strong>#11 Burden</strong> vs <strong>#12 Father Time</strong></div>
+        <span class="outlook-tag tag-toilet">TOILET BOWL</span>
+      </div>
+      <div class="outlook-item">
+        <div class="outlook-icon">&#9925;</div>
+        <div class="outlook-teams">#4 Boonist Monks vs #8 Noble FFT</div>
+        <span class="outlook-tag tag-clear">FAIR</span>
+      </div>
+      <div class="outlook-item">
+        <div class="outlook-icon">&#9925;</div>
+        <div class="outlook-teams">#5 Kittler vs #3 Sleeping Giants</div>
+        <span class="outlook-tag tag-storm">WATCH</span>
+      </div>
+      <div class="outlook-item">
+        <div class="outlook-icon">&#9925;</div>
+        <div class="outlook-teams">#6 Rasheeing vs #9 Ghastly</div>
+        <span class="outlook-tag tag-clear">FAIR</span>
+      </div>
+      <div class="outlook-item">
+        <div class="outlook-icon">&#9925;</div>
+        <div class="outlook-teams">#10 Chudders vs #7 MHJTIME</div>
+        <span class="outlook-tag tag-storm">WATCH</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Full Standings -->
+<div class="standings-strip fade-in">
+  <div class="standings-title">&#128225; BAROMETRIC STANDINGS &mdash; FULL STATION REPORT</div>
+  <div class="standings-row hdr">
+    <div>#</div><div>Station</div><div>Rec</div><div>PF</div><div>Wk6</div><div>Strk</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-up">1</div><div class="standings-team">The Legion of Bouz</div><div class="standings-rec mono">5-1</div><div class="standings-pf mono">935.7</div><div class="standings-wk mono">165.90</div><div class="standings-streak mono streak-w">W1</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-up">2</div><div class="standings-team">General Ken-obi</div><div class="standings-rec mono">5-1</div><div class="standings-pf mono">871.2</div><div class="standings-wk mono">164.94</div><div class="standings-streak mono streak-w">W2</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-flat">3</div><div class="standings-team">Sleeping Giants</div><div class="standings-rec mono">5-1</div><div class="standings-pf mono">857.0</div><div class="standings-wk mono">129.82</div><div class="standings-streak mono streak-w">W4</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-up">4</div><div class="standings-team">The Boonist Monks</div><div class="standings-rec mono">4-2</div><div class="standings-pf mono">912.9</div><div class="standings-wk mono">150.46</div><div class="standings-streak mono streak-w">W1</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-dn">5</div><div class="standings-team">Kittler on the Roof</div><div class="standings-rec mono">4-2</div><div class="standings-pf mono">877.9</div><div class="standings-wk mono">107.74</div><div class="standings-streak mono streak-l">L1</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-dn">6</div><div class="standings-team">Rasheeing the Scene</div><div class="standings-rec mono">4-2</div><div class="standings-pf mono">816.0</div><div class="standings-wk mono">109.10</div><div class="standings-streak mono streak-l">L1</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-flat">7</div><div class="standings-team">MHJTIME</div><div class="standings-rec mono">3-3</div><div class="standings-pf mono">891.9</div><div class="standings-wk mono">140.94</div><div class="standings-streak mono streak-w">W2</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-up">8</div><div class="standings-team">Noble FFT</div><div class="standings-rec mono">3-3</div><div class="standings-pf mono">819.0</div><div class="standings-wk mono">151.88</div><div class="standings-streak mono streak-w">W1</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-dn">9</div><div class="standings-team">Ghastly Grayskull Gang</div><div class="standings-rec mono">2-4</div><div class="standings-pf mono">818.3</div><div class="standings-wk mono">121.30</div><div class="standings-streak mono streak-l">L2</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-flat">10</div><div class="standings-team">Chudders Football Team</div><div class="standings-rec mono">1-5</div><div class="standings-pf mono">727.9</div><div class="standings-wk mono">95.26</div><div class="standings-streak mono streak-l">L1</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-flat">11</div><div class="standings-team">Burden of Etienne-y Woody</div><div class="standings-rec mono">0-6</div><div class="standings-pf mono">732.7</div><div class="standings-wk mono">99.20</div><div class="standings-streak mono streak-l">L6</div>
+  </div>
+  <div class="standings-row">
+    <div class="standings-rank mono mvmt-flat">12</div><div class="standings-team">Father Time</div><div class="standings-rec mono">0-6</div><div class="standings-pf mono">712.7</div><div class="standings-wk mono">107.66</div><div class="standings-streak mono streak-l">L6</div>
+  </div>
+</div>
+
+<footer class="nws-footer">
+  This advisory issued by the Jailyard Dynasty Forecast Office &mdash; Jailyard District, Season 2025<br>
+  Next update: Week 07 &mdash; Marquee front: Legion vs Ken-obi &mdash; Toilet bowl watch: Burden vs Father Time
+</footer>
+
+<script>
+(function(){
+  // Scroll-triggered fade-in
+  var els = document.querySelectorAll('.fade-in');
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    els.forEach(function(el) { obs.observe(el); });
+  } else {
+    els.forEach(function(el) { el.classList.add('visible'); });
+  }
+})();
+</script>
+
+</body>
+</html>

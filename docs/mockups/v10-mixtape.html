@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jailyard Dynasty — WK 06 Mixtape</title>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Inline&family=IBM+Plex+Mono:wght@400;600;700&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1a1a1a;
+  --fg: #f0f0f0;
+  --muted: #999;
+  --orange: #ff6600;
+  --cyan: #00ccff;
+  --magenta: #ff00ff;
+  --yellow: #ffff00;
+  --chrome-light: #d0d0d0;
+  --chrome-mid: #c0c0c0;
+  --chrome-dark: #888888;
+  --chrome-darker: #555;
+  --tape-brown: #5c3a1e;
+  --tape-light: #8b6340;
+  --label-bg: #ff6600;
+  --card: rgba(30,30,30,0.95);
+  --accent: #ff6600;
+  --accent2: #00ccff;
+  --border: #444;
+  --good: #00ff88;
+  --bad: #ff4444;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'IBM Plex Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== STICKER BOMB BACKGROUND ===== */
+.sticker-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sticker-bg svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.main-container {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+
+/* ===== BOOMBOX HOUSING ===== */
+.boombox {
+  background: linear-gradient(180deg, var(--chrome-light) 0%, var(--chrome-mid) 30%, var(--chrome-dark) 100%);
+  border-radius: 24px;
+  padding: 20px;
+  border: 3px solid var(--chrome-darker);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+  position: relative;
+}
+
+.boombox-inner {
+  display: grid;
+  grid-template-columns: 1fr 2.5fr 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+/* ===== SPEAKER GRILLES ===== */
+.speaker {
+  aspect-ratio: 1;
+  background: #333;
+  border-radius: 50%;
+  border: 4px solid var(--chrome-darker);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.speaker::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0px,
+    transparent 3px,
+    #222 3px,
+    #222 4px,
+    transparent 4px,
+    transparent 7px
+  );
+}
+
+.speaker::after {
+  content: '';
+  position: absolute;
+  inset: 35%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #555 0%, #333 60%, #222 100%);
+  border: 2px solid #444;
+}
+
+/* ===== CASSETTE DECK ===== */
+.cassette-deck {
+  background: #222;
+  border-radius: 12px;
+  padding: 16px;
+  border: 2px solid #444;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.cassette-tape {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
+  border-radius: 8px 8px 4px 4px;
+  border: 2px solid #555;
+  padding: 12px;
+  position: relative;
+}
+
+/* Tape window + spools */
+.tape-window {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: rgba(0,0,0,0.4);
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #444;
+}
+
+.spool {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #666 20%, #444 40%, #333 60%, #444 80%, #555 100%);
+  border: 2px solid #777;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.spool::after {
+  content: '';
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  background: #222;
+  border: 1px solid #555;
+}
+
+.tape-strip {
+  flex: 1;
+  height: 20px;
+  background: linear-gradient(180deg, var(--tape-light) 0%, var(--tape-brown) 50%, var(--tape-light) 100%);
+  margin: 0 4px;
+  border-radius: 1px;
+}
+
+/* Cassette label */
+.cassette-label {
+  background: var(--label-bg);
+  border-radius: 4px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.cassette-label h1 {
+  font-family: 'Bungee', cursive;
+  font-size: clamp(0.6rem, 1.5vw, 0.85rem);
+  color: #1a1a1a;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+}
+
+.cassette-label .sublabel {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  color: #333;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+/* ===== TRANSPORT BUTTONS ===== */
+.transport-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.transport-btn {
+  width: 36px;
+  height: 28px;
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+  border-radius: 4px;
+  border: 1px solid #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  position: relative;
+}
+
+.transport-btn .icon {
+  font-size: 10px;
+  color: var(--fg);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+}
+
+.transport-btn.rec { background: linear-gradient(180deg, #cc3333 0%, #992222 100%); }
+.transport-btn.play { background: linear-gradient(180deg, #555 0%, #333 100%); }
+
+/* Transport icon shapes */
+.icon-rew::before { content: '<<'; }
+.icon-play::before { content: '\25B6'; }
+.icon-ff::before { content: '>>'; }
+.icon-stop::before { content: '\25A0'; }
+.icon-rec::before { content: '\25CF'; }
+
+/* Transport labels */
+.transport-labels {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.transport-label {
+  width: 36px;
+  text-align: center;
+  font-size: 0.45rem;
+  color: var(--chrome-dark);
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== BOOMBOX BRAND ===== */
+.boombox-brand {
+  text-align: center;
+  margin-top: 10px;
+  font-family: 'Bungee', cursive;
+  font-size: 0.65rem;
+  color: var(--chrome-darker);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* ===== J-CARD INSERT ===== */
+.jcard {
+  margin-top: 32px;
+  background: linear-gradient(135deg, #111 0%, #1a1a1a 50%, #111 100%);
+  border: 2px solid var(--orange);
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(255,102,0,0.15);
+}
+
+/* J-Card header */
+.jcard-header {
+  background: var(--orange);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.jcard-header h2 {
+  font-family: 'Bungee', cursive;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: #1a1a1a;
+}
+
+.jcard-header .side-label {
+  font-family: 'Bungee Inline', 'Bungee', cursive;
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  color: #1a1a1a;
+  opacity: 0.7;
+}
+
+/* Section headers */
+.section-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.section-header h3 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: clamp(0.85rem, 2.2vw, 1.1rem);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-header .section-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.side-a-header h3 { color: var(--orange); }
+.side-b-header h3 { color: var(--cyan); }
+.liner-header h3 { color: var(--yellow); }
+.shoutouts-header h3 { color: var(--magenta); }
+.coming-header h3 { color: var(--good); }
+
+/* ===== TRACKLIST ===== */
+.tracklist {
+  padding: 8px 20px 16px;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: clamp(0.7rem, 1.8vw, 0.82rem);
+}
+
+.track:last-child { border-bottom: none; }
+
+.track-num {
+  font-family: 'Bungee', cursive;
+  font-size: 0.75rem;
+  text-align: right;
+  padding-right: 4px;
+}
+
+.track-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.track-badge {
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-weight: 700;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-hot {
+  background: var(--orange);
+  color: #1a1a1a;
+}
+
+.badge-skip {
+  background: #444;
+  color: #999;
+}
+
+.badge-upset {
+  background: linear-gradient(90deg, var(--magenta), var(--cyan));
+  color: #1a1a1a;
+}
+
+.badge-blowout {
+  background: var(--yellow);
+  color: #1a1a1a;
+}
+
+/* Track number colors cycling */
+.track:nth-child(1) .track-num { color: var(--orange); }
+.track:nth-child(2) .track-num { color: var(--cyan); }
+.track:nth-child(3) .track-num { color: var(--magenta); }
+.track:nth-child(4) .track-num { color: var(--yellow); }
+.track:nth-child(5) .track-num { color: var(--orange); }
+.track:nth-child(6) .track-num { color: var(--cyan); }
+.track:nth-child(7) .track-num { color: var(--magenta); }
+.track:nth-child(8) .track-num { color: var(--yellow); }
+.track:nth-child(9) .track-num { color: var(--orange); }
+.track:nth-child(10) .track-num { color: var(--cyan); }
+.track:nth-child(11) .track-num { color: var(--magenta); }
+.track:nth-child(12) .track-num { color: var(--yellow); }
+
+/* ===== MATCHUP TRACKS ===== */
+.matchup-track {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 8px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+}
+
+.matchup-track:last-child { border-bottom: none; }
+
+.matchup-details {
+  font-family: 'IBM Plex Mono', monospace;
+  line-height: 1.5;
+}
+
+.matchup-winner {
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.matchup-loser {
+  color: var(--muted);
+}
+
+.matchup-score {
+  font-weight: 600;
+}
+
+.matchup-margin {
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+/* ===== LINER NOTES ===== */
+.liner-notes {
+  padding: 16px 20px 20px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 400;
+  font-size: clamp(0.82rem, 2vw, 0.95rem);
+  line-height: 1.65;
+  color: #ccc;
+}
+
+.liner-notes p {
+  margin-bottom: 12px;
+}
+
+.liner-notes p:last-child {
+  margin-bottom: 0;
+}
+
+.liner-highlight {
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+.liner-orange {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+.liner-cyan {
+  color: var(--cyan);
+  font-weight: 600;
+}
+
+/* ===== SHOUT-OUTS BOX ===== */
+.shoutouts {
+  padding: 16px 20px 20px;
+}
+
+.shoutouts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.shoutout-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.shoutout-title {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.shoutout-card:nth-child(1) .shoutout-title { color: var(--orange); }
+.shoutout-card:nth-child(2) .shoutout-title { color: var(--bad); }
+.shoutout-card:nth-child(3) .shoutout-title { color: var(--cyan); }
+
+.shoutout-value {
+  font-family: 'Bungee', cursive;
+  font-size: clamp(0.85rem, 2vw, 1rem);
+}
+
+.shoutout-detail {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ===== COMING SOON ===== */
+.coming-soon {
+  padding: 16px 20px 24px;
+  text-align: center;
+}
+
+.coming-soon .matchup-tease {
+  font-family: 'Bungee', cursive;
+  font-size: clamp(1rem, 2.8vw, 1.3rem);
+  color: var(--fg);
+  margin: 8px 0 4px;
+}
+
+.coming-soon .vs-text {
+  color: var(--magenta);
+}
+
+.coming-soon .coming-sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.coming-soon .coming-tagline {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--orange);
+  margin-top: 8px;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  padding: 24px 0 0;
+  font-size: 0.65rem;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.footer .footer-brand {
+  font-family: 'Bungee', cursive;
+  font-size: 0.8rem;
+  color: var(--orange);
+  margin-bottom: 4px;
+}
+
+/* ===== DIVIDERS ===== */
+.jcard-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--orange), var(--cyan), var(--magenta), var(--yellow), transparent);
+}
+
+.jcard-divider-thin {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .boombox-inner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .speaker { display: none; }
+  .boombox { padding: 14px; border-radius: 16px; }
+  .cassette-deck { padding: 12px; }
+  .tracklist { padding: 8px 12px 12px; }
+  .track { grid-template-columns: 28px 1fr; }
+  .track-meta { display: none; }
+  .track-name::after {
+    content: attr(data-meta);
+    display: inline;
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 8px;
+    font-size: 0.7rem;
+  }
+  .matchup-track { grid-template-columns: 28px 1fr; }
+  .matchup-track .track-meta { display: none; }
+  .jcard-header { padding: 12px 14px; }
+  .section-header { padding: 10px 14px; }
+  .liner-notes { padding: 12px 14px 16px; }
+  .shoutouts { padding: 12px 14px 16px; }
+  .coming-soon { padding: 12px 14px 20px; }
+  .shoutouts-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sticker bomb background -->
+<div class="sticker-bg">
+<svg viewBox="0 0 1200 2400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Scattered sticker shapes -->
+  <rect x="30" y="50" width="24" height="16" rx="2" fill="#ff6600" opacity="0.15" transform="rotate(15 42 58)"/>
+  <circle cx="1150" cy="120" r="10" fill="#00ccff" opacity="0.12"/>
+  <rect x="80" y="300" width="18" height="18" rx="3" fill="#ff00ff" opacity="0.1" transform="rotate(-20 89 309)"/>
+  <rect x="1100" cy="400" width="22" height="14" rx="2" fill="#ffff00" opacity="0.12" transform="rotate(30 1111 407)"/>
+  <circle cx="50" cy="600" r="8" fill="#ff6600" opacity="0.1"/>
+  <rect x="1130" y="700" width="20" height="12" rx="2" fill="#00ccff" opacity="0.13" transform="rotate(-15 1140 706)"/>
+  <circle cx="25" cy="900" r="12" fill="#ff00ff" opacity="0.08"/>
+  <rect x="1080" y="1000" width="26" height="16" rx="3" fill="#ffff00" opacity="0.1" transform="rotate(25 1093 1008)"/>
+  <rect x="40" y="1200" width="16" height="22" rx="2" fill="#ff6600" opacity="0.12" transform="rotate(-30 48 1211)"/>
+  <circle cx="1170" cy="1400" r="9" fill="#00ccff" opacity="0.1"/>
+  <rect x="60" y="1600" width="20" height="14" rx="2" fill="#ff00ff" opacity="0.13" transform="rotate(20 70 1607)"/>
+  <circle cx="1120" cy="1800" r="11" fill="#ffff00" opacity="0.09"/>
+  <rect x="35" y="2000" width="22" height="16" rx="3" fill="#00ccff" opacity="0.11" transform="rotate(-10 46 2008)"/>
+  <rect x="1090" y="2200" width="18" height="18" rx="2" fill="#ff6600" opacity="0.1" transform="rotate(35 1099 2209)"/>
+</svg>
+</div>
+
+<div class="main-container">
+
+  <!-- ===== BOOMBOX ===== -->
+  <div class="boombox">
+    <div class="boombox-inner">
+      <!-- Left speaker -->
+      <div class="speaker"></div>
+
+      <!-- Cassette deck -->
+      <div class="cassette-deck">
+        <div class="cassette-tape">
+          <div class="tape-window">
+            <div class="spool"></div>
+            <div class="tape-strip"></div>
+            <div class="spool"></div>
+          </div>
+          <div class="cassette-label">
+            <h1>JAILYARD DYNASTY &mdash; WK 06 POWER RANKINGS &mdash; SIDE A</h1>
+            <div class="sublabel">Season 2025 &bull; Est. 2022 &bull; 12 Teams &bull; Dynasty</div>
+          </div>
+        </div>
+        <div class="transport-buttons">
+          <div class="transport-btn"><span class="icon icon-rew"></span></div>
+          <div class="transport-btn play"><span class="icon icon-play"></span></div>
+          <div class="transport-btn rec"><span class="icon icon-rec"></span></div>
+          <div class="transport-btn"><span class="icon icon-ff"></span></div>
+          <div class="transport-btn"><span class="icon icon-stop"></span></div>
+        </div>
+        <div class="transport-labels">
+          <span class="transport-label">REW</span>
+          <span class="transport-label">PLAY</span>
+          <span class="transport-label">REC</span>
+          <span class="transport-label">FF</span>
+          <span class="transport-label">STOP</span>
+        </div>
+      </div>
+
+      <!-- Right speaker -->
+      <div class="speaker"></div>
+    </div>
+    <div class="boombox-brand">JYD Records &bull; Est. 2022</div>
+  </div>
+
+  <!-- ===== J-CARD INSERT ===== -->
+  <div class="jcard">
+
+    <!-- Header -->
+    <div class="jcard-header">
+      <h2>THE MIXTAPE</h2>
+      <span class="side-label">WK 06</span>
+    </div>
+
+    <div class="jcard-divider"></div>
+
+    <!-- SIDE A — POWER RANKINGS -->
+    <div class="section-header side-a-header">
+      <h3>Side A &mdash; Power Rankings</h3>
+      <span class="section-sub">THE LINEUP</span>
+    </div>
+
+    <div class="tracklist">
+      <div class="track">
+        <span class="track-num">01</span>
+        <span class="track-name" data-meta=" 5-1 165.90">The Legion of Bouz</span>
+        <span class="track-meta">5-1 &bull; 165.90 <span class="track-badge badge-hot">HOT TRACK</span></span>
+      </div>
+      <div class="track">
+        <span class="track-num">02</span>
+        <span class="track-name" data-meta=" 5-1 164.94">General Ken-obi</span>
+        <span class="track-meta">5-1 &bull; 164.94</span>
+      </div>
+      <div class="track">
+        <span class="track-num">03</span>
+        <span class="track-name" data-meta=" 5-1 129.82">Sleeping Giants</span>
+        <span class="track-meta">5-1 &bull; 129.82</span>
+      </div>
+      <div class="track">
+        <span class="track-num">04</span>
+        <span class="track-name" data-meta=" 4-2 150.46">The Boonist Monks</span>
+        <span class="track-meta">4-2 &bull; 150.46</span>
+      </div>
+      <div class="track">
+        <span class="track-num">05</span>
+        <span class="track-name" data-meta=" 4-2 107.74">Kittler on the Roof</span>
+        <span class="track-meta">4-2 &bull; 107.74</span>
+      </div>
+      <div class="track">
+        <span class="track-num">06</span>
+        <span class="track-name" data-meta=" 4-2 109.10">Rasheeing the Scene</span>
+        <span class="track-meta">4-2 &bull; 109.10</span>
+      </div>
+      <div class="track">
+        <span class="track-num">07</span>
+        <span class="track-name" data-meta=" 3-3 140.94">MHJTIME</span>
+        <span class="track-meta">3-3 &bull; 140.94</span>
+      </div>
+      <div class="track">
+        <span class="track-num">08</span>
+        <span class="track-name" data-meta=" 3-3 151.88">Noble FFT</span>
+        <span class="track-meta">3-3 &bull; 151.88</span>
+      </div>
+      <div class="track">
+        <span class="track-num">09</span>
+        <span class="track-name" data-meta=" 2-4 121.30">Ghastly Grayskull Gang</span>
+        <span class="track-meta">2-4 &bull; 121.30</span>
+      </div>
+      <div class="track">
+        <span class="track-num">10</span>
+        <span class="track-name" data-meta=" 1-5 95.26">Chudders Football Team</span>
+        <span class="track-meta">1-5 &bull; 95.26</span>
+      </div>
+      <div class="track">
+        <span class="track-num">11</span>
+        <span class="track-name" data-meta=" 0-6 99.20">Burden of Etienne-y Woody</span>
+        <span class="track-meta">0-6 &bull; 99.20</span>
+      </div>
+      <div class="track">
+        <span class="track-num">12</span>
+        <span class="track-name" data-meta=" 0-6 107.66">Father Time</span>
+        <span class="track-meta">0-6 &bull; 107.66 <span class="track-badge badge-skip">SKIP</span></span>
+      </div>
+    </div>
+
+    <div class="jcard-divider"></div>
+
+    <!-- SIDE B — MATCHUPS -->
+    <div class="section-header side-b-header">
+      <h3>Side B &mdash; Matchup Results</h3>
+      <span class="section-sub">THE BATTLES</span>
+    </div>
+
+    <div class="tracklist">
+      <div class="matchup-track">
+        <span class="track-num" style="color: var(--cyan);">01</span>
+        <div class="matchup-details">
+          <span class="matchup-winner">Noble FFT 151.88</span> def <span class="matchup-loser">Ghastly Grayskull Gang 121.30</span>
+          <div class="matchup-margin">Margin: 30.58</div>
+        </div>
+        <span class="track-meta"><span class="track-badge badge-upset">UPSET</span></span>
+      </div>
+      <div class="matchup-track">
+        <span class="track-num" style="color: var(--magenta);">02</span>
+        <div class="matchup-details">
+          <span class="matchup-winner">MHJTIME 140.94</span> def <span class="matchup-loser">Kittler on the Roof 107.74</span>
+          <div class="matchup-margin">Margin: 33.20 &mdash; Kittler fell from #1</div>
+        </div>
+        <span class="track-meta"><span class="track-badge badge-upset">UPSET</span></span>
+      </div>
+      <div class="matchup-track">
+        <span class="track-num" style="color: var(--yellow);">03</span>
+        <div class="matchup-details">
+          <span class="matchup-winner">Sleeping Giants 129.82</span> def <span class="matchup-loser">Chudders FT 95.26</span>
+          <div class="matchup-margin">Margin: 34.56</div>
+        </div>
+        <span class="track-meta"></span>
+      </div>
+      <div class="matchup-track">
+        <span class="track-num" style="color: var(--orange);">04</span>
+        <div class="matchup-details">
+          <span class="matchup-winner">The Boonist Monks 150.46</span> def <span class="matchup-loser">Rasheeing the Scene 109.10</span>
+          <div class="matchup-margin">Margin: 41.36</div>
+        </div>
+        <span class="track-meta"><span class="track-badge badge-upset">UPSET</span></span>
+      </div>
+      <div class="matchup-track">
+        <span class="track-num" style="color: var(--cyan);">05</span>
+        <div class="matchup-details">
+          <span class="matchup-winner">The Legion of Bouz 165.90</span> def <span class="matchup-loser">Father Time 107.66</span>
+          <div class="matchup-margin">Margin: 58.24 &mdash; Week high score</div>
+        </div>
+        <span class="track-meta"><span class="track-badge badge-hot">WK HIGH</span></span>
+      </div>
+      <div class="matchup-track">
+        <span class="track-num" style="color: var(--magenta);">06</span>
+        <div class="matchup-details">
+          <span class="matchup-winner">General Ken-obi 164.94</span> def <span class="matchup-loser">Burden of Etienne-y Woody 99.20</span>
+          <div class="matchup-margin">Margin: 65.74 &mdash; Biggest blowout</div>
+        </div>
+        <span class="track-meta"><span class="track-badge badge-blowout">BLOWOUT</span></span>
+      </div>
+    </div>
+
+    <div class="jcard-divider"></div>
+
+    <!-- LINER NOTES -->
+    <div class="section-header liner-header">
+      <h3>Liner Notes</h3>
+      <span class="section-sub">THE BREAKDOWN</span>
+    </div>
+
+    <div class="liner-notes">
+      <p>Week 6 went platinum. <span class="liner-highlight">Four of six games were upsets</span> &mdash; the wildest session this league has seen all season. The top of the table got reshuffled like a deck of cards at a spades tournament.</p>
+
+      <p>Big ups to <span class="liner-orange">Bijan Robinson</span> for dropping 32.8 on the league. That's platinum status. Noble FFT rode that performance from 2-3 to 3-3 with a 30-point blowout. Meanwhile, <span class="liner-orange">Kittler on the Roof</span> went from the #1 spot to #5 faster than a one-hit wonder falls off the charts. MHJTIME's Ja'Marr Chase (20.1) and Rico Dowdle (30.9) did the damage &mdash; 140.94 to Kittler's 107.74. That's a diss track and a half.</p>
+
+      <p><span class="liner-cyan">The Legion of Bouz</span> and <span class="liner-cyan">General Ken-obi</span> both dropped ~165-point bangers. Mahomes (30.48) and Skattebo (30.0) lit up Side A while LAR DEF (27.0) and Drake London (26.8) held it down on the B-side. Both 5-1. Both locked in. <span class="liner-highlight">Week 7: they collide.</span> That's the headliner.</p>
+
+      <p>Down in the basement, <span class="liner-orange">Burden</span> and <span class="liner-orange">Father Time</span> are both 0-6 with matching 6-game losing streaks. They play each other next week. The toilet bowl matinee. Somebody's gotta get their first W &mdash; or do they?</p>
+    </div>
+
+    <div class="jcard-divider-thin"></div>
+
+    <!-- SHOUT-OUTS -->
+    <div class="section-header shoutouts-header">
+      <h3>Shout-Outs</h3>
+      <span class="section-sub">THE AWARDS</span>
+    </div>
+
+    <div class="shoutouts">
+      <div class="shoutouts-grid">
+        <div class="shoutout-card">
+          <div class="shoutout-title">Producer of the Week</div>
+          <div class="shoutout-value">Bijan Robinson</div>
+          <div class="shoutout-detail">32.8 pts &bull; Noble FFT &bull; RB, ATL</div>
+        </div>
+        <div class="shoutout-card">
+          <div class="shoutout-title">Wack MC Award</div>
+          <div class="shoutout-value">Chudders FT</div>
+          <div class="shoutout-detail">95.26 pts &bull; Low score of the week</div>
+        </div>
+        <div class="shoutout-card">
+          <div class="shoutout-title">Biggest Diss</div>
+          <div class="shoutout-value">Ken-obi 164.94</div>
+          <div class="shoutout-detail">over Burden 99.20 &bull; +65.74 margin</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="jcard-divider"></div>
+
+    <!-- COMING SOON -->
+    <div class="section-header coming-header">
+      <h3>Coming Soon</h3>
+      <span class="section-sub">NEXT DROP</span>
+    </div>
+
+    <div class="coming-soon">
+      <div class="coming-sub">WK 07 Remix</div>
+      <div class="matchup-tease">The Legion of Bouz <span class="vs-text">VS</span> General Ken-obi</div>
+      <div class="coming-tagline">#1 vs #2 &mdash; Both 5-1 &mdash; THE HEADLINER</div>
+    </div>
+
+  </div><!-- .jcard -->
+
+  <div class="footer">
+    <div class="footer-brand">JYD RECORDS</div>
+    Jailyard Dynasty Power Rankings &bull; Season 2025 &bull; Week 6 &bull; v10-mixtape
+  </div>
+
+</div><!-- .main-container -->
+
+</body>
+</html>

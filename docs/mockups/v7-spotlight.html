@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>THE SPOTLIGHT | Week 9 | The Jailyard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --warm-white: #e8e4de;
+    --gold: #c9a84c;
+    --gold-dim: rgba(201, 168, 76, 0.12);
+    --bg: #000000;
+    --muted: #6b6560;
+    --faint: rgba(232, 228, 222, 0.04);
+    --spotlight-radius: 250px;
+    --spotlight-feather: 80px;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --spotlight-radius: 150px;
+      --spotlight-feather: 50px;
+    }
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--warm-white);
+    font-family: 'Newsreader', Georgia, serif;
+    overflow-x: hidden;
+    cursor: none;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* ─── THE SPOTLIGHT OVERLAY ─────────────────────────────────── */
+  #spotlight-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    pointer-events: none;
+    background: var(--bg);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-mask-image: radial-gradient(circle 0px at 50% 50%, transparent 0%, black 0%);
+    mask-image: radial-gradient(circle 0px at 50% 50%, transparent 0%, black 0%);
+    -webkit-mask-composite: source-over;
+    mask-composite: add;
+  }
+
+  #spotlight-overlay.revealed {
+    opacity: 0;
+  }
+
+  /* Custom cursor dot */
+  #cursor-dot {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    pointer-events: none;
+    z-index: 10001;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px var(--gold), 0 0 4px var(--gold);
+    transition: opacity 0.3s;
+  }
+
+  #cursor-dot.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    #cursor-dot { display: none; }
+  }
+
+  /* ─── THE CONTENT FIELD ─────────────────────────────────────── */
+  #content-field {
+    position: relative;
+    width: 100vw;
+    min-height: 300vh;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    #content-field { min-height: 380vh; }
+  }
+
+  /* ─── DISCOVERABLE ELEMENTS ─────────────────────────────────── */
+  .discoverable {
+    position: absolute;
+    transition: text-shadow 0.6s ease, opacity 0.3s;
+  }
+
+  /* ─── WEEK HEADER ───────────────────────────────────────────── */
+  .week-header {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: clamp(5rem, 12vw, 10rem);
+    letter-spacing: -0.03em;
+    color: var(--warm-white);
+    text-transform: uppercase;
+    line-height: 0.9;
+    opacity: 0.9;
+  }
+
+  .week-header .week-num {
+    display: block;
+    font-size: 1.8em;
+    background: linear-gradient(135deg, var(--gold), #e8d5a0, var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 40px rgba(201, 168, 76, 0.3));
+  }
+
+  /* ─── ESSAY ─────────────────────────────────────────────────── */
+  .essay-block {
+    max-width: 600px;
+    font-size: clamp(1rem, 2.2vw, 1.2rem);
+    line-height: 1.75;
+    color: var(--warm-white);
+  }
+
+  .essay-block .dropcap::first-letter {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 3.6em;
+    float: left;
+    line-height: 0.8;
+    margin-right: 0.08em;
+    margin-top: 0.05em;
+    color: var(--gold);
+  }
+
+  .essay-block p { margin-bottom: 1.2em; }
+
+  /* ─── TEAM CARDS ────────────────────────────────────────────── */
+  .team-card {
+    width: clamp(180px, 22vw, 260px);
+    padding: 1.2rem;
+    border: 1px solid rgba(232, 228, 222, 0.08);
+    border-radius: 12px;
+    background: rgba(232, 228, 222, 0.02);
+  }
+
+  .team-card .rank-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 2.2rem;
+    line-height: 1;
+    margin-bottom: 0.2rem;
+  }
+
+  .team-card .team-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.15rem;
+  }
+
+  .team-card .record {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+
+  .team-card .points {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .team-card .blurb {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: rgba(232, 228, 222, 0.7);
+  }
+
+  .team-card .movement {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    margin-top: 0.4rem;
+  }
+
+  .movement.up { color: #4ade80; }
+  .movement.down { color: #f87171; }
+  .movement.steady { color: var(--muted); }
+
+  /* ─── STAT BLOCKS ───────────────────────────────────────────── */
+  .stat-block {
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .stat-block .stat-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-block .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  /* ─── CHAT QUOTES (EASTER EGGS) ─────────────────────────────── */
+  .chat-quote {
+    max-width: 320px;
+    padding: 1rem 1.2rem;
+    border-left: 3px solid var(--gold);
+    background: rgba(201, 168, 76, 0.04);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: rgba(232, 228, 222, 0.8);
+  }
+
+  .chat-quote .chat-author {
+    display: block;
+    margin-top: 0.5rem;
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── MATCHUP RESULT ────────────────────────────────────────── */
+  .matchup-result {
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(232, 228, 222, 0.06);
+    border-radius: 8px;
+    background: rgba(232, 228, 222, 0.02);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    max-width: 280px;
+  }
+
+  .matchup-result .winner {
+    color: #4ade80;
+    font-weight: 600;
+  }
+
+  .matchup-result .loser {
+    color: rgba(232, 228, 222, 0.45);
+  }
+
+  .matchup-result .margin {
+    color: var(--gold);
+    font-size: 0.7rem;
+  }
+
+  /* ─── SECTION LABELS ────────────────────────────────────────── */
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid rgba(232, 228, 222, 0.08);
+    margin-bottom: 0.8rem;
+  }
+
+  /* ─── AWARDS BLOCK ──────────────────────────────────────────── */
+  .award-block {
+    max-width: 240px;
+  }
+
+  .award-block .award-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+  }
+
+  .award-block .award-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--warm-white);
+    line-height: 1.5;
+  }
+
+  .award-block .award-detail {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+  }
+
+  /* ─── DISCOVERY GLOW EFFECT ─────────────────────────────────── */
+  @keyframes discover-pulse {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.6); }
+    100% { filter: brightness(1); }
+  }
+
+  .discoverable.just-found {
+    animation: discover-pulse 0.8s ease-out;
+  }
+
+  /* Golden egg flash */
+  @keyframes gold-flash {
+    0% { box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.6); }
+    50% { box-shadow: 0 0 40px 10px rgba(201, 168, 76, 0.3); }
+    100% { box-shadow: 0 0 0 0 rgba(201, 168, 76, 0); }
+  }
+
+  .golden-egg.just-found {
+    animation: gold-flash 1.2s ease-out;
+  }
+
+  /* ─── ALL FOUND MESSAGE ─────────────────────────────────────── */
+  #all-found-msg {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    opacity: 0;
+    transition: opacity 0.6s, transform 0.6s;
+    z-index: 10000;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #all-found-msg.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ─── CONTROLS HUD ──────────────────────────────────────────── */
+  #controls-hud {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 10000;
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .hud-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(232, 228, 222, 0.15);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .hud-btn:hover {
+    color: var(--warm-white);
+    border-color: rgba(232, 228, 222, 0.3);
+  }
+
+  .hud-btn .key {
+    display: inline-block;
+    padding: 0.1rem 0.35rem;
+    border: 1px solid rgba(232, 228, 222, 0.2);
+    border-radius: 4px;
+    font-size: 0.65rem;
+    margin-left: 0.4rem;
+    background: rgba(232, 228, 222, 0.05);
+  }
+
+  /* ─── DISCOVERY COUNTER ─────────────────────────────────────── */
+  #discovery-counter {
+    position: fixed;
+    top: 1.5rem;
+    left: 1.5rem;
+    z-index: 10000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(232, 228, 222, 0.08);
+    transition: color 0.3s;
+  }
+
+  #discovery-counter.complete {
+    color: var(--gold);
+    border-color: rgba(201, 168, 76, 0.3);
+  }
+
+  /* ─── LIGHTS ON STATE ───────────────────────────────────────── */
+  body.lights-on { cursor: default; }
+  body.lights-on #cursor-dot { display: none; }
+
+  body.lights-on .discoverable {
+    text-shadow: none !important;
+  }
+
+  /* ─── INTRO PROMPT ──────────────────────────────────────────── */
+  #intro-prompt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10002;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    transition: opacity 1s ease;
+    cursor: default;
+  }
+
+  #intro-prompt.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #intro-prompt h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 6vw, 4rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--warm-white);
+    margin-bottom: 0.5rem;
+  }
+
+  #intro-prompt .subtitle {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: clamp(0.9rem, 2vw, 1.15rem);
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    text-align: center;
+    padding: 0 1rem;
+  }
+
+  #intro-prompt .enter-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    padding: 0.8rem 2rem;
+    border: 1px solid var(--gold);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  #intro-prompt .enter-btn:hover {
+    background: var(--gold);
+    color: var(--bg);
+  }
+
+  #intro-prompt .hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(107, 101, 96, 0.6);
+    margin-top: 1.5rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── RESPONSIVE ADJUSTMENTS ────────────────────────────────── */
+  @media (max-width: 768px) {
+    .team-card {
+      width: clamp(150px, 45vw, 200px);
+      padding: 0.8rem;
+    }
+
+    .team-card .rank-badge { font-size: 1.6rem; }
+    .team-card .team-name { font-size: 0.9rem; }
+    .team-card .blurb { font-size: 0.78rem; }
+
+    .essay-block { max-width: 85vw; font-size: 0.95rem; }
+    .chat-quote { max-width: 80vw; }
+    .matchup-result { max-width: 80vw; }
+
+    #controls-hud { top: auto; bottom: 1rem; right: 1rem; }
+    #discovery-counter { top: auto; bottom: 1rem; left: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- INTRO SCREEN -->
+<div id="intro-prompt">
+  <h1>The Spotlight</h1>
+  <div class="subtitle">Week 9 | The Jailyard Dynasty League</div>
+  <button class="enter-btn" id="enter-btn">Enter the Dark</button>
+  <div class="hint">Move your cursor to explore. Find all 12 teams.</div>
+</div>
+
+<!-- CURSOR DOT -->
+<div id="cursor-dot" class="hidden"></div>
+
+<!-- SPOTLIGHT OVERLAY -->
+<div id="spotlight-overlay"></div>
+
+<!-- CONTROLS -->
+<div id="controls-hud" style="opacity:0;">
+  <button class="hud-btn" id="lights-btn">Lights <span class="key">L</span></button>
+  <button class="hud-btn" id="resize-btn">Wider <span class="key">+</span></button>
+</div>
+
+<!-- DISCOVERY COUNTER -->
+<div id="discovery-counter" style="opacity:0;">
+  <span id="found-count">0</span> / 12 teams
+</div>
+
+<!-- ALL FOUND MESSAGE -->
+<div id="all-found-msg">All teams located.</div>
+
+<!-- CONTENT FIELD (populated by JS) -->
+<div id="content-field"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ─── WEEK 9 DATA (all from Sleeper API / week9_data.json) ──
+  var TEAMS = [
+    { rank: 1, name: 'General Ken-obi', owner: 'bLaker24', record: '7-2', pts: 154.86, pf: 1348.0, elo: 1700, streak: 'W2', move: 'up', moveN: 1, color: '#5b9cf6', blurb: 'Drake London dropped 34 points and you dismantled Kittler by 62. The throne is officially yours again.' },
+    { rank: 2, name: 'MHJTIME', owner: 'rango_', record: '6-3', pts: 144.48, pf: 1411.5, elo: 1586, streak: 'W5', move: 'up', moveN: 1, color: '#f97316', blurb: 'Five straight wins and the highest total PF in the league. Rico Dowdle went nuclear. This is a team nobody wants to play right now.' },
+    { rank: 3, name: 'Rasheeing the Scene', owner: 'ToreroGaucho', record: '7-2', pts: 146.92, pf: 1278.8, elo: 1626, streak: 'W3', move: 'up', moveN: 1, color: '#ef4444', blurb: 'You beat the Legion. Josh Allen did Josh Allen things. Three straight wins and climbing.' },
+    { rank: 4, name: 'Sleeping Giants', owner: 'zbcowan', record: '7-2', pts: 136.80, pf: 1280.2, elo: 1561, streak: 'W1', move: 'up', moveN: 1, color: '#a78bfa', blurb: 'Won by 2.04 in a nail-biter against Grayskull. Darnold and Jacobs carried. Your 11-game win streak is league lore.' },
+    { rank: 5, name: 'The Legion of Bouz', owner: 'KidBouzie', record: '6-3', pts: 135.20, pf: 1369.4, elo: 1604, streak: 'L2', move: 'down', moveN: 4, color: '#22d3ee', blurb: 'From first to fifth. Two straight losses and the chat has gone silent. McCaffrey put up 31 and it was not enough.' },
+    { rank: 6, name: 'The Boonist Monks', owner: 'GauchoTrain', record: '5-4', pts: 130.36, pf: 1345.0, elo: 1600, streak: 'L1', move: 'steady', moveN: 0, color: '#4ade80', blurb: 'Lamar and JSN showed up but MHJTIME had the firepower. 46 messages in the chat this week. Loudest team in the league.' },
+    { rank: 7, name: 'Noble FFT', owner: 'kevobucks', record: '5-4', pts: 134.30, pf: 1239.0, elo: 1455, streak: 'L1', move: 'steady', moveN: 0, color: '#fbbf24', blurb: 'Caleb Williams threw for 37 points and you still lost by 2. The margins are razor-thin in the middle of this league.' },
+    { rank: 8, name: 'Kittler on the Roof', owner: 'bchodos', record: '4-5', pts: 92.38, pf: 1202.7, elo: 1488, streak: 'L4', move: 'steady', moveN: 0, color: '#fb7185', blurb: '92 points. Four straight losses. Radio silence in the chat. The defending champ is in freefall.' },
+    { rank: 9, name: 'Ghastly Grayskull Gang', owner: 'GrayskullXX', record: '2-7', pts: 134.76, pf: 1180.8, elo: 1325, streak: 'L5', move: 'steady', moveN: 0, color: '#c084fc', blurb: 'Brock Bowers went for 37 and you STILL lost by 2. Five straight Ls. The fortress is crumbling.' },
+    { rank: 10, name: 'Burden of Etienne-y Woody', owner: 'kharlow', record: '2-7', pts: 136.44, pf: 1115.9, elo: 1324, streak: 'W1', move: 'up', moveN: 1, color: '#34d399', blurb: 'A win! Jaxson Dart and Monangai showed what the future looks like. The kids are helping.' },
+    { rank: 11, name: 'Father Time', owner: 'Redrumsregrub', record: '2-7', pts: 137.52, pf: 1111.9, elo: 1330, streak: 'W2', move: 'down', moveN: 1, color: '#94a3b8', blurb: 'Two straight wins from the basement. Davante Adams and the Ravens D carried. Contenders should worry.' },
+    { rank: 12, name: 'Chudders Football Team', owner: 'Chudders', record: '1-8', pts: 120.90, pf: 1080.8, elo: 1402, streak: 'L4', move: 'steady', moveN: 0, color: '#64748b', blurb: 'Herbert threw for 28 and it did not matter. 1-8. Jeanty and Gibbs are the light at the end of a very long tunnel.' }
+  ];
+
+  var MATCHUPS = [
+    { w: 'Sleeping Giants', wPts: 136.80, l: 'Ghastly Grayskull Gang', lPts: 134.76, margin: 2.04 },
+    { w: 'Burden of Etienne-y Woody', wPts: 136.44, l: 'Noble FFT', lPts: 134.30, margin: 2.14 },
+    { w: 'Rasheeing the Scene', wPts: 146.92, l: 'The Legion of Bouz', lPts: 135.20, margin: 11.72 },
+    { w: 'MHJTIME', wPts: 144.48, l: 'The Boonist Monks', lPts: 130.36, margin: 14.12 },
+    { w: 'Father Time', wPts: 137.52, l: 'Chudders Football Team', lPts: 120.90, margin: 16.62 },
+    { w: 'General Ken-obi', wPts: 154.86, l: 'Kittler on the Roof', lPts: 92.38, margin: 62.48 }
+  ];
+
+  var CHAT_QUOTES = [
+    { text: '"I\'m gearing up dog don\'t need picks"', author: 'Brent Boone', context: 'The Boonist Monks', golden: false },
+    { text: '"I think you saw my move and panicked."', author: 'Sacko', context: 'on Boone\'s trades', golden: false },
+    { text: '"I don\'t panic nate"', author: 'Brent Boone', context: 'narrator: he panicked', golden: false },
+    { text: '"Idk why Zach would trade a starting rb for a 4th but ok"', author: 'Brent Boone', context: 'trade analysis', golden: false },
+    { text: '"Finally, a good rule change suggestion"', author: 'Kevin Noble', context: 'IR slot debate', golden: false },
+    { text: '"Our roster sizes are already huge"', author: 'Brent Boone', context: 'blocking the expansion', golden: true }
+  ];
+
+  var AWARDS = [
+    { title: 'High Scorer', value: 'General Ken-obi', detail: '154.86 pts' },
+    { title: 'Low Scorer', value: 'Kittler on the Roof', detail: '92.38 pts' },
+    { title: 'Closest Game', value: 'Giants vs Grayskull', detail: '2.04 margin' },
+    { title: 'Biggest Blowout', value: 'Ken-obi over Kittler', detail: '62.48 margin' },
+    { title: 'Top Performer', value: 'Caleb Williams (QB)', detail: '37.7 pts for Noble FFT' }
+  ];
+
+  var ESSAY = [
+    'The Legion of Bouz entered Week 9 sitting atop the mountain. Six wins, two losses, the chat whispering about a dynasty repeat. Then Rasheeing the Scene walked in, and Josh Allen did what Josh Allen does \u2014 28.82 points of absolute violence. The Legion fell 146-135, and just like that, two straight losses. The king is bruised.',
+    'Meanwhile, General Ken-obi put on a clinic. Drake London \u2014 34.3 points. Sam LaPorta \u2014 18.7. The Kittler on the Roof matchup was not a game; it was an autopsy. A 62-point margin that made the defending champion look like a team that forgot to set its lineup. Kittler scored 92 points. Ninety-two. In a league averaging 138 per week.',
+    'But the real story? MHJTIME. Five consecutive wins. The highest point total in the entire league at 1,411. Rico Dowdle dropped 27 points against the Monks and nobody in the chat even blinked \u2014 that is how routine dominance has become for this squad. Marvin Harrison, Ja\'Marr Chase, Daniel Jones having a renaissance. This team is a freight train.',
+    'Three teams sit at 7-2. Three more at 6-3 or 5-4. The middle of this league is a knife fight in a phone booth, and the margins are absurd \u2014 Sleeping Giants won by 2.04, Burden won by 2.14. One missed tackle, one dropped pass, and the entire standings flip.',
+    'Down in the cellar, Chudders sits at 1-8 with Herbert throwing 28-point games into the void. Father Time has won two straight from the basement. And Burden of Etienne-y Woody finally got a win behind Jaxson Dart\'s 27-point coming-out party. The bottom of the league is not dead \u2014 it is just waiting.'
+  ];
+
+  // ─── DOM HELPERS (safe, no innerHTML for untrusted data) ──
+  function createEl(tag, cls, text) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (text) el.textContent = text;
+    return el;
+  }
+
+  function appendText(parent, tag, cls, text) {
+    var el = createEl(tag, cls, text);
+    parent.appendChild(el);
+    return el;
+  }
+
+  // ─── LAYOUT ENGINE ──────────────────────────────────────────
+  var field = document.getElementById('content-field');
+  var isMobile = window.innerWidth <= 768;
+  var W = window.innerWidth;
+  var allDiscoverables = [];
+  var teamElements = [];
+  var foundTeams = new Set();
+  var goldenFound = false;
+  var lightsOn = false;
+
+  function vw(pct) { return W * (pct / 100); }
+
+  function placeElement(el, x, y, type) {
+    el.classList.add('discoverable');
+    if (type) el.dataset.type = type;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    field.appendChild(el);
+    allDiscoverables.push(el);
+    return el;
+  }
+
+  function buildTeamCard(team) {
+    var card = createEl('div', 'team-card');
+    card.dataset.teamIndex = team.rank;
+    card.dataset.teamName = team.name;
+    card.style.setProperty('--team-color', team.color);
+
+    var badge = appendText(card, 'div', 'rank-badge', '#' + team.rank);
+    badge.style.color = team.color;
+    appendText(card, 'div', 'team-name', team.name);
+    appendText(card, 'div', 'record', team.record + ' | ' + team.streak);
+    appendText(card, 'div', 'points', 'Week: ' + team.pts.toFixed(1) + ' | Elo: ' + team.elo);
+    appendText(card, 'div', 'blurb', team.blurb);
+
+    var moveClass = team.move === 'up' ? 'up' : team.move === 'down' ? 'down' : 'steady';
+    var moveText = team.move === 'up' ? ('\u2191' + team.moveN) : team.move === 'down' ? ('\u2193' + team.moveN) : '\u2014';
+    appendText(card, 'div', 'movement ' + moveClass, moveText);
+
+    return card;
+  }
+
+  function buildMatchupCard(m) {
+    var el = createEl('div', 'matchup-result');
+    appendText(el, 'div', 'winner', m.w + ' ' + m.wPts.toFixed(1));
+    appendText(el, 'div', 'loser', m.l + ' ' + m.lPts.toFixed(1));
+    appendText(el, 'div', 'margin', 'margin: ' + m.margin.toFixed(2));
+    return el;
+  }
+
+  function buildChatQuote(q) {
+    var el = createEl('div', 'chat-quote' + (q.golden ? ' golden-egg' : ''));
+    if (q.golden) el.dataset.golden = 'true';
+    el.appendChild(document.createTextNode(q.text));
+    var author = appendText(el, 'span', 'chat-author', '\u2014 ' + q.author + ' (' + q.context + ')');
+    return el;
+  }
+
+  function buildLayout() {
+    field.textContent = '';
+    allDiscoverables = [];
+    teamElements = [];
+    W = window.innerWidth;
+    isMobile = W <= 768;
+
+    var baseY = isMobile ? 80 : 120;
+    var essayX = isMobile ? vw(5) : vw(20);
+
+    // ── WEEK 9 HEADER ──
+    var weekH = createEl('div', 'week-header');
+    appendText(weekH, 'span', '', 'Week');
+    appendText(weekH, 'span', 'week-num', '9');
+    placeElement(weekH, isMobile ? vw(15) : vw(38), baseY, 'header');
+
+    // ── SECTION LABEL: THE COLUMN ──
+    var essayLabel = createEl('div', 'section-label', 'THE COLUMN');
+    essayLabel.style.width = isMobile ? '85vw' : '600px';
+    var essayStartY = baseY + (isMobile ? 220 : 300);
+    placeElement(essayLabel, essayX, essayStartY, 'label');
+
+    // ── ESSAY PARAGRAPHS ──
+    var curY = essayStartY + 40;
+    ESSAY.forEach(function(text, i) {
+      var block = createEl('div', 'essay-block');
+      var p = createEl('p', i === 0 ? 'dropcap' : '', text);
+      block.appendChild(p);
+      placeElement(block, essayX, curY, 'essay');
+      curY += isMobile ? 240 : 200;
+    });
+
+    // ── POWER RANKINGS (SCATTERED) ──
+    var rankStartY = curY + (isMobile ? 60 : 100);
+    var rankLabel = createEl('div', 'section-label', 'POWER RANKINGS');
+    rankLabel.style.width = isMobile ? '85vw' : '260px';
+    placeElement(rankLabel, isMobile ? vw(5) : vw(5), rankStartY - 40, 'label');
+
+    var positions;
+    if (isMobile) {
+      positions = [
+        { x: vw(3), y: 0 },    { x: vw(50), y: 0 },
+        { x: vw(3), y: 260 },  { x: vw(50), y: 260 },
+        { x: vw(3), y: 520 },  { x: vw(50), y: 520 },
+        { x: vw(3), y: 780 },  { x: vw(50), y: 780 },
+        { x: vw(3), y: 1040 }, { x: vw(50), y: 1040 },
+        { x: vw(3), y: 1300 }, { x: vw(50), y: 1300 }
+      ];
+    } else {
+      positions = [
+        { x: vw(5), y: 0 },     { x: vw(38), y: 30 },   { x: vw(70), y: 10 },
+        { x: vw(18), y: 320 },  { x: vw(55), y: 290 },  { x: vw(3), y: 600 },
+        { x: vw(40), y: 580 },  { x: vw(72), y: 620 },  { x: vw(10), y: 900 },
+        { x: vw(48), y: 880 },  { x: vw(25), y: 1160 }, { x: vw(65), y: 1140 }
+      ];
+    }
+
+    TEAMS.forEach(function(team, i) {
+      var card = buildTeamCard(team);
+      var pos = positions[i];
+      var el = placeElement(card, pos.x, rankStartY + pos.y, 'team');
+      teamElements.push(el);
+    });
+
+    // ── MATCHUP RESULTS ──
+    var matchupY = rankStartY + (isMobile ? 1560 : 200);
+    var matchupX = isMobile ? vw(5) : vw(75);
+
+    var matchLabel = createEl('div', 'section-label', 'RESULTS');
+    matchLabel.style.width = '240px';
+    placeElement(matchLabel, matchupX, matchupY - 40, 'label');
+
+    MATCHUPS.forEach(function(m, i) {
+      var el = buildMatchupCard(m);
+      placeElement(el, matchupX, matchupY + i * (isMobile ? 110 : 120), 'matchup');
+    });
+
+    // ── STAT BLOCKS ──
+    var statY = isMobile ? matchupY + 720 : rankStartY + 1000;
+    var stats = [
+      { val: '1,411', label: 'MHJTIME Total PF (League High)' },
+      { val: '62.5', label: 'Biggest Blowout Margin' },
+      { val: '2.04', label: 'Closest Game Margin' },
+      { val: '37.7', label: 'Caleb Williams (Top Performer)' }
+    ];
+    var statPositions = isMobile
+      ? [{ x: vw(5), y: 0 }, { x: vw(50), y: 0 }, { x: vw(5), y: 140 }, { x: vw(50), y: 140 }]
+      : [{ x: vw(5), y: 0 }, { x: vw(28), y: 40 }, { x: vw(52), y: 10 }, { x: vw(75), y: 50 }];
+
+    stats.forEach(function(s, i) {
+      var el = createEl('div', 'stat-block');
+      appendText(el, 'div', 'stat-value', s.val);
+      appendText(el, 'div', 'stat-label', s.label);
+      placeElement(el, statPositions[i].x, statY + statPositions[i].y, 'stat');
+    });
+
+    // ── AWARDS ──
+    var awardY = statY + (isMobile ? 320 : 250);
+    var awardLabel = createEl('div', 'section-label', 'WEEKLY AWARDS');
+    awardLabel.style.width = '240px';
+    placeElement(awardLabel, isMobile ? vw(5) : vw(8), awardY - 40, 'label');
+
+    AWARDS.forEach(function(a, i) {
+      var el = createEl('div', 'award-block');
+      appendText(el, 'div', 'award-title', a.title);
+      appendText(el, 'div', 'award-value', a.value);
+      appendText(el, 'div', 'award-detail', a.detail);
+      var ax = isMobile ? vw(5) : vw(8 + (i % 3) * 30);
+      var ay = awardY + Math.floor(i / (isMobile ? 1 : 3)) * (isMobile ? 100 : 110);
+      placeElement(el, ax, ay, 'award');
+    });
+
+    // ── CHAT QUOTES (EASTER EGGS) ──
+    var chatPositions = isMobile
+      ? [
+          { x: vw(8), y: baseY + 160 },
+          { x: vw(10), y: essayStartY + 940 },
+          { x: vw(5), y: rankStartY + 450 },
+          { x: vw(8), y: statY - 100 },
+          { x: vw(5), y: awardY + 350 },
+          { x: vw(10), y: awardY + 520 }
+        ]
+      : [
+          { x: vw(72), y: baseY + 80 },
+          { x: vw(2), y: essayStartY + 600 },
+          { x: vw(75), y: rankStartY + 700 },
+          { x: vw(2), y: statY + 150 },
+          { x: vw(60), y: awardY + 80 },
+          { x: vw(85), y: rankStartY + 1300 }
+        ];
+
+    CHAT_QUOTES.forEach(function(q, i) {
+      var el = buildChatQuote(q);
+      placeElement(el, chatPositions[i].x, chatPositions[i].y, 'chat');
+    });
+
+    // Set total field height
+    var maxBottom = 0;
+    allDiscoverables.forEach(function(el) {
+      var bot = el.offsetTop + el.offsetHeight;
+      if (bot > maxBottom) maxBottom = bot;
+    });
+    field.style.height = (maxBottom + 200) + 'px';
+  }
+
+  // ─── SPOTLIGHT ENGINE ──────────────────────────────────────
+  var overlay = document.getElementById('spotlight-overlay');
+  var cursorDot = document.getElementById('cursor-dot');
+  var mouseX = W / 2, mouseY = window.innerHeight / 2;
+  var spotlightActive = false;
+
+  function updateSpotlight(x, y) {
+    if (!spotlightActive || lightsOn) return;
+    mouseX = x;
+    mouseY = y;
+
+    var r = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spotlight-radius'));
+    var f = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spotlight-feather'));
+    var inner = r;
+    var outer = r + f;
+
+    // Overlay is position:fixed, so mask coordinates are viewport-relative (no scrollY needed)
+    var maskVal = 'radial-gradient(circle ' + inner + 'px at ' + x + 'px ' + y + 'px, transparent ' + inner + 'px, rgba(0,0,0,0.4) ' + (inner + Math.round(f * 0.3)) + 'px, black ' + outer + 'px)';
+    overlay.style.maskImage = maskVal;
+    overlay.style.webkitMaskImage = maskVal;
+
+    // Update cursor dot
+    cursorDot.style.left = x + 'px';
+    cursorDot.style.top = y + 'px';
+
+    // Check for discoverable elements under the spotlight (viewport coordinates)
+    checkDiscoveries(x, y, r);
+  }
+
+  // ─── DISCOVERY DETECTION ────────────────────────────────────
+  // sx, sy are viewport coordinates (same as mouse clientX/clientY)
+  function checkDiscoveries(sx, sy, radius) {
+    for (var i = 0; i < allDiscoverables.length; i++) {
+      var el = allDiscoverables[i];
+      var rect = el.getBoundingClientRect();
+      // getBoundingClientRect returns viewport coordinates, matching our sx/sy
+      var elCx = rect.left + rect.width / 2;
+      var elCy = rect.top + rect.height / 2;
+      var dist = Math.sqrt((sx - elCx) * (sx - elCx) + (sy - elCy) * (sy - elCy));
+      var hitRadius = radius + Math.max(rect.width, rect.height) / 2;
+
+      if (dist < hitRadius) {
+        if (el.dataset.type === 'team' && !el.classList.contains('found')) {
+          el.classList.add('found', 'just-found');
+          var teamColor = el.style.getPropertyValue('--team-color') || '#c9a84c';
+          el.style.textShadow = '0 0 20px ' + teamColor + '33, 0 0 6px ' + teamColor + '1a';
+          foundTeams.add(el.dataset.teamName);
+          updateCounter();
+          (function(elem) {
+            setTimeout(function() { elem.classList.remove('just-found'); }, 800);
+          })(el);
+        }
+
+        if (el.dataset.type === 'chat' && !el.classList.contains('found')) {
+          el.classList.add('found', 'just-found');
+          el.style.textShadow = '0 0 12px rgba(201, 168, 76, 0.15)';
+          var dur = (el.dataset.golden === 'true' && !goldenFound) ? 1200 : 800;
+          if (el.dataset.golden === 'true') goldenFound = true;
+          (function(elem, d) {
+            setTimeout(function() { elem.classList.remove('just-found'); }, d);
+          })(el, dur);
+        }
+      }
+    }
+  }
+
+  function updateCounter() {
+    document.getElementById('found-count').textContent = foundTeams.size;
+
+    if (foundTeams.size === 12) {
+      document.getElementById('discovery-counter').classList.add('complete');
+      var msg = document.getElementById('all-found-msg');
+      msg.classList.add('visible');
+      setTimeout(function() { msg.classList.remove('visible'); }, 4000);
+    }
+  }
+
+  // ─── EVENT HANDLERS ─────────────────────────────────────────
+  document.addEventListener('mousemove', function(e) {
+    updateSpotlight(e.clientX, e.clientY);
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e) {
+    if (e.touches.length > 0) {
+      updateSpotlight(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 0) {
+      updateSpotlight(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
+
+  window.addEventListener('scroll', function() {
+    updateSpotlight(mouseX, mouseY);
+  }, { passive: true });
+
+  // ─── LIGHTS TOGGLE ──────────────────────────────────────────
+  function toggleLights() {
+    lightsOn = !lightsOn;
+    var btn = document.getElementById('lights-btn');
+    if (lightsOn) {
+      overlay.classList.add('revealed');
+      document.body.classList.add('lights-on');
+      btn.textContent = '';
+      btn.appendChild(document.createTextNode('Dark '));
+      var keySpan = createEl('span', 'key', 'L');
+      btn.appendChild(keySpan);
+      // Mark all teams as found
+      for (var i = 0; i < teamElements.length; i++) {
+        if (!teamElements[i].classList.contains('found')) {
+          teamElements[i].classList.add('found');
+          foundTeams.add(teamElements[i].dataset.teamName);
+        }
+      }
+      updateCounter();
+    } else {
+      overlay.classList.remove('revealed');
+      document.body.classList.remove('lights-on');
+      btn.textContent = '';
+      btn.appendChild(document.createTextNode('Lights '));
+      var keySpan2 = createEl('span', 'key', 'L');
+      btn.appendChild(keySpan2);
+      updateSpotlight(mouseX, mouseY);
+    }
+  }
+
+  document.getElementById('lights-btn').addEventListener('click', toggleLights);
+
+  // Resize spotlight
+  var sizeSteps = [250, 350, 450, 200];
+  var sizeStepsMobile = [150, 220, 300, 120];
+  var currentSizeStep = 0;
+
+  function cycleSize() {
+    currentSizeStep = (currentSizeStep + 1) % sizeSteps.length;
+    var steps = isMobile ? sizeStepsMobile : sizeSteps;
+    document.documentElement.style.setProperty('--spotlight-radius', steps[currentSizeStep] + 'px');
+    var feather = Math.round(steps[currentSizeStep] * 0.32);
+    document.documentElement.style.setProperty('--spotlight-feather', feather + 'px');
+    updateSpotlight(mouseX, mouseY);
+  }
+
+  document.getElementById('resize-btn').addEventListener('click', cycleSize);
+
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'l' || e.key === 'L') toggleLights();
+    if (e.key === '+' || e.key === '=') cycleSize();
+  });
+
+  // ─── INTRO FLOW ─────────────────────────────────────────────
+  var intro = document.getElementById('intro-prompt');
+
+  function startExperience() {
+    intro.classList.add('fade-out');
+    setTimeout(function() {
+      intro.style.display = 'none';
+      spotlightActive = true;
+      cursorDot.classList.remove('hidden');
+
+      // Fade in HUD
+      var hud = document.getElementById('controls-hud');
+      hud.style.transition = 'opacity 0.6s';
+      hud.style.opacity = '1';
+      var counter = document.getElementById('discovery-counter');
+      counter.style.transition = 'opacity 0.6s';
+      counter.style.opacity = '1';
+
+      // Initialize spotlight at center
+      updateSpotlight(W / 2, window.innerHeight / 2);
+    }, 1000);
+  }
+
+  document.getElementById('enter-btn').addEventListener('click', startExperience);
+
+  document.addEventListener('keydown', function handler(e) {
+    if (e.key === 'Enter' && intro.style.display !== 'none') {
+      startExperience();
+      document.removeEventListener('keydown', handler);
+    }
+  });
+
+  // ─── BUILD ON LOAD ──────────────────────────────────────────
+  buildLayout();
+
+  // Rebuild on resize (debounced)
+  var resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      var prevFound = new Set(foundTeams);
+      buildLayout();
+      for (var i = 0; i < teamElements.length; i++) {
+        if (prevFound.has(teamElements[i].dataset.teamName)) {
+          teamElements[i].classList.add('found');
+          foundTeams.add(teamElements[i].dataset.teamName);
+          var tc = teamElements[i].style.getPropertyValue('--team-color') || '#c9a84c';
+          teamElements[i].style.textShadow = '0 0 20px ' + tc + '33, 0 0 6px ' + tc + '1a';
+        }
+      }
+      updateCounter();
+      if (spotlightActive) updateSpotlight(mouseX, mouseY);
+    }, 250);
+  });
+
+})();
+</script>
+</body>
+</html>

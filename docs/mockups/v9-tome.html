@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter VI — Of The Great Upsets | The Jailyard Chronicle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=IM+Fell+English+SC&family=Cinzel:wght@500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --parchment:#f5ecd1;
+  --parchment-deep:#ead8a8;
+  --parchment-shadow:#d8c58c;
+  --ink:#3e2a14;
+  --ink-soft:#5a3f22;
+  --rubric:#8b2c23;
+  --rubric-deep:#6a1f19;
+  --gold1:#e8c260;
+  --gold2:#d4a535;
+  --gold-deep:#a87a1c;
+  --forest:#1f3a24;
+  --forest-soft:#355a3b;
+  --border-deep:#4a3216;
+  --accent:#8b2c23;
+  --accent2:#d4a535;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Lora','Crimson Pro',Georgia,serif;
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(168,122,28,0.15), transparent 60%),
+    radial-gradient(ellipse at 80% 90%, rgba(139,44,35,0.08), transparent 60%),
+    linear-gradient(180deg, #ead8a8 0%, #f5ecd1 20%, #f5ecd1 80%, #e3d09a 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  padding:40px 20px 80px;
+  font-size:17px;
+  line-height:1.55;
+}
+/* subtle parchment texture via layered gradients, no images */
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  pointer-events:none;
+  background-image:
+    radial-gradient(circle at 13% 22%, rgba(62,42,20,0.05) 0 1px, transparent 2px),
+    radial-gradient(circle at 47% 61%, rgba(62,42,20,0.04) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 34%, rgba(62,42,20,0.05) 0 1px, transparent 2px),
+    radial-gradient(circle at 30% 82%, rgba(168,122,28,0.05) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 72%, rgba(62,42,20,0.04) 0 1px, transparent 2px);
+  mix-blend-mode:multiply;
+  z-index:0;
+}
+.codex{
+  max-width:1180px;margin:0 auto;position:relative;z-index:1;
+}
+.folio{
+  background:
+    radial-gradient(ellipse at top left, #f8efd6 0%, #f2e6c2 40%, #e6d4a0 100%);
+  border:2px solid var(--border-deep);
+  box-shadow:
+    0 0 0 6px var(--parchment),
+    0 0 0 8px var(--gold-deep),
+    0 30px 60px -20px rgba(62,42,20,0.55),
+    inset 0 0 100px rgba(168,122,28,0.18);
+  padding:50px 56px 60px;
+  position:relative;
+  margin-bottom:60px;
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .9s ease, transform .9s ease;
+}
+.folio.visible{opacity:1;transform:none}
+.folio::before,.folio::after{
+  content:"";position:absolute;left:12px;right:12px;height:22px;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0 14px,
+      rgba(168,122,28,0.35) 14px 15px,
+      transparent 15px 30px),
+    linear-gradient(90deg, transparent, rgba(168,122,28,0.25), transparent);
+  border-top:1px solid var(--gold-deep);
+  border-bottom:1px solid var(--gold-deep);
+}
+.folio::before{top:12px}
+.folio::after{bottom:12px}
+.spread{display:grid;grid-template-columns:1fr 1fr;gap:60px;position:relative}
+.spread::before{
+  content:"";position:absolute;top:-10px;bottom:-10px;left:50%;width:2px;
+  background:linear-gradient(180deg, transparent, rgba(62,42,20,0.35) 10%, rgba(62,42,20,0.35) 90%, transparent);
+  transform:translateX(-50%);
+}
+.page{position:relative;min-height:520px}
+.flag{
+  font-family:'IM Fell English SC',serif;
+  text-align:center;
+  letter-spacing:0.12em;
+  font-size:14px;
+  color:var(--ink-soft);
+  margin-bottom:14px;
+}
+.flag .dot{color:var(--rubric)}
+h1.tome-title{
+  font-family:'UnifrakturMaguntia',serif;
+  font-size:clamp(34px,5vw,58px);
+  text-align:center;
+  line-height:1;
+  margin:10px 0 6px;
+  background:linear-gradient(180deg, var(--gold1) 0%, var(--gold2) 50%, var(--gold-deep) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:0 1px 0 rgba(62,42,20,0.2);
+  filter:drop-shadow(0 1px 0 rgba(62,42,20,0.15));
+}
+.tome-sub{
+  font-family:'Cinzel',serif;
+  text-align:center;
+  font-weight:700;
+  color:var(--rubric);
+  letter-spacing:0.18em;
+  font-size:14px;
+  margin-bottom:30px;
+}
+.tome-sub em{font-style:normal;color:var(--ink-soft);font-weight:500}
+/* illuminated initial */
+.drop-i{
+  float:left;
+  width:130px;height:140px;
+  margin:6px 14px 0 0;
+  position:relative;
+}
+.drop-i svg{width:100%;height:100%;display:block}
+.page p{text-align:justify;hyphens:auto;margin:0 0 0.8em}
+.page.body-col p{
+  column-count:1;
+}
+.body-page{columns:2;column-gap:26px;column-rule:1px solid rgba(62,42,20,0.18);text-align:justify;hyphens:auto}
+.body-page p{margin:0 0 0.75em}
+.body-page p:first-of-type::first-letter{
+  font-family:'UnifrakturMaguntia',serif;
+  font-size:74px;
+  float:left;
+  line-height:0.85;
+  padding:8px 10px 0 0;
+  color:var(--rubric);
+  text-shadow:1px 1px 0 rgba(168,122,28,0.3);
+}
+.rubric{color:var(--rubric);font-weight:700;font-variant:small-caps;letter-spacing:0.02em}
+.goldletter{
+  font-family:'Cinzel',serif;font-weight:700;
+  background:linear-gradient(180deg,var(--gold1),var(--gold-deep));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.coat{
+  display:block;margin:30px auto 6px;width:280px;height:280px;
+}
+.coat-caption{
+  text-align:center;font-family:'IM Fell English SC',serif;
+  color:var(--ink-soft);font-size:12px;letter-spacing:0.1em;
+}
+/* marginalia */
+.marginalia{
+  position:absolute;width:74px;height:74px;
+  color:var(--forest);
+  opacity:0.85;
+}
+.marg-tl{top:-6px;left:-58px}
+.marg-tr{top:-6px;right:-58px}
+.marg-bl{bottom:10px;left:-62px}
+.marg-br{bottom:10px;right:-62px}
+.marginalia svg{width:100%;height:100%;display:block}
+.marginalia .lbl{
+  font-family:'IM Fell English SC',serif;font-size:9px;
+  text-align:center;display:block;color:var(--ink-soft);
+  letter-spacing:0.06em;margin-top:2px;
+}
+/* section heading */
+.chap-head{
+  font-family:'UnifrakturMaguntia',serif;
+  font-size:clamp(28px,3.4vw,42px);
+  text-align:center;
+  margin:10px 0 6px;
+  background:linear-gradient(180deg,var(--gold1),var(--gold2) 55%,var(--gold-deep));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.chap-sub{
+  font-family:'Cinzel',serif;text-align:center;color:var(--rubric);
+  letter-spacing:0.16em;font-size:13px;margin-bottom:24px;
+}
+.fleuron{text-align:center;color:var(--gold-deep);font-size:24px;margin:8px 0 18px;letter-spacing:8px}
+
+/* Houses table */
+.houses{
+  display:grid;grid-template-columns:1fr 1fr;gap:22px 42px;
+}
+.house{
+  display:grid;grid-template-columns:60px 1fr;gap:14px;align-items:start;
+  padding-bottom:14px;
+  border-bottom:1px dashed rgba(62,42,20,0.3);
+}
+.shield{width:60px;height:66px;display:block}
+.h-rank{
+  font-family:'Cinzel',serif;font-weight:700;font-size:12px;
+  color:var(--rubric);letter-spacing:0.14em;
+}
+.h-name{
+  font-family:'IM Fell English SC',serif;font-size:19px;color:var(--ink);
+  margin:2px 0 2px;line-height:1.1;
+}
+.h-owner{font-size:12px;color:var(--ink-soft);font-style:italic;margin-bottom:4px}
+.h-rec{
+  display:inline-block;font-family:'Cinzel',serif;font-size:11px;
+  background:linear-gradient(180deg,var(--gold1),var(--gold2));
+  color:var(--ink);
+  padding:2px 8px;border-radius:2px;
+  border:1px solid var(--gold-deep);
+  margin-right:6px;
+}
+.h-streak{font-size:11px;color:var(--forest);font-family:'IM Fell English SC',serif;letter-spacing:0.05em}
+.h-streak.l{color:var(--rubric)}
+.h-judge{
+  display:block;font-size:13px;color:var(--ink);font-style:italic;
+  margin-top:5px;line-height:1.4;
+}
+
+/* Contests list */
+.contests{list-style:none;padding:0;margin:0}
+.contest{
+  display:grid;grid-template-columns:52px 1fr 110px;gap:14px;align-items:center;
+  padding:12px 4px;border-bottom:1px solid rgba(62,42,20,0.22);
+  position:relative;
+}
+.contest:last-child{border-bottom:none}
+.contest-num{
+  font-family:'UnifrakturMaguntia',serif;font-size:44px;line-height:0.9;
+  color:var(--rubric);text-align:center;
+}
+.contest-line{font-family:'IM Fell English SC',serif;font-size:16px;color:var(--ink)}
+.contest-line .winner{color:var(--forest);font-weight:400}
+.contest-line .loser{color:var(--ink-soft)}
+.contest-line .score{
+  font-family:'Cinzel',serif;font-weight:700;color:var(--ink);
+  margin:0 6px;
+}
+.contest-note{font-size:11px;color:var(--ink-soft);font-style:italic;margin-top:2px;display:block}
+.upset{
+  text-align:right;font-family:'Cinzel',serif;font-size:10px;
+  color:var(--rubric);letter-spacing:0.14em;
+  border:1.5px solid var(--rubric);
+  padding:4px 6px;
+  background:rgba(139,44,35,0.05);
+}
+.no-upset{text-align:right;font-family:'IM Fell English SC',serif;font-size:10px;color:var(--ink-soft);letter-spacing:0.08em}
+
+/* awards panel */
+.awards{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:14px;
+}
+.award{
+  border:1.5px solid var(--gold-deep);
+  background:linear-gradient(180deg,rgba(232,194,96,0.18),rgba(212,165,53,0.06));
+  padding:12px 14px;
+  text-align:center;
+}
+.award-label{
+  font-family:'IM Fell English SC',serif;font-size:11px;
+  color:var(--rubric);letter-spacing:0.1em;display:block;margin-bottom:6px;
+}
+.award-value{
+  font-family:'Cinzel',serif;font-weight:700;font-size:15px;color:var(--ink);
+  display:block;line-height:1.2;
+}
+.award-meta{font-size:11px;color:var(--ink-soft);display:block;margin-top:4px;font-style:italic}
+
+/* footer prophecy */
+.prophecy{
+  margin-top:36px;
+  text-align:center;
+  font-family:'IM Fell English SC',serif;
+  font-size:15px;
+  color:var(--ink);
+  padding:22px 30px;
+  border-top:1px solid var(--gold-deep);
+  border-bottom:1px solid var(--gold-deep);
+  background:linear-gradient(180deg,rgba(232,194,96,0.12),transparent);
+  line-height:1.6;
+}
+.prophecy strong{color:var(--rubric)}
+.colophon{
+  text-align:center;font-family:'IM Fell English SC',serif;font-size:11px;
+  color:var(--ink-soft);margin-top:18px;letter-spacing:0.1em;
+}
+
+/* decorative border frame via SVG corners on each folio */
+.corner{position:absolute;width:56px;height:56px;color:var(--gold-deep)}
+.corner.tl{top:4px;left:4px}
+.corner.tr{top:4px;right:4px;transform:scaleX(-1)}
+.corner.bl{bottom:4px;left:4px;transform:scaleY(-1)}
+.corner.br{bottom:4px;right:4px;transform:scale(-1,-1)}
+
+@media (max-width:820px){
+  body{padding:20px 10px 40px;font-size:15px}
+  .folio{padding:30px 24px}
+  .spread{grid-template-columns:1fr;gap:30px}
+  .spread::before{display:none}
+  .body-page{columns:1}
+  .houses{grid-template-columns:1fr}
+  .awards{grid-template-columns:repeat(2,1fr)}
+  .contest{grid-template-columns:40px 1fr}
+  .upset,.no-upset{grid-column:1/-1;text-align:left}
+  .marginalia{display:none}
+}
+@media print{
+  body{background:#f5ecd1}
+  .folio{box-shadow:none;break-after:page}
+}
+</style>
+</head>
+<body>
+<main class="codex">
+
+<!-- SPREAD 1: HERO -->
+<section class="folio" data-anim>
+  <svg class="corner tl" viewBox="0 0 56 56" aria-hidden="true"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner tr" viewBox="0 0 56 56" aria-hidden="true"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner bl" viewBox="0 0 56 56" aria-hidden="true"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner br" viewBox="0 0 56 56" aria-hidden="true"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+
+  <div class="flag">Anno Domini MMXXV <span class="dot">&#10042;</span> Volume I <span class="dot">&#10042;</span> The Jailyard Chronicle</div>
+  <h1 class="tome-title">The Jailyard Chronicle</h1>
+  <div class="tome-sub">BEING A TRUE AND FAITHFUL ACCOUNT OF <em>Ye Sixth Week</em> OF THE CAMPAIGN</div>
+
+  <div class="spread">
+    <!-- LEFT PAGE: drop cap + opening -->
+    <div class="page">
+      <span class="marginalia marg-tl" aria-hidden="true">
+        <svg viewBox="0 0 80 80">
+          <!-- broken crown -->
+          <path d="M10 50 L70 50 L66 20 L54 38 L40 14 L26 38 L14 20 Z" fill="none" stroke="#8b2c23" stroke-width="2"/>
+          <path d="M18 50 L62 50" stroke="#8b2c23" stroke-width="2"/>
+          <path d="M32 52 L48 68" stroke="#8b2c23" stroke-width="1.5"/>
+          <circle cx="26" cy="38" r="2" fill="#d4a535"/>
+          <circle cx="54" cy="38" r="2" fill="#d4a535"/>
+          <circle cx="40" cy="14" r="2" fill="#d4a535"/>
+        </svg>
+        <span class="lbl">corona fracta</span>
+      </span>
+      <span class="marginalia marg-bl" aria-hidden="true">
+        <svg viewBox="0 0 80 80">
+          <!-- scroll -->
+          <path d="M12 20 q8 -6 16 0 v40 q-8 6 -16 0 z" fill="#f5ecd1" stroke="#1f3a24" stroke-width="1.8"/>
+          <path d="M28 20 h40 v40 h-40" fill="#f5ecd1" stroke="#1f3a24" stroke-width="1.8"/>
+          <path d="M68 20 q6 -6 10 0 v40 q-4 6 -10 0" fill="#f5ecd1" stroke="#1f3a24" stroke-width="1.8"/>
+          <line x1="34" y1="30" x2="62" y2="30" stroke="#1f3a24" stroke-width="1"/>
+          <line x1="34" y1="38" x2="62" y2="38" stroke="#1f3a24" stroke-width="1"/>
+          <line x1="34" y1="46" x2="58" y2="46" stroke="#1f3a24" stroke-width="1"/>
+        </svg>
+        <span class="lbl">ye list</span>
+      </span>
+
+      <div class="drop-i" aria-hidden="true">
+        <svg viewBox="0 0 130 140">
+          <defs>
+            <linearGradient id="gold-i" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#e8c260"/>
+              <stop offset=".55" stop-color="#d4a535"/>
+              <stop offset="1" stop-color="#a87a1c"/>
+            </linearGradient>
+          </defs>
+          <rect x="4" y="4" width="122" height="132" fill="#8b2c23" stroke="#3e2a14" stroke-width="2"/>
+          <rect x="10" y="10" width="110" height="120" fill="none" stroke="#e8c260" stroke-width="1"/>
+          <!-- vines -->
+          <path d="M20 20 q10 18 0 36 q-10 18 0 36 q10 18 0 28" fill="none" stroke="#d4a535" stroke-width="1.2"/>
+          <path d="M110 20 q-10 18 0 36 q10 18 0 36 q-10 18 0 28" fill="none" stroke="#d4a535" stroke-width="1.2"/>
+          <circle cx="22" cy="30" r="2.5" fill="#d4a535"/>
+          <circle cx="20" cy="66" r="2.5" fill="#d4a535"/>
+          <circle cx="108" cy="30" r="2.5" fill="#d4a535"/>
+          <circle cx="110" cy="66" r="2.5" fill="#d4a535"/>
+          <circle cx="20" cy="100" r="2.5" fill="#d4a535"/>
+          <circle cx="110" cy="100" r="2.5" fill="#d4a535"/>
+          <!-- The letter I -->
+          <rect x="38" y="22" width="54" height="10" fill="url(#gold-i)" stroke="#3e2a14"/>
+          <rect x="58" y="32" width="14" height="72" fill="url(#gold-i)" stroke="#3e2a14"/>
+          <rect x="38" y="104" width="54" height="10" fill="url(#gold-i)" stroke="#3e2a14"/>
+          <!-- small shield inside vertical bar -->
+          <path d="M60 50 h10 v8 q0 6 -5 10 q-5 -4 -5 -10 z" fill="#8b2c23" stroke="#3e2a14" stroke-width="0.8"/>
+        </svg>
+      </div>
+
+      <p style="font-family:'IM Fell English SC',serif;font-size:16px;line-height:1.55">
+        <span class="rubric">N THE SIXTH WEEK</span> of our reckoning, the twelve Houses of Jailyard did meet upon the fields of fantasie, and such chaos was unleashed upon the standings as hath not been witnessed in many a moon. Four of the six contests ended in <span class="rubric">UPSETTUM</span>, the defending champion was cast from his throne, and a young man from the House of Noble did summon the spirit of <em>Bijan</em> for thirty-and-two-tenths scoring runs &mdash; a feat not seen since the lost age.
+      </p>
+      <p style="text-align:center;font-family:'Cinzel',serif;color:var(--rubric);letter-spacing:0.14em;font-size:12px;margin-top:22px">&sect; HEREWITHIN BEGINNETH THE TALE &sect;</p>
+    </div>
+
+    <!-- RIGHT PAGE: coat of arms -->
+    <div class="page">
+      <span class="marginalia marg-tr" aria-hidden="true">
+        <svg viewBox="0 0 80 80">
+          <!-- football-as-orb -->
+          <ellipse cx="40" cy="40" rx="28" ry="18" fill="#f5ecd1" stroke="#1f3a24" stroke-width="2"/>
+          <line x1="18" y1="40" x2="62" y2="40" stroke="#1f3a24" stroke-width="1.8"/>
+          <line x1="34" y1="36" x2="34" y2="44" stroke="#1f3a24" stroke-width="1.4"/>
+          <line x1="38" y1="36" x2="38" y2="44" stroke="#1f3a24" stroke-width="1.4"/>
+          <line x1="42" y1="36" x2="42" y2="44" stroke="#1f3a24" stroke-width="1.4"/>
+          <line x1="46" y1="36" x2="46" y2="44" stroke="#1f3a24" stroke-width="1.4"/>
+          <circle cx="40" cy="14" r="3" fill="none" stroke="#d4a535" stroke-width="1.4"/>
+        </svg>
+        <span class="lbl">ye orb</span>
+      </span>
+      <span class="marginalia marg-br" aria-hidden="true">
+        <svg viewBox="0 0 80 80">
+          <!-- knight helm -->
+          <path d="M20 30 q20 -22 40 0 v26 q0 10 -20 12 q-20 -2 -20 -12 z" fill="#f5ecd1" stroke="#1f3a24" stroke-width="2"/>
+          <rect x="26" y="40" width="28" height="3" fill="#1f3a24"/>
+          <rect x="26" y="46" width="28" height="3" fill="#1f3a24"/>
+          <path d="M38 20 q2 -12 8 0" fill="none" stroke="#8b2c23" stroke-width="2"/>
+          <path d="M44 14 q4 -4 8 -2" fill="none" stroke="#8b2c23" stroke-width="2"/>
+        </svg>
+        <span class="lbl">ye knight</span>
+      </span>
+
+      <svg class="coat" viewBox="0 0 280 280" aria-label="Coat of arms with twelve quadrants">
+        <defs>
+          <linearGradient id="gold-coat" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#e8c260"/>
+            <stop offset="1" stop-color="#a87a1c"/>
+          </linearGradient>
+        </defs>
+        <!-- outer shield shape -->
+        <path d="M30 30 L250 30 L250 140 Q250 220 140 260 Q30 220 30 140 Z" fill="#f5ecd1" stroke="url(#gold-coat)" stroke-width="6"/>
+        <path d="M30 30 L250 30 L250 140 Q250 220 140 260 Q30 220 30 140 Z" fill="none" stroke="#3e2a14" stroke-width="1.5"/>
+        <!-- divisions: 3 columns x 4 rows = 12 quadrants -->
+        <g stroke="#3e2a14" stroke-width="1.2" fill="none">
+          <line x1="103" y1="30" x2="103" y2="250"/>
+          <line x1="177" y1="30" x2="177" y2="250"/>
+          <line x1="30" y1="85" x2="250" y2="85"/>
+          <line x1="30" y1="140" x2="250" y2="140"/>
+          <line x1="30" y1="195" x2="250" y2="195"/>
+        </g>
+        <!-- 12 quadrant contents: alternating rubric / forest / gold fills with initials -->
+        <g font-family="Cinzel,serif" font-weight="700" font-size="18" text-anchor="middle">
+          <rect x="33" y="33" width="67" height="49" fill="#8b2c23"/>
+          <text x="66" y="63" fill="#e8c260">LB</text>
+          <rect x="106" y="33" width="68" height="49" fill="#1f3a24"/>
+          <text x="140" y="63" fill="#e8c260">GK</text>
+          <rect x="180" y="33" width="67" height="49" fill="#d4a535"/>
+          <text x="213" y="63" fill="#3e2a14">SG</text>
+
+          <rect x="33" y="88" width="67" height="49" fill="#1f3a24"/>
+          <text x="66" y="118" fill="#e8c260">BM</text>
+          <rect x="106" y="88" width="68" height="49" fill="#d4a535"/>
+          <text x="140" y="118" fill="#3e2a14">KR</text>
+          <rect x="180" y="88" width="67" height="49" fill="#8b2c23"/>
+          <text x="213" y="118" fill="#e8c260">RS</text>
+
+          <rect x="33" y="143" width="67" height="49" fill="#d4a535"/>
+          <text x="66" y="173" fill="#3e2a14">MH</text>
+          <rect x="106" y="143" width="68" height="49" fill="#8b2c23"/>
+          <text x="140" y="173" fill="#e8c260">NF</text>
+          <rect x="180" y="143" width="67" height="49" fill="#1f3a24"/>
+          <text x="213" y="173" fill="#e8c260">GG</text>
+        </g>
+        <!-- bottom 3 quadrants clipped by shield tip -->
+        <g font-family="Cinzel,serif" font-weight="700" font-size="16" text-anchor="middle">
+          <path d="M33 198 L100 198 L100 247 Q66 238 33 215 Z" fill="#1f3a24"/>
+          <text x="66" y="226" fill="#e8c260">CF</text>
+          <path d="M106 198 L174 198 L174 258 Q140 262 106 258 Z" fill="#d4a535"/>
+          <text x="140" y="228" fill="#3e2a14">BE</text>
+          <path d="M180 198 L247 198 L247 215 Q213 238 180 247 Z" fill="#8b2c23"/>
+          <text x="213" y="226" fill="#e8c260">FT</text>
+        </g>
+        <!-- ribbon -->
+        <rect x="50" y="258" width="180" height="16" fill="#f5ecd1" stroke="#3e2a14" stroke-width="1"/>
+        <text x="140" y="270" font-family="Cinzel,serif" font-size="9" font-weight="700" fill="#8b2c23" text-anchor="middle" letter-spacing="2">XII DOMUS &middot; UNA CORONA</text>
+      </svg>
+      <div class="coat-caption">THE TWELVE HOUSES OF JAILYARD &middot; EST. ANNO MMXXII</div>
+    </div>
+  </div>
+</section>
+
+<!-- SPREAD 2: CHAPTER BODY -->
+<section class="folio" data-anim>
+  <svg class="corner tl" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner tr" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner bl" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner br" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+
+  <h2 class="chap-head">Chapter VI</h2>
+  <div class="chap-sub">OF THE GREAT UPSETS, AND THE FALL OF THE DEFENDING CHAMPION</div>
+  <div class="fleuron">&#10086; &#10087; &#10086;</div>
+
+  <div class="body-page">
+    <p>In the sixth week of the year of our Lord Two Thousand and Twenty Five, the Houses did gather, and what a week it was, for four of the six contests did end in upsettum most grievous. The defending champion, bchodos of <span class="rubric">Kittler on the Roof</span>, who had but a week prior sat atop the table as Number the First, did fall to rango_ of <span class="rubric">MHJTIME</span> by the score of one hundred forty-and-ninety-four hundredths to one hundred seven-and-seventy-four. Thus did Kittler tumble unto the fifth seat, his W become an L, his crown set askew.</p>
+
+    <p>Meanwhile, at the top of the realm, the twin banners of <span class="rubric">The Legion of Bouz</span> and <span class="rubric">General Ken-obi</span> did march in lockstep, each scoring in the high one-and-sixty region, and each laying waste to the lowly 0-and-6 Houses of the cellar. KidBouzie's Legion did put unto the sword the House of Father Time, 165.90 unto 107.66, for the week's highest tally. The good bLaker24, whose General Ken-obi now doth bear an Elo of seventeen hundred &mdash; a peak not before witnessed in his career &mdash; did lay low the Burden of Etienne-y Woody by sixty-and-five points, the biggest blowout of the week.</p>
+
+    <p>In the House of Noble, the son kevobucks did summon the spirit of <span class="rubric">Bijan Robinson</span>, who didst run for <span class="goldletter">thirty-and-two-tenths</span> scoring runs, a feat not seen since the lost age. By such grace did Noble FFT, thought but a 2-and-3 middling sort, put the Ghastly Grayskull Gang unto the earth, 151.88 unto 121.30, an upsettum of thirty-and-a-half points.</p>
+
+    <p>The Boonist Monks of GauchoTrain, guided by the hand of George Pickens (27.3) and Jaxon Smith-Njigba (26.2), did deliver unto Rasheeing the Scene a lesson most humbling, 150.46 unto 109.10 &mdash; an upsettum by the margin of forty-and-one points. Even the Sleeping Giants of zbcowan, sometimes sluggish yet ever plodding, did extend their winning streak unto W-the-fourth, quelling Chudders FT 129.82 unto 95.26 upon the shoulders of Josh Jacobs (29.5).</p>
+
+    <p>Now the table is wrought in fire: three Houses tied at 5-and-1 &mdash; the Legion, Ken-obi, and the Sleeping Giants &mdash; with the Monks nipping at their heels at 4-and-2. Yea, and the cellar doth groan, for both kharlow's Burden and Redrumsregrub's Father Time are 0-and-6, their losing streaks stretching unto six long weeks. The group chat, as ever the truest chronicler, hath spoken, and it hath spoken loudly. Gods preserve the Vessels of Kittler.</p>
+  </div>
+
+  <div class="awards">
+    <div class="award">
+      <span class="award-label">High Scorer</span>
+      <span class="award-value">The Legion of Bouz</span>
+      <span class="award-meta">165.90 pts</span>
+    </div>
+    <div class="award">
+      <span class="award-label">Top Performer</span>
+      <span class="award-value">Bijan Robinson</span>
+      <span class="award-meta">32.8 pts &middot; Noble FFT</span>
+    </div>
+    <div class="award">
+      <span class="award-label">Biggest Blowout</span>
+      <span class="award-value">Ken-obi + 65.74</span>
+      <span class="award-meta">164.94 vs 99.20</span>
+    </div>
+    <div class="award">
+      <span class="award-label">Low Scorer</span>
+      <span class="award-value">Chudders FT</span>
+      <span class="award-meta">95.26 pts</span>
+    </div>
+  </div>
+</section>
+
+<!-- SPREAD 3: TABLE OF HOUSES -->
+<section class="folio" data-anim>
+  <svg class="corner tl" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner tr" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner bl" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner br" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+
+  <h2 class="chap-head">Ye Table of the Houses</h2>
+  <div class="chap-sub">RANKINGS MOST POWERFUL &middot; AFTER WEEK VI</div>
+  <div class="fleuron">&#10086; &#10087; &#10086;</div>
+
+  <div class="houses">
+    <!-- 1 Legion -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#8b2c23" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="22" font-weight="700" fill="#e8c260">I</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE FIRST &middot; &uarr;1</div>
+        <div class="h-name">The Legion of Bouz</div>
+        <div class="h-owner">of KidBouzie &middot; Elo 1604</div>
+        <span class="h-rec">5-1 &middot; PF 935.7</span><span class="h-streak">Streak W1</span>
+        <em class="h-judge">Mahomes and ARSB deserve a tight end with a pulse.</em>
+      </div>
+    </div>
+    <!-- 2 Ken-obi -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#1f3a24" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="20" font-weight="700" fill="#e8c260">II</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE SECOND &middot; &uarr;3</div>
+        <div class="h-name">General Ken-obi</div>
+        <div class="h-owner">of bLaker24 &middot; Elo 1700 &middot; II titles</div>
+        <span class="h-rec">5-1 &middot; PF 871.2</span><span class="h-streak">Streak W2</span>
+        <em class="h-judge">We're all just hoping you oversleep on waiver day.</em>
+      </div>
+    </div>
+    <!-- 3 Giants -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#d4a535" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="20" font-weight="700" fill="#3e2a14">III</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE THIRD &middot; &mdash;</div>
+        <div class="h-name">Sleeping Giants</div>
+        <div class="h-owner">of zbcowan &middot; Elo 1561</div>
+        <span class="h-rec">5-1 &middot; PF 857.0</span><span class="h-streak">Streak W4</span>
+        <em class="h-judge">Your WRs peaked when Fortnite did.</em>
+      </div>
+    </div>
+    <!-- 4 Monks -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#1f3a24" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="18" font-weight="700" fill="#e8c260">IV</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE FOURTH &middot; &uarr;2</div>
+        <div class="h-name">The Boonist Monks</div>
+        <div class="h-owner">of GauchoTrain &middot; Elo 1599</div>
+        <span class="h-rec">4-2 &middot; PF 912.9</span><span class="h-streak">Streak W1</span>
+        <em class="h-judge">Your team could win it all or retire it all.</em>
+      </div>
+    </div>
+    <!-- 5 Kittler -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#d4a535" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="18" font-weight="700" fill="#3e2a14">V</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE FIFTH &middot; &darr;4</div>
+        <div class="h-name">Kittler on the Roof</div>
+        <div class="h-owner">of bchodos &middot; Elo 1488 &middot; I title</div>
+        <span class="h-rec">4-2 &middot; PF 877.9</span><span class="h-streak l">Streak L1</span>
+        <em class="h-judge">Your floor is nice but your ceiling might be drywall.</em>
+      </div>
+    </div>
+    <!-- 6 Rasheeing -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#8b2c23" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="18" font-weight="700" fill="#e8c260">VI</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE SIXTH &middot; &darr;2</div>
+        <div class="h-name">Rasheeing the Scene</div>
+        <div class="h-owner">of ToreroGaucho &middot; Elo 1626</div>
+        <span class="h-rec">4-2 &middot; PF 816.0</span><span class="h-streak l">Streak L1</span>
+        <em class="h-judge">Your WR room is a meme waiting to happen.</em>
+      </div>
+    </div>
+    <!-- 7 MHJTIME -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#d4a535" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="18" font-weight="700" fill="#3e2a14">VII</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE SEVENTH &middot; &mdash;</div>
+        <div class="h-name">MHJTIME</div>
+        <div class="h-owner">of rango_ &middot; Elo 1586</div>
+        <span class="h-rec">3-3 &middot; PF 891.9</span><span class="h-streak">Streak W2</span>
+        <em class="h-judge">If you ever find two real running backs, the rest of us are toast.</em>
+      </div>
+    </div>
+    <!-- 8 Noble -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#8b2c23" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="16" font-weight="700" fill="#e8c260">VIII</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE EIGHTH &middot; &uarr;1</div>
+        <div class="h-name">Noble FFT</div>
+        <div class="h-owner">of kevobucks &middot; Elo 1455</div>
+        <span class="h-rec">3-3 &middot; PF 819.0</span><span class="h-streak">Streak W1</span>
+        <em class="h-judge">Bijan and Breece are gods, your tight ends are mortals.</em>
+      </div>
+    </div>
+    <!-- 9 Grayskull -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#1f3a24" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="16" font-weight="700" fill="#e8c260">IX</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE NINTH &middot; &darr;1</div>
+        <div class="h-name">Ghastly Grayskull Gang</div>
+        <div class="h-owner">of GrayskullXX &middot; Elo 1324</div>
+        <span class="h-rec">2-4 &middot; PF 818.3</span><span class="h-streak l">Streak L2</span>
+        <em class="h-judge">Your pick stash is bigger than your WR room.</em>
+      </div>
+    </div>
+    <!-- 10 Chudders -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#d4a535" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="16" font-weight="700" fill="#3e2a14">X</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE TENTH &middot; &mdash;</div>
+        <div class="h-name">Chudders Football Team</div>
+        <div class="h-owner">of Chudders &middot; Elo 1402</div>
+        <span class="h-rec">1-5 &middot; PF 727.9</span><span class="h-streak l">Streak L1</span>
+        <em class="h-judge">Two firsts in two years and Gibbs. You're that guy bench-pressing next to the trophy case.</em>
+      </div>
+    </div>
+    <!-- 11 Burden -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#8b2c23" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="15" font-weight="700" fill="#e8c260">XI</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE ELEVENTH &middot; &mdash;</div>
+        <div class="h-name">Burden of Etienne-y Woody</div>
+        <div class="h-owner">of kharlow &middot; Elo 1324</div>
+        <span class="h-rec">0-6 &middot; PF 732.7</span><span class="h-streak l">Streak L6</span>
+        <em class="h-judge">Justin Jefferson can only carry you so far.</em>
+      </div>
+    </div>
+    <!-- 12 Father Time -->
+    <div class="house">
+      <svg class="shield" viewBox="0 0 60 66"><path d="M5 5 L55 5 L55 30 Q55 55 30 62 Q5 55 5 30 Z" fill="#1f3a24" stroke="#3e2a14" stroke-width="1.5"/><text x="30" y="38" text-anchor="middle" font-family="Cinzel,serif" font-size="15" font-weight="700" fill="#e8c260">XII</text></svg>
+      <div>
+        <div class="h-rank">HOUSE THE TWELFTH &middot; &mdash;</div>
+        <div class="h-name">Father Time</div>
+        <div class="h-owner">of Redrumsregrub &middot; Elo 1330</div>
+        <span class="h-rec">0-6 &middot; PF 712.7</span><span class="h-streak l">Streak L6</span>
+        <em class="h-judge">Your WRs are wagyu beef; your RBs are ramen noodles.</em>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPREAD 4: CONTESTS -->
+<section class="folio" data-anim>
+  <svg class="corner tl" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner tr" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner bl" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+  <svg class="corner br" viewBox="0 0 56 56"><path d="M2 2h18v3H5v15H2z M2 28 L2 2 L28 2 M12 12 q8 -8 20 -8" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+
+  <h2 class="chap-head">Ye Table of Contests</h2>
+  <div class="chap-sub">THE SIX BATTLES OF WEEK VI &middot; FOUR MARKED UPSETTUM</div>
+  <div class="fleuron">&#10086; &#10087; &#10086;</div>
+
+  <ol class="contests">
+    <li class="contest">
+      <span class="contest-num">I</span>
+      <div>
+        <div class="contest-line"><span class="winner">Noble FFT</span> <span class="score">151.88</span> didst vanquish <span class="loser">Ghastly Grayskull Gang</span> <span class="score">121.30</span></div>
+        <span class="contest-note">Margin of 30.58. Bijan Robinson summoned for 32.8 pts.</span>
+      </div>
+      <div class="upset">&#10045; UPSETTUM</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">II</span>
+      <div>
+        <div class="contest-line"><span class="winner">MHJTIME</span> <span class="score">140.94</span> didst dethrone <span class="loser">Kittler on the Roof</span> <span class="score">107.74</span></div>
+        <span class="contest-note">Margin of 33.20. The defending champ fell from House the First.</span>
+      </div>
+      <div class="upset">&#10045; UPSETTUM</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">III</span>
+      <div>
+        <div class="contest-line"><span class="winner">Sleeping Giants</span> <span class="score">129.82</span> didst overcome <span class="loser">Chudders Football Team</span> <span class="score">95.26</span></div>
+        <span class="contest-note">Margin of 34.56. Josh Jacobs 29.5. Streak extended unto W4.</span>
+      </div>
+      <div class="no-upset">&sect; as foretold</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">IV</span>
+      <div>
+        <div class="contest-line"><span class="winner">The Boonist Monks</span> <span class="score">150.46</span> didst humble <span class="loser">Rasheeing the Scene</span> <span class="score">109.10</span></div>
+        <span class="contest-note">Margin of 41.36. Pickens 27.3 and JSN 26.2 led the monastery.</span>
+      </div>
+      <div class="upset">&#10045; UPSETTUM</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">V</span>
+      <div>
+        <div class="contest-line"><span class="winner">The Legion of Bouz</span> <span class="score">165.90</span> didst trample <span class="loser">Father Time</span> <span class="score">107.66</span></div>
+        <span class="contest-note">Margin of 58.24. The week's highest tally. Mahomes 30.48, Skattebo 30.0.</span>
+      </div>
+      <div class="no-upset">&sect; as foretold</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">VI</span>
+      <div>
+        <div class="contest-line"><span class="winner">General Ken-obi</span> <span class="score">164.94</span> didst rout <span class="loser">Burden of Etienne-y Woody</span> <span class="score">99.20</span></div>
+        <span class="contest-note">Margin of 65.74. Biggest blowout of the week. LAR DEF 27.0, Drake London 26.8.</span>
+      </div>
+      <div class="upset">&#10045; UPSETTUM</div>
+    </li>
+  </ol>
+
+  <div class="fleuron" style="margin-top:26px">&#10086; &#10087; &#10086;</div>
+  <h3 class="chap-head" style="font-size:clamp(22px,2.6vw,32px);margin-top:6px">Ye Week VII Prophecies</h3>
+  <div class="chap-sub">CONTESTS TO COME</div>
+
+  <ol class="contests">
+    <li class="contest">
+      <span class="contest-num">&#10077;</span>
+      <div>
+        <div class="contest-line"><span class="rubric">MARQUEE &middot;</span> The Legion of Bouz <span class="score">(5-1, I)</span> vs General Ken-obi <span class="score">(5-1, II)</span></div>
+        <span class="contest-note">A battle most significant. Undefeated-by-standards title vs the two-time champ.</span>
+      </div>
+      <div class="no-upset">&sect; prophesied</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">&#10077;</span>
+      <div>
+        <div class="contest-line">Kittler on the Roof <span class="score">(V)</span> vs Sleeping Giants <span class="score">(III)</span></div>
+        <span class="contest-note">The fallen champ doth seek the road to redemption.</span>
+      </div>
+      <div class="no-upset">&sect; prophesied</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">&#10077;</span>
+      <div>
+        <div class="contest-line">The Boonist Monks <span class="score">(IV)</span> vs Noble FFT <span class="score">(VIII)</span></div>
+        <span class="contest-note">Monastery meets Bijan. May the spirits be kind.</span>
+      </div>
+      <div class="no-upset">&sect; prophesied</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">&#10077;</span>
+      <div>
+        <div class="contest-line">Rasheeing the Scene <span class="score">(VI)</span> vs Ghastly Grayskull Gang <span class="score">(IX)</span></div>
+      </div>
+      <div class="no-upset">&sect; prophesied</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">&#10077;</span>
+      <div>
+        <div class="contest-line">Chudders Football Team <span class="score">(X)</span> vs MHJTIME <span class="score">(VII)</span></div>
+      </div>
+      <div class="no-upset">&sect; prophesied</div>
+    </li>
+    <li class="contest">
+      <span class="contest-num">&#10077;</span>
+      <div>
+        <div class="contest-line"><span class="rubric">TOILET BOWL MATINEE &middot;</span> Burden of Etienne-y Woody <span class="score">(0-6, XI)</span> vs Father Time <span class="score">(0-6, XII)</span></div>
+        <span class="contest-note">Both Houses at 0-and-6, both on L-the-sixth. Someone must win. Alas.</span>
+      </div>
+      <div class="no-upset">&sect; prophesied</div>
+    </li>
+  </ol>
+
+  <div class="prophecy">
+    Here endeth Chapter VI. Chapter VII prophesied to feature a battle most significant between ye <strong>Legion of Bouz</strong> and ye <strong>General Ken-obi</strong>, both at V wins and I loss. May the gods of fantasy have mercy on the Vessels of <strong>Kittler</strong>.
+  </div>
+  <div class="colophon">FINIS CAPITULI SEXTI &middot; SCRIBED BY HAND IN YE GROUP CHAT &middot; MMXXV</div>
+</section>
+
+</main>
+
+<script>
+// Scroll-driven fade-in using IntersectionObserver. One-shot, no repeats.
+(function(){
+  var els = document.querySelectorAll('[data-anim]');
+  if(!('IntersectionObserver' in window)){
+    els.forEach(function(e){e.classList.add('visible')});
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        en.target.classList.add('visible');
+        io.unobserve(en.target);
+      }
+    });
+  },{threshold:0.12});
+  els.forEach(function(e){io.observe(e)});
+})();
+</script>
+</body>
+</html>

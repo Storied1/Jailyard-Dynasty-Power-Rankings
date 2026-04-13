@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>THE JAILYARD DYNASTY -- WEEK 9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,600&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100vw;height:100vh;overflow:hidden;background:#0a0a0a;color:#e8e8e8;font-family:'Newsreader',Georgia,serif;}
+
+/* ── GRAIN TEXTURE ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity:0.03;mix-blend-mode:overlay;
+}
+
+/* ── CSS VARIABLES ── */
+:root{
+  --gold:#c9a84c;
+  --gold-dim:rgba(201,168,76,0.15);
+  --gold-mid:rgba(201,168,76,0.35);
+  --bg:#0a0a0a;
+  --fg:#e8e8e8;
+  --muted:#7a8194;
+  --dim:#3a3e4a;
+  --good:#4ade80;
+  --bad:#f87171;
+  --warn:#fbbf24;
+}
+
+/* ── POSTER GRID ── */
+.poster{
+  display:grid;
+  grid-template-columns:30fr 40fr 30fr;
+  grid-template-rows:8vh 82vh 10vh;
+  width:100vw;height:100vh;
+  gap:0;
+}
+
+/* ── TOP STRIP ── */
+.top-strip{
+  grid-column:1/-1;grid-row:1;
+  display:flex;align-items:center;justify-content:center;
+  border-bottom:1px solid var(--gold-mid);
+  position:relative;overflow:hidden;
+  padding:0 2vw;
+}
+.top-strip::before,.top-strip::after{
+  content:'';position:absolute;top:50%;width:20vw;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-mid),transparent);
+}
+.top-strip::before{left:1vw;}
+.top-strip::after{right:1vw;}
+.masthead{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;font-size:clamp(1rem,2.2vh,1.8rem);
+  letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--gold);text-align:center;
+  display:flex;align-items:center;gap:1.5em;
+}
+.masthead .dot{width:4px;height:4px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.masthead .week-num{
+  font-size:clamp(1.2rem,2.8vh,2.2rem);color:var(--fg);
+}
+.masthead .date{
+  font-weight:500;font-size:clamp(0.65rem,1.3vh,0.9rem);
+  letter-spacing:0.15em;color:var(--muted);
+}
+
+/* ── ZONE BORDERS ── */
+.left-col{grid-column:1;grid-row:2;border-right:1px solid var(--gold-dim);padding:2.5vh 2vw 2vh 2.5vw;display:flex;flex-direction:column;overflow:hidden;}
+.center-col{grid-column:2;grid-row:2;border-right:1px solid var(--gold-dim);padding:2vh 2vw;display:flex;flex-direction:column;overflow:hidden;}
+.right-col{grid-column:3;grid-row:2;padding:2.5vh 2.5vw 2vh 2vw;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── BOTTOM STRIP ── */
+.bottom-strip{
+  grid-column:1/-1;grid-row:3;
+  border-top:1px solid var(--gold-mid);
+  display:flex;align-items:center;justify-content:center;
+  padding:0 5vw;text-align:center;
+}
+.pull-quote{
+  font-family:'Newsreader',Georgia,serif;
+  font-style:italic;font-weight:400;
+  font-size:clamp(0.85rem,1.8vh,1.3rem);
+  color:var(--muted);line-height:1.5;
+  max-width:70vw;
+}
+.pull-quote em{color:var(--gold);font-style:normal;font-weight:600;}
+
+/* ══════════════════════════════════════════════
+   LEFT COLUMN — Editorial
+   ══════════════════════════════════════════════ */
+.section-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:clamp(0.55rem,1vh,0.75rem);
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1vh;
+  display:flex;align-items:center;gap:0.5em;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--gold-dim);}
+
+.headline{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:clamp(1.6rem,4.5vh,3.2rem);
+  line-height:1.05;text-transform:uppercase;
+  color:var(--fg);margin-bottom:1.5vh;
+  letter-spacing:-0.01em;
+}
+.headline .gold{color:var(--gold);}
+
+.essay-hook{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(0.78rem,1.5vh,1.05rem);
+  line-height:1.65;color:var(--muted);
+  flex:1;overflow:hidden;
+  position:relative;
+}
+.essay-hook::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:6vh;
+  background:linear-gradient(transparent,var(--bg));
+  pointer-events:none;
+}
+
+.read-more{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:600;font-size:clamp(0.65rem,1.1vh,0.8rem);
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--gold);cursor:pointer;
+  margin-top:1vh;
+  transition:color 0.2s;
+  background:none;border:none;text-align:left;
+  padding:0;
+}
+.read-more:hover{color:var(--fg);}
+
+/* Awards strip in left col */
+.awards-strip{
+  margin-top:auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:0.8vh;
+  padding-top:1.5vh;
+  border-top:1px solid var(--gold-dim);
+}
+.award-item{
+  display:flex;flex-direction:column;
+}
+.award-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:600;font-size:clamp(0.5rem,0.9vh,0.65rem);
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--gold);
+}
+.award-value{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:600;font-size:clamp(0.6rem,1.1vh,0.8rem);
+  color:var(--fg);
+}
+.award-sub{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(0.5rem,0.85vh,0.65rem);
+  color:var(--dim);
+}
+
+/* ══════════════════════════════════════════════
+   CENTER COLUMN — The Big Number + Rankings
+   ══════════════════════════════════════════════ */
+.big-number-zone{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:1vh 0 1.5vh;
+  position:relative;
+  cursor:pointer;
+}
+.big-number-context{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:600;font-size:clamp(0.55rem,1vh,0.75rem);
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.5vh;
+}
+.big-number{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-size:clamp(4rem,14vh,10rem);
+  line-height:0.85;
+  color:var(--fg);
+  letter-spacing:-0.02em;
+  position:relative;
+}
+.big-number .decimal{
+  font-size:0.45em;color:var(--gold);vertical-align:super;
+  position:relative;top:-0.15em;
+}
+.big-number-sub{
+  font-family:'Newsreader',Georgia,serif;
+  font-style:italic;font-size:clamp(0.6rem,1.1vh,0.85rem);
+  color:var(--muted);margin-top:0.5vh;
+}
+/* tooltip for big number */
+.big-number-tooltip{
+  position:absolute;bottom:calc(100% + 0.5vh);left:50%;transform:translateX(-50%) translateY(5px);
+  opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;
+  background:rgba(15,15,15,0.95);border:1px solid var(--gold-mid);
+  border-radius:6px;padding:0.8vh 1.2vw;
+  font-family:'Newsreader',Georgia,serif;font-size:clamp(0.6rem,1vh,0.8rem);
+  color:var(--muted);white-space:nowrap;z-index:10;
+}
+.big-number-zone:hover .big-number-tooltip{
+  opacity:1;transform:translateX(-50%) translateY(0);
+}
+
+/* ── RANKINGS TABLE ── */
+.rankings-zone{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  padding-top:1.5vh;
+}
+.rankings-header{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:clamp(0.55rem,1vh,0.75rem);
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.8vh;
+  display:flex;align-items:center;gap:0.5em;
+}
+.rankings-header::after{content:'';flex:1;height:1px;background:var(--gold-dim);}
+
+.rank-row{
+  display:grid;
+  grid-template-columns:2.2em 0.8em 1fr 4.5em 2.5em 5em;
+  align-items:center;
+  padding:0.55vh 0.3vw;
+  border-bottom:1px solid rgba(201,168,76,0.06);
+  cursor:pointer;
+  position:relative;
+  transition:background 0.15s;
+  gap:0.4vw;
+}
+.rank-row:hover{background:rgba(201,168,76,0.06);}
+.rank-row:last-child{border-bottom:none;}
+
+.rank-num{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:700;font-size:clamp(0.6rem,1.1vh,0.8rem);
+  color:var(--dim);text-align:right;padding-right:0.3em;
+}
+.rank-dot{
+  width:clamp(5px,0.7vh,8px);height:clamp(5px,0.7vh,8px);
+  border-radius:50%;flex-shrink:0;
+}
+.rank-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:600;font-size:clamp(0.65rem,1.15vh,0.85rem);
+  color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:0.02em;
+}
+.rank-record{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:500;font-size:clamp(0.55rem,0.95vh,0.7rem);
+  color:var(--muted);text-align:right;
+}
+.rank-move{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:600;font-size:clamp(0.5rem,0.85vh,0.65rem);
+  text-align:center;
+}
+.rank-move.up{color:var(--good);}
+.rank-move.down{color:var(--bad);}
+.rank-move.steady{color:var(--dim);}
+
+.rank-bar-wrap{
+  height:clamp(3px,0.5vh,5px);
+  background:rgba(255,255,255,0.04);
+  border-radius:2px;overflow:hidden;
+}
+.rank-bar{
+  height:100%;border-radius:2px;
+  transition:width 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+/* Rank tooltip (blurb on hover) */
+.rank-tooltip{
+  position:fixed;z-index:100;
+  max-width:28vw;
+  background:rgba(10,10,10,0.97);
+  border:1px solid var(--gold-mid);
+  border-radius:8px;
+  padding:1.5vh 1.2vw;
+  pointer-events:none;
+  opacity:0;transform:translateY(4px);
+  transition:opacity 0.2s,transform 0.2s;
+}
+.rank-tooltip.visible{opacity:1;transform:translateY(0);}
+.rank-tooltip .tt-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:clamp(0.7rem,1.2vh,0.9rem);
+  color:var(--gold);margin-bottom:0.4vh;
+}
+.rank-tooltip .tt-meta{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.5rem,0.8vh,0.65rem);
+  color:var(--dim);margin-bottom:0.6vh;
+}
+.rank-tooltip .tt-blurb{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(0.6rem,1vh,0.78rem);
+  line-height:1.55;color:var(--muted);
+}
+
+/* ══════════════════════════════════════════════
+   RIGHT COLUMN — Matchup, Chat, Trending
+   ══════════════════════════════════════════════ */
+
+/* Matchup of the Week card */
+.motw-card{
+  background:rgba(201,168,76,0.04);
+  border:1px solid var(--gold-dim);
+  border-radius:6px;
+  padding:1.5vh 1.2vw;
+  margin-bottom:2vh;
+}
+.motw-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:clamp(0.5rem,0.9vh,0.65rem);
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1vh;
+}
+.motw-vs{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:0.8vh;
+}
+.motw-team{
+  text-align:center;flex:1;
+}
+.motw-team-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:clamp(0.65rem,1.2vh,0.9rem);
+  color:var(--fg);line-height:1.2;
+}
+.motw-score{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:700;font-size:clamp(1rem,2.2vh,1.6rem);
+  color:var(--fg);
+}
+.motw-score.winner{color:var(--gold);}
+.motw-divider{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:300;font-size:clamp(0.7rem,1.3vh,1rem);
+  color:var(--dim);padding:0 0.5vw;
+}
+.motw-record{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.45rem,0.75vh,0.55rem);
+  color:var(--dim);
+}
+.motw-detail{
+  font-family:'Newsreader',Georgia,serif;
+  font-style:italic;
+  font-size:clamp(0.55rem,0.9vh,0.7rem);
+  color:var(--muted);
+  text-align:center;
+  padding-top:0.5vh;
+  border-top:1px solid var(--gold-dim);
+}
+
+/* Chat Quotes */
+.chat-zone{
+  margin-bottom:2vh;
+}
+.chat-quote{
+  padding:0.8vh 0;
+  border-bottom:1px solid rgba(201,168,76,0.06);
+  cursor:pointer;
+  position:relative;
+}
+.chat-quote:last-child{border-bottom:none;}
+.chat-sender{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:600;font-size:clamp(0.45rem,0.8vh,0.6rem);
+  color:var(--gold);
+  margin-bottom:0.2vh;
+}
+.chat-text{
+  font-family:'Newsreader',Georgia,serif;
+  font-style:italic;
+  font-size:clamp(0.6rem,1vh,0.78rem);
+  color:var(--muted);
+  line-height:1.4;
+  overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+.chat-quote:hover .chat-text{color:var(--fg);}
+
+/* Trending */
+.trending-zone{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.trend-item{
+  display:flex;align-items:flex-start;gap:0.6vw;
+  padding:0.8vh 0;
+  border-bottom:1px solid rgba(201,168,76,0.06);
+}
+.trend-item:last-child{border-bottom:none;}
+.trend-arrow{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:700;font-size:clamp(0.6rem,1vh,0.78rem);
+  flex-shrink:0;
+  line-height:1.6;
+}
+.trend-arrow.hot{color:var(--good);}
+.trend-arrow.cold{color:var(--bad);}
+.trend-arrow.watch{color:var(--warn);}
+.trend-content{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(0.6rem,1vh,0.78rem);
+  color:var(--muted);line-height:1.5;
+}
+.trend-content strong{color:var(--fg);font-weight:600;}
+
+/* Next Week preview */
+.next-week{
+  margin-top:auto;
+  padding-top:1.5vh;
+  border-top:1px solid var(--gold-dim);
+}
+.next-week-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:clamp(0.5rem,0.85vh,0.6rem);
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.6vh;
+}
+.next-matchup{
+  display:flex;align-items:center;gap:0.3em;
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.45rem,0.78vh,0.58rem);
+  color:var(--dim);
+  padding:0.2vh 0;
+}
+.next-matchup .vs{color:var(--gold-mid);font-weight:700;}
+.next-matchup .rank-badge{
+  font-weight:700;color:var(--muted);
+  background:rgba(255,255,255,0.04);
+  border-radius:2px;padding:0 0.2em;
+  font-size:0.85em;
+}
+
+/* ── OVERLAY (full essay) ── */
+.overlay{
+  position:fixed;inset:0;z-index:10000;
+  background:rgba(5,5,5,0.92);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.3s;
+}
+.overlay.open{opacity:1;pointer-events:auto;}
+.overlay-content{
+  max-width:52vw;max-height:85vh;overflow-y:auto;
+  padding:4vh 3vw;
+  scrollbar-width:thin;scrollbar-color:var(--gold-dim) transparent;
+}
+.overlay-content::-webkit-scrollbar{width:4px;}
+.overlay-content::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:2px;}
+.overlay-close{
+  position:fixed;top:3vh;right:3vw;z-index:10001;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:1rem;
+  color:var(--gold);background:none;border:1px solid var(--gold-mid);
+  border-radius:4px;padding:0.5vh 1vw;cursor:pointer;
+  letter-spacing:0.1em;
+  transition:background 0.2s,color 0.2s;
+}
+.overlay-close:hover{background:var(--gold);color:var(--bg);}
+.overlay h2{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:clamp(1.5rem,4vh,2.8rem);
+  text-transform:uppercase;color:var(--fg);margin-bottom:2vh;
+  line-height:1.1;
+}
+.overlay p{
+  font-family:'Newsreader',Georgia,serif;
+  font-size:clamp(0.85rem,1.5vh,1.1rem);
+  line-height:1.75;color:var(--muted);
+  margin-bottom:1.5vh;
+}
+.overlay p:first-of-type::first-letter{
+  font-size:3em;float:left;margin:0.05em 0.12em 0 0;
+  line-height:0.8;color:var(--gold);
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+}
+
+/* ── RESPONSIVE (mobile degrades gracefully to scroll) ── */
+@media(max-width:900px){
+  html,body{overflow:auto;height:auto;}
+  .poster{
+    grid-template-columns:1fr;
+    grid-template-rows:auto;
+    height:auto;
+  }
+  .poster > *{grid-column:1;grid-row:auto;border:none;border-bottom:1px solid var(--gold-dim);padding:3vh 5vw;}
+  .left-col,.center-col,.right-col{border-right:none;}
+  .overlay-content{max-width:90vw;}
+  .rank-tooltip{max-width:80vw;}
+  .big-number{font-size:clamp(3rem,15vw,6rem);}
+}
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <!-- TOP STRIP -->
+  <div class="top-strip">
+    <div class="masthead">
+      <span>THE JAILYARD DYNASTY</span>
+      <span class="dot"></span>
+      <span class="week-num">WEEK 9</span>
+      <span class="dot"></span>
+      <span>NOVEMBER 5, 2025</span>
+      <span class="dot"></span>
+      <span class="date">EST. 2022 &middot; 12 TEAMS &middot; DYNASTY</span>
+    </div>
+  </div>
+
+  <!-- LEFT COLUMN — Editorial -->
+  <div class="left-col">
+    <div class="section-label">THE COLUMN</div>
+    <h1 class="headline">
+      KEN-OBI <span class="gold">CORONATION:</span><br>
+      154 AND THE <span class="gold">THRONE</span><br>
+      IS NO LONGER<br>
+      <span class="gold">UP FOR DEBATE</span>
+    </h1>
+    <div class="essay-hook">
+      <p>There are weeks where the standings shift, and then there are weeks where the entire narrative of a season snaps into focus. Week 9 was the latter. General Ken-obi dropped 154.86 points on Kittler on the Roof and the margin wasn't close -- it was 62.48 points, the kind of beatdown that makes the rest of the league check their rosters and wonder if they're even playing the same game.</p>
+      <p>Drake London went nuclear with 34.3 points. Sam LaPorta added 18.7. Drake Maye looked like the future. Meanwhile, the former champ Kittler limped to 92.38 -- the lowest score of the week, the fourth straight loss, and a freefall from 4-1 to 4-5 that nobody in the group chat saw coming. Or maybe they did, and nobody wanted to say it.</p>
+      <p>At the top, three teams sit at 7-2, but only one of them just hung a 62-point margin on a former champion. Ken-obi is the scoring leader. Ken-obi has the best power score. Ken-obi already has two rings. The coronation isn't premature -- it's overdue.</p>
+    </div>
+    <button class="read-more" id="openEssay">TAP TO READ FULL COLUMN &rarr;</button>
+
+    <div class="awards-strip">
+      <div class="award-item">
+        <span class="award-label">High Scorer</span>
+        <span class="award-value">Ken-obi 154.86</span>
+      </div>
+      <div class="award-item">
+        <span class="award-label">Low Scorer</span>
+        <span class="award-value">Kittler 92.38</span>
+      </div>
+      <div class="award-item">
+        <span class="award-label">Closest Game</span>
+        <span class="award-value">Giants 136.8</span>
+        <span class="award-sub">vs Grayskull 134.76 (2.04 margin)</span>
+      </div>
+      <div class="award-item">
+        <span class="award-label">Top Performer</span>
+        <span class="award-value">Caleb Williams 37.7</span>
+        <span class="award-sub">QB &middot; CHI &middot; Noble FFT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER COLUMN — Big Number + Rankings -->
+  <div class="center-col">
+    <div class="big-number-zone" id="bigNumberZone">
+      <div class="big-number-tooltip" id="bigNumberTip">
+        Week-high score. Biggest margin of victory (62.48 pts) since league inception.
+      </div>
+      <div class="big-number-context">WEEK-HIGH SCORE</div>
+      <div class="big-number">154<span class="decimal">.86</span></div>
+      <div class="big-number-sub">General Ken-obi &middot; 2x Champion &middot; 7-2</div>
+    </div>
+
+    <div class="rankings-zone">
+      <div class="rankings-header">POWER RANKINGS</div>
+      <div id="rankingsTable"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN — Matchup, Chat, Trending -->
+  <div class="right-col">
+    <div class="motw-card">
+      <div class="motw-label">BLOWOUT OF THE WEEK</div>
+      <div class="motw-vs">
+        <div class="motw-team">
+          <div class="motw-team-name">General<br>Ken-obi</div>
+          <div class="motw-score winner">154.86</div>
+          <div class="motw-record">7-2 &middot; #1</div>
+        </div>
+        <div class="motw-divider">vs</div>
+        <div class="motw-team">
+          <div class="motw-team-name">Kittler on<br>the Roof</div>
+          <div class="motw-score">92.38</div>
+          <div class="motw-record">4-5 &middot; #8</div>
+        </div>
+      </div>
+      <div class="motw-detail">62.48 pt margin &middot; H2H: Ken-obi leads 6-2 all-time</div>
+    </div>
+
+    <div class="chat-zone">
+      <div class="section-label">OVERHEARD IN THE CHAT</div>
+      <div class="chat-quote" data-full="We're not changing rules like that midseason. Just as THUNTER was about to set the league on fire... he was going to be the alpha in that offense starting this week!! I hate fantasy football">
+        <div class="chat-sender">Brent Boone &middot; The Boonist Monks</div>
+        <div class="chat-text">"We're not changing rules like that midseason"</div>
+      </div>
+      <div class="chat-quote" data-full="Just as THUNTER was about to set the league on fire... he was going to be the alpha in that offense starting this week!! I hate fantasy football. With the attached photo of disappointment.">
+        <div class="chat-sender">Sacko</div>
+        <div class="chat-text">"Just as THUNTER was about to set the league on fire... I hate fantasy football"</div>
+      </div>
+      <div class="chat-quote" data-full="Maybe playing 2 ways as a rookie wasn't a good call. Neo weighing in on the injury debate.">
+        <div class="chat-sender">Neo</div>
+        <div class="chat-text">"Maybe playing 2 ways as a rookie wasn't a good call"</div>
+      </div>
+    </div>
+
+    <div class="trending-zone">
+      <div class="section-label">TRENDING</div>
+      <div class="trend-item">
+        <span class="trend-arrow hot">&uarr;</span>
+        <div class="trend-content"><strong>MHJTIME</strong> on a 5-game win streak. Quietly climbed to #2 with the most points scored (1,411.5) in the league.</div>
+      </div>
+      <div class="trend-item">
+        <span class="trend-arrow cold">&darr;</span>
+        <div class="trend-content"><strong>Legion of Bouz</strong> went from #1 to #5 after back-to-back losses. The former champ went silent in the chat.</div>
+      </div>
+      <div class="trend-item">
+        <span class="trend-arrow watch">&#9679;</span>
+        <div class="trend-content"><strong>Kittler</strong> freefall: 4-1 &rarr; 4-5. Four straight losses. Elo cratered from 1690 peak to 1488.</div>
+      </div>
+      <div class="trend-item">
+        <span class="trend-arrow hot">&uarr;</span>
+        <div class="trend-content"><strong>Rasheeing the Scene</strong> upset Legion 146.92-135.2. Three 7-2 teams at the top. The race is three-headed.</div>
+      </div>
+    </div>
+
+    <div class="next-week">
+      <div class="next-week-label">WEEK 10 PREVIEW</div>
+      <div class="next-matchup"><span class="rank-badge">#6</span> Boonist Monks <span class="vs">vs</span> <span class="rank-badge">#1</span> Ken-obi</div>
+      <div class="next-matchup"><span class="rank-badge">#3</span> Rasheeing <span class="vs">vs</span> <span class="rank-badge">#4</span> Sleeping Giants</div>
+      <div class="next-matchup"><span class="rank-badge">#7</span> Noble FFT <span class="vs">vs</span> <span class="rank-badge">#2</span> MHJTIME</div>
+      <div class="next-matchup"><span class="rank-badge">#8</span> Kittler <span class="vs">vs</span> <span class="rank-badge">#5</span> Legion</div>
+      <div class="next-matchup"><span class="rank-badge">#10</span> Burden <span class="vs">vs</span> <span class="rank-badge">#12</span> Chudders</div>
+      <div class="next-matchup"><span class="rank-badge">#11</span> Father Time <span class="vs">vs</span> <span class="rank-badge">#9</span> Grayskull</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM STRIP -->
+  <div class="bottom-strip">
+    <div class="pull-quote">
+      "Three teams at 7-2. One of them just won by <em>sixty-two points</em>. The other two should be nervous."
+    </div>
+  </div>
+
+</div>
+
+<!-- ESSAY OVERLAY -->
+<div class="overlay" id="essayOverlay">
+  <button class="overlay-close" id="closeEssay">ESC &middot; CLOSE</button>
+  <div class="overlay-content">
+    <h2>Ken-obi Coronation: 154 and the Throne Is No Longer Up for Debate</h2>
+    <p>There are weeks where the standings shift, and then there are weeks where the entire narrative of a season snaps into focus. Week 9 was the latter. General Ken-obi dropped 154.86 points on Kittler on the Roof and the margin wasn't close -- it was 62.48 points, the kind of beatdown that makes the rest of the league check their rosters and wonder if they're even playing the same game.</p>
+    <p>Drake London went nuclear with 34.3 points. Sam LaPorta added 18.7. Drake Maye looked like the future at quarterback with 16.36. Chase Brown chipped in 16.2 on the ground. Even the Rams defense put up 14. This wasn't a one-player explosion -- it was a full roster detonation against a Kittler team that couldn't crack triple digits.</p>
+    <p>And that's the real story of Week 9: the collapse of the defending champion. Kittler entered the season as preseason #6, rode a hot 4-1 start to the top of the standings by Week 5, and has now lost four straight. The 92.38 is the week's floor. Ka'imi Fairbairn, your kicker, outscored most of your skill players. That's not a bad week -- that's an identity crisis.</p>
+    <p>Meanwhile, three teams sit at 7-2 -- Ken-obi, Rasheeing the Scene, and Sleeping Giants -- but the pecking order isn't ambiguous. Ken-obi leads in points scored, power score, and Elo rating (1700.2, the highest in the league by 74 points). Rasheeing the Scene impressed with a 146.92-point upset of the former #1 Legion of Bouz, and Sleeping Giants survived a two-point nail-biter against Grayskull. All three won. Only one won by sixty-two.</p>
+    <p>The Legion's fall from grace continues. They entered Week 9 at #1 overall and left at #5, their second straight loss after a dominant 6-1 start. The chat went silent. McCaffrey dropped 31.8 but it wasn't enough. This is a team that looked untouchable through six weeks and now looks like every other contender with holes.</p>
+    <p>MHJTIME deserves the subplot. Five straight wins. League-leading 1,411.5 points scored. Rico Dowdle exploding for 27.1, Marvin Harrison at 19.1, and a roster that keeps finding production in unexpected places. They're the team nobody talks about, which is exactly how they want it.</p>
+    <p>At the bottom, it's triage. Grayskull, Burden, Father Time, and Chudders are all between 1-8 and 2-7. The playoff math is becoming cruel. But Burden finally won -- their first victory since Week 2 -- and Father Time has strung together two straight. Small mercies in a season that's already decided who's real and who's not.</p>
+    <p>Next week: Boonist Monks vs. Ken-obi is the headliner. Rasheeing the Scene vs. Sleeping Giants is the 7-2 showdown. And Kittler gets Legion, a former heavyweight bout that now feels like two fighters arguing over who's falling faster.</p>
+  </div>
+</div>
+
+<!-- RANK TOOLTIP -->
+<div class="rank-tooltip" id="rankTooltip">
+  <div class="tt-name"></div>
+  <div class="tt-meta"></div>
+  <div class="tt-blurb"></div>
+</div>
+
+<script>
+(function(){
+  /* ── STANDINGS DATA (from Sleeper API Week 9) ── */
+  var standings = [
+    {rank:1,name:"General Ken-obi",abbr:"KEN",record:"7-2",pts:154.86,pf:1348.0,elo:1700.2,move:1,color:"#c9a84c",streak:"W2",champs:2,blurb:"Drake London (34.3) and the full roster detonated for 154.86 -- the week high by 8 points. A 62.48-point margin over the defending champ. You don't just have the best record; you have the best everything. Two rings, highest Elo, most points per game. The league is playing for second place."},
+    {rank:2,name:"MHJTIME",abbr:"MHJ",record:"6-3",pts:144.48,pf:1411.5,elo:1585.7,move:1,color:"#8b5cf6",streak:"W5",champs:0,blurb:"Five straight wins and the league's leading scorer (1,411.5 total PF). Rico Dowdle exploded for 27.1, MHJ added 19.1, and Daniel Jones was... actually good? The quiet assassin of this league. Nobody's talking about you, which is exactly how empires are built."},
+    {rank:3,name:"Rasheeing the Scene",abbr:"RAS",record:"7-2",pts:146.92,pf:1278.8,elo:1626.0,move:1,color:"#ec4899",streak:"W3",champs:0,blurb:"Upset the #1 Legion 146.92-135.2. Josh Allen (28.82) doing Josh Allen things. Three straight wins, 7-2, and a schedule that's about to get real -- Sleeping Giants next. This is the week that separated you from the also-rans. Welcome to the top table."},
+    {rank:4,name:"Sleeping Giants",abbr:"SLP",record:"7-2",pts:136.8,pf:1280.2,elo:1561.1,move:1,color:"#6366f1",streak:"W1",champs:0,blurb:"Survived Grayskull by 2.04 points -- the week's closest game. Sam Darnold (28.2) doing his best 2024 impression. You're 7-2 but the Elo says you're the fourth-best team. The schedule gets harder. Time to prove the record isn't a mirage."},
+    {rank:5,name:"The Legion of Bouz",abbr:"LEG",record:"6-3",pts:135.2,pf:1369.4,elo:1604.3,move:-4,color:"#f97316",streak:"L2",champs:1,blurb:"From #1 to #5 in two weeks. McCaffrey dropped 31.8 and it didn't matter. The chat went silent -- always a tell. You were untouchable through six weeks and now you look mortal. Mahomes at 11.5 is a problem. The dynasty that won in 2022 needs a course correction fast."},
+    {rank:6,name:"The Boonist Monks",abbr:"BOO",record:"5-4",pts:130.36,pf:1345.0,elo:1599.6,move:0,color:"#14b8a6",streak:"L1",champs:0,blurb:"Lamar (25.56) and JSN (18.0) weren't enough against MHJTIME's machine. 5-4 and treading water. The most active chatter this week (46 messages) with nothing to show for it. Next up: Ken-obi. Good luck."},
+    {rank:7,name:"Noble FFT",abbr:"NOB",record:"5-4",pts:134.3,pf:1239.0,elo:1454.8,move:0,color:"#a855f7",streak:"L1",champs:0,blurb:"Caleb Williams dropped 37.7 -- the week's best individual performance -- and you still lost by 2.14. Tee Higgins (29.6) was brilliant. But your floor is too low when the QB cools off. The supporting cast needs to support."},
+    {rank:8,name:"Kittler on the Roof",abbr:"KIT",record:"4-5",pts:92.38,pf:1202.7,elo:1488.2,move:0,color:"#ef4444",streak:"L4",champs:1,blurb:"92.38. The lowest score of the week by 28 points. Your kicker outscored most of your lineup. Four straight losses, Elo in freefall from 1690 to 1488. The defending champion is spiraling and the chat has noticed. From 4-1 to 4-5. That's not regression -- that's a reckoning."},
+    {rank:9,name:"Ghastly Grayskull Gang",abbr:"GRY",record:"2-7",pts:134.76,pf:1180.8,elo:1324.5,move:0,color:"#64748b",streak:"L5",champs:0,blurb:"Lost by 2.04 to the Giants in the week's closest game. Brock Bowers went off for 37.3 and it still wasn't enough. Five straight losses. The young talent is there -- Stroud, Bowers, the picks -- but the wins aren't coming yet."},
+    {rank:10,name:"Burden of Etienne-y Woody",abbr:"BUR",record:"2-7",pts:136.44,pf:1115.9,elo:1323.5,move:1,color:"#78716c",streak:"W1",champs:0,blurb:"Your first win since Week 2. Jaxson Dart (27.24), Kyle Monangai (21.3), and the vibes were immaculate. 136.44 proves the roster can compete when everything clicks. The problem is it almost never clicks. But tonight? Tonight you celebrate."},
+    {rank:11,name:"Father Time",abbr:"FTM",record:"2-7",pts:137.52,pf:1111.9,elo:1329.9,move:-1,color:"#22d3ee",streak:"W2",champs:0,blurb:"Two straight wins and 137.52 this week. Davante Adams (20.5), Bo Nix (19.52), and the Ravens D (19.0) all showed up. You're still 2-7 but the arrow is pointing up. The spoiler arc begins."},
+    {rank:12,name:"Chudders Football Team",abbr:"CHU",record:"1-8",pts:120.9,pf:1080.8,elo:1402.1,move:0,color:"#f472b6",streak:"L4",champs:0,blurb:"Justin Herbert (28.7) deserves better than this. 1-8 with the rebuild in full swing -- Gibbs, Jeanty, and a pile of first-round picks. You're not playing for 2025 and everyone knows it. The draft capital is coming. The pain is now."}
+  ];
+
+  var maxPf = 0;
+  standings.forEach(function(t){ if(t.pf > maxPf) maxPf = t.pf; });
+
+  /* ── BUILD RANKINGS TABLE (safe DOM construction) ── */
+  var table = document.getElementById('rankingsTable');
+
+  standings.forEach(function(t){
+    var moveClass = t.move > 0 ? 'up' : t.move < 0 ? 'down' : 'steady';
+    var moveText = t.move > 0 ? '\u2191'+t.move : t.move < 0 ? '\u2193'+Math.abs(t.move) : '\u2014';
+    var barPct = ((t.pf / maxPf) * 100).toFixed(1);
+
+    var row = document.createElement('div');
+    row.className = 'rank-row';
+    row.dataset.idx = String(t.rank);
+
+    var numSpan = document.createElement('span');
+    numSpan.className = 'rank-num';
+    numSpan.textContent = t.rank;
+
+    var dotSpan = document.createElement('span');
+    dotSpan.className = 'rank-dot';
+    dotSpan.style.background = t.color;
+
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'rank-name';
+    nameSpan.textContent = t.abbr;
+
+    var recSpan = document.createElement('span');
+    recSpan.className = 'rank-record';
+    recSpan.textContent = t.record;
+
+    var moveSpan = document.createElement('span');
+    moveSpan.className = 'rank-move ' + moveClass;
+    moveSpan.textContent = moveText;
+
+    var barWrap = document.createElement('span');
+    barWrap.className = 'rank-bar-wrap';
+    var bar = document.createElement('span');
+    bar.className = 'rank-bar';
+    bar.style.width = barPct + '%';
+    bar.style.background = t.color;
+    barWrap.appendChild(bar);
+
+    row.appendChild(numSpan);
+    row.appendChild(dotSpan);
+    row.appendChild(nameSpan);
+    row.appendChild(recSpan);
+    row.appendChild(moveSpan);
+    row.appendChild(barWrap);
+    table.appendChild(row);
+  });
+
+  /* ── RANK TOOLTIP ON HOVER ── */
+  var tooltip = document.getElementById('rankTooltip');
+  var rows = document.querySelectorAll('.rank-row');
+  rows.forEach(function(row){
+    var idx = parseInt(row.dataset.idx) - 1;
+    var t = standings[idx];
+
+    row.addEventListener('mouseenter', function(){
+      tooltip.querySelector('.tt-name').textContent = t.name;
+      tooltip.querySelector('.tt-meta').textContent = t.record + ' \u00B7 ' + t.pts + ' pts \u00B7 Elo ' + t.elo.toFixed(0) + ' \u00B7 ' + t.streak + (t.champs ? ' \u00B7 ' + t.champs + 'x Champ' : '');
+      tooltip.querySelector('.tt-blurb').textContent = t.blurb;
+      var rect = row.getBoundingClientRect();
+      tooltip.style.left = (rect.right + 12) + 'px';
+      tooltip.style.top = Math.max(10, rect.top - 20) + 'px';
+      /* keep tooltip on screen */
+      requestAnimationFrame(function(){
+        if(rect.right + 12 + tooltip.offsetWidth > window.innerWidth){
+          tooltip.style.left = (rect.left - tooltip.offsetWidth - 12) + 'px';
+        }
+      });
+      tooltip.classList.add('visible');
+    });
+    row.addEventListener('mouseleave', function(){
+      tooltip.classList.remove('visible');
+    });
+  });
+
+  /* mobile tap for rank tooltip */
+  if('ontouchstart' in window){
+    var activeRow = null;
+    rows.forEach(function(row){
+      row.addEventListener('click', function(){
+        var idx = parseInt(row.dataset.idx) - 1;
+        var t = standings[idx];
+        if(activeRow === row){
+          tooltip.classList.remove('visible');
+          activeRow = null;
+        } else {
+          tooltip.querySelector('.tt-name').textContent = t.name;
+          tooltip.querySelector('.tt-meta').textContent = t.record + ' \u00B7 ' + t.pts + ' pts \u00B7 Elo ' + t.elo.toFixed(0);
+          tooltip.querySelector('.tt-blurb').textContent = t.blurb;
+          tooltip.style.left = '5vw';
+          tooltip.style.top = 'auto';
+          tooltip.style.bottom = '2vh';
+          tooltip.classList.add('visible');
+          activeRow = row;
+        }
+      });
+    });
+  }
+
+  /* ── ESSAY OVERLAY ── */
+  var overlay = document.getElementById('essayOverlay');
+  document.getElementById('openEssay').addEventListener('click', function(){
+    overlay.classList.add('open');
+  });
+  document.getElementById('closeEssay').addEventListener('click', function(){
+    overlay.classList.remove('open');
+  });
+  overlay.addEventListener('click', function(e){
+    if(e.target === overlay) overlay.classList.remove('open');
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') overlay.classList.remove('open');
+  });
+
+  /* ── CHAT QUOTE EXPAND ── */
+  document.querySelectorAll('.chat-quote').forEach(function(q){
+    q.addEventListener('click', function(){
+      var text = q.querySelector('.chat-text');
+      var full = q.dataset.full;
+      if(text.style.webkitLineClamp === 'unset'){
+        text.style.webkitLineClamp = '2';
+        text.style.display = '-webkit-box';
+      } else {
+        text.textContent = '"' + full + '"';
+        text.style.webkitLineClamp = 'unset';
+        text.style.display = 'block';
+      }
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

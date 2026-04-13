@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CIC STATION 06 // JAILYARD SIGNALS // WEEK 06 OPERATIONAL REPORT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050b14;
+    --bg2:#071322;
+    --panel:#08182a;
+    --panel2:#0b2135;
+    --border:#153349;
+    --border2:#1f4660;
+    --grid:#0e2a3e;
+    --ring:#1b3a52;
+    --fg:#b9e6d4;
+    --muted:#4d7a8a;
+    --dim:#2d5368;
+    --accent:#00c878;
+    --accent2:#a0ff50;
+    --warn:#ffaa00;
+    --bad:#ff3355;
+    --info:#3aa6ff;
+    --shadow:0 0 0 1px var(--border), 0 0 24px rgba(0,200,120,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:'IBM Plex Mono',ui-monospace,Consolas,Menlo,monospace;font-size:12px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 800px at 50% 30%, #0a1e2e 0%, #050b14 55%, #02060b 100%),
+      var(--bg);
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,200,120,.035) 0 1px, transparent 1px 3px),
+      radial-gradient(circle at 30% 20%, rgba(0,200,120,.05), transparent 60%);
+    mix-blend-mode:screen;
+  }
+  body::after{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:
+      radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.65) 100%);
+  }
+  .wrap{position:relative;z-index:5;max-width:1600px;margin:0 auto;padding:14px 18px 40px}
+
+  .topbar{
+    display:grid;grid-template-columns: auto 1fr auto auto;gap:18px;align-items:center;
+    padding:10px 14px;border:1px solid var(--border);background:linear-gradient(180deg,var(--panel),var(--bg2));
+    box-shadow:var(--shadow);
+  }
+  .topbar .brand{
+    display:flex;align-items:center;gap:10px;
+  }
+  .diamond{
+    width:10px;height:10px;transform:rotate(45deg);
+    background:var(--accent);box-shadow:0 0 8px var(--accent), inset 0 0 3px #022;
+  }
+  .brand b{color:var(--accent2);letter-spacing:.08em;font-weight:600}
+  .brand .sep{color:var(--dim);margin:0 6px}
+  .brand .sub{color:var(--muted)}
+  .status-chip{
+    padding:3px 10px;border:1px solid var(--accent);color:var(--accent);background:rgba(0,200,120,.06);
+    font-weight:600;letter-spacing:.1em;font-size:11px;
+  }
+  .ts{color:var(--muted);font-size:11px;letter-spacing:.05em}
+  .ts b{color:var(--fg)}
+
+  .bearingstrip{
+    margin-top:6px;padding:6px 14px;border:1px solid var(--border);border-top:none;
+    display:flex;gap:24px;align-items:center;font-size:11px;color:var(--muted);
+    background:rgba(8,24,42,.6);flex-wrap:wrap;
+  }
+  .bearingstrip span b{color:var(--accent2);font-weight:500}
+  .bearingstrip .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:6px;box-shadow:0 0 6px var(--accent)}
+
+  .grid{
+    display:grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap:14px;margin-top:14px;
+  }
+  @media (max-width:1200px){
+    .grid{grid-template-columns:1fr;}
+  }
+  .panel{
+    border:1px solid var(--border);
+    background:linear-gradient(180deg,var(--panel) 0%, var(--bg2) 100%);
+    box-shadow:var(--shadow);
+    position:relative;
+  }
+  .panel h3{
+    margin:0;padding:8px 12px;font-size:11px;font-weight:600;letter-spacing:.12em;
+    color:var(--accent2);border-bottom:1px solid var(--border);
+    background:rgba(10,30,46,.6);display:flex;justify-content:space-between;align-items:center;
+  }
+  .panel h3 .id{color:var(--muted);font-weight:400;font-size:10px}
+  .panel .body{padding:12px}
+
+  .coi-item{
+    border-left:2px solid var(--dim);
+    padding:8px 10px;margin-bottom:10px;
+    background:rgba(6,18,32,.6);
+    position:relative;
+  }
+  .coi-item.hvt{border-left-color:var(--accent2)}
+  .coi-item.rogue{border-left-color:var(--warn)}
+  .coi-item.converge{border-left-color:var(--info)}
+  .coi-item.asc{border-left-color:var(--accent)}
+  .coi-item.cellar{border-left-color:var(--bad)}
+  .coi-tag{
+    display:inline-block;font-size:10px;letter-spacing:.1em;padding:2px 6px;
+    color:var(--bg);background:var(--accent2);font-weight:600;
+  }
+  .coi-item.rogue .coi-tag{background:var(--warn)}
+  .coi-item.converge .coi-tag{background:var(--info);color:#021126}
+  .coi-item.asc .coi-tag{background:var(--accent)}
+  .coi-item.cellar .coi-tag{background:var(--bad);color:#fff}
+  .coi-title{margin-top:6px;color:var(--fg);font-size:12px;font-weight:600;letter-spacing:.03em}
+  .coi-sub{color:var(--muted);font-size:11px;margin-top:2px}
+  .coi-stat{color:var(--accent);font-size:11px;margin-top:6px;font-weight:500}
+  .coi-item.rogue .coi-stat{color:var(--warn)}
+  .coi-item.converge .coi-stat{color:var(--info)}
+  .coi-item.cellar .coi-stat{color:var(--bad)}
+
+  .scope-wrap{padding:12px;display:flex;flex-direction:column;align-items:center}
+  .scope-meta{
+    width:100%;display:flex;justify-content:space-between;color:var(--muted);font-size:10.5px;
+    letter-spacing:.1em;padding:0 4px 8px;flex-wrap:wrap;gap:6px;
+  }
+  .scope-meta b{color:var(--accent);font-weight:500}
+  .scope-canvas-box{
+    position:relative;
+    width:100%;
+    aspect-ratio:1/1;
+    max-width:720px;
+  }
+  canvas#scope{
+    display:block;width:100%;height:100%;
+    background:radial-gradient(circle at center, #051828 0%, #02101c 55%, #01070e 100%);
+    border:1px solid var(--border2);
+  }
+  .scope-hint{
+    margin-top:8px;color:var(--muted);font-size:10.5px;letter-spacing:.08em;text-align:center;
+  }
+  .scope-hint b{color:var(--accent2)}
+  .scope-readout{
+    margin-top:10px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;
+  }
+  .readout{
+    border:1px solid var(--border);padding:6px 8px;background:rgba(6,18,32,.6);
+  }
+  .readout .l{color:var(--muted);font-size:10px;letter-spacing:.1em}
+  .readout .v{color:var(--accent);font-size:14px;font-weight:600}
+  .readout.warn .v{color:var(--warn)}
+  .readout.bad .v{color:var(--bad)}
+  .readout.info .v{color:var(--info)}
+
+  .digest{padding:4px 0}
+  .digest .row{
+    display:grid;grid-template-columns: 22px 1fr auto;gap:8px;align-items:center;
+    padding:7px 12px;border-bottom:1px dashed var(--border);
+  }
+  .digest .row:last-child{border-bottom:none}
+  .rank{
+    font-size:10px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;
+  }
+  .desig{font-weight:600;color:var(--fg);letter-spacing:.04em;font-size:11px;}
+  .desig .init{color:var(--accent2);font-size:10px;margin-right:6px}
+  .desig small{display:block;color:var(--muted);font-weight:400;font-size:10px;margin-top:1px;letter-spacing:0}
+  .metrics{text-align:right;font-size:10px;color:var(--muted);line-height:1.35}
+  .metrics .elo{color:var(--accent);font-weight:600;font-size:11px}
+  .metrics .mv{display:inline-block;margin-left:4px}
+  .metrics .mv.up{color:var(--accent2)}
+  .metrics .mv.dn{color:var(--bad)}
+  .metrics .mv.flat{color:var(--muted)}
+
+  .bogey{
+    margin-top:14px;border:1px solid var(--border);
+    background:linear-gradient(180deg,var(--panel),var(--bg2));
+    box-shadow:var(--shadow);
+  }
+  .bogey h3{
+    margin:0;padding:8px 12px;font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--accent2);
+    border-bottom:1px solid var(--border);background:rgba(10,30,46,.6);display:flex;justify-content:space-between;
+  }
+  .bogey h3 .meta{color:var(--muted);font-weight:400}
+  .bogey-grid{
+    padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  }
+  @media (max-width:900px){.bogey-grid{grid-template-columns:1fr}}
+  .bogey-row{
+    border:1px solid var(--border);padding:10px 12px;background:rgba(6,18,32,.55);
+    position:relative;
+  }
+  .bogey-row::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent);
+  }
+  .bogey-row.upset::before{background:var(--warn)}
+  .bogey-row.blowout::before{background:var(--bad)}
+  .bogey-tag{
+    font-size:10px;letter-spacing:.12em;color:var(--accent);font-weight:600;
+  }
+  .bogey-row.upset .bogey-tag{color:var(--warn)}
+  .bogey-row.blowout .bogey-tag{color:var(--bad)}
+  .bogey-line{margin-top:4px;color:var(--fg);font-size:12px}
+  .bogey-line .w{color:var(--accent2)}
+  .bogey-line .l{color:var(--muted)}
+  .bogey-note{margin-top:4px;color:var(--muted);font-size:10.5px;font-style:italic}
+
+  .forecast{
+    margin-top:14px;border:1px solid var(--border);
+    background:linear-gradient(180deg,var(--panel),var(--bg2));
+  }
+  .forecast h3{
+    margin:0;padding:8px 12px;font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--accent2);
+    border-bottom:1px solid var(--border);background:rgba(10,30,46,.6);
+  }
+  .forecast-grid{
+    padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  }
+  @media (max-width:900px){.forecast-grid{grid-template-columns:1fr}}
+  .fx{border:1px dashed var(--border2);padding:8px 10px;background:rgba(4,12,22,.6)}
+  .fx .h{color:var(--muted);font-size:10px;letter-spacing:.1em}
+  .fx .m{color:var(--fg);font-size:12px;margin-top:2px}
+  .fx.marquee{border:1px solid var(--accent);background:rgba(0,200,120,.05)}
+  .fx.marquee .h{color:var(--accent)}
+  .fx.toilet{border-color:var(--bad)}
+  .fx.toilet .h{color:var(--bad)}
+
+  footer{
+    margin-top:18px;padding:10px 14px;color:var(--muted);font-size:10.5px;
+    display:flex;justify-content:space-between;border-top:1px solid var(--border);flex-wrap:wrap;gap:8px;
+  }
+  footer b{color:var(--accent)}
+
+  ::selection{background:var(--accent);color:#021}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="diamond"></span>
+      <b>CIC STATION 06</b>
+      <span class="sep">//</span>
+      <span>JAILYARD SIGNALS</span>
+      <span class="sep">//</span>
+      <span class="sub">WEEK 06 OPERATIONAL REPORT</span>
+    </div>
+    <div></div>
+    <div class="ts">SIG/TS <b>2025-W06 / 1847Z</b> &nbsp; &middot; &nbsp; CYCLE 06/14 &nbsp; &middot; &nbsp; OP <b>CHAOS-SUNDAY</b></div>
+    <div class="status-chip">STATUS: GREEN</div>
+  </header>
+  <div class="bearingstrip">
+    <span><span class="dot"></span>TRACKING <b>12</b> CONTACTS</span>
+    <span>NEW UPSETS <b>4/6</b></span>
+    <span>LEAGUE AVG PPG <b>138.5</b></span>
+    <span>WK06 AVG <b>128.7</b></span>
+    <span>WEEK HIGH <b>165.90 LB</b></span>
+    <span>WEEK LOW <b>95.26 CF</b></span>
+    <span>CYCLES PLAYED <b>06/14</b></span>
+  </div>
+
+  <div class="grid">
+
+    <aside class="panel">
+      <h3>CONTACTS OF INTEREST <span class="id">// COI-06</span></h3>
+      <div class="body">
+
+        <div class="coi-item hvt">
+          <span class="coi-tag">HIGH VALUE TARGET</span>
+          <div class="coi-title">BIJAN ROBINSON &mdash; RB/ATL</div>
+          <div class="coi-sub">Asset: NOBLE FFT (kevobucks)</div>
+          <div class="coi-stat">32.8 PTS &middot; TOP PERFORMER WK06</div>
+        </div>
+
+        <div class="coi-item rogue">
+          <span class="coi-tag">ROGUE CONTACT</span>
+          <div class="coi-title">KITTLER ON THE ROOF</div>
+          <div class="coi-sub">bchodos &middot; def. champion &middot; rank 1 &rarr; 5</div>
+          <div class="coi-stat">107.74 vs MHJTIME 140.94 &middot; &minus;4 MVMT</div>
+        </div>
+
+        <div class="coi-item converge">
+          <span class="coi-tag">CONVERGING CONTACTS</span>
+          <div class="coi-title">LEGION OF BOUZ &harr; KEN-OBI</div>
+          <div class="coi-sub">Intercept window: WEEK 07 marquee</div>
+          <div class="coi-stat">5-1 vs 5-1 &middot; both scored ~165 this cycle</div>
+        </div>
+
+        <div class="coi-item asc">
+          <span class="coi-tag">ASCENDING</span>
+          <div class="coi-title">GENERAL KEN-OBI</div>
+          <div class="coi-sub">bLaker24 &middot; Elo 1700 (peak) &middot; +3 MVMT</div>
+          <div class="coi-stat">2x champ trajectory climbing</div>
+        </div>
+
+        <div class="coi-item cellar">
+          <span class="coi-tag">CELLAR ZONE</span>
+          <div class="coi-title">BURDEN &middot; FATHER TIME</div>
+          <div class="coi-sub">Both 0-6 &middot; L6 streak &middot; WK07 meet</div>
+          <div class="coi-stat">TOILET BOWL MATINEE</div>
+        </div>
+
+      </div>
+    </aside>
+
+    <section class="panel">
+      <h3>TACTICAL SCOPE &mdash; POWER RANK PLOT <span class="id">// RNG: PPG &middot; BRG: ROSTER</span></h3>
+      <div class="scope-wrap">
+        <div class="scope-meta">
+          <span>RANGE <b>1 &rarr; 12</b> (center = #1)</span>
+          <span>SWEEP <b id="sweepDeg">060&deg;</b> &middot; MOVE MOUSE / SCROLL</span>
+          <span>MODE <b>STATIC PLOT</b></span>
+        </div>
+        <div class="scope-canvas-box">
+          <canvas id="scope" width="720" height="720" aria-label="Radar scope showing 12 team contacts"></canvas>
+        </div>
+        <div class="scope-hint">HOVER INSIDE SCOPE TO REBEARING SWEEP &middot; <b>DIAMONDS</b> = CONTACT &middot; <b>!</b> = UPSET &middot; <b>&#9632;</b> = BLOWOUT VICTIM</div>
+        <div class="scope-readout">
+          <div class="readout"><div class="l">CONTACTS</div><div class="v">12</div></div>
+          <div class="readout warn"><div class="l">UPSETS</div><div class="v">04</div></div>
+          <div class="readout bad"><div class="l">BLOWOUTS &gt;50</div><div class="v">02</div></div>
+          <div class="readout info"><div class="l">UNDEFEATED</div><div class="v">02</div></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <h3>INTELLIGENCE DIGEST <span class="id">// BY ELO</span></h3>
+      <div class="digest" id="digest"></div>
+    </aside>
+  </div>
+
+  <section class="bogey">
+    <h3>WEEK 06 BOGEY REPORT <span class="meta">// 6 ENGAGEMENTS &middot; 4 UPSETS &middot; 2 BLOWOUTS</span></h3>
+    <div class="bogey-grid">
+
+      <div class="bogey-row blowout">
+        <div class="bogey-tag">NEUTRALIZED &middot; BIGGEST BLOWOUT &middot; +65.74</div>
+        <div class="bogey-line"><span class="w">GENERAL KEN-OBI 164.94</span> def. <span class="l">BURDEN OF ETIENNE-Y WOODY 99.20</span></div>
+        <div class="bogey-note">LAR DEF 27.0, Drake London 26.8, Drake Maye 26.24 &mdash; full firepower salvo.</div>
+      </div>
+
+      <div class="bogey-row blowout">
+        <div class="bogey-tag">NEUTRALIZED &middot; WEEK HIGH &middot; +58.24</div>
+        <div class="bogey-line"><span class="w">LEGION OF BOUZ 165.90</span> def. <span class="l">FATHER TIME 107.66</span></div>
+        <div class="bogey-note">Mahomes 30.48, Cam Skattebo 30.0, CMC 20.6 &mdash; top score of cycle.</div>
+      </div>
+
+      <div class="bogey-row upset">
+        <div class="bogey-tag">UPSET INTERCEPT &middot; +41.36</div>
+        <div class="bogey-line"><span class="w">THE BOONIST MONKS 150.46</span> def. <span class="l">RASHEEING THE SCENE 109.10</span></div>
+        <div class="bogey-note">Pickens 27.3, JSN 26.2 &mdash; Monks jump +2 into the 4-2 pack.</div>
+      </div>
+
+      <div class="bogey-row upset">
+        <div class="bogey-tag">UPSET INTERCEPT &middot; +33.20 &middot; CHAMP DOWN</div>
+        <div class="bogey-line"><span class="w">MHJTIME 140.94</span> def. <span class="l">KITTLER ON THE ROOF 107.74</span></div>
+        <div class="bogey-note">Rico Dowdle 30.9, Jayden Daniels 22.64. Kittler falls from #1 to #5.</div>
+      </div>
+
+      <div class="bogey-row upset">
+        <div class="bogey-tag">UPSET INTERCEPT &middot; +30.58</div>
+        <div class="bogey-line"><span class="w">NOBLE FFT 151.88</span> def. <span class="l">GHASTLY GRAYSKULL GANG 121.30</span></div>
+        <div class="bogey-note">Bijan 32.8, Caleb Williams 19.88 &mdash; 2-3 before cycle, now 3-3.</div>
+      </div>
+
+      <div class="bogey-row">
+        <div class="bogey-tag">NEUTRALIZED &middot; +34.56</div>
+        <div class="bogey-line"><span class="w">SLEEPING GIANTS 129.82</span> def. <span class="l">CHUDDERS FT 95.26</span></div>
+        <div class="bogey-note">Josh Jacobs 29.5, Jalen Hurts 21.62 &mdash; Giants push W4 streak.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="forecast">
+    <h3>WEEK 07 FORECAST &mdash; TRACKED ENGAGEMENTS</h3>
+    <div class="forecast-grid">
+      <div class="fx marquee">
+        <div class="h">MARQUEE &middot; #1 vs #2</div>
+        <div class="m">LEGION OF BOUZ <b>vs</b> GENERAL KEN-OBI</div>
+      </div>
+      <div class="fx">
+        <div class="h">CHAMP COUNTER &middot; #5 vs #3</div>
+        <div class="m">KITTLER ON THE ROOF <b>vs</b> SLEEPING GIANTS</div>
+      </div>
+      <div class="fx">
+        <div class="h">CONTENDER WATCH &middot; #4 vs #8</div>
+        <div class="m">BOONIST MONKS <b>vs</b> NOBLE FFT</div>
+      </div>
+      <div class="fx">
+        <div class="h">MID PACK &middot; #6 vs #9</div>
+        <div class="m">RASHEEING THE SCENE <b>vs</b> GHASTLY GRAYSKULL GANG</div>
+      </div>
+      <div class="fx">
+        <div class="h">STRUGGLE BUS &middot; #10 vs #7</div>
+        <div class="m">CHUDDERS FT <b>vs</b> MHJTIME</div>
+      </div>
+      <div class="fx toilet">
+        <div class="h">TOILET BOWL MATINEE &middot; #11 vs #12</div>
+        <div class="m">BURDEN OF ETIENNE-Y WOODY <b>vs</b> FATHER TIME</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>CIC STATION 06 &middot; JAILYARD SIGNALS &middot; OPERATIONAL &middot; NEXT CYCLE SYNC: 2025-W07</span>
+    <span>SIGNATURE <b>JY/06/CHAOS</b> &middot; NO INFINITE LOOPS IN RADAR SWEEP &middot; FEED: SLEEPER</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ---------- DATA (Week 6, Season 2025) ----------
+  var TEAMS = [
+    { rank:1,  init:'LB', name:'The Legion of Bouz',        owner:'KidBouzie',    rec:'5-1', pf:935.7, wk:165.90, mv:+1, streak:'W1', elo:1604, tier:'Frisky',            titles:1 },
+    { rank:2,  init:'GK', name:'General Ken-obi',           owner:'bLaker24',     rec:'5-1', pf:871.2, wk:164.94, mv:+3, streak:'W2', elo:1700, tier:'Contender',         titles:2 },
+    { rank:3,  init:'SG', name:'Sleeping Giants',           owner:'zbcowan',      rec:'5-1', pf:857.0, wk:129.82, mv: 0, streak:'W4', elo:1561, tier:'Frisky',            titles:0 },
+    { rank:4,  init:'BM', name:'The Boonist Monks',         owner:'GauchoTrain',  rec:'4-2', pf:912.9, wk:150.46, mv:+2, streak:'W1', elo:1599, tier:'Frisky',            titles:0 },
+    { rank:5,  init:'KR', name:'Kittler on the Roof',       owner:'bchodos',      rec:'4-2', pf:877.9, wk:107.74, mv:-4, streak:'L1', elo:1488, tier:'Contender',         titles:1 },
+    { rank:6,  init:'RS', name:'Rasheeing the Scene',       owner:'ToreroGaucho', rec:'4-2', pf:816.0, wk:109.10, mv:-2, streak:'L1', elo:1626, tier:'Frisky',            titles:0 },
+    { rank:7,  init:'MH', name:'MHJTIME',                   owner:'rango_',       rec:'3-3', pf:891.9, wk:140.94, mv: 0, streak:'W2', elo:1586, tier:'Contender',         titles:0 },
+    { rank:8,  init:'NF', name:'Noble FFT',                 owner:'kevobucks',    rec:'3-3', pf:819.0, wk:151.88, mv:+1, streak:'W1', elo:1455, tier:'Frisky',            titles:0 },
+    { rank:9,  init:'GG', name:'Ghastly Grayskull Gang',    owner:'GrayskullXX',  rec:'2-4', pf:818.3, wk:121.30, mv:-1, streak:'L2', elo:1324, tier:'Frisky',            titles:0 },
+    { rank:10, init:'CF', name:'Chudders Football Team',    owner:'Chudders',     rec:'1-5', pf:727.9, wk: 95.26, mv: 0, streak:'L1', elo:1402, tier:'Trust the Process', titles:0 },
+    { rank:11, init:'BE', name:'Burden of Etienne-y Woody', owner:'kharlow',      rec:'0-6', pf:732.7, wk: 99.20, mv: 0, streak:'L6', elo:1324, tier:'Fraud',             titles:0 },
+    { rank:12, init:'FT', name:'Father Time',               owner:'Redrumsregrub',rec:'0-6', pf:712.7, wk:107.66, mv: 0, streak:'L6', elo:1330, tier:'Frisky',            titles:0 }
+  ];
+
+  var FLAGS = {
+    'NF': { flag:'upset' },
+    'MH': { flag:'upset' },
+    'BM': { flag:'upset' },
+    'KR': { flag:'fell'  },
+    'LB': { flag:'blowout' },
+    'GK': { flag:'blowout' },
+    'BE': { flag:'victim' },
+    'FT': { flag:'victim' }
+  };
+
+  var BEARING_BY_RANK = {
+    1:  345,
+    2:   30,
+    3:   72,
+    4:  115,
+    5:  155,
+    6:  200,
+    7:  230,
+    8:  265,
+    9:  300,
+    10: 125,
+    11: 210,
+    12: 335
+  };
+
+  // ---------- INTELLIGENCE DIGEST (safe DOM construction) ----------
+  var digest = document.getElementById('digest');
+  var byElo = TEAMS.slice().sort(function(a,b){ return b.elo - a.elo; });
+  byElo.forEach(function(t, i){
+    var row = document.createElement('div');
+    row.className = 'row';
+
+    var rankCell = document.createElement('div');
+    rankCell.className = 'rank';
+    rankCell.textContent = String(i+1).padStart(2,'0');
+
+    var desig = document.createElement('div');
+    desig.className = 'desig';
+    var init = document.createElement('span');
+    init.className = 'init';
+    init.textContent = '['+t.init+']';
+    desig.appendChild(init);
+    desig.appendChild(document.createTextNode(t.name.toUpperCase()));
+    var sub = document.createElement('small');
+    sub.textContent = t.owner + ' \u00B7 ' + t.rec + ' \u00B7 ' + t.tier.toUpperCase() + ' \u00B7 ' + t.streak;
+    desig.appendChild(sub);
+
+    var metrics = document.createElement('div');
+    metrics.className = 'metrics';
+    var elo = document.createElement('span');
+    elo.className = 'elo';
+    elo.textContent = String(t.elo);
+    metrics.appendChild(elo);
+    metrics.appendChild(document.createTextNode(' '));
+    var mvCls = t.mv > 0 ? 'up' : (t.mv < 0 ? 'dn' : 'flat');
+    var mvTxt = t.mv > 0 ? '\u25B2'+t.mv : (t.mv < 0 ? '\u25BC'+Math.abs(t.mv) : '\u25CB 0');
+    var mv = document.createElement('span');
+    mv.className = 'mv ' + mvCls;
+    mv.textContent = mvTxt;
+    metrics.appendChild(mv);
+    metrics.appendChild(document.createElement('br'));
+    var sm = document.createElement('small');
+    sm.textContent = t.wk.toFixed(2) + '  pf ' + t.pf.toFixed(1);
+    metrics.appendChild(sm);
+
+    row.appendChild(rankCell);
+    row.appendChild(desig);
+    row.appendChild(metrics);
+    digest.appendChild(row);
+  });
+
+  // ---------- CANVAS RADAR SCOPE ----------
+  var canvas = document.getElementById('scope');
+  var ctx = canvas.getContext('2d');
+  var cssW = 720, cssH = 720;
+  var sweepDeg = 60;
+
+  function resize(){
+    var rect = canvas.getBoundingClientRect();
+    cssW = Math.max(300, Math.floor(rect.width));
+    cssH = Math.max(300, Math.floor(rect.height));
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width  = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function polar(cx, cy, r, deg){
+    var rad = (deg - 90) * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  }
+
+  function draw(){
+    var w = cssW, h = cssH;
+    ctx.clearRect(0, 0, w, h);
+
+    var cx = w/2, cy = h/2;
+    var outer = Math.min(w, h) * 0.46;
+    var inner = outer * 0.06;
+
+    var bg = ctx.createRadialGradient(cx, cy, inner, cx, cy, outer*1.1);
+    bg.addColorStop(0, 'rgba(0,60,45,.35)');
+    bg.addColorStop(0.6, 'rgba(0,30,22,.25)');
+    bg.addColorStop(1, 'rgba(0,10,18,.7)');
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.arc(cx, cy, outer, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.lineWidth = 1;
+    for (var i = 1; i <= 5; i++){
+      var r = inner + (outer - inner) * (i/5);
+      ctx.strokeStyle = 'rgba(0,200,120,'+(0.10 + i*0.03)+')';
+      ctx.setLineDash(i === 5 ? [] : [2, 4]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    var bandLabels = [
+      { r:1, txt:'#1-2 ELITE' },
+      { r:2, txt:'#3-5 CONTENDER' },
+      { r:3, txt:'#6-8 MID' },
+      { r:4, txt:'#9-10 FRINGE' },
+      { r:5, txt:'#11-12 CELLAR' }
+    ];
+    ctx.fillStyle = 'rgba(77,122,138,.8)';
+    ctx.font = '9px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'left';
+    bandLabels.forEach(function(b){
+      var rr = inner + (outer - inner) * (b.r/5);
+      ctx.fillText(b.txt, cx + 6, cy - rr + 10);
+    });
+
+    ctx.strokeStyle = 'rgba(0,200,120,.22)';
+    ctx.beginPath();
+    ctx.moveTo(cx - outer, cy); ctx.lineTo(cx + outer, cy);
+    ctx.moveTo(cx, cy - outer); ctx.lineTo(cx, cy + outer);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(0,200,120,.3)';
+    ctx.fillStyle = 'rgba(160,255,80,.65)';
+    ctx.font = '9px "IBM Plex Mono", monospace';
+    for (var a = 0; a < 360; a += 30){
+      var p1 = polar(cx, cy, outer - 4, a);
+      var p2 = polar(cx, cy, outer + 2, a);
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+      if (a % 90 === 0){
+        var lp = polar(cx, cy, outer + 14, a);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        var lab = a === 0 ? 'N' : (a === 90 ? 'E' : (a === 180 ? 'S' : 'W'));
+        ctx.fillText(lab, lp.x, lp.y);
+      }
+    }
+
+    // Sweep wedge — one-shot, NOT looped
+    var sweepWidth = 44;
+    var sweepStart = sweepDeg - sweepWidth;
+    var grad = ctx.createRadialGradient(cx, cy, inner, cx, cy, outer);
+    grad.addColorStop(0, 'rgba(0,200,120,.02)');
+    grad.addColorStop(0.3, 'rgba(0,200,120,.12)');
+    grad.addColorStop(0.85, 'rgba(0,200,120,.22)');
+    grad.addColorStop(1, 'rgba(0,200,120,.02)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    var a1 = (sweepStart - 90) * Math.PI / 180;
+    var a2 = (sweepDeg - 90) * Math.PI / 180;
+    ctx.arc(cx, cy, outer, a1, a2);
+    ctx.closePath();
+    ctx.fill();
+
+    var lead = polar(cx, cy, outer, sweepDeg);
+    var ledGrad = ctx.createLinearGradient(cx, cy, lead.x, lead.y);
+    ledGrad.addColorStop(0, 'rgba(160,255,80,0)');
+    ledGrad.addColorStop(1, 'rgba(160,255,80,.85)');
+    ctx.strokeStyle = ledGrad;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(lead.x, lead.y);
+    ctx.stroke();
+
+    // Convergence connector: Legion to Ken-obi — Week 7 marquee
+    var lbPos = polar(cx, cy, inner + (outer - inner) * (1 / 12), BEARING_BY_RANK[1]);
+    var gkPos = polar(cx, cy, inner + (outer - inner) * (2 / 12), BEARING_BY_RANK[2]);
+    ctx.strokeStyle = 'rgba(58,166,255,.55)';
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(lbPos.x, lbPos.y);
+    ctx.lineTo(gkPos.x, gkPos.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(58,166,255,.85)';
+    ctx.font = '9px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('W07 INTERCEPT', (lbPos.x + gkPos.x)/2, (lbPos.y + gkPos.y)/2 - 6);
+
+    // Plot 12 contacts
+    TEAMS.forEach(function(t){
+      var rr = inner + (outer - inner) * (t.rank / 12);
+      var bearing = BEARING_BY_RANK[t.rank];
+      var p = polar(cx, cy, rr, bearing);
+      var flag = (FLAGS[t.init] && FLAGS[t.init].flag) || null;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.PI/4);
+      var blipColor, glowColor;
+      if (t.rank <= 2) { blipColor = '#a0ff50'; glowColor = 'rgba(160,255,80,.55)'; }
+      else if (t.rank <= 5) { blipColor = '#00c878'; glowColor = 'rgba(0,200,120,.5)'; }
+      else if (t.rank <= 9) { blipColor = '#3aa6ff'; glowColor = 'rgba(58,166,255,.45)'; }
+      else { blipColor = '#ff3355'; glowColor = 'rgba(255,51,85,.5)'; }
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = blipColor;
+      var sz = t.rank <= 2 ? 8 : 6;
+      ctx.fillRect(-sz/2, -sz/2, sz, sz);
+      ctx.restore();
+
+      if (flag === 'upset'){
+        ctx.fillStyle = '#ffaa00';
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 1;
+        var tx = p.x + 12, ty = p.y - 10;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty - 6);
+        ctx.lineTo(tx + 6, ty + 4);
+        ctx.lineTo(tx - 6, ty + 4);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = 'bold 8px "IBM Plex Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('!', tx, ty + 3);
+      } else if (flag === 'victim'){
+        ctx.strokeStyle = '#ff3355';
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(p.x + 8, p.y - 16, 10, 10);
+        ctx.fillStyle = '#ff3355';
+        ctx.font = 'bold 8px "IBM Plex Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('X', p.x + 13, p.y - 8);
+      } else if (flag === 'fell'){
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(p.x + 9, p.y - 6);
+        ctx.lineTo(p.x + 14, p.y);
+        ctx.lineTo(p.x + 19, p.y - 6);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = 'rgba(185,230,212,.92)';
+      ctx.font = '10px "IBM Plex Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      var labelPos = polar(cx, cy, rr + 14, bearing);
+      if (labelPos.x < cx) ctx.textAlign = 'right';
+      ctx.fillText('['+t.init+'] '+t.rec, labelPos.x, labelPos.y);
+      ctx.fillStyle = 'rgba(77,122,138,.8)';
+      ctx.font = '9px "IBM Plex Mono", monospace';
+      ctx.fillText(t.wk.toFixed(1)+' pts', labelPos.x, labelPos.y + 11);
+    });
+
+    ctx.fillStyle = 'rgba(160,255,80,.9)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(160,255,80,.4)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI*2);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(77,122,138,.8)';
+    ctx.font = '9px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('CIC/06', 10, 10);
+    ctx.fillText('SCOPE A', 10, 22);
+    ctx.textAlign = 'right';
+    ctx.fillText('SIG ' + String(Math.round(sweepDeg)).padStart(3,'0') + '\u00B0', w - 10, 10);
+    ctx.fillText('GAIN 072', w - 10, 22);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('RNG: 1-12', 10, h - 10);
+    ctx.textAlign = 'right';
+    ctx.fillText('FEED: SLEEPER', w - 10, h - 10);
+  }
+
+  function updateSweepLabel(){
+    var el = document.getElementById('sweepDeg');
+    if (el) el.textContent = String(Math.round(sweepDeg)).padStart(3,'0') + '\u00B0';
+  }
+
+  canvas.addEventListener('mousemove', function(e){
+    var rect = canvas.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var cxr = rect.width / 2, cyr = rect.height / 2;
+    var dx = mx - cxr, dy = my - cyr;
+    var ang = Math.atan2(dy, dx) * 180 / Math.PI;
+    var bearing = (ang + 90 + 360) % 360;
+    sweepDeg = bearing;
+    updateSweepLabel();
+    draw();
+  });
+
+  var baseSweep = 60;
+  window.addEventListener('scroll', function(){
+    var sc = window.scrollY || document.documentElement.scrollTop || 0;
+    var max = Math.max(1, (document.documentElement.scrollHeight - window.innerHeight));
+    var frac = Math.min(1, sc / max);
+    sweepDeg = (baseSweep + frac * 300) % 360;
+    updateSweepLabel();
+    draw();
+  }, { passive:true });
+
+  window.addEventListener('resize', resize);
+
+  resize();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function(){ draw(); });
+  }
+
+})();
+</script>
+</body>
+</html>

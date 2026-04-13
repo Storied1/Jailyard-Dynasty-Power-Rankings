@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JailyardOS - Week 6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --desktop:#0a0a0a;
+    --titlebar:#1a1a1a;
+    --titlebar-text:#999;
+    --window-bg:#111;
+    --window-border:#333;
+    --text:#d4d4d4;
+    --text-muted:#777;
+    --gold:#c9a84c;
+    --red:#ff5f57;
+    --yellow:#febc2e;
+    --green:#28c840;
+    --accent:#8b5cf6;
+    --accent2:#ec4899;
+    --taskbar:#0f0f0f;
+    --taskbar-border:#222;
+    --chat-green:#0b3d0b;
+    --chat-bubble:#1a3a1a;
+    --spreadsheet-header:#1a1a2e;
+    --spreadsheet-row:#0d0d14;
+    --spreadsheet-alt:#111118;
+    --terminal-green:#00ff41;
+    --up:#22c55e;
+    --down:#ef4444;
+    --steady:#888;
+  }
+  html,body{
+    width:100%;height:100%;overflow:hidden;
+    font-family:'Inter',sans-serif;color:var(--text);
+    background:var(--desktop);
+  }
+
+  /* Desktop Background */
+  #desktop{
+    position:absolute;inset:0;bottom:48px;
+    background:var(--desktop);
+    overflow:hidden;
+  }
+  #desktop::before{
+    content:'';position:absolute;inset:0;
+    background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity:.6;pointer-events:none;
+  }
+  #desktop::after{
+    content:'JY';
+    position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    font-size:min(30vw,300px);font-weight:900;letter-spacing:-.02em;
+    color:rgba(255,255,255,.018);
+    pointer-events:none;user-select:none;
+    font-family:'Inter',sans-serif;
+  }
+
+  /* Clock */
+  #clock{
+    position:fixed;top:10px;right:16px;z-index:9999;
+    font-family:'IBM Plex Mono',monospace;font-size:.8rem;
+    color:var(--text-muted);letter-spacing:.04em;
+  }
+
+  /* Week badge */
+  #week-badge{
+    position:fixed;top:10px;left:16px;z-index:9999;
+    font-family:'Inter',sans-serif;font-size:.75rem;font-weight:700;
+    color:var(--gold);letter-spacing:.08em;text-transform:uppercase;
+  }
+  #week-badge span{font-weight:400;color:var(--text-muted);margin-left:.5em}
+
+  /* Window System */
+  .window{
+    position:absolute;display:flex;flex-direction:column;
+    background:var(--window-bg);
+    border:1px solid var(--window-border);
+    border-radius:8px;overflow:hidden;
+    box-shadow:0 8px 32px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.3);
+    min-width:280px;min-height:180px;
+    transition:box-shadow .15s;
+    opacity:0;transform:scale(.95);
+    animation:none;
+  }
+  .window.open{
+    animation:winOpen .25s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  .window.closing{
+    animation:winClose .18s ease-in forwards;
+  }
+  .window.focused{
+    border-color:var(--gold);
+    box-shadow:0 12px 48px rgba(0,0,0,.6),0 0 0 1px var(--gold);
+  }
+  .window.maximized{
+    left:0!important;top:0!important;
+    width:100%!important;height:100%!important;
+    border-radius:0;
+  }
+  @keyframes winOpen{
+    from{opacity:0;transform:scale(.95)}
+    to{opacity:1;transform:scale(1)}
+  }
+  @keyframes winClose{
+    from{opacity:1;transform:scale(1)}
+    to{opacity:0;transform:scale(.95)}
+  }
+
+  /* Title bar */
+  .window-titlebar{
+    display:flex;align-items:center;height:32px;
+    background:var(--titlebar);
+    padding:0 12px;cursor:default;flex-shrink:0;
+    user-select:none;-webkit-user-select:none;
+    border-bottom:1px solid rgba(255,255,255,.04);
+  }
+  .window-dots{display:flex;gap:6px;flex-shrink:0}
+  .window-dot{
+    width:12px;height:12px;border-radius:50%;cursor:pointer;
+    transition:filter .15s;position:relative;
+  }
+  .window-dot:hover{filter:brightness(1.3)}
+  .dot-close{background:var(--red)}
+  .dot-minimize{background:var(--yellow)}
+  .dot-maximize{background:var(--green)}
+  .window-title{
+    flex:1;text-align:center;font-size:.75rem;font-weight:500;
+    color:var(--titlebar-text);letter-spacing:.02em;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .window-titlebar-spacer{width:54px;flex-shrink:0}
+
+  /* Window body */
+  .window-body{
+    flex:1;overflow:auto;position:relative;
+  }
+  .window-body::-webkit-scrollbar{width:6px}
+  .window-body::-webkit-scrollbar-track{background:transparent}
+  .window-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+  .window-body::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+
+  /* Column.txt (Notepad Window) */
+  .notepad-body{
+    padding:20px 24px;font-family:'Lora',serif;font-size:.92rem;
+    line-height:1.75;color:#c8c8c8;white-space:pre-wrap;word-wrap:break-word;
+  }
+  .notepad-cursor{
+    display:inline-block;width:2px;height:1em;background:var(--gold);
+    animation:blink 1s step-end infinite;vertical-align:text-bottom;
+  }
+  @keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+  .notepad-statusbar{
+    height:24px;background:var(--titlebar);
+    border-top:1px solid rgba(255,255,255,.04);
+    display:flex;align-items:center;padding:0 12px;
+    font-family:'IBM Plex Mono',monospace;font-size:.65rem;
+    color:var(--text-muted);gap:16px;flex-shrink:0;
+  }
+
+  /* Rankings.xlsx (Spreadsheet Window) */
+  .spreadsheet{width:100%;border-collapse:collapse;font-size:.78rem}
+  .spreadsheet th{
+    background:var(--spreadsheet-header);
+    padding:8px 10px;text-align:left;font-weight:600;
+    color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;
+    font-size:.68rem;cursor:pointer;user-select:none;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    position:sticky;top:0;z-index:1;
+  }
+  .spreadsheet th:hover{color:var(--gold)}
+  .spreadsheet th .sort-arrow{margin-left:4px;font-size:.6rem;opacity:.5}
+  .spreadsheet td{
+    padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);
+  }
+  .spreadsheet tr:nth-child(even) td{background:var(--spreadsheet-alt)}
+  .spreadsheet tr:hover td{background:rgba(139,92,246,.08)}
+  .spreadsheet .rank-cell{font-weight:700;color:var(--gold);text-align:center;width:40px}
+  .spreadsheet .team-cell{font-weight:600}
+  .spreadsheet .movement-up{color:var(--up);font-weight:700}
+  .spreadsheet .movement-down{color:var(--down);font-weight:700}
+  .spreadsheet .movement-steady{color:var(--steady)}
+  .spreadsheet .verdict-cell{
+    font-style:italic;color:var(--text-muted);max-width:200px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .spreadsheet .pf-cell{font-family:'IBM Plex Mono',monospace;font-size:.72rem}
+  .spreadsheet-formula{
+    height:28px;background:rgba(26,26,46,.8);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    display:flex;align-items:center;padding:0 10px;
+    font-family:'IBM Plex Mono',monospace;font-size:.68rem;
+    color:var(--text-muted);flex-shrink:0;
+  }
+  .spreadsheet-formula span{color:var(--gold);margin-right:8px;font-weight:700}
+
+  /* GroupChat.app */
+  .chat-body{
+    background:linear-gradient(180deg,#0a1f0a 0%,#0d2b0d 100%);
+    padding:16px;display:flex;flex-direction:column;gap:8px;
+    min-height:100%;
+  }
+  .chat-msg{
+    max-width:82%;padding:8px 12px;border-radius:12px;
+    font-size:.82rem;line-height:1.5;
+    opacity:0;transform:translateY(8px);
+    transition:opacity .3s,transform .3s;
+  }
+  .chat-msg.visible{opacity:1;transform:translateY(0)}
+  .chat-msg.them{
+    background:var(--chat-bubble);align-self:flex-start;
+    border-bottom-left-radius:4px;
+  }
+  .chat-msg.me{
+    background:#1a4a1a;align-self:flex-end;
+    border-bottom-right-radius:4px;
+  }
+  .chat-sender{
+    font-size:.68rem;font-weight:600;color:var(--gold);
+    margin-bottom:2px;
+  }
+  .chat-text{color:#c4d4c4}
+  .chat-time{font-size:.58rem;color:rgba(255,255,255,.25);margin-top:3px;text-align:right}
+  .chat-typing{
+    padding:8px 12px;font-size:.75rem;color:rgba(255,255,255,.35);
+    font-style:italic;align-self:flex-start;
+  }
+  .chat-typing .dots{display:inline-block}
+  .chat-typing .dots span{
+    animation:typeDot 1.2s infinite;opacity:.3;
+  }
+  .chat-typing .dots span:nth-child(2){animation-delay:.2s}
+  .chat-typing .dots span:nth-child(3){animation-delay:.4s}
+  @keyframes typeDot{0%,60%,100%{opacity:.3}30%{opacity:1}}
+
+  /* Matchups/ (File Explorer) */
+  .explorer-body{padding:8px}
+  .explorer-path{
+    padding:6px 12px;background:rgba(255,255,255,.03);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    font-family:'IBM Plex Mono',monospace;font-size:.68rem;
+    color:var(--text-muted);flex-shrink:0;
+  }
+  .explorer-path span{color:var(--gold)}
+  .explorer-file{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 12px;border-radius:6px;cursor:pointer;
+    transition:background .15s;
+  }
+  .explorer-file:hover{background:rgba(255,255,255,.05)}
+  .file-icon{
+    width:32px;height:32px;border-radius:6px;
+    display:grid;place-items:center;font-size:.7rem;font-weight:700;
+    flex-shrink:0;
+  }
+  .file-icon.win{background:rgba(34,197,94,.15);color:var(--up)}
+  .file-icon.loss{background:rgba(239,68,68,.15);color:var(--down)}
+  .file-name{font-size:.8rem;font-weight:500}
+  .file-meta{font-size:.65rem;color:var(--text-muted)}
+  .file-score{
+    margin-left:auto;font-family:'IBM Plex Mono',monospace;
+    font-size:.75rem;font-weight:600;
+  }
+
+  /* Matchup detail */
+  .matchup-detail{padding:16px;font-size:.8rem}
+  .matchup-detail h3{
+    font-size:.9rem;margin-bottom:12px;color:var(--gold);font-weight:700;
+  }
+  .matchup-detail .score-line{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .matchup-detail .winner-name{color:var(--up);font-weight:600}
+  .matchup-detail .loser-name{color:var(--text-muted)}
+  .matchup-detail .score-pts{font-family:'IBM Plex Mono',monospace;font-weight:700}
+  .matchup-detail .top-performer{
+    margin-top:12px;padding:8px 10px;
+    background:rgba(201,168,76,.08);border-radius:6px;
+    border-left:3px solid var(--gold);font-size:.75rem;
+  }
+  .matchup-detail .summary{
+    margin-top:10px;font-style:italic;color:var(--text-muted);
+    font-size:.75rem;line-height:1.5;
+  }
+
+  /* Terminal */
+  .terminal-body{
+    background:#0c0c0c;padding:16px;
+    font-family:'IBM Plex Mono',monospace;font-size:.75rem;
+    line-height:1.7;color:var(--terminal-green);
+  }
+  .terminal-line{opacity:0;transition:opacity .2s}
+  .terminal-line.visible{opacity:1}
+  .terminal-prompt{color:#666}
+  .terminal-warn{color:#f59e0b}
+  .terminal-error{color:var(--red)}
+  .terminal-success{color:var(--green)}
+  .terminal-info{color:var(--accent)}
+  .terminal-cursor-block{
+    display:inline-block;width:8px;height:14px;
+    background:var(--terminal-green);
+    animation:blink 1s step-end infinite;
+    vertical-align:text-bottom;
+  }
+
+  /* MyTeam.png (Team Card) */
+  .team-card{padding:20px;display:flex;flex-direction:column;gap:16px}
+  .team-card-header{display:flex;align-items:center;gap:14px}
+  .team-card-avatar{
+    width:56px;height:56px;border-radius:12px;
+    display:grid;place-items:center;font-weight:800;font-size:1.1rem;
+    color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    flex-shrink:0;
+  }
+  .team-card-name{font-size:1.1rem;font-weight:700}
+  .team-card-owner{font-size:.75rem;color:var(--text-muted)}
+  .team-card-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .team-card-stat{
+    background:rgba(255,255,255,.03);border-radius:8px;padding:10px;
+    text-align:center;border:1px solid rgba(255,255,255,.05);
+  }
+  .team-card-stat-value{
+    font-size:1.2rem;font-weight:700;color:var(--gold);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .team-card-stat-label{font-size:.6rem;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+  .team-card-elo{
+    height:40px;position:relative;
+    background:rgba(255,255,255,.02);border-radius:6px;
+    overflow:hidden;
+  }
+  .team-card-elo canvas{width:100%;height:100%}
+  .team-card-next{
+    padding:10px;background:rgba(201,168,76,.06);
+    border-radius:6px;border:1px solid rgba(201,168,76,.15);
+    font-size:.78rem;
+  }
+  .team-card-next strong{color:var(--gold)}
+
+  /* Taskbar */
+  #taskbar{
+    position:fixed;bottom:0;left:0;right:0;height:48px;
+    background:var(--taskbar);
+    border-top:1px solid var(--taskbar-border);
+    display:flex;align-items:center;padding:0 8px;gap:2px;
+    z-index:10000;
+  }
+  .taskbar-btn{
+    display:flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:6px;border:none;
+    background:transparent;color:var(--text-muted);
+    font-family:'IBM Plex Mono',monospace;font-size:.7rem;
+    cursor:pointer;transition:all .15s;white-space:nowrap;
+    position:relative;
+  }
+  .taskbar-btn:hover{background:rgba(255,255,255,.06);color:var(--text)}
+  .taskbar-btn.active{
+    background:rgba(201,168,76,.1);color:var(--gold);
+  }
+  .taskbar-btn.active::after{
+    content:'';position:absolute;bottom:2px;left:50%;
+    transform:translateX(-50%);width:4px;height:4px;
+    border-radius:50%;background:var(--gold);
+  }
+  .taskbar-icon{font-size:1rem;line-height:1}
+  .taskbar-spacer{flex:1}
+  #taskbar-clock{
+    font-family:'IBM Plex Mono',monospace;font-size:.7rem;
+    color:var(--text-muted);padding:0 12px;
+  }
+
+  /* Resize Handle */
+  .resize-handle{
+    position:absolute;bottom:0;right:0;
+    width:16px;height:16px;cursor:nwse-resize;
+  }
+  .resize-handle::after{
+    content:'';position:absolute;bottom:3px;right:3px;
+    width:8px;height:8px;
+    border-right:2px solid rgba(255,255,255,.12);
+    border-bottom:2px solid rgba(255,255,255,.12);
+  }
+
+  /* Mobile Responsive */
+  @media(max-width:768px){
+    #desktop{bottom:56px}
+    #taskbar{height:56px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .taskbar-btn{padding:8px 10px;flex-shrink:0}
+    .window{
+      position:fixed!important;
+      left:0!important;top:0!important;
+      width:100%!important;height:calc(100% - 56px)!important;
+      border-radius:0;border:none;
+      transform:translateX(100%);opacity:1;
+    }
+    .window.open{animation:mobileSlideIn .3s ease forwards}
+    .window.closing{animation:mobileSlideOut .25s ease forwards}
+    @keyframes mobileSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    @keyframes mobileSlideOut{from{transform:translateX(0)}to{transform:translateX(100%)}}
+    .resize-handle{display:none}
+    .window-dot.dot-maximize{display:none}
+    #clock{display:none}
+    #week-badge{font-size:.65rem}
+  }
+
+  ::selection{background:rgba(201,168,76,.3);color:#fff}
+</style>
+</head>
+<body>
+
+<div id="week-badge">Week 6 <span>The Jailyard Dynasty</span></div>
+<div id="clock"></div>
+<div id="desktop"></div>
+
+<div id="taskbar">
+  <button class="taskbar-btn" data-window="column" title="Column.txt">
+    <span class="taskbar-icon">&#128221;</span> Column.txt
+  </button>
+  <button class="taskbar-btn" data-window="rankings" title="Rankings.xlsx">
+    <span class="taskbar-icon">&#128202;</span> Rankings.xlsx
+  </button>
+  <button class="taskbar-btn" data-window="chat" title="GroupChat.app">
+    <span class="taskbar-icon">&#128172;</span> GroupChat.app
+  </button>
+  <button class="taskbar-btn" data-window="matchups" title="Matchups/">
+    <span class="taskbar-icon">&#128193;</span> Matchups/
+  </button>
+  <button class="taskbar-btn" data-window="terminal" title="Terminal">
+    <span class="taskbar-icon">&#9000;</span> Terminal
+  </button>
+  <button class="taskbar-btn" data-window="myteam" title="MyTeam.png">
+    <span class="taskbar-icon">&#127942;</span> MyTeam.png
+  </button>
+  <span class="taskbar-spacer"></span>
+  <span id="taskbar-clock"></span>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ---- DATA (all from verified Sleeper API / content pipeline) ----
+
+  var ESSAY = "Kittler on the Roof held the number one ranking for exactly seven days.\n\nOne week. That\u2019s how long the defending champion sat on the throne before MHJTIME \u2014 the same 1-3 team getting eulogized a fortnight ago \u2014 walked in and dropped 140.94 on the crown. Rico Dowdle went for 30.9. Ja\u2019Marr Chase added 20.1. Jayden Daniels orchestrated with 22.64. And Kittler\u2019s 107.74 \u2014 a score that would\u2019ve lost to eight of the twelve teams this week \u2014 sent the defending champion tumbling from first to fifth in the most dramatic single-week fall the power rankings have recorded. It was a prestige-TV collapse: the slow build to the top, the one-week reign, the sudden freefall while the credits roll.\n\nLast week, five teams shared a penthouse at 4-1 and we called it unprecedented parity. This week, three of them separated at 5-1, and both of the other two dropped out of the top four entirely. So who filled the vacuum at the top? The Legion of Bouz reclaimed the number one spot with 165.9 \u2014 Mahomes and Cam Skattebo each eclipsed 30 points \u2014 while General Ken-obi stormed from fifth to second behind a 164.94 demolition of Burden that featured the week\u2019s most absurd stat line: the Rams defense scored 27.0 points. A defense. Twenty-seven. Drake London added 26.8, Drake Maye dropped 26.24, and the franchise everyone measures themselves against is suddenly measuring everybody else from the peak of its all-time Elo at 1700.2.\n\nMeanwhile, the group chat turned into a trade bazaar. Brent opened the market with a casual \u201cHit me up if in need of.\u201d Karim countered with \u201c2/3 top QBs come at me.\u201d Harlow pitched \u201c2 of the top 3 RBs on the Chiefs.\u201d Zach offered \u201cBuncha old serviceable WR3/4s here.\u201d And then Ben delivered the line of the week: \u201cIf you want some old serviceable WR3/4s with championship pedigree instead of Zach\u2019s 2nd place also rans, let me know.\u201d Brent\u2019s verdict \u2014 \u201cZach got served by Ben\u201d \u2014 was the only punctuation that moment needed.\n\nThe Sleeping Giants kept sleepwalking to wins \u2014 four straight now, Josh Jacobs\u2019 29.5 doing the heavy lifting against a Chudders squad that managed just 95.26. The Boonist Monks bounced back from their Kittler loss with a 150.46 explosion that saw Pickens and JSN combine for 53.5 points. And at the bottom, Burden and Father Time remain winless at 0-6, staring at each other across the standings like castaways on the same sinking raft \u2014 fitting, because next week they play each other, and somebody finally has to win.\n\nCircle next week in permanent marker: The Legion of Bouz versus General Ken-obi. First versus second. Both 5-1. Two former champions with three titles between them. Mahomes versus Maye. The Jailyard doesn\u2019t do regular-season Super Bowls \u2014 until it does.";
+
+  var RANKINGS = [
+    {rank:1,prev:2,team:"The Legion of Bouz",owner:"KidBouzie",record:"5-1",pf:"935.7",move:"up_1",verdict:"Mahomes 30.48, Skattebo 30.0. Voltron assembled."},
+    {rank:2,prev:5,team:"General Ken-obi",owner:"bLaker24",record:"5-1",pf:"871.2",move:"up_3",verdict:"Rams D scored 27. All-time Elo peak: 1700.2."},
+    {rank:3,prev:3,team:"Sleeping Giants",owner:"zbcowan",record:"5-1",pf:"857.0",move:"steady",verdict:"Four straight W\u2019s. Jacobs 29.5. Never lost to Chudders."},
+    {rank:4,prev:6,team:"The Boonist Monks",owner:"GauchoTrain",record:"4-2",pf:"912.9",move:"up_2",verdict:"Pickens + JSN = 53.5. Biggest Elo gain of the week."},
+    {rank:5,prev:1,team:"Kittler on the Roof",owner:"bchodos",record:"4-2",pf:"877.9",move:"down_4",verdict:"Throne lasted 7 days. Elo cratered 28.7 points."},
+    {rank:6,prev:4,team:"Rasheeing the Scene",owner:"ToreroGaucho",record:"4-2",pf:"816.0",move:"down_2",verdict:"Achane scored 30, still lost by 41.36."},
+    {rank:7,prev:7,team:"MHJTIME",owner:"rango_",record:"3-3",pf:"891.9",move:"steady",verdict:"From eulogy to two-game streak. Dowdle 30.9 again."},
+    {rank:8,prev:9,team:"Noble FFT",owner:"kevobucks",record:"3-3",pf:"819.0",move:"up_1",verdict:"Bijan 32.8. The sleeping giant woke \u2014 for one week."},
+    {rank:9,prev:8,team:"Ghastly Grayskull Gang",owner:"GrayskullXX",record:"2-4",pf:"818.3",move:"down_1",verdict:"Back-to-back L\u2019s. Week 4 explosion was the outlier."},
+    {rank:10,prev:10,team:"Chudders Football Team",owner:"Chudders",record:"1-5",pf:"727.9",move:"steady",verdict:"Accidentally dropped Haskins. App glitch. Sure."},
+    {rank:11,prev:11,team:"Burden of Etienne-y Woody",owner:"kharlow",record:"0-6",pf:"732.7",move:"steady",verdict:"LB Byron Young outscored QB Tua by 2x."},
+    {rank:12,prev:12,team:"Father Time",owner:"Redrumsregrub",record:"0-6",pf:"712.7",move:"steady",verdict:"Lowest PF in the league. 0-6 Bowl awaits."}
+  ];
+
+  var CHAT_MESSAGES = [
+    {sender:"Brent Boone",team:"Boonist Monks",text:"Hit me up if in need of. I\u2019m looking to deal.",side:"them"},
+    {sender:"Karim",team:"Legion of Bouz",text:"2/3 top QBs come at me",side:"them"},
+    {sender:"Harlow",team:"Burden",text:"2 of the top 3 RBs on the Chiefs. Let\u2019s talk.",side:"them"},
+    {sender:"Zach",team:"Sleeping Giants",text:"Buncha old serviceable WR3/4s here. Hit me up.",side:"them"},
+    {sender:"Ben",team:"Kittler on the Roof",text:"If you want some old serviceable WR3/4s with championship pedigree instead of Zach\u2019s 2nd place also rans, let me know.",side:"them"},
+    {sender:"Brent Boone",team:"Boonist Monks",text:"Zach got served by Ben",side:"them"},
+    {sender:"Matt Russell",team:"Chudders",text:"There\u2019s absolutely no way in my right mind I meant to drop Haskins",side:"them"},
+    {sender:"Zach",team:"Sleeping Giants",text:"Mwahahahaha what a great sight that was to wake up to",side:"them"}
+  ];
+
+  var MATCHUPS = [
+    {id:1,team1:"Noble FFT",score1:151.88,team2:"Ghastly Grayskull Gang",score2:121.3,winner:"Noble FFT",margin:30.58,mvp:"Bijan Robinson",mvpPts:32.8,summary:"Bijan finally showed up with 32.8. The preseason\u2019s #2 pick looked like it for exactly one week."},
+    {id:2,team1:"The Boonist Monks",score1:150.46,team2:"Rasheeing the Scene",score2:109.1,winner:"The Boonist Monks",margin:41.36,mvp:"George Pickens",mvpPts:27.3,summary:"Pickens and JSN combined for 53.5. Achane\u2019s 30 couldn\u2019t save Rasheeing from the blowout."},
+    {id:3,team1:"The Legion of Bouz",score1:165.9,team2:"Father Time",score2:107.66,winner:"The Legion of Bouz",margin:58.24,mvp:"Patrick Mahomes",mvpPts:30.48,summary:"Mahomes and Skattebo each broke 30. The most dominant team in the league right now."},
+    {id:4,team1:"Burden of Etienne-y Woody",score1:99.2,team2:"General Ken-obi",score2:164.94,winner:"General Ken-obi",margin:65.74,mvp:"LA Rams DEF",mvpPts:27.0,summary:"A defense scored 27.0. That\u2019s the week. Ken-obi\u2019s Elo hit its all-time peak."},
+    {id:5,team1:"Kittler on the Roof",score1:107.74,team2:"MHJTIME",score2:140.94,winner:"MHJTIME",margin:33.2,mvp:"Rico Dowdle",mvpPts:30.9,summary:"The dethronement. Kittler\u2019s one-week reign ends at the hands of the team that was 1-3 two weeks ago."},
+    {id:6,team1:"Chudders Football Team",score1:95.26,team2:"Sleeping Giants",score2:129.82,winner:"Sleeping Giants",margin:34.56,mvp:"Josh Jacobs",mvpPts:29.5,summary:"Chudders has never beaten the Giants. 0-5 all-time. The restraining order continues."}
+  ];
+
+  var TERMINAL_LINES = [
+    {text:"$ jailyard --process-week 6 --season 2025",cls:"terminal-prompt"},
+    {text:"[INFO] Loading matchup data from Sleeper API...",cls:""},
+    {text:"[INFO] 6 matchups processed. 72 starters scored.",cls:""},
+    {text:"[DONE] League average: 128.7 ppg (down from 138.5 season avg)",cls:"terminal-success"},
+    {text:"",cls:""},
+    {text:"$ jailyard --compute-rankings",cls:"terminal-prompt"},
+    {text:"[INFO] Computing Elo adjustments...",cls:""},
+    {text:"[WARN] Kittler on the Roof: Elo DROP -28.7 (1516.9 -> 1488.2)",cls:"terminal-warn"},
+    {text:"[WARN] General Ken-obi: Elo PEAK 1700.2 (ALL-TIME HIGH)",cls:"terminal-warn"},
+    {text:"[INFO] The Boonist Monks: Elo GAIN +25.9 (biggest this week)",cls:"terminal-info"},
+    {text:"[DONE] Rankings updated. 4 position changes.",cls:"terminal-success"},
+    {text:"",cls:""},
+    {text:"$ jailyard --threat-assessment",cls:"terminal-prompt"},
+    {text:"[ALERT] Father Time THREAT LEVEL: CRITICAL (0-6, 712.7 PF)",cls:"terminal-error"},
+    {text:"[ALERT] Burden of Etienne-y Woody THREAT LEVEL: CRITICAL (0-6, 732.7 PF)",cls:"terminal-error"},
+    {text:"[WARN] Chudders Football Team: Haskins DROP detected. Possible app glitch.",cls:"terminal-warn"},
+    {text:"[INFO] Next week: Legion of Bouz vs General Ken-obi (1st vs 2nd)",cls:"terminal-info"},
+    {text:"[INFO] Next week: Burden vs Father Time (0-6 Bowl)",cls:"terminal-info"},
+    {text:"[DONE] Threat assessment complete.",cls:"terminal-success"},
+    {text:"",cls:""},
+    {text:"$ jailyard --standings",cls:"terminal-prompt"},
+    {text:"  1. Legion of Bouz    5-1  935.7 PF  [Elo: 1604.3]",cls:""},
+    {text:"  2. General Ken-obi   5-1  871.2 PF  [Elo: 1700.2] <<< PEAK",cls:"terminal-warn"},
+    {text:"  3. Sleeping Giants   5-1  857.0 PF  [Elo: 1561.1]  W4 streak",cls:""},
+    {text:"  4. Boonist Monks     4-2  912.9 PF  [Elo: 1599.6]",cls:""},
+    {text:"  5. Kittler           4-2  877.9 PF  [Elo: 1488.2]  \u2193\u2193\u2193 from #1",cls:"terminal-error"},
+    {text:" 11. Burden            0-6  732.7 PF  [Elo: 1323.5]",cls:"terminal-error"},
+    {text:" 12. Father Time       0-6  712.7 PF  [Elo: 1329.9]",cls:"terminal-error"},
+    {text:"[DONE] All systems nominal. Week 7 data pending.",cls:"terminal-success"},
+    {text:"$ _",cls:"terminal-prompt"}
+  ];
+
+  var TEAM_DATA = {
+    name:"General Ken-obi",owner:"bLaker24",initials:"GK",
+    rank:2,record:"5-1",elo:"1700.2",pf:"871.2",
+    eloHistory:[1580,1610,1640,1655,1642,1690,1700],
+    nextMatchup:"The Legion of Bouz (5-1)",
+    nextDetail:"1st vs 2nd. Three titles between you. Mahomes vs Maye."
+  };
+
+
+  // ---- WINDOW MANAGER ----
+
+  var desktop = document.getElementById('desktop');
+  var zCounter = 100;
+  var windows = {};
+  var activeWindow = null;
+
+  var WINDOW_DEFS = {
+    column:  {title:"Column.txt",    x:40,  y:20,  w:540, h:480},
+    rankings:{title:"Rankings.xlsx",  x:100, y:50,  w:680, h:420},
+    chat:    {title:"GroupChat.app",  x:600, y:30,  w:360, h:450},
+    matchups:{title:"Matchups/",      x:60,  y:340, w:400, h:380},
+    terminal:{title:"Terminal",       x:480, y:260, w:500, h:380},
+    myteam:  {title:"MyTeam.png",     x:700, y:60,  w:340, h:440}
+  };
+
+  function buildTitlebar(title) {
+    var tb = document.createElement('div');
+    tb.className = 'window-titlebar';
+    var dots = document.createElement('div');
+    dots.className = 'window-dots';
+    var dc = document.createElement('div');
+    dc.className = 'window-dot dot-close';
+    dc.dataset.action = 'close';
+    var dm = document.createElement('div');
+    dm.className = 'window-dot dot-minimize';
+    dm.dataset.action = 'minimize';
+    var dx = document.createElement('div');
+    dx.className = 'window-dot dot-maximize';
+    dx.dataset.action = 'maximize';
+    dots.appendChild(dc);
+    dots.appendChild(dm);
+    dots.appendChild(dx);
+    tb.appendChild(dots);
+    var t = document.createElement('div');
+    t.className = 'window-title';
+    t.textContent = title;
+    tb.appendChild(t);
+    var sp = document.createElement('div');
+    sp.className = 'window-titlebar-spacer';
+    tb.appendChild(sp);
+    return tb;
+  }
+
+  function createWindow(id){
+    if(windows[id]){focusWindow(id);return;}
+    var def = WINDOW_DEFS[id];
+    var isMobile = window.innerWidth <= 768;
+    var el = document.createElement('div');
+    el.className = 'window';
+    el.id = 'win-'+id;
+    el.dataset.winId = id;
+    if(!isMobile){
+      el.style.left = def.x+'px';
+      el.style.top = def.y+'px';
+      el.style.width = def.w+'px';
+      el.style.height = def.h+'px';
+    }
+    el.style.zIndex = ++zCounter;
+
+    var tb = buildTitlebar(def.title);
+    el.appendChild(tb);
+
+    var body = document.createElement('div');
+    body.className = 'window-body';
+    el.appendChild(body);
+
+    if(!isMobile){
+      var rh = document.createElement('div');
+      rh.className = 'resize-handle';
+      el.appendChild(rh);
+      initResize(el,rh);
+    }
+
+    desktop.appendChild(el);
+    requestAnimationFrame(function(){el.classList.add('open')});
+    fillWindowContent(id,body);
+    initDrag(el,tb);
+    initWindowControls(el,id);
+
+    windows[id] = el;
+    focusWindow(id);
+    updateTaskbar();
+  }
+
+  function closeWindow(id){
+    var el = windows[id];
+    if(!el) return;
+    el.classList.remove('open');
+    el.classList.add('closing');
+    setTimeout(function(){
+      el.remove();
+      delete windows[id];
+      updateTaskbar();
+      if(activeWindow===id) activeWindow=null;
+    },200);
+  }
+
+  function focusWindow(id){
+    var el = windows[id];
+    if(!el) return;
+    Object.keys(windows).forEach(function(k){
+      if(windows[k]) windows[k].classList.remove('focused');
+    });
+    el.style.zIndex = ++zCounter;
+    el.classList.remove('closing');
+    el.classList.add('focused');
+    el.style.display = '';
+    activeWindow = id;
+    updateTaskbar();
+  }
+
+  function minimizeWindow(id){
+    var el = windows[id];
+    if(!el) return;
+    el.style.display = 'none';
+    if(activeWindow===id) activeWindow=null;
+    updateTaskbar();
+  }
+
+  function toggleMaximize(id){
+    var el = windows[id];
+    if(!el) return;
+    el.classList.toggle('maximized');
+    if(!el.classList.contains('maximized')){
+      var def = WINDOW_DEFS[id] || {x:100,y:100,w:400,h:300};
+      el.style.left = def.x+'px';
+      el.style.top = def.y+'px';
+      el.style.width = def.w+'px';
+      el.style.height = def.h+'px';
+    }
+  }
+
+  function initWindowControls(el,id){
+    el.querySelector('.dot-close').addEventListener('click',function(e){
+      e.stopPropagation();closeWindow(id);
+    });
+    el.querySelector('.dot-minimize').addEventListener('click',function(e){
+      e.stopPropagation();minimizeWindow(id);
+    });
+    el.querySelector('.dot-maximize').addEventListener('click',function(e){
+      e.stopPropagation();toggleMaximize(id);
+    });
+    el.addEventListener('mousedown',function(){focusWindow(id)});
+    el.addEventListener('touchstart',function(){focusWindow(id)},{passive:true});
+    el.querySelector('.window-titlebar').addEventListener('dblclick',function(){toggleMaximize(id)});
+  }
+
+
+  // ---- DRAG ----
+
+  function initDrag(el,tb){
+    var dragging = false, startX, startY, origLeft, origTop;
+    function onDown(e){
+      if(e.target.closest('.window-dot')) return;
+      if(el.classList.contains('maximized')) return;
+      if(window.innerWidth <= 768) return;
+      dragging = true;
+      var ev = e.touches ? e.touches[0] : e;
+      startX = ev.clientX; startY = ev.clientY;
+      origLeft = el.offsetLeft; origTop = el.offsetTop;
+      document.body.style.userSelect = 'none';
+    }
+    function onMove(e){
+      if(!dragging) return;
+      var ev = e.touches ? e.touches[0] : e;
+      el.style.left = (origLeft + ev.clientX - startX) + 'px';
+      el.style.top = (origTop + ev.clientY - startY) + 'px';
+    }
+    function onUp(){dragging=false;document.body.style.userSelect=''}
+    tb.addEventListener('mousedown',onDown);
+    tb.addEventListener('touchstart',onDown,{passive:true});
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('touchmove',onMove,{passive:true});
+    document.addEventListener('mouseup',onUp);
+    document.addEventListener('touchend',onUp);
+  }
+
+
+  // ---- RESIZE ----
+
+  function initResize(el,handle){
+    var resizing=false, startX, startY, origW, origH;
+    function onDown(e){
+      resizing=true;
+      var ev = e.touches ? e.touches[0] : e;
+      startX=ev.clientX;startY=ev.clientY;
+      origW=el.offsetWidth;origH=el.offsetHeight;
+      document.body.style.userSelect='none';
+      e.stopPropagation();
+    }
+    function onMove(e){
+      if(!resizing) return;
+      var ev = e.touches ? e.touches[0] : e;
+      el.style.width = Math.max(280,origW+ev.clientX-startX)+'px';
+      el.style.height = Math.max(180,origH+ev.clientY-startY)+'px';
+    }
+    function onUp(){resizing=false;document.body.style.userSelect=''}
+    handle.addEventListener('mousedown',onDown);
+    handle.addEventListener('touchstart',onDown,{passive:false});
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('touchmove',onMove,{passive:true});
+    document.addEventListener('mouseup',onUp);
+    document.addEventListener('touchend',onUp);
+  }
+
+
+  // ---- TASKBAR ----
+
+  var taskbarBtns = document.querySelectorAll('.taskbar-btn');
+  taskbarBtns.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id = btn.dataset.window;
+      if(windows[id]){
+        if(activeWindow===id && windows[id].style.display!=='none'){
+          minimizeWindow(id);
+        } else {
+          focusWindow(id);
+        }
+      } else {
+        createWindow(id);
+      }
+    });
+  });
+
+  function updateTaskbar(){
+    taskbarBtns.forEach(function(btn){
+      var id = btn.dataset.window;
+      btn.classList.toggle('active',!!windows[id] && windows[id].style.display!=='none');
+    });
+  }
+
+
+  // ---- CLOCK ----
+
+  function updateClock(){
+    var now = new Date();
+    var h = now.getHours(), m = now.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    var str = h + ':' + (m<10?'0':'') + m + ' ' + ampm;
+    document.getElementById('clock').textContent = str;
+    document.getElementById('taskbar-clock').textContent = str;
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
+
+
+  // ---- CONTENT BUILDERS ----
+
+  function fillWindowContent(id,body){
+    switch(id){
+      case 'column': buildColumn(body); break;
+      case 'rankings': buildRankings(body); break;
+      case 'chat': buildChat(body); break;
+      case 'matchups': buildMatchups(body); break;
+      case 'terminal': buildTerminal(body); break;
+      case 'myteam': buildMyTeam(body); break;
+    }
+  }
+
+  // -- Column.txt --
+  function buildColumn(body){
+    var content = document.createElement('div');
+    content.className = 'notepad-body';
+    content.textContent = ESSAY;
+    var cursor = document.createElement('span');
+    cursor.className = 'notepad-cursor';
+    content.appendChild(cursor);
+    body.appendChild(content);
+
+    var statusbar = document.createElement('div');
+    statusbar.className = 'notepad-statusbar';
+    var parts = ['UTF-8','Ln 1, Col 1','Week 6 Column',ESSAY.length+' chars'];
+    parts.forEach(function(p){
+      var s = document.createElement('span');
+      s.textContent = p;
+      statusbar.appendChild(s);
+    });
+    body.parentElement.appendChild(statusbar);
+  }
+
+  // -- Rankings.xlsx --
+  function buildRankings(body){
+    var formula = document.createElement('div');
+    formula.className = 'spreadsheet-formula';
+    var fx = document.createElement('span');
+    fx.textContent = 'fx';
+    formula.appendChild(fx);
+    formula.appendChild(document.createTextNode(' =VLOOKUP("Week 6",rankings_db,ALL,FALSE)'));
+    body.parentElement.insertBefore(formula, body);
+
+    var table = document.createElement('table');
+    table.className = 'spreadsheet';
+    var thead = document.createElement('thead');
+    var headerRow = document.createElement('tr');
+    var cols = ['Rank','Team','Record','PF','Move','Verdict'];
+    var sortKeys = ['rank','team','record','pf','move','verdict'];
+    cols.forEach(function(col,i){
+      var th = document.createElement('th');
+      th.dataset.sort = sortKeys[i];
+      th.textContent = col;
+      var arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = '\u25B4';
+      th.appendChild(arrow);
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    var tbody = document.createElement('tbody');
+    function renderRows(data){
+      tbody.textContent = '';
+      data.forEach(function(row){
+        var tr = document.createElement('tr');
+        var tdRank = document.createElement('td');
+        tdRank.className = 'rank-cell';
+        tdRank.textContent = row.rank;
+        tr.appendChild(tdRank);
+
+        var tdTeam = document.createElement('td');
+        tdTeam.className = 'team-cell';
+        tdTeam.textContent = row.team;
+        tr.appendChild(tdTeam);
+
+        var tdRec = document.createElement('td');
+        tdRec.textContent = row.record;
+        tr.appendChild(tdRec);
+
+        var tdPf = document.createElement('td');
+        tdPf.className = 'pf-cell';
+        tdPf.textContent = row.pf;
+        tr.appendChild(tdPf);
+
+        var tdMove = document.createElement('td');
+        if(row.move==='steady'){tdMove.className='movement-steady';tdMove.textContent='\u2014';}
+        else if(row.move.indexOf('up')===0){tdMove.className='movement-up';tdMove.textContent='\u2191'+row.move.split('_')[1];}
+        else{tdMove.className='movement-down';tdMove.textContent='\u2193'+row.move.split('_')[1];}
+        tr.appendChild(tdMove);
+
+        var tdV = document.createElement('td');
+        tdV.className = 'verdict-cell';
+        tdV.textContent = row.verdict;
+        tdV.title = row.verdict;
+        tr.appendChild(tdV);
+
+        tbody.appendChild(tr);
+      });
+    }
+    renderRows(RANKINGS);
+    table.appendChild(tbody);
+    body.appendChild(table);
+
+    // Sortable
+    var currentSort = {key:'rank',asc:true};
+    thead.querySelectorAll('th').forEach(function(th){
+      th.addEventListener('click',function(){
+        var key = th.dataset.sort;
+        if(currentSort.key===key) currentSort.asc=!currentSort.asc;
+        else {currentSort.key=key;currentSort.asc=true;}
+        var sorted = RANKINGS.slice().sort(function(a,b){
+          var va,vb;
+          switch(key){
+            case 'rank':va=a.rank;vb=b.rank;break;
+            case 'team':return currentSort.asc?a.team.localeCompare(b.team):b.team.localeCompare(a.team);
+            case 'record':return currentSort.asc?a.record.localeCompare(b.record):b.record.localeCompare(a.record);
+            case 'pf':va=parseFloat(a.pf);vb=parseFloat(b.pf);break;
+            case 'move':va=a.rank-a.prev;vb=b.rank-b.prev;break;
+            default:return currentSort.asc?a.verdict.localeCompare(b.verdict):b.verdict.localeCompare(a.verdict);
+          }
+          return currentSort.asc?va-vb:vb-va;
+        });
+        renderRows(sorted);
+      });
+    });
+  }
+
+  // -- GroupChat.app --
+  function buildChat(body){
+    var chatBody = document.createElement('div');
+    chatBody.className = 'chat-body';
+
+    CHAT_MESSAGES.forEach(function(msg,i){
+      var bubble = document.createElement('div');
+      bubble.className = 'chat-msg ' + msg.side;
+      bubble.dataset.idx = i;
+
+      var sender = document.createElement('div');
+      sender.className = 'chat-sender';
+      sender.textContent = msg.sender + ' \u00b7 ' + msg.team;
+      bubble.appendChild(sender);
+
+      var text = document.createElement('div');
+      text.className = 'chat-text';
+      text.textContent = msg.text;
+      bubble.appendChild(text);
+
+      var time = document.createElement('div');
+      time.className = 'chat-time';
+      time.textContent = 'Week 6';
+      bubble.appendChild(time);
+
+      chatBody.appendChild(bubble);
+    });
+
+    var typing = document.createElement('div');
+    typing.className = 'chat-typing';
+    typing.textContent = 'someone is typing';
+    var dots = document.createElement('span');
+    dots.className = 'dots';
+    for(var d=0;d<3;d++){
+      var dot = document.createElement('span');
+      dot.textContent = '.';
+      dots.appendChild(dot);
+    }
+    typing.appendChild(dots);
+    chatBody.appendChild(typing);
+
+    body.appendChild(chatBody);
+
+    // Animate messages in
+    var msgs = chatBody.querySelectorAll('.chat-msg');
+    msgs.forEach(function(m,i){
+      setTimeout(function(){m.classList.add('visible')},200+i*350);
+    });
+  }
+
+  // -- Matchups/ --
+  function buildMatchups(body){
+    var path = document.createElement('div');
+    path.className = 'explorer-path';
+    var pathSpan = document.createElement('span');
+    pathSpan.textContent = 'C:\\Jailyard\\2025\\';
+    path.appendChild(pathSpan);
+    path.appendChild(document.createTextNode('Week6\\Matchups\\'));
+    body.parentElement.insertBefore(path, body);
+
+    var list = document.createElement('div');
+    list.className = 'explorer-body';
+
+    MATCHUPS.forEach(function(m,i){
+      var file = document.createElement('div');
+      file.className = 'explorer-file';
+      file.dataset.matchup = i;
+
+      var isWin = m.winner === m.team1;
+      var icon = document.createElement('div');
+      icon.className = 'file-icon ' + (isWin?'win':'loss');
+      icon.textContent = isWin ? 'W' : 'L';
+      file.appendChild(icon);
+
+      var info = document.createElement('div');
+      var name = document.createElement('div');
+      name.className = 'file-name';
+      name.textContent = m.team1 + ' vs ' + m.team2;
+      info.appendChild(name);
+      var meta = document.createElement('div');
+      meta.className = 'file-meta';
+      meta.textContent = m.mvp + ' \u2014 ' + m.mvpPts + ' pts | Margin: ' + m.margin;
+      info.appendChild(meta);
+      file.appendChild(info);
+
+      var score = document.createElement('div');
+      score.className = 'file-score';
+      score.textContent = (isWin?m.score1:m.score2)+'-'+(isWin?m.score2:m.score1);
+      file.appendChild(score);
+
+      file.addEventListener('click',function(){openMatchupDetail(i)});
+      list.appendChild(file);
+    });
+    body.appendChild(list);
+  }
+
+  function openMatchupDetail(idx){
+    var m = MATCHUPS[idx];
+    var id = 'matchup-'+idx;
+    if(windows[id]){focusWindow(id);return;}
+
+    var isMobile = window.innerWidth <= 768;
+    var el = document.createElement('div');
+    el.className = 'window';
+    el.id = 'win-'+id;
+    el.dataset.winId = id;
+    if(!isMobile){
+      el.style.left = (200+idx*30)+'px';
+      el.style.top = (100+idx*20)+'px';
+      el.style.width = '360px';
+      el.style.height = '300px';
+    }
+    el.style.zIndex = ++zCounter;
+
+    var shortTitle = m.team1.split(' ').pop()+' vs '+m.team2.split(' ').pop()+'.match';
+    var tb = buildTitlebar(shortTitle);
+    el.appendChild(tb);
+
+    var body = document.createElement('div');
+    body.className = 'window-body';
+
+    var detail = document.createElement('div');
+    detail.className = 'matchup-detail';
+
+    var h3 = document.createElement('h3');
+    h3.textContent = 'Matchup #'+(idx+1);
+    detail.appendChild(h3);
+
+    var isTeam1Winner = m.winner === m.team1;
+
+    // Score lines
+    [{name:m.team1,pts:m.score1,isW:isTeam1Winner},{name:m.team2,pts:m.score2,isW:!isTeam1Winner}].forEach(function(s){
+      var line = document.createElement('div');
+      line.className = 'score-line';
+      var nameSpan = document.createElement('span');
+      nameSpan.className = s.isW ? 'winner-name' : 'loser-name';
+      nameSpan.textContent = s.name;
+      line.appendChild(nameSpan);
+      var ptsSpan = document.createElement('span');
+      ptsSpan.className = 'score-pts';
+      ptsSpan.textContent = s.pts;
+      line.appendChild(ptsSpan);
+      detail.appendChild(line);
+    });
+
+    var perf = document.createElement('div');
+    perf.className = 'top-performer';
+    var perfB = document.createElement('strong');
+    perfB.textContent = 'MVP: ';
+    perf.appendChild(perfB);
+    perf.appendChild(document.createTextNode(m.mvp+' \u2014 '+m.mvpPts+' pts'));
+    detail.appendChild(perf);
+
+    var summ = document.createElement('div');
+    summ.className = 'summary';
+    summ.textContent = m.summary;
+    detail.appendChild(summ);
+
+    body.appendChild(detail);
+    el.appendChild(body);
+
+    if(!isMobile){
+      var rh = document.createElement('div');
+      rh.className = 'resize-handle';
+      el.appendChild(rh);
+      initResize(el,rh);
+    }
+
+    desktop.appendChild(el);
+    requestAnimationFrame(function(){el.classList.add('open')});
+    initDrag(el,tb);
+
+    // Wire controls
+    el.querySelector('.dot-close').addEventListener('click',function(e){e.stopPropagation();closeWindow(id)});
+    el.querySelector('.dot-minimize').addEventListener('click',function(e){e.stopPropagation();minimizeWindow(id)});
+    el.querySelector('.dot-maximize').addEventListener('click',function(e){e.stopPropagation();toggleMaximize(id)});
+    el.addEventListener('mousedown',function(){focusWindow(id)});
+    el.addEventListener('touchstart',function(){focusWindow(id)},{passive:true});
+    tb.addEventListener('dblclick',function(){toggleMaximize(id)});
+
+    windows[id] = el;
+    focusWindow(id);
+  }
+
+  // -- Terminal --
+  function buildTerminal(body){
+    var output = document.createElement('div');
+    output.className = 'terminal-body';
+    body.appendChild(output);
+
+    var delay = 0;
+    TERMINAL_LINES.forEach(function(line){
+      delay += (line.text==='' ? 100 : 60+Math.random()*80+line.text.length*8);
+      setTimeout(function(){
+        var div = document.createElement('div');
+        div.className = 'terminal-line '+(line.cls||'');
+        div.textContent = line.text;
+        output.appendChild(div);
+        requestAnimationFrame(function(){div.classList.add('visible')});
+        body.scrollTop = body.scrollHeight;
+      },delay);
+    });
+  }
+
+  // -- MyTeam.png --
+  function buildMyTeam(body){
+    var t = TEAM_DATA;
+    var card = document.createElement('div');
+    card.className = 'team-card';
+
+    // Header
+    var header = document.createElement('div');
+    header.className = 'team-card-header';
+    var avatar = document.createElement('div');
+    avatar.className = 'team-card-avatar';
+    avatar.textContent = t.initials;
+    header.appendChild(avatar);
+    var hInfo = document.createElement('div');
+    var hName = document.createElement('div');
+    hName.className = 'team-card-name';
+    hName.textContent = t.name;
+    hInfo.appendChild(hName);
+    var hOwner = document.createElement('div');
+    hOwner.className = 'team-card-owner';
+    hOwner.textContent = t.owner + ' \u00b7 2x Champion';
+    hInfo.appendChild(hOwner);
+    header.appendChild(hInfo);
+    card.appendChild(header);
+
+    // Stats row 1
+    var stats1 = document.createElement('div');
+    stats1.className = 'team-card-stats';
+    [{val:'#'+t.rank,label:'Rank'},{val:t.record,label:'Record'},{val:t.elo,label:'Elo (Peak)'}].forEach(function(s){
+      var stat = document.createElement('div');
+      stat.className = 'team-card-stat';
+      var v = document.createElement('div');
+      v.className = 'team-card-stat-value';
+      v.textContent = s.val;
+      stat.appendChild(v);
+      var l = document.createElement('div');
+      l.className = 'team-card-stat-label';
+      l.textContent = s.label;
+      stat.appendChild(l);
+      stats1.appendChild(stat);
+    });
+    card.appendChild(stats1);
+
+    // Stats row 2
+    var stats2 = document.createElement('div');
+    stats2.className = 'team-card-stats';
+    [{val:t.pf,label:'Points For'},{val:'164.94',label:'This Week'},{val:'\u21913',label:'Movement',color:'var(--up)'}].forEach(function(s){
+      var stat = document.createElement('div');
+      stat.className = 'team-card-stat';
+      var v = document.createElement('div');
+      v.className = 'team-card-stat-value';
+      v.textContent = s.val;
+      if(s.color) v.style.color = s.color;
+      stat.appendChild(v);
+      var l = document.createElement('div');
+      l.className = 'team-card-stat-label';
+      l.textContent = s.label;
+      stat.appendChild(l);
+      stats2.appendChild(stat);
+    });
+    card.appendChild(stats2);
+
+    // Elo sparkline
+    var eloWrap = document.createElement('div');
+    eloWrap.className = 'team-card-elo';
+    var canvas = document.createElement('canvas');
+    canvas.id = 'elo-spark';
+    eloWrap.appendChild(canvas);
+    card.appendChild(eloWrap);
+
+    // Next matchup
+    var next = document.createElement('div');
+    next.className = 'team-card-next';
+    var nextStrong = document.createElement('strong');
+    nextStrong.textContent = 'Next Week: ';
+    next.appendChild(nextStrong);
+    next.appendChild(document.createTextNode(t.nextMatchup));
+    next.appendChild(document.createElement('br'));
+    var nextDetail = document.createElement('span');
+    nextDetail.style.color = 'var(--text-muted)';
+    nextDetail.style.fontSize = '.72rem';
+    nextDetail.textContent = t.nextDetail;
+    next.appendChild(nextDetail);
+    card.appendChild(next);
+
+    body.appendChild(card);
+
+    // Draw Elo sparkline
+    requestAnimationFrame(function(){
+      var cvs = document.getElementById('elo-spark');
+      if(!cvs) return;
+      var rect = cvs.parentElement.getBoundingClientRect();
+      var dpr = window.devicePixelRatio || 1;
+      cvs.width = rect.width * dpr;
+      cvs.height = rect.height * dpr;
+      cvs.style.width = rect.width + 'px';
+      cvs.style.height = rect.height + 'px';
+      var ctx = cvs.getContext('2d');
+      ctx.scale(dpr,dpr);
+
+      var data = t.eloHistory;
+      var mn = Math.min.apply(null,data)-20;
+      var mx = Math.max.apply(null,data)+20;
+      var w = rect.width, h = rect.height, pad = 4;
+
+      var grad = ctx.createLinearGradient(0,0,0,h);
+      grad.addColorStop(0,'rgba(201,168,76,0.3)');
+      grad.addColorStop(1,'rgba(201,168,76,0)');
+
+      ctx.beginPath();
+      ctx.moveTo(pad,h-pad);
+      for(var i=0;i<data.length;i++){
+        var x=pad+(i/(data.length-1))*(w-pad*2);
+        var y=h-pad-((data[i]-mn)/(mx-mn))*(h-pad*2);
+        ctx.lineTo(x,y);
+      }
+      ctx.lineTo(w-pad,h-pad);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.beginPath();
+      for(var i=0;i<data.length;i++){
+        var x=pad+(i/(data.length-1))*(w-pad*2);
+        var y=h-pad-((data[i]-mn)/(mx-mn))*(h-pad*2);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle='#c9a84c';
+      ctx.lineWidth=2;
+      ctx.stroke();
+
+      var lastX=w-pad;
+      var lastY=h-pad-((data[data.length-1]-mn)/(mx-mn))*(h-pad*2);
+      ctx.beginPath();
+      ctx.arc(lastX,lastY,3,0,Math.PI*2);
+      ctx.fillStyle='#c9a84c';
+      ctx.fill();
+    });
+  }
+
+
+  // ---- INITIAL STATE: open 3 windows staggered ----
+  setTimeout(function(){createWindow('column')},300);
+  setTimeout(function(){createWindow('rankings')},600);
+  setTimeout(function(){createWindow('terminal')},900);
+
+})();
+</script>
+</body>
+</html>

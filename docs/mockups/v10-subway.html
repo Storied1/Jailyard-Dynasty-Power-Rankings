@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jailyard Transit Authority — Week 06 Service Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --fg: #333333;
+  --black: #000000;
+  --red: #E32017;
+  --blue: #003688;
+  --green: #00782A;
+  --purple: #9B0056;
+  --amber: #FF6600;
+  --muted: #888888;
+  --card: rgba(255,255,255,0.6);
+  --border: #ccccbb;
+  --accent: #E32017;
+  --accent2: #003688;
+  --glass: rgba(255,255,255,0.35);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.mono { font-family: 'IBM Plex Mono', monospace; }
+
+/* === HERO === */
+.hero {
+  text-align: center;
+  padding: 48px 24px 32px;
+  border-bottom: 3px solid var(--fg);
+}
+
+.roundel {
+  display: inline-block;
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 16px;
+}
+
+.roundel-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 8px solid var(--red);
+  background: var(--bg);
+  position: relative;
+}
+
+.roundel-bar {
+  position: absolute;
+  top: 50%;
+  left: -4px;
+  right: -4px;
+  height: 36px;
+  transform: translateY(-50%);
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.roundel-bar span {
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 4px;
+}
+
+.hero h1 {
+  font-size: clamp(24px, 5vw, 42px);
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.hero .subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(12px, 2.5vw, 16px);
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+/* === MAP SECTION === */
+.map-section {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.map-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  position: relative;
+}
+
+.map-container svg {
+  display: block;
+  min-width: 900px;
+  width: 100%;
+  height: auto;
+}
+
+/* === LEGEND === */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-top: 2px solid var(--border);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.legend-line {
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.legend-station {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--black);
+}
+
+.legend-interchange {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid var(--fg);
+  background: var(--bg);
+}
+
+.legend-disruption {
+  width: 20px;
+  height: 20px;
+  background: var(--amber);
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+/* === PANELS === */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .panels { grid-template-columns: 1fr; }
+}
+
+.panel {
+  border: 2px solid var(--border);
+  background: var(--card);
+  padding: 20px;
+}
+
+.panel-header {
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--fg);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-header .icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Route Planner */
+.route {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.route:last-child { border-bottom: none; }
+
+.route-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.route-team {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.route-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.route-marquee {
+  background: var(--red);
+  color: #fff;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* Service Updates */
+.service-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.service-item:last-child { border-bottom: none; }
+
+.service-line-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-right: 6px;
+}
+
+.service-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-delays { color: var(--amber); }
+.status-ahead { color: var(--green); }
+.status-suspended { color: var(--red); }
+.status-disruption { color: var(--amber); }
+
+/* === AWARDS === */
+.awards-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 24px;
+}
+
+.awards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.award-card {
+  border: 2px solid var(--border);
+  background: var(--card);
+  padding: 16px;
+  text-align: center;
+}
+
+.award-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.award-value {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.award-detail {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* === FOOTER === */
+.footer {
+  text-align: center;
+  padding: 32px 24px;
+  border-top: 3px solid var(--fg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  line-height: 2;
+}
+
+.footer .doors {
+  font-weight: 700;
+  color: var(--fg);
+  font-size: 14px;
+}
+
+/* === STANDINGS TABLE === */
+.standings-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 24px;
+}
+
+.standings-header {
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--fg);
+  margin-bottom: 0;
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.standings-table th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.standings-table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.standings-table tr:last-child td { border-bottom: none; }
+
+.station-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.line-badge-sm {
+  display: inline-block;
+  padding: 0 6px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.movement-up { color: var(--green); font-weight: 700; }
+.movement-down { color: var(--red); font-weight: 700; }
+.movement-none { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="roundel">
+    <div class="roundel-circle">
+      <div class="roundel-bar"><span>JTA</span></div>
+    </div>
+  </div>
+  <h1>Jailyard Transit Authority</h1>
+  <p class="subtitle">WEEK 06 SERVICE MAP &mdash; SEASON 2025</p>
+</header>
+
+<!-- TRANSIT MAP -->
+<section class="map-section">
+  <div class="map-container">
+    <svg viewBox="0 0 960 620" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <style>
+          .line-label { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: central; }
+          .station-name { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; fill: #333; }
+          .station-record { font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: #888; }
+          .station-rank { font-family: 'IBM Plex Mono', monospace; font-size: 9px; fill: #888; }
+          .matchup-score { font-family: 'IBM Plex Mono', monospace; font-size: 9px; fill: #333; font-weight: 600; }
+          .disruption-text { font-family: 'DM Sans', sans-serif; font-size: 9px; fill: #FF6600; font-weight: 700; text-transform: uppercase; }
+          .line-name-label { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+        </style>
+      </defs>
+
+      <!-- Background grid (subtle) -->
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e0dbd0" stroke-width="0.5"/>
+      </pattern>
+      <rect width="960" height="620" fill="url(#grid)"/>
+
+      <!-- ===== RED LINE (Contender): Ken-obi → MHJTIME → Kittler ===== -->
+      <!-- Route: (140,120) → (380,120) → (620,120) -->
+      <line x1="140" y1="120" x2="620" y2="120" stroke="#E32017" stroke-width="8" stroke-linecap="round"/>
+      <!-- Line label -->
+      <rect x="100" y="68" width="110" height="20" rx="3" fill="#E32017"/>
+      <text x="155" y="78" class="line-label">CONTENDER LINE</text>
+
+      <!-- Station: Ken-obi (Rank 2) -->
+      <circle cx="140" cy="120" r="10" fill="#000" stroke="#E32017" stroke-width="3"/>
+      <text x="140" y="148" class="station-name" text-anchor="middle">Gen. Ken-obi</text>
+      <text x="140" y="162" class="station-record" text-anchor="middle">5-1 | 871.2 PF</text>
+      <text x="140" y="104" class="station-rank" text-anchor="middle">#2</text>
+
+      <!-- Station: MHJTIME (Rank 7) -->
+      <circle cx="380" cy="120" r="7" fill="#000" stroke="#E32017" stroke-width="3"/>
+      <text x="380" y="148" class="station-name" text-anchor="middle">MHJTIME</text>
+      <text x="380" y="162" class="station-record" text-anchor="middle">3-3 | 891.9 PF</text>
+      <text x="380" y="104" class="station-rank" text-anchor="middle">#7</text>
+
+      <!-- Station: Kittler (Rank 5) -->
+      <circle cx="620" cy="120" r="8" fill="#000" stroke="#E32017" stroke-width="3"/>
+      <text x="620" y="148" class="station-name" text-anchor="middle">Kittler</text>
+      <text x="620" y="162" class="station-record" text-anchor="middle">4-2 | 877.9 PF</text>
+      <text x="620" y="104" class="station-rank" text-anchor="middle">#5</text>
+
+      <!-- ===== BLUE LINE (Frisky): Legion → Noble → Ghastly → Rasheeing → Boonist → Father Time → Sleeping Giants ===== -->
+      <!-- Route: horizontal from left, 45deg down, horizontal across, 45deg up, horizontal to end -->
+      <!-- (80,280) → (200,280) → (320,280) → (440,280) → (560,280) → (680,280) → (800,280) → (880,400) -->
+      <polyline points="80,280 200,280 340,280 480,280 600,280 720,280 840,280 880,320"
+        stroke="#003688" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- 45deg down to Father Time -->
+      <line x1="840" y1="280" x2="880" y2="320" stroke="#003688" stroke-width="8" stroke-linecap="round"/>
+
+      <!-- Line label -->
+      <rect x="40" y="228" width="90" height="20" rx="3" fill="#003688"/>
+      <text x="85" y="238" class="line-label">FRISKY LINE</text>
+
+      <!-- Station: Legion (Rank 1) -->
+      <circle cx="80" cy="280" r="12" fill="#000" stroke="#003688" stroke-width="3"/>
+      <text x="80" y="308" class="station-name" text-anchor="middle">Legion</text>
+      <text x="80" y="322" class="station-record" text-anchor="middle">5-1 | 935.7 PF</text>
+      <text x="80" y="262" class="station-rank" text-anchor="middle">#1</text>
+
+      <!-- Station: Noble FFT (Rank 8) -->
+      <circle cx="200" cy="280" r="6" fill="#000" stroke="#003688" stroke-width="3"/>
+      <text x="200" y="308" class="station-name" text-anchor="middle">Noble FFT</text>
+      <text x="200" y="322" class="station-record" text-anchor="middle">3-3 | 819.0 PF</text>
+      <text x="200" y="262" class="station-rank" text-anchor="middle">#8</text>
+
+      <!-- Station: Ghastly (Rank 9) -->
+      <circle cx="340" cy="280" r="6" fill="#000" stroke="#003688" stroke-width="3"/>
+      <text x="340" y="308" class="station-name" text-anchor="middle">Ghastly</text>
+      <text x="340" y="322" class="station-record" text-anchor="middle">2-4 | 818.3 PF</text>
+      <text x="340" y="262" class="station-rank" text-anchor="middle">#9</text>
+
+      <!-- Station: Rasheeing (Rank 6) -->
+      <circle cx="480" cy="280" r="7" fill="#000" stroke="#003688" stroke-width="3"/>
+      <text x="480" y="308" class="station-name" text-anchor="middle">Rasheeing</text>
+      <text x="480" y="322" class="station-record" text-anchor="middle">4-2 | 816.0 PF</text>
+      <text x="480" y="262" class="station-rank" text-anchor="middle">#6</text>
+
+      <!-- Station: Boonist Monks (Rank 4) -->
+      <circle cx="600" cy="280" r="9" fill="#000" stroke="#003688" stroke-width="3"/>
+      <text x="600" y="308" class="station-name" text-anchor="middle">Boonist Monks</text>
+      <text x="600" y="322" class="station-record" text-anchor="middle">4-2 | 912.9 PF</text>
+      <text x="600" y="262" class="station-rank" text-anchor="middle">#4</text>
+
+      <!-- Station: Sleeping Giants (Rank 3) -->
+      <circle cx="720" cy="280" r="10" fill="#000" stroke="#003688" stroke-width="3"/>
+      <text x="720" y="308" class="station-name" text-anchor="middle">Sleeping Giants</text>
+      <text x="720" y="322" class="station-record" text-anchor="middle">5-1 | 857.0 PF</text>
+      <text x="720" y="262" class="station-rank" text-anchor="middle">#3</text>
+
+      <!-- Station: Father Time (Rank 12) -->
+      <circle cx="880" cy="320" r="5" fill="#000" stroke="#003688" stroke-width="3"/>
+      <text x="880" y="348" class="station-name" text-anchor="middle">Father Time</text>
+      <text x="880" y="362" class="station-record" text-anchor="middle">0-6 | 712.7 PF</text>
+      <text x="880" y="308" class="station-rank" text-anchor="middle">#12</text>
+
+      <!-- ===== GREEN LINE (Trust the Process): Chudders ===== -->
+      <!-- Single station with short stub line -->
+      <line x1="140" y1="440" x2="280" y2="440" stroke="#00782A" stroke-width="8" stroke-linecap="round"/>
+      <rect x="100" y="392" width="156" height="20" rx="3" fill="#00782A"/>
+      <text x="178" y="402" class="line-label">TRUST THE PROCESS</text>
+
+      <!-- Station: Chudders (Rank 10) -->
+      <circle cx="200" cy="440" r="6" fill="#000" stroke="#00782A" stroke-width="3"/>
+      <text x="200" y="468" class="station-name" text-anchor="middle">Chudders FT</text>
+      <text x="200" y="482" class="station-record" text-anchor="middle">1-5 | 727.9 PF</text>
+      <text x="200" y="424" class="station-rank" text-anchor="middle">#10</text>
+
+      <!-- ===== PURPLE LINE (Fraud): Burden ===== -->
+      <line x1="400" y1="440" x2="560" y2="440" stroke="#9B0056" stroke-width="8" stroke-linecap="round"/>
+      <rect x="400" y="392" width="88" height="20" rx="3" fill="#9B0056"/>
+      <text x="444" y="402" class="line-label">FRAUD LINE</text>
+
+      <!-- Station: Burden (Rank 11) -->
+      <circle cx="480" cy="440" r="5" fill="#000" stroke="#9B0056" stroke-width="3"/>
+      <text x="480" y="468" class="station-name" text-anchor="middle">Burden</text>
+      <text x="480" y="482" class="station-record" text-anchor="middle">0-6 | 732.7 PF</text>
+      <text x="480" y="424" class="station-rank" text-anchor="middle">#11</text>
+
+      <!-- ===== INTERCHANGES (Week 6 Matchups) ===== -->
+
+      <!-- Matchup 1: Noble FFT (200,280) def Ghastly (340,280) — UPSET -->
+      <line x1="200" y1="280" x2="340" y2="280" stroke="#FF6600" stroke-width="3" stroke-dasharray="6,4" opacity="0.7"/>
+      <rect x="232" y="252" width="76" height="22" rx="3" fill="#fff" stroke="#FF6600" stroke-width="1.5"/>
+      <text x="270" y="264" class="matchup-score" text-anchor="middle">151.88-121.30</text>
+      <!-- Disruption triangle -->
+      <polygon points="270,247 264,237 276,237" fill="#FF6600"/>
+      <text x="270" y="234" class="disruption-text" text-anchor="middle">UPSET</text>
+
+      <!-- Matchup 2: MHJTIME (380,120) def Kittler (620,120) — UPSET (same line, Red) -->
+      <line x1="380" y1="120" x2="620" y2="120" stroke="#FF6600" stroke-width="3" stroke-dasharray="6,4" opacity="0.5"/>
+      <rect x="462" y="82" width="76" height="22" rx="3" fill="#fff" stroke="#FF6600" stroke-width="1.5"/>
+      <text x="500" y="94" class="matchup-score" text-anchor="middle">140.94-107.74</text>
+      <polygon points="500,77 494,67 506,67" fill="#FF6600"/>
+      <text x="500" y="64" class="disruption-text" text-anchor="middle">UPSET</text>
+
+      <!-- Matchup 3: Sleeping Giants (720,280) def Chudders (200,440) -->
+      <!-- Connector: from SG down at 45deg to Chudders -->
+      <polyline points="720,280 720,360 200,440" stroke="#ccc" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+      <circle cx="720" cy="280" r="16" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="440" r="14" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="430" y="356" width="76" height="22" rx="3" fill="#fff" stroke="#999" stroke-width="1"/>
+      <text x="468" y="368" class="matchup-score" text-anchor="middle">129.82-95.26</text>
+      <text x="468" y="384" class="station-record" text-anchor="middle">+34.56</text>
+
+      <!-- Matchup 4: Boonist Monks (600,280) def Rasheeing (480,280) — UPSET -->
+      <line x1="480" y1="280" x2="600" y2="280" stroke="#FF6600" stroke-width="3" stroke-dasharray="6,4" opacity="0.7"/>
+      <rect x="502" y="336" width="76" height="22" rx="3" fill="#fff" stroke="#FF6600" stroke-width="1.5"/>
+      <text x="540" y="348" class="matchup-score" text-anchor="middle">150.46-109.10</text>
+      <polygon points="540,331 534,321 546,321" fill="#FF6600"/>
+      <text x="540" y="318" class="disruption-text" text-anchor="middle">UPSET</text>
+
+      <!-- Matchup 5: Legion (80,280) def Father Time (880,320) -->
+      <!-- Connector path around the outside -->
+      <polyline points="80,280 40,280 40,540 880,540 880,320" stroke="#ccc" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+      <circle cx="80" cy="280" r="18" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="880" cy="320" r="14" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="420" y="526" width="120" height="22" rx="3" fill="#fff" stroke="#999" stroke-width="1"/>
+      <text x="480" y="538" class="matchup-score" text-anchor="middle">165.90-107.66 (+58.24)</text>
+
+      <!-- Matchup 6: Ken-obi (140,120) def Burden (480,440) — cross-line -->
+      <polyline points="140,120 140,440 480,440" stroke="#ccc" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+      <circle cx="140" cy="120" r="16" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="480" cy="440" r="14" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="260" y="426" width="128" height="22" rx="3" fill="#fff" stroke="#999" stroke-width="1"/>
+      <text x="324" y="438" class="matchup-score" text-anchor="middle">164.94-99.20 (+65.74)</text>
+      <text x="324" y="416" class="station-record" text-anchor="middle">BIGGEST BLOWOUT</text>
+
+      <!-- Week high label on Legion matchup -->
+      <text x="480" y="555" class="station-record" text-anchor="middle">WEEK HIGH: 165.90</text>
+
+      <!-- Map border -->
+      <rect x="1" y="1" width="958" height="618" fill="none" stroke="#ccc" stroke-width="1"/>
+    </svg>
+  </div>
+</section>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-line" style="background: var(--red);"></div>
+    <span>Contender Line</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-line" style="background: var(--blue);"></div>
+    <span>Frisky Line</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-line" style="background: var(--green);"></div>
+    <span>Trust the Process Line</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-line" style="background: var(--purple);"></div>
+    <span>Fraud Line</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-station"></div>
+    <span>Team Station</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-interchange"></div>
+    <span>Week 6 Interchange (Matchup)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-disruption"></div>
+    <span>Service Disruption (Upset)</span>
+  </div>
+</div>
+
+<!-- PANELS: Route Planner + Service Updates -->
+<div class="panels">
+  <!-- ROUTE PLANNER (Week 7) -->
+  <div class="panel">
+    <div class="panel-header">
+      <svg class="icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#333" stroke-width="2"/><path d="M10 6v4l3 2" stroke="#333" stroke-width="2" stroke-linecap="round"/></svg>
+      Route Planner &mdash; Week 07
+    </div>
+
+    <div class="route">
+      <div class="route-label">FROM</div>
+      <div class="route-team">The Legion of Bouz <span class="mono" style="color:var(--muted);font-size:11px;">(#1, 5-1)</span></div>
+      <div class="route-label" style="margin-top:4px;">TO</div>
+      <div class="route-team">General Ken-obi <span class="mono" style="color:var(--muted);font-size:11px;">(#2, 5-1)</span></div>
+      <div class="route-meta">FRISKY &harr; CONTENDER &bull; EXPRESS SERVICE</div>
+      <div class="route-marquee">MARQUEE MATCHUP</div>
+    </div>
+
+    <div class="route">
+      <div class="route-team" style="font-size:13px;">#4 Boonist Monks <span style="color:var(--muted);">vs</span> #8 Noble FFT</div>
+      <div class="route-meta">FRISKY &harr; FRISKY &bull; LOCAL SERVICE</div>
+    </div>
+
+    <div class="route">
+      <div class="route-team" style="font-size:13px;">#5 Kittler <span style="color:var(--muted);">vs</span> #3 Sleeping Giants</div>
+      <div class="route-meta">CONTENDER &harr; FRISKY &bull; EXPRESS SERVICE</div>
+    </div>
+
+    <div class="route">
+      <div class="route-team" style="font-size:13px;">#6 Rasheeing <span style="color:var(--muted);">vs</span> #9 Ghastly</div>
+      <div class="route-meta">FRISKY &harr; FRISKY &bull; LOCAL SERVICE</div>
+    </div>
+
+    <div class="route">
+      <div class="route-team" style="font-size:13px;">#10 Chudders FT <span style="color:var(--muted);">vs</span> #7 MHJTIME</div>
+      <div class="route-meta">PROCESS &harr; CONTENDER &bull; CROSS-LINE</div>
+    </div>
+
+    <div class="route">
+      <div class="route-team" style="font-size:13px;">#11 Burden <span style="color:var(--muted);">vs</span> #12 Father Time</div>
+      <div class="route-meta">FRAUD &harr; FRISKY &bull; TOILET BOWL MATINEE</div>
+      <div class="route-marquee" style="background: var(--purple);">BOTH 0-6 &bull; SERVICE SUSPENDED</div>
+    </div>
+  </div>
+
+  <!-- SERVICE UPDATES -->
+  <div class="panel">
+    <div class="panel-header">
+      <svg class="icon" viewBox="0 0 20 20" fill="none"><polygon points="10,2 2,18 18,18" fill="none" stroke="#FF6600" stroke-width="2"/><line x1="10" y1="8" x2="10" y2="12" stroke="#FF6600" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="15" r="1" fill="#FF6600"/></svg>
+      Service Updates &mdash; Week 06
+    </div>
+
+    <div class="service-item">
+      <span class="service-line-badge" style="background:var(--red);">RED</span>
+      <strong>Kittler station</strong>
+      <div class="service-status status-delays">SEVERE DELAYS &mdash; fell from #1 to #5, scored 107.74</div>
+    </div>
+
+    <div class="service-item">
+      <span class="service-line-badge" style="background:var(--blue);">BLUE</span>
+      <strong>Legion station</strong>
+      <div class="service-status status-ahead">RUNNING AHEAD OF SCHEDULE &mdash; +1 to #1, scored 165.90 (week high)</div>
+    </div>
+
+    <div class="service-item">
+      <span class="service-line-badge" style="background:var(--blue);">BLUE</span>
+      <strong>Father Time station</strong>
+      <div class="service-status status-suspended">SERVICE SUSPENDED &mdash; 0-6, L6 streak</div>
+    </div>
+
+    <div class="service-item">
+      <span class="service-line-badge" style="background:var(--purple);">PRPL</span>
+      <strong>Burden station</strong>
+      <div class="service-status status-suspended">SERVICE SUSPENDED &mdash; 0-6, L6 streak</div>
+    </div>
+
+    <div class="service-item">
+      <span class="service-line-badge" style="background:var(--amber);">AMBE</span>
+      <strong>System-wide disruption</strong>
+      <div class="service-status status-disruption">4 OF 6 SERVICES EXPERIENCED UPSET DISRUPTIONS &mdash; WILDEST WEEK OF THE SEASON</div>
+    </div>
+
+    <div class="service-item">
+      <span class="service-line-badge" style="background:var(--green);">GRN</span>
+      <strong>Chudders station</strong>
+      <div class="service-status" style="color:var(--muted);">REDUCED SERVICE &mdash; 1-5, lone process rider</div>
+    </div>
+  </div>
+</div>
+
+<!-- AWARDS -->
+<section class="awards-section">
+  <div class="standings-header" style="margin-bottom:16px;">Station Performance Awards &mdash; Week 06</div>
+  <div class="awards-grid">
+    <div class="award-card">
+      <div class="award-label">High Scorer</div>
+      <div class="award-value">The Legion of Bouz</div>
+      <div class="award-detail">165.90 pts</div>
+    </div>
+    <div class="award-card">
+      <div class="award-label">Low Scorer</div>
+      <div class="award-value">Chudders Football Team</div>
+      <div class="award-detail">95.26 pts</div>
+    </div>
+    <div class="award-card">
+      <div class="award-label">Top Performer</div>
+      <div class="award-value">Bijan Robinson (RB, ATL)</div>
+      <div class="award-detail">32.8 pts &mdash; Noble FFT</div>
+    </div>
+    <div class="award-card">
+      <div class="award-label">Biggest Blowout</div>
+      <div class="award-value">Gen. Ken-obi def Burden</div>
+      <div class="award-detail">164.94 &ndash; 99.20 (+65.74)</div>
+    </div>
+  </div>
+</section>
+
+<!-- STANDINGS TABLE -->
+<section class="standings-section">
+  <div class="standings-header">Full Network Map &mdash; All Stations</div>
+  <table class="standings-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Line</th>
+        <th>Station</th>
+        <th>Owner</th>
+        <th>Rec</th>
+        <th>PF</th>
+        <th>Wk6</th>
+        <th>Mvmt</th>
+        <th>Streak</th>
+        <th>Elo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mono">1</td>
+        <td><span class="line-badge-sm" style="background:var(--blue);">FRI</span></td>
+        <td><span class="station-dot" style="background:var(--blue);"></span>The Legion of Bouz</td>
+        <td>KidBouzie</td>
+        <td class="mono">5-1</td>
+        <td class="mono">935.7</td>
+        <td class="mono">165.90</td>
+        <td class="movement-up">+1</td>
+        <td class="mono">W1</td>
+        <td class="mono">1604</td>
+      </tr>
+      <tr>
+        <td class="mono">2</td>
+        <td><span class="line-badge-sm" style="background:var(--red);">CON</span></td>
+        <td><span class="station-dot" style="background:var(--red);"></span>General Ken-obi</td>
+        <td>bLaker24</td>
+        <td class="mono">5-1</td>
+        <td class="mono">871.2</td>
+        <td class="mono">164.94</td>
+        <td class="movement-up">+3</td>
+        <td class="mono">W2</td>
+        <td class="mono">1700</td>
+      </tr>
+      <tr>
+        <td class="mono">3</td>
+        <td><span class="line-badge-sm" style="background:var(--blue);">FRI</span></td>
+        <td><span class="station-dot" style="background:var(--blue);"></span>Sleeping Giants</td>
+        <td>zbcowan</td>
+        <td class="mono">5-1</td>
+        <td class="mono">857.0</td>
+        <td class="mono">129.82</td>
+        <td class="movement-none">&mdash;</td>
+        <td class="mono">W4</td>
+        <td class="mono">1561</td>
+      </tr>
+      <tr>
+        <td class="mono">4</td>
+        <td><span class="line-badge-sm" style="background:var(--blue);">FRI</span></td>
+        <td><span class="station-dot" style="background:var(--blue);"></span>The Boonist Monks</td>
+        <td>GauchoTrain</td>
+        <td class="mono">4-2</td>
+        <td class="mono">912.9</td>
+        <td class="mono">150.46</td>
+        <td class="movement-up">+2</td>
+        <td class="mono">W1</td>
+        <td class="mono">1599</td>
+      </tr>
+      <tr>
+        <td class="mono">5</td>
+        <td><span class="line-badge-sm" style="background:var(--red);">CON</span></td>
+        <td><span class="station-dot" style="background:var(--red);"></span>Kittler on the Roof</td>
+        <td>bchodos</td>
+        <td class="mono">4-2</td>
+        <td class="mono">877.9</td>
+        <td class="mono">107.74</td>
+        <td class="movement-down">-4</td>
+        <td class="mono">L1</td>
+        <td class="mono">1488</td>
+      </tr>
+      <tr>
+        <td class="mono">6</td>
+        <td><span class="line-badge-sm" style="background:var(--blue);">FRI</span></td>
+        <td><span class="station-dot" style="background:var(--blue);"></span>Rasheeing the Scene</td>
+        <td>ToreroGaucho</td>
+        <td class="mono">4-2</td>
+        <td class="mono">816.0</td>
+        <td class="mono">109.10</td>
+        <td class="movement-down">-2</td>
+        <td class="mono">L1</td>
+        <td class="mono">1626</td>
+      </tr>
+      <tr>
+        <td class="mono">7</td>
+        <td><span class="line-badge-sm" style="background:var(--red);">CON</span></td>
+        <td><span class="station-dot" style="background:var(--red);"></span>MHJTIME</td>
+        <td>rango_</td>
+        <td class="mono">3-3</td>
+        <td class="mono">891.9</td>
+        <td class="mono">140.94</td>
+        <td class="movement-none">&mdash;</td>
+        <td class="mono">W2</td>
+        <td class="mono">1586</td>
+      </tr>
+      <tr>
+        <td class="mono">8</td>
+        <td><span class="line-badge-sm" style="background:var(--blue);">FRI</span></td>
+        <td><span class="station-dot" style="background:var(--blue);"></span>Noble FFT</td>
+        <td>kevobucks</td>
+        <td class="mono">3-3</td>
+        <td class="mono">819.0</td>
+        <td class="mono">151.88</td>
+        <td class="movement-up">+1</td>
+        <td class="mono">W1</td>
+        <td class="mono">1455</td>
+      </tr>
+      <tr>
+        <td class="mono">9</td>
+        <td><span class="line-badge-sm" style="background:var(--blue);">FRI</span></td>
+        <td><span class="station-dot" style="background:var(--blue);"></span>Ghastly Grayskull Gang</td>
+        <td>GrayskullXX</td>
+        <td class="mono">2-4</td>
+        <td class="mono">818.3</td>
+        <td class="mono">121.30</td>
+        <td class="movement-down">-1</td>
+        <td class="mono">L2</td>
+        <td class="mono">1324</td>
+      </tr>
+      <tr>
+        <td class="mono">10</td>
+        <td><span class="line-badge-sm" style="background:var(--green);">TTP</span></td>
+        <td><span class="station-dot" style="background:var(--green);"></span>Chudders Football Team</td>
+        <td>Chudders</td>
+        <td class="mono">1-5</td>
+        <td class="mono">727.9</td>
+        <td class="mono">95.26</td>
+        <td class="movement-none">&mdash;</td>
+        <td class="mono">L1</td>
+        <td class="mono">1402</td>
+      </tr>
+      <tr>
+        <td class="mono">11</td>
+        <td><span class="line-badge-sm" style="background:var(--purple);">FRD</span></td>
+        <td><span class="station-dot" style="background:var(--purple);"></span>Burden of Etienne-y Woody</td>
+        <td>kharlow</td>
+        <td class="mono">0-6</td>
+        <td class="mono">732.7</td>
+        <td class="mono">99.20</td>
+        <td class="movement-none">&mdash;</td>
+        <td class="mono">L6</td>
+        <td class="mono">1324</td>
+      </tr>
+      <tr>
+        <td class="mono">12</td>
+        <td><span class="line-badge-sm" style="background:var(--blue);">FRI</span></td>
+        <td><span class="station-dot" style="background:var(--blue);"></span>Father Time</td>
+        <td>Redrumsregrub</td>
+        <td class="mono">0-6</td>
+        <td class="mono">712.7</td>
+        <td class="mono">107.66</td>
+        <td class="movement-none">&mdash;</td>
+        <td class="mono">L6</td>
+        <td class="mono">1330</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>MAP NOT TO SCALE. PLEASE STAND CLEAR OF THE CLOSING DOORS.</p>
+  <p class="doors">NEXT SERVICE: WEEK 07</p>
+  <p>#1 LEGION vs #2 KEN-OBI &bull; THE MARQUEE EXPRESS &bull; ALL STATIONS</p>
+  <p style="margin-top:16px;">JAILYARD TRANSIT AUTHORITY &copy; SEASON 2025 &bull; EST. 2022 &bull; 12 STATIONS &bull; 4 LINES</p>
+  <p>LEAGUE AVG PPG: 138.5 &bull; WEEK 6 AVG: 128.7 &bull; 6 OF 14 WEEKS PLAYED</p>
+</footer>
+
+</body>
+</html>

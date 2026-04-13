@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle Text — The Jailyard Dynasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    overflow-x: hidden;
+    font-family: 'Barlow Condensed', sans-serif;
+    cursor: crosshair;
+  }
+  canvas#main {
+    display: block;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  /* Invisible spacer to create scrollable area */
+  #scroll-spacer {
+    position: relative;
+    z-index: 0;
+    width: 100%;
+  }
+  /* Scroll hint */
+  #scroll-hint {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    color: rgba(255,255,255,0.25);
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 0.25;
+  }
+</style>
+</head>
+<body>
+<canvas id="main"></canvas>
+<div id="scroll-spacer"></div>
+<div id="scroll-hint">scroll &middot; hover &middot; click</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════════════
+  // CONFIGURATION
+  // ═══════════════════════════════════════════════════════════
+
+  const isMobile = window.innerWidth <= 768;
+  const DENSITY_SCALE = isMobile ? 0.55 : 1.0;
+  const BASE_PARTICLE_SIZE = isMobile ? 2.2 : 1.5;
+
+  // Team binding strengths: 1.0 = immovable, 0.0 = dust in the wind
+  const TEAMS = {
+    'ken-obi':      { binding: 0.95, color: [255, 215, 0],   glowR: 6  },
+    'legion':       { binding: 0.55, color: [91, 141, 239],   glowR: 5  },
+    'father-time':  { binding: 0.12, color: [255, 68, 68],    glowR: 4  },
+    'essay':        { binding: 0.70, color: [200, 205, 213],   glowR: 3  },
+    'chat':         { binding: 0.40, color: [122, 129, 148],   glowR: 4  },
+    'hero':         { binding: 0.85, color: [255, 215, 0],   glowR: 7  },
+  };
+
+  // ═══════════════════════════════════════════════════════════
+  // SECTIONS — content rendered as particles
+  // ═══════════════════════════════════════════════════════════
+
+  const SECTIONS = [
+    {
+      id: 'hero', team: 'hero',
+      lines: [
+        { text: 'WEEK 9', font: '900 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 110 : 200, sampling: 3 },
+      ],
+      yOffset: 0.12,
+    },
+    {
+      id: 'top-team', team: 'ken-obi',
+      lines: [
+        { text: 'GENERAL KEN-OBI', font: '900 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 42 : 86, sampling: 3 },
+        { text: '165.2', font: '700 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 64 : 124, sampling: 3 },
+        { text: '#1 \u00B7 7-2', font: '700 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 26 : 42, sampling: 4 },
+      ],
+      yOffset: 0.32,
+    },
+    {
+      id: 'mid-team', team: 'legion',
+      lines: [
+        { text: 'LEGION OF BOUZ', font: '900 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 40 : 76, sampling: 3 },
+        { text: '130.4', font: '700 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 56 : 106, sampling: 3 },
+        { text: '#5 \u00B7 5-4', font: '700 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 22 : 36, sampling: 4 },
+      ],
+      yOffset: 0.52,
+    },
+    {
+      id: 'bottom-team', team: 'father-time',
+      lines: [
+        { text: 'FATHER TIME', font: '900 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 40 : 76, sampling: 3 },
+        { text: '85.0', font: '700 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 56 : 106, sampling: 3 },
+        { text: '2-7', font: '700 __SIZE__px "Barlow Condensed"', sizePx: isMobile ? 22 : 36, sampling: 4 },
+      ],
+      yOffset: 0.72,
+    },
+    {
+      id: 'essay', team: 'essay',
+      lines: [
+        { text: 'Nine weeks in and the standings are a crime scene.', font: '400 __SIZE__px "Newsreader"', sizePx: isMobile ? 16 : 26, sampling: 2 },
+        { text: 'Ken-obi sits at 7-2 with the quiet confidence of', font: '400 __SIZE__px "Newsreader"', sizePx: isMobile ? 16 : 26, sampling: 2 },
+        { text: 'someone who knows the rest of you are cooked.', font: '400 __SIZE__px "Newsreader"', sizePx: isMobile ? 16 : 26, sampling: 2 },
+      ],
+      yOffset: 0.88,
+    },
+    {
+      id: 'chat', team: 'chat',
+      lines: [
+        { text: '\u201CThis league is rigged\u201D', font: '600 __SIZE__px "Newsreader"', sizePx: isMobile ? 24 : 40, sampling: 3 },
+        { text: '@zbcowan', font: '400 __SIZE__px "JetBrains Mono"', sizePx: isMobile ? 13 : 19, sampling: 2 },
+      ],
+      yOffset: 1.02,
+    },
+  ];
+
+  const TOTAL_SCROLL = (SECTIONS.length + 0.5) * window.innerHeight;
+
+  // ═══════════════════════════════════════════════════════════
+  // CANVAS SETUP
+  // ═══════════════════════════════════════════════════════════
+
+  const canvas = document.getElementById('main');
+  const ctx = canvas.getContext('2d', { alpha: true });
+  const dpr = Math.min(window.devicePixelRatio || 1, 2); // cap at 2x
+
+  let W, H;
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    document.getElementById('scroll-spacer').style.height = TOTAL_SCROLL + 'px';
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // TEXT SAMPLING — offscreen canvas to particle positions
+  // ═══════════════════════════════════════════════════════════
+
+  function sampleText(text, font, sizePx, samplingGap) {
+    const off = document.createElement('canvas');
+    const oc = off.getContext('2d');
+    const realFont = font.replace('__SIZE__', String(sizePx));
+
+    // Measure text width
+    oc.font = realFont;
+    const metrics = oc.measureText(text);
+    const tw = Math.ceil(metrics.width) + 4;
+    const th = Math.ceil(sizePx * 1.35);
+
+    off.width = tw;
+    off.height = th;
+
+    // Must re-set font after resizing canvas
+    oc.font = realFont;
+    oc.fillStyle = '#fff';
+    oc.textBaseline = 'top';
+    oc.fillText(text, 2, sizePx * 0.18);
+
+    const imgData = oc.getImageData(0, 0, tw, th);
+    const px = imgData.data;
+    const points = [];
+    const gap = Math.max(1, Math.round(samplingGap / DENSITY_SCALE));
+
+    for (let y = 0; y < th; y += gap) {
+      for (let x = 0; x < tw; x += gap) {
+        if (px[(y * tw + x) * 4 + 3] > 100) {
+          points.push({ x: x - tw / 2, y: y - th / 2 });
+        }
+      }
+    }
+    return { points, width: tw, height: th };
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // PARTICLE STORAGE (SoA for performance)
+  // ═══════════════════════════════════════════════════════════
+
+  // Structure of Arrays for cache-friendly iteration
+  let N = 0; // particle count
+  let homeX, homeY, posX, posY, velX, velY;
+  let pBinding, pSize, pOpacity, pSection;
+  let pColorR, pColorG, pColorB, pGlowR;
+  let pWobblePhase, pWobbleSpeed;
+  let pDripTimer;
+
+  function allocateArrays(count) {
+    N = count;
+    homeX = new Float32Array(N);
+    homeY = new Float32Array(N);
+    posX = new Float32Array(N);
+    posY = new Float32Array(N);
+    velX = new Float32Array(N);
+    velY = new Float32Array(N);
+    pBinding = new Float32Array(N);
+    pSize = new Float32Array(N);
+    pOpacity = new Float32Array(N);
+    pSection = new Uint8Array(N);
+    pColorR = new Uint8Array(N);
+    pColorG = new Uint8Array(N);
+    pColorB = new Uint8Array(N);
+    pGlowR = new Float32Array(N);
+    pWobblePhase = new Float32Array(N);
+    pWobbleSpeed = new Float32Array(N);
+    pDripTimer = new Float32Array(N);
+  }
+
+  function buildParticles() {
+    // First pass: count total particles needed
+    const allSampled = [];
+    let totalCount = 0;
+
+    SECTIONS.forEach((section, sIdx) => {
+      const sectionSampled = [];
+      let sectionHeight = 0;
+      section.lines.forEach(line => {
+        const s = sampleText(line.text, line.font, line.sizePx, line.sampling);
+        sectionSampled.push(s);
+        sectionHeight += s.height * 0.85;
+        totalCount += s.points.length;
+      });
+      allSampled.push({ data: sectionSampled, totalHeight: sectionHeight });
+    });
+
+    allocateArrays(totalCount);
+
+    // Second pass: fill arrays
+    let idx = 0;
+    SECTIONS.forEach((section, sIdx) => {
+      const team = TEAMS[section.team];
+      const centerX = W / 2;
+      const baseCenterY = section.yOffset * TOTAL_SCROLL;
+      const { data, totalHeight } = allSampled[sIdx];
+
+      let lineY = -totalHeight / 2;
+      data.forEach((sampled) => {
+        const lineCenterY = baseCenterY + lineY + sampled.height * 0.425;
+
+        sampled.points.forEach(pt => {
+          const hx = centerX + pt.x;
+          const hy = lineCenterY + pt.y;
+
+          homeX[idx] = hx;
+          homeY[idx] = hy;
+          // Start scattered — random position far from home
+          posX[idx] = hx + (Math.random() - 0.5) * W * 1.5;
+          posY[idx] = hy + (Math.random() - 0.5) * H * 1.5;
+          velX[idx] = 0;
+          velY[idx] = 0;
+          pBinding[idx] = team.binding;
+          pSize[idx] = BASE_PARTICLE_SIZE * (0.6 + Math.random() * 0.8);
+          pOpacity[idx] = 0.55 + Math.random() * 0.45;
+          pSection[idx] = sIdx;
+          pColorR[idx] = team.color[0];
+          pColorG[idx] = team.color[1];
+          pColorB[idx] = team.color[2];
+          pGlowR[idx] = team.glowR;
+          pWobblePhase[idx] = Math.random() * 6.2832;
+          pWobbleSpeed[idx] = 0.4 + Math.random() * 1.6;
+          pDripTimer[idx] = 0;
+          idx++;
+        });
+
+        lineY += sampled.height * 0.85;
+      });
+    });
+
+    console.log('[Particle Text] ' + N + ' particles');
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // INPUT TRACKING
+  // ═══════════════════════════════════════════════════════════
+
+  let mouseX = -9999, mouseY = -9999;
+  let prevMouseX = -9999, prevMouseY = -9999;
+  let mouseSpeed = 0;
+  let isDown = false;
+  let scrollTop = 0;
+
+  // Track pointer on document — canvas has pointer-events:none so scroll works naturally
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+  document.addEventListener('mousedown', e => {
+    isDown = true;
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+  document.addEventListener('mouseup', () => { isDown = false; });
+
+  document.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      mouseX = t.clientX;
+      mouseY = t.clientY;
+      isDown = true;
+    }
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      mouseX = t.clientX;
+      mouseY = t.clientY;
+    }
+  }, { passive: true });
+  document.addEventListener('touchend', () => {
+    isDown = false;
+    // Delay clearing mouse position so last touch frame still shows effect
+    setTimeout(() => { mouseX = -9999; mouseY = -9999; }, 100);
+  });
+
+  window.addEventListener('scroll', () => {
+    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  }, { passive: true });
+
+  // ═══════════════════════════════════════════════════════════
+  // SECTION VISIBILITY — scroll-driven assembly
+  // ═══════════════════════════════════════════════════════════
+
+  const sectionVis = new Float32Array(SECTIONS.length);
+
+  function updateVisibility() {
+    for (let i = 0; i < SECTIONS.length; i++) {
+      const worldY = SECTIONS[i].yOffset * TOTAL_SCROLL;
+      const screenY = worldY - scrollTop;
+      // How close is this section's center to the viewport center?
+      const dist = Math.abs(screenY - H * 0.45);
+      const maxDist = H * 1.0;
+      sectionVis[i] = Math.max(0, Math.min(1, 1 - dist / maxDist));
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // PHYSICS
+  // ═══════════════════════════════════════════════════════════
+
+  const REPULSION_R = isMobile ? 70 : 110;
+  const REPULSION_STR = 600;
+
+  function physics(dt) {
+    // Mouse speed
+    const dmx = mouseX - prevMouseX;
+    const dmy = mouseY - prevMouseY;
+    mouseSpeed = Math.sqrt(dmx * dmx + dmy * dmy);
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+
+    const speedMul = 1 + Math.min(mouseSpeed / 8, 6);
+    const pressMul = isDown ? 3.5 : 1.0;
+    const effStr = REPULSION_STR * speedMul * pressMul;
+    const effR = REPULSION_R * (isDown ? 2.0 : 1.0) * (1 + Math.min(mouseSpeed / 25, 1.5));
+    const effRSq = effR * effR;
+
+    // World-space mouse position
+    const wmx = mouseX;
+    const wmy = mouseY + scrollTop;
+
+    for (let i = 0; i < N; i++) {
+      const bind = pBinding[i];
+      const vis = sectionVis[pSection[i]];
+
+      // Screen-space home Y
+      const shY = homeY[i] - scrollTop;
+
+      // Off-screen optimization: if home is far off viewport, lerp to home gently
+      if (shY < -H * 0.6 || shY > H * 1.6) {
+        posX[i] += (homeX[i] - posX[i]) * 0.03;
+        posY[i] += (homeY[i] - posY[i]) * 0.03;
+        velX[i] *= 0.7;
+        velY[i] *= 0.7;
+        continue;
+      }
+
+      // ── Spring toward home ──
+      // Spring stiffness scales with binding AND visibility
+      // When section not visible (vis=0), spring is very weak (particles drift away)
+      // When visible (vis=1), spring pulls particles into formation
+      const visK = 0.005 + vis * (0.02 + bind * 0.08);
+      const damping = 0.82 + bind * 0.12;
+
+      let fx = (homeX[i] - posX[i]) * visK;
+      let fy = (homeY[i] - posY[i]) * visK;
+
+      // ── Scatter force when section not visible ──
+      if (vis < 0.3) {
+        const scatter = (0.3 - vis) * 2; // 0 to ~0.6
+        fx += (Math.random() - 0.5) * scatter * 1.5;
+        fy += (Math.random() - 0.5) * scatter * 1.5;
+      }
+
+      // ── Wobble for weak teams ──
+      if (bind < 0.5 && vis > 0.2) {
+        const wobStr = (1 - bind * 2) * vis;
+        pWobblePhase[i] += pWobbleSpeed[i] * dt;
+        fx += Math.sin(pWobblePhase[i]) * wobStr * 0.9;
+        fy += Math.cos(pWobblePhase[i] * 0.7 + 1.3) * wobStr * 0.7;
+      }
+
+      // ── Extra chaos for Father Time (binding < 0.2) ──
+      if (bind < 0.2 && vis > 0.2) {
+        fx += (Math.random() - 0.5) * 2.5;
+        fy += (Math.random() - 0.5) * 2.5;
+
+        // Sand-drip: random particles fall away briefly
+        if (pDripTimer[i] > 0) {
+          fy += 4.0; // gravity
+          pDripTimer[i] -= dt;
+        } else if (Math.random() < 0.0008) {
+          pDripTimer[i] = 40 + Math.random() * 80;
+        }
+      }
+
+      // ── Cursor repulsion ──
+      const pdx = posX[i] - wmx;
+      const pdy = posY[i] - wmy;
+      const dSq = pdx * pdx + pdy * pdy;
+
+      if (dSq < effRSq && dSq > 1) {
+        const d = Math.sqrt(dSq);
+        const f = effStr * (1 - d / effR) / d;
+        // Vulnerability: weaker teams blast harder
+        const vuln = 2.2 - bind;
+        fx += pdx * f * vuln;
+        fy += pdy * f * vuln;
+      }
+
+      // ── Integrate ──
+      velX[i] = (velX[i] + fx * dt) * damping;
+      velY[i] = (velY[i] + fy * dt) * damping;
+      posX[i] += velX[i];
+      posY[i] += velY[i];
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // RENDER — batched by approximate color for fewer state changes
+  // ═══════════════════════════════════════════════════════════
+
+  // Pre-build ImageData buffer for pixel-level rendering?
+  // No — at <5K particles, arc() calls are fine. Batch by section instead.
+
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Additive blending for particle glow
+    ctx.globalCompositeOperation = 'lighter';
+
+    // We'll draw section by section so fillStyle changes are minimized
+    let currentR = -1, currentG = -1, currentB = -1;
+    let coreStyle = '';
+    let glowStyle = '';
+
+    for (let i = 0; i < N; i++) {
+      const sy = posY[i] - scrollTop;
+
+      // Cull off-screen particles
+      if (sy < -30 || sy > H + 30 || posX[i] < -30 || posX[i] > W + 30) continue;
+
+      // Distance from home — dim particles that are far away
+      const dhx = posX[i] - homeX[i];
+      const dhy = posY[i] - homeY[i];
+      const dHome = Math.sqrt(dhx * dhx + dhy * dhy);
+      const alpha = pOpacity[i] * Math.max(0.1, 1 - dHome / 600);
+
+      // Section visibility also affects alpha (fade out off-screen sections)
+      const vis = sectionVis[pSection[i]];
+      const finalAlpha = alpha * (0.15 + vis * 0.85);
+
+      if (finalAlpha < 0.02) continue;
+
+      const r = pColorR[i];
+      const g = pColorG[i];
+      const b = pColorB[i];
+
+      // Update fill styles only when color changes
+      if (r !== currentR || g !== currentG || b !== currentB) {
+        currentR = r; currentG = g; currentB = b;
+        coreStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+        glowStyle = 'rgba(' + r + ',' + g + ',' + b + ',0.25)';
+      }
+
+      const sz = pSize[i];
+      const x = posX[i];
+
+      // Glow circle (larger, dimmer)
+      ctx.globalAlpha = finalAlpha * 0.35;
+      ctx.fillStyle = glowStyle;
+      ctx.beginPath();
+      ctx.arc(x, sy, sz * pGlowR[i] * 0.5, 0, 6.2832);
+      ctx.fill();
+
+      // Core particle
+      ctx.globalAlpha = finalAlpha;
+      ctx.fillStyle = coreStyle;
+      ctx.beginPath();
+      ctx.arc(x, sy, sz, 0, 6.2832);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // SCROLL HINT
+  // ═══════════════════════════════════════════════════════════
+
+  const scrollHint = document.getElementById('scroll-hint');
+  let hintHidden = false;
+  // Gentle pulse via JS (no infinite CSS animation per project rules)
+  let hintPhase = 0;
+
+  function updateHint(dt) {
+    if (hintHidden) return;
+    if (scrollTop > 60) {
+      scrollHint.style.opacity = '0';
+      hintHidden = true;
+      return;
+    }
+    hintPhase += dt * 0.04;
+    scrollHint.style.opacity = String(0.25 + Math.sin(hintPhase) * 0.2);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // MAIN LOOP
+  // ═══════════════════════════════════════════════════════════
+
+  let prevTimestamp = -1;
+
+  function loop(timestamp) {
+    if (prevTimestamp < 0) {
+      prevTimestamp = timestamp;
+      requestAnimationFrame(loop);
+      return;
+    }
+    const elapsed = timestamp - prevTimestamp;
+    prevTimestamp = timestamp;
+    const dt = Math.min(elapsed / 16.667, 3); // normalized to 60fps, capped at 3x
+
+    updateVisibility();
+    updateHint(dt);
+    physics(dt);
+    render();
+
+    requestAnimationFrame(loop);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════════════════
+
+  function init() {
+    resize();
+
+    document.fonts.ready.then(() => {
+      buildParticles();
+      requestAnimationFrame(loop);
+    });
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      resize();
+      document.fonts.ready.then(() => buildParticles());
+    }, 150);
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>

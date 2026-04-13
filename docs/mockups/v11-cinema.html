@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 6 — The Week the Models Broke</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050505;
+  --fg:#f0f0f0;
+  --muted:#555;
+  --accent:#ffaa00;
+  --accent2:#ffaa00;
+  --dim:#333;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ── FRAME: one idea per screen ── */
+.frame{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:clamp(2rem,8vw,6rem) clamp(1.5rem,6vw,4rem);
+  position:relative;
+  opacity:0;
+  transition:opacity 1.4s cubic-bezier(.16,1,.3,1);
+}
+.frame.in{opacity:1}
+.frame--short{min-height:70vh}
+.frame--tall{min-height:120vh}
+
+/* ── TYPE SCALE ── */
+.t-hero{
+  font-size:clamp(4rem,15vw,12rem);
+  font-weight:900;
+  letter-spacing:-0.04em;
+  line-height:0.9;
+  color:var(--fg);
+  text-align:center;
+}
+.t-huge{
+  font-size:clamp(3rem,10vw,8rem);
+  font-weight:900;
+  letter-spacing:-0.03em;
+  line-height:0.95;
+  text-align:center;
+}
+.t-large{
+  font-size:clamp(1.8rem,5vw,3.5rem);
+  font-weight:800;
+  letter-spacing:-0.02em;
+  line-height:1.15;
+  text-align:center;
+}
+.t-medium{
+  font-size:clamp(1.2rem,3vw,2rem);
+  font-weight:600;
+  line-height:1.4;
+  text-align:center;
+  max-width:35ch;
+}
+.t-body{
+  font-size:clamp(1rem,2vw,1.25rem);
+  font-weight:400;
+  line-height:1.7;
+  text-align:center;
+  max-width:50ch;
+  color:#bbb;
+}
+.t-label{
+  font-size:0.7rem;
+  font-weight:700;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.t-accent{color:var(--accent)}
+.t-dim{color:var(--muted)}
+.t-white{color:#fff}
+.t-red{color:#ff3b3b}
+
+/* ── NUMBER REVEAL ── */
+.num{
+  font-size:clamp(5rem,22vw,16rem);
+  font-weight:900;
+  letter-spacing:-0.04em;
+  line-height:0.85;
+  text-align:center;
+}
+
+/* ── MATCHUP FRAME ── */
+.vs-block{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.5rem;
+  width:100%;
+  max-width:600px;
+}
+.vs-team{
+  font-size:clamp(1.2rem,3vw,2rem);
+  font-weight:800;
+  text-align:center;
+}
+.vs-score{
+  font-size:clamp(2rem,7vw,5rem);
+  font-weight:900;
+  letter-spacing:-0.03em;
+  text-align:center;
+  margin:0.5rem 0;
+}
+.vs-detail{
+  font-size:clamp(0.85rem,1.5vw,1rem);
+  color:var(--muted);
+  text-align:center;
+}
+.vs-tag{
+  display:inline-block;
+  background:#ff3b3b;
+  color:#fff;
+  font-weight:800;
+  font-size:clamp(0.9rem,2vw,1.2rem);
+  padding:0.3em 1em;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  margin-top:0.8rem;
+}
+
+/* ── SVG CHART ── */
+.chart-container{
+  width:100%;
+  max-width:700px;
+  margin:0 auto;
+}
+.chart-container svg{width:100%;height:auto;display:block}
+.chart-bar{
+  transition:width 1.2s cubic-bezier(.16,1,.3,1);
+}
+.chart-label{
+  font-family:'Inter',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  fill:var(--fg);
+}
+.chart-value{
+  font-family:'Inter',sans-serif;
+  font-size:10px;
+  font-weight:600;
+  fill:var(--muted);
+}
+
+/* ── SPARKLINE ── */
+.sparkline-wrap{
+  width:100%;
+  max-width:500px;
+  margin:2rem auto 0;
+}
+.sparkline-wrap svg{width:100%;height:auto}
+
+/* ── WEEK 7 CARD ── */
+.preview-card{
+  border:2px solid var(--accent);
+  border-radius:8px;
+  padding:clamp(2rem,4vw,3rem);
+  max-width:500px;
+  width:100%;
+  text-align:center;
+}
+
+/* ── DIVIDER ── */
+.divider{
+  width:60px;
+  height:2px;
+  background:var(--dim);
+  margin:1.5rem auto;
+}
+
+/* ── SPACING ── */
+.mt-1{margin-top:0.5rem}
+.mt-2{margin-top:1rem}
+.mt-3{margin-top:2rem}
+.mt-4{margin-top:3rem}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .frame{padding:2rem 1.25rem}
+}
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  .frame{opacity:1;transition:none}
+  .chart-bar{transition:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ 1. TITLE ═══ -->
+<div class="frame">
+  <p class="t-label">Jailyard Dynasty &middot; 2025</p>
+  <h1 class="t-hero mt-2">WEEK 6</h1>
+  <p class="t-medium t-dim mt-3">The week the models broke.</p>
+</div>
+
+<!-- ═══ 2. THE HIGH SCORE ═══ -->
+<div class="frame">
+  <p class="t-label t-accent">Week High</p>
+  <div class="num t-accent">165.9</div>
+  <p class="t-medium mt-2">The Legion of Bouz.</p>
+  <p class="t-body mt-2">Mahomes. Skattebo. McCaffrey. Three players combined for 81.08 fantasy points. The highest single-team output since Week 3. Father Time scored 107.66 on the other side and never had a chance.</p>
+</div>
+
+<!-- ═══ 3. THE LOW ═══ -->
+<div class="frame frame--short">
+  <p class="t-label">Week Low</p>
+  <div class="num t-dim">95.26</div>
+  <p class="t-medium t-dim mt-2">Chudders Football Team.</p>
+  <p class="t-body mt-2">The rebuild is real. Herbert threw for 18.76. Jeanty ran for 15.6. Gibbs — the franchise back — managed 7.0. On a week where the league averaged 128.7, Chudders didn't come close.</p>
+</div>
+
+<!-- ═══ 4. THE UPSETS ═══ -->
+<div class="frame">
+  <p class="t-label t-red">Week 6 Anomaly</p>
+  <div class="t-huge t-red mt-2">4 / 6</div>
+  <p class="t-large mt-2">Four of six games<br>were upsets.</p>
+  <div class="divider"></div>
+  <p class="t-body">That's a 66.7% upset rate. In a league where the models predict winners at ~60% accuracy, four upsets in one week is a statistical earthquake. Here's how it happened.</p>
+</div>
+
+<!-- ═══ 5. UPSET: Noble over Ghastly ═══ -->
+<div class="frame">
+  <div class="vs-block">
+    <p class="t-label">Matchup 1</p>
+    <p class="vs-team t-white mt-1">Noble FFT</p>
+    <div class="vs-score">151.88<span class="t-dim" style="font-size:0.4em;margin:0 0.3em">—</span>121.30</div>
+    <p class="vs-team t-dim">Ghastly Grayskull Gang</p>
+    <p class="vs-detail mt-1">+30.58 margin &middot; Bijan Robinson: 32.8 pts</p>
+    <span class="vs-tag">Upset</span>
+  </div>
+</div>
+
+<!-- ═══ 6. UPSET: MHJTIME over Kittler ═══ -->
+<div class="frame">
+  <div class="vs-block">
+    <p class="t-label t-red">Matchup 2 &middot; The Dethroning</p>
+    <p class="vs-team t-white mt-1">MHJTIME</p>
+    <div class="vs-score">140.94<span class="t-dim" style="font-size:0.4em;margin:0 0.3em">—</span>107.74</div>
+    <p class="vs-team t-dim">Kittler on the Roof</p>
+    <p class="vs-detail mt-1">+33.20 &middot; Dowdle 30.9, Daniels 22.64, Chase 20.1</p>
+    <span class="vs-tag">Upset</span>
+  </div>
+  <p class="t-body mt-3">The defending champion.<br>The #1 power ranking.<br>Gone in one Sunday.</p>
+</div>
+
+<!-- ═══ 7. UPSET: Boonist over Rasheeing ═══ -->
+<div class="frame">
+  <div class="vs-block">
+    <p class="t-label">Matchup 3</p>
+    <p class="vs-team t-white mt-1">The Boonist Monks</p>
+    <div class="vs-score">150.46<span class="t-dim" style="font-size:0.4em;margin:0 0.3em">—</span>109.10</div>
+    <p class="vs-team t-dim">Rasheeing the Scene</p>
+    <p class="vs-detail mt-1">+41.36 &middot; Pickens 27.3, JSN 26.2, Flacco 18.76</p>
+    <span class="vs-tag">Upset</span>
+  </div>
+</div>
+
+<!-- ═══ 8. THE BLOWOUT: Ken-obi over Burden ═══ -->
+<div class="frame">
+  <div class="vs-block">
+    <p class="t-label t-accent">Matchup 4 &middot; Biggest Blowout of 2025</p>
+    <p class="vs-team t-white mt-1">General Ken-obi</p>
+    <div class="vs-score t-accent">164.94<span class="t-dim" style="font-size:0.4em;margin:0 0.3em">—</span>99.20</div>
+    <p class="vs-team t-dim">Burden of Etienne-y Woody</p>
+    <p class="vs-detail mt-1">+65.74 margin &middot; Rams DEF 27.0, London 26.8, Maye 26.24</p>
+  </div>
+  <p class="t-body mt-3">Sixty-five points. The largest margin of the entire season. Ken-obi's Elo climbed to 1700.2 — an all-time career peak.</p>
+</div>
+
+<!-- ═══ 9. THE CHALK ═══ -->
+<div class="frame frame--short">
+  <p class="t-label t-dim">The two that went to script</p>
+  <div class="vs-block mt-3" style="gap:2rem">
+    <div>
+      <p class="t-medium t-dim" style="max-width:none">Sleeping Giants 129.82 — Chudders 95.26</p>
+      <p class="vs-detail">+34.56 &middot; Josh Jacobs: 29.5</p>
+    </div>
+    <div>
+      <p class="t-medium t-dim" style="max-width:none">Legion of Bouz 165.90 — Father Time 107.66</p>
+      <p class="vs-detail">+58.24 &middot; Mahomes: 30.48</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 10. THE CHART — Week 6 Scores ═══ -->
+<div class="frame" id="chart-frame">
+  <p class="t-label">Week 6 — Every Team's Output</p>
+  <p class="t-medium t-dim mt-1" style="font-weight:400;font-size:clamp(0.9rem,1.5vw,1.1rem)">League average: 128.7</p>
+  <div class="chart-container mt-3">
+    <svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+      <!-- Avg line -->
+      <line x1="130" y1="0" x2="130" y2="360" stroke="#333" stroke-width="1" stroke-dasharray="4,4"/>
+      <text x="132" y="12" class="chart-value" fill="#555" font-size="9">128.7 avg</text>
+      <!-- Bars (sorted desc by Week 6 score) -->
+      <g id="bars">
+        <text x="0" y="22" class="chart-label">LB</text><rect x="100" y="10" width="0" height="18" rx="2" fill="var(--accent)" class="chart-bar" data-w="560"/><text x="665" y="23" class="chart-value" id="v-lb">165.90</text>
+        <text x="0" y="52" class="chart-label">GK</text><rect x="100" y="40" width="0" height="18" rx="2" fill="var(--accent)" class="chart-bar" data-w="557"/><text x="662" y="53" class="chart-value" id="v-gk">164.94</text>
+        <text x="0" y="82" class="chart-label">NF</text><rect x="100" y="70" width="0" height="18" rx="2" fill="#ff3b3b" class="chart-bar" data-w="513"/><text x="618" y="83" class="chart-value">151.88</text>
+        <text x="0" y="112" class="chart-label">BM</text><rect x="100" y="100" width="0" height="18" rx="2" fill="#ff3b3b" class="chart-bar" data-w="508"/><text x="613" y="113" class="chart-value">150.46</text>
+        <text x="0" y="142" class="chart-label">MH</text><rect x="100" y="130" width="0" height="18" rx="2" fill="#ff3b3b" class="chart-bar" data-w="476"/><text x="581" y="143" class="chart-value">140.94</text>
+        <text x="0" y="172" class="chart-label">SG</text><rect x="100" y="160" width="0" height="18" rx="2" fill="var(--fg)" class="chart-bar" data-w="438"/><text x="543" y="173" class="chart-value">129.82</text>
+        <text x="0" y="202" class="chart-label">GG</text><rect x="100" y="190" width="0" height="18" rx="2" fill="var(--fg)" class="chart-bar" data-w="410"/><text x="515" y="203" class="chart-value">121.30</text>
+        <text x="0" y="232" class="chart-label">RS</text><rect x="100" y="220" width="0" height="18" rx="2" fill="var(--fg)" class="chart-bar" data-w="368"/><text x="473" y="233" class="chart-value">109.10</text>
+        <text x="0" y="262" class="chart-label">FT</text><rect x="100" y="250" width="0" height="18" rx="2" fill="var(--fg)" class="chart-bar" data-w="364"/><text x="469" y="263" class="chart-value">107.66</text>
+        <text x="0" y="292" class="chart-label" fill="#ff3b3b">KR</text><rect x="100" y="280" width="0" height="18" rx="2" fill="#ff3b3b" class="chart-bar" data-w="364" style="opacity:0.6"/><text x="469" y="293" class="chart-value" fill="#ff3b3b">107.74</text>
+        <text x="0" y="322" class="chart-label">BE</text><rect x="100" y="310" width="0" height="18" rx="2" fill="var(--dim)" class="chart-bar" data-w="335"/><text x="440" y="323" class="chart-value">99.20</text>
+        <text x="0" y="352" class="chart-label">CF</text><rect x="100" y="340" width="0" height="18" rx="2" fill="var(--dim)" class="chart-bar" data-w="322"/><text x="427" y="353" class="chart-value">95.26</text>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<!-- ═══ 11. THE FALL — Kittler ═══ -->
+<div class="frame">
+  <p class="t-label t-red">The Fall</p>
+  <p class="t-huge t-white mt-2">#1 → #5</p>
+  <p class="t-large t-dim mt-2">In one Sunday.</p>
+  <div class="divider"></div>
+  <p class="t-body">Kittler on the Roof entered Week 6 at the top of the power rankings. The defending champion. The steady hand. Then MHJTIME's receivers went off and Kittler's lineup produced 107.74 — below the league average of 128.7. Four ranks gone. The Elo drop was the largest in the league: -28.7. From 1516.9 to 1488.2.</p>
+  <div class="sparkline-wrap mt-3">
+    <svg viewBox="0 0 500 100" xmlns="http://www.w3.org/2000/svg">
+      <line x1="0" y1="50" x2="500" y2="50" stroke="#222" stroke-width="1"/>
+      <polyline points="0,30 83,25 166,22 250,18 333,15 416,60" fill="none" stroke="#ff3b3b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="416" cy="60" r="5" fill="#ff3b3b"/>
+      <text x="0" y="95" font-family="Inter" font-size="10" fill="#555">W1</text>
+      <text x="83" y="95" font-family="Inter" font-size="10" fill="#555">W2</text>
+      <text x="166" y="95" font-family="Inter" font-size="10" fill="#555">W3</text>
+      <text x="250" y="95" font-family="Inter" font-size="10" fill="#555">W4</text>
+      <text x="333" y="95" font-family="Inter" font-size="10" fill="#555">W5</text>
+      <text x="410" y="95" font-family="Inter" font-size="10" fill="#ff3b3b" font-weight="700">W6</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ═══ 12. THE RISE — Ken-obi ═══ -->
+<div class="frame">
+  <p class="t-label t-accent">The Rise</p>
+  <div class="num t-accent">1700</div>
+  <p class="t-large t-white mt-2">General Ken-obi</p>
+  <p class="t-medium t-dim mt-1">Elo 1700.2. Career peak.</p>
+  <div class="divider"></div>
+  <p class="t-body">Two-time champion. 5-1 record. Scored 164.94 this week — second-highest in the league, behind only Legion. The Rams defense dropped 27.0 points by themselves. Drake London added 26.8. Drake Maye threw for 26.24. Three players, three 26+ performances. The machine is running.</p>
+</div>
+
+<!-- ═══ 13. TOP PERFORMER ═══ -->
+<div class="frame frame--short">
+  <p class="t-label">Top Individual Performer</p>
+  <div class="num" style="color:#fff">32.8</div>
+  <p class="t-large mt-1">Bijan Robinson</p>
+  <p class="t-medium t-dim mt-1">RB &middot; ATL &middot; Noble FFT</p>
+</div>
+
+<!-- ═══ 14. WEEK 7 ═══ -->
+<div class="frame">
+  <p class="t-label t-accent">Coming Next</p>
+  <div class="preview-card mt-3">
+    <p class="t-label t-accent">Week 7 Marquee</p>
+    <p class="t-large t-white mt-2">Legion of Bouz</p>
+    <p class="t-medium t-dim">vs</p>
+    <p class="t-large t-white">General Ken-obi</p>
+    <div class="divider"></div>
+    <p class="t-body" style="max-width:35ch;margin:0 auto">#1 vs #2. Both 5-1. Both scored 164+ this week. One walks out alone at the top.</p>
+  </div>
+</div>
+
+<!-- ═══ 15. THE CLOSE ═══ -->
+<div class="frame frame--short">
+  <p class="t-huge t-accent" style="max-width:15ch">#1 vs #2.</p>
+  <p class="t-large t-dim mt-2">See you next Sunday.</p>
+  <p class="t-label mt-4 t-dim">Jailyard Dynasty &middot; Week 6 &middot; 2025</p>
+</div>
+
+<script>
+(function(){
+  // Frame reveal on scroll
+  var frames = document.querySelectorAll('.frame');
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting) e.target.classList.add('in');
+    });
+  },{threshold:0.12});
+  frames.forEach(function(f){obs.observe(f)});
+
+  // Chart bar animation
+  var chartFrame = document.getElementById('chart-frame');
+  var chartDone = false;
+  var chartObs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting && !chartDone){
+        chartDone = true;
+        var bars = document.querySelectorAll('.chart-bar');
+        bars.forEach(function(bar,i){
+          setTimeout(function(){
+            bar.setAttribute('width', bar.getAttribute('data-w'));
+          }, i * 80);
+        });
+      }
+    });
+  },{threshold:0.3});
+  chartObs.observe(chartFrame);
+})();
+</script>
+</body>
+</html>

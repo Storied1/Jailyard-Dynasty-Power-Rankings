@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JDL-2025 / SHEET 06 / POWER RANKINGS ELEVATION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c2340;
+  --bg2:#123057;
+  --fg:#e8e4d0;
+  --muted:#8faecc;
+  --line:#e8e4d0;
+  --line-dim:rgba(232,228,208,.28);
+  --line-faint:rgba(232,228,208,.12);
+  --accent:#ffc857;
+  --accent2:#ffd98a;
+  --bad:#ff4444;
+  --good:#9be38a;
+  --ink:#061628;
+  --mono:'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --sans:'Inter', system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--mono);-webkit-font-smoothing:antialiased}
+body{
+  background-color:var(--bg);
+  background-image:
+    /* fine grid */
+    linear-gradient(to right, var(--line-faint) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-faint) 1px, transparent 1px),
+    /* major grid every 10 */
+    linear-gradient(to right, var(--line-dim) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-dim) 1px, transparent 1px);
+  background-size: 12px 12px, 12px 12px, 120px 120px, 120px 120px;
+  background-position: 0 0, 0 0, 0 0, 0 0;
+  min-height:100vh;
+  padding:28px 32px 40px;
+}
+.sheet{
+  max-width:1400px;
+  margin:0 auto;
+  border:2px solid var(--line);
+  padding:22px 26px 26px;
+  position:relative;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,200,87,.04), transparent 60%);
+}
+.sheet::before{
+  content:"";
+  position:absolute;inset:8px;
+  border:1px solid var(--line-dim);
+  pointer-events:none;
+}
+
+/* === HEADER BAR === */
+.header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  border-bottom:1px solid var(--line-dim);
+  padding-bottom:14px;margin-bottom:18px;
+  gap:24px;
+}
+.header .id{font-size:11px;letter-spacing:.18em;color:var(--muted)}
+.header h1{
+  font-family:var(--sans);
+  font-weight:900;
+  font-size:clamp(22px,3.2vw,38px);
+  letter-spacing:.02em;
+  margin:4px 0 2px;
+  line-height:1;
+  color:var(--fg);
+}
+.header .sub{
+  font-size:11px;letter-spacing:.14em;color:var(--muted);
+  text-transform:uppercase;
+}
+.header .rev{
+  text-align:right;
+  font-size:10px;letter-spacing:.15em;color:var(--muted);
+  text-transform:uppercase;
+  line-height:1.6;
+  border:1px solid var(--line-dim);
+  padding:8px 12px;
+  min-width:180px;
+}
+.header .rev b{color:var(--accent);font-weight:600}
+
+/* === GENERAL === */
+.section-tag{
+  display:inline-block;
+  font-size:10px;letter-spacing:.2em;
+  color:var(--ink);background:var(--accent);
+  padding:3px 9px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+.section-tag.red{background:var(--bad);color:#fff}
+.section-title{
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:15px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--fg);
+  border-bottom:1px dashed var(--line-dim);
+  padding-bottom:6px;
+  margin:0 0 14px;
+}
+
+/* === ELEVATION (main tower diagram) === */
+.elevation{
+  position:relative;
+  margin-bottom:32px;
+}
+.elevation svg{
+  width:100%;height:auto;display:block;
+  font-family:var(--mono);
+}
+.elv-caption{
+  display:flex;justify-content:space-between;
+  font-size:10px;letter-spacing:.15em;color:var(--muted);
+  text-transform:uppercase;
+  margin-top:4px;
+  border-top:1px solid var(--line-dim);padding-top:6px;
+}
+
+/* === SECTION A-A (matchups) === */
+.section-aa{margin-bottom:32px}
+.matchups{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.matchup{
+  border:1px solid var(--line-dim);
+  padding:10px 12px 12px;
+  position:relative;
+  background:rgba(255,255,255,.02);
+}
+.matchup .tag{
+  position:absolute;top:-8px;left:10px;
+  background:var(--bg);
+  padding:0 6px;
+  font-size:9px;letter-spacing:.15em;color:var(--muted);
+}
+.matchup .tag.upset{color:var(--bad)}
+.matchup svg{width:100%;height:90px;display:block}
+.matchup .label{
+  display:flex;justify-content:space-between;
+  font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-top:6px;
+}
+.matchup .name{color:var(--fg);font-weight:600;font-size:11px}
+.matchup .name.win{color:var(--accent)}
+.matchup .name.lose{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:1.5px}
+.matchup .margin{
+  font-size:10px;color:var(--fg);
+  text-align:center;margin-top:2px;
+  letter-spacing:.1em;
+}
+
+/* === DETAIL BUBBLES === */
+.details{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin-bottom:32px;
+}
+.detail{
+  border:1px solid var(--line-dim);
+  padding:16px 18px;
+  position:relative;
+  min-height:140px;
+}
+.detail .bubble{
+  position:absolute;
+  top:-14px;left:14px;
+  width:42px;height:42px;
+  border-radius:50%;
+  border:1.5px solid var(--accent);
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--sans);
+  font-weight:900;
+  font-size:11px;
+  letter-spacing:.04em;
+  color:var(--accent);
+  text-align:center;
+  line-height:1.1;
+  flex-direction:column;
+}
+.detail h3{
+  margin:14px 0 8px;
+  font-family:var(--sans);
+  font-size:13px;letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--fg);
+  font-weight:700;
+}
+.detail p{
+  font-size:11px;line-height:1.55;color:var(--fg);
+  margin:0 0 8px;
+}
+.detail .stat{
+  display:flex;gap:8px;align-items:baseline;
+  font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;
+  border-top:1px dashed var(--line-dim);
+  padding-top:6px;
+}
+.detail .stat b{color:var(--accent);font-size:13px;font-weight:600}
+.detail.red .bubble{border-color:var(--bad);color:var(--bad)}
+.detail.red .stat b{color:var(--bad)}
+
+/* === LOWER ROW: NOTES + LEGEND + NEXT WEEK === */
+.lower{
+  display:grid;
+  grid-template-columns: 1.4fr 1fr 1.4fr;
+  gap:20px;
+  margin-bottom:28px;
+}
+.panel{
+  border:1px solid var(--line-dim);
+  padding:14px 16px;
+}
+.panel h4{
+  margin:0 0 10px;
+  font-family:var(--sans);
+  font-size:12px;letter-spacing:.1em;
+  text-transform:uppercase;
+  font-weight:700;color:var(--fg);
+  border-bottom:1px solid var(--line-dim);
+  padding-bottom:6px;
+}
+.notes-list{
+  list-style:none;padding:0;margin:0;
+  counter-reset:nt;
+}
+.notes-list li{
+  counter-increment:nt;
+  font-size:11px;line-height:1.55;
+  padding:4px 0 4px 26px;
+  position:relative;
+  color:var(--fg);
+  border-bottom:1px dashed var(--line-faint);
+}
+.notes-list li:last-child{border-bottom:none}
+.notes-list li::before{
+  content:counter(nt,decimal-leading-zero) ".";
+  position:absolute;left:0;top:4px;
+  color:var(--accent);
+  font-size:10px;
+}
+.legend-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:6px 12px;
+  font-size:10px;
+  text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);
+}
+.legend-grid span{display:flex;align-items:center;gap:6px}
+.legend-grid b{color:var(--fg);font-weight:600}
+.legend-grid i{
+  display:inline-block;width:14px;font-style:normal;
+  color:var(--accent);text-align:center;font-weight:700;
+}
+.legend-grid i.red{color:var(--bad)}
+.legend-grid i.good{color:var(--good)}
+.rev-history{
+  margin-top:14px;
+  padding-top:10px;
+  border-top:1px dashed var(--line-dim);
+  font-size:10px;color:var(--muted);
+  letter-spacing:.08em;
+}
+.rev-history div{display:flex;justify-content:space-between;padding:2px 0}
+.rev-history div.now{color:var(--accent)}
+
+/* NEXT WEEK TABLE */
+.w7-tbl{
+  width:100%;border-collapse:collapse;
+  font-size:10px;
+}
+.w7-tbl th,.w7-tbl td{
+  text-align:left;padding:5px 6px;
+  border-bottom:1px dashed var(--line-faint);
+  letter-spacing:.05em;
+}
+.w7-tbl th{
+  color:var(--muted);font-weight:500;
+  text-transform:uppercase;font-size:9px;
+  border-bottom:1px solid var(--line-dim);
+}
+.w7-tbl td.vs{color:var(--muted);text-align:center;width:14px}
+.w7-tbl tr.marquee td{color:var(--accent)}
+.w7-tbl tr.toilet td{color:var(--bad)}
+
+/* === TITLE BLOCK === */
+.titleblock{
+  display:grid;
+  grid-template-columns:1.6fr 1fr 1fr 1fr;
+  border:2px solid var(--line);
+  font-size:10px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.titleblock .cell{
+  padding:10px 12px;
+  border-right:1px solid var(--line-dim);
+  border-bottom:1px solid var(--line-dim);
+}
+.titleblock .cell:last-child{border-right:none}
+.titleblock .row-2 .cell{border-bottom:none}
+.titleblock .k{color:var(--muted);font-size:9px;display:block;margin-bottom:3px}
+.titleblock .v{color:var(--fg);font-size:11px;font-weight:600}
+.titleblock .logo{
+  grid-row:1 / span 2;
+  border-right:1px solid var(--line-dim);
+  border-bottom:none;
+  padding:14px 14px;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+.titleblock .logo .big{
+  font-family:var(--sans);
+  font-size:22px;font-weight:900;
+  color:var(--fg);letter-spacing:.01em;
+  line-height:1;
+}
+.titleblock .logo .small{color:var(--muted);font-size:9px;letter-spacing:.15em}
+.titleblock .logo .seal{
+  margin-top:8px;
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:9px;color:var(--accent);
+}
+.titleblock .logo .seal::before{
+  content:"";width:10px;height:10px;border:1.5px solid var(--accent);border-radius:50%;
+}
+
+/* === corner crosshairs === */
+.crosshair{
+  position:absolute;width:14px;height:14px;
+  border:1px solid var(--line-dim);
+}
+.ch-tl{top:-1px;left:-1px;border-right:none;border-bottom:none}
+.ch-tr{top:-1px;right:-1px;border-left:none;border-bottom:none}
+.ch-bl{bottom:-1px;left:-1px;border-right:none;border-top:none}
+.ch-br{bottom:-1px;right:-1px;border-left:none;border-top:none}
+
+/* === scroll reveal === */
+.reveal{opacity:0;transform:translateY(8px);transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* === responsive === */
+@media (max-width:980px){
+  .matchups,.details{grid-template-columns:1fr 1fr}
+  .lower{grid-template-columns:1fr}
+  .titleblock{grid-template-columns:1fr 1fr}
+  .titleblock .logo{grid-row:auto;grid-column:1 / -1}
+}
+@media (max-width:600px){
+  body{padding:12px}
+  .sheet{padding:14px}
+  .matchups,.details{grid-template-columns:1fr}
+  .header{flex-direction:column}
+  .header .rev{text-align:left;min-width:0;width:100%}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="crosshair ch-tl"></div>
+  <div class="crosshair ch-tr"></div>
+  <div class="crosshair ch-bl"></div>
+  <div class="crosshair ch-br"></div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div>
+      <div class="id">DRAWING NO. JDL-2025-W06 / SHEET 06 OF 14</div>
+      <h1>POWER RANKINGS ELEVATION</h1>
+      <div class="sub">THE JAILYARD DYNASTY LEAGUE &nbsp;/&nbsp; SEASON 2025 &nbsp;/&nbsp; WEEK 06 AS-BUILT</div>
+    </div>
+    <div class="rev">
+      ISSUED FOR REVIEW<br>
+      <b>REV 06</b> &nbsp;//&nbsp; 2025-10-14<br>
+      STATUS: CHAOS WEEK<br>
+      UPSET COUNT: <b>04 / 06</b>
+    </div>
+  </header>
+
+  <!-- ELEVATION DRAWING -->
+  <section class="elevation reveal">
+    <span class="section-tag">ELEVATION A &mdash; POWER RANKING TOWERS</span>
+    <h2 class="section-title">12-TEAM STRUCTURAL ARRAY &nbsp;//&nbsp; HEIGHT = POINTS FOR (PF)</h2>
+
+    <svg viewBox="0 0 1320 540" preserveAspectRatio="xMidYMid meet" aria-label="Power Rankings Elevation">
+      <defs>
+        <marker id="tick" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,10 M10,0 L0,10" stroke="#e8e4d0" stroke-width="1"/>
+        </marker>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#e8e4d0"/>
+        </marker>
+        <pattern id="crack" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+          <path d="M0,3 L6,3" stroke="#ff4444" stroke-width="1" stroke-dasharray="2 2"/>
+        </pattern>
+      </defs>
+
+      <!-- Ground line -->
+      <line x1="60" y1="440" x2="1280" y2="440" stroke="#e8e4d0" stroke-width="1.5"/>
+      <!-- Hatched ground -->
+      <g stroke="#e8e4d0" stroke-width="0.6" opacity="0.55">
+        <line x1="60" y1="440" x2="50" y2="454"/>
+        <line x1="100" y1="440" x2="90" y2="454"/>
+        <line x1="140" y1="440" x2="130" y2="454"/>
+        <line x1="180" y1="440" x2="170" y2="454"/>
+        <line x1="220" y1="440" x2="210" y2="454"/>
+        <line x1="260" y1="440" x2="250" y2="454"/>
+        <line x1="300" y1="440" x2="290" y2="454"/>
+        <line x1="340" y1="440" x2="330" y2="454"/>
+        <line x1="380" y1="440" x2="370" y2="454"/>
+        <line x1="420" y1="440" x2="410" y2="454"/>
+        <line x1="460" y1="440" x2="450" y2="454"/>
+        <line x1="500" y1="440" x2="490" y2="454"/>
+        <line x1="540" y1="440" x2="530" y2="454"/>
+        <line x1="580" y1="440" x2="570" y2="454"/>
+        <line x1="620" y1="440" x2="610" y2="454"/>
+        <line x1="660" y1="440" x2="650" y2="454"/>
+        <line x1="700" y1="440" x2="690" y2="454"/>
+        <line x1="740" y1="440" x2="730" y2="454"/>
+        <line x1="780" y1="440" x2="770" y2="454"/>
+        <line x1="820" y1="440" x2="810" y2="454"/>
+        <line x1="860" y1="440" x2="850" y2="454"/>
+        <line x1="900" y1="440" x2="890" y2="454"/>
+        <line x1="940" y1="440" x2="930" y2="454"/>
+        <line x1="980" y1="440" x2="970" y2="454"/>
+        <line x1="1020" y1="440" x2="1010" y2="454"/>
+        <line x1="1060" y1="440" x2="1050" y2="454"/>
+        <line x1="1100" y1="440" x2="1090" y2="454"/>
+        <line x1="1140" y1="440" x2="1130" y2="454"/>
+        <line x1="1180" y1="440" x2="1170" y2="454"/>
+        <line x1="1220" y1="440" x2="1210" y2="454"/>
+        <line x1="1260" y1="440" x2="1250" y2="454"/>
+      </g>
+
+      <!-- Horizontal reference levels -->
+      <g stroke="#e8e4d0" stroke-width="0.4" stroke-dasharray="3 6" opacity="0.28">
+        <line x1="60" y1="350" x2="1280" y2="350"/>
+        <line x1="60" y1="260" x2="1280" y2="260"/>
+        <line x1="60" y1="170" x2="1280" y2="170"/>
+        <line x1="60" y1="80" x2="1280" y2="80"/>
+      </g>
+      <g font-family="IBM Plex Mono" font-size="9" fill="#8faecc" text-anchor="end">
+        <text x="54" y="443">700 PF</text>
+        <text x="54" y="353">770</text>
+        <text x="54" y="263">840</text>
+        <text x="54" y="173">910</text>
+        <text x="54" y="83">980</text>
+      </g>
+
+      <!--
+        PF scale: 700 = y440, 980 = y80. range 280 PF → 360 px. 1 PF = 1.2857 px.
+        y = 440 - (PF - 700) * 1.2857
+        Team PFs (rank order):
+        LB 935.7 → 440 - 235.7*1.2857 = 440-303 = 137
+        GK 871.2 → 440 - 171.2*1.2857 = 440-220.1 = 220
+        SG 857.0 → 440 - 157.0*1.2857 = 440-201.9 = 238
+        BM 912.9 → 440 - 212.9*1.2857 = 440-273.7 = 166
+        KR 877.9 → 440 - 177.9*1.2857 = 440-228.7 = 211
+        RS 816.0 → 440 - 116.0*1.2857 = 440-149.1 = 291
+        MH 891.9 → 440 - 191.9*1.2857 = 440-246.7 = 193
+        NF 819.0 → 440 - 119.0*1.2857 = 440-153 = 287
+        GG 818.3 → 440 - 118.3*1.2857 = 440-152.1 = 288
+        CF 727.9 → 440 - 27.9*1.2857 = 440-35.9 = 404
+        BE 732.7 → 440 - 32.7*1.2857 = 440-42.0 = 398
+        FT 712.7 → 440 - 12.7*1.2857 = 440-16.3 = 424
+      -->
+
+      <!-- Team towers. Each tower is 56 wide. First center at 110, step 100. -->
+      <!-- Tower 1: LB -->
+      <g>
+        <rect x="82" y="137" width="56" height="303" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <line x1="82" y1="160" x2="138" y2="160" stroke="#ffc857" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="110" y="130" text-anchor="middle" font-size="11" fill="#ffc857" font-weight="700">#1 ★</text>
+        <text x="110" y="155" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">935.7</text>
+        <text x="110" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">LB</text>
+        <text x="110" y="470" text-anchor="middle" font-size="8" fill="#8faecc">5-1</text>
+        <text x="110" y="482" text-anchor="middle" font-size="7" fill="#8faecc">LEGION</text>
+        <text x="110" y="494" text-anchor="middle" font-size="7" fill="#ffc857">▲+1</text>
+      </g>
+      <!-- Tower 2: GK -->
+      <g>
+        <rect x="182" y="220" width="56" height="220" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <text x="210" y="213" text-anchor="middle" font-size="11" fill="#e8e4d0" font-weight="700">#2</text>
+        <text x="210" y="240" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">871.2</text>
+        <text x="210" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">GK</text>
+        <text x="210" y="470" text-anchor="middle" font-size="8" fill="#8faecc">5-1</text>
+        <text x="210" y="482" text-anchor="middle" font-size="7" fill="#8faecc">KEN-OBI</text>
+        <text x="210" y="494" text-anchor="middle" font-size="7" fill="#ffc857">▲+3</text>
+      </g>
+      <!-- Tower 3: SG -->
+      <g>
+        <rect x="282" y="238" width="56" height="202" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <text x="310" y="231" text-anchor="middle" font-size="11" fill="#e8e4d0" font-weight="700">#3</text>
+        <text x="310" y="258" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">857.0</text>
+        <text x="310" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">SG</text>
+        <text x="310" y="470" text-anchor="middle" font-size="8" fill="#8faecc">5-1</text>
+        <text x="310" y="482" text-anchor="middle" font-size="7" fill="#8faecc">GIANTS</text>
+        <text x="310" y="494" text-anchor="middle" font-size="7" fill="#8faecc">— 0</text>
+      </g>
+      <!-- Tower 4: BM -->
+      <g>
+        <rect x="382" y="166" width="56" height="274" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <text x="410" y="159" text-anchor="middle" font-size="11" fill="#e8e4d0" font-weight="700">#4</text>
+        <text x="410" y="186" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">912.9</text>
+        <text x="410" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">BM</text>
+        <text x="410" y="470" text-anchor="middle" font-size="8" fill="#8faecc">4-2</text>
+        <text x="410" y="482" text-anchor="middle" font-size="7" fill="#8faecc">MONKS</text>
+        <text x="410" y="494" text-anchor="middle" font-size="7" fill="#ffc857">▲+2</text>
+      </g>
+      <!-- Tower 5: KR (CRACKED) -->
+      <g>
+        <rect x="482" y="211" width="56" height="229" fill="url(#crack)" stroke="#ff4444" stroke-width="1.6"/>
+        <path d="M482,260 L508,300 L494,340 L520,390 L495,435" stroke="#ff4444" stroke-width="1.5" fill="none"/>
+        <text x="510" y="204" text-anchor="middle" font-size="11" fill="#ff4444" font-weight="700">#5 ⊠</text>
+        <text x="510" y="231" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">877.9</text>
+        <text x="510" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">KR</text>
+        <text x="510" y="470" text-anchor="middle" font-size="8" fill="#8faecc">4-2</text>
+        <text x="510" y="482" text-anchor="middle" font-size="7" fill="#8faecc">KITTLER</text>
+        <text x="510" y="494" text-anchor="middle" font-size="7" fill="#ff4444">▼-4</text>
+      </g>
+      <!-- Tower 6: RS (CRACKED) -->
+      <g>
+        <rect x="582" y="291" width="56" height="149" fill="url(#crack)" stroke="#ff4444" stroke-width="1.6"/>
+        <path d="M582,320 L608,355 L590,395 L620,430" stroke="#ff4444" stroke-width="1.5" fill="none"/>
+        <text x="610" y="284" text-anchor="middle" font-size="11" fill="#ff4444" font-weight="700">#6 ⊠</text>
+        <text x="610" y="311" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">816.0</text>
+        <text x="610" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">RS</text>
+        <text x="610" y="470" text-anchor="middle" font-size="8" fill="#8faecc">4-2</text>
+        <text x="610" y="482" text-anchor="middle" font-size="7" fill="#8faecc">RASHEEING</text>
+        <text x="610" y="494" text-anchor="middle" font-size="7" fill="#ff4444">▼-2</text>
+      </g>
+      <!-- Tower 7: MH -->
+      <g>
+        <rect x="682" y="193" width="56" height="247" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <text x="710" y="186" text-anchor="middle" font-size="11" fill="#e8e4d0" font-weight="700">#7</text>
+        <text x="710" y="213" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">891.9</text>
+        <text x="710" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">MH</text>
+        <text x="710" y="470" text-anchor="middle" font-size="8" fill="#8faecc">3-3</text>
+        <text x="710" y="482" text-anchor="middle" font-size="7" fill="#8faecc">MHJTIME</text>
+        <text x="710" y="494" text-anchor="middle" font-size="7" fill="#8faecc">— 0</text>
+      </g>
+      <!-- Tower 8: NF (upset winner — no crack but yellow cap) -->
+      <g>
+        <rect x="782" y="287" width="56" height="153" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <rect x="782" y="287" width="56" height="10" fill="#ffc857" opacity="0.7"/>
+        <text x="810" y="280" text-anchor="middle" font-size="11" fill="#ffc857" font-weight="700">#8 ⊠</text>
+        <text x="810" y="307" text-anchor="middle" font-size="9" fill="#061628" font-weight="700">819.0</text>
+        <text x="810" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">NF</text>
+        <text x="810" y="470" text-anchor="middle" font-size="8" fill="#8faecc">3-3</text>
+        <text x="810" y="482" text-anchor="middle" font-size="7" fill="#8faecc">NOBLE</text>
+        <text x="810" y="494" text-anchor="middle" font-size="7" fill="#ffc857">▲+1</text>
+      </g>
+      <!-- Tower 9: GG -->
+      <g>
+        <rect x="882" y="288" width="56" height="152" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <text x="910" y="281" text-anchor="middle" font-size="11" fill="#e8e4d0" font-weight="700">#9</text>
+        <text x="910" y="308" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">818.3</text>
+        <text x="910" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">GG</text>
+        <text x="910" y="470" text-anchor="middle" font-size="8" fill="#8faecc">2-4</text>
+        <text x="910" y="482" text-anchor="middle" font-size="7" fill="#8faecc">GRAYSKULL</text>
+        <text x="910" y="494" text-anchor="middle" font-size="7" fill="#ff4444">▼-1</text>
+      </g>
+      <!-- Tower 10: CF -->
+      <g>
+        <rect x="982" y="404" width="56" height="36" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <text x="1010" y="397" text-anchor="middle" font-size="11" fill="#e8e4d0" font-weight="700">#10</text>
+        <text x="1010" y="424" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">727.9</text>
+        <text x="1010" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">CF</text>
+        <text x="1010" y="470" text-anchor="middle" font-size="8" fill="#8faecc">1-5</text>
+        <text x="1010" y="482" text-anchor="middle" font-size="7" fill="#8faecc">CHUDDERS</text>
+        <text x="1010" y="494" text-anchor="middle" font-size="7" fill="#8faecc">— 0</text>
+      </g>
+      <!-- Tower 11: BE -->
+      <g>
+        <rect x="1082" y="398" width="56" height="42" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <text x="1110" y="391" text-anchor="middle" font-size="11" fill="#e8e4d0" font-weight="700">#11</text>
+        <text x="1110" y="418" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600">732.7</text>
+        <text x="1110" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">BE</text>
+        <text x="1110" y="470" text-anchor="middle" font-size="8" fill="#ff4444">0-6</text>
+        <text x="1110" y="482" text-anchor="middle" font-size="7" fill="#8faecc">ETIENNE-Y</text>
+        <text x="1110" y="494" text-anchor="middle" font-size="7" fill="#8faecc">— 0</text>
+      </g>
+      <!-- Tower 12: FT -->
+      <g>
+        <rect x="1182" y="424" width="56" height="16" fill="none" stroke="#e8e4d0" stroke-width="1.6"/>
+        <text x="1210" y="417" text-anchor="middle" font-size="11" fill="#e8e4d0" font-weight="700">#12</text>
+        <text x="1210" y="444" text-anchor="middle" font-size="9" fill="#e8e4d0" font-weight="600" transform="translate(0,-30)">712.7</text>
+        <text x="1210" y="456" text-anchor="middle" font-size="10" fill="#e8e4d0" font-weight="700">FT</text>
+        <text x="1210" y="470" text-anchor="middle" font-size="8" fill="#ff4444">0-6</text>
+        <text x="1210" y="482" text-anchor="middle" font-size="7" fill="#8faecc">F. TIME</text>
+        <text x="1210" y="494" text-anchor="middle" font-size="7" fill="#8faecc">— 0</text>
+      </g>
+
+      <!-- Overall horizontal dimension line at top -->
+      <g stroke="#e8e4d0" stroke-width="0.8">
+        <line x1="82" y1="50" x2="1238" y2="50" marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <line x1="82" y1="46" x2="82" y2="54"/>
+        <line x1="1238" y1="46" x2="1238" y2="54"/>
+      </g>
+      <text x="660" y="42" text-anchor="middle" font-size="10" fill="#ffc857" letter-spacing="1">12 TEAMS @ 100 O.C. &mdash; TOTAL 1156 UNITS</text>
+
+      <!-- LEAGUE AVG PPG reference -->
+      <line x1="60" y1="263" x2="1280" y2="263" stroke="#ffc857" stroke-width="0.8" stroke-dasharray="5 3"/>
+      <text x="1272" y="258" text-anchor="end" font-size="9" fill="#ffc857">LEAGUE AVG 138.5 PPG &mdash; BASELINE</text>
+
+      <!-- Arrow calling out KR collapse -->
+      <g>
+        <path d="M540,140 Q520,170 510,200" stroke="#ff4444" stroke-width="1" fill="none" marker-end="url(#arrow)"/>
+        <text x="548" y="132" font-size="9" fill="#ff4444" font-weight="700">REV 05: LEAD STRUCT.</text>
+        <text x="548" y="144" font-size="8" fill="#ff4444">NOW: CRACKED ▼4</text>
+      </g>
+      <!-- Arrow calling out Ken-obi climb -->
+      <g>
+        <path d="M240,90 Q220,140 215,210" stroke="#ffc857" stroke-width="1" fill="none" marker-end="url(#arrow)"/>
+        <text x="148" y="82" font-size="9" fill="#ffc857" font-weight="700">GK ELO 1700 &mdash; CAREER PEAK</text>
+        <text x="148" y="94" font-size="8" fill="#ffc857">▲3 / W2 STREAK</text>
+      </g>
+
+      <!-- Dimension line: LB tower overall height (PF above datum) -->
+      <g stroke="#e8e4d0" stroke-width="0.6">
+        <line x1="150" y1="137" x2="170" y2="137"/>
+        <line x1="150" y1="440" x2="170" y2="440"/>
+        <line x1="160" y1="137" x2="160" y2="440" marker-start="url(#tick)" marker-end="url(#tick)"/>
+      </g>
+      <text x="164" y="295" font-size="8" fill="#e8e4d0" transform="rotate(-90 164 295)" text-anchor="middle">235.7 ABOVE DATUM</text>
+
+      <!-- Dimension line: LB week 6 output callout -->
+      <g stroke="#ffc857" stroke-width="0.6">
+        <line x1="82" y1="380" x2="138" y2="380" stroke-dasharray="2 2"/>
+      </g>
+      <text x="140" y="378" font-size="7" fill="#ffc857">WK06 165.90 (RANGE)</text>
+
+      <!-- Datum arrow -->
+      <g>
+        <path d="M1278,278 L1255,264" stroke="#ffc857" stroke-width="0.8" fill="none" marker-end="url(#arrow)"/>
+      </g>
+
+      <!-- Callout: KR defending champ tag -->
+      <g>
+        <circle cx="510" cy="118" r="14" fill="none" stroke="#ff4444" stroke-width="1"/>
+        <text x="510" y="114" text-anchor="middle" font-size="8" fill="#ff4444" font-weight="700">PREV.</text>
+        <text x="510" y="124" text-anchor="middle" font-size="8" fill="#ff4444" font-weight="700">CHAMP</text>
+      </g>
+      <line x1="510" y1="132" x2="510" y2="200" stroke="#ff4444" stroke-width="0.6" stroke-dasharray="2 2"/>
+
+      <!-- Callout: CF/BE/FT cellar bracket -->
+      <g stroke="#8faecc" stroke-width="0.6">
+        <line x1="982" y1="510" x2="1238" y2="510"/>
+        <line x1="982" y1="502" x2="982" y2="510"/>
+        <line x1="1238" y1="502" x2="1238" y2="510"/>
+      </g>
+      <text x="1110" y="518" text-anchor="middle" font-size="8" fill="#8faecc">BASEMENT BAY &mdash; 3 UNITS, 1 WIN TOTAL</text>
+    </svg>
+    <div class="elv-caption">
+      <span>SCALE 1" = 1.0 PPG</span>
+      <span>DATUM: PF @ 700.0</span>
+      <span>SEE SHEET 07 FOR WEEK 07 MATCHUP PLAN</span>
+    </div>
+  </section>
+
+  <!-- SECTION A-A / MATCHUPS -->
+  <section class="section-aa reveal">
+    <span class="section-tag">SECTION A-A &mdash; WEEK 06 CONNECTIONS</span>
+    <h2 class="section-title">STRUCTURAL PAIRS &nbsp;//&nbsp; 06 MATCHUPS &nbsp;/&nbsp; 04 UPSETS FLAGGED</h2>
+    <div class="matchups">
+
+      <!-- M1: Noble FFT def GG UPSET -->
+      <div class="matchup">
+        <span class="tag upset">M-01 / UPSET</span>
+        <svg viewBox="0 0 280 90">
+          <rect x="25" y="18" width="50" height="64" fill="none" stroke="#ffc857" stroke-width="1.5"/>
+          <rect x="205" y="30" width="50" height="52" fill="url(#crack)" stroke="#ff4444" stroke-width="1.5"/>
+          <path d="M205,45 L230,60 L215,78" stroke="#ff4444" stroke-width="1.2" fill="none"/>
+          <line x1="75" y1="50" x2="205" y2="50" stroke="#e8e4d0" stroke-width="1" marker-start="url(#tick)" marker-end="url(#tick)"/>
+          <text x="140" y="44" text-anchor="middle" font-size="9" fill="#ffc857">Δ 30.58</text>
+          <text x="50" y="12" text-anchor="middle" font-size="9" fill="#ffc857" font-weight="700">151.88</text>
+          <text x="230" y="24" text-anchor="middle" font-size="9" fill="#e8e4d0">121.30</text>
+        </svg>
+        <div class="label"><span class="name win">NF &mdash; NOBLE FFT</span><span class="name lose">GG &mdash; GRAYSKULL</span></div>
+        <div class="margin">BIJAN 32.8 &middot; CALEB 19.88 &middot; WAN'DALE 17.4</div>
+      </div>
+
+      <!-- M2: MH def KR UPSET -->
+      <div class="matchup">
+        <span class="tag upset">M-02 / UPSET</span>
+        <svg viewBox="0 0 280 90">
+          <rect x="25" y="20" width="50" height="62" fill="none" stroke="#ffc857" stroke-width="1.5"/>
+          <rect x="205" y="36" width="50" height="46" fill="url(#crack)" stroke="#ff4444" stroke-width="1.5"/>
+          <path d="M205,50 L232,65 L215,80" stroke="#ff4444" stroke-width="1.2" fill="none"/>
+          <line x1="75" y1="50" x2="205" y2="50" stroke="#e8e4d0" stroke-width="1" marker-start="url(#tick)" marker-end="url(#tick)"/>
+          <text x="140" y="44" text-anchor="middle" font-size="9" fill="#ffc857">Δ 33.20</text>
+          <text x="50" y="14" text-anchor="middle" font-size="9" fill="#ffc857" font-weight="700">140.94</text>
+          <text x="230" y="30" text-anchor="middle" font-size="9" fill="#e8e4d0">107.74</text>
+        </svg>
+        <div class="label"><span class="name win">MH &mdash; MHJTIME</span><span class="name lose">KR &mdash; KITTLER</span></div>
+        <div class="margin">DOWDLE 30.9 &middot; DANIELS 22.64 &middot; CHASE 20.1</div>
+      </div>
+
+      <!-- M3: SG def CF -->
+      <div class="matchup">
+        <span class="tag">M-03 / CHALK</span>
+        <svg viewBox="0 0 280 90">
+          <rect x="25" y="24" width="50" height="58" fill="none" stroke="#ffc857" stroke-width="1.5"/>
+          <rect x="205" y="46" width="50" height="36" fill="none" stroke="#e8e4d0" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <line x1="75" y1="50" x2="205" y2="50" stroke="#e8e4d0" stroke-width="1" marker-start="url(#tick)" marker-end="url(#tick)"/>
+          <text x="140" y="44" text-anchor="middle" font-size="9" fill="#ffc857">Δ 34.56</text>
+          <text x="50" y="18" text-anchor="middle" font-size="9" fill="#ffc857" font-weight="700">129.82</text>
+          <text x="230" y="40" text-anchor="middle" font-size="9" fill="#e8e4d0">95.26</text>
+        </svg>
+        <div class="label"><span class="name win">SG &mdash; GIANTS</span><span class="name lose">CF &mdash; CHUDDERS</span></div>
+        <div class="margin">JACOBS 29.5 &middot; HURTS 21.62 &middot; K.WILLIAMS 15.7</div>
+      </div>
+
+      <!-- M4: BM def RS UPSET -->
+      <div class="matchup">
+        <span class="tag upset">M-04 / UPSET</span>
+        <svg viewBox="0 0 280 90">
+          <rect x="25" y="16" width="50" height="66" fill="none" stroke="#ffc857" stroke-width="1.5"/>
+          <rect x="205" y="38" width="50" height="44" fill="url(#crack)" stroke="#ff4444" stroke-width="1.5"/>
+          <path d="M205,52 L230,66 L215,80" stroke="#ff4444" stroke-width="1.2" fill="none"/>
+          <line x1="75" y1="50" x2="205" y2="50" stroke="#e8e4d0" stroke-width="1" marker-start="url(#tick)" marker-end="url(#tick)"/>
+          <text x="140" y="44" text-anchor="middle" font-size="9" fill="#ffc857">Δ 41.36</text>
+          <text x="50" y="10" text-anchor="middle" font-size="9" fill="#ffc857" font-weight="700">150.46</text>
+          <text x="230" y="32" text-anchor="middle" font-size="9" fill="#e8e4d0">109.10</text>
+        </svg>
+        <div class="label"><span class="name win">BM &mdash; MONKS</span><span class="name lose">RS &mdash; RASHEEING</span></div>
+        <div class="margin">PICKENS 27.3 &middot; JSN 26.2 &middot; FLACCO 18.76</div>
+      </div>
+
+      <!-- M5: LB def FT (week high) -->
+      <div class="matchup">
+        <span class="tag">M-05 / WK HIGH</span>
+        <svg viewBox="0 0 280 90">
+          <rect x="25" y="8" width="50" height="74" fill="none" stroke="#ffc857" stroke-width="1.8"/>
+          <rect x="205" y="38" width="50" height="44" fill="none" stroke="#e8e4d0" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <line x1="75" y1="50" x2="205" y2="50" stroke="#e8e4d0" stroke-width="1" marker-start="url(#tick)" marker-end="url(#tick)"/>
+          <text x="140" y="44" text-anchor="middle" font-size="9" fill="#ffc857">Δ 58.24</text>
+          <text x="50" y="4" text-anchor="middle" font-size="9" fill="#ffc857" font-weight="700">165.90 ★</text>
+          <text x="230" y="32" text-anchor="middle" font-size="9" fill="#e8e4d0">107.66</text>
+        </svg>
+        <div class="label"><span class="name win">LB &mdash; LEGION</span><span class="name lose">FT &mdash; F.TIME</span></div>
+        <div class="margin">MAHOMES 30.48 &middot; SKATTEBO 30.0 &middot; CMC 20.6</div>
+      </div>
+
+      <!-- M6: GK def BE (biggest blowout) -->
+      <div class="matchup">
+        <span class="tag">M-06 / BLOWOUT</span>
+        <svg viewBox="0 0 280 90">
+          <rect x="25" y="10" width="50" height="72" fill="none" stroke="#ffc857" stroke-width="1.8"/>
+          <rect x="205" y="44" width="50" height="38" fill="none" stroke="#e8e4d0" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <line x1="75" y1="50" x2="205" y2="50" stroke="#e8e4d0" stroke-width="1" marker-start="url(#tick)" marker-end="url(#tick)"/>
+          <text x="140" y="44" text-anchor="middle" font-size="9" fill="#ffc857">Δ 65.74</text>
+          <text x="50" y="5" text-anchor="middle" font-size="9" fill="#ffc857" font-weight="700">164.94</text>
+          <text x="230" y="38" text-anchor="middle" font-size="9" fill="#e8e4d0">99.20</text>
+        </svg>
+        <div class="label"><span class="name win">GK &mdash; KEN-OBI</span><span class="name lose">BE &mdash; ETIENNE-Y</span></div>
+        <div class="margin">LAR DEF 27.0 &middot; LONDON 26.8 &middot; MAYE 26.24</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DETAIL BUBBLES -->
+  <section class="details reveal">
+
+    <div class="detail red">
+      <div class="bubble">DET<br>1</div>
+      <h3>KITTLER &mdash; STRUCTURAL FAILURE</h3>
+      <p>Defending champion enters REV 06 as the #1 tower. Exits cracked at #5. Scored 107.74 against MHJTIME — a team carrying Dowdle, Daniels, and Chase. W1 season converted to L1 in one Sunday. Floor looked fine; ceiling was drywall.</p>
+      <div class="stat">DROP <b>▼4</b> &nbsp;/&nbsp; PF <b>877.9</b> &nbsp;/&nbsp; WK6 <b>107.74</b></div>
+    </div>
+
+    <div class="detail">
+      <div class="bubble">DET<br>2</div>
+      <h3>BIJAN ROBINSON &mdash; 32.8 UNITS</h3>
+      <p>Noble FFT came in 2-3, left 3-3. Bijan posted 32.8 for the week's top individual performance. Caleb Williams added 19.88, Wan'Dale 17.4, Tyler Warren 15.3. Grayskull never had a connection detail that could carry the load.</p>
+      <div class="stat">BIJAN <b>32.8</b> &nbsp;/&nbsp; TEAM <b>151.88</b> &nbsp;/&nbsp; NF ▲+1</div>
+    </div>
+
+    <div class="detail">
+      <div class="bubble">DET<br>3</div>
+      <h3>LB vs GK &mdash; WEEK 07 NODE</h3>
+      <p>Two 5-1 towers. Both posted ~165 in Week 6. Legion's Mahomes/Skattebo/CMC stack versus Ken-obi's LAR DEF / London / Maye — the latter at career-peak Elo 1700, the former at ★ title count 1. Marquee connection. REV 07 pending.</p>
+      <div class="stat">LB ELO <b>1604</b> &nbsp;/&nbsp; GK ELO <b>1700</b> &nbsp;/&nbsp; Δ 96</div>
+    </div>
+  </section>
+
+  <!-- LOWER: NOTES + LEGEND + NEXT WEEK -->
+  <section class="lower reveal">
+    <div class="panel">
+      <h4>GENERAL NOTES</h4>
+      <ol class="notes-list">
+        <li>ALL DIMENSIONS IN PF (POINTS FOR) AND PPG UNLESS NOTED. SEASON 2025, 06 OF 14 WEEKS AS-BUILT.</li>
+        <li>TOWERS KR (#5) AND RS (#6) PREVIOUSLY LEAD STRUCTURES THROUGH REV 05. SEE ELEVATION A FOR CURRENT STATE &mdash; CRACKED.</li>
+        <li>UPSET RATE WEEK 06: 04 OF 06 GAMES &mdash; ABNORMAL. FIELD CONDITIONS SUSPECT.</li>
+        <li>LEAGUE AVG PPG 138.5 / WK06 AVG 128.7. DATUM LINE AT 138.5 ON ELEVATION A.</li>
+        <li>LB &amp; GK BOTH CARRIED 5-1 / ~165 PT LOADS. CONNECTION SCHEDULED WEEK 07 &mdash; SEE DETAIL 3.</li>
+        <li>BE (#11) AND FT (#12) BOTH 0-6 ON L6 STREAKS. CONTRACTOR FILING AS "TOILET BOWL MATINEE."</li>
+        <li>KITTLER'S ON THE ROOF &mdash; PREV. CHAMPION. NOW L1. SEE DET-1 FOR FAILURE MODE.</li>
+        <li>NO WELDS, NO SUBSTITUTIONS. ALL FIGURES FROM SLEEPER API BOX SCORES, WEEK 06.</li>
+      </ol>
+    </div>
+
+    <div class="panel">
+      <h4>LEGEND / SYMBOLS</h4>
+      <div class="legend-grid">
+        <span><i>▲</i><b>POS. MOVE</b></span>
+        <span><i class="red">▼</i><b>NEG. MOVE</b></span>
+        <span><i>—</i><b>NO CHANGE</b></span>
+        <span><i class="red">⊠</i><b>UPSET</b></span>
+        <span><i>★</i><b>CHAMPION</b></span>
+        <span><i class="good">W</i><b>WIN STREAK</b></span>
+        <span><i class="red">L</i><b>LOSS STREAK</b></span>
+        <span><i>Δ</i><b>MARGIN</b></span>
+      </div>
+      <div class="rev-history">
+        <div><span>REV 01</span><span>2025-09-09 &middot; WK1</span></div>
+        <div><span>REV 02</span><span>2025-09-16 &middot; WK2</span></div>
+        <div><span>REV 03</span><span>2025-09-23 &middot; WK3</span></div>
+        <div><span>REV 04</span><span>2025-09-30 &middot; WK4</span></div>
+        <div><span>REV 05</span><span>2025-10-07 &middot; WK5</span></div>
+        <div class="now"><span>REV 06 ◆</span><span>2025-10-14 &middot; WK6</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h4>SHEET 07 &mdash; WEEK 07 PLAN</h4>
+      <table class="w7-tbl">
+        <thead><tr><th>AWAY</th><th></th><th>HOME</th><th>NOTE</th></tr></thead>
+        <tbody>
+          <tr class="marquee"><td>#1 LB LEGION</td><td class="vs">/</td><td>#2 GK KEN-OBI</td><td>★ MARQUEE</td></tr>
+          <tr><td>#4 BM MONKS</td><td class="vs">/</td><td>#8 NF NOBLE</td><td>REMATCH?</td></tr>
+          <tr><td>#5 KR KITTLER</td><td class="vs">/</td><td>#3 SG GIANTS</td><td>BOUNCE-BACK</td></tr>
+          <tr><td>#6 RS RASHEEING</td><td class="vs">/</td><td>#9 GG GRAYSKULL</td><td>—</td></tr>
+          <tr><td>#10 CF CHUDDERS</td><td class="vs">/</td><td>#7 MH MHJTIME</td><td>—</td></tr>
+          <tr class="toilet"><td>#11 BE ETIENNE-Y</td><td class="vs">/</td><td>#12 FT F.TIME</td><td>TOILET</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TITLE BLOCK -->
+  <section class="titleblock reveal">
+    <div class="cell logo">
+      <div>
+        <div class="small">THE</div>
+        <div class="big">JAILYARD</div>
+        <div class="big" style="color:var(--accent)">DYNASTY</div>
+        <div class="small">LEAGUE &mdash; EST. 2022</div>
+      </div>
+      <div class="seal">SEALED &mdash; REV 06</div>
+    </div>
+    <div class="cell"><span class="k">PROJECT</span><span class="v">JDL SEASON 2025</span></div>
+    <div class="cell"><span class="k">SHEET TITLE</span><span class="v">POWER RANKINGS ELEVATION</span></div>
+    <div class="cell"><span class="k">DRAWING NO.</span><span class="v">JDL-2025-W06</span></div>
+
+    <div class="row-2" style="display:contents">
+      <div class="cell"><span class="k">DRAWN BY</span><span class="v">AI EDITORIAL STAFF</span></div>
+      <div class="cell"><span class="k">CHECKED BY</span><span class="v">BLAKE B.</span></div>
+      <div class="cell"><span class="k">SCALE</span><span class="v">1" = 1.0 PPG</span></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  // Scroll-triggered reveal. No looping animation.
+  var items = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) {
+    items.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  items.forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>

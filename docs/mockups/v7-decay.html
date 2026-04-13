@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 9 — The Decay | The Jailyard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;0,6..72,700;0,6..72,800;1,6..72,400;1,6..72,600&family=Barlow+Condensed:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  --decay: 0;
+  --bg-r: 10; --bg-g: 10; --bg-b: 10;
+  --text-opacity: 1;
+  --accent-r: 201; --accent-g: 168; --accent-b: 76;
+  --letter-spread: 0;
+  --sepia: 0;
+  --grain-opacity: 0.04;
+  --crack-opacity: 0;
+  --noise-contrast: 1;
+  --tear-amount: 0;
+
+  background: rgb(var(--bg-r), var(--bg-g), var(--bg-b));
+  color: #e8e4dc;
+  overflow-x: hidden;
+  font-family: 'Newsreader', Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  transition: background 0.1s;
+}
+
+/* ── Typography tokens ─────────────────────────────── */
+.f-serif   { font-family: 'Newsreader', Georgia, serif; }
+.f-sans    { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+.f-mono    { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+/* ── Decay timeline indicator ──────────────────────── */
+.decay-timeline {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+.decay-timeline .day {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+  background: rgba(201, 168, 76, 0.06);
+  color: rgba(201, 168, 76, 0.25);
+  transition: all 0.4s ease;
+  white-space: nowrap;
+}
+.decay-timeline .day.active {
+  background: rgba(201, 168, 76, 0.15);
+  color: rgba(201, 168, 76, 0.9);
+  box-shadow: 0 0 12px rgba(201, 168, 76, 0.15);
+}
+
+/* ── Grain overlay ─────────────────────────────────── */
+.grain-overlay {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 50;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* ── Crack SVG lines ───────────────────────────────── */
+.crack-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 45;
+  pointer-events: none;
+  opacity: var(--crack-opacity);
+}
+
+/* ── Page content wrapper ──────────────────────────── */
+.page-content {
+  position: relative;
+  z-index: 10;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px 200px;
+}
+
+/* ── Masthead ──────────────────────────────────────── */
+.masthead {
+  text-align: center;
+  padding: 80px 0 20px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+  margin-bottom: 12px;
+}
+.masthead-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: clamp(11px, 1.4vw, 14px);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+  margin-bottom: 4px;
+}
+.masthead-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(232, 228, 220, 0.35);
+}
+
+/* ── Issue header ──────────────────────────────────── */
+.issue-header {
+  text-align: center;
+  padding: 48px 0 56px;
+}
+.week-number {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(72px, 14vw, 140px);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+  text-shadow: 0 0 40px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.15);
+}
+.week-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 300;
+  font-size: clamp(14px, 2vw, 18px);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(232, 228, 220, 0.5);
+  margin-top: 8px;
+}
+.issue-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: rgba(232, 228, 220, 0.3);
+  margin-top: 16px;
+}
+.freshness-tag {
+  display: inline-block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  margin-top: 20px;
+  border: 1px solid rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+  color: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* ── Section dividers ──────────────────────────────── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 56px 0 32px;
+}
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(201, 168, 76, 0.15);
+}
+.section-divider .label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+  white-space: nowrap;
+}
+
+/* ── Essay ─────────────────────────────────────────── */
+.essay-title {
+  font-family: 'Newsreader', Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(28px, 4.5vw, 42px);
+  line-height: 1.15;
+  color: #e8e4dc;
+  margin-bottom: 8px;
+}
+.essay-subtitle {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(16px, 2.2vw, 20px);
+  color: rgba(232, 228, 220, 0.55);
+  margin-bottom: 32px;
+  line-height: 1.4;
+}
+.essay-body p {
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.75;
+  color: rgba(232, 228, 220, var(--text-opacity));
+  margin-bottom: 24px;
+  letter-spacing: calc(var(--letter-spread) * 1em);
+  filter: sepia(var(--sepia)) contrast(var(--noise-contrast));
+}
+.essay-body .dropcap::first-letter {
+  float: left;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 3.6em;
+  line-height: 0.85;
+  margin: 4px 10px 0 -3px;
+  color: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+}
+
+/* ── Power Rankings ────────────────────────────────── */
+.ranking-card {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.08);
+}
+.ranking-card:last-child { border-bottom: none; }
+.rank-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 36px;
+  line-height: 1;
+  color: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+  text-align: center;
+}
+.rank-content h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.rank-content .record {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(232, 228, 220, 0.4);
+  margin-bottom: 8px;
+}
+.rank-content .blurb {
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(232, 228, 220, var(--text-opacity));
+  letter-spacing: calc(var(--letter-spread) * 1em);
+  filter: sepia(var(--sepia)) contrast(var(--noise-contrast));
+}
+
+/* Team colors */
+.team-kenobi h3   { color: #d4a04a; }
+.team-legion h3   { color: #ef4444; }
+.team-mhjtime h3  { color: #4dabf7; }
+.team-kittler h3  { color: #8b5cf6; }
+
+/* ── Mailbag ───────────────────────────────────────── */
+.mailbag-q {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.6;
+  color: rgba(232, 228, 220, 0.65);
+  padding-left: 20px;
+  border-left: 3px solid rgba(201, 168, 76, 0.3);
+  margin-bottom: 20px;
+  letter-spacing: calc(var(--letter-spread) * 1em);
+  filter: sepia(var(--sepia));
+}
+.mailbag-q .sender {
+  display: block;
+  font-style: normal;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(201, 168, 76, 0.5);
+  margin-top: 8px;
+}
+.mailbag-a {
+  font-size: clamp(15px, 1.9vw, 17px);
+  line-height: 1.7;
+  color: rgba(232, 228, 220, var(--text-opacity));
+  margin-bottom: 32px;
+  letter-spacing: calc(var(--letter-spread) * 1em);
+  filter: sepia(var(--sepia)) contrast(var(--noise-contrast));
+}
+
+/* ── Decay-rotated characters ──────────────────────── */
+.decay-char {
+  display: inline-block;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* ── Next issue CTA (always fresh) ─────────────────── */
+.next-issue {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  text-align: center;
+  padding: 28px 24px;
+  background: linear-gradient(to top, rgba(10,10,10,0.98) 60%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.next-issue.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.next-issue .fresh-line {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: clamp(18px, 3vw, 28px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  text-shadow: 0 0 20px rgba(201, 168, 76, 0.4), 0 0 60px rgba(201, 168, 76, 0.15);
+  /* Always pristine -- immune to decay */
+  filter: none !important;
+  opacity: 1 !important;
+}
+.next-issue .fresh-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: rgba(201, 168, 76, 0.45);
+  margin-top: 6px;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* ── Scrollbar styling ─────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(201, 168, 76, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201, 168, 76, 0.35); }
+
+/* ── Mobile ────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .decay-timeline { display: none; }
+  .page-content { padding: 0 16px 200px; }
+  .masthead { padding: 60px 0 16px; }
+  .issue-header { padding: 32px 0 40px; }
+  .ranking-card { grid-template-columns: 36px 1fr; gap: 12px; }
+  .rank-num { font-size: 28px; }
+}
+
+/* ── Stain blotches (appear at high decay) ─────────── */
+.stain {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(139, 119, 72, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+/* ── Yellowed edge vignette ────────────────────────── */
+.vignette-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 42;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(80, 65, 30, 0.25) 100%);
+  transition: opacity 0.3s;
+}
+</style>
+</head>
+<body>
+
+<!-- Grain overlay -->
+<div class="grain-overlay" id="grain"></div>
+
+<!-- Vignette overlay -->
+<div class="vignette-overlay" id="vignette"></div>
+
+<!-- Crack SVG overlay -->
+<svg class="crack-overlay" id="cracks" viewBox="0 0 1440 900" preserveAspectRatio="none">
+  <g fill="none" stroke="rgba(120, 100, 60, 0.4)" stroke-linecap="round">
+    <path d="M 210 0 L 225 120 L 195 280 L 240 410 L 220 560" stroke-width="0.5"/>
+    <path d="M 225 120 L 310 160 L 380 145" stroke-width="0.3"/>
+    <path d="M 780 0 L 760 90 L 790 220 L 750 380 L 770 500 L 730 650" stroke-width="0.6"/>
+    <path d="M 790 220 L 850 260 L 920 240" stroke-width="0.3"/>
+    <path d="M 750 380 L 680 420 L 640 400" stroke-width="0.25"/>
+    <path d="M 1100 0 L 1080 150 L 1110 310 L 1070 490 L 1090 620 L 1060 780" stroke-width="0.4"/>
+    <path d="M 1110 310 L 1180 350 L 1230 330" stroke-width="0.3"/>
+    <path d="M 400 200 L 420 340 L 390 480 L 430 600" stroke-width="0.35"/>
+    <path d="M 420 340 L 500 370 L 560 355" stroke-width="0.2"/>
+    <path d="M 950 100 L 930 250 L 960 400 L 920 540" stroke-width="0.45"/>
+    <path d="M 150 400 L 170 520 L 140 660 L 180 800" stroke-width="0.3"/>
+    <path d="M 600 300 L 580 440 L 620 580 L 590 720 L 610 860" stroke-width="0.4"/>
+    <path d="M 1250 200 L 1230 340 L 1260 480 L 1220 620" stroke-width="0.35"/>
+  </g>
+</svg>
+
+<!-- Decay timeline -->
+<div class="decay-timeline" id="timeline">
+  <div class="day active" data-day="tue">Tue -- Fresh</div>
+  <div class="day" data-day="wed">Wed</div>
+  <div class="day" data-day="thu">Thu -- Fading</div>
+  <div class="day" data-day="fri">Fri</div>
+  <div class="day" data-day="sat">Sat -- Crumbling</div>
+  <div class="day" data-day="sun">Sun -- Gone</div>
+</div>
+
+<!-- Page content -->
+<div class="page-content" id="content">
+
+  <!-- Masthead -->
+  <div class="masthead">
+    <div class="masthead-title">The Jailyard Dynasty</div>
+    <div class="masthead-sub">Est. 2022 &middot; 12 Teams &middot; Superflex PPR</div>
+  </div>
+
+  <!-- Issue Header -->
+  <div class="issue-header">
+    <div class="week-label">Week</div>
+    <div class="week-number">9</div>
+    <div class="issue-date">Published Tuesday, November 4, 2025 &middot; 8:02 AM</div>
+    <div class="freshness-tag" id="freshTag">Fresh off the press</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- ESSAY SECTION -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section-divider"><span class="label">The Column</span></div>
+
+  <h2 class="essay-title">The Week the Basement Finally Had Something to Say</h2>
+  <div class="essay-subtitle">How three bottom-tier teams turned one Sunday into a full-blown identity crisis for the league's self-appointed contenders.</div>
+
+  <div class="essay-body">
+    <p class="dropcap" data-decaytext>There is a specific kind of panic that sets in around Week 9 of a dynasty season. Not the early-season optimism, not the trade-deadline desperation -- something quieter. It's the realization that the team you built might just be the team you have. The Jailyard hit that wall this week, and the collision was spectacular. Three teams that had been written off as dead roster space decided they weren't done yet, and in doing so, they exposed every contender's deepest fear: that the gap between the top and the middle might be a mirage.</p>
+
+    <p data-decaytext>Ken-Obi took their third straight L to a team running a waiver-wire quarterback, and the group chat went from "dynasty lock" to "are we sure about this?" in the space of a single Jayden Daniels interception. Meanwhile, MHJ Time put up the highest score of the season -- 168.4 points of pure, roster-construction vindication -- against a Legion squad that had been talking championship or bust since August. The receipts are in the chat. The receipts are always in the chat. If you didn't read this column by Thursday, the cracks in the page should tell you something: even takes have a shelf life in this league. By Sunday, everything you thought you knew is yellowed newsprint.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- POWER RANKINGS (Top 4) -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section-divider"><span class="label">Power Rankings</span></div>
+
+  <div class="ranking-card team-mhjtime">
+    <div class="rank-num">1</div>
+    <div class="rank-content">
+      <h3>MHJ Time</h3>
+      <div class="record">7-2 &middot; 1,248.6 PF &middot; &uarr;3</div>
+      <div class="blurb" data-decaytext>You don't climb to number one by accident in Week 9. You climb there because you built a roster that scores 168 when it matters and you let the rest of the league choke on their preseason projections. The Ja'Marr Chase-Josh Allen stack is operating at a frequency that makes defensive coordinators weep. You earned this.</div>
+    </div>
+  </div>
+
+  <div class="ranking-card team-kenobi">
+    <div class="rank-num">2</div>
+    <div class="rank-content">
+      <h3>Ken-Obi</h3>
+      <div class="record">7-2 &middot; 1,190.2 PF &middot; &darr;1</div>
+      <div class="blurb" data-decaytext>Three straight losses and dropping from the top spot should feel worse than it does, but your point total is still elite and the roster is still loaded. The problem isn't talent -- it's that Jayden Daniels has been making decisions like a man who just discovered he's mortal. You're fine. Probably. The chat isn't so sure.</div>
+    </div>
+  </div>
+
+  <div class="ranking-card team-legion">
+    <div class="rank-num">3</div>
+    <div class="rank-content">
+      <h3>Legion of Gloom</h3>
+      <div class="record">6-3 &middot; 1,156.8 PF &middot; &darr;1</div>
+      <div class="blurb" data-decaytext>Getting boat-raced by the new number one team is never ideal, but getting boat-raced after declaring yourself the championship favorite in the group chat? That's the kind of content that sustains a dynasty league through the bye weeks. Your roster is still dangerous. Your credibility needs a week off.</div>
+    </div>
+  </div>
+
+  <div class="ranking-card team-kittler">
+    <div class="rank-num">4</div>
+    <div class="rank-content">
+      <h3>Kittler Did Nothing Wrong</h3>
+      <div class="record">6-3 &middot; 1,134.4 PF &middot; &uarr;1</div>
+      <div class="blurb" data-decaytext>The quietest 6-3 in league history. No trash talk in the chat, no victory laps, just methodical weekly wins built on the back of a Lamar Jackson who refuses to stop being Lamar Jackson. You're the team nobody wants to play in the first round, which is exactly where you want to be.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- MAILBAG -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section-divider"><span class="label">Mailbag</span></div>
+
+  <div class="mailbag-q">
+    "Is it time to blow up the Father Time roster or ride it out? Asking for a friend who definitely isn't panicking at 3-6."
+    <span class="sender">-- @FatherTime_FF via group chat</span>
+  </div>
+
+  <div class="mailbag-a" data-decaytext>Look, there's blowing it up and there's recognizing what you actually have. You're sitting on Bijan Robinson and CeeDee Lamb -- that's not a teardown roster, that's a "your quarterback situation is a war crime" roster. The move isn't to sell the franchise pieces; it's to figure out why you're starting a quarterback who puts up 11 points in a superflex league. Trade for a QB2 you can trust, stop overthinking your flex spot, and suddenly 3-6 doesn't look terminal. It looks like a team that figured it out in the second half. The window isn't closed. The window is just stuck, and you need to stop pulling and start pushing.</div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- BOTTOM SPACER (deep decay zone) -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div style="height: 250px;"></div>
+
+  <!-- Stain blotches -->
+  <div class="stain" id="stain1" style="width:280px;height:200px;top:65%;left:-5%;"></div>
+  <div class="stain" id="stain2" style="width:220px;height:180px;top:75%;right:-8%;"></div>
+  <div class="stain" id="stain3" style="width:340px;height:260px;top:85%;left:20%;"></div>
+
+</div>
+
+<!-- Next issue (always pristine) -->
+<div class="next-issue" id="nextIssue">
+  <div class="fresh-line">Week 10 drops Tuesday.</div>
+  <div class="fresh-sub">Fresh ink. Sharp takes. No decay.</div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Decay engine ──────────────────────────────────
+  // Maps scroll position (0..1) to decay level (0..1)
+  // 0 = top of page (Tuesday fresh), 1 = bottom (Sunday dead)
+
+  var body = document.body;
+  var grain = document.getElementById('grain');
+  var vignette = document.getElementById('vignette');
+  var cracks = document.getElementById('cracks');
+  var nextIssue = document.getElementById('nextIssue');
+  var freshTag = document.getElementById('freshTag');
+  var timelineDays = document.querySelectorAll('.decay-timeline .day');
+  var stains = [
+    document.getElementById('stain1'),
+    document.getElementById('stain2'),
+    document.getElementById('stain3')
+  ];
+
+  // Decay text for the freshness tag
+  var freshLabels = [
+    'Fresh off the press',
+    'Still crisp',
+    'Starting to yellow',
+    'Edges curling',
+    'Crumbling',
+    'Nearly gone'
+  ];
+
+  // Easing: accelerate decay in the second half
+  function easeDecay(t) {
+    return t < 0.4 ? t * 0.6 : 0.24 + (t - 0.4) * 1.267;
+  }
+
+  // Lerp helper
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  // ── Character-level decay via DOM manipulation ────
+  // Instead of innerHTML, we use safe DOM methods to wrap
+  // individual characters in spans with decay transforms.
+  var charDecayApplied = false;
+  var decayTargets = document.querySelectorAll('[data-decaytext]');
+  var originalNodes = new Map();
+
+  // Store original DOM state for each target
+  decayTargets.forEach(function(el) {
+    originalNodes.set(el, el.textContent);
+  });
+
+  function applyCharDecay(decayLevel) {
+    if (decayLevel > 0.55 && !charDecayApplied) {
+      charDecayApplied = true;
+      // Seed the random so it's deterministic per session
+      var seed = 42;
+      function seededRandom() {
+        seed = (seed * 16807 + 0) % 2147483647;
+        return (seed - 1) / 2147483646;
+      }
+      decayTargets.forEach(function(el) {
+        var text = originalNodes.get(el);
+        if (!text) return;
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < text.length; i++) {
+          var ch = text[i];
+          if (ch === ' ') {
+            frag.appendChild(document.createTextNode(' '));
+          } else if (seededRandom() < 0.07) {
+            var span = document.createElement('span');
+            span.className = 'decay-char';
+            var rot = (seededRandom() - 0.5) * 6;
+            var opa = 0.6 + seededRandom() * 0.35;
+            var yShift = (seededRandom() - 0.5) * 2;
+            span.style.transform = 'rotate(' + rot.toFixed(1) + 'deg) translateY(' + yShift.toFixed(1) + 'px)';
+            span.style.opacity = opa.toFixed(2);
+            span.textContent = ch;
+            frag.appendChild(span);
+          } else {
+            frag.appendChild(document.createTextNode(ch));
+          }
+        }
+        // Clear existing content safely
+        while (el.firstChild) {
+          el.removeChild(el.firstChild);
+        }
+        el.appendChild(frag);
+      });
+    } else if (decayLevel <= 0.45 && charDecayApplied) {
+      // Restore original text content
+      charDecayApplied = false;
+      decayTargets.forEach(function(el) {
+        var text = originalNodes.get(el);
+        if (!text) return;
+        while (el.firstChild) {
+          el.removeChild(el.firstChild);
+        }
+        el.appendChild(document.createTextNode(text));
+      });
+    }
+  }
+
+  // ── Tear clip-path generation ─────────────────────
+  function buildTearClip(intensity) {
+    if (intensity < 0.05) return 'none';
+    var points = [];
+    var steps = 30;
+    var i, x, y;
+    // Top edge: slightly wavy
+    for (i = 0; i <= steps; i++) {
+      x = (i / steps) * 100;
+      y = Math.sin(i * 1.7) * intensity * 1.5;
+      points.push(x.toFixed(1) + '% ' + y.toFixed(1) + '%');
+    }
+    // Right edge: torn
+    for (i = 0; i <= steps; i++) {
+      y = (i / steps) * 100;
+      x = 100 - Math.abs(Math.sin(i * 2.3 + 5)) * intensity * 3;
+      points.push(x.toFixed(1) + '% ' + y.toFixed(1) + '%');
+    }
+    // Bottom edge
+    for (i = steps; i >= 0; i--) {
+      x = (i / steps) * 100;
+      y = 100 + Math.sin(i * 1.9 + 3) * intensity * 2;
+      points.push(x.toFixed(1) + '% ' + y.toFixed(1) + '%');
+    }
+    // Left edge: torn
+    for (i = steps; i >= 0; i--) {
+      y = (i / steps) * 100;
+      x = Math.abs(Math.sin(i * 2.1 + 7)) * intensity * 3;
+      points.push(x.toFixed(1) + '% ' + y.toFixed(1) + '%');
+    }
+    return 'polygon(' + points.join(', ') + ')';
+  }
+
+  // ── Main scroll handler ───────────────────────────
+  var ticking = false;
+
+  function updateDecay() {
+    var scrollY = window.scrollY || window.pageYOffset;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var rawProgress = docHeight > 0 ? Math.min(scrollY / docHeight, 1) : 0;
+    var decay = easeDecay(rawProgress);
+
+    // Background: #0a0a0a (fresh) -> #1a1610 (yellowed) -> #1e1a0e (dead)
+    var bgR = Math.round(lerp(10, 30, decay));
+    var bgG = Math.round(lerp(10, 26, decay));
+    var bgB = Math.round(lerp(10, 14, decay));
+    body.style.setProperty('--bg-r', bgR);
+    body.style.setProperty('--bg-g', bgG);
+    body.style.setProperty('--bg-b', bgB);
+    body.style.background = 'rgb(' + bgR + ',' + bgG + ',' + bgB + ')';
+
+    // Text opacity: 1 -> 0.3
+    body.style.setProperty('--text-opacity', lerp(1, 0.3, decay).toFixed(3));
+
+    // Accent color: gold -> tarnished brown
+    body.style.setProperty('--accent-r', Math.round(lerp(201, 120, decay)));
+    body.style.setProperty('--accent-g', Math.round(lerp(168, 100, decay)));
+    body.style.setProperty('--accent-b', Math.round(lerp(76, 50, decay)));
+
+    // Letter spacing: 0 -> 0.04em
+    body.style.setProperty('--letter-spread', lerp(0, 0.04, decay).toFixed(4));
+
+    // Sepia filter: 0 -> 0.7
+    body.style.setProperty('--sepia', lerp(0, 0.7, decay).toFixed(3));
+
+    // Contrast: 1 -> 0.75 (washed out)
+    body.style.setProperty('--noise-contrast', lerp(1, 0.75, decay).toFixed(3));
+
+    // Grain: 4% -> 45%
+    grain.style.opacity = lerp(0.04, 0.45, decay).toFixed(3);
+
+    // Vignette: 0 -> 0.8
+    vignette.style.opacity = lerp(0, 0.8, decay).toFixed(3);
+
+    // Cracks: 0 -> 1 (starting at 20% scroll)
+    var crackStart = Math.max(0, (decay - 0.2) / 0.8);
+    cracks.style.opacity = crackStart.toFixed(3);
+
+    // Stains: appear after 50% decay
+    var stainLevel = Math.max(0, (decay - 0.5) / 0.5);
+    stains.forEach(function(s) {
+      if (s) s.style.opacity = (stainLevel * 0.6).toFixed(3);
+    });
+
+    // Freshness tag text
+    var labelIdx = Math.min(Math.floor(decay * freshLabels.length), freshLabels.length - 1);
+    freshTag.textContent = freshLabels[labelIdx];
+    freshTag.style.borderColor = 'rgba(' + Math.round(lerp(201,120,decay)) + ',' + Math.round(lerp(168,100,decay)) + ',' + Math.round(lerp(76,50,decay)) + ',' + lerp(0.6, 0.15, decay).toFixed(2) + ')';
+    freshTag.style.color = 'rgba(' + Math.round(lerp(201,120,decay)) + ',' + Math.round(lerp(168,100,decay)) + ',' + Math.round(lerp(76,50,decay)) + ',' + lerp(0.9, 0.25, decay).toFixed(2) + ')';
+
+    // Timeline indicator
+    var dayIndex = Math.min(Math.floor(rawProgress * timelineDays.length), timelineDays.length - 1);
+    timelineDays.forEach(function(d, i) {
+      if (i === dayIndex) {
+        d.classList.add('active');
+      } else {
+        d.classList.remove('active');
+      }
+    });
+
+    // Character-level decay
+    applyCharDecay(decay);
+
+    // Clip-path tears on content sections (after 60% decay)
+    var tearIntensity = Math.max(0, (decay - 0.6) / 0.4);
+    var contentEl = document.getElementById('content');
+    if (tearIntensity > 0) {
+      contentEl.style.clipPath = buildTearClip(tearIntensity);
+    } else {
+      contentEl.style.clipPath = 'none';
+    }
+
+    // "Week 10 drops Tuesday" -- show when decay > 0.65
+    if (decay > 0.65) {
+      nextIssue.classList.add('visible');
+    } else {
+      nextIssue.classList.remove('visible');
+    }
+
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(updateDecay);
+    }
+  }, { passive: true });
+
+  // Initial render
+  updateDecay();
+
+  // ── Grain animation (subtle drift) ────────────────
+  // Slowly shift the grain overlay to prevent static pattern
+  var grainOffset = 0;
+  function animateGrain() {
+    grainOffset += 0.3;
+    grain.style.transform = 'translate(' + (Math.sin(grainOffset * 0.01) * 10).toFixed(1) + 'px, ' + (Math.cos(grainOffset * 0.013) * 10).toFixed(1) + 'px)';
+    requestAnimationFrame(animateGrain);
+  }
+  animateGrain();
+
+})();
+</script>
+
+</body>
+</html>
