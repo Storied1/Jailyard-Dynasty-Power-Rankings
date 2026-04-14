@@ -21,6 +21,7 @@ from shared import (
     WEEKS_DIR as OUTPUT_DIR,
     TEAM_PROFILES_PATH,
     load_json,
+    load_nfl_stats_cache,
 )
 
 PROJECT_DIR = REPO_ROOT
@@ -42,6 +43,157 @@ def load_history_data():
     return load_json(DATA_DIR / "league_history.json")
 
 
+NFL_TEAM_FULL = {
+    "ARI": "Cardinals",
+    "ATL": "Falcons",
+    "BAL": "Ravens",
+    "BUF": "Bills",
+    "CAR": "Panthers",
+    "CHI": "Bears",
+    "CIN": "Bengals",
+    "CLE": "Browns",
+    "DAL": "Cowboys",
+    "DEN": "Broncos",
+    "DET": "Lions",
+    "GB": "Packers",
+    "HOU": "Texans",
+    "IND": "Colts",
+    "JAX": "Jaguars",
+    "KC": "Chiefs",
+    "LAC": "Chargers",
+    "LAR": "Rams",
+    "LV": "Raiders",
+    "MIA": "Dolphins",
+    "MIN": "Vikings",
+    "NE": "Patriots",
+    "NO": "Saints",
+    "NYG": "Giants",
+    "NYJ": "Jets",
+    "PHI": "Eagles",
+    "PIT": "Steelers",
+    "SEA": "Seahawks",
+    "SF": "49ers",
+    "TB": "Buccaneers",
+    "TEN": "Titans",
+    "WAS": "Commanders",
+}
+
+
+def _stat_line(position, stats):
+    """Render a position-appropriate stat line from a Sleeper player stats dict."""
+    if not stats:
+        return ""
+    p = position or ""
+    parts = []
+    if p == "QB":
+        if stats.get("pass_yd"):
+            parts.append(f"{int(stats['pass_yd'])} pass yd")
+        if stats.get("pass_td"):
+            parts.append(f"{int(stats['pass_td'])} pass TD")
+        if stats.get("pass_int"):
+            parts.append(f"{int(stats['pass_int'])} INT")
+        if stats.get("rush_yd"):
+            parts.append(f"{int(stats['rush_yd'])} rush yd")
+        if stats.get("rush_td"):
+            parts.append(f"{int(stats['rush_td'])} rush TD")
+    elif p == "RB":
+        if stats.get("rush_att"):
+            parts.append(f"{int(stats['rush_att'])} carries")
+        if stats.get("rush_yd"):
+            parts.append(f"{int(stats['rush_yd'])} yd")
+        if stats.get("rush_td"):
+            parts.append(f"{int(stats['rush_td'])} rush TD")
+        if stats.get("rec"):
+            parts.append(f"{int(stats['rec'])} rec")
+        if stats.get("rec_yd"):
+            parts.append(f"{int(stats['rec_yd'])} rec yd")
+        if stats.get("rec_td"):
+            parts.append(f"{int(stats['rec_td'])} rec TD")
+    elif p in ("WR", "TE"):
+        if stats.get("rec"):
+            parts.append(f"{int(stats['rec'])} rec")
+        if stats.get("rec_yd"):
+            parts.append(f"{int(stats['rec_yd'])} yd")
+        if stats.get("rec_td"):
+            parts.append(f"{int(stats['rec_td'])} TD")
+    elif p == "K":
+        if stats.get("fgm"):
+            parts.append(
+                f"{int(stats['fgm'])}/{int(stats.get('fga', stats['fgm']))} FG"
+            )
+        if stats.get("xpm"):
+            parts.append(f"{int(stats['xpm'])} XP")
+    elif p in (
+        "DEF",
+        "DL",
+        "DE",
+        "DT",
+        "NT",
+        "LB",
+        "ILB",
+        "OLB",
+        "MLB",
+        "DB",
+        "CB",
+        "S",
+        "SS",
+        "FS",
+    ):
+        if stats.get("idp_tkl_solo"):
+            parts.append(f"{int(stats['idp_tkl_solo'])} solo tkl")
+        if stats.get("idp_sack"):
+            parts.append(f"{stats['idp_sack']} sack")
+        if stats.get("idp_qb_hit"):
+            parts.append(f"{int(stats['idp_qb_hit'])} QB hit")
+        if stats.get("idp_int"):
+            parts.append(f"{int(stats['idp_int'])} INT")
+        if stats.get("def_td"):
+            parts.append(f"{int(stats['def_td'])} def TD")
+        if stats.get("idp_fum_rec"):
+            parts.append(f"{int(stats['idp_fum_rec'])} FR")
+    return ", ".join(parts)
+
+
+def build_game_context(player_id, nfl_team, position, stats_cache):
+    """Build a game_context dict for a single player-week.
+
+    stats_cache is the raw list from the Sleeper stats endpoint (each entry has
+    player_id, team, opponent, stats, game_id, etc.). Returns None if no
+    matching entry.
+    """
+    if not player_id or not stats_cache:
+        return None
+
+    player_entry = None
+    for item in stats_cache:
+        if str(item.get("player_id")) == str(player_id):
+            player_entry = item
+            break
+
+    if not player_entry:
+        return None
+
+    opponent = player_entry.get("opponent")
+    stats_dict = player_entry.get("stats") or {}
+    stat_line = _stat_line(position, stats_dict)
+    opp_full = NFL_TEAM_FULL.get(opponent, opponent) if opponent else None
+
+    if opp_full and stat_line:
+        one_liner = f"{stat_line} vs. the {opp_full}"
+    elif stat_line:
+        one_liner = stat_line
+    elif opp_full:
+        one_liner = f"played vs. the {opp_full}"
+    else:
+        one_liner = ""
+
+    return {
+        "opponent": opponent,
+        "stat_line": stat_line,
+        "one_liner": one_liner,
+    }
+
+
 def build_roster_lookup(data):
     """Build roster_id -> team info lookup from roster_map."""
     lookup = {}
@@ -57,7 +209,9 @@ def build_roster_lookup(data):
     return lookup
 
 
-def build_matchup_entry(m, roster_lookup, prev_rankings, history_data, rid_to_owner):
+def build_matchup_entry(
+    m, roster_lookup, prev_rankings, history_data, rid_to_owner, stats_cache=None
+):
     """Build a single matchup dict from raw matchup data."""
     t1 = m["team1"]
     t2 = m["team2"]
@@ -77,10 +231,14 @@ def build_matchup_entry(m, roster_lookup, prev_rankings, history_data, rid_to_ow
             "projected": t1.get("projected", 0),
             "top_scorers": [
                 {
+                    "player_id": p.get("pid"),
                     "name": p["name"],
                     "position": p["position"],
                     "team": p["team"],
                     "points": p["points"],
+                    "game_context": build_game_context(
+                        p.get("pid"), p.get("team"), p.get("position"), stats_cache
+                    ),
                 }
                 for p in t1.get("top_starters", [])[:5]
             ],
@@ -93,10 +251,14 @@ def build_matchup_entry(m, roster_lookup, prev_rankings, history_data, rid_to_ow
             "projected": t2.get("projected", 0),
             "top_scorers": [
                 {
+                    "player_id": p.get("pid"),
                     "name": p["name"],
                     "position": p["position"],
                     "team": p["team"],
                     "points": p["points"],
+                    "game_context": build_game_context(
+                        p.get("pid"), p.get("team"), p.get("position"), stats_cache
+                    ),
                 }
                 for p in t2.get("top_starters", [])[:5]
             ],
@@ -237,6 +399,10 @@ def extract_week(
             week_idx = i
             break
 
+    # Load NFL stats cache for this week (may be None if cache absent)
+    nfl_cache = load_nfl_stats_cache(data.get("season", 2025), week_num)
+    stats_cache = (nfl_cache or {}).get("stats") if nfl_cache else None
+
     if week_idx is None:
         print(f"ERROR: Week {week_num} not found in data.")
         return None
@@ -270,7 +436,12 @@ def extract_week(
         all_scores[m["team2"]["roster_id"]] = m["team2"]["points"]
         matchups.append(
             build_matchup_entry(
-                m, roster_lookup, prev_rankings, history_data, rid_to_owner
+                m,
+                roster_lookup,
+                prev_rankings,
+                history_data,
+                rid_to_owner,
+                stats_cache,
             )
         )
 
@@ -339,6 +510,7 @@ def extract_week(
         ),
         "top_performer": (
             {
+                "player_id": top_performer.get("pid"),
                 "name": top_performer["name"],
                 "position": top_performer["position"],
                 "nfl_team": top_performer["team"],
@@ -346,6 +518,12 @@ def extract_week(
                 "fantasy_team": roster_lookup.get(
                     top_performer.get("roster_id"), {}
                 ).get("team_name", "?"),
+                "game_context": build_game_context(
+                    top_performer.get("pid"),
+                    top_performer.get("team"),
+                    top_performer.get("position"),
+                    stats_cache,
+                ),
             }
             if top_performer
             else None
