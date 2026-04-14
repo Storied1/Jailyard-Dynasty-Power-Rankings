@@ -159,3 +159,132 @@ SECTION_TOKEN_BUDGETS = {
     "mailbag": 2048,
     "bits": 1024,
 }
+
+
+# ---------------------------------------------------------------------------
+# NFL stats (Sleeper undocumented endpoint)
+# ---------------------------------------------------------------------------
+
+SLEEPER_BASE = "https://api.sleeper.app"
+NFL_STATS_URL = SLEEPER_BASE + "/stats/nfl/{season}/{week}?season_type=regular"
+USER_AGENT = "JailyardDynasty/1.0"
+
+
+def nfl_stats_path(season, week):
+    """Path to cached NFL stats for a season-week."""
+    return DATA_DIR / str(season) / f"nfl_stats_week{week}.json"
+
+
+def fetch_nfl_stats(season, week, timeout=15):
+    """Fetch per-player NFL stats from Sleeper's undocumented endpoint.
+
+    Returns a list of entries (one per player-week). Each entry has top-level
+    keys: player_id, team, opponent, player (nested dict with first_name,
+    last_name, position), stats (nested dict with numeric fields), game_id,
+    week, season, etc. Raises on network/HTTP error.
+    """
+    url = NFL_STATS_URL.format(season=season, week=week)
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def load_nfl_stats_cache(season, week):
+    """Load cached NFL stats. Returns None if cache file absent.
+
+    Cache file is a dict {"stats": [...]} wrapping the raw Sleeper list.
+    """
+    return load_json(nfl_stats_path(season, week), warn=False)
+
+
+# ---------------------------------------------------------------------------
+# Momentum computation
+# ---------------------------------------------------------------------------
+
+MOMENTUM_LABELS = ("collapsing", "cooling", "steady", "hot", "surging")
+MOMENTUM_WINDOW = 3
+
+
+def _signed_streak(streak_str):
+    """Convert a streak string like 'W3' or 'L2' to a signed integer."""
+    if not streak_str or streak_str == "—":
+        return 0
+    kind = streak_str[0]
+    try:
+        count = int(streak_str[1:])
+    except (ValueError, IndexError):
+        return 0
+    if kind == "W":
+        return count
+    if kind == "L":
+        return -count
+    return 0
+
+
+def _find_standing(prev_week, rid):
+    """Find a roster's standings entry within a prev_weeks item."""
+    for s in prev_week.get("standings", []):
+        if s.get("roster_id") == rid:
+            return s
+    return None
+
+
+def compute_momentum(prev_weeks, rid, current_week):
+    """Compute a team's 3-week rolling momentum.
+
+    Formula:
+        score = (streak_signed * 0.35)
+              + (avg_margin_last_3 / 25 * 0.35)
+              + (rank_delta_last_3 * 0.30)
+
+    Clamped to [-3, +3]. Week 1 (and teams with no prior data) returns
+    {"score": 0, "label": "opening"}.
+
+    Args:
+        prev_weeks: list of prior weekN_data.json dicts (already extracted),
+            in chronological order. Empty for week 1.
+        rid: roster_id of the team to compute for.
+        current_week: week number being extracted (for sentinel check).
+
+    Returns:
+        dict with keys "score" (float) and "label" (str).
+    """
+    if current_week == 1 or not prev_weeks:
+        return {"score": 0, "label": "opening"}
+
+    window = prev_weeks[-MOMENTUM_WINDOW:]
+    snapshots = []
+    for pw in window:
+        s = _find_standing(pw, rid)
+        if s:
+            snapshots.append(s)
+
+    if not snapshots:
+        return {"score": 0, "label": "opening"}
+
+    latest = snapshots[-1]
+    streak_signed = _signed_streak(latest.get("streak", ""))
+
+    margins = [s.get("margin_this_week", 0) for s in snapshots]
+    avg_margin = sum(margins) / max(len(margins), 1)
+
+    oldest_rank = snapshots[0].get("rank", 0)
+    newest_rank = latest.get("rank", 0)
+    rank_delta = oldest_rank - newest_rank
+
+    score = (streak_signed * 0.35) + (avg_margin / 25.0 * 0.35) + (rank_delta * 0.30)
+    score = max(-3.0, min(3.0, score))
+    score = round(score, 2)
+
+    if score < -1.5:
+        label = "collapsing"
+    elif score < -0.5:
+        label = "cooling"
+    elif score <= 0.5:
+        label = "steady"
+    elif score <= 1.5:
+        label = "hot"
+    else:
+        label = "surging"
+
+    return {"score": score, "label": label}
