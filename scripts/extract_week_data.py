@@ -22,6 +22,7 @@ from shared import (
     TEAM_PROFILES_PATH,
     load_json,
     load_nfl_stats_cache,
+    compute_momentum,
 )
 
 PROJECT_DIR = REPO_ROOT
@@ -306,7 +307,15 @@ def build_matchup_entry(
 
 
 def build_standing_entry(
-    s, data, week_num, roster_lookup, prev_rankings, history_data, rid_to_owner
+    s,
+    data,
+    week_num,
+    roster_lookup,
+    prev_rankings,
+    history_data,
+    rid_to_owner,
+    prev_weeks=None,
+    margin_this_week=0.0,
 ):
     """Build a single standings dict from raw standings data."""
     rid = s["roster_id"]
@@ -320,8 +329,10 @@ def build_standing_entry(
         movement = 0
 
     streak = compute_streak(data, week_num, rid, roster_lookup)
+    momentum = compute_momentum(prev_weeks or [], rid, week_num)
 
     entry = {
+        "roster_id": rid,
         "rank": current_rank,
         "prev_rank": prev_rank,
         "movement": movement,
@@ -336,6 +347,8 @@ def build_standing_entry(
         "power_score": s["power_score"],
         "week_points": s["week_points"],
         "streak": streak,
+        "margin_this_week": margin_this_week,
+        "momentum": momentum,
     }
 
     # Inject Elo + franchise stats if history data available
@@ -448,9 +461,18 @@ def extract_week(
     # Sort matchups by closest margin first (for narrative interest)
     matchups.sort(key=lambda x: x["margin"])
 
+    # Compute per-roster margin this week (for momentum)
+    margins_this_week = {}
+    for mu in week_data["matchups"]:
+        t1 = mu["team1"]
+        t2 = mu["team2"]
+        margins_this_week[t1["roster_id"]] = round(t1["points"] - t2["points"], 2)
+        margins_this_week[t2["roster_id"]] = round(t2["points"] - t1["points"], 2)
+
     # --- Standings ---
     standings = []
     for s in week_data["standings"]:
+        rid = s["roster_id"]
         standings.append(
             build_standing_entry(
                 s,
@@ -460,6 +482,8 @@ def extract_week(
                 prev_rankings,
                 history_data,
                 rid_to_owner,
+                prev_weeks=prev_weeks,
+                margin_this_week=margins_this_week.get(rid, 0.0),
             )
         )
 
