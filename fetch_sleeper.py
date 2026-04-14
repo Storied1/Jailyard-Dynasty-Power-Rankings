@@ -23,6 +23,9 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
+from shared import fetch_nfl_stats, nfl_stats_path  # noqa: E402
+
 BASE_URL = "https://api.sleeper.app/v1"
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -180,7 +183,7 @@ def fetch_season(season, league_id):
     print(f"  {trades} trades, {waivers} waiver/FA moves")
 
     # 7. Player projections (for projected matchup scores)
-    print(f"\n[7/7] Projections (weeks 1-{len(all_matchups)})...")
+    print(f"\n[7/8] Projections (weeks 1-{len(all_matchups)})...")
     all_projections = {}
     for week in range(1, len(all_matchups) + 1):
         season_type = "regular"
@@ -207,6 +210,27 @@ def fetch_season(season, league_id):
         print(f"  Saved projections for {len(all_projections)} weeks")
     else:
         print("  No projections data available (may be an older season)")
+
+    # 8. NFL player stats per week (for game_context enrichment in week_data.json)
+    # Sleeper stats endpoint returns a list of ~2300 entries/week. Each entry
+    # has player_id, team, opponent, nested stats dict, and nested player dict
+    # (first_name, last_name, position). Opponent is per-entry — no separate
+    # schedule call needed.
+    print(f"\n[8/8] NFL stats (weeks 1-{len(all_matchups)})...")
+    for week in range(1, len(all_matchups) + 1):
+        cache_path = nfl_stats_path(season, week)
+        if cache_path.exists():
+            print(f"  Week {week}: cached")
+            continue
+        try:
+            stats = fetch_nfl_stats(season, week)
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(cache_path, "w") as f:
+                json.dump({"stats": stats}, f)
+            print(f"  Week {week}: {len(stats)} player-week entries")
+        except Exception as e:
+            print(f"  Week {week}: stats fetch failed ({e})")
+        time.sleep(0.1)
 
     # Build the combined data file for season.html
     print("\nBuilding combined season data...")
