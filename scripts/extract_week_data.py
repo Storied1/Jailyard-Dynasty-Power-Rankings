@@ -489,6 +489,45 @@ def extract_week(
 
     standings.sort(key=lambda x: x["rank"])
 
+    # --- Matchup momentum (derived from team momentum) ---
+    momentum_by_team = {s["team_name"]: s["momentum"] for s in standings}
+    rank_by_team = {s["team_name"]: s["rank"] for s in standings}
+    for mu in matchups:
+        t1_name = mu["team1"]["team_name"]
+        t2_name = mu["team2"]["team_name"]
+        t1_m = momentum_by_team.get(t1_name, {"score": 0, "label": "opening"})
+        t2_m = momentum_by_team.get(t2_name, {"score": 0, "label": "opening"})
+        edge = round(t1_m["score"] - t2_m["score"], 2)
+        t1_rank = rank_by_team.get(t1_name, 99)
+        t2_rank = rank_by_team.get(t2_name, 99)
+
+        abs_edge = abs(edge)
+        if abs_edge < 0.5:
+            label = "coin flip"
+        elif abs_edge < 1.5:
+            label = "slight edge"
+        else:
+            label = "heavy lean"
+
+        # Upset brewing: lower-ranked (numerically higher) team has higher
+        # momentum AND the rank gap is small (<= 4).
+        if t1_rank < t2_rank:
+            higher_momentum = t1_m
+            lower_momentum = t2_m
+        else:
+            higher_momentum = t2_m
+            lower_momentum = t1_m
+        rank_gap = abs(t1_rank - t2_rank)
+        if lower_momentum["score"] > higher_momentum["score"] and rank_gap <= 4:
+            label = "upset brewing"
+
+        favorite = t1_name if edge >= 0 else t2_name
+        mu["momentum"] = {
+            "edge": edge,
+            "label": label,
+            "favorite_team_name": favorite,
+        }
+
     # --- Weekly Awards ---
     high_scorer_rid = week_data["highest_scorer"]["roster_id"]
     low_scorer_rid = week_data["lowest_scorer"]["roster_id"]
