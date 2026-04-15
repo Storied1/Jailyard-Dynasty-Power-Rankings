@@ -313,6 +313,89 @@ def check_picks_ledger(content: dict, data: dict, errors: list):
                 )
 
 
+VALID_MOMENTUM_LABELS = {
+    "opening",
+    "collapsing",
+    "cooling",
+    "steady",
+    "hot",
+    "surging",
+}
+VALID_MATCHUP_MOMENTUM_LABELS = {
+    "coin flip",
+    "slight edge",
+    "heavy lean",
+    "upset brewing",
+}
+
+
+def check_game_context_presence(content, data, errors):
+    """Every top_scorer must have a game_context key (populated dict or null)."""
+    for mu in data.get("matchups", []):
+        for side_key in ("team1", "team2"):
+            side = mu.get(side_key, {})
+            for scorer in side.get("top_scorers", []):
+                if "game_context" not in scorer:
+                    errors.append(
+                        f"Matchup {mu.get('matchup_id')} {side_key} "
+                        f"top_scorer '{scorer.get('name')}' missing game_context key"
+                    )
+    top_perf = data.get("awards", {}).get("top_performer")
+    if top_perf and "game_context" not in top_perf:
+        errors.append(
+            f"awards.top_performer '{top_perf.get('name')}' missing game_context key"
+        )
+
+
+def check_momentum_bounds(content, data, errors):
+    """All team momentum scores in [-3, +3]; labels in known set."""
+    for s in data.get("standings", []):
+        momentum = s.get("momentum")
+        if momentum is None:
+            errors.append(f"Standing '{s.get('team_name')}' missing momentum")
+            continue
+        score = momentum.get("score")
+        label = momentum.get("label")
+        if score is None or not (-3 <= score <= 3):
+            errors.append(
+                f"Standing '{s.get('team_name')}' momentum.score out of bounds: {score}"
+            )
+        if label not in VALID_MOMENTUM_LABELS:
+            errors.append(
+                f"Standing '{s.get('team_name')}' unknown momentum.label: {label}"
+            )
+
+
+def check_matchup_momentum_consistency(content, data, errors):
+    """Sign of matchup edge matches direction of team momentum scores."""
+    name_to_score = {
+        s["team_name"]: s.get("momentum", {}).get("score", 0)
+        for s in data.get("standings", [])
+    }
+    for mu in data.get("matchups", []):
+        momentum = mu.get("momentum")
+        if momentum is None:
+            errors.append(f"Matchup {mu.get('matchup_id')} missing momentum")
+            continue
+        edge = momentum.get("edge")
+        label = momentum.get("label")
+        if edge is None:
+            errors.append(f"Matchup {mu.get('matchup_id')} momentum.edge missing")
+            continue
+        if label not in VALID_MATCHUP_MOMENTUM_LABELS:
+            errors.append(
+                f"Matchup {mu.get('matchup_id')} unknown momentum.label: {label}"
+            )
+        t1_score = name_to_score.get(mu.get("team1", {}).get("team_name"), 0)
+        t2_score = name_to_score.get(mu.get("team2", {}).get("team_name"), 0)
+        expected_edge = round(t1_score - t2_score, 2)
+        if abs(edge - expected_edge) > 0.01:
+            errors.append(
+                f"Matchup {mu.get('matchup_id')} edge={edge} inconsistent with "
+                f"team momentum diff={expected_edge}"
+            )
+
+
 def run_tier1(content: dict, data: dict) -> dict:
     """Run all Tier 1 structural checks."""
     checks = [
@@ -323,6 +406,9 @@ def run_tier1(content: dict, data: dict) -> dict:
         ("picks_matchups", check_picks_matchups),
         ("media_slots", check_media_slots),
         ("picks_ledger", check_picks_ledger),
+        ("game_context_presence", check_game_context_presence),
+        ("momentum_bounds", check_momentum_bounds),
+        ("matchup_momentum_consistency", check_matchup_momentum_consistency),
     ]
 
     all_errors = []
