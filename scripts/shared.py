@@ -206,7 +206,11 @@ MOMENTUM_WINDOW = 3
 
 
 def _signed_streak(streak_str):
-    """Convert a streak string like 'W3' or 'L2' to a signed integer."""
+    """Convert a streak string like 'W3' or 'L2' to a signed integer.
+
+    Clamped to ±5 so a W10 streak can't peg the momentum clamp and drown
+    out margin/rank signals. Returns 0 for '—' or unknown.
+    """
     if not streak_str or streak_str == "—":
         return 0
     kind = streak_str[0]
@@ -214,6 +218,7 @@ def _signed_streak(streak_str):
         count = int(streak_str[1:])
     except (ValueError, IndexError):
         return 0
+    count = min(count, 5)
     if kind == "W":
         return count
     if kind == "L":
@@ -261,6 +266,12 @@ def compute_momentum(prev_weeks, rid, current_week):
 
     if not snapshots:
         return {"score": 0, "label": "opening"}
+
+    # Weeks 2-3 have insufficient data for a real 3-week rolling window.
+    # Once we've confirmed the team has some prior data (snapshots non-empty),
+    # emit an "early" sentinel so writer prose can skip trajectory framing.
+    if current_week <= 3:
+        return {"score": 0, "label": "early"}
 
     latest = snapshots[-1]
     streak_signed = _signed_streak(latest.get("streak", ""))

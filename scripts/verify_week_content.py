@@ -315,6 +315,8 @@ def check_picks_ledger(content: dict, data: dict, errors: list):
 
 VALID_MOMENTUM_LABELS = {
     "opening",
+    "early",
+    "inactive",
     "collapsing",
     "cooling",
     "steady",
@@ -330,7 +332,21 @@ VALID_MATCHUP_MOMENTUM_LABELS = {
 
 
 def check_game_context_presence(content, data, errors):
-    """Every top_scorer must have a game_context key (populated dict or null)."""
+    """Every top_scorer must have a game_context key, AND the aggregate
+    populated ratio (stat_line non-empty) must clear MIN_POPULATED_RATIO.
+
+    K and DEF are excluded from both numerator and denominator since they
+    legitimately produce empty stat_lines for some weeks.
+
+    Threshold derivation: weeks 1-6 baseline measurement was 100% populated
+    ratio for non-K/DEF top_scorers. Setting threshold at 80% gives a 20pp
+    cushion for legitimate DNP/injury variability while still flagging a
+    silent endpoint/cache regression.
+    """
+    # Threshold set from Phase 11 Step 3.5 empirical measurement.
+    MIN_POPULATED_RATIO = 0.80
+    populated = 0
+    eligible = 0
     for mu in data.get("matchups", []):
         for side_key in ("team1", "team2"):
             side = mu.get(side_key, {})
@@ -340,11 +356,30 @@ def check_game_context_presence(content, data, errors):
                         f"Matchup {mu.get('matchup_id')} {side_key} "
                         f"top_scorer '{scorer.get('name')}' missing game_context key"
                     )
+                    continue
+                pos = scorer.get("position", "")
+                if pos in ("K", "DEF"):
+                    continue
+                eligible += 1
+                gc = scorer.get("game_context")
+                if gc and gc.get("stat_line"):
+                    populated += 1
+
     top_perf = data.get("awards", {}).get("top_performer")
     if top_perf and "game_context" not in top_perf:
         errors.append(
             f"awards.top_performer '{top_perf.get('name')}' missing game_context key"
         )
+
+    if eligible >= 20:
+        ratio = populated / eligible
+        if ratio < MIN_POPULATED_RATIO:
+            errors.append(
+                f"game_context populated ratio {ratio:.0%} "
+                f"({populated}/{eligible} non-K/DEF top_scorers) — "
+                f"expected >= {MIN_POPULATED_RATIO:.0%}. "
+                f"Probable cache or endpoint regression."
+            )
 
 
 def check_momentum_bounds(content, data, errors):

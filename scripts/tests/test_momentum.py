@@ -100,3 +100,44 @@ def test_missing_team_returns_opening():
     ]
     result = compute_momentum(prev_weeks, rid=1, current_week=2)
     assert result["label"] == "opening"
+
+
+def test_week2_returns_early_label_partial_window():
+    # Week 2 should return 'early' — insufficient data for real momentum
+    prev_weeks = [
+        make_prev_week(
+            1, [{"roster_id": 1, "rank": 6, "margin_this_week": -30, "streak": "L1"}]
+        ),
+    ]
+    result = compute_momentum(prev_weeks, rid=1, current_week=2)
+    assert (
+        result["label"] == "early"
+    ), f"week 2 should be 'early' with partial window, got {result}"
+
+
+def test_long_win_streak_does_not_peg_clamp_from_streak_alone():
+    # W10 streak with flat margin/rank should not peg the clamp purely from streak
+    prev_weeks = [
+        make_prev_week(
+            w,
+            [{"roster_id": 1, "rank": 6, "margin_this_week": 0, "streak": f"W{w}"}],
+        )
+        for w in range(1, 11)
+    ]
+    result = compute_momentum(prev_weeks, rid=1, current_week=11)
+    # Streak capped at ±5 → 5 * 0.35 = 1.75
+    assert result["score"] < 3.0, f"W10 streak alone should not peg clamp, got {result}"
+    assert result["score"] > 1.5
+
+
+def test_long_loss_streak_does_not_peg_clamp_from_streak_alone():
+    prev_weeks = [
+        make_prev_week(
+            w,
+            [{"roster_id": 1, "rank": 6, "margin_this_week": 0, "streak": f"L{w}"}],
+        )
+        for w in range(1, 11)
+    ]
+    result = compute_momentum(prev_weeks, rid=1, current_week=11)
+    assert result["score"] > -3.0
+    assert result["score"] < -1.5
