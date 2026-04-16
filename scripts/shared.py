@@ -6,6 +6,7 @@ that were previously copy-pasted across 17+ scripts.
 
 import json
 import sys
+import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timezone
@@ -175,18 +176,69 @@ def nfl_stats_path(season, week):
     return DATA_DIR / str(season) / f"nfl_stats_week{week}.json"
 
 
-def fetch_nfl_stats(season, week, timeout=15):
+class NflStatsResponseError(ValueError):
+    """Raised when the Sleeper stats response doesn't match expected shape."""
+
+
+def validate_nfl_stats_response(payload, min_entries=0):
+    """Validate a raw Sleeper stats response (list of player-week dicts).
+
+    A minimum-viable response is a list of dicts, each with a `player_id`
+    key. Empty lists are permitted (preseason / off-week) unless
+    min_entries is set higher. Raises NflStatsResponseError with a
+    descriptive message on any shape violation.
+    """
+    if not isinstance(payload, list):
+        raise NflStatsResponseError(f"expected list, got {type(payload).__name__}")
+    if len(payload) < min_entries:
+        raise NflStatsResponseError(
+            f"response has {len(payload)} entries, need at least {min_entries}"
+        )
+    for i, entry in enumerate(payload[:5]):  # sample first 5
+        if not isinstance(entry, dict):
+            raise NflStatsResponseError(
+                f"entry {i} is {type(entry).__name__}, expected dict"
+            )
+        if entry.get("player_id") is None:
+            raise NflStatsResponseError(f"entry {i} missing player_id field")
+    return True
+
+
+def fetch_nfl_stats(season, week, timeout=15, retries=3, delay=1):
     """Fetch per-player NFL stats from Sleeper's undocumented endpoint.
+
+    Retries on transient network errors (URLError/HTTPError/TimeoutError)
+    with exponential backoff matching fetch_sleeper.py's fetch_json pattern.
+    Validates the response shape before returning — raises
+    NflStatsResponseError if Sleeper returns something other than a list
+    of player-week dicts.
 
     Returns a list of entries (one per player-week). Each entry has top-level
     keys: player_id, team, opponent, player (nested dict with first_name,
     last_name, position), stats (nested dict with numeric fields), game_id,
-    week, season, etc. Raises on network/HTTP error.
+    week, season, etc.
     """
     url = NFL_STATS_URL.format(season=season, week=week)
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    last_err = None
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            validate_nfl_stats_response(payload)
+            return payload
+        except (
+            urllib.error.URLError,
+            urllib.error.HTTPError,
+            TimeoutError,
+        ) as e:
+            last_err = e
+            if attempt < retries - 1:
+                wait = delay * (2**attempt)
+                print(f"  Retry {attempt + 1} after {wait}s: {e}")
+                time.sleep(wait)
+    # Exhausted retries — raise last network error
+    raise last_err if last_err else RuntimeError(f"fetch_nfl_stats failed: {url}")
 
 
 def load_nfl_stats_cache(season, week):

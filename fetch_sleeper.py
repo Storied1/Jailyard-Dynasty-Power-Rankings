@@ -24,7 +24,11 @@ import urllib.error
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
-from shared import fetch_nfl_stats, nfl_stats_path  # noqa: E402
+from shared import (  # noqa: E402
+    NflStatsResponseError,
+    fetch_nfl_stats,
+    nfl_stats_path,
+)
 
 BASE_URL = "https://api.sleeper.app/v1"
 DATA_DIR = Path(__file__).parent / "data"
@@ -228,6 +232,10 @@ def fetch_season(season, league_id):
             with open(cache_path, "w") as f:
                 json.dump({"stats": stats}, f)
             print(f"  Week {week}: {len(stats)} player-week entries")
+        except NflStatsResponseError as e:
+            # Bad shape — the endpoint changed or Sleeper is serving garbage.
+            # Loud signal: don't silently cache anything.
+            print(f"  Week {week}: INVALID RESPONSE SHAPE — {e}")
         except Exception as e:
             print(f"  Week {week}: stats fetch failed ({e})")
         time.sleep(0.1)
