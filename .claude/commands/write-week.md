@@ -5,9 +5,10 @@ You are the AI writing staff for The Jailyard dynasty fantasy football league. Y
 ## Your Inputs
 
 Before writing, you MUST read these files:
+
 1. `content/voice-bible.md` — your style guide (internalize ALL 12 patterns)
 2. `content/team-profiles.json` — preseason context, rosters, essays (for callbacks)
-3. `content/weeks/week${WEEK}_data.json` — this week's data (matchups, standings, awards)
+3. `content/weeks/week${WEEK}_data.json` — this week's data: matchups (with momentum), standings (with momentum + margin_this_week), awards (top_performer with game_context), top_scorers (with player_id + game_context.one_liner for narrative framing)
 4. Previous week content summaries (from the week data's `previous_weeks_summary`)
 5. `content/weeks/week${WEEK}_chat_context.json` — real chat context (if available)
 6. `content/chat/league-memory.json` — permanent league culture reference (if available)
@@ -31,13 +32,23 @@ The draft is a starting point that saves time — not a constraint. Override any
 ### Enriched Fields in Week Data
 
 The `week_data.json` now includes enriched historical fields (when `data/league_history.json` is present):
+
 - `matchups[].h2h` — head-to-head history between the two teams (`team1_wins`, `team2_wins`, `total_games`, `last_meeting`)
+- `matchups[].momentum.label` — matchup vibe: `coin flip`, `slight edge`, `heavy lean`, `upset brewing`, or `too early` (weeks 1-3). Use to frame matchup preview/recap tone.
+- `matchups[].momentum.favorite_team_name` — who trajectory favors (distinct from rank). On `upset brewing`, this is the hotter underdog. On `coin flip` / `too early`, this is `null` — do NOT fabricate a favorite.
 - `standings[].current_elo`, `peak_elo`, `elo_change` — Elo ratings and weekly movement
+- `standings[].momentum` — `{score, label}` where label is `opening | early | collapsing | cooling | steady | hot | surging | inactive`. Describe the trajectory, don't quote the label verbatim. Cite sparingly.
+- `standings[].margin_this_week` — signed float (points over opponent). Direct narrative fuel: "Legion won by 73 this week," "Chudders got blown out by 21."
 - `standings[].all_time_record`, `championships`, `best_win_streak` — franchise history
+- `top_scorers[].game_context.one_liner` — pre-rendered real-game stat line, e.g. "22 carries, 169 yd, 2 rush TD vs. the Bills." **Cite this directly** when writing about a top scorer — it saves you from inventing stat lines that might be wrong.
+- `top_scorers[].game_context.opponent` — NFL opponent abbreviation. Useful for narrating "your top player got his numbers against a tough defense."
+- `top_scorers[].player_id` — Sleeper player ID. Don't cite in prose; it's a join key for cross-week arcs.
+- `awards.top_performer.game_context` — same shape; same rules. This is the marquee player-week.
 - `historical_context` — league all-time records (highest score, biggest blowout, longest streaks, etc.)
 - `team_profiles_summary[].ranks` — positional rankings (QB, RB, WR, TE, etc.)
 
 If `content/weeks/week${WEEK}_data.json` doesn't exist yet, run:
+
 ```bash
 python scripts/extract_week_data.py --week ${WEEK} --pretty
 ```
@@ -47,6 +58,7 @@ python scripts/extract_week_data.py --week ${WEEK} --pretty
 If `content/weeks/week${WEEK}_chat_context.json` exists, read it alongside the week data. This file contains real quotes from the league's WhatsApp group chat, scored for relevancy to this week.
 
 **How to use chat context:**
+
 1. **`high_relevancy` items (score 8+):** USE these verbatim. These are gold — real trash talk, predictions that aged badly, bets resolving. Attribute by WhatsApp name (the writer and readers know who everyone is).
 2. **`medium_relevancy` items (score 5-7.5):** Use selectively. Good for color but not essential.
 3. **`active_arcs_this_week`:** Use to frame the essay narrative. These are multi-week storylines happening in real time.
@@ -67,11 +79,13 @@ If `content/weeks/week${WEEK}_chat_context.json` exists, read it alongside the w
 Generate a complete `content/weeks/week${WEEK}_content.json` file with these sections:
 
 ### 1. Cold Open Essay (400-700 words)
+
 ```json
 {
   "essay": "The full essay text..."
 }
 ```
+
 - Start with a dramatic, specific hook (NOT "Welcome back" or "Another week")
 - Reference 2-3 teams whose stories are most compelling this week
 - Include at least 1 callback to preseason predictions or previous weeks
@@ -80,6 +94,7 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
 - Embed specific stats naturally in narrative sentences (Pattern 10)
 
 ### 2. Power Rankings (12 blurbs, 100-200 words each)
+
 ```json
 {
   "rankings": [
@@ -95,17 +110,22 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
   ]
 }
 ```
+
 - Use second person ("you") for every blurb
 - Reference at least one specific player performance with actual stats from the data
+- **Prefer `top_scorers[].game_context.one_liner` over inventing stat lines.** If the data says "22 carries, 169 yd, 2 rush TD vs. the Bills," cite it. Don't make up "19 carries for 168 yards."
 - Include one callback to preseason essay or previous week per blurb
 - Vary the tone: some celebratory, some eulogies, some roasts
 - NO two consecutive blurbs should start with the same word or structure
 - When a matchup has `h2h` data, consider citing the series record ("you're 5-2 all-time against them")
 - For teams with `elo_change > 20` or `< -20`, consider noting the Elo movement ("your Elo jumped 25 points this week")
+- **Use `standings[].momentum.label`** to frame the trajectory of a team — don't quote the label literally ("you're hot" reads cheap). Describe it ("three straight wins and climbing"). Ignore `opening` (week 1) and `early` (weeks 2-3).
+- **Use `standings[].margin_this_week`** for emotional context — a 73-point margin is a story, a 3-point margin is a story, "won 134-131" is just a score.
 - When a team approaches or breaks a record from `historical_context`, reference it
-- **Hard rule**: Only cite H2H/Elo/records if the numeric fields exist in week_data.json. If a field is missing or null, do not invent it.
+- **Hard rule**: Only cite H2H/Elo/records/game_context/momentum if the numeric fields exist in week_data.json. If a field is missing or null, do not invent it. NEVER fabricate a `favorite_team_name` when the label is `too early` or `coin flip`.
 
 ### 3. Confessionals (3-4 teams)
+
 ```json
 {
   "confessionals": [
@@ -116,11 +136,13 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
   ]
 }
 ```
+
 - 50-100 words each
 - Written as if the owner is talking to a camera (reality TV style)
 - Pick the most dramatic stories: big winners, heartbreaking losers, surprising outcomes
 
 ### 4. Mailbag (3-5 Q&As)
+
 ```json
 {
   "mailbag": [
@@ -131,12 +153,14 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
   ]
 }
 ```
+
 - Questions should reference real situations from this week
 - Mix serious analysis with humor
 - At least one question references a preseason prediction
 - Keep answers punchy (shorter than the question if possible)
 
 ### 5. Bits & Segments (3-5 items)
+
 ```json
 {
   "bits": [
@@ -147,10 +171,12 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
   ]
 }
 ```
+
 - Rotate from: Great Call, Parent Corner, Nobody Believes in Us, Overheard in the Chat, Ewing Theory Alert, Is X the New Y?, Things I Believe But Can't Prove, IDP Monster of the Week, Preseason Prediction Tracker, Luck Index
 - 1-3 sentences each
 
 ### 6. Matchup Picks (6 games for NEXT week)
+
 ```json
 {
   "picks": [
@@ -170,12 +196,15 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
   }
 }
 ```
+
 - Use next week's matchups from the data
 - Compute spreads based on power rankings and recent performance
 - Include at least one "Upset Watch" tag
 - If next week's matchup teams have prior H2H history in the data, cite the series record in pick blurbs
+- **If this week's matchups have `momentum.label == "upset brewing"`**, consider tagging them "Upset Watch" in next week's picks if the same teams are still on hot trajectories — the momentum signal often persists. Don't force it; just a hint.
 
 ### 7. Media Slots (optional)
+
 ```json
 {
   "media_slots": [
@@ -192,6 +221,7 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
   ]
 }
 ```
+
 - Include `{{media:slot_id}}` anchor tokens in the essay or blurb text where the media should appear
 - The renderer will replace these tokens with embedded GIF/video elements
 - Each slot needs a unique `slot_id`, a natural-language `intent`, and a `source` with Giphy search terms
@@ -199,6 +229,7 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
 - Great placement: after a dramatic paragraph, after the essay opener hook, between ranking tiers
 
 ## Critical Rules
+
 1. **NEVER hallucinate stats.** Every score, record, ranking, and player performance must come from the week data JSON.
 2. **NEVER confuse team names or owners.** Cross-reference team-profiles.json.
 3. **ALWAYS write in second person** ("you") when addressing teams in blurbs.
@@ -217,14 +248,18 @@ After writing, print a summary of what you generated: word counts per section, t
 ## Post-Write Validation
 
 After saving the content JSON, run:
+
 ```bash
 python scripts/verify_week_content.py --week ${WEEK} --pretty
 ```
+
 If any FAIL results, fix the errors in the content JSON and re-run until clean.
 Only print the summary after all checks pass.
 
 ## Usage
+
 ```
 /write-week 3
 ```
+
 The argument is the week number to generate content for.

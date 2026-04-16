@@ -5,15 +5,18 @@ You are the quality gate for The Jailyard weekly content. Your job is to review 
 ## Pre-Review Validation
 
 Before starting the manual review, run:
+
 ```bash
 python scripts/verify_week_content.py --week ${WEEK} --pretty
 ```
+
 If the validator finds errors, the verdict is automatically REVISE — list the
 validator errors alongside any voice/narrative issues you find.
 
 ## Your Inputs
 
 Read these files in order:
+
 1. `content/weeks/week${WEEK}_content.json` — the content to review
 2. `content/weeks/week${WEEK}_data.json` — the source data (ground truth)
 3. `content/voice-bible.md` — the style guide (scoring rubric)
@@ -23,6 +26,7 @@ Read these files in order:
 ## Review Checklist
 
 ### 1. Data Accuracy (CRITICAL — any failure here = REJECT)
+
 - [ ] Every matchup score in blurbs matches `week_data.json` exactly
 - [ ] Every team record (W-L) matches standings data
 - [ ] Every player performance stat is accurate to the data
@@ -34,9 +38,16 @@ Read these files in order:
 - [ ] Elo ratings cited match `standings[].current_elo` in week data (if present)
 - [ ] All-time records cited match `historical_context` in week data (if present)
 - [ ] Franchise stats (championships, all-time record) are accurate to week data (if present)
+- [ ] Any player stat lines cited in prose match `top_scorers[].game_context.stat_line` or `awards.top_performer.game_context.stat_line` in the week data. Flag any fabricated "X carries for Y yards" that don't appear in `game_context`.
+- [ ] Any NFL opponent references in the content (e.g. "vs. the Ravens") match `top_scorers[].game_context.opponent`. No ghost opponents.
+- [ ] Any momentum language ("surging", "collapsing", "upset brewing", "coin flip") tracks to `standings[].momentum.label` or `matchups[].momentum.label`. If the writer says Team X is "surging" but `momentum.label == "cooling"`, flag.
+- [ ] Matchup previews / recaps that frame the vibe check against `matchups[].momentum.label` for consistency — or at minimum, don't contradict it.
+- [ ] When `matchups[].momentum.label == "too early"` (weeks 1-3) or `"coin flip"`, the content does NOT declare a trajectory-based favorite. `favorite_team_name` is `null` in those cases; fabricating one is a fail.
 
 ### 2. Voice Consistency (Score 1-10, target: 7+)
+
 Count how many of the 12 Voice Bible patterns appear:
+
 - [ ] Pattern 1: Everyfan Narrator (couch perspective, "we")
 - [ ] Pattern 2: Pop Culture Analogy (at least 2 in essay)
 - [ ] Pattern 3: Escalating Sentence Structure (short-short-long)
@@ -53,6 +64,7 @@ Count how many of the 12 Voice Bible patterns appear:
 Score: [patterns found] / 12
 
 ### 3. Variety
+
 - [ ] No pop culture reference is used more than once
 - [ ] No two consecutive ranking blurbs start with the same word
 - [ ] No two consecutive blurbs use the same sentence structure
@@ -61,6 +73,7 @@ Score: [patterns found] / 12
 - [ ] At least 3 different tones across blurbs (celebratory, roast, eulogy, warning)
 
 ### 4. Continuity
+
 - [ ] Callbacks to previous weeks are factually correct
 - [ ] Callbacks to preseason predictions reference actual preseason essay text
 - [ ] Running narratives are consistent (a team described as "rising" shouldn't suddenly be "collapsing" without data to support it)
@@ -68,6 +81,7 @@ Score: [patterns found] / 12
 - [ ] Elo narrative direction matches actual elo_change sign (don't say "rising" if Elo dropped)
 
 ### 5. Tone
+
 - [ ] Roasts are playful, never cruel or personal
 - [ ] No mean-spirited attacks on owners
 - [ ] No uncomfortable insider references
@@ -75,6 +89,7 @@ Score: [patterns found] / 12
 - [ ] Fun, conversational, engaging throughout
 
 ### 6. Structure & Word Counts
+
 - [ ] Essay: 400-700 words
 - [ ] Each ranking blurb: 100-200 words
 - [ ] Each confessional: 50-100 words
@@ -83,7 +98,9 @@ Score: [patterns found] / 12
 - [ ] Pick blurbs: 2-4 sentences each
 
 ## Anti-Pattern Check
+
 Verify NONE of these appear:
+
 - [ ] No "In conclusion", "Moving on to", "Welcome back", "Another week"
 - [ ] No emoji in prose
 - [ ] No "at the end of the day", "it is what it is", "110%"
@@ -129,7 +146,9 @@ If **REJECT**, explain what needs to be completely rewritten and why.
 **IMPORTANT: There is no "APPROVE with notes."** If ANY fix is needed — even a single word — the verdict is REVISE. Fix it, re-verify, then re-review for APPROVE. Quality gates are binary.
 
 ## Usage
+
 ```
 /edit-week 3
 ```
+
 The argument is the week number to review.
