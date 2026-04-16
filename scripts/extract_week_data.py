@@ -118,14 +118,30 @@ def _stat_line(position, stats):
         if stats.get("rec_td"):
             parts.append(f"{int(stats['rec_td'])} TD")
     elif p == "K":
-        if stats.get("fgm"):
-            parts.append(
-                f"{int(stats['fgm'])}/{int(stats.get('fga', stats['fgm']))} FG"
-            )
+        # Show FGA even when FGM is 0 (0-for-N narrative color)
+        fgm = stats.get("fgm") or 0
+        fga = stats.get("fga") or 0
+        if fga:
+            parts.append(f"{int(fgm)}/{int(fga)} FG")
         if stats.get("xpm"):
             parts.append(f"{int(stats['xpm'])} XP")
+    elif p == "DEF":
+        # Team defense — aggregate stat keys, NOT idp_* keys (F19)
+        if stats.get("sack"):
+            parts.append(f"{int(stats['sack'])} sack")
+        if stats.get("int"):
+            parts.append(f"{int(stats['int'])} INT")
+        if stats.get("fum_rec"):
+            parts.append(f"{int(stats['fum_rec'])} FR")
+        if stats.get("def_td"):
+            parts.append(f"{int(stats['def_td'])} def TD")
+        if stats.get("safe"):
+            parts.append(f"{int(stats['safe'])} safety")
+        if stats.get("blk_kick"):
+            parts.append(f"{int(stats['blk_kick'])} blk")
+        if stats.get("pts_allow") is not None:
+            parts.append(f"{int(stats['pts_allow'])} pts allowed")
     elif p in (
-        "DEF",
         "DL",
         "DE",
         "DT",
@@ -140,6 +156,7 @@ def _stat_line(position, stats):
         "SS",
         "FS",
     ):
+        # Individual defensive player (IDP) — idp_* keys
         if stats.get("idp_tkl_solo"):
             parts.append(f"{int(stats['idp_tkl_solo'])} solo tkl")
         if stats.get("idp_sack"):
@@ -148,29 +165,33 @@ def _stat_line(position, stats):
             parts.append(f"{int(stats['idp_qb_hit'])} QB hit")
         if stats.get("idp_int"):
             parts.append(f"{int(stats['idp_int'])} INT")
-        if stats.get("def_td"):
-            parts.append(f"{int(stats['def_td'])} def TD")
         if stats.get("idp_fum_rec"):
             parts.append(f"{int(stats['idp_fum_rec'])} FR")
+
+    # Fallback for unhandled positions (P, FB, OL, etc.) — emit fantasy pts
+    # so consumers can distinguish "no data" from "data but no formatter". (F19)
+    if not parts and stats.get("pts_ppr"):
+        parts.append(f"{stats['pts_ppr']:.1f} fantasy pts")
+
     return ", ".join(parts)
 
 
 def build_game_context(player_id, nfl_team, position, stats_cache):
     """Build a game_context dict for a single player-week.
 
-    stats_cache is the raw list from the Sleeper stats endpoint (each entry has
-    player_id, team, opponent, stats, game_id, etc.). Returns None if no
-    matching entry.
+    stats_cache is a dict keyed by str(player_id) (O(1) lookup, built once per
+    week by extract_week — F18). Returns None if no matching entry.
+
+    Note: home/away (F20) is DEFERRED — Sleeper's stats game_id is an opaque
+    numeric identifier (e.g. "202510102"), not a YYYY_WW_AWAY_HOME format.
+    Per-player entries lack a home/away flag. Determining venue requires an
+    external schedule source (Sleeper schedule endpoint 404s; nflreadpy
+    deferred). one_liner uses "vs." as a neutral default.
     """
     if not player_id or not stats_cache:
         return None
 
-    player_entry = None
-    for item in stats_cache:
-        if str(item.get("player_id")) == str(player_id):
-            player_entry = item
-            break
-
+    player_entry = stats_cache.get(str(player_id))
     if not player_entry:
         return None
 
@@ -193,6 +214,81 @@ def build_game_context(player_id, nfl_team, position, stats_cache):
         "stat_line": stat_line,
         "one_liner": one_liner,
     }
+
+
+def _is_upset(winner_rid, t1_rid, t2_rid, prev_rankings):
+    """Return True iff the winner had a numerically-higher (worse) prev rank.
+
+    Returns False when prev_rankings is empty (week 1) or either roster is
+    missing from prev_rankings — no baseline to judge. (F23)
+    """
+    if winner_rid is None or not prev_rankings:
+        return False
+    if t1_rid not in prev_rankings or t2_rid not in prev_rankings:
+        return False
+    loser_rid = t1_rid if winner_rid == t2_rid else t2_rid
+    return prev_rankings[winner_rid] > prev_rankings[loser_rid]
+
+
+EARLY_MOMENTUM_LABELS = {"opening", "early"}
+
+
+def _compute_matchup_momentum(mu, momentum_by_team, rank_by_team, all_early):
+    """Derive edge/label/favorite for a single matchup from team momentum.
+
+    Returns a dict with keys edge, label, favorite_team_name. Handles four
+    cases: (a) all-early sentinel → "too early" with None favorite; (b)
+    zero-edge → "coin flip" with None favorite; (c) normal edge → slight
+    edge / heavy lean with favorite = team with higher momentum; (d) upset
+    brewing override → favorite = hotter underdog (rank gap ≤ 4). (F16)
+    """
+    if all_early:
+        return {"edge": 0, "label": "too early", "favorite_team_name": None}
+
+    t1_name = mu["team1"]["team_name"]
+    t2_name = mu["team2"]["team_name"]
+    t1_m = momentum_by_team.get(t1_name, {"score": 0, "label": "opening"})
+    t2_m = momentum_by_team.get(t2_name, {"score": 0, "label": "opening"})
+    edge = round(t1_m["score"] - t2_m["score"], 2)
+    t1_rank = rank_by_team.get(t1_name, 99)
+    t2_rank = rank_by_team.get(t2_name, 99)
+
+    abs_edge = abs(edge)
+    if abs_edge < 0.5:
+        return {"edge": edge, "label": "coin flip", "favorite_team_name": None}
+
+    if abs_edge < 1.5:
+        label = "slight edge"
+    else:
+        label = "heavy lean"
+    favorite = t1_name if edge > 0 else t2_name
+
+    # Upset brewing: lower-ranked (numerically higher) team has higher momentum
+    # AND the rank gap is small (<= 4). The hotter underdog IS the upset
+    # favorite — don't leave favorite pointing at the higher seed.
+    if t1_rank < t2_rank:
+        higher_momentum, lower_momentum, lower_name = t1_m, t2_m, t2_name
+    else:
+        higher_momentum, lower_momentum, lower_name = t2_m, t1_m, t1_name
+    rank_gap = abs(t1_rank - t2_rank)
+    if lower_momentum["score"] > higher_momentum["score"] and rank_gap <= 4:
+        label = "upset brewing"
+        favorite = lower_name
+
+    return {"edge": edge, "label": label, "favorite_team_name": favorite}
+
+
+def _annotate_matchup_momentum(matchups, standings):
+    """Second-pass annotator: attach .momentum to each matchup in place."""
+    momentum_by_team = {s["team_name"]: s["momentum"] for s in standings}
+    rank_by_team = {s["team_name"]: s["rank"] for s in standings}
+    all_early = all(
+        m.get("label") in EARLY_MOMENTUM_LABELS for m in momentum_by_team.values()
+    )
+    for mu in matchups:
+        mu["momentum"] = _compute_matchup_momentum(
+            mu, momentum_by_team, rank_by_team, all_early
+        )
 
 
 def build_roster_lookup(data):
@@ -270,13 +366,7 @@ def build_matchup_entry(
             else "Tie"
         ),
         "margin": round(margin, 2),
-        "upset": (
-            winner_rid is not None
-            and prev_rankings.get(winner_rid, 99)
-            > prev_rankings.get(
-                t1["roster_id"] if winner_rid == t2["roster_id"] else t2["roster_id"], 0
-            )
-        ),
+        "upset": _is_upset(winner_rid, t1["roster_id"], t2["roster_id"], prev_rankings),
     }
 
     # Inject H2H history if available
@@ -412,9 +502,21 @@ def extract_week(
             week_idx = i
             break
 
-    # Load NFL stats cache for this week (may be None if cache absent)
+    # Load NFL stats cache for this week. Index by player_id for O(1) lookup
+    # in build_game_context (F18). Warn loudly if absent so silent cache
+    # drift doesn't leave every game_context null (F24).
     nfl_cache = load_nfl_stats_cache(data.get("season", 2025), week_num)
-    stats_cache = (nfl_cache or {}).get("stats") if nfl_cache else None
+    stats_list = (nfl_cache or {}).get("stats") if nfl_cache else None
+    if stats_list:
+        stats_cache = {
+            str(item["player_id"]): item for item in stats_list if item.get("player_id")
+        }
+    else:
+        stats_cache = None
+        print(
+            f"  WARN: NFL stats cache missing for week {week_num}; "
+            f"game_context will be null for all top_scorers"
+        )
 
     if week_idx is None:
         print(f"ERROR: Week {week_num} not found in data.")
@@ -490,51 +592,25 @@ def extract_week(
     standings.sort(key=lambda x: x["rank"])
 
     # --- Matchup momentum (derived from team momentum) ---
-    momentum_by_team = {s["team_name"]: s["momentum"] for s in standings}
-    rank_by_team = {s["team_name"]: s["rank"] for s in standings}
-    for mu in matchups:
-        t1_name = mu["team1"]["team_name"]
-        t2_name = mu["team2"]["team_name"]
-        t1_m = momentum_by_team.get(t1_name, {"score": 0, "label": "opening"})
-        t2_m = momentum_by_team.get(t2_name, {"score": 0, "label": "opening"})
-        edge = round(t1_m["score"] - t2_m["score"], 2)
-        t1_rank = rank_by_team.get(t1_name, 99)
-        t2_rank = rank_by_team.get(t2_name, 99)
-
-        abs_edge = abs(edge)
-        if abs_edge < 0.5:
-            label = "coin flip"
-        elif abs_edge < 1.5:
-            label = "slight edge"
-        else:
-            label = "heavy lean"
-
-        # Upset brewing: lower-ranked (numerically higher) team has higher
-        # momentum AND the rank gap is small (<= 4).
-        if t1_rank < t2_rank:
-            higher_momentum = t1_m
-            lower_momentum = t2_m
-        else:
-            higher_momentum = t2_m
-            lower_momentum = t1_m
-        rank_gap = abs(t1_rank - t2_rank)
-        if lower_momentum["score"] > higher_momentum["score"] and rank_gap <= 4:
-            label = "upset brewing"
-
-        favorite = t1_name if edge >= 0 else t2_name
-        mu["momentum"] = {
-            "edge": edge,
-            "label": label,
-            "favorite_team_name": favorite,
-        }
+    _annotate_matchup_momentum(matchups, standings)
 
     # --- Weekly Awards ---
-    high_scorer_rid = week_data["highest_scorer"]["roster_id"]
-    low_scorer_rid = week_data["lowest_scorer"]["roster_id"]
+    high_scorer_entry = week_data.get("highest_scorer") or {}
+    low_scorer_entry = week_data.get("lowest_scorer") or {}
+    high_scorer_rid = high_scorer_entry.get("roster_id")
+    low_scorer_rid = low_scorer_entry.get("roster_id")
 
-    # Find closest and biggest blowout matchups
-    closest_matchup = min(matchups, key=lambda m: m["margin"]) if matchups else None
-    biggest_blowout = max(matchups, key=lambda m: m["margin"]) if matchups else None
+    # Closest vs blowout — suppress one when there's only one matchup so the
+    # same game isn't described as both "closest" and "biggest blowout". (F22)
+    if len(matchups) >= 2:
+        closest_matchup = min(matchups, key=lambda m: m["margin"])
+        biggest_blowout = max(matchups, key=lambda m: m["margin"])
+    elif len(matchups) == 1:
+        closest_matchup = matchups[0]
+        biggest_blowout = None
+    else:
+        closest_matchup = None
+        biggest_blowout = None
 
     # Top individual performer
     top_performer = (
@@ -542,16 +618,28 @@ def extract_week(
     )
 
     awards = {
-        "high_scorer": {
-            "team_name": roster_lookup.get(high_scorer_rid, {}).get("team_name", "?"),
-            "owner": roster_lookup.get(high_scorer_rid, {}).get("owner", "?"),
-            "points": week_data["highest_scorer"]["points"],
-        },
-        "low_scorer": {
-            "team_name": roster_lookup.get(low_scorer_rid, {}).get("team_name", "?"),
-            "owner": roster_lookup.get(low_scorer_rid, {}).get("owner", "?"),
-            "points": week_data["lowest_scorer"]["points"],
-        },
+        "high_scorer": (
+            {
+                "team_name": roster_lookup.get(high_scorer_rid, {}).get(
+                    "team_name", "?"
+                ),
+                "owner": roster_lookup.get(high_scorer_rid, {}).get("owner", "?"),
+                "points": high_scorer_entry.get("points"),
+            }
+            if high_scorer_rid is not None
+            else None
+        ),
+        "low_scorer": (
+            {
+                "team_name": roster_lookup.get(low_scorer_rid, {}).get(
+                    "team_name", "?"
+                ),
+                "owner": roster_lookup.get(low_scorer_rid, {}).get("owner", "?"),
+                "points": low_scorer_entry.get("points"),
+            }
+            if low_scorer_rid is not None
+            else None
+        ),
         "closest_game": (
             {
                 "teams": f"{closest_matchup['team1']['team_name']} vs {closest_matchup['team2']['team_name']}",
@@ -737,6 +825,13 @@ def compute_streak(data, up_to_week, roster_id, roster_lookup):
             if winner_rid == roster_id:
                 result = "W"
             elif winner_rid is None:
+                # Distinguish played-but-tied from unplayed/TBD games. A
+                # legit fantasy tie requires both teams to have posted
+                # non-zero points; otherwise skip the matchup entirely. (F17)
+                t1_pts = m["team1"].get("points") or 0
+                t2_pts = m["team2"].get("points") or 0
+                if t1_pts == 0 and t2_pts == 0:
+                    continue
                 return "T1" if streak_count == 0 else f"{streak_type}{streak_count}"
             else:
                 result = "L"
@@ -785,8 +880,22 @@ def main():
         )
         sys.exit(1)
 
-    # Extract sequentially so each week can reference previous weeks
+    # Extract sequentially so each week can reference previous weeks. When
+    # --week N is used for a late-season week, load prior weeks from disk so
+    # momentum computation has the rolling window it needs. (F15)
     prev_weeks = []
+    if not extract_all and weeks_to_extract:
+        earliest = min(weeks_to_extract)
+        for prior_week in range(1, earliest):
+            prior_path = OUTPUT_DIR / f"week{prior_week}_data.json"
+            if not prior_path.exists():
+                print(
+                    f"  WARN: prior week {prior_week} not found at {prior_path}; "
+                    f"momentum for week {earliest}+ will use a partial window"
+                )
+                continue
+            with open(prior_path, encoding="utf-8") as f:
+                prev_weeks.append(json.load(f))
     for week_num in sorted(weeks_to_extract):
         print(f"Extracting Week {week_num}...")
         result = extract_week(

@@ -324,6 +324,7 @@ VALID_MOMENTUM_LABELS = {
     "surging",
 }
 VALID_MATCHUP_MOMENTUM_LABELS = {
+    "too early",
     "coin flip",
     "slight edge",
     "heavy lean",
