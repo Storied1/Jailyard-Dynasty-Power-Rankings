@@ -203,6 +203,8 @@ def build_essay_context(week_data, chat_context, prev_content):
                     "record": s.get("record"),
                     "rank": s.get("rank"),
                     "pf": s.get("points_for"),
+                    "momentum": (s.get("momentum") or {}).get("label"),
+                    "margin": s.get("margin_this_week"),
                 }
                 for s in week_data["standings"]
             ]
@@ -295,6 +297,8 @@ def build_light_context(week_data, chat_context):
                     "team": s.get("team_name"),
                     "record": s.get("record"),
                     "rank": s.get("rank"),
+                    "momentum": (s.get("momentum") or {}).get("label"),
+                    "margin": s.get("margin_this_week"),
                 }
                 for s in week_data["standings"]
             ]
@@ -365,6 +369,11 @@ SECTION_PROMPTS = {
         "- Weave in at least 1 callback to previous weeks\n"
         "- Reference the group chat at least once (use quotes from CHAT QUOTES if available)\n"
         "- Embed specific stats naturally in narrative (never standalone stat lines)\n"
+        "- When citing player performances, use `top_scorers[].game_context.one_liner` "
+        "verbatim -- do NOT invent yards / TDs / targets. Fabricated stat lines are a fail mode.\n"
+        "- Frame team trajectories using `standings[].momentum.label` and "
+        "`standings[].margin_this_week`. Ignore 'opening' and 'early' labels "
+        "(weeks 1-3, not enough data).\n"
         "- End with a quotable kicker line\n\n"
         'Output ONLY valid JSON: {{"essay": "the full essay text..."}}'
     ),
@@ -373,6 +382,9 @@ SECTION_PROMPTS = {
         "REQUIREMENTS:\n"
         "- Each blurb: 100-200 words, written in SECOND PERSON ('you')\n"
         "- Reference at least one specific player performance with actual stats from the data\n"
+        "- Each standings entry has `momentum.score` (-3 to +3) and `momentum.label`. "
+        "Prefer describing trajectory (e.g. 'surging', 'cooling') over just citing rank change. "
+        "Skip the label if it's 'opening' or 'early'.\n"
         "- NO two consecutive blurbs should start with the same word or structure\n"
         "- Vary the tone: some celebratory, some eulogies, some roasts\n"
         "- When H2H data exists, consider citing the series record\n"
