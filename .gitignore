@@ -4,6 +4,11 @@ data/players.json
 # Projection files are huge (~100MB each) and can be re-fetched
 data/*/projections.json
 
+# NFL stats cache (~2MB per week × 18 weeks/season). Fetched from Sleeper
+# on demand; fetch_sleeper.py [8/8] re-populates. Not source of truth.
+# Kept locally but never committed, same pattern as projections.
+data/*/nfl_stats_week*.json
+
 # Python bytecode cache
 __pycache__/
 
