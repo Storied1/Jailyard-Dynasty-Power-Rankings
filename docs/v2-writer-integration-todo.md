@@ -1,5 +1,7 @@
 # Writer Integration TODO — v2 data enrichment
 
+> **Status (2026-04-16, post-Phase-17):** Superseded by Phases 11-17. Writer (`write-week.md`), editor (`edit-week.md`), voice-bible, and local_draft prompts are all wired. The `momentum.label` enumeration below is incomplete — Phase 11 added `early` (weeks 1-3 with partial rolling window). Canonical set: `opening | early | collapsing | cooling | steady | hot | surging`.
+
 Generated during Phase 9 of `C:\Users\blake\.claude\plans\purrfect-bouncing-fox.md` (2026-04-14). This catalogs where the writer / editor / chat-context / local-draft consumers should reference the new enrichment fields in `content/weeks/weekN_data.json`:
 
 - `top_scorers[].player_id` — Sleeper player ID (string)
@@ -35,6 +37,7 @@ Where the writer agent learns what fields exist in `week_data.json`.
 - Line 173 — "Use next week's matchups from the data" — could extend to mention using `matchups[].momentum` for next-week preview vibe.
 
 **Voice bible companion update (out of scope, cross-reference):**
+
 - `content/voice-bible.md` has 12 Simmons-DNA patterns. A new pattern entry for "Real-game anchor" should be added: "Every fantasy number should trace to a real NFL moment. Use `game_context.one_liner` to anchor fantasy scores in actual Sunday action — 'Bijan went for 195 and a TD in a blowout of the Rams' reads better than 'Bijan put up 37.4.'"
 
 ---
@@ -89,11 +92,13 @@ Chat relevancy engine. Iterates matchups + top_scorers to score chat messages. *
 ## Suggested follow-up session scope
 
 **Option A — minimum writer-integration update:**
+
 1. Update `write-week.md` lines 10, 34, 35 + new per-player section (under 30 min of editing).
 2. Update `edit-week.md` with 4 new checklist items.
 3. Regenerate a single week (e.g. week 7 or rewrite week 6) to validate the writer uses the new fields naturally.
 
 **Option B — full integration + voice bible:**
+
 1. Everything in A.
 2. Update `local_draft.py` prompts for essay + rankings + confessionals.
 3. Add "Real-game anchor" pattern to `content/voice-bible.md`.

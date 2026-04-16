@@ -37,7 +37,7 @@ The `week_data.json` now includes enriched historical fields (when `data/league_
 - `matchups[].momentum.label` — matchup vibe: `coin flip`, `slight edge`, `heavy lean`, `upset brewing`, or `too early` (weeks 1-3). Use to frame matchup preview/recap tone.
 - `matchups[].momentum.favorite_team_name` — who trajectory favors (distinct from rank). On `upset brewing`, this is the hotter underdog. On `coin flip` / `too early`, this is `null` — do NOT fabricate a favorite.
 - `standings[].current_elo`, `peak_elo`, `elo_change` — Elo ratings and weekly movement
-- `standings[].momentum` — `{score, label}` where label is `opening | early | collapsing | cooling | steady | hot | surging | inactive`. Describe the trajectory, don't quote the label verbatim. Cite sparingly.
+- `standings[].momentum` — `{score, label}` where label is `opening | early | collapsing | cooling | steady | hot | surging`. Describe the trajectory, don't quote the label verbatim. Cite sparingly.
 - `standings[].margin_this_week` — signed float (points over opponent). Direct narrative fuel: "Legion won by 73 this week," "Chudders got blown out by 21."
 - `standings[].all_time_record`, `championships`, `best_win_streak` — franchise history
 - `top_scorers[].game_context.one_liner` — pre-rendered real-game stat line, e.g. "22 carries, 169 yd, 2 rush TD vs. the Bills." **Cite this directly** when writing about a top scorer — it saves you from inventing stat lines that might be wrong.

@@ -316,7 +316,6 @@ def check_picks_ledger(content: dict, data: dict, errors: list):
 VALID_MOMENTUM_LABELS = {
     "opening",
     "early",
-    "inactive",
     "collapsing",
     "cooling",
     "steady",
