@@ -7,8 +7,8 @@ that were previously copy-pasted across 17+ scripts.
 import json
 import sys
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -86,6 +86,23 @@ def save_json(path, data, indent=2, ensure_ascii=False, verbose=False):
         json.dump(data, f, indent=indent, ensure_ascii=ensure_ascii)
     if verbose:
         print(f"  Saved: {path.relative_to(REPO_ROOT)}")
+
+
+def save_json_canonical(path, data, verbose=False):
+    """Canonical JSON write — sort_keys=True, ensure_ascii=False, indent=2.
+
+    All new generators (Phase 1+ data work) use this helper to guarantee
+    byte-identical output across runs (architect M6 mandate). The canonical
+    form is also what the pre-commit prettier hook produces, so post-commit
+    re-extraction stays clean.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False, sort_keys=True)
+        f.write("\n")
+    if verbose:
+        print(f"  Saved (canonical): {path.relative_to(REPO_ROOT)}")
 
 
 # ---------------------------------------------------------------------------
