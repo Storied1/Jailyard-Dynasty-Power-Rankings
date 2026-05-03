@@ -9,6 +9,9 @@ data/*/projections.json
 # Kept locally but never committed, same pattern as projections.
 data/*/nfl_stats_week*.json
 
+# nflreadpy and external API caches (Phase 1a — architect F1 cadence)
+data/external/
+
 # Python bytecode cache
 __pycache__/
 
