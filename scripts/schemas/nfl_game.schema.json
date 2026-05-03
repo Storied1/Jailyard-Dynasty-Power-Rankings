@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NFLGame",
+  "description": "First-class NFL game entity. One file per game_id under data/2025/nfl_games/.",
+  "type": "object",
+  "required": ["game_id", "season", "week", "home_team", "away_team"],
+  "properties": {
+    "game_id": {
+      "type": "string",
+      "description": "nflreadpy schedule game_id, e.g. 2025_06_BUF_NYJ"
+    },
+    "season": { "type": "integer", "minimum": 2022 },
+    "week": { "type": "integer", "minimum": 1, "maximum": 22 },
+    "home_team": { "type": "string" },
+    "away_team": { "type": "string" },
+    "home_score": { "type": ["integer", "null"] },
+    "away_score": { "type": ["integer", "null"] },
+    "result": {
+      "type": ["integer", "null"],
+      "description": "home_score - away_score"
+    },
+    "kickoff": { "type": ["string", "null"], "description": "ISO8601" },
+    "stadium": { "type": ["string", "null"] },
+    "stadium_id": { "type": ["string", "null"] },
+    "roof": {
+      "type": ["string", "null"],
+      "enum": ["dome", "outdoors", "closed", "open", null]
+    },
+    "surface": { "type": ["string", "null"] },
+    "temp": { "type": ["integer", "null"] },
+    "wind": { "type": ["integer", "null"] },
+    "spread_line": { "type": ["number", "null"] },
+    "total_line": { "type": ["number", "null"] },
+    "starting_qbs": {
+      "type": ["object", "null"],
+      "properties": {
+        "home": { "type": ["string", "null"], "description": "gsis_id" },
+        "away": { "type": ["string", "null"] }
+      }
+    },
+    "rest_days": {
+      "type": ["object", "null"],
+      "properties": {
+        "home": { "type": ["integer", "null"] },
+        "away": { "type": ["integer", "null"] }
+      }
+    },
+    "div_game": { "type": ["boolean", "null"] },
+    "team_stats": {
+      "type": ["object", "null"],
+      "description": "Per-team aggregated EPA + counts from nflreadpy team_stats."
+    },
+    "key_injuries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["team", "gsis_id", "status"],
+        "properties": {
+          "team": { "type": "string" },
+          "gsis_id": { "type": "string" },
+          "name": { "type": ["string", "null"] },
+          "status": { "type": "string" },
+          "primary_injury": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

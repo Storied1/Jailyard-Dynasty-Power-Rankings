@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FantasyRosterWeek",
+  "description": "Weekly snapshot of all 12 fantasy rosters. data/2025/fantasy_rosters/week{N}.json.",
+  "type": "object",
+  "required": ["week", "captured", "derived", "rosters"],
+  "properties": {
+    "week": { "type": "integer", "minimum": 1, "maximum": 22 },
+    "captured": {
+      "type": "boolean",
+      "description": "True if captured live at fetch time"
+    },
+    "derived": {
+      "type": "boolean",
+      "description": "True if back-derived from transactions (starters/reserve null)"
+    },
+    "captured_at": {
+      "type": ["string", "null"],
+      "description": "ISO8601 fetch timestamp"
+    },
+    "rosters": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "required": ["roster_id", "owner_id", "players"],
+        "properties": {
+          "roster_id": { "type": "integer" },
+          "owner_id": { "type": "string" },
+          "players": { "type": "array", "items": { "type": "string" } },
+          "starters": {
+            "type": ["array", "null"],
+            "description": "Null for derived snapshots (architect B2 — unrecoverable)"
+          },
+          "reserve": { "type": ["array", "null"] }
+        }
+      }
+    }
+  }
+}

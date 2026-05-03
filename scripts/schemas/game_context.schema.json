@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GameContext",
+  "description": "Per-player game-context block in top_scorers[] of weekN_data.json.",
+  "type": "object",
+  "required": ["game_id", "src"],
+  "properties": {
+    "game_id": {
+      "type": ["string", "null"],
+      "description": "Reference to data/2025/nfl_games/{game_id}.json"
+    },
+    "stat_line": {
+      "type": ["string", "null"],
+      "description": "Pre-rendered fantasy stat line"
+    },
+    "one_liner": {
+      "type": ["string", "null"],
+      "description": "Real-game stat line, e.g. '22 carries, 169 yd, 2 TD vs the Bills'"
+    },
+    "opponent": { "type": ["string", "null"] },
+    "src": {
+      "type": "object",
+      "description": "Per-field source attribution for graceful degradation (architect M3).",
+      "additionalProperties": {
+        "type": ["string", "null"],
+        "enum": ["nflreadpy", "sleeper_stats", "fallback", null]
+      }
+    }
+  }
+}
