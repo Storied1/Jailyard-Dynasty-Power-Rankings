@@ -4,6 +4,7 @@ Cache discipline (architect F1): --max-age-hours N controls re-fetch.
 Idempotency (architect M6): re-running with fresh cache produces no diff.
 """
 
+import os
 import time
 from pathlib import Path
 from unittest.mock import patch
@@ -29,8 +30,6 @@ def test_is_stale_when_file_old(tmp_path: Path, monkeypatch):
     f.write_text("x")
     # Set mtime to 25 hours ago
     old_time = time.time() - (25 * 3600)
-    import os
-
     os.utime(f, (old_time, old_time))
     assert is_stale(f, max_age_hours=24) is True
 

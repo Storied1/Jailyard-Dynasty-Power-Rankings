@@ -82,7 +82,7 @@ def main() -> int:
 
     for name in args.tables:
         path = fetch_one(name, season=args.season, max_age_hours=args.max_age_hours)
-        print(f"  {name}: {path}")
+        print(f"{name}: {path}")
     return 0
 
 
