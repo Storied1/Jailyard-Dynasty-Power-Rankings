@@ -34,7 +34,8 @@
             "description": "Null for derived snapshots (architect B2 — unrecoverable)"
           },
           "reserve": { "type": ["array", "null"] }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }

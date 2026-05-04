@@ -3,7 +3,14 @@
   "title": "NFLGame",
   "description": "First-class NFL game entity. One file per game_id under data/2025/nfl_games/.",
   "type": "object",
-  "required": ["game_id", "season", "week", "home_team", "away_team"],
+  "required": [
+    "game_id",
+    "season",
+    "week",
+    "home_team",
+    "away_team",
+    "key_injuries"
+  ],
   "properties": {
     "game_id": {
       "type": "string",
@@ -36,14 +43,16 @@
       "properties": {
         "home": { "type": ["string", "null"], "description": "gsis_id" },
         "away": { "type": ["string", "null"] }
-      }
+      },
+      "additionalProperties": false
     },
     "rest_days": {
       "type": ["object", "null"],
       "properties": {
         "home": { "type": ["integer", "null"] },
         "away": { "type": ["integer", "null"] }
-      }
+      },
+      "additionalProperties": false
     },
     "div_game": { "type": ["boolean", "null"] },
     "team_stats": {
@@ -61,7 +70,8 @@
           "name": { "type": ["string", "null"] },
           "status": { "type": "string" },
           "primary_injury": { "type": ["string", "null"] }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }
