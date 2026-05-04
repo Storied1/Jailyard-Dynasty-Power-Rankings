@@ -21,72 +21,40 @@ from pathlib import Path
 # and for `python -m pytest` from the repo root.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from shared import load_json  # noqa: E402
 from shared import DATA_DIR, REPO_ROOT, TEAM_PROFILES_PATH  # noqa: E402
 from shared import WEEKS_DIR as OUTPUT_DIR  # noqa: E402
-from shared import compute_momentum, load_json, load_nfl_stats_cache  # noqa: E402
+from shared import compute_momentum, load_nfl_stats_cache, normalize_team  # noqa: E402
 
 PROJECT_DIR = REPO_ROOT
 
 
-# ff_playerids uses legacy team abbreviations (KCC, LVR, GBP) while nflreadpy
-# schedules use the modern set (KC, LV, GB). Normalize when joining.
-_FF_TO_SCHED_TEAM = {
-    "KCC": "KC",
-    "LVR": "LV",
-    "GBP": "GB",
-    "TBB": "TB",
-    "NEP": "NE",
-    "NOS": "NO",
-    "SFO": "SF",
-    "JAC": "JAX",
-    "LAR": "LA",
-    # Historical relocations / aliases that still appear in the dataset
-    "OAK": "LV",
-    "SDC": "LAC",
-    "STL": "LA",
-    "RAM": "LA",
-}
+def _load_team_pair_to_game_id(season: int, week: int) -> dict:
+    """Build (team_pair) -> game_id mapping for one week.
 
+    Uses Sleeper's per-week (team, opponent) truth at the call site, NOT
+    ff_playerids' static team field (which has stale-team bug for traded
+    players). Returns ~16 entries per week (one per NFL game), keyed by
+    frozenset({home_team, away_team}).
 
-def _load_player_to_game_crosswalk(season: int, week: int) -> dict:
-    """Build sleeper_id -> game_id mapping for one week.
-
-    Joins:
-    - data/external/ff_playerids.parquet (sleeper_id <-> team)
-    - data/external/schedules_{season}.parquet (week -> home_team/away_team -> game_id)
-
-    For each rostered player on a team playing this week, map to that game_id.
-    Normalizes ff_playerids' legacy team abbreviations (KCC/LVR/etc.) to the
-    modern set used by schedules. Returns dict keyed by str(sleeper_id) for
-    downstream lookup parity (Sleeper IDs are strings in season_combined).
+    Phase 1a Task 5 fix-up (C1): replaces _load_player_to_game_crosswalk,
+    which falsely advertised referential integrity for ~12% of traded
+    players in week 6.
     """
     import polars as pl
-    from fetch_nflreadpy import fetch_one
+    from fetch_nflreadpy import fetch_one  # noqa: E402 — sys.path bootstrap
 
-    ff_path = fetch_one("ff_playerids", season=season)
     sched_path = fetch_one("schedules", season=season)
-
-    ff = pl.read_parquet(ff_path).select(["sleeper_id", "team"])
     schedules = pl.read_parquet(sched_path).filter(pl.col("week") == week)
 
-    # team -> game_id (one team plays one game per week)
-    team_to_game: dict = {}
+    team_pair_to_game: dict = {}
     for row in schedules.iter_rows(named=True):
-        team_to_game[row["home_team"]] = row["game_id"]
-        team_to_game[row["away_team"]] = row["game_id"]
-
-    # sleeper_id -> game_id via team (normalize ff team abbrev first)
-    crosswalk: dict = {}
-    for row in ff.iter_rows(named=True):
-        sid = row["sleeper_id"]
-        ff_team = row["team"]
-        if sid is None or not ff_team:
+        home = normalize_team(row["home_team"])
+        away = normalize_team(row["away_team"])
+        if home is None or away is None:
             continue
-        sched_team = _FF_TO_SCHED_TEAM.get(ff_team, ff_team)
-        game_id = team_to_game.get(sched_team)
-        if game_id:
-            crosswalk[str(sid)] = game_id
-    return crosswalk
+        team_pair_to_game[frozenset({home, away})] = row["game_id"]
+    return team_pair_to_game
 
 
 def load_season_data(season=2025):
@@ -122,8 +90,9 @@ NFL_TEAM_FULL = {
     "IND": "Colts",
     "JAX": "Jaguars",
     "KC": "Chiefs",
+    "LA": "Rams",  # Modern nflreadpy schedules abbrev (post-normalize_team)
     "LAC": "Chargers",
-    "LAR": "Rams",
+    "LAR": "Rams",  # Legacy abbrev kept for compat with raw Sleeper opponent
     "LV": "Raiders",
     "MIA": "Dolphins",
     "MIN": "Vikings",
@@ -277,61 +246,8 @@ def build_game_context(player_id, nfl_team, position, stats_cache):
     }
 
 
-def build_game_context_v2(
-    player_id: str,
-    sleeper_stats_for_player: dict,
-    player_id_to_game_id: dict,
-    nfl_team_full: dict,
-    opponent_abbr: str | None,
-) -> dict:
-    """Build v2 game_context: game_id reference + src attribution.
-
-    v2 differences from v1 (per architect M2 + M3):
-    - Returns `game_id` reference instead of nesting weather/opponent
-    - Adds `src` field with per-attribution sources
-    - Weather, opponent_def_epa, injury_status live in the NFLGame entity now
-
-    Returns dict shape:
-        {
-            "game_id": str | None,
-            "stat_line": str | None,
-            "one_liner": str | None,
-            "opponent": str | None,
-            "src": {"game_id": "nflreadpy" | "fallback" | None, ...}
-        }
-    """
-    game_id = player_id_to_game_id.get(player_id) if player_id else None
-    src: dict = {
-        "game_id": "nflreadpy" if game_id else None,
-    }
-
-    stat_line = (
-        _format_stat_line(sleeper_stats_for_player)
-        if sleeper_stats_for_player
-        else None
-    )
-    src["stat_line"] = "sleeper_stats" if stat_line else None
-
-    opponent_full = nfl_team_full.get(opponent_abbr) if opponent_abbr else None
-    one_liner = (
-        f"{stat_line} vs the {opponent_full}"
-        if stat_line and opponent_full
-        else stat_line
-    )
-    src["opponent"] = "sleeper_stats" if opponent_abbr else None
-    src["one_liner"] = "fallback" if one_liner else None
-
-    return {
-        "game_id": game_id,
-        "stat_line": stat_line,
-        "one_liner": one_liner,
-        "opponent": opponent_full,
-        "src": src,
-    }
-
-
-def _format_stat_line(stats: dict) -> str | None:
-    """Render a Sleeper stats blob as a one-line stat string. Trivial cases only."""
+def _default_format_stat_line(stats):
+    """Trivial fallback stat-line renderer. Production callers pass _stat_line."""
     if not stats:
         return None
     parts = []
@@ -350,19 +266,96 @@ def _format_stat_line(stats: dict) -> str | None:
     return ", ".join(parts) if parts else None
 
 
-def _build_game_context_v2_for_player(
-    player_id, position, stats_cache, player_id_to_game_id
+def build_game_context_v2(
+    player_id,
+    sleeper_stats_for_player,
+    team_pair_to_game_id,
+    nfl_team_full,
+    player_team,
+    opponent_abbr,
+    format_stat_line=None,
 ):
-    """Adapter: extract Sleeper opponent + stats blob from cache, then call v2.
+    """Build v2 game_context: game_id reference + src attribution.
+
+    v2 differences from v1 (per architect M2 + M3):
+    - Returns `game_id` reference instead of nesting weather/opponent
+    - Adds `src` field with per-attribution sources
+    - Weather, opponent_def_epa, injury_status live in the NFLGame entity now
+
+    Phase 1a Task 5 fix-up (C1 + C2 + I1):
+    - C1: takes team_pair_to_game_id (frozenset) + player_team + opponent_abbr.
+      Resolves game_id via Sleeper's per-week (player_team, opponent) truth
+      instead of ff_playerids' static team field. No more stale-team bug.
+    - C2: assumes both team abbrevs are already normalized via normalize_team()
+      so opponent and game_id share the canonical abbrev set. Adapter is
+      responsible for the normalization pass.
+    - I1: format_stat_line callback genuinely delegates stat-line rendering;
+      adapter passes v1's richer _stat_line for production fidelity. Tests
+      get the trivial _default_format_stat_line.
+
+    Returns dict shape:
+        {
+            "game_id": str | None,
+            "stat_line": str | None,
+            "one_liner": str | None,
+            "opponent": str | None,
+            "src": {"game_id": "nflreadpy" | "fallback" | None, ...}
+        }
+    """
+    if format_stat_line is None:
+        format_stat_line = _default_format_stat_line
+
+    game_id = None
+    if team_pair_to_game_id and player_team and opponent_abbr:
+        game_id = team_pair_to_game_id.get(frozenset({player_team, opponent_abbr}))
+    src = {"game_id": "nflreadpy" if game_id else None}
+
+    stat_line = (
+        format_stat_line(sleeper_stats_for_player) if sleeper_stats_for_player else None
+    )
+    src["stat_line"] = "sleeper_stats" if stat_line else None
+
+    opponent_full = nfl_team_full.get(opponent_abbr) if opponent_abbr else None
+    if stat_line and opponent_full:
+        one_liner = f"{stat_line} vs. the {opponent_full}"
+    elif stat_line:
+        one_liner = stat_line
+    elif opponent_full:
+        one_liner = f"played vs. the {opponent_full}"
+    else:
+        one_liner = None
+
+    src["opponent"] = "sleeper_stats" if opponent_abbr else None
+    src["one_liner"] = "fallback" if one_liner else None
+
+    return {
+        "game_id": game_id,
+        "stat_line": stat_line,
+        "one_liner": one_liner,
+        "opponent": opponent_abbr,
+        "src": src,
+    }
+
+
+def _build_game_context_v2_for_player(
+    player_id, position, stats_cache, team_pair_to_game_id
+):
+    """Adapter: extract Sleeper team+opponent+stats from cache, then delegate to v2.
 
     Bridges the existing per-player call sites (which only have player_id +
     position + the week's stats_cache) to build_game_context_v2's parameter
     contract. Returns None if player_id missing or no cache entry — preserves
     v1's behavior for downstream null-handling.
 
-    The stat_line uses v1's richer position-aware _stat_line (Sleeper's
-    `rush_att`/`pass_yd` keys, etc.); _format_stat_line is the v2 doc-spec
-    placeholder. This adapter routes to _stat_line for production fidelity.
+    Phase 1a Task 5 fix-up:
+    - C1: pulls player_team from Sleeper's per-week stats entry (NOT
+      ff_playerids' static team), so traded players resolve correctly.
+    - C2: normalizes both player_team and opponent via normalize_team() so the
+      frozenset({player_team, opponent}) lookup matches the schedule's
+      canonical abbrev set.
+    - I1: passes v1's _stat_line to build_game_context_v2 via format_stat_line,
+      preserving production fidelity (Sleeper's `rush_att`/`pass_yd` keys, etc.)
+      without parallel-implementing v2's shape.
     """
     if not player_id or not stats_cache:
         return None
@@ -370,34 +363,22 @@ def _build_game_context_v2_for_player(
     if not entry:
         return None
 
-    opponent = entry.get("opponent")
+    raw_player_team = entry.get("team")
+    raw_opponent = entry.get("opponent")
+    player_team = normalize_team(raw_player_team)
+    opponent = normalize_team(raw_opponent)
+
     stats_dict = entry.get("stats") or {}
-    stat_line_text = _stat_line(position, stats_dict) or None
 
-    game_id = player_id_to_game_id.get(str(player_id)) if player_id_to_game_id else None
-    opponent_full = NFL_TEAM_FULL.get(opponent) if opponent else None
-
-    if stat_line_text and opponent_full:
-        one_liner = f"{stat_line_text} vs. the {opponent_full}"
-    elif stat_line_text:
-        one_liner = stat_line_text
-    elif opponent_full:
-        one_liner = f"played vs. the {opponent_full}"
-    else:
-        one_liner = ""
-
-    return {
-        "game_id": game_id,
-        "stat_line": stat_line_text,
-        "one_liner": one_liner,
-        "opponent": opponent,
-        "src": {
-            "game_id": "nflreadpy" if game_id else None,
-            "stat_line": "sleeper_stats" if stat_line_text else None,
-            "opponent": "sleeper_stats" if opponent else None,
-            "one_liner": "fallback" if one_liner else None,
-        },
-    }
+    return build_game_context_v2(
+        player_id=str(player_id),
+        sleeper_stats_for_player=stats_dict,
+        team_pair_to_game_id=team_pair_to_game_id,
+        nfl_team_full=NFL_TEAM_FULL,
+        player_team=player_team,
+        opponent_abbr=opponent,
+        format_stat_line=lambda s: _stat_line(position, s) or None,
+    )
 
 
 def _is_upset(winner_rid, t1_rid, t2_rid, prev_rankings):
@@ -497,12 +478,13 @@ def build_matchup_entry(
     history_data,
     rid_to_owner,
     stats_cache=None,
-    player_id_to_game_id=None,
+    team_pair_to_game_id=None,
 ):
     """Build a single matchup dict from raw matchup data.
 
-    player_id_to_game_id (Item 1 / architect M2): sleeper_id -> nfl game_id
-    crosswalk for the week. Built once per week in extract_week. When None,
+    team_pair_to_game_id (Phase 1a Task 5 fix-up C1): frozenset({home, away})
+    -> game_id crosswalk for the week. Built once per week in extract_week
+    from the schedule (NOT from ff_playerids' static team field). When None,
     game_context.game_id will be null (graceful degradation per architect M3).
     """
     t1 = m["team1"]
@@ -532,7 +514,7 @@ def build_matchup_entry(
                         p.get("pid"),
                         p.get("position"),
                         stats_cache,
-                        player_id_to_game_id,
+                        team_pair_to_game_id,
                     ),
                 }
                 for p in t1.get("top_starters", [])[:5]
@@ -555,7 +537,7 @@ def build_matchup_entry(
                         p.get("pid"),
                         p.get("position"),
                         stats_cache,
-                        player_id_to_game_id,
+                        team_pair_to_game_id,
                     ),
                 }
                 for p in t2.get("top_starters", [])[:5]
@@ -703,10 +685,14 @@ def extract_week(
             week_idx = i
             break
 
+    # Season is required by season_combined.json's schema. Fail loud rather
+    # than silently rolling over to 2025 at the next season boundary. (I2)
+    season_for_xwalk = data["season"]
+
     # Load NFL stats cache for this week. Index by player_id for O(1) lookup
     # in build_game_context (F18). Warn loudly if absent so silent cache
     # drift doesn't leave every game_context null (F24).
-    nfl_cache = load_nfl_stats_cache(data.get("season", 2025), week_num)
+    nfl_cache = load_nfl_stats_cache(season_for_xwalk, week_num)
     stats_list = (nfl_cache or {}).get("stats") if nfl_cache else None
     if stats_list:
         stats_cache = {
@@ -719,20 +705,21 @@ def extract_week(
             f"game_context will be null for all top_scorers"
         )
 
-    # Build sleeper_id -> nfl game_id crosswalk ONCE per week (Item 1 / M2).
-    # Falls back to empty dict on failure so extraction still proceeds with
-    # null game_id (graceful degradation per architect M3).
-    season_for_xwalk = data.get("season", 2025)
+    # Build (team_pair) -> nfl game_id crosswalk ONCE per week (C1 fix-up).
+    # Uses Sleeper's per-week (player_team, opponent) truth at call sites
+    # instead of ff_playerids' static team field. Falls back to empty dict on
+    # failure so extraction still proceeds with null game_id (graceful
+    # degradation per architect M3).
     try:
-        player_id_to_game_id = _load_player_to_game_crosswalk(
+        team_pair_to_game_id = _load_team_pair_to_game_id(
             season=season_for_xwalk, week=week_num
         )
     except Exception as exc:  # noqa: BLE001 — log and degrade
         print(
-            f"  WARN: player_id->game_id crosswalk failed for week {week_num}: {exc}; "
+            f"  WARN: team_pair->game_id crosswalk failed for week {week_num}: {exc}; "
             f"game_context.game_id will be null"
         )
-        player_id_to_game_id = {}
+        team_pair_to_game_id = {}
 
     if week_idx is None:
         print(f"ERROR: Week {week_num} not found in data.")
@@ -773,7 +760,7 @@ def extract_week(
                 history_data,
                 rid_to_owner,
                 stats_cache,
-                player_id_to_game_id,
+                team_pair_to_game_id,
             )
         )
 
@@ -890,7 +877,7 @@ def extract_week(
                     top_performer.get("pid"),
                     top_performer.get("position"),
                     stats_cache,
-                    player_id_to_game_id,
+                    team_pair_to_game_id,
                 ),
             }
             if top_performer

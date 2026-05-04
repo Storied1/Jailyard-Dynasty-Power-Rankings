@@ -29,6 +29,45 @@ VOICE_BIBLE_PATH = CONTENT_DIR / "voice-bible.md"
 
 
 # ---------------------------------------------------------------------------
+# Team abbreviation normalization (Phase 1a Task 5 fix-up).
+# ff_playerids and some legacy data sources use older abbreviations
+# (KCC, GBP, LVR, etc.) while nflreadpy schedules and current Sleeper data use
+# modern ones (KC, GB, LV). Sleeper's per-week opponent field also occasionally
+# uses legacy abbrevs (LAR, OAK, SDC, STL).
+# Normalize ALL team-abbrev usage through normalize_team() to prevent
+# comparison drift between data sources.
+# ---------------------------------------------------------------------------
+
+FF_TO_SCHED_TEAM = {
+    "KCC": "KC",
+    "LVR": "LV",
+    "GBP": "GB",
+    "TBB": "TB",
+    "NEP": "NE",
+    "NOS": "NO",
+    "SFO": "SF",
+    "JAC": "JAX",
+    "LAR": "LA",
+    "OAK": "LV",  # Oakland Raiders -> Las Vegas Raiders (relocated 2020)
+    "SDC": "LAC",  # San Diego Chargers -> Los Angeles Chargers (relocated 2017)
+    "STL": "LA",  # St. Louis Rams -> Los Angeles Rams (relocated 2016)
+    "RAM": "LA",  # alternate Rams abbrev
+}
+
+
+def normalize_team(abbr):
+    """Normalize team abbreviation to the modern set used by nflreadpy schedules.
+
+    Applies symmetrically to ALL team-abbrev fields: ff_playerids team,
+    Sleeper opponent abbreviations, downstream consumer comparisons.
+    Returns None for None input (graceful pass-through).
+    """
+    if abbr is None:
+        return None
+    return FF_TO_SCHED_TEAM.get(abbr, abbr)
+
+
+# ---------------------------------------------------------------------------
 # JSON I/O
 # ---------------------------------------------------------------------------
 
