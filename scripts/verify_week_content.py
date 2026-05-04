@@ -15,7 +15,18 @@ import sys
 import unicodedata
 from pathlib import Path
 
-from shared import WEEKS_DIR, CONTENT_CHAT_DIR as CHAT_DIR, load_json as _load_json
+import jsonschema
+from shared import CONTENT_CHAT_DIR as CHAT_DIR
+from shared import REPO_ROOT, WEEKS_DIR
+from shared import load_json as _load_json
+
+# Single source of truth for game_context shape (Phase 1a Task 3 schema).
+# Loaded once at import; validation iterates per-scorer in check_game_context_presence.
+_GAME_CONTEXT_SCHEMA = json.loads(
+    (REPO_ROOT / "scripts" / "schemas" / "game_context.schema.json").read_text(
+        encoding="utf-8"
+    )
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -332,11 +343,20 @@ VALID_MATCHUP_MOMENTUM_LABELS = {
 
 
 def check_game_context_presence(content, data, errors):
-    """Every top_scorer must have a game_context key, AND the aggregate
-    populated ratio (stat_line non-empty) must clear MIN_POPULATED_RATIO.
+    """Tier 1 v2 (Phase 1a Task 6): each top_scorer carries a v2 game_context
+    that conforms to game_context.schema.json AND meets two semantic rules:
 
-    K and DEF are excluded from both numerator and denominator since they
-    legitimately produce empty stat_lines for some weeks.
+    1. game_id may be null only when status explains why (bye/retired/DNP).
+    2. populated_ratio (stat_line non-empty) for non-K/DEF eligible scorers
+       must clear MIN_POPULATED_RATIO when sample size >= 20.
+
+    Structural validation (game_id type, src enum) is delegated to
+    jsonschema.validate(_GAME_CONTEXT_SCHEMA) — the schema is the single
+    source of truth (architect I3 fix). Adding a future src enum value only
+    requires editing scripts/schemas/game_context.schema.json.
+
+    K and DEF are excluded from both populated_ratio numerator and denominator
+    since they legitimately produce empty stat_lines for some weeks.
 
     Threshold derivation: weeks 1-6 baseline measurement was 100% populated
     ratio for non-K/DEF top_scorers. Setting threshold at 80% gives a 20pp
@@ -345,31 +365,64 @@ def check_game_context_presence(content, data, errors):
     """
     # Threshold set from Phase 11 Step 3.5 empirical measurement.
     MIN_POPULATED_RATIO = 0.80
+    EXPLANATORY_STATUS = {"bye_week", "retired", "did_not_play"}
     populated = 0
     eligible = 0
+
+    def validate_ctx(label: str, scorer: dict) -> bool:
+        """Run schema + semantic checks on one scorer's game_context.
+
+        Returns True if structural validation passed (semantic errors still
+        appended to outer ``errors`` but do not short-circuit). Returns False
+        when the block is missing or schema-invalid (caller should skip the
+        populated_ratio increment in that case).
+        """
+        if "game_context" not in scorer:
+            errors.append(f"{label} '{scorer.get('name')}' missing game_context key")
+            return False
+        ctx = scorer.get("game_context")
+        if ctx is None:
+            errors.append(f"{label} '{scorer.get('name')}' game_context is null")
+            return False
+        # Structural: schema enforces game_id/src shape + src enum values.
+        try:
+            jsonschema.validate(ctx, _GAME_CONTEXT_SCHEMA)
+        except jsonschema.ValidationError as e:
+            errors.append(
+                f"{label} '{scorer.get('name')}' game_context schema violation: "
+                f"{e.message} (path: {list(e.absolute_path)})"
+            )
+            return False
+        # Semantic: game_id null only with explanatory status.
+        if ctx.get("game_id") is None:
+            status = scorer.get("status")
+            if status not in EXPLANATORY_STATUS:
+                errors.append(
+                    f"{label} '{scorer.get('name')}' game_context.game_id is null "
+                    f"without explanatory status (got: {status!r})"
+                )
+                return False
+        return True
+
     for mu in data.get("matchups", []):
         for side_key in ("team1", "team2"):
             side = mu.get(side_key, {})
             for scorer in side.get("top_scorers", []):
-                if "game_context" not in scorer:
-                    errors.append(
-                        f"Matchup {mu.get('matchup_id')} {side_key} "
-                        f"top_scorer '{scorer.get('name')}' missing game_context key"
-                    )
-                    continue
+                label = f"Matchup {mu.get('matchup_id')} {side_key} top_scorer"
+                ok = validate_ctx(label, scorer)
                 pos = scorer.get("position", "")
                 if pos in ("K", "DEF"):
                     continue
                 eligible += 1
+                if not ok:
+                    continue
                 gc = scorer.get("game_context")
                 if gc and gc.get("stat_line"):
                     populated += 1
 
     top_perf = data.get("awards", {}).get("top_performer")
-    if top_perf and "game_context" not in top_perf:
-        errors.append(
-            f"awards.top_performer '{top_perf.get('name')}' missing game_context key"
-        )
+    if top_perf:
+        validate_ctx("awards.top_performer", top_perf)
 
     if eligible >= 20:
         ratio = populated / eligible

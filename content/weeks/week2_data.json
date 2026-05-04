@@ -22,9 +22,16 @@
             "team": "IND",
             "points": 28.5,
             "game_context": {
-              "opponent": "DEN",
+              "game_id": "2025_02_DEN_IND",
               "stat_line": "25 carries, 165 yd, 2 rec, 50 rec yd, 1 rec TD",
-              "one_liner": "25 carries, 165 yd, 2 rec, 50 rec yd, 1 rec TD vs. the Broncos"
+              "one_liner": "25 carries, 165 yd, 2 rec, 50 rec yd, 1 rec TD vs. the Broncos",
+              "opponent": "DEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -34,9 +41,16 @@
             "team": "LAR",
             "points": 23.6,
             "game_context": {
-              "opponent": "TEN",
+              "game_id": "2025_02_LA_TEN",
               "stat_line": "8 rec, 91 yd",
-              "one_liner": "8 rec, 91 yd vs. the Titans"
+              "one_liner": "8 rec, 91 yd vs. the Titans",
+              "opponent": "TEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -46,9 +60,16 @@
             "team": "GB",
             "points": 21.4,
             "game_context": {
-              "opponent": "WAS",
+              "game_id": "2025_02_WAS_GB",
               "stat_line": "6 rec, 124 yd, 1 TD",
-              "one_liner": "6 rec, 124 yd, 1 TD vs. the Commanders"
+              "one_liner": "6 rec, 124 yd, 1 TD vs. the Commanders",
+              "opponent": "WAS",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -58,9 +79,16 @@
             "team": "SF",
             "points": 10.0,
             "game_context": {
-              "opponent": "NO",
+              "game_id": "2025_02_SF_NO",
               "stat_line": "2/2 FG, 2 XP",
-              "one_liner": "2/2 FG, 2 XP vs. the Saints"
+              "one_liner": "2/2 FG, 2 XP vs. the Saints",
+              "opponent": "NO",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -70,9 +98,16 @@
             "team": "TEN",
             "points": 9.2,
             "game_context": {
-              "opponent": "LAR",
+              "game_id": "2025_02_LA_TEN",
               "stat_line": "20 carries, 92 yd",
-              "one_liner": "20 carries, 92 yd vs. the Rams"
+              "one_liner": "20 carries, 92 yd vs. the Rams",
+              "opponent": "LA",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -91,9 +126,16 @@
             "team": "GB",
             "points": 20.88,
             "game_context": {
-              "opponent": "WAS",
+              "game_id": "2025_02_WAS_GB",
               "stat_line": "292 pass yd, 2 pass TD, 12 rush yd",
-              "one_liner": "292 pass yd, 2 pass TD, 12 rush yd vs. the Commanders"
+              "one_liner": "292 pass yd, 2 pass TD, 12 rush yd vs. the Commanders",
+              "opponent": "WAS",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -103,9 +145,16 @@
             "team": "ATL",
             "points": 18.3,
             "game_context": {
-              "opponent": "MIN",
+              "game_id": "2025_02_ATL_MIN",
               "stat_line": "22 carries, 143 yd, 3 rec, 25 rec yd",
-              "one_liner": "22 carries, 143 yd, 3 rec, 25 rec yd vs. the Vikings"
+              "one_liner": "22 carries, 143 yd, 3 rec, 25 rec yd vs. the Vikings",
+              "opponent": "MIN",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -115,9 +164,16 @@
             "team": "DET",
             "points": 18.0,
             "game_context": {
-              "opponent": "CHI",
+              "game_id": "2025_02_CHI_DET",
               "stat_line": "6 solo tkl, 1.0 sack, 1 QB hit",
-              "one_liner": "6 solo tkl, 1.0 sack, 1 QB hit vs. the Bears"
+              "one_liner": "6 solo tkl, 1.0 sack, 1 QB hit vs. the Bears",
+              "opponent": "CHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -127,9 +183,16 @@
             "team": "JAX",
             "points": 15.0,
             "game_context": {
-              "opponent": "CIN",
+              "game_id": "2025_02_JAX_CIN",
               "stat_line": "3 solo tkl, 1.0 sack, 1 QB hit",
-              "one_liner": "3 solo tkl, 1.0 sack, 1 QB hit vs. the Bengals"
+              "one_liner": "3 solo tkl, 1.0 sack, 1 QB hit vs. the Bengals",
+              "opponent": "CIN",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -139,9 +202,16 @@
             "team": "CIN",
             "points": 13.1,
             "game_context": {
-              "opponent": "JAX",
+              "game_id": "2025_02_JAX_CIN",
               "stat_line": "3 rec, 56 yd, 1 TD",
-              "one_liner": "3 rec, 56 yd, 1 TD vs. the Jaguars"
+              "one_liner": "3 rec, 56 yd, 1 TD vs. the Jaguars",
+              "opponent": "JAX",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -181,9 +251,16 @@
             "team": "NYG",
             "points": 34.2,
             "game_context": {
-              "opponent": "DAL",
+              "game_id": "2025_02_NYG_DAL",
               "stat_line": "9 rec, 167 yd, 2 TD",
-              "one_liner": "9 rec, 167 yd, 2 TD vs. the Cowboys"
+              "one_liner": "9 rec, 167 yd, 2 TD vs. the Cowboys",
+              "opponent": "DAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -193,9 +270,16 @@
             "team": "CIN",
             "points": 30.5,
             "game_context": {
-              "opponent": "JAX",
+              "game_id": "2025_02_JAX_CIN",
               "stat_line": "14 rec, 165 yd, 1 TD",
-              "one_liner": "14 rec, 165 yd, 1 TD vs. the Jaguars"
+              "one_liner": "14 rec, 165 yd, 1 TD vs. the Jaguars",
+              "opponent": "JAX",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -205,9 +289,16 @@
             "team": "WAS",
             "points": 19.7,
             "game_context": {
-              "opponent": "GB",
+              "game_id": "2025_02_WAS_GB",
               "stat_line": "200 pass yd, 2 pass TD, 17 rush yd",
-              "one_liner": "200 pass yd, 2 pass TD, 17 rush yd vs. the Packers"
+              "one_liner": "200 pass yd, 2 pass TD, 17 rush yd vs. the Packers",
+              "opponent": "GB",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -217,9 +308,16 @@
             "team": "NE",
             "points": 17.0,
             "game_context": {
-              "opponent": "MIA",
+              "game_id": "2025_02_NE_MIA",
               "stat_line": "5 sack, 1 INT, 27 pts allowed",
-              "one_liner": "5 sack, 1 INT, 27 pts allowed vs. the Dolphins"
+              "one_liner": "5 sack, 1 INT, 27 pts allowed vs. the Dolphins",
+              "opponent": "MIA",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -229,9 +327,16 @@
             "team": "CAR",
             "points": 16.2,
             "game_context": {
-              "opponent": "ARI",
+              "game_id": "2025_02_CAR_ARI",
               "stat_line": "10 carries, 38 yd, 5 rec, 39 rec yd, 1 rec TD",
-              "one_liner": "10 carries, 38 yd, 5 rec, 39 rec yd, 1 rec TD vs. the Cardinals"
+              "one_liner": "10 carries, 38 yd, 5 rec, 39 rec yd, 1 rec TD vs. the Cardinals",
+              "opponent": "ARI",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -250,9 +355,16 @@
             "team": "DET",
             "points": 33.96,
             "game_context": {
-              "opponent": "CHI",
+              "game_id": "2025_02_CHI_DET",
               "stat_line": "334 pass yd, 5 pass TD, 6 rush yd",
-              "one_liner": "334 pass yd, 5 pass TD, 6 rush yd vs. the Bears"
+              "one_liner": "334 pass yd, 5 pass TD, 6 rush yd vs. the Bears",
+              "opponent": "CHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -262,9 +374,16 @@
             "team": "BAL",
             "points": 26.5,
             "game_context": {
-              "opponent": "CLE",
+              "game_id": "2025_02_CLE_BAL",
               "stat_line": "8 solo tkl, 2 QB hit, 1 FR",
-              "one_liner": "8 solo tkl, 2 QB hit, 1 FR vs. the Browns"
+              "one_liner": "8 solo tkl, 2 QB hit, 1 FR vs. the Browns",
+              "opponent": "CLE",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -274,9 +393,16 @@
             "team": "LAR",
             "points": 19.6,
             "game_context": {
-              "opponent": "TEN",
+              "game_id": "2025_02_LA_TEN",
               "stat_line": "6 rec, 106 yd, 1 TD",
-              "one_liner": "6 rec, 106 yd, 1 TD vs. the Titans"
+              "one_liner": "6 rec, 106 yd, 1 TD vs. the Titans",
+              "opponent": "TEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -286,9 +412,16 @@
             "team": "BAL",
             "points": 18.0,
             "game_context": {
-              "opponent": "CLE",
+              "game_id": "2025_02_CLE_BAL",
               "stat_line": "2 sack, 1 INT, 1 FR, 1 def TD, 1 blk, 17 pts allowed",
-              "one_liner": "2 sack, 1 INT, 1 FR, 1 def TD, 1 blk, 17 pts allowed vs. the Browns"
+              "one_liner": "2 sack, 1 INT, 1 FR, 1 def TD, 1 blk, 17 pts allowed vs. the Browns",
+              "opponent": "CLE",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -298,9 +431,16 @@
             "team": "PIT",
             "points": 15.4,
             "game_context": {
-              "opponent": "SEA",
+              "game_id": "2025_02_SEA_PIT",
               "stat_line": "14 carries, 48 yd, 4 rec, 86 rec yd",
-              "one_liner": "14 carries, 48 yd, 4 rec, 86 rec yd vs. the Seahawks"
+              "one_liner": "14 carries, 48 yd, 4 rec, 86 rec yd vs. the Seahawks",
+              "opponent": "SEA",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -340,9 +480,16 @@
             "team": "MIA",
             "points": 22.2,
             "game_context": {
-              "opponent": "NE",
+              "game_id": "2025_02_NE_MIA",
               "stat_line": "11 carries, 30 yd, 8 rec, 92 rec yd, 1 rec TD",
-              "one_liner": "11 carries, 30 yd, 8 rec, 92 rec yd, 1 rec TD vs. the Patriots"
+              "one_liner": "11 carries, 30 yd, 8 rec, 92 rec yd, 1 rec TD vs. the Patriots",
+              "opponent": "NE",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -352,9 +499,16 @@
             "team": "NO",
             "points": 15.9,
             "game_context": {
-              "opponent": "CIN",
+              "game_id": "2025_02_JAX_CIN",
               "stat_line": "14 carries, 71 yd, 2 rec, 18 rec yd, 1 rec TD",
-              "one_liner": "14 carries, 71 yd, 2 rec, 18 rec yd, 1 rec TD vs. the Bengals"
+              "one_liner": "14 carries, 71 yd, 2 rec, 18 rec yd, 1 rec TD vs. the Bengals",
+              "opponent": "CIN",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -364,9 +518,16 @@
             "team": "TB",
             "points": 15.1,
             "game_context": {
-              "opponent": "HOU",
+              "game_id": "2025_02_TB_HOU",
               "stat_line": "17 carries, 71 yd, 6 rec, 50 rec yd",
-              "one_liner": "17 carries, 71 yd, 6 rec, 50 rec yd vs. the Texans"
+              "one_liner": "17 carries, 71 yd, 6 rec, 50 rec yd vs. the Texans",
+              "opponent": "HOU",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -376,9 +537,16 @@
             "team": "DET",
             "points": 13.0,
             "game_context": {
-              "opponent": "CHI",
+              "game_id": "2025_02_CHI_DET",
               "stat_line": "4 sack, 1 INT, 1 FR, 21 pts allowed",
-              "one_liner": "4 sack, 1 INT, 1 FR, 21 pts allowed vs. the Bears"
+              "one_liner": "4 sack, 1 INT, 1 FR, 21 pts allowed vs. the Bears",
+              "opponent": "CHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -388,9 +556,16 @@
             "team": "BAL",
             "points": 12.5,
             "game_context": {
-              "opponent": "JAX",
+              "game_id": "2025_02_JAX_CIN",
               "stat_line": "2 solo tkl, 1.0 sack, 3 QB hit",
-              "one_liner": "2 solo tkl, 1.0 sack, 3 QB hit vs. the Jaguars"
+              "one_liner": "2 solo tkl, 1.0 sack, 3 QB hit vs. the Jaguars",
+              "opponent": "JAX",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -409,9 +584,16 @@
             "team": "DET",
             "points": 17.9,
             "game_context": {
-              "opponent": "CHI",
+              "game_id": "2025_02_CHI_DET",
               "stat_line": "12 carries, 94 yd, 1 rush TD, 3 rec, 10 rec yd",
-              "one_liner": "12 carries, 94 yd, 1 rush TD, 3 rec, 10 rec yd vs. the Bears"
+              "one_liner": "12 carries, 94 yd, 1 rush TD, 3 rec, 10 rec yd vs. the Bears",
+              "opponent": "CHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -421,9 +603,16 @@
             "team": "LAC",
             "points": 17.78,
             "game_context": {
-              "opponent": "LV",
+              "game_id": "2025_02_LAC_LV",
               "stat_line": "242 pass yd, 2 pass TD, 31 rush yd",
-              "one_liner": "242 pass yd, 2 pass TD, 31 rush yd vs. the Raiders"
+              "one_liner": "242 pass yd, 2 pass TD, 31 rush yd vs. the Raiders",
+              "opponent": "LV",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -433,9 +622,16 @@
             "team": "NO",
             "points": 13.4,
             "game_context": {
-              "opponent": "SF",
+              "game_id": "2025_02_SF_NO",
               "stat_line": "5 rec, 49 yd, 1 TD",
-              "one_liner": "5 rec, 49 yd, 1 TD vs. the 49ers"
+              "one_liner": "5 rec, 49 yd, 1 TD vs. the 49ers",
+              "opponent": "SF",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -445,9 +641,16 @@
             "team": "PHI",
             "points": 12.9,
             "game_context": {
-              "opponent": "KC",
+              "game_id": "2025_02_PHI_KC",
               "stat_line": "2/2 FG, 2 XP",
-              "one_liner": "2/2 FG, 2 XP vs. the Chiefs"
+              "one_liner": "2/2 FG, 2 XP vs. the Chiefs",
+              "opponent": "KC",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -457,9 +660,16 @@
             "team": "TB",
             "points": 10.9,
             "game_context": {
-              "opponent": "HOU",
+              "game_id": "2025_02_TB_HOU",
               "stat_line": "4 rec, 29 yd, 1 TD",
-              "one_liner": "4 rec, 29 yd, 1 TD vs. the Texans"
+              "one_liner": "4 rec, 29 yd, 1 TD vs. the Texans",
+              "opponent": "HOU",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -499,9 +709,16 @@
             "team": "NE",
             "points": 26.3,
             "game_context": {
-              "opponent": "MIA",
+              "game_id": "2025_02_NE_MIA",
               "stat_line": "230 pass yd, 2 pass TD, 31 rush yd, 1 rush TD",
-              "one_liner": "230 pass yd, 2 pass TD, 31 rush yd, 1 rush TD vs. the Dolphins"
+              "one_liner": "230 pass yd, 2 pass TD, 31 rush yd, 1 rush TD vs. the Dolphins",
+              "opponent": "MIA",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -511,9 +728,16 @@
             "team": "KC",
             "points": 18.3,
             "game_context": {
-              "opponent": "PIT",
+              "game_id": "2025_02_SEA_PIT",
               "stat_line": "13 carries, 105 yd, 1 rush TD, 1 rec, 13 rec yd",
-              "one_liner": "13 carries, 105 yd, 1 rush TD, 1 rec, 13 rec yd vs. the Steelers"
+              "one_liner": "13 carries, 105 yd, 1 rush TD, 1 rec, 13 rec yd vs. the Steelers",
+              "opponent": "PIT",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -523,9 +747,16 @@
             "team": "DAL",
             "points": 16.7,
             "game_context": {
-              "opponent": "NYG",
+              "game_id": "2025_02_NYG_DAL",
               "stat_line": "9 rec, 112 yd",
-              "one_liner": "9 rec, 112 yd vs. the Giants"
+              "one_liner": "9 rec, 112 yd vs. the Giants",
+              "opponent": "NYG",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -535,9 +766,16 @@
             "team": "PHI",
             "points": 16.4,
             "game_context": {
-              "opponent": "KC",
+              "game_id": "2025_02_PHI_KC",
               "stat_line": "22 carries, 88 yd, 1 rush TD, 2 rec, 6 rec yd",
-              "one_liner": "22 carries, 88 yd, 1 rush TD, 2 rec, 6 rec yd vs. the Chiefs"
+              "one_liner": "22 carries, 88 yd, 1 rush TD, 2 rec, 6 rec yd vs. the Chiefs",
+              "opponent": "KC",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -547,9 +785,16 @@
             "team": "SF",
             "points": 16.0,
             "game_context": {
-              "opponent": "NO",
+              "game_id": "2025_02_SF_NO",
               "stat_line": "7 solo tkl, 1 FR",
-              "one_liner": "7 solo tkl, 1 FR vs. the Saints"
+              "one_liner": "7 solo tkl, 1 FR vs. the Saints",
+              "opponent": "NO",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -568,9 +813,16 @@
             "team": "DAL",
             "points": 24.5,
             "game_context": {
-              "opponent": "NYG",
+              "game_id": "2025_02_NYG_DAL",
               "stat_line": "4/4 FG, 4 XP",
-              "one_liner": "4/4 FG, 4 XP vs. the Giants"
+              "one_liner": "4/4 FG, 4 XP vs. the Giants",
+              "opponent": "NYG",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -580,9 +832,16 @@
             "team": null,
             "points": 14.6,
             "game_context": {
-              "opponent": "LV",
+              "game_id": "2025_02_LAC_LV",
               "stat_line": "5 rec, 61 yd, 1 TD",
-              "one_liner": "5 rec, 61 yd, 1 TD vs. the Raiders"
+              "one_liner": "5 rec, 61 yd, 1 TD vs. the Raiders",
+              "opponent": "LV",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -592,9 +851,16 @@
             "team": "GB",
             "points": 14.4,
             "game_context": {
-              "opponent": "WAS",
+              "game_id": "2025_02_WAS_GB",
               "stat_line": "23 carries, 84 yd, 1 rush TD",
-              "one_liner": "23 carries, 84 yd, 1 rush TD vs. the Commanders"
+              "one_liner": "23 carries, 84 yd, 1 rush TD vs. the Commanders",
+              "opponent": "WAS",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -604,9 +870,16 @@
             "team": "PHI",
             "points": 10.54,
             "game_context": {
-              "opponent": "KC",
+              "game_id": "2025_02_PHI_KC",
               "stat_line": "101 pass yd, 15 rush yd, 1 rush TD",
-              "one_liner": "101 pass yd, 15 rush yd, 1 rush TD vs. the Chiefs"
+              "one_liner": "101 pass yd, 15 rush yd, 1 rush TD vs. the Chiefs",
+              "opponent": "KC",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -616,9 +889,16 @@
             "team": "HOU",
             "points": 9.5,
             "game_context": {
-              "opponent": "TB",
+              "game_id": "2025_02_TB_HOU",
               "stat_line": "3 solo tkl, 1.0 sack, 1 QB hit",
-              "one_liner": "3 solo tkl, 1.0 sack, 1 QB hit vs. the Buccaneers"
+              "one_liner": "3 solo tkl, 1.0 sack, 1 QB hit vs. the Buccaneers",
+              "opponent": "TB",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -658,9 +938,16 @@
             "team": "DET",
             "points": 34.7,
             "game_context": {
-              "opponent": "CHI",
+              "game_id": "2025_02_CHI_DET",
               "stat_line": "9 rec, 115 yd, 3 TD",
-              "one_liner": "9 rec, 115 yd, 3 TD vs. the Bears"
+              "one_liner": "9 rec, 115 yd, 3 TD vs. the Bears",
+              "opponent": "CHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -670,9 +957,16 @@
             "team": "DAL",
             "points": 22.14,
             "game_context": {
-              "opponent": "NYG",
+              "game_id": "2025_02_NYG_DAL",
               "stat_line": "361 pass yd, 2 pass TD, 1 INT, 17 rush yd",
-              "one_liner": "361 pass yd, 2 pass TD, 1 INT, 17 rush yd vs. the Giants"
+              "one_liner": "361 pass yd, 2 pass TD, 1 INT, 17 rush yd vs. the Giants",
+              "opponent": "NYG",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -682,9 +976,16 @@
             "team": "SF",
             "points": 19.7,
             "game_context": {
-              "opponent": "NO",
+              "game_id": "2025_02_SF_NO",
               "stat_line": "13 carries, 55 yd, 6 rec, 52 rec yd, 1 rec TD",
-              "one_liner": "13 carries, 55 yd, 6 rec, 52 rec yd, 1 rec TD vs. the Saints"
+              "one_liner": "13 carries, 55 yd, 6 rec, 52 rec yd, 1 rec TD vs. the Saints",
+              "opponent": "NO",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -694,9 +995,16 @@
             "team": "ARI",
             "points": 16.0,
             "game_context": {
-              "opponent": "CAR",
+              "game_id": "2025_02_CAR_ARI",
               "stat_line": "3 sack, 1 INT, 1 FR, 1 def TD, 22 pts allowed",
-              "one_liner": "3 sack, 1 INT, 1 FR, 1 def TD, 22 pts allowed vs. the Panthers"
+              "one_liner": "3 sack, 1 INT, 1 FR, 1 def TD, 22 pts allowed vs. the Panthers",
+              "opponent": "CAR",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -706,9 +1014,16 @@
             "team": "PIT",
             "points": 14.1,
             "game_context": {
-              "opponent": "SEA",
+              "game_id": "2025_02_SEA_PIT",
               "stat_line": "3/3 FG",
-              "one_liner": "3/3 FG vs. the Seahawks"
+              "one_liner": "3/3 FG vs. the Seahawks",
+              "opponent": "SEA",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -727,9 +1042,16 @@
             "team": "DEN",
             "points": 15.0,
             "game_context": {
-              "opponent": "IND",
+              "game_id": "2025_02_DEN_IND",
               "stat_line": "14 carries, 76 yd, 1 rush TD, 1 rec, 9 rec yd",
-              "one_liner": "14 carries, 76 yd, 1 rush TD, 1 rec, 9 rec yd vs. the Colts"
+              "one_liner": "14 carries, 76 yd, 1 rush TD, 1 rec, 9 rec yd vs. the Colts",
+              "opponent": "IND",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -739,9 +1061,16 @@
             "team": "LAC",
             "points": 14.4,
             "game_context": {
-              "opponent": "LV",
+              "game_id": "2025_02_LAC_LV",
               "stat_line": "3 rec, 71 yd, 1 TD",
-              "one_liner": "3 rec, 71 yd, 1 TD vs. the Raiders"
+              "one_liner": "3 rec, 71 yd, 1 TD vs. the Raiders",
+              "opponent": "LV",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -751,9 +1080,16 @@
             "team": null,
             "points": 13.9,
             "game_context": {
-              "opponent": "GB",
+              "game_id": "2025_02_WAS_GB",
               "stat_line": "7 rec, 44 yd, 1 TD",
-              "one_liner": "7 rec, 44 yd, 1 TD vs. the Packers"
+              "one_liner": "7 rec, 44 yd, 1 TD vs. the Packers",
+              "opponent": "GB",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -763,9 +1099,16 @@
             "team": "NYG",
             "points": 13.0,
             "game_context": {
-              "opponent": "DAL",
+              "game_id": "2025_02_NYG_DAL",
               "stat_line": "3 solo tkl, 1.0 sack, 1 QB hit",
-              "one_liner": "3 solo tkl, 1.0 sack, 1 QB hit vs. the Cowboys"
+              "one_liner": "3 solo tkl, 1.0 sack, 1 QB hit vs. the Cowboys",
+              "opponent": "DAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -775,9 +1118,16 @@
             "team": "JAX",
             "points": 10.2,
             "game_context": {
-              "opponent": "CIN",
+              "game_id": "2025_02_JAX_CIN",
               "stat_line": "2/2 FG, 3 XP",
-              "one_liner": "2/2 FG, 3 XP vs. the Bengals"
+              "one_liner": "2/2 FG, 3 XP vs. the Bengals",
+              "opponent": "CIN",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -817,9 +1167,16 @@
             "team": "BAL",
             "points": 26.3,
             "game_context": {
-              "opponent": "CLE",
+              "game_id": "2025_02_CLE_BAL",
               "stat_line": "225 pass yd, 4 pass TD, 13 rush yd",
-              "one_liner": "225 pass yd, 4 pass TD, 13 rush yd vs. the Browns"
+              "one_liner": "225 pass yd, 4 pass TD, 13 rush yd vs. the Browns",
+              "opponent": "CLE",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -829,9 +1186,16 @@
             "team": "BUF",
             "points": 25.0,
             "game_context": {
-              "opponent": "NYJ",
+              "game_id": "2025_02_BUF_NYJ",
               "stat_line": "21 carries, 132 yd, 2 rush TD, 1 rec, 3 rec yd",
-              "one_liner": "21 carries, 132 yd, 2 rush TD, 1 rec, 3 rec yd vs. the Jets"
+              "one_liner": "21 carries, 132 yd, 2 rush TD, 1 rec, 3 rec yd vs. the Jets",
+              "opponent": "NYJ",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -841,9 +1205,16 @@
             "team": "LAC",
             "points": 23.5,
             "game_context": {
-              "opponent": "LV",
+              "game_id": "2025_02_LAC_LV",
               "stat_line": "7 solo tkl, 1.0 sack, 1 QB hit, 1 INT",
-              "one_liner": "7 solo tkl, 1.0 sack, 1 QB hit, 1 INT vs. the Raiders"
+              "one_liner": "7 solo tkl, 1.0 sack, 1 QB hit, 1 INT vs. the Raiders",
+              "opponent": "LV",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -853,9 +1224,16 @@
             "team": "SEA",
             "points": 14.3,
             "game_context": {
-              "opponent": "PIT",
+              "game_id": "2025_02_SEA_PIT",
               "stat_line": "8 rec, 103 yd",
-              "one_liner": "8 rec, 103 yd vs. the Steelers"
+              "one_liner": "8 rec, 103 yd vs. the Steelers",
+              "opponent": "PIT",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -865,9 +1243,16 @@
             "team": null,
             "points": 13.9,
             "game_context": {
-              "opponent": "NE",
+              "game_id": "2025_02_NE_MIA",
               "stat_line": "6 rec, 109 yd",
-              "one_liner": "6 rec, 109 yd vs. the Patriots"
+              "one_liner": "6 rec, 109 yd vs. the Patriots",
+              "opponent": "NE",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -886,9 +1271,16 @@
             "team": "DAL",
             "points": 15.3,
             "game_context": {
-              "opponent": "NYG",
+              "game_id": "2025_02_NYG_DAL",
               "stat_line": "5 rec, 68 yd, 1 TD",
-              "one_liner": "5 rec, 68 yd, 1 TD vs. the Giants"
+              "one_liner": "5 rec, 68 yd, 1 TD vs. the Giants",
+              "opponent": "NYG",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -898,9 +1290,16 @@
             "team": "MIN",
             "points": 15.0,
             "game_context": {
-              "opponent": "CAR",
+              "game_id": "2025_02_CAR_ARI",
               "stat_line": "220 pass yd, 1 pass TD, 1 INT, 32 rush yd",
-              "one_liner": "220 pass yd, 1 pass TD, 1 INT, 32 rush yd vs. the Panthers"
+              "one_liner": "220 pass yd, 1 pass TD, 1 INT, 32 rush yd vs. the Panthers",
+              "opponent": "CAR",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -910,9 +1309,16 @@
             "team": "ARI",
             "points": 11.7,
             "game_context": {
-              "opponent": "CAR",
+              "game_id": "2025_02_CAR_ARI",
               "stat_line": "11 carries, 34 yd, 1 rush TD, 1 rec, 18 rec yd",
-              "one_liner": "11 carries, 34 yd, 1 rush TD, 1 rec, 18 rec yd vs. the Panthers"
+              "one_liner": "11 carries, 34 yd, 1 rush TD, 1 rec, 18 rec yd vs. the Panthers",
+              "opponent": "CAR",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -922,9 +1328,16 @@
             "team": "HOU",
             "points": 9.8,
             "game_context": {
-              "opponent": "TB",
+              "game_id": "2025_02_TB_HOU",
               "stat_line": "2/2 FG, 1 XP",
-              "one_liner": "2/2 FG, 1 XP vs. the Buccaneers"
+              "one_liner": "2/2 FG, 1 XP vs. the Buccaneers",
+              "opponent": "TB",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           },
           {
@@ -934,9 +1347,16 @@
             "team": "MIN",
             "points": 9.6,
             "game_context": {
-              "opponent": "ATL",
+              "game_id": "2025_02_ATL_MIN",
               "stat_line": "3 rec, 81 yd",
-              "one_liner": "3 rec, 81 yd vs. the Falcons"
+              "one_liner": "3 rec, 81 yd vs. the Falcons",
+              "opponent": "ATL",
+              "src": {
+                "game_id": "nflreadpy",
+                "stat_line": "sleeper_stats",
+                "opponent": "sleeper_stats",
+                "one_liner": "fallback"
+              }
             }
           }
         ]
@@ -1317,9 +1737,16 @@
       "points": 34.7,
       "fantasy_team": "The Legion of Bouz",
       "game_context": {
-        "opponent": "CHI",
+        "game_id": "2025_02_CHI_DET",
         "stat_line": "9 rec, 115 yd, 3 TD",
-        "one_liner": "9 rec, 115 yd, 3 TD vs. the Bears"
+        "one_liner": "9 rec, 115 yd, 3 TD vs. the Bears",
+        "opponent": "CHI",
+        "src": {
+          "game_id": "nflreadpy",
+          "stat_line": "sleeper_stats",
+          "opponent": "sleeper_stats",
+          "one_liner": "fallback"
+        }
       }
     }
   },
