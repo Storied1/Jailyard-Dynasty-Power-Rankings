@@ -26,7 +26,10 @@
       "type": ["integer", "null"],
       "description": "home_score - away_score"
     },
-    "kickoff": { "type": ["string", "null"], "description": "ISO8601" },
+    "kickoff": {
+      "type": ["string", "null"],
+      "description": "Local kickoff time-of-day from nflreadpy (e.g. '13:00'); not ISO8601. Combine with stadium timezone for absolute time."
+    },
     "stadium": { "type": ["string", "null"] },
     "stadium_id": { "type": ["string", "null"] },
     "roof": {

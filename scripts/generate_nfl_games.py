@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from fetch_nflreadpy import fetch_one  # noqa: E402
 from shared import REPO_ROOT, save_json_canonical  # noqa: E402
 
-OUT_DIR = REPO_ROOT / "data" / "2025" / "nfl_games"
+KEY_INJURY_STATUSES = ("Out", "Doubtful", "Questionable")
 
 
 def build_game_record(
@@ -118,7 +118,7 @@ def _injuries_for_game(
     rows = injuries.filter(
         (pl.col("week") == week)
         & (pl.col("team").is_in([home, away]))
-        & (pl.col("report_status").is_in(["Out", "Doubtful", "Questionable"]))
+        & (pl.col("report_status").is_in(list(KEY_INJURY_STATUSES)))
     )
     return [
         {
@@ -146,14 +146,15 @@ def main() -> int:
     team_stats = pl.read_parquet(ts_path).sort(["game_id", "team"])
     injuries = pl.read_parquet(inj_path).sort(["week", "team", "gsis_id"])
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir = REPO_ROOT / "data" / str(args.season) / "nfl_games"
+    out_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for row in schedules.iter_rows(named=True):
         record = build_game_record(row, team_stats, injuries)
-        out_path = OUT_DIR / f"{record['game_id']}.json"
+        out_path = out_dir / f"{record['game_id']}.json"
         save_json_canonical(out_path, record)
         count += 1
-    print(f"Wrote {count} NFLGame files to {OUT_DIR}")
+    print(f"Wrote {count} NFLGame files to {out_dir}")
     return 0
 
 

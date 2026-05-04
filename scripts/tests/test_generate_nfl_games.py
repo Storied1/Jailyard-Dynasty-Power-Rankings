@@ -5,11 +5,14 @@ Idempotency (architect M6): re-running produces byte-identical files.
 Schema validity (architect M4): each file validates against nfl_game.schema.json.
 """
 
+import polars as pl
+
 from scripts.generate_nfl_games import build_game_record
 
 
 def test_build_game_record_minimal():
     """Minimal schedule row produces valid game record."""
+    # Synthetic schedule row — game_id is illustrative, not from real 2025 schedule.
     schedule_row = {
         "game_id": "2025_06_BUF_NYJ",
         "season": 2025,
@@ -47,6 +50,7 @@ def test_build_game_record_minimal():
 
 def test_build_game_record_handles_missing_fields():
     """Optional fields default to null without crashing."""
+    # Synthetic schedule row — game_id is illustrative, not from real 2025 schedule.
     schedule_row = {
         "game_id": "2025_18_FOO_BAR",
         "season": 2025,
@@ -63,3 +67,95 @@ def test_build_game_record_handles_missing_fields():
     record = build_game_record(schedule_row, team_stats=None, injuries=None)
     assert record["temp"] is None
     assert record["result"] is None
+
+
+def test_team_stats_for_game_returns_both_teams():
+    """Given a 2-row team_stats DataFrame for one game, returns both team entries."""
+    from scripts.generate_nfl_games import _team_stats_for_game
+
+    df = pl.DataFrame(
+        {
+            "game_id": ["2025_06_BUF_NYJ", "2025_06_BUF_NYJ"],
+            "team": ["BUF", "NYJ"],
+            "passing_epa": [12.5, -3.2],
+            "rushing_epa": [4.1, 2.0],
+            "receiving_epa": [12.5, -3.2],
+            "passing_yards": [320, 180],
+            "rushing_yards": [120, 95],
+            "passing_tds": [3, 1],
+            "rushing_tds": [1, 0],
+        }
+    )
+    result = _team_stats_for_game("2025_06_BUF_NYJ", df)
+    assert "BUF" in result
+    assert "NYJ" in result
+    assert result["BUF"]["passing_epa"] == 12.5
+    assert result["NYJ"]["rushing_yards"] == 95
+
+
+def test_team_stats_for_game_no_match_returns_none():
+    """Wrong game_id returns None (no rows match)."""
+    from scripts.generate_nfl_games import _team_stats_for_game
+
+    df = pl.DataFrame(
+        {
+            "game_id": ["2025_06_BUF_NYJ"],
+            "team": ["BUF"],
+            "passing_epa": [12.5],
+            "rushing_epa": [4.1],
+            "receiving_epa": [12.5],
+            "passing_yards": [320],
+            "rushing_yards": [120],
+            "passing_tds": [3],
+            "rushing_tds": [1],
+        }
+    )
+    result = _team_stats_for_game("2025_06_DEN_KC", df)
+    assert result is None
+
+
+def test_injuries_for_game_filters_status():
+    """Only Out/Doubtful/Questionable statuses pass the filter."""
+    from scripts.generate_nfl_games import _injuries_for_game
+
+    df = pl.DataFrame(
+        {
+            "week": [6, 6, 6, 6, 6, 7],
+            "team": ["BUF", "BUF", "NYJ", "BUF", "DEN", "BUF"],
+            "gsis_id": ["00-001", "00-002", "00-003", "00-004", "00-005", "00-006"],
+            "full_name": ["A", "B", "C", "D", "E", "F"],
+            "report_status": [
+                "Out",
+                "Probable",
+                "Questionable",
+                "IR",
+                "Doubtful",
+                "Out",
+            ],
+            "report_primary_injury": [
+                "ankle",
+                "knee",
+                "shoulder",
+                "hamstring",
+                "back",
+                "wrist",
+            ],
+            "practice_status": ["DNP", "FP", "LP", "DNP", "DNP", "DNP"],
+            "practice_primary_injury": [
+                "ankle",
+                None,
+                "shoulder",
+                "hamstring",
+                "back",
+                "wrist",
+            ],
+        }
+    )
+    result = _injuries_for_game(week=6, home="BUF", away="NYJ", injuries=df)
+    statuses = [r["status"] for r in result]
+    assert "Out" in statuses
+    assert "Questionable" in statuses
+    assert "Probable" not in statuses  # Filtered out
+    assert "IR" not in statuses  # Filtered out
+    assert all(r["team"] in ("BUF", "NYJ") for r in result)  # Wrong team filtered
+    assert all(r["gsis_id"] != "00-006" for r in result)  # Wrong week filtered
