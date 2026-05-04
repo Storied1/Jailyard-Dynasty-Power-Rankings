@@ -14,18 +14,79 @@ Output is saved to content/weeks/week{N}_data.json
 import json
 import os
 import sys
+from pathlib import Path
 
-from shared import (
-    REPO_ROOT,
-    DATA_DIR,
-    WEEKS_DIR as OUTPUT_DIR,
-    TEAM_PROFILES_PATH,
-    load_json,
-    load_nfl_stats_cache,
-    compute_momentum,
-)
+# Ensure scripts/ is on sys.path so cross-module imports (fetch_nflreadpy)
+# resolve both for direct invocation (`python scripts/extract_week_data.py`)
+# and for `python -m pytest` from the repo root.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from shared import DATA_DIR, REPO_ROOT, TEAM_PROFILES_PATH  # noqa: E402
+from shared import WEEKS_DIR as OUTPUT_DIR  # noqa: E402
+from shared import compute_momentum, load_json, load_nfl_stats_cache  # noqa: E402
 
 PROJECT_DIR = REPO_ROOT
+
+
+# ff_playerids uses legacy team abbreviations (KCC, LVR, GBP) while nflreadpy
+# schedules use the modern set (KC, LV, GB). Normalize when joining.
+_FF_TO_SCHED_TEAM = {
+    "KCC": "KC",
+    "LVR": "LV",
+    "GBP": "GB",
+    "TBB": "TB",
+    "NEP": "NE",
+    "NOS": "NO",
+    "SFO": "SF",
+    "JAC": "JAX",
+    "LAR": "LA",
+    # Historical relocations / aliases that still appear in the dataset
+    "OAK": "LV",
+    "SDC": "LAC",
+    "STL": "LA",
+    "RAM": "LA",
+}
+
+
+def _load_player_to_game_crosswalk(season: int, week: int) -> dict:
+    """Build sleeper_id -> game_id mapping for one week.
+
+    Joins:
+    - data/external/ff_playerids.parquet (sleeper_id <-> team)
+    - data/external/schedules_{season}.parquet (week -> home_team/away_team -> game_id)
+
+    For each rostered player on a team playing this week, map to that game_id.
+    Normalizes ff_playerids' legacy team abbreviations (KCC/LVR/etc.) to the
+    modern set used by schedules. Returns dict keyed by str(sleeper_id) for
+    downstream lookup parity (Sleeper IDs are strings in season_combined).
+    """
+    import polars as pl
+    from fetch_nflreadpy import fetch_one
+
+    ff_path = fetch_one("ff_playerids", season=season)
+    sched_path = fetch_one("schedules", season=season)
+
+    ff = pl.read_parquet(ff_path).select(["sleeper_id", "team"])
+    schedules = pl.read_parquet(sched_path).filter(pl.col("week") == week)
+
+    # team -> game_id (one team plays one game per week)
+    team_to_game: dict = {}
+    for row in schedules.iter_rows(named=True):
+        team_to_game[row["home_team"]] = row["game_id"]
+        team_to_game[row["away_team"]] = row["game_id"]
+
+    # sleeper_id -> game_id via team (normalize ff team abbrev first)
+    crosswalk: dict = {}
+    for row in ff.iter_rows(named=True):
+        sid = row["sleeper_id"]
+        ff_team = row["team"]
+        if sid is None or not ff_team:
+            continue
+        sched_team = _FF_TO_SCHED_TEAM.get(ff_team, ff_team)
+        game_id = team_to_game.get(sched_team)
+        if game_id:
+            crosswalk[str(sid)] = game_id
+    return crosswalk
 
 
 def load_season_data(season=2025):
@@ -216,6 +277,129 @@ def build_game_context(player_id, nfl_team, position, stats_cache):
     }
 
 
+def build_game_context_v2(
+    player_id: str,
+    sleeper_stats_for_player: dict,
+    player_id_to_game_id: dict,
+    nfl_team_full: dict,
+    opponent_abbr: str | None,
+) -> dict:
+    """Build v2 game_context: game_id reference + src attribution.
+
+    v2 differences from v1 (per architect M2 + M3):
+    - Returns `game_id` reference instead of nesting weather/opponent
+    - Adds `src` field with per-attribution sources
+    - Weather, opponent_def_epa, injury_status live in the NFLGame entity now
+
+    Returns dict shape:
+        {
+            "game_id": str | None,
+            "stat_line": str | None,
+            "one_liner": str | None,
+            "opponent": str | None,
+            "src": {"game_id": "nflreadpy" | "fallback" | None, ...}
+        }
+    """
+    game_id = player_id_to_game_id.get(player_id) if player_id else None
+    src: dict = {
+        "game_id": "nflreadpy" if game_id else None,
+    }
+
+    stat_line = (
+        _format_stat_line(sleeper_stats_for_player)
+        if sleeper_stats_for_player
+        else None
+    )
+    src["stat_line"] = "sleeper_stats" if stat_line else None
+
+    opponent_full = nfl_team_full.get(opponent_abbr) if opponent_abbr else None
+    one_liner = (
+        f"{stat_line} vs the {opponent_full}"
+        if stat_line and opponent_full
+        else stat_line
+    )
+    src["opponent"] = "sleeper_stats" if opponent_abbr else None
+    src["one_liner"] = "fallback" if one_liner else None
+
+    return {
+        "game_id": game_id,
+        "stat_line": stat_line,
+        "one_liner": one_liner,
+        "opponent": opponent_full,
+        "src": src,
+    }
+
+
+def _format_stat_line(stats: dict) -> str | None:
+    """Render a Sleeper stats blob as a one-line stat string. Trivial cases only."""
+    if not stats:
+        return None
+    parts = []
+    if stats.get("car"):
+        parts.append(f"{stats['car']} carries")
+    if stats.get("rush_yd"):
+        parts.append(f"{stats['rush_yd']} yd")
+    if stats.get("rush_td"):
+        parts.append(f"{stats['rush_td']} rush TD")
+    if stats.get("rec"):
+        parts.append(f"{stats['rec']} rec")
+    if stats.get("rec_yd"):
+        parts.append(f"{stats['rec_yd']} rec yd")
+    if stats.get("rec_td"):
+        parts.append(f"{stats['rec_td']} rec TD")
+    return ", ".join(parts) if parts else None
+
+
+def _build_game_context_v2_for_player(
+    player_id, position, stats_cache, player_id_to_game_id
+):
+    """Adapter: extract Sleeper opponent + stats blob from cache, then call v2.
+
+    Bridges the existing per-player call sites (which only have player_id +
+    position + the week's stats_cache) to build_game_context_v2's parameter
+    contract. Returns None if player_id missing or no cache entry — preserves
+    v1's behavior for downstream null-handling.
+
+    The stat_line uses v1's richer position-aware _stat_line (Sleeper's
+    `rush_att`/`pass_yd` keys, etc.); _format_stat_line is the v2 doc-spec
+    placeholder. This adapter routes to _stat_line for production fidelity.
+    """
+    if not player_id or not stats_cache:
+        return None
+    entry = stats_cache.get(str(player_id))
+    if not entry:
+        return None
+
+    opponent = entry.get("opponent")
+    stats_dict = entry.get("stats") or {}
+    stat_line_text = _stat_line(position, stats_dict) or None
+
+    game_id = player_id_to_game_id.get(str(player_id)) if player_id_to_game_id else None
+    opponent_full = NFL_TEAM_FULL.get(opponent) if opponent else None
+
+    if stat_line_text and opponent_full:
+        one_liner = f"{stat_line_text} vs. the {opponent_full}"
+    elif stat_line_text:
+        one_liner = stat_line_text
+    elif opponent_full:
+        one_liner = f"played vs. the {opponent_full}"
+    else:
+        one_liner = ""
+
+    return {
+        "game_id": game_id,
+        "stat_line": stat_line_text,
+        "one_liner": one_liner,
+        "opponent": opponent,
+        "src": {
+            "game_id": "nflreadpy" if game_id else None,
+            "stat_line": "sleeper_stats" if stat_line_text else None,
+            "opponent": "sleeper_stats" if opponent else None,
+            "one_liner": "fallback" if one_liner else None,
+        },
+    }
+
+
 def _is_upset(winner_rid, t1_rid, t2_rid, prev_rankings):
     """Return True iff the winner had a numerically-higher (worse) prev rank.
 
@@ -307,9 +491,20 @@ def build_roster_lookup(data):
 
 
 def build_matchup_entry(
-    m, roster_lookup, prev_rankings, history_data, rid_to_owner, stats_cache=None
+    m,
+    roster_lookup,
+    prev_rankings,
+    history_data,
+    rid_to_owner,
+    stats_cache=None,
+    player_id_to_game_id=None,
 ):
-    """Build a single matchup dict from raw matchup data."""
+    """Build a single matchup dict from raw matchup data.
+
+    player_id_to_game_id (Item 1 / architect M2): sleeper_id -> nfl game_id
+    crosswalk for the week. Built once per week in extract_week. When None,
+    game_context.game_id will be null (graceful degradation per architect M3).
+    """
     t1 = m["team1"]
     t2 = m["team2"]
     r1_info = roster_lookup.get(t1["roster_id"], {})
@@ -333,8 +528,11 @@ def build_matchup_entry(
                     "position": p["position"],
                     "team": p["team"],
                     "points": p["points"],
-                    "game_context": build_game_context(
-                        p.get("pid"), p.get("team"), p.get("position"), stats_cache
+                    "game_context": _build_game_context_v2_for_player(
+                        p.get("pid"),
+                        p.get("position"),
+                        stats_cache,
+                        player_id_to_game_id,
                     ),
                 }
                 for p in t1.get("top_starters", [])[:5]
@@ -353,8 +551,11 @@ def build_matchup_entry(
                     "position": p["position"],
                     "team": p["team"],
                     "points": p["points"],
-                    "game_context": build_game_context(
-                        p.get("pid"), p.get("team"), p.get("position"), stats_cache
+                    "game_context": _build_game_context_v2_for_player(
+                        p.get("pid"),
+                        p.get("position"),
+                        stats_cache,
+                        player_id_to_game_id,
                     ),
                 }
                 for p in t2.get("top_starters", [])[:5]
@@ -518,6 +719,21 @@ def extract_week(
             f"game_context will be null for all top_scorers"
         )
 
+    # Build sleeper_id -> nfl game_id crosswalk ONCE per week (Item 1 / M2).
+    # Falls back to empty dict on failure so extraction still proceeds with
+    # null game_id (graceful degradation per architect M3).
+    season_for_xwalk = data.get("season", 2025)
+    try:
+        player_id_to_game_id = _load_player_to_game_crosswalk(
+            season=season_for_xwalk, week=week_num
+        )
+    except Exception as exc:  # noqa: BLE001 — log and degrade
+        print(
+            f"  WARN: player_id->game_id crosswalk failed for week {week_num}: {exc}; "
+            f"game_context.game_id will be null"
+        )
+        player_id_to_game_id = {}
+
     if week_idx is None:
         print(f"ERROR: Week {week_num} not found in data.")
         return None
@@ -557,6 +773,7 @@ def extract_week(
                 history_data,
                 rid_to_owner,
                 stats_cache,
+                player_id_to_game_id,
             )
         )
 
@@ -669,11 +886,11 @@ def extract_week(
                 "fantasy_team": roster_lookup.get(
                     top_performer.get("roster_id"), {}
                 ).get("team_name", "?"),
-                "game_context": build_game_context(
+                "game_context": _build_game_context_v2_for_player(
                     top_performer.get("pid"),
-                    top_performer.get("team"),
                     top_performer.get("position"),
                     stats_cache,
+                    player_id_to_game_id,
                 ),
             }
             if top_performer
