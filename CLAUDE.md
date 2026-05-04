@@ -197,4 +197,5 @@ Use `python` not `python3` on this machine. Python is at:
 - GIPHY API key: stored in `.claude/settings.local.json` (gitignored) — needed for `/pick-media`
 - GitHub Actions runs `fetch_sleeper.py` automatically on NFL Sundays
 - `chat/` directory and `content/chat/.map_cache/` are gitignored (privacy + intermediate data)
+- **Python deps (no requirements.txt):** verifier requires `pip install jsonschema>=4.0`. Other scripts use `nflreadpy` (Task 2 spike), `polars` (transitive via nflreadpy), `playwright` (Task 5 future use). Install on fresh clones.
 - **Pre-commit hook gotcha**: eslint v10 fails with exit code 2 when no `eslint.config.js` exists. The global hook at `~/tools/hooks/pre-commit` now skips eslint when no config is found, but be aware if the hook is ever reverted.

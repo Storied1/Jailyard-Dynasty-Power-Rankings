@@ -21,10 +21,13 @@ from shared import REPO_ROOT, WEEKS_DIR
 from shared import load_json as _load_json
 
 # Single source of truth for game_context shape (Phase 1a Task 3 schema).
-# Loaded once at import; validation iterates per-scorer in check_game_context_presence.
-_GAME_CONTEXT_SCHEMA = json.loads(
-    (REPO_ROOT / "scripts" / "schemas" / "game_context.schema.json").read_text(
-        encoding="utf-8"
+# Pre-compiled validator avoids per-call validator-construction overhead
+# (38x speedup: 699ms->18ms for 60 contexts x 10 iters per reviewer benchmark).
+_GAME_CONTEXT_VALIDATOR = jsonschema.Draft202012Validator(
+    json.loads(
+        (REPO_ROOT / "scripts" / "schemas" / "game_context.schema.json").read_text(
+            encoding="utf-8"
+        )
     )
 )
 
@@ -351,7 +354,7 @@ def check_game_context_presence(content, data, errors):
        must clear MIN_POPULATED_RATIO when sample size >= 20.
 
     Structural validation (game_id type, src enum) is delegated to
-    jsonschema.validate(_GAME_CONTEXT_SCHEMA) — the schema is the single
+    _GAME_CONTEXT_VALIDATOR.validate(ctx) — the schema is the single
     source of truth (architect I3 fix). Adding a future src enum value only
     requires editing scripts/schemas/game_context.schema.json.
 
@@ -386,7 +389,7 @@ def check_game_context_presence(content, data, errors):
             return False
         # Structural: schema enforces game_id/src shape + src enum values.
         try:
-            jsonschema.validate(ctx, _GAME_CONTEXT_SCHEMA)
+            _GAME_CONTEXT_VALIDATOR.validate(ctx)
         except jsonschema.ValidationError as e:
             errors.append(
                 f"{label} '{scorer.get('name')}' game_context schema violation: "
@@ -394,6 +397,11 @@ def check_game_context_presence(content, data, errors):
             )
             return False
         # Semantic: game_id null only with explanatory status.
+        # (Phase 1a: producer never emits null game_id post-Task-5 fix-up — the
+        # DEF coverage gap closed when we switched to per-week team-pair lookup.
+        # This branch is forward-compat for Phase 1b enrichment that adds
+        # `status` field to top_scorers (e.g., "bye_week", "retired", "did_not_play").
+        # Today, any null game_id is treated as an error.)
         if ctx.get("game_id") is None:
             status = scorer.get("status")
             if status not in EXPLANATORY_STATUS:
