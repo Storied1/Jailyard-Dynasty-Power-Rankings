@@ -53,3 +53,7 @@ content/chat/.map_cache/
 # Playwright MCP artifacts
 .playwright-mcp/
 .superpowers/
+
+# Local session-recovery logs (raw terminal transcripts saved before /compact;
+# preserve human-readable recovery insurance without entering source control).
+docs/sessions/

@@ -1,6 +1,6 @@
 # Jailyard Content-Depth — Phase 1a (Data Foundation) Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task — linear, single-context execution (this codebase's ethos for data-layer work; no `subagent-driven-development`). Steps use checkbox (`- [ ]`) syntax for tracking. See `~/.claude/projects/C--Users-blake-projects-Jailyard-Dynasty-Power-Rankings/memory/feedback_data_work_single_context.md` for rationale.
 
 **Goal:** Stand up the L1 data foundation — NFLGame as first-class entity, extended `top_scorers[].game_context` with nflreadpy-sourced fields and `src` attribution, and weekly fantasy roster snapshots (capture-from-now-on with derived backfill for weeks 1-6).
 
