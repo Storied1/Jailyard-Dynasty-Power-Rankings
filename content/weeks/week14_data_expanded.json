@@ -1,0 +1,3584 @@
+{
+  "awards": {
+    "biggest_blowout": {
+      "margin": 46.42,
+      "score": "134.9-88.5",
+      "teams": "Father Time  vs Sleeping Giants",
+      "winner": "Sleeping Giants"
+    },
+    "closest_game": {
+      "margin": 1.16,
+      "score": "123.6-122.4",
+      "teams": "Burden of Etienne-y Woody vs Ghastly Grayskull Gang"
+    },
+    "high_scorer": {
+      "owner": "ToreroGaucho",
+      "points": 194.64,
+      "team_name": "Rasheeing the Scene"
+    },
+    "low_scorer": {
+      "owner": "kevobucks",
+      "points": 82.84,
+      "team_name": "Noble FFT"
+    },
+    "top_performer": {
+      "fantasy_team": "Rasheeing the Scene",
+      "game_context": {
+        "game_id": "2025_14_CIN_BUF",
+        "one_liner": "251 pass yd, 3 pass TD, 78 rush yd, 1 rush TD vs. the Bengals",
+        "opponent": "CIN",
+        "src": {
+          "game_id": "nflreadpy",
+          "one_liner": "fallback",
+          "opponent": "sleeper_stats",
+          "stat_line": "sleeper_stats"
+        },
+        "stat_line": "251 pass yd, 3 pass TD, 78 rush yd, 1 rush TD"
+      },
+      "name": "Josh Allen",
+      "nfl_team": "BUF",
+      "player_id": "4984",
+      "points": 37.84,
+      "position": "QB"
+    }
+  },
+  "games": {
+    "2025_14_CHI_GB": {
+      "away_score": 21,
+      "away_team": "CHI",
+      "div_game": true,
+      "game_id": "2025_14_CHI_GB",
+      "home_score": 28,
+      "home_team": "GB",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0039071",
+          "name": "Tyrique Stevenson",
+          "primary_injury": "Hip",
+          "status": "Out",
+          "team": "CHI"
+        },
+        {
+          "gsis_id": "00-0039919",
+          "name": "Rome Odunze",
+          "primary_injury": "Foot",
+          "status": "Out",
+          "team": "CHI"
+        },
+        {
+          "gsis_id": "00-0040167",
+          "name": "Ruben Hyppolite II",
+          "primary_injury": "Shoulder",
+          "status": "Out",
+          "team": "CHI"
+        },
+        {
+          "gsis_id": "00-0036871",
+          "name": "Nate Hobbs",
+          "primary_injury": "Knee",
+          "status": "Questionable",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0037075",
+          "name": "Devonte Wyatt",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0038463",
+          "name": "Brenton Cox Jr.",
+          "primary_injury": "Groin",
+          "status": "Questionable",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0039112",
+          "name": "Lukas Van Ness",
+          "primary_injury": "Foot",
+          "status": "Out",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0039146",
+          "name": "Jayden Reed",
+          "primary_injury": "Foot",
+          "status": "Questionable",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0039811",
+          "name": "MarShawn Lloyd",
+          "primary_injury": "Calf",
+          "status": "Out",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0039867",
+          "name": "Javon Bullard",
+          "primary_injury": "Ankle",
+          "status": "Questionable",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0040009",
+          "name": "Savion Williams",
+          "primary_injury": "Foot",
+          "status": "Out",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0040012",
+          "name": "Collin Oliver",
+          "primary_injury": "Hamstring",
+          "status": "Out",
+          "team": "GB"
+        },
+        {
+          "gsis_id": "00-0040667",
+          "name": "Matthew Golden",
+          "primary_injury": "Wrist",
+          "status": "Questionable",
+          "team": "GB"
+        }
+      ],
+      "kickoff": "16:25",
+      "rest_days": {
+        "away": 9,
+        "home": 10
+      },
+      "result": 7,
+      "roof": "outdoors",
+      "season": 2025,
+      "spread_line": 6.5,
+      "stadium": "Lambeau Field",
+      "stadium_id": "GNB00",
+      "starting_qbs": {
+        "away": "00-0039918",
+        "home": "00-0036264"
+      },
+      "surface": "grass",
+      "team_stats": {
+        "CHI": {
+          "passing_epa": -0.17887377711148567,
+          "passing_tds": 2,
+          "passing_yards": 186,
+          "receiving_epa": 6.287753624851808,
+          "rushing_epa": 7.6364084068774245,
+          "rushing_tds": 0,
+          "rushing_yards": 138
+        },
+        "GB": {
+          "passing_epa": 8.027323357702699,
+          "passing_tds": 3,
+          "passing_yards": 234,
+          "receiving_epa": 11.508787702128757,
+          "rushing_epa": 4.204686890647281,
+          "rushing_tds": 1,
+          "rushing_yards": 117
+        }
+      },
+      "temp": 16,
+      "total_line": 44.5,
+      "week": 14,
+      "wind": 9
+    },
+    "2025_14_CIN_BUF": {
+      "away_score": 34,
+      "away_team": "CIN",
+      "div_game": false,
+      "game_id": "2025_14_CIN_BUF",
+      "home_score": 39,
+      "home_team": "BUF",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0033156",
+          "name": "Joey Bosa",
+          "primary_injury": "Hamstring",
+          "status": "Out",
+          "team": "BUF"
+        },
+        {
+          "gsis_id": "00-0036976",
+          "name": "Spencer Brown",
+          "primary_injury": "Shoulder",
+          "status": "Questionable",
+          "team": "BUF"
+        },
+        {
+          "gsis_id": "00-0036988",
+          "name": "Josh Palmer",
+          "primary_injury": "Knee",
+          "status": "Doubtful",
+          "team": "BUF"
+        },
+        {
+          "gsis_id": "00-0037254",
+          "name": "Terrel Bernard",
+          "primary_injury": "Elbow",
+          "status": "Out",
+          "team": "BUF"
+        },
+        {
+          "gsis_id": "00-0038933",
+          "name": "Dalton Kincaid",
+          "primary_injury": "Hamstring",
+          "status": "Questionable",
+          "team": "BUF"
+        },
+        {
+          "gsis_id": "00-0033935",
+          "name": "Trey Hendrickson",
+          "primary_injury": "Hip",
+          "status": "Out",
+          "team": "CIN"
+        },
+        {
+          "gsis_id": "00-0038890",
+          "name": "Shaka Heyward",
+          "primary_injury": "Fibula",
+          "status": "Out",
+          "team": "CIN"
+        },
+        {
+          "gsis_id": "00-0039810",
+          "name": "Jermaine Burton",
+          "primary_injury": "Not injury related - other",
+          "status": "Out",
+          "team": "CIN"
+        }
+      ],
+      "kickoff": "13:00",
+      "rest_days": {
+        "away": 10,
+        "home": 7
+      },
+      "result": 5,
+      "roof": "outdoors",
+      "season": 2025,
+      "spread_line": 6.0,
+      "stadium": "New Era Field",
+      "stadium_id": "BUF00",
+      "starting_qbs": {
+        "away": "00-0036442",
+        "home": "00-0034857"
+      },
+      "surface": "a_turf",
+      "team_stats": {
+        "BUF": {
+          "passing_epa": 16.701261836904568,
+          "passing_tds": 3,
+          "passing_yards": 251,
+          "receiving_epa": 20.678119868665934,
+          "rushing_epa": -1.91680274278333,
+          "rushing_tds": 1,
+          "rushing_yards": 183
+        },
+        "CIN": {
+          "passing_epa": 8.175821986326017,
+          "passing_tds": 4,
+          "passing_yards": 284,
+          "receiving_epa": 10.21393216837896,
+          "rushing_epa": -1.3991516482783481,
+          "rushing_tds": 1,
+          "rushing_yards": 62
+        }
+      },
+      "temp": 31,
+      "total_line": 54.5,
+      "week": 14,
+      "wind": 12
+    },
+    "2025_14_DAL_DET": {
+      "away_score": 30,
+      "away_team": "DAL",
+      "div_game": false,
+      "game_id": "2025_14_DAL_DET",
+      "home_score": 44,
+      "home_team": "DET",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0031364",
+          "name": "Jadeveon Clowney",
+          "primary_injury": "Hamstring",
+          "status": "Questionable",
+          "team": "DAL"
+        },
+        {
+          "gsis_id": "00-0033877",
+          "name": "Malik Hooker",
+          "primary_injury": "Back",
+          "status": "Questionable",
+          "team": "DAL"
+        },
+        {
+          "gsis_id": "00-0036361",
+          "name": "Trevon Diggs",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "DAL"
+        },
+        {
+          "gsis_id": "00-0039341",
+          "name": "Tyler Guyton",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "DAL"
+        },
+        {
+          "gsis_id": "00-0032381",
+          "name": "Taylor Decker",
+          "primary_injury": "Shoulder",
+          "status": "Questionable",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0032395",
+          "name": "Graham Glasgow",
+          "primary_injury": "Knee",
+          "status": "Questionable",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0032464",
+          "name": "Kalif Raymond",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0036534",
+          "name": "Shane Zylstra",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0036736",
+          "name": "Kayode Awosika",
+          "primary_injury": "Foot",
+          "status": "Out",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0036754",
+          "name": "Brock Wright",
+          "primary_injury": "Neck",
+          "status": "Out",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0036880",
+          "name": "Penei Sewell",
+          "primary_injury": "Shoulder",
+          "status": "Questionable",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0036963",
+          "name": "Amon-Ra St. Brown",
+          "primary_injury": "Ankle",
+          "status": "Questionable",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0037667",
+          "name": "Kerby Joseph",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0039141",
+          "name": "Brian Branch",
+          "primary_injury": "Toe",
+          "status": "Questionable",
+          "team": "DET"
+        },
+        {
+          "gsis_id": "00-0039364",
+          "name": "Sione Vaki",
+          "primary_injury": "Thumb",
+          "status": "Questionable",
+          "team": "DET"
+        }
+      ],
+      "kickoff": "20:15",
+      "rest_days": {
+        "away": 7,
+        "home": 7
+      },
+      "result": 14,
+      "roof": "dome",
+      "season": 2025,
+      "spread_line": 3.5,
+      "stadium": "Ford Field",
+      "stadium_id": "DET00",
+      "starting_qbs": {
+        "away": "00-0033077",
+        "home": "00-0033106"
+      },
+      "surface": "fieldturf",
+      "team_stats": {
+        "DAL": {
+          "passing_epa": 1.0007189599864175,
+          "passing_tds": 1,
+          "passing_yards": 376,
+          "receiving_epa": 7.567702317719732,
+          "rushing_epa": 0.39286664337851107,
+          "rushing_tds": 1,
+          "rushing_yards": 91
+        },
+        "DET": {
+          "passing_epa": 12.198009743105478,
+          "passing_tds": 1,
+          "passing_yards": 309,
+          "receiving_epa": 16.037926808312253,
+          "rushing_epa": 6.130527636792976,
+          "rushing_tds": 4,
+          "rushing_yards": 109
+        }
+      },
+      "temp": null,
+      "total_line": 55.5,
+      "week": 14,
+      "wind": null
+    },
+    "2025_14_DEN_LV": {
+      "away_score": 24,
+      "away_team": "DEN",
+      "div_game": true,
+      "game_id": "2025_14_DEN_LV",
+      "home_score": 17,
+      "home_team": "LV",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0033297",
+          "name": "D.J. Jones",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "DEN"
+        },
+        {
+          "gsis_id": "00-0038783",
+          "name": "Nate Adkins",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "DEN"
+        },
+        {
+          "gsis_id": "00-0033872",
+          "name": "Jamal Adams",
+          "primary_injury": "Knee",
+          "status": "Questionable",
+          "team": "LV"
+        },
+        {
+          "gsis_id": "00-0034973",
+          "name": "Maxx Crosby",
+          "primary_injury": "Knee",
+          "status": "Questionable",
+          "team": "LV"
+        },
+        {
+          "gsis_id": "00-0035602",
+          "name": "Alex Bachman",
+          "primary_injury": "Thumb",
+          "status": "Out",
+          "team": "LV"
+        },
+        {
+          "gsis_id": "00-0036293",
+          "name": "Jeremy Chinn",
+          "primary_injury": "Back",
+          "status": "Questionable",
+          "team": "LV"
+        },
+        {
+          "gsis_id": "00-0036604",
+          "name": "Jordan Meredith",
+          "primary_injury": "Ankle",
+          "status": "Questionable",
+          "team": "LV"
+        },
+        {
+          "gsis_id": "00-0037255",
+          "name": "Dylan Parham",
+          "primary_injury": "Back",
+          "status": "Questionable",
+          "team": "LV"
+        },
+        {
+          "gsis_id": "00-0039066",
+          "name": "Michael Mayer",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "LV"
+        },
+        {
+          "gsis_id": "00-0040581",
+          "name": "Dont'e Thornton Jr.",
+          "primary_injury": "Concussion",
+          "status": "Out",
+          "team": "LV"
+        }
+      ],
+      "kickoff": "16:05",
+      "rest_days": {
+        "away": 7,
+        "home": 7
+      },
+      "result": -7,
+      "roof": "dome",
+      "season": 2025,
+      "spread_line": -8.5,
+      "stadium": "Allegiant Stadium",
+      "stadium_id": "VEG00",
+      "starting_qbs": {
+        "away": "00-0039732",
+        "home": "00-0030565"
+      },
+      "surface": "grass",
+      "team_stats": {
+        "DEN": {
+          "passing_epa": 5.895924786257751,
+          "passing_tds": 0,
+          "passing_yards": 212,
+          "receiving_epa": 10.293814946874704,
+          "rushing_epa": 5.2838893315638416,
+          "rushing_tds": 2,
+          "rushing_yards": 152
+        },
+        "LV": {
+          "passing_epa": -0.830933353329657,
+          "passing_tds": 2,
+          "passing_yards": 213,
+          "receiving_epa": 7.826124413705783,
+          "rushing_epa": -1.897992432990577,
+          "rushing_tds": 0,
+          "rushing_yards": 40
+        }
+      },
+      "temp": null,
+      "total_line": 40.5,
+      "week": 14,
+      "wind": null
+    },
+    "2025_14_HOU_KC": {
+      "away_score": 20,
+      "away_team": "HOU",
+      "div_game": false,
+      "game_id": "2025_14_HOU_KC",
+      "home_score": 10,
+      "home_team": "KC",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0039343",
+          "name": "Kamari Lassiter",
+          "primary_injury": "Foot",
+          "status": "Questionable",
+          "team": "HOU"
+        },
+        {
+          "gsis_id": "00-0039395",
+          "name": "Jamal Hill",
+          "primary_injury": "Hamstring",
+          "status": "Out",
+          "team": "HOU"
+        },
+        {
+          "gsis_id": "00-0040204",
+          "name": "Jaylen Reed",
+          "primary_injury": "Forearm",
+          "status": "Out",
+          "team": "HOU"
+        },
+        {
+          "gsis_id": "00-0035237",
+          "name": "Jawaan Taylor",
+          "primary_injury": "Triceps",
+          "status": "Doubtful",
+          "team": "KC"
+        },
+        {
+          "gsis_id": "00-0036660",
+          "name": "Trey Smith",
+          "primary_injury": "Ankle",
+          "status": "Doubtful",
+          "team": "KC"
+        },
+        {
+          "gsis_id": "00-0038519",
+          "name": "Nikko Remigio",
+          "primary_injury": "Shoulder",
+          "status": "Out",
+          "team": "KC"
+        },
+        {
+          "gsis_id": "00-0039324",
+          "name": "Christian Roland-Wallace",
+          "primary_injury": "Back",
+          "status": "Out",
+          "team": "KC"
+        }
+      ],
+      "kickoff": "20:20",
+      "rest_days": {
+        "away": 7,
+        "home": 10
+      },
+      "result": -10,
+      "roof": "outdoors",
+      "season": 2025,
+      "spread_line": 4.5,
+      "stadium": "GEHA Field at Arrowhead Stadium",
+      "stadium_id": "KAN00",
+      "starting_qbs": {
+        "away": "00-0039163",
+        "home": "00-0033873"
+      },
+      "surface": "grass",
+      "team_stats": {
+        "HOU": {
+          "passing_epa": 0.1888540767831728,
+          "passing_tds": 1,
+          "passing_yards": 203,
+          "receiving_epa": 6.4443386240745895,
+          "rushing_epa": -5.089950044170452,
+          "rushing_tds": 1,
+          "rushing_yards": 82
+        },
+        "KC": {
+          "passing_epa": -22.3309291034004,
+          "passing_tds": 0,
+          "passing_yards": 160,
+          "receiving_epa": -17.017475164329426,
+          "rushing_epa": 3.863311624445487,
+          "rushing_tds": 1,
+          "rushing_yards": 126
+        }
+      },
+      "temp": 27,
+      "total_line": 41.5,
+      "week": 14,
+      "wind": 8
+    },
+    "2025_14_IND_JAX": {
+      "away_score": 19,
+      "away_team": "IND",
+      "div_game": true,
+      "game_id": "2025_14_IND_JAX",
+      "home_score": 36,
+      "home_team": "JAX",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0034359",
+          "name": "Tyquan Lewis",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "IND"
+        },
+        {
+          "gsis_id": "00-0037190",
+          "name": "Sauce Gardner",
+          "primary_injury": "Calf",
+          "status": "Out",
+          "team": "IND"
+        },
+        {
+          "gsis_id": "00-0032164",
+          "name": "Arik Armstead",
+          "primary_injury": "Hand",
+          "status": "Questionable",
+          "team": "JAX"
+        },
+        {
+          "gsis_id": "00-0033038",
+          "name": "Eric Murray",
+          "primary_injury": "Neck",
+          "status": "Questionable",
+          "team": "JAX"
+        },
+        {
+          "gsis_id": "00-0035378",
+          "name": "Andrew Wingard",
+          "primary_injury": "Concussion",
+          "status": "Out",
+          "team": "JAX"
+        },
+        {
+          "gsis_id": "00-0036975",
+          "name": "Walker Little",
+          "primary_injury": "Concussion",
+          "status": "Out",
+          "team": "JAX"
+        },
+        {
+          "gsis_id": "00-0037235",
+          "name": "Travon Walker",
+          "primary_injury": "Knee",
+          "status": "Questionable",
+          "team": "JAX"
+        },
+        {
+          "gsis_id": "00-0038606",
+          "name": "Parker Washington",
+          "primary_injury": "Hip",
+          "status": "Questionable",
+          "team": "JAX"
+        }
+      ],
+      "kickoff": "13:00",
+      "rest_days": {
+        "away": 7,
+        "home": 7
+      },
+      "result": 17,
+      "roof": "outdoors",
+      "season": 2025,
+      "spread_line": -2.5,
+      "stadium": "TIAA Bank Stadium",
+      "stadium_id": "JAX00",
+      "starting_qbs": {
+        "away": "00-0035710",
+        "home": "00-0036971"
+      },
+      "surface": "grass",
+      "team_stats": {
+        "IND": {
+          "passing_epa": -5.477668785139246,
+          "passing_tds": 0,
+          "passing_yards": 205,
+          "receiving_epa": -3.51201711944144,
+          "rushing_epa": -6.399143426271621,
+          "rushing_tds": 2,
+          "rushing_yards": 89
+        },
+        "JAX": {
+          "passing_epa": 10.902549861138151,
+          "passing_tds": 2,
+          "passing_yards": 247,
+          "receiving_epa": 10.902549861138151,
+          "rushing_epa": -5.4179017864807975,
+          "rushing_tds": 2,
+          "rushing_yards": 103
+        }
+      },
+      "temp": 61,
+      "total_line": 44.5,
+      "week": 14,
+      "wind": 7
+    },
+    "2025_14_LA_ARI": {
+      "away_score": 45,
+      "away_team": "LA",
+      "div_game": true,
+      "game_id": "2025_14_LA_ARI",
+      "home_score": 17,
+      "home_team": "ARI",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0029316",
+          "name": "Kelvin Beachum",
+          "primary_injury": "Groin",
+          "status": "Questionable",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0034495",
+          "name": "Evan Brown",
+          "primary_injury": "Not injury related - personal matter",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0035500",
+          "name": "Greg Dortch",
+          "primary_injury": "Chest",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0035636",
+          "name": "L.J. Collier",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0038705",
+          "name": "Emari Demercado",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0039382",
+          "name": "Christian Jones",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0039521",
+          "name": "Xavier Weaver",
+          "primary_injury": "Hamstring",
+          "status": "Questionable",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0039807",
+          "name": "Max Melton",
+          "primary_injury": "Heel",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0039849",
+          "name": "Marvin Harrison Jr.",
+          "primary_injury": "Heel",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0039864",
+          "name": "Dadrion Taylor-Demerson",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0039921",
+          "name": "Trey Benson",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0040706",
+          "name": "Walter Nolen",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "ARI"
+        },
+        {
+          "gsis_id": "00-0034203",
+          "name": "Darious Williams",
+          "primary_injury": "Tibia",
+          "status": "Doubtful",
+          "team": "LA"
+        },
+        {
+          "gsis_id": "00-0034234",
+          "name": "Poona Ford",
+          "primary_injury": "Calf",
+          "status": "Questionable",
+          "team": "LA"
+        },
+        {
+          "gsis_id": "00-0036849",
+          "name": "Tutu Atwell",
+          "primary_injury": "Hamstring",
+          "status": "Questionable",
+          "team": "LA"
+        }
+      ],
+      "kickoff": "16:25",
+      "rest_days": {
+        "away": 7,
+        "home": 7
+      },
+      "result": -28,
+      "roof": "closed",
+      "season": 2025,
+      "spread_line": -9.5,
+      "stadium": "State Farm Stadium",
+      "stadium_id": "PHO00",
+      "starting_qbs": {
+        "away": "00-0026498",
+        "home": "00-0033119"
+      },
+      "surface": "grass",
+      "team_stats": {
+        "ARI": {
+          "passing_epa": -3.2885501382786293,
+          "passing_tds": 2,
+          "passing_yards": 271,
+          "receiving_epa": 0.092464103421662,
+          "rushing_epa": -0.48506566812988705,
+          "rushing_tds": 0,
+          "rushing_yards": 51
+        },
+        "LA": {
+          "passing_epa": 15.409675605792277,
+          "passing_tds": 3,
+          "passing_yards": 281,
+          "receiving_epa": 15.409675605792277,
+          "rushing_epa": 12.6580068981566,
+          "rushing_tds": 3,
+          "rushing_yards": 249
+        }
+      },
+      "temp": null,
+      "total_line": 49.5,
+      "week": 14,
+      "wind": null
+    },
+    "2025_14_MIA_NYJ": {
+      "away_score": 34,
+      "away_team": "MIA",
+      "div_game": true,
+      "game_id": "2025_14_MIA_NYJ",
+      "home_score": 10,
+      "home_team": "NYJ",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0034248",
+          "name": "Elijah Campbell",
+          "primary_injury": "Ankle",
+          "status": "Questionable",
+          "team": "MIA"
+        },
+        {
+          "gsis_id": "00-0036171",
+          "name": "Aaron Brewer",
+          "primary_injury": "Ankle",
+          "status": "Questionable",
+          "team": "MIA"
+        },
+        {
+          "gsis_id": "00-0036993",
+          "name": "Ifeatu Melifonwu",
+          "primary_injury": "Thumb",
+          "status": "Questionable",
+          "team": "MIA"
+        },
+        {
+          "gsis_id": "00-0037013",
+          "name": "Zach Wilson",
+          "primary_injury": "Illness",
+          "status": "Questionable",
+          "team": "MIA"
+        },
+        {
+          "gsis_id": "00-0036945",
+          "name": "Justin Fields",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "NYJ"
+        },
+        {
+          "gsis_id": "00-0037155",
+          "name": "Tony Adams",
+          "primary_injury": "Groin",
+          "status": "Doubtful",
+          "team": "NYJ"
+        },
+        {
+          "gsis_id": "00-0037526",
+          "name": "Marcelino McCrary-Ball",
+          "primary_injury": "Hamstring",
+          "status": "Out",
+          "team": "NYJ"
+        },
+        {
+          "gsis_id": "00-0038513",
+          "name": "Cam Jones",
+          "primary_injury": "Hip",
+          "status": "Out",
+          "team": "NYJ"
+        },
+        {
+          "gsis_id": "00-0039372",
+          "name": "Jarvis Brownlee Jr.",
+          "primary_injury": "Hip",
+          "status": "Out",
+          "team": "NYJ"
+        },
+        {
+          "gsis_id": "00-0039789",
+          "name": "Qwan'tez Stiggers",
+          "primary_injury": "Concussion",
+          "status": "Questionable",
+          "team": "NYJ"
+        }
+      ],
+      "kickoff": "13:00",
+      "rest_days": {
+        "away": 7,
+        "home": 7
+      },
+      "result": -24,
+      "roof": "outdoors",
+      "season": 2025,
+      "spread_line": -2.5,
+      "stadium": "MetLife Stadium",
+      "stadium_id": "NYC01",
+      "starting_qbs": {
+        "away": "00-0036212",
+        "home": "00-0028118"
+      },
+      "surface": "fieldturf",
+      "team_stats": {
+        "MIA": {
+          "passing_epa": 1.6633908300718758,
+          "passing_tds": 1,
+          "passing_yards": 127,
+          "receiving_epa": 3.573359975038329,
+          "rushing_epa": 10.948677862434222,
+          "rushing_tds": 3,
+          "rushing_yards": 239
+        },
+        "NYJ": {
+          "passing_epa": -24.154239428005567,
+          "passing_tds": 0,
+          "passing_yards": 169,
+          "receiving_epa": -13.635443687680565,
+          "rushing_epa": -1.657607929140795,
+          "rushing_tds": 0,
+          "rushing_yards": 65
+        }
+      },
+      "temp": 41,
+      "total_line": 41.5,
+      "week": 14,
+      "wind": 6
+    },
+    "2025_14_PHI_LAC": {
+      "away_score": 19,
+      "away_team": "PHI",
+      "div_game": false,
+      "game_id": "2025_14_PHI_LAC",
+      "home_score": 22,
+      "home_team": "LAC",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0036355",
+          "name": "Justin Herbert",
+          "primary_injury": "Hand",
+          "status": "Questionable",
+          "team": "LAC"
+        },
+        {
+          "gsis_id": "00-0037270",
+          "name": "Otito Ogbonnia",
+          "primary_injury": "Elbow",
+          "status": "Questionable",
+          "team": "LAC"
+        },
+        {
+          "gsis_id": "00-0037617",
+          "name": "Hassan Haskins",
+          "primary_injury": "Hamstring",
+          "status": "Questionable",
+          "team": "LAC"
+        },
+        {
+          "gsis_id": "00-0037654",
+          "name": "Tucker Fisk",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "LAC"
+        },
+        {
+          "gsis_id": "00-0040666",
+          "name": "Omarion Hampton",
+          "primary_injury": "Ankle",
+          "status": "Questionable",
+          "team": "LAC"
+        },
+        {
+          "gsis_id": "00-0030561",
+          "name": "Lane Johnson",
+          "primary_injury": "Foot",
+          "status": "Out",
+          "team": "PHI"
+        },
+        {
+          "gsis_id": "00-0034993",
+          "name": "Marcus Epps",
+          "primary_injury": "Shoulder",
+          "status": "Questionable",
+          "team": "PHI"
+        },
+        {
+          "gsis_id": "00-0038386",
+          "name": "Jalen Carter",
+          "primary_injury": "Shoulder",
+          "status": "Out",
+          "team": "PHI"
+        },
+        {
+          "gsis_id": "00-0040015",
+          "name": "Myles Hinton",
+          "primary_injury": "Back",
+          "status": "Questionable",
+          "team": "PHI"
+        }
+      ],
+      "kickoff": "20:15",
+      "rest_days": {
+        "away": 10,
+        "home": 8
+      },
+      "result": 3,
+      "roof": "dome",
+      "season": 2025,
+      "spread_line": -1.5,
+      "stadium": "SoFi Stadium",
+      "stadium_id": "LAX01",
+      "starting_qbs": {
+        "away": "00-0036389",
+        "home": "00-0036355"
+      },
+      "surface": "matrixturf",
+      "team_stats": {
+        "LAC": {
+          "passing_epa": -15.577254686101282,
+          "passing_tds": 1,
+          "passing_yards": 139,
+          "receiving_epa": 0.2184189886768202,
+          "rushing_epa": -3.755313467113298,
+          "rushing_tds": 0,
+          "rushing_yards": 169
+        },
+        "PHI": {
+          "passing_epa": -16.236034230799348,
+          "passing_tds": 0,
+          "passing_yards": 240,
+          "receiving_epa": -12.913428933600605,
+          "rushing_epa": -0.8584324861003552,
+          "rushing_tds": 1,
+          "rushing_yards": 134
+        }
+      },
+      "temp": null,
+      "total_line": 41.5,
+      "week": 14,
+      "wind": null
+    },
+    "2025_14_PIT_BAL": {
+      "away_score": 27,
+      "away_team": "PIT",
+      "div_game": true,
+      "game_id": "2025_14_PIT_BAL",
+      "home_score": 22,
+      "home_team": "BAL",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0036587",
+          "name": "Ar'Darius Washington",
+          "primary_injury": "Achilles",
+          "status": "Out",
+          "team": "BAL"
+        },
+        {
+          "gsis_id": "00-0038505",
+          "name": "Tavius Robinson",
+          "primary_injury": "Foot",
+          "status": "Out",
+          "team": "BAL"
+        },
+        {
+          "gsis_id": "00-0034957",
+          "name": "Calvin Anderson",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "PIT"
+        },
+        {
+          "gsis_id": "00-0036231",
+          "name": "Kyle Dugger",
+          "primary_injury": "Hand",
+          "status": "Out",
+          "team": "PIT"
+        },
+        {
+          "gsis_id": "00-0040678",
+          "name": "Derrick Harmon",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "PIT"
+        }
+      ],
+      "kickoff": "13:00",
+      "rest_days": {
+        "away": 7,
+        "home": 10
+      },
+      "result": -5,
+      "roof": "outdoors",
+      "season": 2025,
+      "spread_line": 5.5,
+      "stadium": "M&T Bank Stadium",
+      "stadium_id": "BAL00",
+      "starting_qbs": {
+        "away": "00-0023459",
+        "home": "00-0034796"
+      },
+      "surface": "grass",
+      "team_stats": {
+        "BAL": {
+          "passing_epa": -5.129352546305684,
+          "passing_tds": 1,
+          "passing_yards": 219,
+          "receiving_epa": -0.38090142547437855,
+          "rushing_epa": 5.782166621618671,
+          "rushing_tds": 1,
+          "rushing_yards": 217
+        },
+        "PIT": {
+          "passing_epa": 10.56656205523317,
+          "passing_tds": 1,
+          "passing_yards": 284,
+          "receiving_epa": 11.087124048820932,
+          "rushing_epa": 2.8751471120631322,
+          "rushing_tds": 2,
+          "rushing_yards": 34
+        }
+      },
+      "temp": 44,
+      "total_line": 43.5,
+      "week": 14,
+      "wind": 6
+    },
+    "2025_14_SEA_ATL": {
+      "away_score": 37,
+      "away_team": "SEA",
+      "div_game": false,
+      "game_id": "2025_14_SEA_ATL",
+      "home_score": 9,
+      "home_team": "ATL",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0033051",
+          "name": "David Onyemata",
+          "primary_injury": "Foot",
+          "status": "Questionable",
+          "team": "ATL"
+        },
+        {
+          "gsis_id": "00-0037238",
+          "name": "Drake London",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "ATL"
+        },
+        {
+          "gsis_id": "00-0038628",
+          "name": "DeMarcco Hellams",
+          "primary_injury": "Hamstring",
+          "status": "Out",
+          "team": "ATL"
+        },
+        {
+          "gsis_id": "00-0039859",
+          "name": "Brandon Dorlus",
+          "primary_injury": "Groin",
+          "status": "Out",
+          "team": "ATL"
+        },
+        {
+          "gsis_id": "00-0040578",
+          "name": "James Pearce Jr.",
+          "primary_injury": "Back",
+          "status": "Questionable",
+          "team": "ATL"
+        },
+        {
+          "gsis_id": "00-0037093",
+          "name": "Dareke Young",
+          "primary_injury": "Quadricep",
+          "status": "Out",
+          "team": "SEA"
+        },
+        {
+          "gsis_id": "00-0040647",
+          "name": "Rylie Mills",
+          "primary_injury": "Knee",
+          "status": "Out",
+          "team": "SEA"
+        }
+      ],
+      "kickoff": "13:00",
+      "rest_days": {
+        "away": 7,
+        "home": 7
+      },
+      "result": -28,
+      "roof": "closed",
+      "season": 2025,
+      "spread_line": -7.0,
+      "stadium": "Mercedes-Benz Stadium",
+      "stadium_id": "ATL97",
+      "starting_qbs": {
+        "away": "00-0034869",
+        "home": "00-0029604"
+      },
+      "surface": "fieldturf",
+      "team_stats": {
+        "ATL": {
+          "passing_epa": -15.373345657525775,
+          "passing_tds": 0,
+          "passing_yards": 162,
+          "receiving_epa": -12.151348858297993,
+          "rushing_epa": -6.699612575408537,
+          "rushing_tds": 0,
+          "rushing_yards": 120
+        },
+        "SEA": {
+          "passing_epa": 10.041374834340722,
+          "passing_tds": 3,
+          "passing_yards": 249,
+          "receiving_epa": 13.082453788810135,
+          "rushing_epa": -1.2361699429457076,
+          "rushing_tds": 0,
+          "rushing_yards": 129
+        }
+      },
+      "temp": null,
+      "total_line": 44.5,
+      "week": 14,
+      "wind": null
+    },
+    "2025_14_TEN_CLE": {
+      "away_score": 31,
+      "away_team": "TEN",
+      "div_game": false,
+      "game_id": "2025_14_TEN_CLE",
+      "home_score": 29,
+      "home_team": "CLE",
+      "key_injuries": [
+        {
+          "gsis_id": "00-0033057",
+          "name": "Jack Conklin",
+          "primary_injury": "Concussion",
+          "status": "Out",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0033537",
+          "name": "Deshaun Watson",
+          "primary_injury": "Achilles",
+          "status": "Out",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0034399",
+          "name": "Wyatt Teller",
+          "primary_injury": "Calf",
+          "status": "Out",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0035525",
+          "name": "Devin Bush",
+          "primary_injury": "Foot",
+          "status": "Questionable",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0038574",
+          "name": "Isaiah McGuire",
+          "primary_injury": "Knee",
+          "status": "Questionable",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0039458",
+          "name": "Brenden Bates",
+          "primary_injury": "Ankle",
+          "status": "Out",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0039895",
+          "name": "Mike Hall Jr.",
+          "primary_injury": "Knee",
+          "status": "Questionable",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0040162",
+          "name": "Dylan Sampson",
+          "primary_injury": "Calf",
+          "status": "Questionable",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0040255",
+          "name": "Adin Huntington",
+          "primary_injury": "Quadricep",
+          "status": "Out",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0040685",
+          "name": "Mason Graham",
+          "primary_injury": "Ribs",
+          "status": "Questionable",
+          "team": "CLE"
+        },
+        {
+          "gsis_id": "00-0035409",
+          "name": "Shy Tuttle",
+          "primary_injury": "Concussion",
+          "status": "Out",
+          "team": "TEN"
+        },
+        {
+          "gsis_id": "00-0036391",
+          "name": "Lloyd Cushenberry III",
+          "primary_injury": "Foot",
+          "status": "Out",
+          "team": "TEN"
+        },
+        {
+          "gsis_id": "00-0038119",
+          "name": "Jalyn Armour-Davis",
+          "primary_injury": "Achilles",
+          "status": "Out",
+          "team": "TEN"
+        },
+        {
+          "gsis_id": "00-0038703",
+          "name": "Kendell Brooks",
+          "primary_injury": "Concussion",
+          "status": "Questionable",
+          "team": "TEN"
+        }
+      ],
+      "kickoff": "13:00",
+      "rest_days": {
+        "away": 7,
+        "home": 7
+      },
+      "result": -2,
+      "roof": "outdoors",
+      "season": 2025,
+      "spread_line": 4.5,
+      "stadium": "FirstEnergy Stadium",
+      "stadium_id": "CLE00",
+      "starting_qbs": {
+        "away": "00-0040676",
+        "home": "00-0040668"
+      },
+      "surface": "grass",
+      "team_stats": {
+        "CLE": {
+          "passing_epa": 5.939805881192169,
+          "passing_tds": 3,
+          "passing_yards": 364,
+          "receiving_epa": 7.3916090403364505,
+          "rushing_epa": -3.3680161992523354,
+          "rushing_tds": 1,
+          "rushing_yards": 61
+        },
+        "TEN": {
+          "passing_epa": -8.783842270087916,
+          "passing_tds": 2,
+          "passing_yards": 117,
+          "receiving_epa": -4.903391339001246,
+          "rushing_epa": 2.85020054428261,
+          "rushing_tds": 2,
+          "rushing_yards": 184
+        }
+      },
+      "temp": 33,
+      "total_line": 33.5,
+      "week": 14,
+      "wind": 6
+    }
+  },
+  "historical_context": {
+    "biggest_blowout": {
+      "loser": "Noble FFT",
+      "margin": 113.32,
+      "score": "248.3-134.9",
+      "season": 2024,
+      "week": 11,
+      "winner": "The Legion of Bouz"
+    },
+    "highest_combined": {
+      "points": 385.7,
+      "score": "191.1-194.6",
+      "season": 2025,
+      "teams": "Kittler on the Roof vs Rasheeing the Scene",
+      "week": 14
+    },
+    "highest_score": {
+      "opponent": "Noble FFT",
+      "owner_id": "510215233736572928",
+      "points": 248.26,
+      "season": 2024,
+      "team": "The Legion of Bouz",
+      "week": 11
+    },
+    "longest_losing_streak": {
+      "count": 10,
+      "owner_id": "575878107617718272",
+      "team": "Noble FFT"
+    },
+    "longest_win_streak": {
+      "count": 11,
+      "owner_id": "510254202180411392",
+      "team": "Sleeping Giants"
+    },
+    "lowest_combined": {
+      "points": 138.78,
+      "score": "72.4-66.4",
+      "season": 2023,
+      "teams": "Noble FFT vs MHJTIME",
+      "week": 14
+    },
+    "lowest_winning_score": {
+      "opponent": "MHJTIME",
+      "owner_id": "575878107617718272",
+      "points": 72.42,
+      "season": 2023,
+      "team": "Noble FFT",
+      "week": 14
+    }
+  },
+  "matchups": [
+    {
+      "h2h": {
+        "last_meeting": {
+          "score": "123.58-122.42",
+          "season": 2025,
+          "week": 14
+        },
+        "team1_wins": 5,
+        "team2_wins": 2,
+        "total_games": 7
+      },
+      "margin": 1.16,
+      "matchup_id": 1,
+      "momentum": {
+        "edge": -0.4,
+        "favorite_team_name": null,
+        "label": "coin flip"
+      },
+      "team1": {
+        "owner": "kharlow",
+        "points": 123.58,
+        "projected": 0,
+        "roster_id": 3,
+        "team_name": "Burden of Etienne-y Woody",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_SEA_ATL",
+              "one_liner": "5 solo tkl, 1.0 sack, 1 QB hit, 1 INT vs. the Falcons",
+              "opponent": "ATL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "5 solo tkl, 1.0 sack, 1 QB hit, 1 INT"
+            },
+            "name": "Nick Emmanwori",
+            "player_id": "12597",
+            "points": 21.5,
+            "position": "DB",
+            "team": "SEA"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DEN_LV",
+              "one_liner": "4 sack, 17 pts allowed vs. the Raiders",
+              "opponent": "LV",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 sack, 17 pts allowed"
+            },
+            "name": "Denver Broncos",
+            "player_id": "DEN",
+            "points": 15.0,
+            "position": "DEF",
+            "team": "DEN"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_HOU_KC",
+              "one_liner": "26 carries, 68 yd, 2 rec, 8 rec yd, 1 rec TD vs. the Chiefs",
+              "opponent": "KC",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "26 carries, 68 yd, 2 rec, 8 rec yd, 1 rec TD"
+            },
+            "name": "Woody Marks",
+            "player_id": "12474",
+            "points": 14.6,
+            "position": "RB",
+            "team": "HOU"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_IND_JAX",
+              "one_liner": "5 rec, 80 yd vs. the Jaguars",
+              "opponent": "JAX",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "5 rec, 80 yd"
+            },
+            "name": "Alec Pierce",
+            "player_id": "8142",
+            "points": 11.5,
+            "position": "WR",
+            "team": "IND"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PIT_BAL",
+              "one_liner": "3/3 FG, 1 XP vs. the Steelers",
+              "opponent": "PIT",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "3/3 FG, 1 XP"
+            },
+            "name": "Tyler Loop",
+            "player_id": "12711",
+            "points": 10.2,
+            "position": "K",
+            "team": "BAL"
+          }
+        ]
+      },
+      "team2": {
+        "owner": "GrayskullXX",
+        "points": 122.42,
+        "projected": 0,
+        "roster_id": 12,
+        "team_name": "Ghastly Grayskull Gang",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_PIT_BAL",
+              "one_liner": "7 rec, 148 yd vs. the Ravens",
+              "opponent": "BAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "7 rec, 148 yd"
+            },
+            "name": "DK Metcalf",
+            "player_id": "5846",
+            "points": 18.3,
+            "position": "WR",
+            "team": "PIT"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PHI_LAC",
+              "one_liner": "13 carries, 56 yd, 2 rec, 11 rec yd, 1 rec TD vs. the Eagles",
+              "opponent": "PHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "13 carries, 56 yd, 2 rec, 11 rec yd, 1 rec TD"
+            },
+            "name": "Omarion Hampton",
+            "player_id": "12507",
+            "points": 14.7,
+            "position": "RB",
+            "team": "LAC"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_HOU_KC",
+              "one_liner": "6 solo tkl, 1 QB hit vs. the Texans",
+              "opponent": "HOU",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "6 solo tkl, 1 QB hit"
+            },
+            "name": "Nick Bolton",
+            "player_id": "7648",
+            "points": 14.0,
+            "position": "LB",
+            "team": "KC"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_HOU_KC",
+              "one_liner": "203 pass yd, 1 pass TD, 5 rush yd vs. the Chiefs",
+              "opponent": "KC",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "203 pass yd, 1 pass TD, 5 rush yd"
+            },
+            "name": "C.J. Stroud",
+            "player_id": "9758",
+            "points": 12.62,
+            "position": "QB",
+            "team": "HOU"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DEN_LV",
+              "one_liner": "4 rec, 46 yd, 1 TD vs. the Broncos",
+              "opponent": "DEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 rec, 46 yd, 1 TD"
+            },
+            "name": "Brock Bowers",
+            "player_id": "11604",
+            "points": 12.6,
+            "position": "TE",
+            "team": "LV"
+          }
+        ]
+      },
+      "upset": true,
+      "winner": "Burden of Etienne-y Woody"
+    },
+    {
+      "h2h": {
+        "last_meeting": {
+          "score": "191.06-194.64",
+          "season": 2025,
+          "week": 14
+        },
+        "team1_wins": 3,
+        "team2_wins": 2,
+        "total_games": 5
+      },
+      "margin": 3.58,
+      "matchup_id": 3,
+      "momentum": {
+        "edge": -2.7,
+        "favorite_team_name": "Rasheeing the Scene",
+        "label": "heavy lean"
+      },
+      "team1": {
+        "owner": "bchodos",
+        "points": 191.06,
+        "projected": 0,
+        "roster_id": 2,
+        "team_name": "Kittler on the Roof",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_LA_ARI",
+              "one_liner": "7 rec, 167 yd, 2 TD vs. the Cardinals",
+              "opponent": "ARI",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "7 rec, 167 yd, 2 TD"
+            },
+            "name": "Puka Nacua",
+            "player_id": "9493",
+            "points": 32.2,
+            "position": "WR",
+            "team": "LAR"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_TEN_CLE",
+              "one_liner": "25 carries, 161 yd, 2 rush TD vs. the Browns",
+              "opponent": "CLE",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "25 carries, 161 yd, 2 rush TD"
+            },
+            "name": "Tony Pollard",
+            "player_id": "5967",
+            "points": 28.1,
+            "position": "RB",
+            "team": "TEN"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_CIN_BUF",
+              "one_liner": "284 pass yd, 4 pass TD, 2 INT vs. the Bills",
+              "opponent": "BUF",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "284 pass yd, 4 pass TD, 2 INT"
+            },
+            "name": "Joe Burrow",
+            "player_id": "6770",
+            "points": 25.36,
+            "position": "QB",
+            "team": "CIN"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_CHI_GB",
+              "one_liner": "4 rec, 89 yd, 2 TD vs. the Bears",
+              "opponent": "CHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 rec, 89 yd, 2 TD"
+            },
+            "name": "Christian Watson",
+            "player_id": "8167",
+            "points": 22.9,
+            "position": "WR",
+            "team": "GB"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DEN_LV",
+              "one_liner": "17 carries, 75 yd, 1 rush TD, 6 rec, 25 rec yd vs. the Raiders",
+              "opponent": "LV",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "17 carries, 75 yd, 1 rush TD, 6 rec, 25 rec yd"
+            },
+            "name": "RJ Harvey",
+            "player_id": "12489",
+            "points": 19.0,
+            "position": "RB",
+            "team": "DEN"
+          }
+        ]
+      },
+      "team2": {
+        "owner": "ToreroGaucho",
+        "points": 194.64,
+        "projected": 0,
+        "roster_id": 6,
+        "team_name": "Rasheeing the Scene",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_CIN_BUF",
+              "one_liner": "251 pass yd, 3 pass TD, 78 rush yd, 1 rush TD vs. the Bengals",
+              "opponent": "CIN",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "251 pass yd, 3 pass TD, 78 rush yd, 1 rush TD"
+            },
+            "name": "Josh Allen",
+            "player_id": "4984",
+            "points": 37.84,
+            "position": "QB",
+            "team": "BUF"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_LA_ARI",
+              "one_liner": "11 rec, 142 yd, 2 TD vs. the Rams",
+              "opponent": "LA",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "11 rec, 142 yd, 2 TD"
+            },
+            "name": "Michael Wilson",
+            "player_id": "10232",
+            "points": 32.7,
+            "position": "WR",
+            "team": "ARI"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PHI_LAC",
+              "one_liner": "5/5 FG, 1 XP vs. the Eagles",
+              "opponent": "PHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "5/5 FG, 1 XP"
+            },
+            "name": "Cameron Dicker",
+            "player_id": "8259",
+            "points": 22.0,
+            "position": "K",
+            "team": "LAC"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_IND_JAX",
+              "one_liner": "20 carries, 74 yd, 2 rush TD, 1 rec, 8 rec yd vs. the Colts",
+              "opponent": "IND",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "20 carries, 74 yd, 2 rush TD, 1 rec, 8 rec yd"
+            },
+            "name": "Travis Etienne",
+            "player_id": "7543",
+            "points": 20.7,
+            "position": "RB",
+            "team": "NO"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_MIA_NYJ",
+              "one_liner": "7 carries, 92 yd, 1 rush TD, 1 rec, 13 rec yd vs. the Jets",
+              "opponent": "NYJ",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "7 carries, 92 yd, 1 rush TD, 1 rec, 13 rec yd"
+            },
+            "name": "De'Von Achane",
+            "player_id": "9226",
+            "points": 17.0,
+            "position": "RB",
+            "team": "MIA"
+          }
+        ]
+      },
+      "upset": false,
+      "winner": "Rasheeing the Scene"
+    },
+    {
+      "h2h": {
+        "last_meeting": {
+          "score": "128.66-121.8",
+          "season": 2025,
+          "week": 14
+        },
+        "team1_wins": 4,
+        "team2_wins": 2,
+        "total_games": 6
+      },
+      "margin": 6.86,
+      "matchup_id": 2,
+      "momentum": {
+        "edge": -0.35,
+        "favorite_team_name": null,
+        "label": "coin flip"
+      },
+      "team1": {
+        "owner": "GauchoTrain",
+        "points": 128.66,
+        "projected": 0,
+        "roster_id": 1,
+        "team_name": "The Boonist Monks",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_SEA_ATL",
+              "one_liner": "7 rec, 92 yd, 2 TD vs. the Falcons",
+              "opponent": "ATL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "7 rec, 92 yd, 2 TD"
+            },
+            "name": "Jaxon Smith-Njigba",
+            "player_id": "9488",
+            "points": 23.6,
+            "position": "WR",
+            "team": "SEA"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PIT_BAL",
+              "one_liner": "219 pass yd, 1 pass TD, 1 INT, 43 rush yd, 1 rush TD vs. the Steelers",
+              "opponent": "PIT",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "219 pass yd, 1 pass TD, 1 INT, 43 rush yd, 1 rush TD"
+            },
+            "name": "Lamar Jackson",
+            "player_id": "4881",
+            "points": 22.06,
+            "position": "QB",
+            "team": "BAL"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DAL_DET",
+              "one_liner": "6 solo tkl, 1.0 sack, 1 QB hit vs. the Cowboys",
+              "opponent": "DAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "6 solo tkl, 1.0 sack, 1 QB hit"
+            },
+            "name": "Jack Campbell",
+            "player_id": "10880",
+            "points": 17.0,
+            "position": "LB",
+            "team": "DET"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DAL_DET",
+              "one_liner": "17 carries, 67 yd, 1 rush TD, 2 rec vs. the Lions",
+              "opponent": "DET",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "17 carries, 67 yd, 1 rush TD, 2 rec"
+            },
+            "name": "Javonte Williams",
+            "player_id": "7588",
+            "points": 13.7,
+            "position": "RB",
+            "team": "DAL"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DEN_LV",
+              "one_liner": "2 solo tkl, 1.0 sack, 1 QB hit vs. the Broncos",
+              "opponent": "DEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "2 solo tkl, 1.0 sack, 1 QB hit"
+            },
+            "name": "Maxx Crosby",
+            "player_id": "5991",
+            "points": 11.0,
+            "position": "DE",
+            "team": "LV"
+          }
+        ]
+      },
+      "team2": {
+        "owner": "KidBouzie",
+        "points": 121.8,
+        "projected": 0,
+        "roster_id": 5,
+        "team_name": "The Legion of Bouz",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_SEA_ATL",
+              "one_liner": "1 sack, 2 INT, 1 FR, 1 blk, 9 pts allowed vs. the Falcons",
+              "opponent": "ATL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "1 sack, 2 INT, 1 FR, 1 blk, 9 pts allowed"
+            },
+            "name": "Seattle Seahawks",
+            "player_id": "SEA",
+            "points": 22.0,
+            "position": "DEF",
+            "team": "SEA"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_MIA_NYJ",
+              "one_liner": "5 rec, 50 yd, 1 TD vs. the Jets",
+              "opponent": "NYJ",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "5 rec, 50 yd, 1 TD"
+            },
+            "name": "Jaylen Waddle",
+            "player_id": "7526",
+            "points": 15.6,
+            "position": "WR",
+            "team": "DEN"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_SEA_ATL",
+              "one_liner": "3/3 FG, 4 XP vs. the Falcons",
+              "opponent": "ATL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "3/3 FG, 4 XP"
+            },
+            "name": "Jason Myers",
+            "player_id": "2747",
+            "points": 15.5,
+            "position": "K",
+            "team": "SEA"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_IND_JAX",
+              "one_liner": "4 rec, 39 yd, 1 TD vs. the Colts",
+              "opponent": "IND",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 rec, 39 yd, 1 TD"
+            },
+            "name": "Jakobi Meyers",
+            "player_id": "5947",
+            "points": 12.8,
+            "position": "WR",
+            "team": "JAX"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DAL_DET",
+              "one_liner": "6 rec, 92 yd vs. the Cowboys",
+              "opponent": "DAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "6 rec, 92 yd"
+            },
+            "name": "Amon-Ra St. Brown",
+            "player_id": "7547",
+            "points": 12.2,
+            "position": "WR",
+            "team": "DET"
+          }
+        ]
+      },
+      "upset": true,
+      "winner": "The Boonist Monks"
+    },
+    {
+      "h2h": {
+        "last_meeting": {
+          "score": "117.84-133.86",
+          "season": 2025,
+          "week": 14
+        },
+        "team1_wins": 3,
+        "team2_wins": 5,
+        "total_games": 8
+      },
+      "margin": 16.02,
+      "matchup_id": 5,
+      "momentum": {
+        "edge": 0.61,
+        "favorite_team_name": "MHJTIME",
+        "label": "upset brewing"
+      },
+      "team1": {
+        "owner": "rango_",
+        "points": 117.84,
+        "projected": 0,
+        "roster_id": 8,
+        "team_name": "MHJTIME",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_LA_ARI",
+              "one_liner": "271 pass yd, 2 pass TD, 1 INT, 22 rush yd vs. the Rams",
+              "opponent": "LA",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "271 pass yd, 2 pass TD, 1 INT, 22 rush yd"
+            },
+            "name": "Jacoby Brissett",
+            "player_id": "3257",
+            "points": 20.04,
+            "position": "QB",
+            "team": "ARI"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_TEN_CLE",
+              "one_liner": "4 solo tkl, 1.0 sack, 2 QB hit vs. the Titans",
+              "opponent": "TEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 solo tkl, 1.0 sack, 2 QB hit"
+            },
+            "name": "Myles Garrett",
+            "player_id": "3973",
+            "points": 17.0,
+            "position": "DE",
+            "team": "CLE"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DEN_LV",
+              "one_liner": "7 solo tkl, 1.0 sack, 2 QB hit vs. the Broncos",
+              "opponent": "DEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "7 solo tkl, 1.0 sack, 2 QB hit"
+            },
+            "name": "Jeremy Chinn",
+            "player_id": "7016",
+            "points": 14.0,
+            "position": "DB",
+            "team": "LV"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PIT_BAL",
+              "one_liner": "4 carries, 15 yd, 1 rush TD, 6 rec, 27 rec yd vs. the Ravens",
+              "opponent": "BAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 carries, 15 yd, 1 rush TD, 6 rec, 27 rec yd"
+            },
+            "name": "Kenneth Gainwell",
+            "player_id": "7567",
+            "points": 13.2,
+            "position": "RB",
+            "team": "TB"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_TEN_CLE",
+              "one_liner": "14 carries, 26 yd, 1 rec, 58 rec yd vs. the Titans",
+              "opponent": "TEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "14 carries, 26 yd, 1 rec, 58 rec yd"
+            },
+            "name": "Quinshon Judkins",
+            "player_id": "12512",
+            "points": 8.9,
+            "position": "RB",
+            "team": "CLE"
+          }
+        ]
+      },
+      "team2": {
+        "owner": "bLaker24",
+        "points": 133.86,
+        "projected": 0,
+        "roster_id": 10,
+        "team_name": "General Ken-obi",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_IND_JAX",
+              "one_liner": "244 pass yd, 2 pass TD, 16 rush yd vs. the Colts",
+              "opponent": "IND",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "244 pass yd, 2 pass TD, 16 rush yd"
+            },
+            "name": "Trevor Lawrence",
+            "player_id": "7523",
+            "points": 19.36,
+            "position": "QB",
+            "team": "JAX"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PHI_LAC",
+              "one_liner": "20 carries, 122 yd, 1 rush TD vs. the Chargers",
+              "opponent": "LAC",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "20 carries, 122 yd, 1 rush TD"
+            },
+            "name": "Saquon Barkley",
+            "player_id": "4866",
+            "points": 18.2,
+            "position": "RB",
+            "team": "PHI"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_CIN_BUF",
+              "one_liner": "12 carries, 23 yd, 1 rush TD, 3 rec, 12 rec yd, 1 rec TD vs. the Bills",
+              "opponent": "BUF",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "12 carries, 23 yd, 1 rush TD, 3 rec, 12 rec yd, 1 rec TD"
+            },
+            "name": "Chase Brown",
+            "player_id": "9224",
+            "points": 17.0,
+            "position": "RB",
+            "team": "CIN"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DAL_DET",
+              "one_liner": "6 rec, 121 yd vs. the Lions",
+              "opponent": "DET",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "6 rec, 121 yd"
+            },
+            "name": "CeeDee Lamb",
+            "player_id": "6786",
+            "points": 15.1,
+            "position": "WR",
+            "team": "DAL"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_HOU_KC",
+              "one_liner": "4 rec, 121 yd vs. the Chiefs",
+              "opponent": "KC",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 rec, 121 yd"
+            },
+            "name": "Nico Collins",
+            "player_id": "7569",
+            "points": 14.1,
+            "position": "WR",
+            "team": "HOU"
+          }
+        ]
+      },
+      "upset": true,
+      "winner": "General Ken-obi"
+    },
+    {
+      "h2h": {
+        "last_meeting": {
+          "score": "131.1-142.9",
+          "season": 2025,
+          "week": 16
+        },
+        "team1_wins": 3,
+        "team2_wins": 5,
+        "total_games": 8
+      },
+      "margin": 30.52,
+      "matchup_id": 4,
+      "momentum": {
+        "edge": 0.88,
+        "favorite_team_name": "Noble FFT",
+        "label": "slight edge"
+      },
+      "team1": {
+        "owner": "kevobucks",
+        "points": 82.84,
+        "projected": 0,
+        "roster_id": 4,
+        "team_name": "Noble FFT",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_PIT_BAL",
+              "one_liner": "8 rec, 124 yd vs. the Steelers",
+              "opponent": "PIT",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "8 rec, 124 yd"
+            },
+            "name": "Zay Flowers",
+            "player_id": "9997",
+            "points": 16.6,
+            "position": "WR",
+            "team": "BAL"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_CHI_GB",
+              "one_liner": "186 pass yd, 2 pass TD, 1 INT, 15 rush yd vs. the Packers",
+              "opponent": "GB",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "186 pass yd, 2 pass TD, 1 INT, 15 rush yd"
+            },
+            "name": "Caleb Williams",
+            "player_id": "11560",
+            "points": 15.94,
+            "position": "QB",
+            "team": "CHI"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PHI_LAC",
+              "one_liner": "6 rec, 100 yd vs. the Chargers",
+              "opponent": "LAC",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "6 rec, 100 yd"
+            },
+            "name": "A.J. Brown",
+            "player_id": "5859",
+            "points": 13.0,
+            "position": "WR",
+            "team": "PHI"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_IND_JAX",
+              "one_liner": "4 solo tkl vs. the Colts",
+              "opponent": "IND",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 solo tkl"
+            },
+            "name": "Foyesade Oluokun",
+            "player_id": "5332",
+            "points": 9.5,
+            "position": "LB",
+            "team": "JAX"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_SEA_ATL",
+              "one_liner": "20 carries, 86 yd, 2 rec, 8 rec yd vs. the Seahawks",
+              "opponent": "SEA",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "20 carries, 86 yd, 2 rec, 8 rec yd"
+            },
+            "name": "Bijan Robinson",
+            "player_id": "9509",
+            "points": 8.4,
+            "position": "RB",
+            "team": "ATL"
+          }
+        ]
+      },
+      "team2": {
+        "owner": "Chudders",
+        "points": 113.36,
+        "projected": 0,
+        "roster_id": 7,
+        "team_name": "Chudders Football Team",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_DAL_DET",
+              "one_liner": "12 carries, 43 yd, 3 rush TD, 7 rec, 77 rec yd vs. the Cowboys",
+              "opponent": "DAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "12 carries, 43 yd, 3 rush TD, 7 rec, 77 rec yd"
+            },
+            "name": "Jahmyr Gibbs",
+            "player_id": "9221",
+            "points": 33.5,
+            "position": "RB",
+            "team": "DET"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_DAL_DET",
+              "one_liner": "3/4 FG, 5 XP vs. the Cowboys",
+              "opponent": "DAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "3/4 FG, 5 XP"
+            },
+            "name": "Jake Bates",
+            "player_id": "11539",
+            "points": 17.1,
+            "position": "K",
+            "team": "DET"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PHI_LAC",
+              "one_liner": "139 pass yd, 1 pass TD, 1 INT, 66 rush yd vs. the Eagles",
+              "opponent": "PHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "139 pass yd, 1 pass TD, 1 INT, 66 rush yd"
+            },
+            "name": "Justin Herbert",
+            "player_id": "6797",
+            "points": 12.16,
+            "position": "QB",
+            "team": "LAC"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_CHI_GB",
+              "one_liner": "4 rec, 29 yd, 1 TD vs. the Packers",
+              "opponent": "GB",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 rec, 29 yd, 1 TD"
+            },
+            "name": "Colston Loveland",
+            "player_id": "12517",
+            "points": 10.9,
+            "position": "TE",
+            "team": "CHI"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_TEN_CLE",
+              "one_liner": "7 solo tkl, 1 QB hit, 1 FR vs. the Browns",
+              "opponent": "CLE",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "7 solo tkl, 1 QB hit, 1 FR"
+            },
+            "name": "Cedric Gray",
+            "player_id": "11742",
+            "points": 10.5,
+            "position": "LB",
+            "team": "TEN"
+          }
+        ]
+      },
+      "upset": true,
+      "winner": "Chudders Football Team"
+    },
+    {
+      "h2h": {
+        "last_meeting": {
+          "score": "88.48-134.9",
+          "season": 2025,
+          "week": 14
+        },
+        "team1_wins": 0,
+        "team2_wins": 8,
+        "total_games": 8
+      },
+      "margin": 46.42,
+      "matchup_id": 6,
+      "momentum": {
+        "edge": -0.38,
+        "favorite_team_name": null,
+        "label": "coin flip"
+      },
+      "team1": {
+        "owner": "Redrumsregrub",
+        "points": 88.48,
+        "projected": 0,
+        "roster_id": 9,
+        "team_name": "Father Time ",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_DEN_LV",
+              "one_liner": "212 pass yd, 15 rush yd, 1 rush TD vs. the Raiders",
+              "opponent": "LV",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "212 pass yd, 15 rush yd, 1 rush TD"
+            },
+            "name": "Bo Nix",
+            "player_id": "11563",
+            "points": 15.98,
+            "position": "QB",
+            "team": "DEN"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_TEN_CLE",
+              "one_liner": "3 rec, 76 yd, 1 TD vs. the Titans",
+              "opponent": "TEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "3 rec, 76 yd, 1 TD"
+            },
+            "name": "Jerry Jeudy",
+            "player_id": "6783",
+            "points": 15.1,
+            "position": "WR",
+            "team": "CLE"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PIT_BAL",
+              "one_liner": "8 carries, 13 yd, 3 rec, 49 rec yd, 1 rec TD vs. the Ravens",
+              "opponent": "BAL",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "8 carries, 13 yd, 3 rec, 49 rec yd, 1 rec TD"
+            },
+            "name": "Jaylen Warren",
+            "player_id": "8228",
+            "points": 13.7,
+            "position": "RB",
+            "team": "PIT"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_IND_JAX",
+              "one_liner": "3 rec, 87 yd vs. the Colts",
+              "opponent": "IND",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "3 rec, 87 yd"
+            },
+            "name": "Brian Thomas",
+            "player_id": "11631",
+            "points": 10.2,
+            "position": "WR",
+            "team": "JAX"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_PIT_BAL",
+              "one_liner": "4 solo tkl vs. the Steelers",
+              "opponent": "PIT",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "4 solo tkl"
+            },
+            "name": "Roquan Smith",
+            "player_id": "4960",
+            "points": 9.0,
+            "position": "LB",
+            "team": "BAL"
+          }
+        ]
+      },
+      "team2": {
+        "owner": "zbcowan",
+        "points": 134.9,
+        "projected": 0,
+        "roster_id": 11,
+        "team_name": "Sleeping Giants",
+        "top_scorers": [
+          {
+            "game_context": {
+              "game_id": "2025_14_DAL_DET",
+              "one_liner": "5/5 FG, 1 XP vs. the Lions",
+              "opponent": "DET",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "5/5 FG, 1 XP"
+            },
+            "name": "Brandon Aubrey",
+            "player_id": "11533",
+            "points": 25.7,
+            "position": "K",
+            "team": "DAL"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_LA_ARI",
+              "one_liner": "13 carries, 84 yd, 1 rush TD, 2 rec, 13 rec yd vs. the Cardinals",
+              "opponent": "ARI",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "13 carries, 84 yd, 1 rush TD, 2 rec, 13 rec yd"
+            },
+            "name": "Kyren Williams",
+            "player_id": "8150",
+            "points": 16.7,
+            "position": "RB",
+            "team": "LAR"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_CHI_GB",
+              "one_liner": "20 carries, 86 yd, 1 rush TD, 2 rec, 6 rec yd vs. the Bears",
+              "opponent": "CHI",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "20 carries, 86 yd, 1 rush TD, 2 rec, 6 rec yd"
+            },
+            "name": "Josh Jacobs",
+            "player_id": "5850",
+            "points": 16.2,
+            "position": "RB",
+            "team": "GB"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_HOU_KC",
+              "one_liner": "2 sack, 3 INT, 10 pts allowed vs. the Chiefs",
+              "opponent": "KC",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "2 sack, 3 INT, 10 pts allowed"
+            },
+            "name": "Houston Texans",
+            "player_id": "HOU",
+            "points": 16.0,
+            "position": "DEF",
+            "team": "HOU"
+          },
+          {
+            "game_context": {
+              "game_id": "2025_14_TEN_CLE",
+              "one_liner": "6 solo tkl vs. the Titans",
+              "opponent": "TEN",
+              "src": {
+                "game_id": "nflreadpy",
+                "one_liner": "fallback",
+                "opponent": "sleeper_stats",
+                "stat_line": "sleeper_stats"
+              },
+              "stat_line": "6 solo tkl"
+            },
+            "name": "Carson Schwesinger",
+            "player_id": "12578",
+            "points": 11.0,
+            "position": "LB",
+            "team": "CLE"
+          }
+        ]
+      },
+      "upset": false,
+      "winner": "Sleeping Giants"
+    }
+  ],
+  "meta": {
+    "generated_for": "AI content generation",
+    "is_playoff": false,
+    "season": 2025,
+    "week": 14
+  },
+  "next_matchups": [
+    {
+      "team1": "The Boonist Monks",
+      "team1_rank": 5,
+      "team2": "MHJTIME",
+      "team2_rank": 4
+    },
+    {
+      "team1": "Burden of Etienne-y Woody",
+      "team1_rank": 11,
+      "team2": "Chudders Football Team",
+      "team2_rank": 9
+    },
+    {
+      "team1": "The Legion of Bouz",
+      "team1_rank": 2,
+      "team2": "Sleeping Giants",
+      "team2_rank": 6
+    },
+    {
+      "team1": "Father Time ",
+      "team1_rank": 12,
+      "team2": "Ghastly Grayskull Gang",
+      "team2_rank": 10
+    }
+  ],
+  "previous_weeks_summary": [
+    {
+      "high_score": 151.48,
+      "high_scorer": "Sleeping Giants",
+      "leader": "Sleeping Giants",
+      "leader_record": "1-0",
+      "week": 1
+    },
+    {
+      "high_score": 182.8,
+      "high_scorer": "MHJTIME",
+      "leader": "The Boonist Monks",
+      "leader_record": "2-0",
+      "week": 2
+    },
+    {
+      "high_score": 191.34,
+      "high_scorer": "The Legion of Bouz",
+      "leader": "The Legion of Bouz",
+      "leader_record": "3-0",
+      "week": 3
+    },
+    {
+      "high_score": 176.42,
+      "high_scorer": "Ghastly Grayskull Gang",
+      "leader": "The Legion of Bouz",
+      "leader_record": "4-0",
+      "week": 4
+    },
+    {
+      "high_score": 177.94,
+      "high_scorer": "MHJTIME",
+      "leader": "Kittler on the Roof",
+      "leader_record": "4-1",
+      "week": 5
+    },
+    {
+      "high_score": 165.9,
+      "high_scorer": "The Legion of Bouz",
+      "leader": "The Legion of Bouz",
+      "leader_record": "5-1",
+      "week": 6
+    },
+    {
+      "high_score": 196.84,
+      "high_scorer": "MHJTIME",
+      "leader": "The Legion of Bouz",
+      "leader_record": "6-1",
+      "week": 7
+    },
+    {
+      "high_score": 196.48,
+      "high_scorer": "General Ken-obi",
+      "leader": "The Legion of Bouz",
+      "leader_record": "6-2",
+      "week": 8
+    },
+    {
+      "high_score": 154.86,
+      "high_scorer": "General Ken-obi",
+      "leader": "General Ken-obi",
+      "leader_record": "7-2",
+      "week": 9
+    },
+    {
+      "high_score": 197.1,
+      "high_scorer": "Chudders Football Team",
+      "leader": "General Ken-obi",
+      "leader_record": "8-2",
+      "week": 10
+    },
+    {
+      "high_score": 194.68,
+      "high_scorer": "Rasheeing the Scene",
+      "leader": "Rasheeing the Scene",
+      "leader_record": "9-2",
+      "week": 11
+    },
+    {
+      "high_score": 192.72,
+      "high_scorer": "Chudders Football Team",
+      "leader": "The Legion of Bouz",
+      "leader_record": "9-3",
+      "week": 12
+    },
+    {
+      "high_score": 148.44,
+      "high_scorer": "MHJTIME",
+      "leader": "The Legion of Bouz",
+      "leader_record": "10-3",
+      "week": 13
+    }
+  ],
+  "season_context": {
+    "best_record": {
+      "record": "11-3",
+      "team_name": "Rasheeing the Scene"
+    },
+    "is_playoff": false,
+    "league_avg_ppg": 137.6,
+    "points_leader": {
+      "pf": 2145.9,
+      "team_name": "MHJTIME"
+    },
+    "this_week_avg": 129.5,
+    "total_weeks": 14,
+    "weeks_played": 14,
+    "worst_record": {
+      "record": "2-12",
+      "team_name": "Father Time "
+    }
+  },
+  "standings": [
+    {
+      "all_time_record": "32-24",
+      "best_win_streak": 7,
+      "championships": 0,
+      "current_elo": 1626.0,
+      "elo_change": 8.8,
+      "losses": 3,
+      "margin_this_week": 3.58,
+      "momentum": {
+        "label": "steady",
+        "score": 0.38
+      },
+      "movement": 1,
+      "owner": "ToreroGaucho",
+      "pa": 1956.0,
+      "peak_elo": 1647.7,
+      "pf": 2097.4,
+      "power_score": 0.9776,
+      "prev_rank": 2,
+      "rank": 1,
+      "record": "11-3",
+      "roster_id": 6,
+      "streak": "W2",
+      "team_name": "Rasheeing the Scene",
+      "week_points": 194.64,
+      "wins": 11
+    },
+    {
+      "all_time_record": "36-20",
+      "best_win_streak": 8,
+      "championships": 1,
+      "current_elo": 1604.3,
+      "elo_change": -16.6,
+      "losses": 4,
+      "margin_this_week": -6.86,
+      "momentum": {
+        "label": "surging",
+        "score": 2.35
+      },
+      "movement": -1,
+      "owner": "KidBouzie",
+      "pa": 1799.8,
+      "peak_elo": 1638.9,
+      "pf": 2124.7,
+      "power_score": 0.9361,
+      "prev_rank": 1,
+      "rank": 2,
+      "record": "10-4",
+      "roster_id": 5,
+      "streak": "L1",
+      "team_name": "The Legion of Bouz",
+      "week_points": 121.8,
+      "wins": 10
+    },
+    {
+      "all_time_record": "36-20",
+      "best_win_streak": 7,
+      "championships": 2,
+      "current_elo": 1700.2,
+      "elo_change": 14.7,
+      "losses": 3,
+      "margin_this_week": 16.02,
+      "momentum": {
+        "label": "steady",
+        "score": 0.47
+      },
+      "movement": 1,
+      "owner": "bLaker24",
+      "pa": 1751.9,
+      "peak_elo": 1700.2,
+      "pf": 2030.1,
+      "power_score": 0.9226,
+      "prev_rank": 4,
+      "rank": 3,
+      "record": "11-3",
+      "roster_id": 10,
+      "streak": "W3",
+      "team_name": "General Ken-obi",
+      "week_points": 133.86,
+      "wins": 11
+    },
+    {
+      "all_time_record": "29-27",
+      "best_win_streak": 6,
+      "championships": 0,
+      "current_elo": 1585.7,
+      "elo_change": -14.7,
+      "losses": 5,
+      "margin_this_week": -16.02,
+      "momentum": {
+        "label": "hot",
+        "score": 1.08
+      },
+      "movement": -1,
+      "owner": "rango_",
+      "pa": 1893.5,
+      "peak_elo": 1621.0,
+      "pf": 2145.9,
+      "power_score": 0.9034,
+      "prev_rank": 3,
+      "rank": 4,
+      "record": "9-5",
+      "roster_id": 8,
+      "streak": "L1",
+      "team_name": "MHJTIME",
+      "week_points": 117.84,
+      "wins": 9
+    },
+    {
+      "all_time_record": "34-22",
+      "best_win_streak": 6,
+      "championships": 0,
+      "current_elo": 1599.6,
+      "elo_change": 16.7,
+      "losses": 5,
+      "margin_this_week": 6.86,
+      "momentum": {
+        "label": "surging",
+        "score": 2.0
+      },
+      "movement": 0,
+      "owner": "GauchoTrain",
+      "pa": 1825.5,
+      "peak_elo": 1619.9,
+      "pf": 2068.1,
+      "power_score": 0.9015,
+      "prev_rank": 5,
+      "rank": 5,
+      "record": "9-5",
+      "roster_id": 1,
+      "streak": "W4",
+      "team_name": "The Boonist Monks",
+      "week_points": 128.66,
+      "wins": 9
+    },
+    {
+      "all_time_record": "39-17",
+      "best_win_streak": 11,
+      "championships": 0,
+      "current_elo": 1561.1,
+      "elo_change": 9.5,
+      "losses": 5,
+      "margin_this_week": 46.42,
+      "momentum": {
+        "label": "cooling",
+        "score": -1.12
+      },
+      "movement": 0,
+      "owner": "zbcowan",
+      "pa": 1826.7,
+      "peak_elo": 1672.1,
+      "pf": 1933.0,
+      "power_score": 0.8441,
+      "prev_rank": 6,
+      "rank": 6,
+      "record": "9-5",
+      "roster_id": 11,
+      "streak": "W1",
+      "team_name": "Sleeping Giants",
+      "week_points": 134.9,
+      "wins": 9
+    },
+    {
+      "all_time_record": "17-39",
+      "best_win_streak": 3,
+      "championships": 0,
+      "current_elo": 1454.8,
+      "elo_change": -26.7,
+      "losses": 7,
+      "margin_this_week": -30.52,
+      "momentum": {
+        "label": "hot",
+        "score": 0.78
+      },
+      "movement": 0,
+      "owner": "kevobucks",
+      "pa": 1816.2,
+      "peak_elo": 1491.2,
+      "pf": 1843.1,
+      "power_score": 0.7763,
+      "prev_rank": 7,
+      "rank": 7,
+      "record": "7-7",
+      "roster_id": 4,
+      "streak": "L1",
+      "team_name": "Noble FFT",
+      "week_points": 82.84,
+      "wins": 7
+    },
+    {
+      "all_time_record": "33-23",
+      "best_win_streak": 7,
+      "championships": 1,
+      "current_elo": 1488.2,
+      "elo_change": -8.7,
+      "losses": 10,
+      "margin_this_week": -3.58,
+      "momentum": {
+        "label": "collapsing",
+        "score": -2.32
+      },
+      "movement": 1,
+      "owner": "bchodos",
+      "pa": 2114.7,
+      "peak_elo": 1690.4,
+      "pf": 1884.7,
+      "power_score": 0.7235,
+      "prev_rank": 9,
+      "rank": 8,
+      "record": "4-10",
+      "roster_id": 2,
+      "streak": "L9",
+      "team_name": "Kittler on the Roof",
+      "week_points": 191.06,
+      "wins": 4
+    },
+    {
+      "all_time_record": "15-41",
+      "best_win_streak": 2,
+      "championships": 0,
+      "current_elo": 1402.1,
+      "elo_change": 26.7,
+      "losses": 10,
+      "margin_this_week": 30.52,
+      "momentum": {
+        "label": "steady",
+        "score": -0.1
+      },
+      "movement": 1,
+      "owner": "Chudders",
+      "pa": 1982.2,
+      "peak_elo": 1516.0,
+      "pf": 1757.6,
+      "power_score": 0.6841,
+      "prev_rank": 10,
+      "rank": 9,
+      "record": "4-10",
+      "roster_id": 7,
+      "streak": "W1",
+      "team_name": "Chudders Football Team",
+      "week_points": 113.36,
+      "wins": 4
+    },
+    {
+      "all_time_record": "21-35",
+      "best_win_streak": 5,
+      "championships": 0,
+      "current_elo": 1324.5,
+      "elo_change": -15.8,
+      "losses": 10,
+      "margin_this_week": -1.16,
+      "momentum": {
+        "label": "cooling",
+        "score": -1.15
+      },
+      "movement": -2,
+      "owner": "GrayskullXX",
+      "pa": 2021.4,
+      "peak_elo": 1519.5,
+      "pf": 1789.5,
+      "power_score": 0.6707,
+      "prev_rank": 8,
+      "rank": 10,
+      "record": "4-10",
+      "roster_id": 12,
+      "streak": "L3",
+      "team_name": "Ghastly Grayskull Gang",
+      "week_points": 122.42,
+      "wins": 4
+    },
+    {
+      "all_time_record": "23-33",
+      "best_win_streak": 5,
+      "championships": 0,
+      "current_elo": 1323.5,
+      "elo_change": 15.8,
+      "losses": 10,
+      "margin_this_week": 1.16,
+      "momentum": {
+        "label": "collapsing",
+        "score": -1.55
+      },
+      "movement": 0,
+      "owner": "kharlow",
+      "pa": 2170.7,
+      "peak_elo": 1590.8,
+      "pf": 1736.7,
+      "power_score": 0.6635,
+      "prev_rank": 11,
+      "rank": 11,
+      "record": "4-10",
+      "roster_id": 3,
+      "streak": "W1",
+      "team_name": "Burden of Etienne-y Woody",
+      "week_points": 123.58,
+      "wins": 4
+    },
+    {
+      "all_time_record": "21-35",
+      "best_win_streak": 4,
+      "championships": 0,
+      "current_elo": 1329.9,
+      "elo_change": -9.5,
+      "losses": 12,
+      "margin_this_week": -46.42,
+      "momentum": {
+        "label": "cooling",
+        "score": -1.5
+      },
+      "movement": 0,
+      "owner": "Redrumsregrub",
+      "pa": 1951.2,
+      "peak_elo": 1567.4,
+      "pf": 1699.2,
+      "power_score": 0.5965,
+      "prev_rank": 12,
+      "rank": 12,
+      "record": "2-12",
+      "roster_id": 9,
+      "streak": "L5",
+      "team_name": "Father Time ",
+      "week_points": 88.48,
+      "wins": 2
+    }
+  ],
+  "team_profiles_summary": {
+    "Burden of Etienne‑y Woody": {
+      "essay_snippet": "You’re a cautionary tale of stars without support. Justin Jefferson remains a top-three overall asset, and Mark Andrews plus Dalton Kincaid gives you arguably the best tight-end room in the league. Yet Kyler Murray’s health is a question mark, your running backs are a triage unit and depth behind Jefferson is thin. Your weekly projection sits around 43 points and the schedule is friendly, but you’ve lingered in the lower half of the standings the past two seasons. Rumours in the chat suggest you...",
+      "needs": ["QB", "RB", "TE"],
+      "preseason_rank": 8,
+      "ranks": {
+        "draft": 2,
+        "qb": 12,
+        "rb": 10,
+        "starter": 11,
+        "te": 11,
+        "wr": 5
+      },
+      "roast": "Justin Jefferson can only carry you so far.",
+      "tier": "Fraud",
+      "weeklyPoints_projected": 42.8
+    },
+    "Chudders Football Team": {
+      "essay_snippet": "The rebuild is in full swing. Jahmyr Gibbs and Ashton Jeanty give you perhaps the best young RB duo in the league, and Justin Herbert remains underrated in dynasty circles. Unfortunately the WR room is barren and your backup QBs read like waiver-wire fodder. With a league-high haul of first-round picks you’re clearly playing for 2026. Your weekly projection around 39 points and a middling schedule suggest a long season, but with two years of drafts to come, you can afford the lumps. The chat jok...",
+      "needs": ["WR", "QB"],
+      "preseason_rank": 7,
+      "ranks": {
+        "draft": 1,
+        "qb": 8,
+        "rb": 3,
+        "starter": 12,
+        "te": 6,
+        "wr": 12
+      },
+      "roast": "Two firsts in two years and Gibbs. You’re that guy bench-pressing next to the trophy case.",
+      "tier": "Trust the Process",
+      "weeklyPoints_projected": 38.6
+    },
+    "Father Time": {
+      "essay_snippet": "Living up to your name, your roster reads like a “Who’s Who” of rookies and veterans. Brian Thomas Jr. and Ladd McConkey headline the 2024 rookie class; Rome Odunze waits in the wings. Your running backs are all committee pieces and Bo Nix profiles as a mid-range QB2. Weekly projections around 45 points and a schedule near the middle scream mediocrity. Your best hope is that one of Warren or Guerendo seizes a backfield and Odunze ascends quickly. Otherwise you’re a classic spoiler who knocks con...",
+      "needs": ["QB", "RB", "TE"],
+      "preseason_rank": 10,
+      "ranks": {
+        "draft": 8,
+        "qb": 10,
+        "rb": 12,
+        "starter": 8,
+        "te": 9,
+        "wr": 3
+      },
+      "roast": "Your WRs are wagyu beef; your RBs are ramen noodles.",
+      "tier": "Frisky",
+      "weeklyPoints_projected": 44.5
+    },
+    "General Ken‑obi": {
+      "essay_snippet": "Since capturing the 2023 title you’ve become the franchise everyone measures themselves against. A surprise early exit in 2024 barely dented your aura – your bench could compete in most leagues. The 2025 roster reads like the All-Pro team: Maye and Richardson headline a four-deep quarterback room with J.J. McCarthy and Trevor Lawrence backing them up. Saquon Barkley and Kenneth Walker are both in their primes behind improved offensive lines. CeeDee Lamb landed inside the top ten of ESPN’s 2025 o...",
+      "needs": ["QB"],
+      "preseason_rank": 1,
+      "ranks": {
+        "draft": 5,
+        "qb": 11,
+        "rb": 1,
+        "starter": 1,
+        "te": 3,
+        "wr": 1
+      },
+      "roast": "We’re all just hoping you oversleep on waiver day.",
+      "tier": "Contender",
+      "weeklyPoints_projected": 48.9
+    },
+    "Ghastly Grayskull Gang": {
+      "essay_snippet": "It takes patience to turn draft picks into production, and you’ve executed the blueprint. After ranking tenth in starters using our metrics, you cashed in capital to load up on explosive young runners and paired them with C.J. Stroud and Brock Bowers – both consensus top-five dynasty assets. The receiver room remains thin; Xavier Worthy’s 4.21 speed will blow up highlight reels, but DK Metcalf and Deebo Samuel are better complementary pieces than primary alphas. Your schedule is modest and the w...",
+      "needs": ["WR"],
+      "preseason_rank": 4,
+      "ranks": {
+        "draft": 3,
+        "qb": 7,
+        "rb": 6,
+        "starter": 10,
+        "te": 2,
+        "wr": 11
+      },
+      "roast": "Your pick stash is bigger than your WR room.",
+      "tier": "Frisky",
+      "weeklyPoints_projected": 44.3
+    },
+    "Kittler on the Roof": {
+      "essay_snippet": "The defending champion returns most of its core, but regression is a fickle thing. Joe Burrow, Jonathan Taylor and Puka Nacua all battled injuries last season. If they rebound, the starting lineup remains as steady as any. Your weekly projection around 46 points is tied for third-highest, though depth is still a concern – one injury and you’re starting Bryce Young. The schedule is slightly tougher than average. You’ve thrived on consistency: runner-up in 2022, runner-up again in 2023, champion i...",
+      "needs": [],
+      "preseason_rank": 6,
+      "ranks": {
+        "draft": 6,
+        "qb": 3,
+        "rb": 7,
+        "starter": 4,
+        "te": 4,
+        "wr": 6
+      },
+      "roast": "Your floor is nice but your ceiling might be drywall.",
+      "tier": "Contender",
+      "weeklyPoints_projected": 46.2
+    },
+    "MHJTIME": {
+      "essay_snippet": "Few franchises have turned things around as dramatically as MHJTIME. You were the toilet-bowl runner-up in 2023, surged to a third-place finish last season and now sit firmly among the contenders. Ja’Marr Chase and Malik Nabers are both top-ten overall assets and teaming them with Marvin Harrison Jr. gives you a historic trio. Trey McBride blossomed into a top-five tight end. Rookie quarterback Jayden Daniels brings electric rushing upside. The downside: your running backs are patchwork – Chuba ...",
+      "needs": ["RB", "Picks"],
+      "preseason_rank": 3,
+      "ranks": {
+        "draft": 12,
+        "qb": 2,
+        "rb": 11,
+        "starter": 2,
+        "te": 1,
+        "wr": 2
+      },
+      "roast": "If you ever find two real running backs, the rest of us are toast.",
+      "tier": "Contender",
+      "weeklyPoints_projected": 47.2
+    },
+    "Noble FFT": {
+      "essay_snippet": "After finishing in the consolation bracket in 2024 you come into 2025 with the league’s scariest backfield. Bijan Robinson and Breece Hall both rank among the top fantasy backs and give you a weekly floor others envy. Rookie quarterback Caleb Williams arrives with as much hype as any prospect in a decade, and Jordan Love is a handy insurance policy. With A.J. Brown and Tee Higgins manning the flanks your weekly projection sits around 45 points. What’s missing? An elite tight end and a little rec...",
+      "needs": ["TE", "QB", "WR depth"],
+      "preseason_rank": 2,
+      "ranks": {
+        "draft": 4,
+        "qb": 9,
+        "rb": 4,
+        "starter": 5,
+        "te": 10,
+        "wr": 8
+      },
+      "roast": "Bijan and Breece are gods, your tight ends are mortals.",
+      "tier": "Frisky",
+      "weeklyPoints_projected": 45.2
+    },
+    "Rasheeing the Scene": {
+      "essay_snippet": "This roster is a weekly thrill ride: you led the league in points several weeks in 2024 yet still finished fifth. Josh Allen is still the QB1 on most boards and your committee of rookies – De’Von Achane, Bucky Irving, Quinshon Judkins – oozes upside. Rashee Rice’s suspension and the lack of a true alpha receiver leave you praying for touchdown variance. Projections around 44 points mirror that imbalance, and the schedule doesn’t help. The consensus in the chat: invest in a steady WR1 rather than...",
+      "needs": ["WR", "Picks"],
+      "preseason_rank": 5,
+      "ranks": {
+        "draft": 9,
+        "qb": 1,
+        "rb": 2,
+        "starter": 9,
+        "te": 5,
+        "wr": 9
+      },
+      "roast": "Your WR room is a meme waiting to happen.",
+      "tier": "Frisky",
+      "weeklyPoints_projected": 44.5
+    },
+    "Sleeping Giants": {
+      "essay_snippet": "The name says it all: a roster of aging stars that could awaken for one more run. Derrick Henry and Josh Jacobs remain workhorses but both have more than 1,500 career carries. Jalen Hurts is a cheat code, and Jordan Addison appears ready to claim a bigger role opposite Cooper Kupp and Keenan Allen. Your weekly projection around 45 points and one of the league’s softest schedules suggest you’re fighting uphill. You’ve reached a championship (2024) and a semifinal in the last three seasons; if the...",
+      "needs": ["WR", "TE"],
+      "preseason_rank": 11,
+      "ranks": {
+        "draft": 7,
+        "qb": 5,
+        "rb": 5,
+        "starter": 6,
+        "te": 8,
+        "wr": 10
+      },
+      "roast": "Your WRs peaked when Fortnite did.",
+      "tier": "Frisky",
+      "weeklyPoints_projected": 44.9
+    },
+    "The Boonist Monks": {
+      "essay_snippet": "After claiming third place in 2023, The Boonist Monks looked mortal in 2024, bowing out before the semifinals. Lamar Jackson, Tyreek Hill and Travis Kelce are still video-game characters, but all three are approaching age cliffs. James Cook and David Montgomery provide steady RB production and Zay Flowers could ascend. Projected weekly points around 47 put you in contention and your schedule is favourable, but your lack of picks makes retooling tricky. In the group chat you’re often the instigat...",
+      "needs": ["Picks", "RB"],
+      "preseason_rank": 12,
+      "ranks": {
+        "draft": 10,
+        "qb": 4,
+        "rb": 9,
+        "starter": 3,
+        "te": 7,
+        "wr": 7
+      },
+      "roast": "Your team could win it all or retire it all.",
+      "tier": "Frisky",
+      "weeklyPoints_projected": 46.8
+    },
+    "The Legion of Bouz": {
+      "essay_snippet": "Since winning the inaugural title in 2022, you’ve been stuck in the middle. Patrick Mahomes and Amon-Ra St. Brown anchor an electric passing attack. Christian McCaffrey and Jaylen Waddle are still elite assets, but Joe Mixon and Aaron Jones are nearing the cliff, and your tight-end room is empty. Projected weekly points sit around 45 and your schedule ranks slightly above average. You’ve thrived on big swings — remember trading for Mahomes in 2023? To make another run, you’ll likely need to pack...",
+      "needs": ["TE", "Picks", "RB"],
+      "preseason_rank": 9,
+      "ranks": {
+        "draft": 11,
+        "qb": 6,
+        "rb": 8,
+        "starter": 7,
+        "te": 12,
+        "wr": 4
+      },
+      "roast": "Mahomes and ARSB deserve a tight end with a pulse.",
+      "tier": "Frisky",
+      "weeklyPoints_projected": 44.6
+    }
+  }
+}

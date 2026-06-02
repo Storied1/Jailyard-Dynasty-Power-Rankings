@@ -1235,6 +1235,16 @@ All 6 weeks PASS. Idempotency holds (architect M6)."
 
 ## Task 7: Generate weekN_data_expanded.json companion + manifest hash
 
+> **Drift note (2026-06-01, corrected during execution).** The original draft walked a
+> non-existent top-level `top_scorers[]` array, used `from scripts.shared import` (breaks
+> `python scripts/X.py`), and inlined the full game per scorer. Verified ground truth: holders
+> nest under `matchups[].team{1,2}.top_scorers[]` + `awards.top_performer`. An independent
+> architect review additionally caught a CRLF/LF manifest-hash Blocker (F4 — `save_json_canonical`
+> writes CRLF on Windows but git stores LF, so a byte-hash breaks Task 10's CI idempotency gate on
+> LF checkouts) and a missing inliner-version (F1). **Shipped version (below):** a top-level
+> `games{}` map (no per-scorer duplication — advisor-backed, ~4.3x smaller), canonical `sys.path`
+> bootstrap, and a logical-content + `INLINER_VERSION` hash. Tests mirror the real nested shape.
+
 **Files:**
 
 - Create: `scripts/generate_expanded_week.py`
@@ -1242,63 +1252,120 @@ All 6 weeks PASS. Idempotency holds (architect M6)."
 
 - [ ] **Step 1: Write failing test**
 
-Create `scripts/tests/test_generate_expanded.py`:
+Create `scripts/tests/test_generate_expanded.py` (9 tests — nested shape + F4 line-ending + F1
+inliner-version guards):
 
 ```python
 """Tests for generate_expanded_week.py.
 
-Architect M2: weekN_data_expanded.json inlines NFLGame data per top_scorer
-for chrome authors who prefer one-fetch-per-week.
+Architect M2: weekN_data_expanded.json carries a top-level games{} map; scorers
++ awards.top_performer reference games by game_context.game_id (one fetch, no
+per-holder duplication).
+Architect N2: content-addressable regen via line-ending- & version-aware hash.
 
-Architect N2: regeneration is content-addressable via manifest hash.
+Holders nest under matchups[].team{1,2}.top_scorers[] + awards.top_performer —
+NOT a top-level array. Tests mirror reality.
 """
-import json
 from pathlib import Path
 
-import pytest
+import scripts.generate_expanded_week as mod
+from scripts.generate_expanded_week import (
+    build_expanded,
+    compute_manifest_hash,
+    _referenced_game_ids,
+)
 
-from scripts.generate_expanded_week import compute_manifest_hash, build_expanded
+
+def _week_fixture():
+    return {
+        "meta": {"week": 6, "season": 2025},
+        "matchups": [
+            {
+                "team1": {"top_scorers": [
+                    {"player_id": "9509", "game_context": {"game_id": "2025_06_BUF_ATL", "src": {}}}]},
+                "team2": {"top_scorers": [
+                    {"player_id": "4017", "game_context": {"game_id": "2025_06_CHI_WAS", "src": {}}}]},
+            }
+        ],
+        "awards": {"top_performer": {
+            "player_id": "9509", "game_context": {"game_id": "2025_06_BUF_ATL", "src": {}}}},
+    }
 
 
 def test_compute_manifest_hash_stable_across_runs(tmp_path: Path):
-    """Same inputs → same hash."""
     a = tmp_path / "a.json"
     a.write_text('{"x": 1}')
-    h1 = compute_manifest_hash([a])
-    h2 = compute_manifest_hash([a])
-    assert h1 == h2
+    assert compute_manifest_hash([a]) == compute_manifest_hash([a])
 
 
 def test_compute_manifest_hash_changes_when_input_changes(tmp_path: Path):
-    """Modify input → different hash."""
     a = tmp_path / "a.json"
     a.write_text('{"x": 1}')
     h1 = compute_manifest_hash([a])
     a.write_text('{"x": 2}')
-    h2 = compute_manifest_hash([a])
-    assert h1 != h2
+    assert h1 != compute_manifest_hash([a])
 
 
-def test_build_expanded_inlines_game_data():
-    """top_scorers entries get a `game` field with the full NFLGame data."""
-    week_data = {
-        "meta": {"week": 6, "season": 2025},
-        "top_scorers": [
-            {"player_id": "4017", "game_context": {"game_id": "2025_06_ATL_BUF", "src": {}}}
-        ],
-    }
+def test_compute_manifest_hash_line_ending_invariant(tmp_path: Path):
+    """F4: CRLF (Windows on-disk) and LF (git/CI) inputs hash identically."""
+    lf = tmp_path / "lf"
+    lf.mkdir()
+    crlf = tmp_path / "crlf"
+    crlf.mkdir()
+    (lf / "a.json").write_bytes(b'{\n  "x": 1\n}\n')
+    (crlf / "a.json").write_bytes(b'{\r\n  "x": 1\r\n}\r\n')
+    assert compute_manifest_hash([lf / "a.json"]) == compute_manifest_hash([crlf / "a.json"])
+
+
+def test_compute_manifest_hash_changes_with_inliner_version(tmp_path: Path, monkeypatch):
+    """F1: bumping INLINER_VERSION invalidates the manifest."""
+    a = tmp_path / "a.json"
+    a.write_text('{"x": 1}')
+    monkeypatch.setattr(mod, "INLINER_VERSION", "1")
+    h1 = mod.compute_manifest_hash([a])
+    monkeypatch.setattr(mod, "INLINER_VERSION", "2")
+    assert h1 != mod.compute_manifest_hash([a])
+
+
+def test_build_expanded_builds_games_map_from_nested_and_awards():
     nfl_games = {
-        "2025_06_ATL_BUF": {
-            "game_id": "2025_06_ATL_BUF",
-            "home_team": "BUF",
-            "away_team": "ATL",
-            "temp": 52,
-        }
+        "2025_06_BUF_ATL": {"game_id": "2025_06_BUF_ATL", "home_team": "ATL", "away_team": "BUF", "temp": 52},
+        "2025_06_CHI_WAS": {"game_id": "2025_06_CHI_WAS", "home_team": "WAS", "away_team": "CHI", "temp": 61},
     }
-    expanded = build_expanded(week_data, nfl_games)
-    inlined_game = expanded["top_scorers"][0]["game"]
-    assert inlined_game["temp"] == 52
-    assert inlined_game["home_team"] == "BUF"
+    expanded = build_expanded(_week_fixture(), nfl_games)
+    assert set(expanded["games"]) == {"2025_06_BUF_ATL", "2025_06_CHI_WAS"}
+    assert expanded["games"]["2025_06_BUF_ATL"]["temp"] == 52
+
+
+def test_build_expanded_no_per_holder_duplication():
+    nfl_games = {
+        "2025_06_BUF_ATL": {"game_id": "2025_06_BUF_ATL", "temp": 52},
+        "2025_06_CHI_WAS": {"game_id": "2025_06_CHI_WAS", "temp": 61},
+    }
+    expanded = build_expanded(_week_fixture(), nfl_games)
+    scorer = expanded["matchups"][0]["team1"]["top_scorers"][0]
+    assert "game" not in scorer  # referenced via game_context.game_id, not inlined
+    assert scorer["game_context"]["game_id"] == "2025_06_BUF_ATL"
+
+
+def test_build_expanded_games_map_excludes_unreferenced():
+    nfl_games = {
+        "2025_06_BUF_ATL": {"game_id": "2025_06_BUF_ATL", "temp": 52},
+        "2025_06_CHI_WAS": {"game_id": "2025_06_CHI_WAS", "temp": 61},
+        "2025_06_UNUSED_XX": {"game_id": "2025_06_UNUSED_XX", "temp": 99},
+    }
+    expanded = build_expanded(_week_fixture(), nfl_games)
+    assert "2025_06_UNUSED_XX" not in expanded["games"]
+
+
+def test_build_expanded_awards_game_resolvable_in_map():
+    expanded = build_expanded(_week_fixture(), {"2025_06_BUF_ATL": {"game_id": "2025_06_BUF_ATL", "temp": 52}})
+    tp_gid = expanded["awards"]["top_performer"]["game_context"]["game_id"]
+    assert tp_gid in expanded["games"]
+
+
+def test_referenced_game_ids_collects_nested_and_awards():
+    assert _referenced_game_ids(_week_fixture()) == {"2025_06_BUF_ATL", "2025_06_CHI_WAS"}
 ```
 
 - [ ] **Step 2: Run test, verify it fails**
@@ -1307,7 +1374,7 @@ def test_build_expanded_inlines_game_data():
 python -m pytest scripts/tests/test_generate_expanded.py -v
 ```
 
-Expected: ImportError.
+Expected: `ModuleNotFoundError: No module named 'scripts.generate_expanded_week'`.
 
 - [ ] **Step 3: Create the generator**
 
@@ -1316,78 +1383,112 @@ Create `scripts/generate_expanded_week.py`:
 ```python
 """Generate weekN_data_expanded.json from weekN_data.json + NFLGame entities.
 
-Architect M2: denormalized companion for chrome authors who prefer one
-fetch per week instead of N+1 (week + per-game files).
+Architect M2: denormalized COMPANION for chrome authors who want one fetch per
+week instead of N+1. Game data lives in a top-level `games` map; scorers +
+awards.top_performer reference it by game_context.game_id (normalize within the
+single-fetch document -- no per-holder duplication, ~4.3x smaller than inlining).
 
-Architect N2: content-addressable regeneration via manifest hash. Avoids
-unnecessary writes when inputs haven't changed.
+Architect N2: content-addressable regeneration via a logical-content +
+inliner-version hash -- line-ending- & format-invariant (CRLF Windows tree and
+LF CI checkout agree) and sensitive to inliner-semantics changes.
+
+Holders nest under matchups[].team{1,2}.top_scorers[] + awards.top_performer.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
 
-from scripts.shared import REPO_ROOT, load_json, save_json_canonical
+# scripts/ on sys.path -> runnable as `python scripts/generate_expanded_week.py`
+# AND importable as `from scripts.generate_expanded_week import ...` under pytest.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from shared import REPO_ROOT, load_json, save_json_canonical  # noqa: E402
 
 WEEKS_DIR = REPO_ROOT / "content" / "weeks"
 NFL_GAMES_DIR = REPO_ROOT / "data" / "2025" / "nfl_games"
 MANIFEST_PATH = NFL_GAMES_DIR / "_expanded_manifest.json"
 
+# Bump when build_expanded / _iter_game_context_holders SEMANTICS change, so the
+# content-addressable manifest invalidates even when inputs are unchanged (F1).
+INLINER_VERSION = "1"
 
-def compute_manifest_hash(paths: list[Path]) -> str:
-    """SHA-256 over sorted (path, content) pairs. Stable across runs."""
+
+def _iter_game_context_holders(week_data: dict):
+    """Yield every dict carrying a game_context (verified nested shape)."""
+    for matchup in week_data.get("matchups", []):
+        for side_key in ("team1", "team2"):
+            side = matchup.get(side_key) or {}
+            for scorer in side.get("top_scorers", []):
+                yield scorer
+    top_performer = (week_data.get("awards") or {}).get("top_performer")
+    if isinstance(top_performer, dict):
+        yield top_performer
+
+
+def _referenced_game_ids(week_data: dict) -> set:
+    ids = {
+        (h.get("game_context") or {}).get("game_id")
+        for h in _iter_game_context_holders(week_data)
+    }
+    ids.discard(None)
+    return ids
+
+
+def compute_manifest_hash(paths: list) -> str:
+    """SHA-256 over INLINER_VERSION + sorted (name, canonical-content) pairs.
+
+    Hashes LOGICAL JSON content (load_json normalizes CRLF->LF on read), so a
+    Windows working tree and an LF CI checkout produce the same digest (F4).
+    INLINER_VERSION invalidates the manifest on a logic change (F1).
+    """
     h = hashlib.sha256()
+    h.update(f"inliner-v{INLINER_VERSION}\x00".encode("utf-8"))
     for p in sorted(paths, key=str):
-        h.update(str(p.name).encode("utf-8"))
+        h.update(p.name.encode("utf-8"))
         h.update(b"\x00")
-        h.update(p.read_bytes())
+        h.update(json.dumps(load_json(p), sort_keys=True, ensure_ascii=False).encode("utf-8"))
         h.update(b"\x00")
     return h.hexdigest()
 
 
-def build_expanded(week_data: dict, nfl_games: dict[str, dict]) -> dict:
-    """Build the expanded week-data by inlining NFLGame data per top_scorer."""
+def build_expanded(week_data: dict, nfl_games: dict) -> dict:
+    """Attach a top-level `games` map keyed by game_id.
+
+    Scorers + awards.top_performer keep their game_context.game_id as the
+    reference. Chrome authors resolve via week.games[ctx.game_id] -- one fetch,
+    one local lookup, no per-holder duplication.
+    """
     expanded = json.loads(json.dumps(week_data))  # deep copy
-    for ts in expanded.get("top_scorers", []):
-        ctx = ts.get("game_context") or {}
-        game_id = ctx.get("game_id")
-        if game_id and game_id in nfl_games:
-            ts["game"] = nfl_games[game_id]
+    referenced = _referenced_game_ids(expanded)
+    expanded["games"] = {gid: nfl_games[gid] for gid in sorted(referenced) if gid in nfl_games}
     return expanded
 
 
 def regenerate_for_week(week: int, season: int = 2025) -> bool:
-    """Regenerate the expanded file for one week. Returns True if written."""
+    """Regenerate one week's expanded file. Returns True if written."""
     week_data_path = WEEKS_DIR / f"week{week}_data.json"
     week_data = load_json(week_data_path)
+    if week_data is None:
+        print(f"  week{week}: no week_data.json -- skipped")
+        return False
 
-    # Collect referenced game_ids
-    game_ids = {
-        ts.get("game_context", {}).get("game_id")
-        for ts in week_data.get("top_scorers", [])
-        if ts.get("game_context", {}).get("game_id")
-    }
-    referenced_game_paths = sorted(NFL_GAMES_DIR / f"{gid}.json" for gid in game_ids if gid)
+    game_ids = _referenced_game_ids(week_data)
+    referenced_game_paths = [NFL_GAMES_DIR / f"{gid}.json" for gid in game_ids]
     inputs = [week_data_path] + [p for p in referenced_game_paths if p.exists()]
-
     new_hash = compute_manifest_hash(inputs)
 
-    # Manifest check
-    manifest = load_json(MANIFEST_PATH) if MANIFEST_PATH.exists() else {}
+    manifest = (load_json(MANIFEST_PATH) if MANIFEST_PATH.exists() else {}) or {}
     if manifest.get(str(week)) == new_hash:
-        return False  # Already up-to-date
+        return False  # up-to-date
 
-    # Build + write
-    nfl_games = {
-        p.stem: load_json(p) for p in referenced_game_paths if p.exists()
-    }
+    nfl_games = {p.stem: load_json(p) for p in referenced_game_paths if p.exists()}
     expanded = build_expanded(week_data, nfl_games)
-    out_path = WEEKS_DIR / f"week{week}_data_expanded.json"
-    save_json_canonical(out_path, expanded)
+    save_json_canonical(WEEKS_DIR / f"week{week}_data_expanded.json", expanded)
 
-    # Update manifest
     manifest[str(week)] = new_hash
     save_json_canonical(MANIFEST_PATH, manifest)
     return True
@@ -1421,41 +1522,51 @@ if __name__ == "__main__":
 python -m pytest scripts/tests/test_generate_expanded.py -v
 ```
 
-Expected: 3 passed.
+Expected: 9 passed.
 
-- [ ] **Step 5: Generate expanded files for all 18 weeks**
+- [ ] **Step 5: Generate expanded files for all 18 weeks + per-week no-op audit**
 
 ```bash
 python scripts/generate_expanded_week.py --season 2025
 ```
 
-Expected: writes 18 expanded files + manifest. Second run: all "up-to-date."
+Expected: writes 18 expanded files + manifest. Then a per-week audit asserts every referenced
+game_id appears in that week's `games` map — guards against a silent no-op (week 18 legitimately
+maps 0 games: championship week, empty top_scorers + null top_performer).
 
-- [ ] **Step 6: Idempotency check**
+- [ ] **Step 6: Idempotency + determinism check**
 
 ```bash
-python scripts/generate_expanded_week.py --season 2025
-git diff content/weeks/*_expanded.json | wc -l
+python scripts/generate_expanded_week.py --season 2025   # 2nd run: all "up-to-date", 0 written
+# determinism: sha256 the expanded files, delete the manifest, regenerate, compare bytes
 ```
 
-Expected: 0.
+Expected: 0 written; expanded files byte-identical after a forced regen (proves true determinism,
+not just a manifest skip). NOTE: `git diff` is a weak check here — expanded files are untracked
+until first commit, so it is trivially empty.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add scripts/generate_expanded_week.py scripts/tests/test_generate_expanded.py content/weeks/*_expanded.json data/2025/nfl_games/_expanded_manifest.json
-git commit -m "feat(data): weekN_data_expanded.json companion + manifest hash
+git add scripts/generate_expanded_week.py scripts/tests/test_generate_expanded.py content/weeks/week*_data_expanded.json data/2025/nfl_games/_expanded_manifest.json docs/superpowers/plans/2026-05-03-jailyard-content-depth-phase-1a.md
+git commit -m "feat(data): weekN_data_expanded.json companion (games map) + manifest hash
 
-Architect M2: chrome authors who prefer one fetch per week consume the
-expanded file (NFLGame data inlined per top_scorer) instead of week_data
-+ N per-game files.
+Architect M2: one-fetch-per-week companion. Game data in a top-level games{}
+map; scorers + awards.top_performer reference by game_context.game_id. Map over
+per-scorer inline avoids ~4.3x duplication (advisor-backed) while staying
+single-fetch.
 
-Architect N2: content-addressable regeneration via manifest hash at
-data/2025/nfl_games/_expanded_manifest.json. Re-runs skip unchanged weeks.
+Architect N2: content-addressable regen via logical-content + INLINER_VERSION
+hash at data/2025/nfl_games/_expanded_manifest.json. Line-ending invariant
+(CRLF tree == LF CI checkout); re-runs skip unchanged weeks.
 
-18 expanded files generated. Idempotent.
+Fixes vs committed plan: (1) walked a non-existent top-level top_scorers[];
+real holders nest under matchups[].team{1,2}.top_scorers[] + awards.top_performer.
+(2) sibling-import bootstrap (from shared, not from scripts.shared). (3) architect
+review: CRLF/LF hash Blocker (F4), inliner-version (F1), games-map (F2), per-week
+no-op audit (F5). Plan doc Task 7 patched. 18 files. Idempotent.
 
-Tests: +3. Suite: 65+/65+."
+Tests: +9. Suite: 76/76."
 ```
 
 ---
