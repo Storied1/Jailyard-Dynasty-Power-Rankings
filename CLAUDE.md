@@ -35,7 +35,8 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `data/{year}/season_combined.json` — main season data file
 - `data/league_history.json` — cross-season analytics (Elo, H2H, records)
 - `data/{year}/nfl_stats_week{N}.json` — gitignored Sleeper stats cache, populated by `fetch_sleeper.py` step 8/8; required for `game_context` enrichment; use `--force` to refresh
-- `weekN_data.json` v2 enrichment: `top_scorers[].{player_id, game_context}`, `awards.top_performer.game_context`, `standings[].{roster_id, margin_this_week, momentum}`, `matchups[].momentum`
+- `weekN_data.json` v2 enrichment: `matchups[].team{1,2}.top_scorers[].game_context` (NESTED — there is NO top-level `top_scorers[]`) + `awards.top_performer.game_context`; `standings[].{roster_id, margin_this_week, momentum}`, `matchups[].momentum`
+- `weekN_data_expanded.json` — denormalized companion (Task 7): top-level `games{}` map keyed by game_id; holders reference by `game_context.game_id`. Idempotent via `data/2025/nfl_games/_expanded_manifest.json` (hashes inputs). Built by `scripts/generate_expanded_week.py`
 - Sleeper API (`https://api.sleeper.app/v1`) as live fallback
 
 ## Critical Rules
