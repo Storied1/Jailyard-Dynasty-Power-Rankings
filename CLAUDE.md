@@ -8,7 +8,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 
 - HTML5 / CSS3 / Vanilla JS (no frameworks, no npm, no build)
 - Canvas 2D API for charts (scatter, stacked bar, trend, Elo)
-- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 18 scripts)
+- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 21 scripts)
 - GitHub Actions for automated weekly data fetches
 - Hosted as static files (GitHub Pages or direct)
 
@@ -170,7 +170,7 @@ Use `python` not `python3` on this machine. Python is at:
 - **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Run tests:** `python -m pytest scripts/tests/ -v` — 48 tests across momentum, extract_week_data, nfl_stats_fetch
+- **Run tests:** `python -m pytest scripts/tests/ -v` — 76 tests across momentum, extract_week_data (v1+v2), nflreadpy/nfl_games, expanded companion, canonical save, and verifier
 - **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
 - **Add chart:** Canvas 2D pattern from `preseason.html`, always handle `devicePixelRatio`
