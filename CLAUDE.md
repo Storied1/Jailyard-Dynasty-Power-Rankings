@@ -8,7 +8,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 
 - HTML5 / CSS3 / Vanilla JS (no frameworks, no npm, no build)
 - Canvas 2D API for charts (scatter, stacked bar, trend, Elo)
-- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 21 scripts)
+- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 22 scripts)
 - GitHub Actions for automated weekly data fetches
 - Hosted as static files (GitHub Pages or direct)
 
@@ -105,15 +105,16 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 
 ### Key Scripts
 
-| Script                                 | Purpose                                                               |
-| -------------------------------------- | --------------------------------------------------------------------- |
-| `fetch_sleeper.py`                     | Fetch season data from Sleeper API                                    |
-| `scripts/extract_week_data.py`         | Transforms `season_combined.json` → per-week AI-ready JSON            |
-| `scripts/verify_week_content.py`       | Content validator (Tier 1: structural, Tier 2: data, Tier 3: chat)    |
-| `scripts/parse_whatsapp.py`            | Phase 1: parse raw WhatsApp export → `chat/parsed_messages.json`      |
-| `scripts/map_chat_deterministic.py`    | Phase 2 MAP: heuristic extraction from monthly chat chunks            |
-| `scripts/reduce_chat_deterministic.py` | Phase 2 REDUCE: merge MAP outputs → analytics files                   |
-| `scripts/build_chat_context.py`        | Phase 3: per-week chat relevancy engine (`--no-ai` for deterministic) |
+| Script                                 | Purpose                                                                          |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| `fetch_sleeper.py`                     | Fetch season data from Sleeper API                                               |
+| `scripts/extract_week_data.py`         | Transforms `season_combined.json` → per-week AI-ready JSON                       |
+| `scripts/verify_week_content.py`       | Content validator (Tier 1: structural, Tier 2: data, Tier 3: chat)               |
+| `scripts/parse_whatsapp.py`            | Phase 1: parse raw WhatsApp export → `chat/parsed_messages.json`                 |
+| `scripts/map_chat_deterministic.py`    | Phase 2 MAP: heuristic extraction from monthly chat chunks                       |
+| `scripts/reduce_chat_deterministic.py` | Phase 2 REDUCE: merge MAP outputs → analytics files                              |
+| `scripts/build_chat_context.py`        | Phase 3: per-week chat relevancy engine (`--no-ai` for deterministic)            |
+| `scripts/derive_historical_rosters.py` | Per-week roster snapshots wks 1-17 (Sleeper matchup backfill; reversal fallback) |
 
 ### Workflow
 
@@ -173,7 +174,7 @@ Use `python` not `python3` on this machine. Python is at:
 - **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Run tests:** `python -m pytest scripts/tests/ -v` — 76 tests across momentum, extract_week_data (v1+v2), nflreadpy/nfl_games, expanded companion, canonical save, and verifier
+- **Run tests:** `python -m pytest scripts/tests/ -v` — 86 tests across momentum, extract_week_data (v1+v2), nflreadpy/nfl_games, expanded companion, roster snapshots, canonical save, and verifier
 - **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
 - **Add chart:** Canvas 2D pattern from `preseason.html`, always handle `devicePixelRatio`
