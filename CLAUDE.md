@@ -50,10 +50,13 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - **Canvas charts must handle `devicePixelRatio`** for Retina displays
 - **Data changes must update all consumers** — if you change `league.teams` schema, grep for every reference
 - **Sleeper bracket data has 2 games at max round** — championship (`min(matchup_id)`) + 3rd-place. Always filter to `min(m)` when detecting finals/champions.
+- **2025 season ended at week 17** — championship played wk17 (4 playoff matchups); week 18 has 0 matchups. Week-18 content = season finale/awards format, never a standard column.
 - **NEVER trust AI-generated inline data arrays** — always cross-reference against Sleeper API endpoints before publishing (draft picks, records, etc.)
 - **No repeating animations** — `animation-iteration-count: infinite` is banned for shimmer, pulse, blink, glow. Loading spinners and tickers are OK.
 - **Quality gates are binary** — if a gate (`/edit-week`, `verify_week_content.py`, `/review`, `/grill`) finds an error, the verdict follows the gate's rules. Never rationalize "minor" exceptions. Fix first, approve second.
 - **Content fixes require HTML re-render** — editing `weekN_content.json` does NOT update `weekN.html`. After any content fix, re-render the affected week's HTML before pushing.
+- **As-if-realtime law** — column bodies + week subtitles use only knowledge available at that point in the season (UTC chat cutoffs → writer temporal rule → verifier Tier-3 check → cumulative-through-N data). Site chrome (Vault, landing, meta) is exempt — present-day frame. Full law: `project_editorial_identity` memory + `docs/superpowers/specs/2026-06-04-jailyard-2025-catchup-design.md`.
+- **Running-blog continuity** — later weeks back-reference earlier ones. Produce chronologically so every piece lands on the FINAL version of its predecessors; `meta.threads` ledger (Phase 4+) makes continuity structural.
 
 ## Known Patterns
 
