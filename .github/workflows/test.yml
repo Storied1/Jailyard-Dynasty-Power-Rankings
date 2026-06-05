@@ -31,3 +31,11 @@ jobs:
 
       - name: Run test suite
         run: python -m pytest scripts/tests/ -v
+
+      # T10 idempotency gate: regenerating the expanded companions against the
+      # committed manifest must write 0 files and leave the tree clean
+      # (manifest-skip path — hashes INPUTS, line-ending invariant).
+      - name: Idempotency gate (expanded companion manifest-skip)
+        run: |
+          python scripts/generate_expanded_week.py --season 2025
+          git diff --exit-code -- content/weeks data/2025/nfl_games
