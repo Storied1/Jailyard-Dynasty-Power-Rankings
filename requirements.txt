@@ -1,0 +1,25 @@
+# Python dependencies for the Jailyard Dynasty data + content pipeline.
+#
+# The FRONTEND (HTML/CSS/JS) has ZERO dependencies by design — this file is
+# only for the Python scripts under scripts/ and fetch_sleeper.py.
+#
+# Fresh clone:  pip install -r requirements.txt
+#
+# Versions are floors pinned at the last known-good set. The test CI
+# (.github/workflows/test.yml) re-runs the suite on every push/PR, so a
+# breaking upstream release surfaces there instead of rotting silently —
+# which is why loose floors are safe here rather than reckless.
+
+# --- Core data pipeline (required to run scripts/ + the pytest suite) ---
+jsonschema>=4.25.1        # content + schema validation (verify_week_content.py, scripts/schemas/)
+nflreadpy>=0.1.5,<0.2     # NFL schedule / play-by-play source (fetch_nflreadpy.py); pre-1.0, capped
+polars>=1.40.1            # dataframe engine for NFLGame generation (generate_nfl_games.py)
+
+# --- Test runner (dev) ---
+pytest>=9.0.2             # python -m pytest scripts/tests/   (76 tests)
+
+# --- Optional / feature-specific (uncomment as needed) ---
+# anthropic>=0.86.0       # AI media descriptions + chat analysis (describe_media.py, analyze_chat.py, build_chat_context.py)
+# requests>=2.32.5        # GIPHY media resolution (resolve_media.py)
+# opencv-python           # video-frame extraction for media description (describe_media.py); not currently installed
+# playwright>=1.58.0      # Task 5 (future) render / screenshot automation

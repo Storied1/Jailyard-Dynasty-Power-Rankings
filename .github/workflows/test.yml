@@ -1,0 +1,33 @@
+name: Tests
+
+# Gate the pytest suite (scripts/tests/) on every push + PR to main.
+# Companion to fetch-sleeper-data.yml, which refreshes data but runs no tests.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Run manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run test suite
+        run: python -m pytest scripts/tests/ -v
