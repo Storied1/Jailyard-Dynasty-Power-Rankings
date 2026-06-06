@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Player Arc",
+  "description": "Cross-season per-player timeline (Phase 1b Item 2). Validates ONE arc object. status 'retired' is reserved (spec architect Mi3) but not yet wired.",
+  "type": "object",
+  "required": [
+    "player_id",
+    "name",
+    "position",
+    "gsis_id",
+    "current_owner",
+    "ownership_history",
+    "weekly",
+    "season_aggregates"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "player_id": { "type": "string" },
+    "gsis_id": { "type": ["string", "null"] },
+    "name": { "type": "string" },
+    "position": { "type": ["string", "null"] },
+    "current_owner": {
+      "type": ["object", "null"],
+      "required": ["roster_id", "team_name"],
+      "additionalProperties": false,
+      "properties": {
+        "roster_id": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "team_name": { "type": ["string", "null"] }
+      }
+    },
+    "ownership_history": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "event",
+              "season",
+              "round",
+              "pick",
+              "draft_slot",
+              "roster_id",
+              "date"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "event": { "const": "draft" },
+              "season": { "type": "integer", "minimum": 2022 },
+              "round": { "type": "integer", "minimum": 1 },
+              "pick": { "type": "integer", "minimum": 1 },
+              "draft_slot": { "type": "integer", "minimum": 1 },
+              "roster_id": { "type": "integer", "minimum": 1, "maximum": 12 },
+              "date": { "type": ["string", "null"] }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["event", "season", "date", "roster_id", "via"],
+            "additionalProperties": false,
+            "properties": {
+              "event": { "enum": ["add", "drop"] },
+              "season": { "type": "integer", "minimum": 2022 },
+              "date": { "type": "string" },
+              "roster_id": { "type": "integer", "minimum": 1, "maximum": 12 },
+              "via": { "enum": ["waiver", "free_agent", "commissioner"] },
+              "bid": { "type": ["integer", "null"] }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "event",
+              "season",
+              "date",
+              "from_roster_id",
+              "to_roster_id",
+              "in_return"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "event": { "const": "trade" },
+              "season": { "type": "integer", "minimum": 2022 },
+              "date": { "type": "string" },
+              "from_roster_id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12
+              },
+              "to_roster_id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12
+              },
+              "in_return": {
+                "type": "object",
+                "required": ["players", "picks"],
+                "additionalProperties": false,
+                "properties": {
+                  "players": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["player_id", "name"],
+                      "additionalProperties": false,
+                      "properties": {
+                        "player_id": { "type": "string" },
+                        "name": { "type": ["string", "null"] }
+                      }
+                    }
+                  },
+                  "picks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "round",
+                        "season",
+                        "original_roster_id",
+                        "from_roster_id",
+                        "to_roster_id"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "round": { "type": "integer", "minimum": 1 },
+                        "season": { "type": "string" },
+                        "original_roster_id": { "type": ["integer", "null"] },
+                        "from_roster_id": { "type": ["integer", "null"] },
+                        "to_roster_id": { "type": ["integer", "null"] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "event",
+              "season",
+              "roster_id",
+              "from_week",
+              "to_week"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "event": { "const": "rostered" },
+              "season": { "type": "integer", "minimum": 2022 },
+              "roster_id": { "type": "integer", "minimum": 1, "maximum": 12 },
+              "from_week": { "type": "integer", "minimum": 1, "maximum": 18 },
+              "to_week": { "type": "integer", "minimum": 1, "maximum": 18 }
+            }
+          }
+        ]
+      }
+    },
+    "weekly": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "season",
+          "week",
+          "owner_roster_id",
+          "fantasy_points",
+          "started",
+          "game_id",
+          "status"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "season": { "type": "integer", "minimum": 2022 },
+          "week": { "type": "integer", "minimum": 1, "maximum": 18 },
+          "owner_roster_id": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "fantasy_points": { "type": ["number", "null"] },
+          "started": { "type": "boolean" },
+          "game_id": { "type": ["string", "null"] },
+          "status": {
+            "enum": [
+              "played",
+              "bye_week",
+              "did_not_play",
+              "no_game_data",
+              "retired"
+            ]
+          }
+        }
+      }
+    },
+    "season_aggregates": {
+      "type": "object",
+      "propertyNames": { "pattern": "^20[0-9]{2}$" },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "total_fantasy_pts",
+          "weeks_rostered",
+          "weeks_started",
+          "weeks_played",
+          "best_week",
+          "worst_week"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "total_fantasy_pts": { "type": "number" },
+          "weeks_rostered": { "type": "integer" },
+          "weeks_started": { "type": "integer" },
+          "weeks_played": { "type": "integer" },
+          "best_week": {
+            "type": ["object", "null"],
+            "required": ["week", "points", "owner_roster_id"],
+            "additionalProperties": false,
+            "properties": {
+              "week": { "type": "integer" },
+              "points": { "type": "number" },
+              "owner_roster_id": { "type": "integer" }
+            }
+          },
+          "worst_week": {
+            "type": ["object", "null"],
+            "required": ["week", "points", "owner_roster_id"],
+            "additionalProperties": false,
+            "properties": {
+              "week": { "type": "integer" },
+              "points": { "type": "number" },
+              "owner_roster_id": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
