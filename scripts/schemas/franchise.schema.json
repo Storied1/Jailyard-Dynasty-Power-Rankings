@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Franchise Wing",
+  "description": "Per-franchise biography keyed by roster_id (Phase 1b Item 3). Validates ONE franchise file.",
+  "type": "object",
+  "required": [
+    "roster_id",
+    "owner_id",
+    "username",
+    "current_team_name",
+    "trophy_case",
+    "all_time_record",
+    "elo",
+    "h2h",
+    "season_results",
+    "milestones",
+    "roster_lineage",
+    "voice_bible_callbacks"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "roster_id": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "owner_id": { "type": "string" },
+    "username": { "type": "string" },
+    "current_team_name": { "type": ["string", "null"] },
+    "trophy_case": {
+      "type": "object",
+      "required": ["championships", "runner_ups", "playoff_appearances"],
+      "additionalProperties": false,
+      "properties": {
+        "championships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["season", "runner_up_roster_id"],
+            "additionalProperties": false,
+            "properties": {
+              "season": { "type": "integer" },
+              "runner_up_roster_id": { "type": ["integer", "null"] }
+            }
+          }
+        },
+        "runner_ups": { "type": "array", "items": { "type": "integer" } },
+        "playoff_appearances": {
+          "type": "array",
+          "items": { "type": "integer" }
+        }
+      }
+    },
+    "all_time_record": {
+      "type": "object",
+      "required": ["wins", "losses", "ties", "pf", "pa", "win_pct"],
+      "additionalProperties": false,
+      "properties": {
+        "wins": { "type": "integer" },
+        "losses": { "type": "integer" },
+        "ties": { "type": "integer" },
+        "pf": { "type": "number" },
+        "pa": { "type": "number" },
+        "win_pct": { "type": "number" }
+      }
+    },
+    "elo": {
+      "type": "object",
+      "required": ["current", "peak", "peak_season", "peak_week"],
+      "additionalProperties": false,
+      "properties": {
+        "current": { "type": "number" },
+        "peak": { "type": "number" },
+        "peak_season": { "type": ["integer", "null"] },
+        "peak_week": { "type": ["integer", "null"] }
+      }
+    },
+    "h2h": {
+      "type": "object",
+      "propertyNames": { "pattern": "^([1-9]|1[0-2])$" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["opponent_roster_id", "wins", "losses", "pf", "pa"],
+        "additionalProperties": false,
+        "properties": {
+          "opponent_roster_id": { "type": "integer" },
+          "wins": { "type": "integer" },
+          "losses": { "type": "integer" },
+          "pf": { "type": "number" },
+          "pa": { "type": "number" }
+        }
+      }
+    },
+    "season_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "season",
+          "wins",
+          "losses",
+          "ties",
+          "pf",
+          "pa",
+          "team_name",
+          "champion",
+          "runner_up",
+          "made_playoffs"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "season": { "type": "integer" },
+          "wins": { "type": "integer" },
+          "losses": { "type": "integer" },
+          "ties": { "type": "integer" },
+          "pf": { "type": "number" },
+          "pa": { "type": "number" },
+          "team_name": { "type": ["string", "null"] },
+          "champion": { "type": "boolean" },
+          "runner_up": { "type": "boolean" },
+          "made_playoffs": { "type": "boolean" }
+        }
+      }
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "label", "season", "week", "value"],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "enum": [
+              "league_record",
+              "best_win_streak",
+              "peak_elo",
+              "first_season"
+            ]
+          },
+          "label": { "type": "string" },
+          "season": { "type": ["integer", "null"] },
+          "week": { "type": ["integer", "null"] },
+          "value": { "type": ["number", "string", "null"] }
+        }
+      }
+    },
+    "roster_lineage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["player_id", "name", "position", "acquired"],
+        "additionalProperties": false,
+        "properties": {
+          "player_id": { "type": "string" },
+          "name": { "type": ["string", "null"] },
+          "position": { "type": ["string", "null"] },
+          "acquired": {
+            "type": "object",
+            "required": ["event", "season", "detail"],
+            "additionalProperties": false,
+            "properties": {
+              "event": { "enum": ["draft", "trade", "add", "unknown"] },
+              "season": { "type": ["integer", "null"] },
+              "detail": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "voice_bible_callbacks": {
+      "type": "object",
+      "required": ["preseason_rank", "tier", "roast", "key_players", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "preseason_rank": { "type": ["integer", "null"] },
+        "tier": { "type": ["string", "null"] },
+        "roast": { "type": ["string", "null"] },
+        "key_players": { "type": "array", "items": { "type": "string" } },
+        "source": { "const": "team-profiles.json (2025 preseason)" }
+      }
+    }
+  }
+}
