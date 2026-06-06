@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "La'Mical Perine",
+  "ownership_history": [
+    {
+      "bid": 32,
+      "date": "2023-11-07",
+      "event": "add",
+      "roster_id": 4,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-21",
+      "event": "drop",
+      "roster_id": 4,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 4,
+      "season": 2023,
+      "to_week": 11
+    }
+  ],
+  "player_id": "6908",
+  "position": "RB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 4,
+        "points": 0.0,
+        "week": 11
+      },
+      "total_fantasy_pts": 0.0,
+      "weeks_played": 1,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 4,
+        "points": 0.0,
+        "week": 11
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2023,
+      "started": false,
+      "status": "bye_week",
+      "week": 10
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 11
+    }
+  ]
+}

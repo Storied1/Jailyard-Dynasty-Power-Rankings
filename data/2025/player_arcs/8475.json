@@ -1,0 +1,106 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Montrell Washington",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-09-05",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-19",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 5,
+      "season": 2022,
+      "to_week": 6
+    }
+  ],
+  "player_id": "8475",
+  "position": "WR",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 5,
+        "points": 1.9,
+        "week": 2
+      },
+      "total_fantasy_pts": -0.8,
+      "weeks_played": 6,
+      "weeks_rostered": 6,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": -3.5,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 1.9,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.9,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": -0.1,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": -3.5,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 6
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Coby Bryant",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-10-20",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-20",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-30",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-04",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 9,
+      "roster_id": 3,
+      "season": 2025,
+      "to_week": 9
+    }
+  ],
+  "player_id": "8293",
+  "position": "DB",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 3,
+        "points": 2.0,
+        "week": 9
+      },
+      "total_fantasy_pts": 2.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 3,
+        "points": 2.0,
+        "week": 9
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 2.0,
+      "game_id": "2025_09_SEA_WAS",
+      "owner_roster_id": 3,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 9
+    }
+  ]
+}

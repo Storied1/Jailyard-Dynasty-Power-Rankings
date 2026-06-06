@@ -1,0 +1,119 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Davis Mills",
+  "ownership_history": [
+    {
+      "date": "2022-09-05",
+      "draft_slot": 1,
+      "event": "draft",
+      "pick": 360,
+      "roster_id": 8,
+      "round": 30,
+      "season": 2022
+    },
+    {
+      "bid": null,
+      "date": "2022-09-21",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": 5,
+      "date": "2022-10-26",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-27",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": 27,
+      "date": "2022-11-16",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-23",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 8,
+      "season": 2022,
+      "to_week": 2
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 3,
+      "season": 2022,
+      "to_week": 11
+    }
+  ],
+  "player_id": "7585",
+  "position": "QB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 14.5,
+        "week": 1
+      },
+      "total_fantasy_pts": 31.44,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 5.18,
+        "week": 2
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 14.5,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 5.18,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 11.76,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 11
+    }
+  ]
+}

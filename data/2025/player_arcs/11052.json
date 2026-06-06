@@ -1,0 +1,77 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Jaylon Jones",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-10-09",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-10-16",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": 0,
+      "date": "2024-11-19",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-11-20",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 1,
+      "season": 2024,
+      "to_week": 6
+    }
+  ],
+  "player_id": "11052",
+  "position": "DB",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 8.5,
+        "week": 6
+      },
+      "total_fantasy_pts": 8.5,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 8.5,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 8.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 6
+    }
+  ]
+}

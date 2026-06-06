@@ -1,0 +1,111 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0035406",
+  "name": "Lil'Jordan Humphrey",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-01-05",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-01-10",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": 10,
+      "date": "2024-09-24",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-10-17",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 4,
+      "roster_id": 1,
+      "season": 2024,
+      "to_week": 6
+    },
+    {
+      "bid": 0,
+      "date": "2025-10-15",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-17",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "free_agent"
+    }
+  ],
+  "player_id": "5938",
+  "position": "WR",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 5.8,
+        "week": 5
+      },
+      "total_fantasy_pts": 7.1,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 0.0,
+        "week": 4
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 5.8,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 1.3,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 6
+    }
+  ]
+}

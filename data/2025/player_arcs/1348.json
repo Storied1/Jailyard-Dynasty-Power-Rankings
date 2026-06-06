@@ -1,0 +1,184 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0030098",
+  "name": "Dustin Hopkins",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-10-01",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-05",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 4,
+      "roster_id": 8,
+      "season": 2022,
+      "to_week": 4
+    },
+    {
+      "bid": null,
+      "date": "2023-10-19",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-22",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": 17,
+      "date": "2023-10-24",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-21",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": 0,
+      "date": "2023-12-18",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-28",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 8,
+      "roster_id": 3,
+      "season": 2023,
+      "to_week": 11
+    },
+    {
+      "event": "rostered",
+      "from_week": 16,
+      "roster_id": 1,
+      "season": 2023,
+      "to_week": 16
+    }
+  ],
+  "player_id": "1348",
+  "position": "K",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 10.0,
+        "week": 4
+      },
+      "total_fantasy_pts": 10.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 10.0,
+        "week": 4
+      }
+    },
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 3,
+        "points": 13.0,
+        "week": 10
+      },
+      "total_fantasy_pts": 39.0,
+      "weeks_played": 5,
+      "weeks_rostered": 5,
+      "weeks_started": 5,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 2.0,
+        "week": 16
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 10.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 8.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 9.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 13.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 7.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 16
+    }
+  ]
+}

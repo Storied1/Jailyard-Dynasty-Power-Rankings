@@ -1,0 +1,156 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0026968",
+  "name": "Ryan Succop",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-09-14",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-18",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-19",
+      "event": "add",
+      "roster_id": 7,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-16",
+      "event": "drop",
+      "roster_id": 7,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 2,
+      "roster_id": 3,
+      "season": 2022,
+      "to_week": 6
+    },
+    {
+      "event": "rostered",
+      "from_week": 7,
+      "roster_id": 7,
+      "season": 2022,
+      "to_week": 10
+    }
+  ],
+  "player_id": "391",
+  "position": "K",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 3,
+        "points": 14.0,
+        "week": 6
+      },
+      "total_fantasy_pts": 74.0,
+      "weeks_played": 9,
+      "weeks_rostered": 9,
+      "weeks_started": 8,
+      "worst_week": {
+        "owner_roster_id": 7,
+        "points": 2.0,
+        "week": 10
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 10.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 8.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 8.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 8.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 14.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 10.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 11.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 10
+    }
+  ]
+}

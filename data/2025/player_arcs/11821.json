@@ -1,0 +1,134 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Tahj Washington",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-08-25",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-09-17",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 5,
+      "season": 2024,
+      "to_week": 2
+    },
+    {
+      "bid": null,
+      "date": "2025-01-06",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-07-21",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-12",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-25",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 5,
+      "season": 2025,
+      "to_week": 11
+    }
+  ],
+  "player_id": "11821",
+  "position": "WR",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 5,
+        "points": 0.0,
+        "week": 1
+      },
+      "total_fantasy_pts": 0.0,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": 0.0,
+        "week": 1
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 5,
+        "points": 0.0,
+        "week": 11
+      },
+      "total_fantasy_pts": 0.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": 0.0,
+        "week": 11
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_11_WAS_MIA",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 11
+    }
+  ]
+}

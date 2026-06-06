@@ -1,0 +1,111 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0034208",
+  "name": "Mike Boone",
+  "ownership_history": [
+    {
+      "bid": 92,
+      "date": "2022-10-04",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-26",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-12-11",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-12-16",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 8,
+      "season": 2022,
+      "to_week": 7
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 14
+    }
+  ],
+  "player_id": "5209",
+  "position": "RB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 10.0,
+        "week": 5
+      },
+      "total_fantasy_pts": 17.1,
+      "weeks_played": 4,
+      "weeks_rostered": 4,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 0.9,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 10.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 0.9,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 2.3,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 3.9,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 14
+    }
+  ]
+}

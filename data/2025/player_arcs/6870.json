@@ -1,0 +1,98 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Bryan Edwards",
+  "ownership_history": [
+    {
+      "date": "2022-09-05",
+      "draft_slot": 9,
+      "event": "draft",
+      "pick": 321,
+      "roster_id": 12,
+      "round": 27,
+      "season": 2022
+    },
+    {
+      "bid": null,
+      "date": "2022-10-13",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 12,
+      "season": 2022,
+      "to_week": 5
+    }
+  ],
+  "player_id": "6870",
+  "position": "WR",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 1.5,
+        "week": 5
+      },
+      "total_fantasy_pts": 2.2,
+      "weeks_played": 3,
+      "weeks_rostered": 5,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 0.0,
+        "week": 1
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 0.7,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 4
+    },
+    {
+      "fantasy_points": 1.5,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 5
+    }
+  ]
+}

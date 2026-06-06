@@ -1,0 +1,136 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "George Karlaftis",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-10-01",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-15",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-06",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-06",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-13",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-12-03",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 5,
+      "season": 2025,
+      "to_week": 6
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 12,
+      "season": 2025,
+      "to_week": 13
+    }
+  ],
+  "player_id": "8385",
+  "position": "DL",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 6.5,
+        "week": 11
+      },
+      "total_fantasy_pts": 17.5,
+      "weeks_played": 5,
+      "weeks_rostered": 5,
+      "weeks_started": 4,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": 1.0,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 6.0,
+      "game_id": "2025_05_KC_JAX",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": "2025_06_DET_KC",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 6.5,
+      "game_id": "2025_11_KC_DEN",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": "2025_12_IND_KC",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": "2025_13_KC_DAL",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 13
+    }
+  ]
+}

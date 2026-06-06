@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0034765",
+  "name": "Tre'Quan Smith",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-10-19",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-02",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 7,
+      "roster_id": 10,
+      "season": 2022,
+      "to_week": 8
+    }
+  ],
+  "player_id": "5026",
+  "position": "WR",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 8.4,
+        "week": 7
+      },
+      "total_fantasy_pts": 8.4,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 0.0,
+        "week": 8
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 8.4,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 8
+    }
+  ]
+}

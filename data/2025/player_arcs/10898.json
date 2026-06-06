@@ -1,0 +1,242 @@
+{
+  "current_owner": {
+    "roster_id": 9,
+    "team_name": "Father Time "
+  },
+  "gsis_id": null,
+  "name": "Tuli Tuipulotu",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-10-16",
+      "event": "add",
+      "roster_id": 4,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-25",
+      "event": "drop",
+      "roster_id": 4,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 4,
+      "season": 2023,
+      "to_week": 7
+    },
+    {
+      "bid": null,
+      "date": "2024-11-23",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-05",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 12,
+      "roster_id": 1,
+      "season": 2024,
+      "to_week": 13
+    },
+    {
+      "bid": null,
+      "date": "2025-11-06",
+      "event": "add",
+      "roster_id": 9,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 9,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "10898",
+  "position": "DL",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 4,
+        "points": 4.0,
+        "week": 7
+      },
+      "total_fantasy_pts": 6.0,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 4,
+        "points": 2.0,
+        "week": 6
+      }
+    },
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 3.5,
+        "week": 12
+      },
+      "total_fantasy_pts": 4.0,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 0.5,
+        "week": 13
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 9,
+        "points": 23.5,
+        "week": 13
+      },
+      "total_fantasy_pts": 70.5,
+      "weeks_played": 7,
+      "weeks_rostered": 9,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 9,
+        "points": 1.5,
+        "week": 17
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 2.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 4.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 3.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 0.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 8.0,
+      "game_id": "2025_10_PIT_LAC",
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 3.5,
+      "game_id": "2025_11_LAC_JAX",
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "bye_week",
+      "week": 12
+    },
+    {
+      "fantasy_points": 23.5,
+      "game_id": "2025_13_LV_LAC",
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": "2025_14_PHI_LAC",
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 20.0,
+      "game_id": "2025_15_LAC_KC",
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 11.0,
+      "game_id": "2025_16_LAC_DAL",
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 1.5,
+      "game_id": "2025_17_HOU_LAC",
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_18_LAC_DEN",
+      "owner_roster_id": 9,
+      "season": 2025,
+      "started": false,
+      "status": "did_not_play",
+      "week": 18
+    }
+  ]
+}

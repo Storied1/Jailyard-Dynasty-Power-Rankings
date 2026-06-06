@@ -1,0 +1,120 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "DaRon Bland",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-10-05",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-13",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": 0,
+      "date": "2023-12-12",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-01-02",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 1,
+      "season": 2023,
+      "to_week": 5
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 1,
+      "season": 2023,
+      "to_week": 18
+    }
+  ],
+  "player_id": "8476",
+  "position": "DB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 6.5,
+        "week": 18
+      },
+      "total_fantasy_pts": 18.0,
+      "weeks_played": 5,
+      "weeks_rostered": 5,
+      "weeks_started": 5,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 1.0,
+        "week": 15
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 5.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 1.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 4.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 6.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

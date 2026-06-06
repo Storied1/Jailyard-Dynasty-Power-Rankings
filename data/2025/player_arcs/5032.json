@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0034364",
+  "name": "Jordan Akins",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-09-28",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-10-06",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 4,
+      "roster_id": 6,
+      "season": 2024,
+      "to_week": 5
+    }
+  ],
+  "player_id": "5032",
+  "position": "TE",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 6,
+        "points": 9.7,
+        "week": 5
+      },
+      "total_fantasy_pts": 11.2,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 6,
+        "points": 1.5,
+        "week": 4
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 1.5,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 9.7,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 5
+    }
+  ]
+}

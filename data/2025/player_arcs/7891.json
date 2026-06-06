@@ -1,0 +1,166 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Brock Wright",
+  "ownership_history": [
+    {
+      "bid": 26,
+      "date": "2022-11-01",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-15",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 9,
+      "roster_id": 6,
+      "season": 2022,
+      "to_week": 10
+    },
+    {
+      "bid": 35,
+      "date": "2024-09-24",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-09-28",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-09-19",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-09-23",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-15",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-18",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 3,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 3
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 6,
+      "season": 2025,
+      "to_week": 11
+    }
+  ],
+  "player_id": "7891",
+  "position": "TE",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 6,
+        "points": 6.7,
+        "week": 10
+      },
+      "total_fantasy_pts": 6.7,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 6,
+        "points": 0.0,
+        "week": 9
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 6,
+        "points": 1.8,
+        "week": 11
+      },
+      "total_fantasy_pts": 1.8,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": 0.0,
+        "week": 3
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 6.7,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_03_DET_BAL",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 1.8,
+      "game_id": "2025_11_DET_PHI",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 11
+    }
+  ]
+}

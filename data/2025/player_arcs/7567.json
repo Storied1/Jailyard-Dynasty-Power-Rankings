@@ -1,0 +1,816 @@
+{
+  "current_owner": {
+    "roster_id": 8,
+    "team_name": "MHJTIME"
+  },
+  "gsis_id": null,
+  "name": "Kenneth Gainwell",
+  "ownership_history": [
+    {
+      "date": "2022-09-05",
+      "draft_slot": 1,
+      "event": "draft",
+      "pick": 145,
+      "roster_id": 8,
+      "round": 13,
+      "season": 2022
+    },
+    {
+      "bid": null,
+      "date": "2022-11-24",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": 100,
+      "date": "2022-11-25",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-12-22",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 8,
+      "season": 2022,
+      "to_week": 11
+    },
+    {
+      "event": "rostered",
+      "from_week": 12,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 15
+    },
+    {
+      "event": "rostered",
+      "from_week": 18,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2023-03-20",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-07-13",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-08-11",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 8,
+      "season": 2023,
+      "to_week": 18
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 8,
+      "season": 2024,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2025-09-03",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": 19,
+      "date": "2025-09-09",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 2,
+      "roster_id": 8,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "7567",
+  "position": "RB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 11.3,
+        "week": 9
+      },
+      "total_fantasy_pts": 65.9,
+      "weeks_played": 15,
+      "weeks_rostered": 16,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 0.0,
+        "week": 11
+      }
+    },
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 9.4,
+        "week": 1
+      },
+      "total_fantasy_pts": 79.38,
+      "weeks_played": 16,
+      "weeks_rostered": 18,
+      "weeks_started": 3,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 1.0,
+        "week": 11
+      }
+    },
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 8.2,
+        "week": 12
+      },
+      "total_fantasy_pts": 54.6,
+      "weeks_played": 17,
+      "weeks_rostered": 18,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 0.0,
+        "week": 13
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 28.4,
+        "week": 4
+      },
+      "total_fantasy_pts": 182.0,
+      "weeks_played": 16,
+      "weeks_rostered": 17,
+      "weeks_started": 6,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 2.4,
+        "week": 10
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 10.2,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 2.3,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 0.6,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 8.2,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 2.5,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "bye_week",
+      "week": 7
+    },
+    {
+      "fantasy_points": 1.6,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 11.3,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 1.7,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 11.1,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 6.8,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 0.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 2.4,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 4.7,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 18
+    },
+    {
+      "fantasy_points": 9.4,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "did_not_play",
+      "week": 2
+    },
+    {
+      "fantasy_points": 5.3,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 4.1,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 2.9,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 2.2,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 7.6,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 2.1,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 8.8,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "bye_week",
+      "week": 10
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 4.6,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 7.2,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 2.8,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 2.1,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 8.4,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 4.68,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 6.2,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 18
+    },
+    {
+      "fantasy_points": 1.7,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 0.6,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 2.2,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.9,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "bye_week",
+      "week": 5
+    },
+    {
+      "fantasy_points": 2.3,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 7.2,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 1.9,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 1.5,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 4.4,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 5.4,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 8.2,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 4.3,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 7.5,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 1.8,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 1.4,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 3.3,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 18
+    },
+    {
+      "fantasy_points": 5.1,
+      "game_id": "2025_02_SEA_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 9.1,
+      "game_id": "2025_03_PIT_NE",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 28.4,
+      "game_id": "2025_04_MIN_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "bye_week",
+      "week": 5
+    },
+    {
+      "fantasy_points": 6.6,
+      "game_id": "2025_06_CLE_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 2.5,
+      "game_id": "2025_07_PIT_CIN",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 2.5,
+      "game_id": "2025_08_GB_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 5.4,
+      "game_id": "2025_09_IND_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 2.4,
+      "game_id": "2025_10_PIT_LAC",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 26.0,
+      "game_id": "2025_11_CIN_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 15.2,
+      "game_id": "2025_12_PIT_CHI",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 5.5,
+      "game_id": "2025_13_BUF_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 13.2,
+      "game_id": "2025_14_PIT_BAL",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 16.1,
+      "game_id": "2025_15_MIA_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 21.3,
+      "game_id": "2025_16_PIT_DET",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 5.3,
+      "game_id": "2025_17_PIT_CLE",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 17.4,
+      "game_id": "2025_18_BAL_PIT",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

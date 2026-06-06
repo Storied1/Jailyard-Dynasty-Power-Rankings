@@ -1,0 +1,182 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0034173",
+  "name": "Eddy Pineiro",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-09-10",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-09-17",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-15",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-29",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": 7,
+      "date": "2025-11-04",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-11",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": 0,
+      "date": "2025-11-14",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-20",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": 0,
+      "date": "2025-11-26",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-26",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 2,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 2
+    },
+    {
+      "event": "rostered",
+      "from_week": 7,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 8
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 11,
+      "season": 2025,
+      "to_week": 10
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 8,
+      "season": 2025,
+      "to_week": 11
+    }
+  ],
+  "player_id": "5189",
+  "position": "K",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 14.2,
+        "week": 11
+      },
+      "total_fantasy_pts": 38.0,
+      "weeks_played": 5,
+      "weeks_rostered": 5,
+      "weeks_started": 5,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": 1.0,
+        "week": 8
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 10.0,
+      "game_id": "2025_02_SF_NO",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 11.8,
+      "game_id": "2025_07_ATL_SF",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": "2025_08_SF_HOU",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": "2025_10_LA_SF",
+      "owner_roster_id": 11,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 14.2,
+      "game_id": "2025_11_SF_ARI",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 11
+    }
+  ]
+}

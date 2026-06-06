@@ -1,0 +1,294 @@
+{
+  "current_owner": {
+    "roster_id": 10,
+    "team_name": "General Ken-obi"
+  },
+  "gsis_id": null,
+  "name": "Jared Verse",
+  "ownership_history": [
+    {
+      "bid": 25,
+      "date": "2024-11-13",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-11-21",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 1,
+      "season": 2024,
+      "to_week": 11
+    },
+    {
+      "bid": null,
+      "date": "2025-07-24",
+      "event": "add",
+      "roster_id": 7,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-24",
+      "event": "drop",
+      "roster_id": 7,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": 7,
+      "date": "2025-10-28",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-11",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-23",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 7,
+      "season": 2025,
+      "to_week": 7
+    },
+    {
+      "event": "rostered",
+      "from_week": 8,
+      "roster_id": 11,
+      "season": 2025,
+      "to_week": 10
+    },
+    {
+      "event": "rostered",
+      "from_week": 12,
+      "roster_id": 10,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "11665",
+  "position": "DL",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 3.0,
+        "week": 11
+      },
+      "total_fantasy_pts": 3.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 3.0,
+        "week": 11
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 7,
+        "points": 17.5,
+        "week": 6
+      },
+      "total_fantasy_pts": 132.5,
+      "weeks_played": 16,
+      "weeks_rostered": 17,
+      "weeks_started": 13,
+      "worst_week": {
+        "owner_roster_id": 11,
+        "points": 0.5,
+        "week": 9
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": "2025_01_HOU_LA",
+      "owner_roster_id": 7,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 3.5,
+      "game_id": "2025_02_LA_TEN",
+      "owner_roster_id": 7,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 15.0,
+      "game_id": "2025_03_LA_PHI",
+      "owner_roster_id": 7,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 13.5,
+      "game_id": "2025_04_IND_LA",
+      "owner_roster_id": 7,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 12.0,
+      "game_id": "2025_05_SF_LA",
+      "owner_roster_id": 7,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 17.5,
+      "game_id": "2025_06_LA_BAL",
+      "owner_roster_id": 7,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 8.5,
+      "game_id": "2025_07_LA_JAX",
+      "owner_roster_id": 7,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2025,
+      "started": false,
+      "status": "bye_week",
+      "week": 8
+    },
+    {
+      "fantasy_points": 0.5,
+      "game_id": "2025_09_NO_LA",
+      "owner_roster_id": 11,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 4.0,
+      "game_id": "2025_10_LA_SF",
+      "owner_roster_id": 11,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 15.5,
+      "game_id": "2025_12_TB_LA",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 3.5,
+      "game_id": "2025_13_LA_CAR",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": "2025_14_LA_ARI",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 1.5,
+      "game_id": "2025_15_DET_LA",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 6.0,
+      "game_id": "2025_16_LA_SEA",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 16.5,
+      "game_id": "2025_17_LA_ATL",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 10.0,
+      "game_id": "2025_18_ARI_LA",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

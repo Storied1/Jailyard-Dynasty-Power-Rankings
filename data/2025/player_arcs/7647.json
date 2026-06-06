@@ -1,0 +1,104 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Pete Werner",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-10-27",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-23",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 8,
+      "roster_id": 12,
+      "season": 2022,
+      "to_week": 11
+    },
+    {
+      "bid": null,
+      "date": "2025-09-18",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-09-18",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2025,
+      "via": "free_agent"
+    }
+  ],
+  "player_id": "7647",
+  "position": "LB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 10.0,
+        "week": 8
+      },
+      "total_fantasy_pts": 12.0,
+      "weeks_played": 2,
+      "weeks_rostered": 4,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 2.0,
+        "week": 9
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 10.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 10
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 11
+    }
+  ]
+}

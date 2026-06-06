@@ -1,0 +1,257 @@
+{
+  "current_owner": {
+    "roster_id": 2,
+    "team_name": "Kittler on the Roof"
+  },
+  "gsis_id": null,
+  "name": "Edgerrin Cooper",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-12-25",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 17,
+      "roster_id": 1,
+      "season": 2024,
+      "to_week": 17
+    },
+    {
+      "bid": null,
+      "date": "2025-02-05",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-07-21",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "11687",
+  "position": "LB",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 16.5,
+        "week": 17
+      },
+      "total_fantasy_pts": 16.5,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 16.5,
+        "week": 17
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 2,
+        "points": 14.5,
+        "week": 15
+      },
+      "total_fantasy_pts": 115.5,
+      "weeks_played": 16,
+      "weeks_rostered": 18,
+      "weeks_started": 15,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": 2.5,
+        "week": 16
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 16.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 10.0,
+      "game_id": "2025_01_DET_GB",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 12.0,
+      "game_id": "2025_02_WAS_GB",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 5.0,
+      "game_id": "2025_03_GB_CLE",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 8.0,
+      "game_id": "2025_04_GB_DAL",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": false,
+      "status": "bye_week",
+      "week": 5
+    },
+    {
+      "fantasy_points": 9.5,
+      "game_id": "2025_06_CIN_GB",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 6.0,
+      "game_id": "2025_07_GB_ARI",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 6.0,
+      "game_id": "2025_08_GB_PIT",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 5.5,
+      "game_id": "2025_09_CAR_GB",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 6.0,
+      "game_id": "2025_10_PHI_GB",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 6.5,
+      "game_id": "2025_11_GB_NYG",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": "2025_12_MIN_GB",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 6.0,
+      "game_id": "2025_13_GB_DET",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 8.0,
+      "game_id": "2025_14_CHI_GB",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 14.5,
+      "game_id": "2025_15_GB_DEN",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 2.5,
+      "game_id": "2025_16_GB_CHI",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 7.0,
+      "game_id": "2025_17_BAL_GB",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_18_GB_MIN",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "did_not_play",
+      "week": 18
+    }
+  ]
+}

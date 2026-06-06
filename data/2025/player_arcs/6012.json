@@ -1,0 +1,220 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0035594",
+  "name": "Travis Homer",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-09-07",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-09-15",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-24",
+      "event": "add",
+      "roster_id": 4,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 1
+    },
+    {
+      "event": "rostered",
+      "from_week": 12,
+      "roster_id": 4,
+      "season": 2022,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2023-02-22",
+      "event": "drop",
+      "roster_id": 4,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-07",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-11",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-14",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-17",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 8,
+      "season": 2024,
+      "to_week": 15
+    }
+  ],
+  "player_id": "6012",
+  "position": "RB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 4,
+        "points": 12.3,
+        "week": 12
+      },
+      "total_fantasy_pts": 19.4,
+      "weeks_played": 6,
+      "weeks_rostered": 8,
+      "weeks_started": 6,
+      "worst_week": {
+        "owner_roster_id": 4,
+        "points": 0.0,
+        "week": 16
+      }
+    },
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 2.6,
+        "week": 14
+      },
+      "total_fantasy_pts": 4.3,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 1.7,
+        "week": 15
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.2,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 12.3,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 13
+    },
+    {
+      "fantasy_points": 4.9,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2022,
+      "started": true,
+      "status": "did_not_play",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 18
+    },
+    {
+      "fantasy_points": 2.6,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 1.7,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 15
+    }
+  ]
+}

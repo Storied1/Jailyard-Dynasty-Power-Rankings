@@ -1,0 +1,86 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Connor Heyward",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-10-22",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-22",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-27",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-07",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 8,
+      "roster_id": 11,
+      "season": 2023,
+      "to_week": 9
+    }
+  ],
+  "player_id": "8181",
+  "position": "TE",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 11,
+        "points": 4.9,
+        "week": 8
+      },
+      "total_fantasy_pts": 7.5,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 11,
+        "points": 2.6,
+        "week": 9
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 4.9,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 2.6,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 9
+    }
+  ]
+}

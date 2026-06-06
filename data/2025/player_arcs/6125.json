@@ -1,0 +1,138 @@
+{
+  "current_owner": {
+    "roster_id": 10,
+    "team_name": "General Ken-obi"
+  },
+  "gsis_id": " 00-0035643",
+  "name": "Jeffery Simmons",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-12-08",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-11",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 10,
+      "season": 2024,
+      "to_week": 14
+    },
+    {
+      "bid": 0,
+      "date": "2025-10-07",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-09",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-12-21",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 16,
+      "roster_id": 10,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "6125",
+  "position": "DT",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 8.0,
+        "week": 14
+      },
+      "total_fantasy_pts": 8.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 8.0,
+        "week": 14
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 12.5,
+        "week": 16
+      },
+      "total_fantasy_pts": 31.5,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 3,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 7.5,
+        "week": 18
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 8.0,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 12.5,
+      "game_id": "2025_16_KC_TEN",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 11.5,
+      "game_id": "2025_17_NO_TEN",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 7.5,
+      "game_id": "2025_18_TEN_JAX",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

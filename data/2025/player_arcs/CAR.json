@@ -1,0 +1,316 @@
+{
+  "current_owner": {
+    "roster_id": 4,
+    "team_name": "Noble FFT"
+  },
+  "gsis_id": null,
+  "name": "Carolina Panthers",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-12-16",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-12-22",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 15
+    },
+    {
+      "bid": null,
+      "date": "2023-11-05",
+      "event": "add",
+      "roster_id": 9,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-07",
+      "event": "drop",
+      "roster_id": 9,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-03",
+      "event": "add",
+      "roster_id": 4,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-03",
+      "event": "drop",
+      "roster_id": 4,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 9,
+      "roster_id": 9,
+      "season": 2023,
+      "to_week": 9
+    },
+    {
+      "bid": null,
+      "date": "2024-10-23",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-10-29",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 8,
+      "roster_id": 2,
+      "season": 2024,
+      "to_week": 8
+    },
+    {
+      "bid": null,
+      "date": "2025-10-01",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-15",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": 29,
+      "date": "2025-11-04",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-12",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-12-14",
+      "event": "add",
+      "roster_id": 4,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 12,
+      "season": 2025,
+      "to_week": 6
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 10
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 4,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "CAR",
+  "position": "DEF",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 1.0,
+        "week": 15
+      },
+      "total_fantasy_pts": 1.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 1.0,
+        "week": 15
+      }
+    },
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 9,
+        "points": 3.0,
+        "week": 9
+      },
+      "total_fantasy_pts": 3.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 9,
+        "points": 3.0,
+        "week": 9
+      }
+    },
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 2,
+        "points": 9.0,
+        "week": 8
+      },
+      "total_fantasy_pts": 9.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": 9.0,
+        "week": 8
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 4,
+        "points": 10.0,
+        "week": 17
+      },
+      "total_fantasy_pts": 41.0,
+      "weeks_played": 7,
+      "weeks_rostered": 7,
+      "weeks_started": 6,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 0.0,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 1.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 9,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 9.0,
+      "game_id": null,
+      "owner_roster_id": 2,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": "2025_05_MIA_CAR",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_06_DAL_CAR",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 6.0,
+      "game_id": "2025_10_NO_CAR",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 9.0,
+      "game_id": "2025_15_CAR_NO",
+      "owner_roster_id": 4,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 5.0,
+      "game_id": "2025_16_TB_CAR",
+      "owner_roster_id": 4,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 10.0,
+      "game_id": "2025_17_SEA_CAR",
+      "owner_roster_id": 4,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 8.0,
+      "game_id": "2025_18_CAR_TB",
+      "owner_roster_id": 4,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

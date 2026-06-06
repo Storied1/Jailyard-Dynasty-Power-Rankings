@@ -1,0 +1,161 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Elijah Dotson",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-09-06",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-09",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-13",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-31",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": 0,
+      "date": "2024-01-01",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 1,
+      "season": 2023,
+      "to_week": 4
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 8,
+      "season": 2023,
+      "to_week": 16
+    },
+    {
+      "event": "rostered",
+      "from_week": 18,
+      "roster_id": 8,
+      "season": 2023,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2024-01-28",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    }
+  ],
+  "player_id": "11114",
+  "position": "RB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 2.9,
+        "week": 2
+      },
+      "total_fantasy_pts": 2.9,
+      "weeks_played": 7,
+      "weeks_rostered": 7,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 0.0,
+        "week": 1
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 2.9,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

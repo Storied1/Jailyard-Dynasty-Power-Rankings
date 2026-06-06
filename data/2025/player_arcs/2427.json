@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0031576",
+  "name": "Za'Darius Smith",
+  "ownership_history": [
+    {
+      "bid": 5,
+      "date": "2022-11-01",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-17",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 9,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 10
+    }
+  ],
+  "player_id": "2427",
+  "position": "LB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 6.5,
+        "week": 9
+      },
+      "total_fantasy_pts": 13.0,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 6.5,
+        "week": 9
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 6.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 6.5,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 10
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0035189",
+  "name": "Matthew Wright",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-11-18",
+      "event": "add",
+      "roster_id": 4,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-24",
+      "event": "drop",
+      "roster_id": 4,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 4,
+      "season": 2022,
+      "to_week": 11
+    },
+    {
+      "bid": null,
+      "date": "2024-10-10",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-10-16",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-04",
+      "event": "add",
+      "roster_id": 4,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-13",
+      "event": "drop",
+      "roster_id": 4,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 8,
+      "season": 2024,
+      "to_week": 6
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 4,
+      "season": 2024,
+      "to_week": 14
+    }
+  ],
+  "player_id": "6268",
+  "position": "K",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 4,
+        "points": 13.0,
+        "week": 11
+      },
+      "total_fantasy_pts": 13.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 4,
+        "points": 13.0,
+        "week": 11
+      }
+    },
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 4,
+        "points": 17.1,
+        "week": 14
+      },
+      "total_fantasy_pts": 30.7,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 13.6,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 13.0,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 13.6,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 17.1,
+      "game_id": null,
+      "owner_roster_id": 4,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 14
+    }
+  ]
+}

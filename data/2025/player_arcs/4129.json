@@ -1,0 +1,97 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0033928",
+  "name": "Jourdan Lewis",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-09-21",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-22",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 3,
+      "roster_id": 5,
+      "season": 2025,
+      "to_week": 7
+    }
+  ],
+  "player_id": "4129",
+  "position": "CB",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 5,
+        "points": 12.5,
+        "week": 3
+      },
+      "total_fantasy_pts": 28.0,
+      "weeks_played": 5,
+      "weeks_rostered": 5,
+      "weeks_started": 5,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": 2.0,
+        "week": 4
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 12.5,
+      "game_id": "2025_03_HOU_JAX",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": "2025_04_JAX_SF",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 2.5,
+      "game_id": "2025_05_KC_JAX",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 4.0,
+      "game_id": "2025_06_SEA_JAX",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 7.0,
+      "game_id": "2025_07_LA_JAX",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 7
+    }
+  ]
+}

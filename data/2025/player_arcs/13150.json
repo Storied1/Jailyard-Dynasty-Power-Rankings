@@ -1,0 +1,142 @@
+{
+  "current_owner": {
+    "roster_id": 1,
+    "team_name": "The Boonist Monks"
+  },
+  "gsis_id": null,
+  "name": "Darius Cooper",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-08-13",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-03",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": 0,
+      "date": "2025-12-09",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 1,
+      "season": 2025,
+      "to_week": 4
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 1,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "13150",
+  "position": "WR",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 4.8,
+        "week": 18
+      },
+      "total_fantasy_pts": 9.6,
+      "weeks_played": 8,
+      "weeks_rostered": 8,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 0.0,
+        "week": 1
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_01_DAL_PHI",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_02_PHI_KC",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_03_LA_PHI",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_04_PHI_TB",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 3.9,
+      "game_id": "2025_15_LV_PHI",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_16_PHI_WAS",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 0.9,
+      "game_id": "2025_17_PHI_BUF",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 4.8,
+      "game_id": "2025_18_WAS_PHI",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0033662",
+  "name": "Cooper Rush",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-11-06",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-15",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": 20,
+      "date": "2024-12-18",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 5,
+      "season": 2024,
+      "to_week": 14
+    },
+    {
+      "event": "rostered",
+      "from_week": 16,
+      "roster_id": 5,
+      "season": 2024,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2025-01-09",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-05",
+      "event": "add",
+      "roster_id": 4,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-12",
+      "event": "drop",
+      "roster_id": 4,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 4,
+      "season": 2025,
+      "to_week": 5
+    }
+  ],
+  "player_id": "4574",
+  "position": "QB",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 5,
+        "points": 16.98,
+        "week": 12
+      },
+      "total_fantasy_pts": 79.32,
+      "weeks_played": 8,
+      "weeks_rostered": 8,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": -2.0,
+        "week": 10
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 4,
+        "points": 4.16,
+        "week": 5
+      },
+      "total_fantasy_pts": 4.16,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 4,
+        "points": 4.16,
+        "week": 5
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": -2.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 15.36,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 16.98,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 10.8,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 14.82,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 15.28,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 8.08,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 18
+    },
+    {
+      "fantasy_points": 4.16,
+      "game_id": "2025_05_HOU_BAL",
+      "owner_roster_id": 4,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 5
+    }
+  ]
+}

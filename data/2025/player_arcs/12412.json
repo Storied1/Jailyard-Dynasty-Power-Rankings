@@ -1,0 +1,79 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Terrell Jennings",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-11-01",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-18",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 9,
+      "roster_id": 1,
+      "season": 2025,
+      "to_week": 11
+    }
+  ],
+  "player_id": "12412",
+  "position": "RB",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 10.9,
+        "week": 9
+      },
+      "total_fantasy_pts": 11.4,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 0.0,
+        "week": 11
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 10.9,
+      "game_id": "2025_09_ATL_NE",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 0.5,
+      "game_id": "2025_10_NE_TB",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_11_NYJ_NE",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 11
+    }
+  ]
+}

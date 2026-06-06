@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0035632",
+  "name": "Amani Hooker",
+  "ownership_history": [
+    {
+      "bid": 2,
+      "date": "2023-09-26",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-10",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 4,
+      "roster_id": 3,
+      "season": 2023,
+      "to_week": 5
+    }
+  ],
+  "player_id": "5908",
+  "position": "DB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 3,
+        "points": 7.5,
+        "week": 4
+      },
+      "total_fantasy_pts": 10.5,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 3,
+        "points": 3.0,
+        "week": 5
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 7.5,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 5
+    }
+  ]
+}

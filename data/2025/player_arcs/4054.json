@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0033217",
+  "name": "Mo Alie-Cox",
+  "ownership_history": [
+    {
+      "bid": 8,
+      "date": "2022-10-05",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-19",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 10,
+      "season": 2022,
+      "to_week": 6
+    }
+  ],
+  "player_id": "4054",
+  "position": "TE",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 1.2,
+        "week": 5
+      },
+      "total_fantasy_pts": 1.2,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 0.0,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 1.2,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 6
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Tony Jones",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-09-18",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-09-21",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-12-07",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-12-22",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 2,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 2
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 10,
+      "season": 2022,
+      "to_week": 15
+    },
+    {
+      "event": "rostered",
+      "from_week": 18,
+      "roster_id": 10,
+      "season": 2022,
+      "to_week": 18
+    },
+    {
+      "bid": 125,
+      "date": "2023-09-19",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-09-29",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 3,
+      "roster_id": 1,
+      "season": 2023,
+      "to_week": 3
+    }
+  ],
+  "player_id": "6984",
+  "position": "RB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 3.0,
+        "week": 2
+      },
+      "total_fantasy_pts": 3.7,
+      "weeks_played": 3,
+      "weeks_rostered": 4,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 0.0,
+        "week": 18
+      }
+    },
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 7.2,
+        "week": 3
+      },
+      "total_fantasy_pts": 7.2,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 7.2,
+        "week": 3
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 0.7,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 15
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 18
+    },
+    {
+      "fantasy_points": 7.2,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 3
+    }
+  ]
+}

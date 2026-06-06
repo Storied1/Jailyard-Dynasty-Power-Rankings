@@ -1,0 +1,127 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Spencer Shrader",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-11-22",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-11-28",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 12,
+      "roster_id": 12,
+      "season": 2024,
+      "to_week": 12
+    },
+    {
+      "bid": null,
+      "date": "2025-09-17",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-08",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 3,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 5
+    }
+  ],
+  "player_id": "12185",
+  "position": "K",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 13.2,
+        "week": 12
+      },
+      "total_fantasy_pts": 13.2,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 13.2,
+        "week": 12
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 2,
+        "points": 11.0,
+        "week": 4
+      },
+      "total_fantasy_pts": 23.6,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 3,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": 2.0,
+        "week": 5
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 13.2,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 10.6,
+      "game_id": "2025_03_IND_TEN",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 11.0,
+      "game_id": "2025_04_IND_LA",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": "2025_05_LV_IND",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 5
+    }
+  ]
+}

@@ -1,0 +1,292 @@
+{
+  "current_owner": {
+    "roster_id": 1,
+    "team_name": "The Boonist Monks"
+  },
+  "gsis_id": null,
+  "name": "Cam Little",
+  "ownership_history": [
+    {
+      "bid": 5,
+      "date": "2024-10-09",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-11-08",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 12,
+      "season": 2024,
+      "to_week": 9
+    },
+    {
+      "bid": null,
+      "date": "2025-08-27",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-23",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-12",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-14",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": 1,
+      "date": "2025-11-18",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-12-02",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-12-18",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 12,
+      "season": 2025,
+      "to_week": 7
+    },
+    {
+      "event": "rostered",
+      "from_week": 12,
+      "roster_id": 6,
+      "season": 2025,
+      "to_week": 13
+    },
+    {
+      "event": "rostered",
+      "from_week": 16,
+      "roster_id": 1,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "11786",
+  "position": "K",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 11.6,
+        "week": 8
+      },
+      "total_fantasy_pts": 22.6,
+      "weeks_played": 4,
+      "weeks_rostered": 4,
+      "weeks_started": 4,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 1.0,
+        "week": 9
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 16.9,
+        "week": 18
+      },
+      "total_fantasy_pts": 110.9,
+      "weeks_played": 12,
+      "weeks_rostered": 12,
+      "weeks_started": 11,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": -2.0,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 4.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 6.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 11.6,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 16.8,
+      "game_id": "2025_01_CAR_JAX",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 10.2,
+      "game_id": "2025_02_JAX_CIN",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 4.9,
+      "game_id": "2025_03_HOU_JAX",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 8.4,
+      "game_id": "2025_04_JAX_SF",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 9.2,
+      "game_id": "2025_05_KC_JAX",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": -2.0,
+      "game_id": "2025_06_SEA_JAX",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_07_LA_JAX",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 13.4,
+      "game_id": "2025_12_JAX_ARI",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 6.5,
+      "game_id": "2025_13_JAX_TEN",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 11.7,
+      "game_id": "2025_16_JAX_DEN",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 14.9,
+      "game_id": "2025_17_JAX_IND",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 16.9,
+      "game_id": "2025_18_TEN_JAX",
+      "owner_roster_id": 1,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

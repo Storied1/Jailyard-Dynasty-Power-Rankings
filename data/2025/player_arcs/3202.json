@@ -1,0 +1,88 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0032392",
+  "name": "Austin Hooper",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-09-06",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-05",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 10,
+      "season": 2022,
+      "to_week": 4
+    }
+  ],
+  "player_id": "3202",
+  "position": "TE",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 3.9,
+        "week": 3
+      },
+      "total_fantasy_pts": 8.3,
+      "weeks_played": 4,
+      "weeks_rostered": 4,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 0.9,
+        "week": 4
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 1.1,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 2.4,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 3.9,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.9,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 4
+    }
+  ]
+}

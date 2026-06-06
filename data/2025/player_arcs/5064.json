@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0034745",
+  "name": "Tracy Walker",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-09-15",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-09-27",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 2,
+      "roster_id": 10,
+      "season": 2022,
+      "to_week": 3
+    }
+  ],
+  "player_id": "5064",
+  "position": "DB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 3.0,
+        "week": 2
+      },
+      "total_fantasy_pts": 4.5,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 1.5,
+        "week": 3
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 1.5,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 3
+    }
+  ]
+}

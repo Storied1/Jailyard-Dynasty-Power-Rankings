@@ -1,0 +1,134 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Derius Davis",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-11-16",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-28",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-13",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-16",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 11,
+      "season": 2023,
+      "to_week": 12
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 8,
+      "season": 2023,
+      "to_week": 15
+    },
+    {
+      "bid": null,
+      "date": "2024-05-07",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-05-21",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-05-29",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-08-11",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2024,
+      "via": "free_agent"
+    }
+  ],
+  "player_id": "10234",
+  "position": "WR",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 11,
+        "points": 0.6,
+        "week": 12
+      },
+      "total_fantasy_pts": -1.9,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": -2.7,
+        "week": 15
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.2,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 0.6,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": -2.7,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 15
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0027940",
+  "name": "Von Miller",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-11-09",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-29",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 8,
+      "season": 2023,
+      "to_week": 12
+    }
+  ],
+  "player_id": "871",
+  "position": "LB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 1.0,
+        "week": 10
+      },
+      "total_fantasy_pts": 1.0,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 3,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 0.0,
+        "week": 11
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 1.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 12
+    }
+  ]
+}

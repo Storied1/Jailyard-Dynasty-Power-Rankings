@@ -1,0 +1,62 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Harrison Mevis",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-12-24",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 17,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "12015",
+  "position": "K",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 2,
+        "points": 15.6,
+        "week": 18
+      },
+      "total_fantasy_pts": 22.1,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": 6.5,
+        "week": 17
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 6.5,
+      "game_id": "2025_17_LA_ATL",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 15.6,
+      "game_id": "2025_18_ARI_LA",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

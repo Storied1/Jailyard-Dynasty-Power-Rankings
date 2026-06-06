@@ -1,0 +1,134 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0032939",
+  "name": "Vonn Bell",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-10-14",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-25",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-06",
+      "event": "add",
+      "roster_id": 7,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-09",
+      "event": "drop",
+      "roster_id": 7,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-18",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-11-24",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 3,
+      "season": 2022,
+      "to_week": 7
+    },
+    {
+      "event": "rostered",
+      "from_week": 9,
+      "roster_id": 7,
+      "season": 2022,
+      "to_week": 9
+    },
+    {
+      "event": "rostered",
+      "from_week": 11,
+      "roster_id": 10,
+      "season": 2022,
+      "to_week": 11
+    }
+  ],
+  "player_id": "3230",
+  "position": "DB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 3,
+        "points": 4.5,
+        "week": 7
+      },
+      "total_fantasy_pts": 13.0,
+      "weeks_played": 4,
+      "weeks_rostered": 4,
+      "weeks_started": 3,
+      "worst_week": {
+        "owner_roster_id": 7,
+        "points": 2.0,
+        "week": 9
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 2.5,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 4.5,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 9
+    },
+    {
+      "fantasy_points": 4.0,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 11
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "current_owner": {
+    "roster_id": 2,
+    "team_name": "Kittler on the Roof"
+  },
+  "gsis_id": null,
+  "name": "Jake Tonges",
+  "ownership_history": [
+    {
+      "bid": 50,
+      "date": "2025-09-09",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-09-23",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-01",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-21",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-12-24",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 2,
+      "roster_id": 5,
+      "season": 2025,
+      "to_week": 3
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 12,
+      "season": 2025,
+      "to_week": 7
+    },
+    {
+      "event": "rostered",
+      "from_week": 17,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 17
+    }
+  ],
+  "player_id": "8698",
+  "position": "TE",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 2,
+        "points": 15.5,
+        "week": 17
+      },
+      "total_fantasy_pts": 47.1,
+      "weeks_played": 6,
+      "weeks_rostered": 6,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 0.0,
+        "week": 7
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 5.1,
+      "game_id": "2025_02_SF_NO",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 3.1,
+      "game_id": "2025_03_ARI_SF",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 13.6,
+      "game_id": "2025_05_SF_LA",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 9.8,
+      "game_id": "2025_06_SF_TB",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_07_ATL_SF",
+      "owner_roster_id": 12,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 15.5,
+      "game_id": "2025_17_CHI_SF",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 17
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Deven Thompkins",
+  "ownership_history": [
+    {
+      "bid": 55,
+      "date": "2023-10-03",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-17",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-08",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-12",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 3,
+      "season": 2023,
+      "to_week": 6
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 11,
+      "season": 2023,
+      "to_week": 14
+    }
+  ],
+  "player_id": "8253",
+  "position": "WR",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 3,
+        "points": 2.3,
+        "week": 6
+      },
+      "total_fantasy_pts": 2.3,
+      "weeks_played": 2,
+      "weeks_rostered": 3,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 11,
+        "points": 0.0,
+        "week": 14
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2023,
+      "started": false,
+      "status": "bye_week",
+      "week": 5
+    },
+    {
+      "fantasy_points": 2.3,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 14
+    }
+  ]
+}

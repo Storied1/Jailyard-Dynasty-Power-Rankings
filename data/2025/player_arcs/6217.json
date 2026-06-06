@@ -1,0 +1,92 @@
+{
+  "current_owner": {
+    "roster_id": 10,
+    "team_name": "General Ken-obi"
+  },
+  "gsis_id": " 00-0035276",
+  "name": "Blake Cashman",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-12-07",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 10,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "6217",
+  "position": "LB",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 17.5,
+        "week": 17
+      },
+      "total_fantasy_pts": 55.5,
+      "weeks_played": 5,
+      "weeks_rostered": 5,
+      "weeks_started": 5,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 6.5,
+        "week": 14
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 6.5,
+      "game_id": "2025_14_WAS_MIN",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 9.0,
+      "game_id": "2025_15_MIN_DAL",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 11.5,
+      "game_id": "2025_16_MIN_NYG",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 17.5,
+      "game_id": "2025_17_DET_MIN",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 11.0,
+      "game_id": "2025_18_GB_MIN",
+      "owner_roster_id": 10,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0035236",
+  "name": "Byron Murphy",
+  "ownership_history": [
+    {
+      "bid": 0,
+      "date": "2024-12-03",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-10",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-16",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-17",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 6,
+      "season": 2024,
+      "to_week": 14
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 11,
+      "season": 2024,
+      "to_week": 15
+    }
+  ],
+  "player_id": "5864",
+  "position": "CB",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 6,
+        "points": 7.0,
+        "week": 14
+      },
+      "total_fantasy_pts": 7.0,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 11,
+        "points": 0.0,
+        "week": 15
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 7.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 15
+    }
+  ]
+}

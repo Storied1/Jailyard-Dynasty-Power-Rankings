@@ -1,0 +1,118 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0035021",
+  "name": "Ashton Dulin",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-09-18",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-09-27",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 2,
+      "roster_id": 12,
+      "season": 2022,
+      "to_week": 3
+    },
+    {
+      "bid": null,
+      "date": "2024-10-11",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-10-17",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 1,
+      "season": 2024,
+      "to_week": 6
+    }
+  ],
+  "player_id": "6427",
+  "position": "WR",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 10.7,
+        "week": 2
+      },
+      "total_fantasy_pts": 11.9,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 1.2,
+        "week": 3
+      }
+    },
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 0.0,
+        "week": 6
+      },
+      "total_fantasy_pts": 0.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 0.0,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 10.7,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 1.2,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 6
+    }
+  ]
+}

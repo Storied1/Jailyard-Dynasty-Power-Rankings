@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0035166",
+  "name": "Azeez Al-Shaair",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-10-27",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-09",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 8,
+      "roster_id": 8,
+      "season": 2023,
+      "to_week": 9
+    }
+  ],
+  "player_id": "6485",
+  "position": "LB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 12.0,
+        "week": 8
+      },
+      "total_fantasy_pts": 19.0,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 8,
+        "points": 7.0,
+        "week": 9
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 12.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 7.0,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 9
+    }
+  ]
+}

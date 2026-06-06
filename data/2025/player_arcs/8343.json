@@ -1,0 +1,152 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Boye Mafe",
+  "ownership_history": [
+    {
+      "bid": 0,
+      "date": "2023-11-08",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-22",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": 0,
+      "date": "2023-11-22",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-29",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 10,
+      "season": 2023,
+      "to_week": 11
+    },
+    {
+      "bid": null,
+      "date": "2024-10-09",
+      "event": "add",
+      "roster_id": 3,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-10-30",
+      "event": "drop",
+      "roster_id": 3,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 3,
+      "season": 2024,
+      "to_week": 8
+    }
+  ],
+  "player_id": "8343",
+  "position": "DL",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 9.5,
+        "week": 10
+      },
+      "total_fantasy_pts": 10.5,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 1.0,
+        "week": 11
+      }
+    },
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 3,
+        "points": 10.5,
+        "week": 7
+      },
+      "total_fantasy_pts": 15.0,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 3,
+      "worst_week": {
+        "owner_roster_id": 3,
+        "points": 0.0,
+        "week": 8
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 9.5,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 4.5,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 10.5,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 3,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 8
+    }
+  ]
+}

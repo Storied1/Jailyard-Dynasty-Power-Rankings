@@ -1,0 +1,130 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Amari Rodgers",
+  "ownership_history": [
+    {
+      "date": "2022-09-05",
+      "draft_slot": 5,
+      "event": "draft",
+      "pick": 317,
+      "roster_id": 2,
+      "round": 27,
+      "season": 2022
+    },
+    {
+      "bid": null,
+      "date": "2022-09-21",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-12-15",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 2,
+      "season": 2022,
+      "to_week": 2
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2023-07-13",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    }
+  ],
+  "player_id": "7540",
+  "position": "WR",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 4.2,
+        "week": 16
+      },
+      "total_fantasy_pts": 12.1,
+      "weeks_played": 6,
+      "weeks_rostered": 6,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": -1.0,
+        "week": 2
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 2,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": -1.0,
+      "game_id": null,
+      "owner_roster_id": 2,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 3.6,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 4.2,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 2.6,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 2.7,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

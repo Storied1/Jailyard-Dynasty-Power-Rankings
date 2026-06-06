@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Chad Ryland",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-12-06",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-12-18",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 2,
+      "season": 2024,
+      "to_week": 15
+    }
+  ],
+  "player_id": "10955",
+  "position": "K",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 2,
+        "points": 15.4,
+        "week": 15
+      },
+      "total_fantasy_pts": 18.4,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": 3.0,
+        "week": 14
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 2,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 15.4,
+      "game_id": null,
+      "owner_roster_id": 2,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 15
+    }
+  ]
+}

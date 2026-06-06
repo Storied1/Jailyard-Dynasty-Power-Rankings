@@ -1,0 +1,83 @@
+{
+  "current_owner": {
+    "roster_id": 5,
+    "team_name": "The Legion of Bouz"
+  },
+  "gsis_id": null,
+  "name": "Kamari Lassiter",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2025-12-13",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 5,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "11685",
+  "position": "DB",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 5,
+        "points": 11.0,
+        "week": 15
+      },
+      "total_fantasy_pts": 28.5,
+      "weeks_played": 3,
+      "weeks_rostered": 4,
+      "weeks_started": 4,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": 7.5,
+        "week": 17
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 11.0,
+      "game_id": "2025_15_ARI_HOU",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 10.0,
+      "game_id": "2025_16_LV_HOU",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 7.5,
+      "game_id": "2025_17_HOU_LAC",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_18_IND_HOU",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": true,
+      "status": "did_not_play",
+      "week": 18
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0031345",
+  "name": "Jimmy Garoppolo",
+  "ownership_history": [
+    {
+      "bid": 40,
+      "date": "2022-09-20",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-09-30",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": 3,
+      "date": "2022-10-12",
+      "event": "add",
+      "roster_id": 7,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 3,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 3
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 7,
+      "season": 2022,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2023-11-05",
+      "event": "drop",
+      "roster_id": 7,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 7,
+      "season": 2023,
+      "to_week": 8
+    }
+  ],
+  "player_id": "1837",
+  "position": "QB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 7,
+        "points": 25.42,
+        "week": 11
+      },
+      "total_fantasy_pts": 118.24,
+      "weeks_played": 8,
+      "weeks_rostered": 14,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 7,
+        "points": 2.24,
+        "week": 13
+      }
+    },
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 7,
+        "points": 20.66,
+        "week": 3
+      },
+      "total_fantasy_pts": 72.1,
+      "weeks_played": 6,
+      "weeks_rostered": 8,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 7,
+        "points": 5.24,
+        "week": 8
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 8.44,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 18.94,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 16.32,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 17.7,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "bye_week",
+      "week": 9
+    },
+    {
+      "fantasy_points": 15.9,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 25.42,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 13.28,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 12
+    },
+    {
+      "fantasy_points": 2.24,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 14
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 15
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 16
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 18
+    },
+    {
+      "fantasy_points": 15.1,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 9.5,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 20.66,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2023,
+      "started": false,
+      "status": "did_not_play",
+      "week": 4
+    },
+    {
+      "fantasy_points": 11.72,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 9.88,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2023,
+      "started": false,
+      "status": "did_not_play",
+      "week": 7
+    },
+    {
+      "fantasy_points": 5.24,
+      "game_id": null,
+      "owner_roster_id": 7,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 8
+    }
+  ]
+}

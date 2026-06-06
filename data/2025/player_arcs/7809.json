@@ -1,0 +1,61 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Avery Williams",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2022-10-13",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-22",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 1,
+      "season": 2022,
+      "to_week": 6
+    }
+  ],
+  "player_id": "7809",
+  "position": "RB",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 1.3,
+        "week": 6
+      },
+      "total_fantasy_pts": 1.3,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 1.3,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 1.3,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 6
+    }
+  ]
+}

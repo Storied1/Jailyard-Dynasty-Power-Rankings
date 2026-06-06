@@ -1,0 +1,93 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Kenneth Murray",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-11-08",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-15",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-11-29",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-06",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 12,
+      "season": 2023,
+      "to_week": 10
+    },
+    {
+      "event": "rostered",
+      "from_week": 13,
+      "roster_id": 12,
+      "season": 2023,
+      "to_week": 13
+    }
+  ],
+  "player_id": "6811",
+  "position": "LB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 6.5,
+        "week": 10
+      },
+      "total_fantasy_pts": 12.5,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 6.0,
+        "week": 13
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 6.5,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 6.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 13
+    }
+  ]
+}

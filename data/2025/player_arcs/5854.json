@@ -1,0 +1,111 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0035704",
+  "name": "Drew Lock",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-12-10",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-13",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": 1,
+      "date": "2023-12-20",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2023,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 8,
+      "season": 2023,
+      "to_week": 14
+    },
+    {
+      "event": "rostered",
+      "from_week": 16,
+      "roster_id": 6,
+      "season": 2023,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2024-05-31",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "free_agent"
+    }
+  ],
+  "player_id": "5854",
+  "position": "QB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 8,
+        "points": 17.26,
+        "week": 14
+      },
+      "total_fantasy_pts": 17.26,
+      "weeks_played": 4,
+      "weeks_rostered": 4,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 6,
+        "points": 0.0,
+        "week": 16
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 17.26,
+      "game_id": null,
+      "owner_roster_id": 8,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

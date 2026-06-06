@@ -1,0 +1,86 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Kene Nwangwu",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-07-31",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-08-11",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-15",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-27",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 11,
+      "season": 2023,
+      "to_week": 16
+    }
+  ],
+  "player_id": "7720",
+  "position": "RB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 11,
+        "points": 0.1,
+        "week": 15
+      },
+      "total_fantasy_pts": 0.1,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 11,
+        "points": 0.0,
+        "week": 16
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.1,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 11,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 16
+    }
+  ]
+}

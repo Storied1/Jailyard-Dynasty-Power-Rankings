@@ -1,0 +1,190 @@
+{
+  "current_owner": {
+    "roster_id": 6,
+    "team_name": "Rasheeing the Scene"
+  },
+  "gsis_id": null,
+  "name": "Jordan Battle",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-12-06",
+      "event": "add",
+      "roster_id": 12,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 14,
+      "roster_id": 12,
+      "season": 2023,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2024-09-12",
+      "event": "drop",
+      "roster_id": 12,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 12,
+      "season": 2024,
+      "to_week": 1
+    },
+    {
+      "bid": 0,
+      "date": "2025-12-17",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 16,
+      "roster_id": 6,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "10927",
+  "position": "DB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 14.5,
+        "week": 18
+      },
+      "total_fantasy_pts": 38.5,
+      "weeks_played": 5,
+      "weeks_rostered": 5,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 3.0,
+        "week": 14
+      }
+    },
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 12,
+        "points": 0.0,
+        "week": 1
+      },
+      "total_fantasy_pts": 0.0,
+      "weeks_played": 1,
+      "weeks_rostered": 1,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 12,
+        "points": 0.0,
+        "week": 1
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 6,
+        "points": 6.5,
+        "week": 16
+      },
+      "total_fantasy_pts": 10.5,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 3,
+      "worst_week": {
+        "owner_roster_id": 6,
+        "points": 1.0,
+        "week": 17
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 14
+    },
+    {
+      "fantasy_points": 6.5,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 7.5,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 7.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 14.5,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 18
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 12,
+      "season": 2024,
+      "started": true,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 6.5,
+      "game_id": "2025_16_CIN_MIA",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": "2025_17_ARI_CIN",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": "2025_18_CLE_CIN",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

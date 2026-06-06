@@ -1,0 +1,127 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Xavier Restrepo",
+  "ownership_history": [
+    {
+      "date": "2025-07-10",
+      "draft_slot": 6,
+      "event": "draft",
+      "pick": 54,
+      "roster_id": 5,
+      "round": 5,
+      "season": 2025
+    },
+    {
+      "bid": null,
+      "date": "2025-09-09",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": 47,
+      "date": "2025-11-25",
+      "event": "add",
+      "roster_id": 11,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-12-03",
+      "event": "drop",
+      "roster_id": 11,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-12-24",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 5,
+      "season": 2025,
+      "to_week": 1
+    },
+    {
+      "event": "rostered",
+      "from_week": 13,
+      "roster_id": 11,
+      "season": 2025,
+      "to_week": 13
+    },
+    {
+      "event": "rostered",
+      "from_week": 17,
+      "roster_id": 8,
+      "season": 2025,
+      "to_week": 18
+    }
+  ],
+  "player_id": "12520",
+  "position": "WR",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 11,
+        "points": 2.0,
+        "week": 13
+      },
+      "total_fantasy_pts": 2.0,
+      "weeks_played": 4,
+      "weeks_rostered": 4,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": 0.0,
+        "week": 1
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_01_TEN_DEN",
+      "owner_roster_id": 5,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 2.0,
+      "game_id": "2025_13_JAX_TEN",
+      "owner_roster_id": 11,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 13
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_17_NO_TEN",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_18_TEN_JAX",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

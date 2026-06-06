@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": "00-0028118",
+  "name": "Tyrod Taylor",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-12-30",
+      "event": "add",
+      "roster_id": 10,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 17,
+      "roster_id": 10,
+      "season": 2023,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2024-01-07",
+      "event": "drop",
+      "roster_id": 10,
+      "season": 2024,
+      "via": "free_agent"
+    }
+  ],
+  "player_id": "827",
+  "position": "QB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 10,
+        "points": 18.76,
+        "week": 17
+      },
+      "total_fantasy_pts": 36.44,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 2,
+      "worst_week": {
+        "owner_roster_id": 10,
+        "points": 17.68,
+        "week": 18
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 18.76,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 17.68,
+      "game_id": null,
+      "owner_roster_id": 10,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

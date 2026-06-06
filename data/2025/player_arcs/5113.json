@@ -1,0 +1,172 @@
+{
+  "current_owner": null,
+  "gsis_id": " 00-0034418",
+  "name": "Cedrick Wilson",
+  "ownership_history": [
+    {
+      "date": "2022-09-05",
+      "draft_slot": 10,
+      "event": "draft",
+      "pick": 346,
+      "roster_id": 5,
+      "round": 29,
+      "season": 2022
+    },
+    {
+      "bid": null,
+      "date": "2022-09-05",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-09-05",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2022-10-26",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2022,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 5,
+      "season": 2022,
+      "to_week": 7
+    },
+    {
+      "bid": null,
+      "date": "2024-11-08",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2024-11-11",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2024,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 6,
+      "season": 2024,
+      "to_week": 10
+    }
+  ],
+  "player_id": "5113",
+  "position": "WR",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 5,
+        "points": 3.8,
+        "week": 1
+      },
+      "total_fantasy_pts": 6.8,
+      "weeks_played": 6,
+      "weeks_rostered": 7,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": 0.0,
+        "week": 2
+      }
+    },
+    "2024": {
+      "best_week": null,
+      "total_fantasy_pts": 0.0,
+      "weeks_played": 0,
+      "weeks_rostered": 1,
+      "weeks_started": 0,
+      "worst_week": null
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 3.8,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "did_not_play",
+      "week": 4
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2024,
+      "started": false,
+      "status": "did_not_play",
+      "week": 10
+    }
+  ]
+}

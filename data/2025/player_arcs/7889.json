@@ -1,0 +1,86 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Jerry Jacobs",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-10-15",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-10-28",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-01",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2023-12-02",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 6,
+      "roster_id": 6,
+      "season": 2023,
+      "to_week": 7
+    }
+  ],
+  "player_id": "7889",
+  "position": "CB",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 6,
+        "points": 4.0,
+        "week": 6
+      },
+      "total_fantasy_pts": 4.0,
+      "weeks_played": 1,
+      "weeks_rostered": 2,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 6,
+        "points": 4.0,
+        "week": 6
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 4.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2023,
+      "started": true,
+      "status": "played",
+      "week": 6
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2023,
+      "started": false,
+      "status": "did_not_play",
+      "week": 7
+    }
+  ]
+}

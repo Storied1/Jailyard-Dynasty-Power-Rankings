@@ -1,0 +1,157 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Tai Felton",
+  "ownership_history": [
+    {
+      "date": "2025-07-10",
+      "draft_slot": 8,
+      "event": "draft",
+      "pick": 56,
+      "roster_id": 6,
+      "round": 5,
+      "season": 2025
+    },
+    {
+      "bid": null,
+      "date": "2025-10-28",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2025,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-06",
+      "event": "add",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-11-12",
+      "event": "drop",
+      "roster_id": 8,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 1,
+      "roster_id": 6,
+      "season": 2025,
+      "to_week": 8
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 8,
+      "season": 2025,
+      "to_week": 10
+    }
+  ],
+  "player_id": "12496",
+  "position": "WR",
+  "season_aggregates": {
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 6,
+        "points": 1.4,
+        "week": 3
+      },
+      "total_fantasy_pts": 1.4,
+      "weeks_played": 8,
+      "weeks_rostered": 9,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 6,
+        "points": 0.0,
+        "week": 1
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_01_MIN_CHI",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 1
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_02_ATL_MIN",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 2
+    },
+    {
+      "fantasy_points": 1.4,
+      "game_id": "2025_03_CIN_MIN",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 3
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_04_MIN_PIT",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 4
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_05_MIN_CLE",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "bye_week",
+      "week": 6
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_07_PHI_MIN",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 7
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_08_MIN_LAC",
+      "owner_roster_id": 6,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 8
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": "2025_10_BAL_MIN",
+      "owner_roster_id": 8,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 10
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Derrick Brown",
+  "ownership_history": [
+    {
+      "bid": 0,
+      "date": "2022-11-08",
+      "event": "add",
+      "roster_id": 6,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "bid": null,
+      "date": "2022-12-02",
+      "event": "drop",
+      "roster_id": 6,
+      "season": 2022,
+      "via": "waiver"
+    },
+    {
+      "event": "rostered",
+      "from_week": 10,
+      "roster_id": 6,
+      "season": 2022,
+      "to_week": 12
+    }
+  ],
+  "player_id": "6784",
+  "position": "DT",
+  "season_aggregates": {
+    "2022": {
+      "best_week": {
+        "owner_roster_id": 6,
+        "points": 8.0,
+        "week": 10
+      },
+      "total_fantasy_pts": 12.0,
+      "weeks_played": 3,
+      "weeks_rostered": 3,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 6,
+        "points": 1.0,
+        "week": 12
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 8.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2022,
+      "started": true,
+      "status": "played",
+      "week": 10
+    },
+    {
+      "fantasy_points": 3.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 11
+    },
+    {
+      "fantasy_points": 1.0,
+      "game_id": null,
+      "owner_roster_id": 6,
+      "season": 2022,
+      "started": false,
+      "status": "played",
+      "week": 12
+    }
+  ]
+}

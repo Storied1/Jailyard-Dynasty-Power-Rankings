@@ -1,0 +1,70 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Will Mallory",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2023-12-28",
+      "event": "add",
+      "roster_id": 1,
+      "season": 2023,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 17,
+      "roster_id": 1,
+      "season": 2023,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2024-01-25",
+      "event": "drop",
+      "roster_id": 1,
+      "season": 2024,
+      "via": "free_agent"
+    }
+  ],
+  "player_id": "10220",
+  "position": "TE",
+  "season_aggregates": {
+    "2023": {
+      "best_week": {
+        "owner_roster_id": 1,
+        "points": 2.4,
+        "week": 17
+      },
+      "total_fantasy_pts": 2.4,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 1,
+        "points": 0.0,
+        "week": 18
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 2.4,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 1,
+      "season": 2023,
+      "started": false,
+      "status": "played",
+      "week": 18
+    }
+  ]
+}

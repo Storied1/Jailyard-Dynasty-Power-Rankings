@@ -1,0 +1,145 @@
+{
+  "current_owner": null,
+  "gsis_id": null,
+  "name": "Tommy Tremble",
+  "ownership_history": [
+    {
+      "bid": null,
+      "date": "2024-12-12",
+      "event": "add",
+      "roster_id": 5,
+      "season": 2024,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 15,
+      "roster_id": 5,
+      "season": 2024,
+      "to_week": 18
+    },
+    {
+      "bid": null,
+      "date": "2025-08-28",
+      "event": "drop",
+      "roster_id": 5,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-01",
+      "event": "add",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "bid": null,
+      "date": "2025-10-15",
+      "event": "drop",
+      "roster_id": 2,
+      "season": 2025,
+      "via": "free_agent"
+    },
+    {
+      "event": "rostered",
+      "from_week": 5,
+      "roster_id": 2,
+      "season": 2025,
+      "to_week": 6
+    }
+  ],
+  "player_id": "7694",
+  "position": "TE",
+  "season_aggregates": {
+    "2024": {
+      "best_week": {
+        "owner_roster_id": 5,
+        "points": 10.0,
+        "week": 18
+      },
+      "total_fantasy_pts": 17.2,
+      "weeks_played": 4,
+      "weeks_rostered": 4,
+      "weeks_started": 0,
+      "worst_week": {
+        "owner_roster_id": 5,
+        "points": 0.0,
+        "week": 17
+      }
+    },
+    "2025": {
+      "best_week": {
+        "owner_roster_id": 2,
+        "points": 5.9,
+        "week": 6
+      },
+      "total_fantasy_pts": 8.1,
+      "weeks_played": 2,
+      "weeks_rostered": 2,
+      "weeks_started": 1,
+      "worst_week": {
+        "owner_roster_id": 2,
+        "points": 2.2,
+        "week": 5
+      }
+    }
+  },
+  "weekly": [
+    {
+      "fantasy_points": 2.5,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 15
+    },
+    {
+      "fantasy_points": 4.7,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 16
+    },
+    {
+      "fantasy_points": 0.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 17
+    },
+    {
+      "fantasy_points": 10.0,
+      "game_id": null,
+      "owner_roster_id": 5,
+      "season": 2024,
+      "started": false,
+      "status": "played",
+      "week": 18
+    },
+    {
+      "fantasy_points": 2.2,
+      "game_id": "2025_05_MIA_CAR",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": true,
+      "status": "played",
+      "week": 5
+    },
+    {
+      "fantasy_points": 5.9,
+      "game_id": "2025_06_DAL_CAR",
+      "owner_roster_id": 2,
+      "season": 2025,
+      "started": false,
+      "status": "played",
+      "week": 6
+    }
+  ]
+}
