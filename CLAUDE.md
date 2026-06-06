@@ -37,6 +37,9 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `data/{year}/nfl_stats_week{N}.json` — gitignored Sleeper stats cache, populated by `fetch_sleeper.py` step 8/8; required for `game_context` enrichment; use `--force` to refresh
 - `weekN_data.json` v2 enrichment: `matchups[].team{1,2}.top_scorers[].game_context` (NESTED — there is NO top-level `top_scorers[]`) + `awards.top_performer.game_context`; `standings[].{roster_id, margin_this_week, momentum}`, `matchups[].momentum`
 - `weekN_data_expanded.json` — denormalized companion (Task 7): top-level `games{}` map keyed by game_id; holders reference by `game_context.game_id`. Idempotent via `data/2025/nfl_games/_expanded_manifest.json` (hashes inputs). Built by `scripts/generate_expanded_week.py`
+- `data/{year}/draft_picks.json` — Sleeper draft picks per season (round, pick_no; `roster_id` + `picked_by` both recorded verbatim)
+- `data/2025/player_arcs/{player_id}.json` + `_index.json` — cross-season player arcs 2022-2025 (ownership history, weekly timeline, season aggregates); 979 per-player files per the spec 3MB split rule; **regenerate locally only** (inputs include gitignored `players.json` + `nfl_stats_week{N}.json` caches — NOT in the CI idempotency gate)
+- `data/franchises/{roster_id}.json` + `_index.json` — franchise biographies (trophy case from brackets, h2h rekeyed to roster_id, roster lineage from arcs, historical team names per season). NOTE: `league_history.json` `franchise_stats.playoff_appearances` is 0 for all owners (dead upstream field) — gates use `championships`/`finals` instead
 - Sleeper API (`https://api.sleeper.app/v1`) as live fallback
 
 ## Critical Rules
@@ -115,6 +118,9 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 | `scripts/reduce_chat_deterministic.py` | Phase 2 REDUCE: merge MAP outputs → analytics files                              |
 | `scripts/build_chat_context.py`        | Phase 3: per-week chat relevancy engine (`--no-ai` for deterministic)            |
 | `scripts/derive_historical_rosters.py` | Per-week roster snapshots wks 1-17 (Sleeper matchup backfill; reversal fallback) |
+| `scripts/fetch_draft_picks.py`         | One-time Sleeper draft-pick backfill → `data/{season}/draft_picks.json`          |
+| `scripts/generate_player_arcs.py`      | Cross-season player arcs (matchups = ground truth; `--fetch-stats` backfills)    |
+| `scripts/generate_franchise_wings.py`  | 12 franchise biography files keyed by roster_id + rename-map `_index.json`       |
 
 ### Workflow
 
@@ -174,7 +180,8 @@ Use `python` not `python3` on this machine. Python is at:
 - **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Run tests:** `python -m pytest scripts/tests/ -v` — 86 tests across momentum, extract_week_data (v1+v2), nflreadpy/nfl_games, expanded companion, roster snapshots, canonical save, and verifier
+- **Run tests:** `python -m pytest scripts/tests/ -v` — 117 tests across momentum, extract_week_data (v1+v2), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, canonical save, and verifier
+- **Regenerate dynasty layer:** `python scripts/generate_player_arcs.py` then `python scripts/generate_franchise_wings.py` (local only — needs gitignored `players.json` + stats caches; `--fetch-stats` backfills 2022-24 caches once)
 - **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
 - **Add chart:** Canvas 2D pattern from `preseason.html`, always handle `devicePixelRatio`
