@@ -171,7 +171,13 @@
         "preseason_rank": { "type": ["integer", "null"] },
         "tier": { "type": ["string", "null"] },
         "roast": { "type": ["string", "null"] },
-        "key_players": { "type": "array", "items": { "type": "string" } },
+        "key_players": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
         "source": { "const": "team-profiles.json (2025 preseason)" }
       }
     }

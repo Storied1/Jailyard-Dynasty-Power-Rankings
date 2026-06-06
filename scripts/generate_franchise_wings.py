@@ -259,11 +259,17 @@ def main():
                 f"{len(trophy['championships'])} != franchise_stats "
                 f"{stats.get('championships')}"
             )
-        if len(trophy["playoff_appearances"]) != stats.get("playoff_appearances", 0):
+        # finals = championships + runner-ups; franchise_stats.finals IS
+        # populated (sums to 2 finalists x 4 seasons). NOTE: we deliberately
+        # do NOT gate on franchise_stats.playoff_appearances -- that field is
+        # 0 for all 12 owners (dead upstream in build_league_history); the
+        # bracket-derived years are the observable truth, sanity-checked
+        # globally below (6 participants x 4 seasons).
+        finals = len(trophy["championships"]) + len(trophy["runner_ups"])
+        if finals != stats.get("finals", 0):
             sys.exit(
-                f"GATE: roster {rid} playoff appearances "
-                f"{len(trophy['playoff_appearances'])} != franchise_stats "
-                f"{stats.get('playoff_appearances')}"
+                f"GATE: roster {rid} bracket finals {finals} "
+                f"!= franchise_stats {stats.get('finals')}"
             )
 
         peak = max(lh["elo_history"].get(oid, []), key=lambda e: e["elo"], default=None)
@@ -294,7 +300,8 @@ def main():
                 "preseason_rank": (profile or {}).get("rank"),
                 "tier": (profile or {}).get("tier"),
                 "roast": (profile or {}).get("roast"),
-                "key_players": (profile or {}).get("keyPlayers") or [],
+                # position-keyed dict in team-profiles ({qb: [...], rb: ...})
+                "key_players": (profile or {}).get("keyPlayers") or {},
                 "source": PROFILE_SOURCE,
             },
         }
@@ -304,6 +311,13 @@ def main():
 
     if matched != 12:
         sys.exit(f"GATE: only {matched}/12 team-profiles matched by username")
+
+    total_appearances = sum(len(playoffs_by_season[s]) for s in SEASONS)
+    if total_appearances != 6 * len(SEASONS):
+        sys.exit(
+            f"GATE: bracket playoff participants {total_appearances} "
+            f"!= {6 * len(SEASONS)} (6 per season expected)"
+        )
 
     index = {}
     for rid in sorted(roster_to_owner):

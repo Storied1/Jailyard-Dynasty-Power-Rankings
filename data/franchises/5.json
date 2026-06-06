@@ -1,0 +1,535 @@
+{
+  "all_time_record": {
+    "losses": 20,
+    "pa": 7592.2,
+    "pf": 8155.3,
+    "ties": 0,
+    "win_pct": 0.6429,
+    "wins": 36
+  },
+  "current_team_name": "The Legion of Bouz",
+  "elo": {
+    "current": 1604.3,
+    "peak": 1638.9,
+    "peak_season": 2023,
+    "peak_week": 8
+  },
+  "h2h": {
+    "1": {
+      "losses": 4,
+      "opponent_roster_id": 1,
+      "pa": 922.68,
+      "pf": 836.02,
+      "wins": 2
+    },
+    "10": {
+      "losses": 2,
+      "opponent_roster_id": 10,
+      "pa": 739.44,
+      "pf": 721.12,
+      "wins": 3
+    },
+    "11": {
+      "losses": 2,
+      "opponent_roster_id": 11,
+      "pa": 852.8,
+      "pf": 873.54,
+      "wins": 4
+    },
+    "12": {
+      "losses": 1,
+      "opponent_roster_id": 12,
+      "pa": 1009.8399999999999,
+      "pf": 1183.94,
+      "wins": 7
+    },
+    "2": {
+      "losses": 4,
+      "opponent_roster_id": 2,
+      "pa": 860.96,
+      "pf": 821.7400000000001,
+      "wins": 2
+    },
+    "3": {
+      "losses": 2,
+      "opponent_roster_id": 3,
+      "pa": 936.5,
+      "pf": 1041.2199999999998,
+      "wins": 5
+    },
+    "4": {
+      "losses": 2,
+      "opponent_roster_id": 4,
+      "pa": 516.5,
+      "pf": 596.24,
+      "wins": 2
+    },
+    "6": {
+      "losses": 4,
+      "opponent_roster_id": 6,
+      "pa": 991.8,
+      "pf": 1015.3200000000002,
+      "wins": 3
+    },
+    "7": {
+      "losses": 1,
+      "opponent_roster_id": 7,
+      "pa": 671.0199999999999,
+      "pf": 908.6600000000001,
+      "wins": 5
+    },
+    "8": {
+      "losses": 1,
+      "opponent_roster_id": 8,
+      "pa": 796.9599999999999,
+      "pf": 863.32,
+      "wins": 5
+    },
+    "9": {
+      "losses": 2,
+      "opponent_roster_id": 9,
+      "pa": 687.64,
+      "pf": 740.74,
+      "wins": 3
+    }
+  },
+  "milestones": [
+    {
+      "label": "highest_score",
+      "season": 2024,
+      "type": "league_record",
+      "value": 248.26,
+      "week": 11
+    },
+    {
+      "label": "best win streak",
+      "season": null,
+      "type": "best_win_streak",
+      "value": 8,
+      "week": null
+    },
+    {
+      "label": "peak Elo",
+      "season": 2023,
+      "type": "peak_elo",
+      "value": 1638.9,
+      "week": 8
+    },
+    {
+      "label": "first season",
+      "season": 2022,
+      "type": "first_season",
+      "value": null,
+      "week": null
+    }
+  ],
+  "owner_id": "510215233736572928",
+  "roster_id": 5,
+  "roster_lineage": [
+    {
+      "acquired": {
+        "detail": "waiver",
+        "event": "add",
+        "season": 2023
+      },
+      "name": "Tre Tucker",
+      "player_id": "10213",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "free_agent",
+        "event": "add",
+        "season": 2024
+      },
+      "name": "Emanuel Wilson",
+      "player_id": "11435",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "from roster 11",
+        "event": "trade",
+        "season": 2024
+      },
+      "name": "Ben Sinnott",
+      "player_id": "11596",
+      "position": "TE"
+    },
+    {
+      "acquired": {
+        "detail": "from roster 4",
+        "event": "trade",
+        "season": 2024
+      },
+      "name": "Jaylen Wright",
+      "player_id": "11643",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 3 Pick 33",
+        "event": "draft",
+        "season": 2024
+      },
+      "name": "Tyrone Tracy",
+      "player_id": "11655",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "free_agent",
+        "event": "add",
+        "season": 2025
+      },
+      "name": "Kamari Lassiter",
+      "player_id": "11685",
+      "position": "DB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 5 Pick 57",
+        "event": "draft",
+        "season": 2024
+      },
+      "name": "Sione Vaki",
+      "player_id": "11729",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 2 Pick 18",
+        "event": "draft",
+        "season": 2025
+      },
+      "name": "Cam Skattebo",
+      "player_id": "12481",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 4 Pick 42",
+        "event": "draft",
+        "season": 2025
+      },
+      "name": "Tory Horton",
+      "player_id": "12497",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "free_agent",
+        "event": "add",
+        "season": 2025
+      },
+      "name": "Quinn Ewers",
+      "player_id": "12500",
+      "position": "QB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 2 Pick 17",
+        "event": "draft",
+        "season": 2025
+      },
+      "name": "Cam Ward",
+      "player_id": "12522",
+      "position": "QB"
+    },
+    {
+      "acquired": {
+        "detail": "from roster 4",
+        "event": "trade",
+        "season": 2025
+      },
+      "name": "Isaac TeSlaa",
+      "player_id": "12535",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "waiver",
+        "event": "add",
+        "season": 2025
+      },
+      "name": "Darren Waller",
+      "player_id": "2505",
+      "position": "TE"
+    },
+    {
+      "acquired": {
+        "detail": "free_agent",
+        "event": "add",
+        "season": 2025
+      },
+      "name": "Jason Myers",
+      "player_id": "2747",
+      "position": "K"
+    },
+    {
+      "acquired": {
+        "detail": "free_agent",
+        "event": "add",
+        "season": 2024
+      },
+      "name": "Hunter Henry",
+      "player_id": "3214",
+      "position": "TE"
+    },
+    {
+      "acquired": {
+        "detail": "from roster 10",
+        "event": "trade",
+        "season": 2023
+      },
+      "name": "Dak Prescott",
+      "player_id": "3294",
+      "position": "QB"
+    },
+    {
+      "acquired": {
+        "detail": "from roster 11",
+        "event": "trade",
+        "season": 2023
+      },
+      "name": "Joe Mixon",
+      "player_id": "4018",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 2 Pick 15",
+        "event": "draft",
+        "season": 2022
+      },
+      "name": "Christian McCaffrey",
+      "player_id": "4034",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 1 Pick 10",
+        "event": "draft",
+        "season": 2022
+      },
+      "name": "Patrick Mahomes",
+      "player_id": "4046",
+      "position": "QB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 10 Pick 111",
+        "event": "draft",
+        "season": 2022
+      },
+      "name": "T.J. Watt",
+      "player_id": "4070",
+      "position": "LB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 4 Pick 39",
+        "event": "draft",
+        "season": 2022
+      },
+      "name": "Aaron Jones",
+      "player_id": "4199",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 6 Pick 63",
+        "event": "draft",
+        "season": 2022
+      },
+      "name": "Marquise Brown",
+      "player_id": "5848",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "from roster 2",
+        "event": "trade",
+        "season": 2022
+      },
+      "name": "Jakobi Meyers",
+      "player_id": "5947",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "waiver",
+        "event": "add",
+        "season": 2024
+      },
+      "name": "Andrew Van Ginkel",
+      "player_id": "6183",
+      "position": "LB"
+    },
+    {
+      "acquired": {
+        "detail": "free_agent",
+        "event": "add",
+        "season": 2025
+      },
+      "name": "Tyrel Dodson",
+      "player_id": "6315",
+      "position": "LB"
+    },
+    {
+      "acquired": {
+        "detail": "Round 5 Pick 58",
+        "event": "draft",
+        "season": 2022
+      },
+      "name": "DeVonta Smith",
+      "player_id": "7525",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "Round 3 Pick 34",
+        "event": "draft",
+        "season": 2022
+      },
+      "name": "Jaylen Waddle",
+      "player_id": "7526",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "from roster 12",
+        "event": "trade",
+        "season": 2024
+      },
+      "name": "Amon-Ra St. Brown",
+      "player_id": "7547",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "from roster 4",
+        "event": "trade",
+        "season": 2025
+      },
+      "name": "Marvin Mims",
+      "player_id": "9494",
+      "position": "WR"
+    },
+    {
+      "acquired": {
+        "detail": "Round 5 Pick 60",
+        "event": "draft",
+        "season": 2023
+      },
+      "name": "Keaton Mitchell",
+      "player_id": "9511",
+      "position": "RB"
+    },
+    {
+      "acquired": {
+        "detail": "waiver",
+        "event": "add",
+        "season": 2025
+      },
+      "name": "New England Patriots",
+      "player_id": "NE",
+      "position": "DEF"
+    },
+    {
+      "acquired": {
+        "detail": "waiver",
+        "event": "add",
+        "season": 2025
+      },
+      "name": "Seattle Seahawks",
+      "player_id": "SEA",
+      "position": "DEF"
+    }
+  ],
+  "season_results": [
+    {
+      "champion": true,
+      "losses": 6,
+      "made_playoffs": true,
+      "pa": 1888.6,
+      "pf": 1939.8,
+      "runner_up": false,
+      "season": 2022,
+      "team_name": "The Legion of Bouz",
+      "ties": 0,
+      "wins": 8
+    },
+    {
+      "champion": false,
+      "losses": 3,
+      "made_playoffs": true,
+      "pa": 1869.0,
+      "pf": 2054.9,
+      "runner_up": false,
+      "season": 2023,
+      "team_name": "The Legion of Bouz",
+      "ties": 0,
+      "wins": 11
+    },
+    {
+      "champion": false,
+      "losses": 7,
+      "made_playoffs": false,
+      "pa": 2034.9,
+      "pf": 2035.9,
+      "runner_up": false,
+      "season": 2024,
+      "team_name": "The Legion of Bouz",
+      "ties": 0,
+      "wins": 7
+    },
+    {
+      "champion": false,
+      "losses": 4,
+      "made_playoffs": true,
+      "pa": 1799.8,
+      "pf": 2124.7,
+      "runner_up": false,
+      "season": 2025,
+      "team_name": "The Legion of Bouz",
+      "ties": 0,
+      "wins": 10
+    },
+    {
+      "champion": false,
+      "losses": 0,
+      "made_playoffs": false,
+      "pa": 0.0,
+      "pf": 0.0,
+      "runner_up": false,
+      "season": 2026,
+      "team_name": "The Legion of Bouz",
+      "ties": 0,
+      "wins": 0
+    }
+  ],
+  "trophy_case": {
+    "championships": [
+      {
+        "runner_up_roster_id": 2,
+        "season": 2022
+      }
+    ],
+    "playoff_appearances": [2022, 2023, 2025],
+    "runner_ups": []
+  },
+  "username": "KidBouzie",
+  "voice_bible_callbacks": {
+    "key_players": {
+      "qb": ["Patrick Mahomes", "Dak Prescott", "Cameron Ward"],
+      "rb": ["Christian McCaffrey", "Joe Mixon", "Tyrone Tracy", "Aaron Jones"],
+      "te": ["Hunter Henry"],
+      "wr": ["Amon-Ra St. Brown", "DeVonta Smith", "Jaylen Waddle"]
+    },
+    "preseason_rank": 9,
+    "roast": "Mahomes and ARSB deserve a tight end with a pulse.",
+    "source": "team-profiles.json (2025 preseason)",
+    "tier": "Frisky"
+  }
+}

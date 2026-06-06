@@ -68,7 +68,7 @@ def test_match_profile_by_normalized_username():
             "rank": 4,
             "tier": "Contender",
             "roast": "r",
-            "keyPlayers": ["X"],
+            "keyPlayers": {"qb": ["X"]},
         }
     ]
     assert match_profile(teams, "kharlow")["rank"] == 4
