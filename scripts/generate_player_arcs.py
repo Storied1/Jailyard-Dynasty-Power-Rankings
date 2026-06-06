@@ -10,6 +10,8 @@ nfl_games files (2025 game_ids only). See plan design decisions 1-12
 (~/.claude/plans/immutable-questing-origami.md).
 """
 
+import argparse
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,7 +20,11 @@ _SCRIPTS_DIR = str(Path(__file__).resolve().parent)
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
-from shared import DATA_DIR  # noqa: E402
+# fmt: off
+from shared import (DATA_DIR, load_json, load_nfl_stats_cache,  # noqa: E402
+                    normalize_team, save_json, save_json_canonical)
+
+# fmt: on
 
 SEASONS = (2022, 2023, 2024, 2025)
 CURRENT_SEASON = 2026  # current_owner source (live offseason state)
@@ -248,5 +254,243 @@ def build_ownership(txn_events, draft_events, spans):
     return [e for _, e in sorted(decorated, key=lambda pair: pair[0])]
 
 
-def choose_split(*args, **kwargs):  # implemented in T4
-    raise NotImplementedError
+def load_stats_index(season):
+    """{week: {"teams": set, "players": {pid: team}}} from gitignored caches.
+    Weeks with no cache are absent from the dict."""
+    index = {}
+    for week in WEEKS:
+        cache = load_nfl_stats_cache(season, week)
+        if not cache:
+            continue
+        entries = cache.get("stats") or []
+        players, teams = {}, set()
+        for e in entries:
+            team = normalize_team(e.get("team")) if e.get("team") else None
+            if not team:
+                continue
+            teams.add(team)
+            pid = e.get("player_id")
+            if pid:
+                players[pid] = team
+        index[week] = {"teams": teams, "players": players}
+    return index
+
+
+def resolve_team(pid, week, stats_index):
+    """Player's NFL team that week: direct, else nearest backward then forward."""
+    wk = stats_index.get(week)
+    if wk and pid in wk["players"]:
+        return wk["players"][pid]
+    for w in range(week - 1, 0, -1):
+        wkb = stats_index.get(w)
+        if wkb and pid in wkb["players"]:
+            return wkb["players"][pid]
+    for w in range(week + 1, 19):
+        wkf = stats_index.get(w)
+        if wkf and pid in wkf["players"]:
+            return wkf["players"][pid]
+    return None
+
+
+def build_game_index_from_records(records):
+    """(week, normalized_team) -> nflreadpy game_id, from committed
+    data/2025/nfl_games/*.json. Skips the week:null orphan (decision #4)."""
+    idx = {}
+    for rec in records:
+        week, gid = rec.get("week"), rec.get("game_id")
+        if week is None or gid is None:
+            continue
+        for side in ("home_team", "away_team"):
+            team = rec.get(side)
+            if team:
+                idx[(week, normalize_team(team))] = gid
+    return idx
+
+
+def load_game_index():
+    games_dir = DATA_DIR / "2025" / "nfl_games"
+    records = [
+        load_json(p)
+        for p in sorted(games_dir.glob("*.json"))
+        if not p.name.startswith("_")
+    ]
+    return build_game_index_from_records([r for r in records if r])
+
+
+def enrich_status(weekly_by_pid, stats_indexes, game_index):
+    """In-place status + game_id enrichment (decisions #3, #4).
+
+    played        stats entry exists for (pid, week)
+    did_not_play  no entry, but player's team appears in that week's stats
+    bye_week      no entry, team known, team absent from that week's stats
+    no_game_data  no cache for that week OR team unresolvable
+    game_id       2025 rows only, via (week, team) lookup
+    """
+    for pid, rows in weekly_by_pid.items():
+        for r in rows:
+            sidx = stats_indexes.get(r["season"])
+            wk = (sidx or {}).get(r["week"])
+            if not wk:
+                continue  # stays no_game_data
+            team = resolve_team(pid, r["week"], sidx)
+            if pid in wk["players"]:
+                r["status"] = "played"
+            elif team is None:
+                r["status"] = "no_game_data"
+            elif team in wk["teams"]:
+                r["status"] = "did_not_play"
+            else:
+                r["status"] = "bye_week"
+            if r["season"] == 2025 and team and r["status"] != "bye_week":
+                r["game_id"] = game_index.get((r["week"], team))
+
+
+def backfill_stats(seasons, force=False):
+    """Fetch + cache Sleeper stats for historical seasons (~51 GETs, one-time).
+    Writes the same {"stats": [...]} wrapper fetch_sleeper.py uses."""
+    from shared import fetch_nfl_stats, nfl_stats_path
+
+    for season in seasons:
+        for week in WEEKS:
+            path = nfl_stats_path(season, week)
+            if path.exists() and not force:
+                continue
+            stats = fetch_nfl_stats(season, week)
+            save_json(path, {"stats": stats})
+            print(f"[{season}] cached stats week {week} ({len(stats)} entries)")
+
+
+def choose_split(arcs, threshold=SPLIT_THRESHOLD_BYTES):
+    """Spec architect F2: serialized size > 3MB -> per-player files."""
+    size = len(json.dumps(arcs, ensure_ascii=False, sort_keys=True).encode("utf-8"))
+    return "split" if size > threshold else "single"
+
+
+def build_arc_index_entry(arc):
+    return {
+        "name": arc["name"],
+        "position": arc["position"],
+        "current_owner_roster_id": (arc["current_owner"] or {}).get("roster_id"),
+        "seasons": sorted(arc["season_aggregates"].keys()),
+        "file": f"player_arcs/{arc['player_id']}.json",
+    }
+
+
+def write_outputs(arcs, mode):
+    if mode == "split":
+        out_dir = ARC_SEASON_DIR / "player_arcs"
+        for pid, arc in sorted(arcs.items()):
+            save_json_canonical(out_dir / f"{pid}.json", arc)
+        index = {pid: build_arc_index_entry(a) for pid, a in sorted(arcs.items())}
+        save_json_canonical(out_dir / "_index.json", index)
+        return len(arcs) + 1
+    save_json_canonical(ARC_SEASON_DIR / "player_arcs.json", arcs)
+    return 1
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "--fetch-stats",
+        action="store_true",
+        help="backfill 2022-2024 Sleeper stats caches first (network)",
+    )
+    ap.add_argument("--split-threshold", type=int, default=SPLIT_THRESHOLD_BYTES)
+    args = ap.parse_args()
+
+    players_path = DATA_DIR / "players.json"
+    if not players_path.exists():
+        sys.exit(
+            "data/players.json missing (gitignored input). "
+            "Run: python fetch_sleeper.py --season 2025"
+        )
+    players = load_json(players_path, required=True)
+
+    if args.fetch_stats:
+        backfill_stats([s for s in SEASONS if s != 2025])
+
+    matchups = {
+        s: load_json(DATA_DIR / str(s) / "matchups.json", required=True)
+        for s in SEASONS
+    }
+    txns = {
+        s: load_json(DATA_DIR / str(s) / "transactions.json", required=True)
+        for s in SEASONS
+    }
+    picks = {}
+    for s in SEASONS:
+        doc = load_json(DATA_DIR / str(s) / "draft_picks.json")
+        if doc:
+            picks[s] = doc
+    rosters_now = load_json(
+        DATA_DIR / str(CURRENT_SEASON) / "rosters.json", required=True
+    )
+    users_now = load_json(DATA_DIR / str(CURRENT_SEASON) / "users.json", required=True)
+    team_name_by_owner = {
+        u["user_id"]: (u.get("metadata") or {}).get("team_name") for u in users_now
+    }
+    owner_now = {}
+    for r in rosters_now:
+        for pid in r.get("players") or []:
+            owner_now[pid] = {
+                "roster_id": r["roster_id"],
+                "team_name": team_name_by_owner.get(r["owner_id"]),
+            }
+
+    def display_name(pid):
+        p = players.get(pid) or {}
+        return (
+            p.get("full_name")
+            or " ".join(x for x in (p.get("first_name"), p.get("last_name")) if x)
+            or pid
+        )
+
+    weekly = build_weekly(matchups)
+    stats_indexes = {s: load_stats_index(s) for s in SEASONS}
+    enrich_status(weekly, stats_indexes, load_game_index())
+
+    names = {pid: display_name(pid) for pid in weekly}
+    txn_events = build_txn_events(txns, names)
+    draft_events = build_draft_events(picks)
+
+    arcs = {}
+    for pid, rows in sorted(weekly.items()):
+        p = players.get(pid) or {}
+        arcs[pid] = {
+            "player_id": pid,
+            "gsis_id": p.get("gsis_id"),
+            "name": display_name(pid),
+            "position": p.get("position"),
+            "current_owner": owner_now.get(pid),
+            "ownership_history": build_ownership(
+                txn_events.get(pid, []),
+                draft_events.get(pid, []),
+                build_rostered_spans(rows),
+            ),
+            "weekly": rows,
+            "season_aggregates": build_aggregates(rows),
+        }
+
+    import jsonschema  # deferred: only main() validates (repo pattern)
+
+    schema = load_json(
+        Path(__file__).resolve().parent / "schemas" / "player_arc.schema.json",
+        required=True,
+    )
+    for arc in arcs.values():
+        jsonschema.validate(arc, schema)  # loud failure
+
+    mode = choose_split(arcs, args.split_threshold)
+    written = write_outputs(arcs, mode)
+    statuses = {}
+    for rows in weekly.values():
+        for r in rows:
+            statuses[r["status"]] = statuses.get(r["status"], 0) + 1
+    print(f"arcs: {len(arcs)} players, mode={mode}, files written={written}")
+    print(f"status coverage: {sorted(statuses.items())}")
+    with_game = sum(1 for rows in weekly.values() for r in rows if r["game_id"])
+    print(f"game_id populated: {with_game} rows (2025 only by design)")
+
+
+if __name__ == "__main__":
+    main()

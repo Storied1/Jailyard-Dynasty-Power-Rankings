@@ -3,10 +3,14 @@
 from scripts.generate_player_arcs import (
     build_aggregates,
     build_draft_events,
+    build_game_index_from_records,
     build_ownership,
     build_rostered_spans,
     build_txn_events,
     build_weekly,
+    choose_split,
+    enrich_status,
+    resolve_team,
 )
 
 
@@ -311,3 +315,83 @@ def test_build_ownership_order_draft_then_dated_then_spans():
     }
     history = build_ownership([trade], [draft], [span])
     assert [e["event"] for e in history] == ["draft", "trade", "rostered"]
+
+
+# --- enrichment + split (T4) ---
+
+
+def _stats_index():
+    """{week: {"teams": set, "players": {pid: team}}} -- 2 weeks of caches."""
+    return {
+        1: {"teams": {"KC", "BUF"}, "players": {"p1": "KC", "p2": "BUF"}},
+        2: {"teams": {"KC"}, "players": {"p1": "KC"}},  # BUF on bye wk2
+    }
+
+
+def test_resolve_team_direct_then_nearest():
+    idx = _stats_index()
+    assert resolve_team("p2", 1, idx) == "BUF"  # direct hit
+    assert resolve_team("p2", 2, idx) == "BUF"  # nearest backward
+    assert resolve_team("ghost", 2, idx) is None  # never seen
+
+
+def test_enrich_status_full_matrix():
+    idx = {2025: _stats_index()}
+    games = {
+        (1, "KC"): "2025_01_KC_LAC",
+        (1, "BUF"): "2025_01_BUF_NYJ",
+        (2, "KC"): "2025_02_KC_DEN",
+    }
+    rows = [
+        _wk(2025, 1, 3, 22.0),
+        _wk(2025, 2, 3, 0.0),  # p1: played both
+        _wk(2025, 1, 4, 0.0),
+        _wk(2025, 2, 4, 0.0),  # p2: played, bye
+    ]
+    enrich_status({"p1": rows[:2], "p2": rows[2:]}, idx, games)
+    assert rows[0]["status"] == "played" and rows[0]["game_id"] == "2025_01_KC_LAC"
+    assert rows[1]["status"] == "played" and rows[1]["game_id"] == "2025_02_KC_DEN"
+    assert rows[2]["status"] == "played" and rows[2]["game_id"] == "2025_01_BUF_NYJ"
+    assert rows[3]["status"] == "bye_week" and rows[3]["game_id"] is None
+
+
+def test_enrich_status_dnp_and_no_cache():
+    idx = {2025: {1: {"teams": {"KC"}, "players": {"other": "KC"}}}}
+    rows = [
+        _wk(2025, 1, 3, 0.0),  # p9 team unresolvable -> no_game_data
+        # week 2 has no cache -> row passes through untouched; build it with
+        # the initial value build_weekly emits so the assertion is faithful
+        _wk(2025, 2, 3, 0.0, status="no_game_data"),
+    ]
+    enrich_status({"p9": rows}, idx, {})
+    assert rows[0]["status"] == "no_game_data"
+    assert rows[1]["status"] == "no_game_data"
+    # DNP: pY resolves to KC via wk2; KC played wk1 but pY has no wk1 entry
+    rows2 = [_wk(2025, 1, 3, 0.0)]
+    idx2 = {
+        2025: {
+            1: {"teams": {"KC", "BUF"}, "players": {"pX": "BUF"}},
+            2: {"teams": {"KC"}, "players": {"pY": "KC"}},
+        }
+    }
+    enrich_status({"pY": rows2}, idx2, {})
+    assert rows2[0]["status"] == "did_not_play"
+
+
+def test_game_index_skips_null_week_and_normalizes():
+    records = [
+        {"game_id": "2025_01_ARI_NO", "week": 1, "home_team": "NO", "away_team": "ARI"},
+        {"game_id": None, "week": None, "home_team": None, "away_team": None},
+        {"game_id": "2025_02_LA_SF", "week": 2, "home_team": "LA", "away_team": "SF"},
+    ]
+    idx = build_game_index_from_records(records)
+    assert idx[(1, "NO")] == "2025_01_ARI_NO"
+    assert idx[(1, "ARI")] == "2025_01_ARI_NO"
+    assert idx[(2, "LA")] == "2025_02_LA_SF"
+    assert (None, None) not in idx
+
+
+def test_choose_split_threshold():
+    small = {"p1": {"player_id": "p1"}}
+    assert choose_split(small, threshold=10**9) == "single"
+    assert choose_split(small, threshold=1) == "split"
