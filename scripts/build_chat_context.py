@@ -494,7 +494,7 @@ def _month_le(month_str, cutoff_dt):
     return str(month_str)[:7] <= cutoff_dt.strftime("%Y-%m")
 
 
-def find_active_arcs(arcs, week, season, week_data, roster_to_team):
+def find_active_arcs(arcs, week, season, week_data, roster_to_team, cutoff):
     """Find arcs relevant to this week and annotate with weekly development."""
     if not arcs:
         return []
@@ -509,9 +509,15 @@ def find_active_arcs(arcs, week, season, week_data, roster_to_team):
         playing_rids.add(m.get("team2", {}).get("roster_id"))
 
     for arc in arc_list:
-        status = arc.get("status", "")
-        if status in ("resolved", "dead", "dormant"):
+        span = arc.get("span", {}) if isinstance(arc.get("span"), dict) else {}
+        start = span.get("start") or arc.get("started")
+        # As-of-week-N: an arc that starts AFTER the cutoff is the future.
+        # Do NOT filter on the baked season-end status -- an arc that resolves
+        # later was still live earlier and must appear in those weeks.
+        if not _month_le(start, cutoff):
             continue
+        end = span.get("end")
+        as_of_status = "resolved" if (end and _month_le(end, cutoff)) else "active"
 
         # Check if any arc participants are playing this week
         participants = arc.get("roster_ids", arc.get("participants", []))
@@ -543,7 +549,7 @@ def find_active_arcs(arcs, week, season, week_data, roster_to_team):
             {
                 "arc_id": arc.get("arc_id", arc.get("id", "")),
                 "title": arc.get("title", ""),
-                "status": status,
+                "status": as_of_status,
                 "this_week_development": (
                     "; ".join(developments)
                     if developments
