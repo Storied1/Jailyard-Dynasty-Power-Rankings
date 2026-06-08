@@ -131,9 +131,12 @@ def save_json_canonical(path, data, verbose=False):
     """Canonical JSON write — sort_keys=True, ensure_ascii=False, indent=2.
 
     All new generators (Phase 1+ data work) use this helper to guarantee
-    byte-identical output across runs (architect M6 mandate). The canonical
-    form is also what the pre-commit prettier hook produces, so post-commit
-    re-extraction stays clean.
+    byte-identical output across runs (architect M6 mandate). NOTE: the
+    pre-commit prettier hook may collapse short multi-line arrays onto one
+    line — cosmetic only (values stay parse-identical). Re-extraction
+    idempotency relies on input-hash manifests (e.g.
+    nfl_games/_expanded_manifest.json), not byte parity with the committed,
+    prettier-reformatted form.
     """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
