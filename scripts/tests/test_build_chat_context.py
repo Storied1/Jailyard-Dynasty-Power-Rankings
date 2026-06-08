@@ -85,3 +85,44 @@ def test_find_active_arcs_marks_resolved_when_ended_before_cutoff():
     ]
     out = find_active_arcs(arcs, 5, 2025, WEEK_DATA, {}, CUTOFF)
     assert out and out[0]["status"] == "resolved"
+
+
+from build_chat_context import resolve_predictions  # noqa: E402
+
+
+def test_resolve_predictions_skips_predictions_made_after_cutoff():
+    # made_at (UTC) is Nov 1, after the ~Oct-7 week-5 cutoff -> must be skipped.
+    preds = [{"id": "p1", "made_at": "2025-11-01T00:00:00Z", "subject": "Alpha rolls"}]
+    assert resolve_predictions(preds, 5, 2025, WEEK_DATA, CUTOFF) == []
+
+
+def test_resolve_predictions_made_before_cutoff_resolves_without_baked_fields():
+    wd = {
+        "matchups": [
+            {
+                "team1": {
+                    "team_name": "Alpha",
+                    "points": 120,
+                    "top_scorers": [{"name": "Mahomes", "points": 31.0}],
+                },
+                "team2": {"team_name": "Bravo", "points": 90, "top_scorers": []},
+                "winner": "Alpha",
+                "margin": 30,
+            }
+        ]
+    }
+    preds = [
+        {
+            "id": "p3",
+            "made_at": "2025-09-15T00:00:00Z",
+            "author": "Karim",
+            "quote": "Mahomes is elite",
+            "resolution": "wrong",
+            "resolution_context": "leaked",
+            "credibility_impact": -9,
+        }
+    ]
+    out = resolve_predictions(preds, 5, 2025, wd, CUTOFF)
+    assert len(out) == 1  # made before cutoff -> not filtered out
+    assert out[0]["resolution"] == "right"  # recomputed locally (elite + 31 pts)
+    assert "credibility_impact" not in out[0] and out[0].get("evidence")

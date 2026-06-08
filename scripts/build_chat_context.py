@@ -570,7 +570,7 @@ def find_active_arcs(arcs, week, season, week_data, roster_to_team, cutoff):
 # ---------------------------------------------------------------------------
 
 
-def resolve_predictions(predictions, week, season, week_data):
+def resolve_predictions(predictions, week, season, week_data, cutoff):
     """
     Check predictions that can be resolved given this week's results.
     Returns list of resolved prediction objects.
@@ -603,6 +603,13 @@ def resolve_predictions(predictions, week, season, week_data):
                 player_scores[p.get("name", "").lower()] = p.get("points", 0)
 
     for pred in pred_list:
+        made_at = pred.get("made_at")
+        if made_at:
+            try:
+                if parse_ts(made_at) > cutoff:
+                    continue  # prediction not yet made as of week N
+            except (ValueError, TypeError):
+                pass
         status = pred.get("status", "open")
         if status != "open":
             continue
