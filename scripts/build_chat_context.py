@@ -19,15 +19,8 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
-from shared import (
-    CHAT_DIR,
-    CONTENT_CHAT_DIR,
-    WEEKS_DIR,
-    DATA_DIR,
-    load_json,
-    save_json as _save_json,
-    parse_ts,
-)
+from shared import CHAT_DIR, CONTENT_CHAT_DIR, DATA_DIR, WEEKS_DIR, load_json, parse_ts
+from shared import save_json as _save_json
 
 MEDIA_CATALOG_PATH = CONTENT_CHAT_DIR / "media-catalog.json"
 
@@ -488,6 +481,17 @@ def score_message_relevancy(
 # ---------------------------------------------------------------------------
 # Arc matching
 # ---------------------------------------------------------------------------
+
+
+def _month_le(month_str, cutoff_dt):
+    """True if a 'YYYY-MM' month string is on/before the cutoff datetime.
+
+    Arc spans and key-moment dates are month-grained; the as-if-realtime
+    boundary only needs month resolution for them. None == not-future (True).
+    """
+    if not month_str:
+        return True
+    return str(month_str)[:7] <= cutoff_dt.strftime("%Y-%m")
 
 
 def find_active_arcs(arcs, week, season, week_data, roster_to_team):
