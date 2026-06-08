@@ -37,9 +37,12 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `data/{year}/nfl_stats_week{N}.json` — gitignored Sleeper stats cache, populated by `fetch_sleeper.py` step 8/8; required for `game_context` enrichment; use `--force` to refresh
 - `weekN_data.json` v2 enrichment: `matchups[].team{1,2}.top_scorers[].game_context` (NESTED — there is NO top-level `top_scorers[]`) + `awards.top_performer.game_context`; `standings[].{roster_id, margin_this_week, momentum}`, `matchups[].momentum`
 - `weekN_data_expanded.json` — denormalized companion (Task 7): top-level `games{}` map keyed by game_id; holders reference by `game_context.game_id`. Idempotent via `data/2025/nfl_games/_expanded_manifest.json` (hashes inputs). Built by `scripts/generate_expanded_week.py`
+- `data/2025/nfl_games/{game_id}.json` — first-class NFLGame entity per game (scores, EPA `team_stats`, `key_injuries`, `rest_days`, `div_game`, `spread_line`, roof/temp/wind). Built by `scripts/generate_nfl_games.py` from `data/external/`; `game_context` references these by `game_id`
+- `data/2025/fantasy_rosters/week{1..17}.json` — per-week roster snapshots (`rosters[].{players[], starters[], reserve}`); all 17 weeks captured with real starters (the `derived:true` fallback would null starters — none shipped). Built by `scripts/derive_historical_rosters.py`
+- `data/external/*.parquet` — **gitignored** nflreadpy caches (`schedules_2025`, `injuries_2025`, `team_stats_2025`, `ff_playerids`; mostly year-suffixed). Source for `generate_nfl_games.py` + the arc crosswalk; `--max-age-hours` refresh
 - `data/{year}/draft_picks.json` — Sleeper draft picks per season (round, pick_no; `roster_id` + `picked_by` both recorded verbatim)
 - `data/2025/player_arcs/{player_id}.json` + `_index.json` — cross-season player arcs 2022-2025 (ownership history, weekly timeline, season aggregates); 979 per-player files per the spec 3MB split rule; **regenerate locally only** (inputs include gitignored `players.json` + `nfl_stats_week{N}.json` caches — NOT in the CI idempotency gate)
-- `data/franchises/{roster_id}.json` + `_index.json` — franchise biographies (trophy case from brackets, h2h rekeyed to roster_id, roster lineage from arcs, historical team names per season). NOTE: `league_history.json` `franchise_stats.playoff_appearances` is 0 for all owners (dead upstream field) — gates use `championships`/`finals` instead
+- `data/franchises/{roster_id}.json` + `_index.json` — franchise biographies (trophy case from brackets, h2h rekeyed to roster_id, roster lineage from arcs, historical team names per season). NOTE: `league_history.json` `franchise_stats.playoff_appearances` is now bracket-derived (was hardcoded 0; fixed in the 2026-suppression commit) and matches each wing's `trophy_case.playoff_appearances`
 - Sleeper API (`https://api.sleeper.app/v1`) as live fallback
 
 ## Critical Rules
@@ -74,6 +77,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `franchise_map` stores CURRENT team names, not historical. Cross-season records show 2025 names for all eras. Known limitation, deferred.
 - **Momentum label sets** — Team `momentum.label`: `opening | early | cooling | collapsing | steady | hot | surging`. Matchup `momentum.label`: `too early | coin flip | slight edge | heavy lean | upset brewing`. Defined across `shared.py` (producer) + `extract_week_data.py` (matchup-second-pass) + `verify_week_content.py` (validator). **Label drift risk:** three separate sets in three files — when adding a label, update all three in the same commit.
 - **Script import pattern (sys.path bootstrap):** Scripts in `scripts/` that need to be runnable BOTH as modules under pytest AND directly via `python scripts/X.py` use a sys.path bootstrap pattern: insert `scripts/` into sys.path[0] before the `from shared import ...` line. See `scripts/fetch_nflreadpy.py:20-25` for the canonical pattern. Reason: Python adds the script's directory to sys.path when running a file directly (NOT the CWD), so `from scripts.shared import` fails. The bare `from shared import` only works after the bootstrap. Tests use `from scripts.X import` (pytest configures sys.path with the repo root). Acceptable side effect: `shared` may load twice in long-running processes — currently harmless because `shared.py` has no module-level mutable state.
+- **Idempotency convention (architect M6):** all new data generators write via `save_json_canonical` (sort_keys=True, ensure_ascii=False, indent=2, explicit DataFrame/list sort before serialization). Re-extraction idempotency rides input-hash manifests (e.g. `nfl_games/_expanded_manifest.json`), NOT byte-parity with the prettier-reformatted committed file. Canonical data-layer spec: `docs/superpowers/specs/2026-05-02-jailyard-content-depth-design.md`.
 
 ## Style Conventions
 
@@ -121,6 +125,9 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 | `scripts/fetch_draft_picks.py`         | One-time Sleeper draft-pick backfill → `data/{season}/draft_picks.json`          |
 | `scripts/generate_player_arcs.py`      | Cross-season player arcs (matchups = ground truth; `--fetch-stats` backfills)    |
 | `scripts/generate_franchise_wings.py`  | 12 franchise biography files keyed by roster_id + rename-map `_index.json`       |
+| `scripts/fetch_nflreadpy.py`           | Fetch nflreadpy caches → `data/external/*.parquet` (`--max-age-hours` refresh)   |
+| `scripts/generate_nfl_games.py`        | Per-game NFLGame entities → `data/2025/nfl_games/{game_id}.json` (EPA, injuries) |
+| `scripts/generate_expanded_week.py`    | `weekN_data_expanded.json` companion (games map); manifest-hash idempotent       |
 
 ### Workflow
 
@@ -180,7 +187,7 @@ Use `python` not `python3` on this machine. Python is at:
 - **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Run tests:** `python -m pytest scripts/tests/ -v` — 117 tests across momentum, extract_week_data (v1+v2), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, canonical save, and verifier
+- **Run tests:** `python -m pytest scripts/tests/ -v` — 123 tests across momentum, extract_week_data (v1+v2), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, canonical save, and verifier
 - **Regenerate dynasty layer:** `python scripts/generate_player_arcs.py` then `python scripts/generate_franchise_wings.py` (local only — needs gitignored `players.json` + stats caches; `--fetch-stats` backfills 2022-24 caches once)
 - **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
