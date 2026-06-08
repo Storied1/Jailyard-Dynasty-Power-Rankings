@@ -43,6 +43,9 @@ Read these files in order:
 - [ ] Any momentum language ("surging", "collapsing", "upset brewing", "coin flip") tracks to `standings[].momentum.label` or `matchups[].momentum.label`. If the writer says Team X is "surging" but `momentum.label == "cooling"`, flag.
 - [ ] Matchup previews / recaps that frame the vibe check against `matchups[].momentum.label` for consistency — or at minimum, don't contradict it.
 - [ ] When `matchups[].momentum.label == "too early"` (weeks 1-3) or `"coin flip"`, the content does NOT declare a trajectory-based favorite. `favorite_team_name` is `null` in those cases; fabricating one is a fail.
+- [ ] Any NFLGame-level detail cited (EPA / `team_stats`, `key_injuries`, `rest_days`, `div_game`, `spread_line`, roof/temp/wind) resolves to the matching `game_id` in `weekN_data_expanded.json` (the `games` map) or `data/2025/nfl_games/{game_id}.json`. No fabricated EPA, injuries, lines, or weather.
+- [ ] Any dynasty-layer fact (`player_arcs` ownership/weekly history; franchise `all_time_record` / `elo` / `h2h` / `trophy_case` / `season_results` / `roster_lineage` from `data/franchises/`; draft pick round/slot) matches the source file. No invented draft slots, owners, or records.
+- [ ] As-of-week sanity: dynasty-layer claims respect the per-source as-of-week slice rules in `write-week.md` — flag any citation of franchise `h2h` / `all_time_record` / `elo.current` / `season_results` ≥2025 rows, arc `current_owner` / 2025 aggregates, or the 2025 title inside a pre-finale week body. Hard enforcement lands later; until then this is a manual editor check.
 
 ### 2. Voice Consistency (Score 1-10, target: 7+)
 

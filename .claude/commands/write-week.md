@@ -47,6 +47,35 @@ The `week_data.json` now includes enriched historical fields (when `data/league_
 - `historical_context` — league all-time records (highest score, biggest blowout, longest streaks, etc.)
 - `team_profiles_summary[].ranks` — positional rankings (QB, RB, WR, TE, etc.)
 
+### Week Data v2 + Dynasty Layer
+
+Beyond the enriched fields above, each week has a denormalized companion plus a cross-season dynasty layer. Load these only when you want the extra depth — and obey the as-of-week slice rules below, because the dynasty stores are end-of-2025 snapshots that leak the future if cited naively.
+
+**The `game_id` join.** Each `game_context` is THIN — `game_id`, `stat_line`, `one_liner`, `opponent`. The real-game detail lives in the NFLGame entity. Join on `game_context.game_id`:
+
+- `content/weeks/week${WEEK}_data_expanded.json` — a superset of the week data with a top-level `games` map keyed by `game_id` (all of this week's NFL games). **Prefer this** — one file, everything resolved.
+- `data/2025/nfl_games/{game_id}.json` — the same NFLGame, one file per game.
+
+**NFLGame fields** (per `game_id`): `home_team`/`away_team` + scores, `result` (home − away), `spread_line`, `total_line`, `roof`, `surface`, `temp`, `wind`, `rest_days` (`{home, away}`), `div_game`, `starting_qbs`, `team_stats` (per-team `passing_epa` / `rushing_epa` / `receiving_epa` + counts), `key_injuries[]` (`{team, status, name, primary_injury}`). `kickoff` is local time-of-day ("13:00"), NOT a date. Use EPA / injuries / rest / `div_game` / `spread_line` as analytic color — never cite a number that isn't present for that `game_id`.
+
+**Dynasty layer** (separate stores — load on demand):
+
+- Player arcs — `data/2025/player_arcs/{player_id}.json` (+ `_index.json`): `weekly[]` (`{season, week, fantasy_points, status, started, owner_roster_id, game_id}`), `ownership_history[]` (`{date, event, roster_id, via}`), `season_aggregates`, `current_owner`. One file spans 2022–2025.
+- Franchise wings — `data/franchises/{roster_id}.json` (+ `_index.json`): `all_time_record`, `elo`, `h2h`, `trophy_case`, `milestones`, `roster_lineage`, `season_results`, `voice_bible_callbacks`.
+- Roster snapshots — `data/2025/fantasy_rosters/week{N}.json`: `rosters[]` (`{roster_id, owner_id, players[], starters[], reserve}`). All weeks 1–17 are captured with real starters.
+- Draft picks — `data/{year}/draft_picks.json`: `picks[]` (`{round, pick_no, roster_id, player_id, metadata}`). `roster_id` = who drafted the player.
+
+**As-of-week slice rules (MUST).** You are writing from inside week N. The dynasty stores carry the FULL 2025 season, so citing them naively leaks games that haven't happened. Default-deny — if a fact's season is 2025-or-later and unstated, omit it.
+
+- **Player arcs:** cite only `weekly[]` entries where `season < 2025` OR (`season == 2025` AND `week <= N`). NEVER cite `current_owner`, `season_aggregates["2025"]`, or an `ownership_history` event dated after week N as if known now.
+- **Franchise wings (end-of-2025 snapshots — most fields leak):** SAFE mid-season = `historical_names` plus `roster_lineage` / `milestones` / `trophy_case` / `season_results` entries whose season is `< 2025`. DO NOT cite as known-now: `all_time_record` (sums 2025), any `h2h` entry (sums 2025 meetings), `elo.current`, any `season_results` row for season `>= 2025`, any 2025-dated lineage/milestone/trophy, or the 2025 title.
+- **Roster snapshots:** read `week <= N` files only.
+- **Draft picks:** always safe (preseason + history). **NFLGame / expanded data for week N:** safe (those games already happened).
+
+Hard enforcement lands later; until then these MUST rules are the guard. When in doubt, omit.
+
+**Citation rules.** Only cite a field that is present and non-null for that key. Never fabricate EPA, injuries, owners, draft slots, records, or Elo. If the join key (`game_id`, `player_id`, `roster_id`) is missing, skip the beat.
+
 If `content/weeks/week${WEEK}_data.json` doesn't exist yet, run:
 
 ```bash

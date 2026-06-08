@@ -23,20 +23,24 @@ import json
 import re
 import sys
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
 
+# Ensure scripts/ is on sys.path so this module is runnable both as a script
+# (`python scripts/local_draft.py`) and as part of the test package
+# (`from scripts.local_draft import ...`). See CLAUDE.md "Script import pattern".
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from shared import (
-    WEEKS_DIR,
-    VOICE_BIBLE_PATH as VOICE_BIBLE,
-    TEAM_PROFILES_PATH as TEAM_PROFILES,
-    OLLAMA_BASE,
     MODEL_HEAVY,
     MODEL_LIGHT,
+    OLLAMA_BASE,  # noqa: E402
     SECTION_TOKEN_BUDGETS,
-    load_json,
 )
+from shared import TEAM_PROFILES_PATH as TEAM_PROFILES  # noqa: E402
+from shared import VOICE_BIBLE_PATH as VOICE_BIBLE  # noqa: E402
+from shared import WEEKS_DIR, load_json  # noqa: E402
 
 # Section generation order and model assignment
 SECTIONS = [
@@ -374,7 +378,15 @@ SECTION_PROMPTS = {
         "- Frame team trajectories using `standings[].momentum.label` and "
         "`standings[].margin_this_week`. Ignore 'opening' and 'early' labels "
         "(weeks 1-3, not enough data).\n"
-        "- End with a quotable kicker line\n\n"
+        "- End with a quotable kicker line\n"
+        "- top_scorers carry game_context.game_id. A companion file "
+        "(week{week}_data_expanded.json, a games map) holds the full NFLGame per "
+        "game_id: team_stats EPA, key_injuries, rest_days, div_game, spread_line, "
+        "roof/temp/wind. If that color is present in the supplied data, weave it "
+        "in (short week, division game, elite defense) -- never invent it.\n"
+        "- Dynasty color (player_arcs, franchises) may appear below. AS-OF-WEEK "
+        "RULE: only facts true through week {week} -- never end-of-season owners, "
+        "2025 final records, or the 2025 title mid-season.\n\n"
         'Output ONLY valid JSON: {{"essay": "the full essay text..."}}'
     ),
     "rankings": (
@@ -388,7 +400,13 @@ SECTION_PROMPTS = {
         "- NO two consecutive blurbs should start with the same word or structure\n"
         "- Vary the tone: some celebratory, some eulogies, some roasts\n"
         "- When H2H data exists, consider citing the series record\n"
-        "- End each blurb with a kicker line\n\n"
+        "- End each blurb with a kicker line\n"
+        "- Where game_context.game_id resolves to NFLGame color in the supplied "
+        "data (team_stats EPA, key_injuries, rest_days, div_game, spread_line), "
+        "use it for analytic punch -- ONLY values actually present; fabricated "
+        "EPA/injuries fail review.\n"
+        "- Franchise/arc history (franchises, player_arcs) is dynasty fuel but "
+        "obeys the as-of-week rule: nothing later than week {week}.\n\n"
         "Order teams from rank 1 (best) to rank 12 (worst) based on standings.\n\n"
         "Output ONLY valid JSON:\n"
         '{{"rankings": [\n'
