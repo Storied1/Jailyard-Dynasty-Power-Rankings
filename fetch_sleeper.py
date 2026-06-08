@@ -19,16 +19,12 @@ import json
 import os
 import sys
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
-from shared import (  # noqa: E402
-    NflStatsResponseError,
-    fetch_nfl_stats,
-    nfl_stats_path,
-)
+from shared import NflStatsResponseError, fetch_nfl_stats, nfl_stats_path  # noqa: E402
 
 BASE_URL = "https://api.sleeper.app/v1"
 DATA_DIR = Path(__file__).parent / "data"
@@ -51,12 +47,17 @@ PLAYOFF_WEEKS = 4  # Weeks after regular season
 def fetch_json(endpoint, retries=3, delay=1):
     """Fetch JSON from the Sleeper API with retry logic."""
     url = f"{BASE_URL}{endpoint}"
+    # BASE_URL is the constant https Sleeper host and endpoint is built
+    # internally (never user-controlled); enforce that before any request.
+    if not url.startswith("https://api.sleeper.app/"):
+        raise ValueError(f"refusing non-Sleeper URL: {url}")
     for attempt in range(retries):
         try:
             req = urllib.request.Request(
                 url, headers={"User-Agent": "JailyardDynasty/1.0"}
             )
-            with urllib.request.urlopen(req, timeout=15) as resp:
+            # nosemgrep: audited -- constant https Sleeper host enforced above
+            with urllib.request.urlopen(req, timeout=15) as resp:  # nosemgrep
                 return json.loads(resp.read().decode())
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
             if attempt < retries - 1:
@@ -194,11 +195,16 @@ def fetch_season(season, league_id):
         if week >= playoff_week_start:
             season_type = "post"
         proj_url = f"https://api.sleeper.app/projections/nfl/{season}/{week}?season_type={season_type}"
+        # Literal https Sleeper host; season/week are ints, season_type is a
+        # fixed enum. Enforce host before the request to keep the audit honest.
+        if not proj_url.startswith("https://api.sleeper.app/"):
+            raise ValueError(f"refusing non-Sleeper URL: {proj_url}")
         try:
             req = urllib.request.Request(
                 proj_url, headers={"User-Agent": "JailyardDynasty/1.0"}
             )
-            with urllib.request.urlopen(req, timeout=15) as resp:
+            # nosemgrep: audited -- literal https Sleeper host enforced above
+            with urllib.request.urlopen(req, timeout=15) as resp:  # nosemgrep
                 proj_data = json.loads(resp.read().decode())
                 if proj_data:
                     all_projections[str(week)] = proj_data
@@ -680,7 +686,22 @@ def build_league_history(seasons):
         path = DATA_DIR / str(s) / "season_combined.json"
         if path.exists():
             with open(path) as f:
-                all_seasons[s] = json.load(f)
+                data = json.load(f)
+            # Skip unstarted seasons (offseason shells): Sleeper creates the
+            # next-season league as soon as the current one ends, so a future
+            # year has real rosters but zero games. Excluding it here keeps ALL
+            # games-derived history (seasons list, records, H2H, Elo, per-season
+            # results) to seasons that actually happened. The shell remains the
+            # current-roster/name source elsewhere (generate_franchise_wings.py
+            # reads data/{CURRENT_SEASON}/rosters.json directly). Self-correcting:
+            # the season re-enters history automatically once it has games.
+            games_played = sum(
+                len(w.get("matchups", [])) for w in data.get("weeks", [])
+            )
+            if games_played == 0:
+                print(f"  Skipping {s} — no games played yet (offseason shell)")
+                continue
+            all_seasons[s] = data
             print(f"  Loaded {s} season data")
         else:
             print(f"  WARNING: No data for {s}, skipping")
@@ -1047,6 +1068,25 @@ def build_league_history(seasons):
                 brackets = json.load(f)
             winners = brackets.get("winners", [])
             if winners:
+                rid_to_owner = {}
+                for rid_str, info in all_seasons[s].get("roster_map", {}).items():
+                    rid_to_owner[int(rid_str)] = info.get("owner_id", "")
+
+                # Playoff appearances: every distinct roster that appears in the
+                # winners bracket made the playoffs that season. Top seeds get a
+                # round-1 bye, so count ALL winners games (not just round 1) —
+                # bye teams first surface as a numeric t1/t2 in their round-2 game.
+                playoff_rids = set()
+                for g in winners:
+                    for slot in ("t1", "t2"):
+                        rid = g.get(slot)
+                        if isinstance(rid, int):
+                            playoff_rids.add(rid)
+                for rid in playoff_rids:
+                    oid = rid_to_owner.get(rid, "")
+                    if oid in franchise_stats:
+                        franchise_stats[oid]["playoff_appearances"] += 1
+
                 # Find the championship game (highest round, lowest matchup_id).
                 # Sleeper brackets have 2 games at max round: championship (m=6)
                 # and 3rd-place (m=7). We only want the championship.
@@ -1054,9 +1094,6 @@ def build_league_history(seasons):
                 champ_round = [g for g in winners if g.get("r") == max_round]
                 if champ_round:
                     game = min(champ_round, key=lambda g: g.get("m", 999))
-                    rid_to_owner = {}
-                    for rid_str, info in all_seasons[s].get("roster_map", {}).items():
-                        rid_to_owner[int(rid_str)] = info.get("owner_id", "")
                     champ_rid = game.get("w")
                     r1 = game.get("t1")
                     r2 = game.get("t2")

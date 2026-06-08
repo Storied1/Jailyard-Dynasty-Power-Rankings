@@ -429,7 +429,11 @@ async function fetchLiveHistory(prog){
 }
 
 function computeHistory(raw){
-  const seasons=Object.keys(raw).map(Number).sort();
+  // Skip unstarted seasons (offseason shells: Sleeper spins up the next-season
+  // league immediately, so it has rosters but zero games). Keeps the live
+  // fallback in sync with cached league_history.json, whose producer
+  // (fetch_sleeper.build_league_history) applies the same zero-game filter.
+  const seasons=Object.keys(raw).map(Number).filter(s=>Object.keys((raw[s]||{}).matchups||{}).length>0).sort();
   // 1. Franchise map
   const fm={};
   for(const s of seasons){
