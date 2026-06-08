@@ -1,0 +1,6 @@
+# The site's HTML is hand-maintained, compact, and inline-everything by design
+# (zero-dependency, no build step — see CLAUDE.md "Critical Rules"). Prettier
+# would expand it ~2.4x and fight the house style on every edit, so it's excluded
+# here. JSON/CSS/MD stay prettier-managed (the data pipeline relies on prettier's
+# canonical JSON form). If a build step is ever added, revisit this.
+*.html
