@@ -10,6 +10,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from build_chat_context import _month_le  # noqa: E402
+from build_chat_context import (
+    build_suggested_callbacks,
+    find_active_arcs,
+    resolve_predictions,
+    sanitize_league_memory,
+)
 
 # ~ Tuesday after Week 5 MNF, 2025 (early October).
 CUTOFF = datetime(2025, 10, 7, 6, 59, 59, tzinfo=timezone.utc)
@@ -29,8 +35,6 @@ def test_month_le_none_is_true():
     # Missing date == not future; treat as visible (callers decide inclusion).
     assert _month_le(None, CUTOFF) is True
 
-
-from build_chat_context import find_active_arcs  # noqa: E402
 
 WEEK_DATA = {
     "matchups": [
@@ -87,9 +91,6 @@ def test_find_active_arcs_marks_resolved_when_ended_before_cutoff():
     assert out and out[0]["status"] == "resolved"
 
 
-from build_chat_context import resolve_predictions  # noqa: E402
-
-
 def test_resolve_predictions_skips_predictions_made_after_cutoff():
     # made_at (UTC) is Nov 1, after the ~Oct-7 week-5 cutoff -> must be skipped.
     preds = [{"id": "p1", "made_at": "2025-11-01T00:00:00Z", "subject": "Alpha rolls"}]
@@ -126,3 +127,34 @@ def test_resolve_predictions_made_before_cutoff_resolves_without_baked_fields():
     assert len(out) == 1  # made before cutoff -> not filtered out
     assert out[0]["resolution"] == "right"  # recomputed locally (elite + 31 pts)
     assert "credibility_impact" not in out[0] and out[0].get("evidence")
+
+
+def test_sanitize_league_memory_drops_greatest_moments_and_meta():
+    lm = {
+        "meta": {"generated": "2026-02-26T00:00:00Z"},
+        "culture": {"x": 1},
+        "lexicon": {"y": 2},
+        "greatest_moments": [{"rank": 1, "title": "leak"}],
+        "running_jokes": [
+            {
+                "name": "old",
+                "first_seen": "2025-09",
+                "last_seen": "2026-02",
+                "still_active": True,
+            },
+            {"name": "future", "first_seen": "2025-11", "last_seen": "2026-01"},
+        ],
+    }
+    out = sanitize_league_memory(lm, CUTOFF)
+    assert "greatest_moments" not in out and "meta" not in out
+    assert out["culture"] == {"x": 1} and out["lexicon"] == {"y": 2}
+    names = [j["name"] for j in out["running_jokes"]]
+    assert "old" in names and "future" not in names
+    old = next(j for j in out["running_jokes"] if j["name"] == "old")
+    assert old["last_seen"] == "2025-10"  # clamped to cutoff month
+
+
+def test_build_suggested_callbacks_excludes_future_arc():
+    arcs = [{"arc_id": "f1", "title": "Alpha future", "span": {"start": "2025-11"}}]
+    cbs = build_suggested_callbacks({}, arcs, {}, WEEK_DATA, {}, CUTOFF)
+    assert all(c["source"] != "arc" for c in cbs)

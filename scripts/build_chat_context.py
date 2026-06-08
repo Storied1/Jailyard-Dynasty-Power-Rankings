@@ -922,8 +922,31 @@ def extract_chat_highlights(window_messages, scored_items, max_highlights=8):
 # ---------------------------------------------------------------------------
 
 
+def sanitize_league_memory(league_memory, cutoff):
+    """As-of-week-N league memory: timeless culture/lexicon + running jokes
+    first seen on/before the cutoff. Excludes retrospective greatest_moments
+    and the post-season meta block (both encode the ending)."""
+    if not league_memory:
+        return {}
+    cutoff_month = cutoff.strftime("%Y-%m")
+    jokes = []
+    for j in league_memory.get("running_jokes", []):
+        if not _month_le(j.get("first_seen"), cutoff):
+            continue
+        jk = dict(j)
+        if jk.get("last_seen") and jk["last_seen"][:7] > cutoff_month:
+            jk["last_seen"] = cutoff_month
+            jk["still_active"] = True
+        jokes.append(jk)
+    return {
+        "culture": league_memory.get("culture", {}),
+        "lexicon": league_memory.get("lexicon", {}),
+        "running_jokes": jokes,
+    }
+
+
 def build_suggested_callbacks(
-    league_memory, arcs, predictions, week_data, roster_to_team
+    league_memory, arcs, predictions, week_data, roster_to_team, cutoff
 ):
     """Suggest callbacks to past events that connect to this week."""
     callbacks = []
@@ -959,6 +982,9 @@ def build_suggested_callbacks(
     if arcs:
         arc_list = arcs if isinstance(arcs, list) else arcs.get("arcs", [])
         for arc in arc_list:
+            span = arc.get("span", {}) if isinstance(arc.get("span"), dict) else {}
+            if not _month_le(span.get("start") or arc.get("started"), cutoff):
+                continue
             arc_text = json.dumps(arc).lower()
             for tn in playing_teams:
                 if tn in arc_text:
@@ -982,6 +1008,13 @@ def build_suggested_callbacks(
             else predictions.get("predictions", [])
         )
         for pred in pred_list:
+            made_at = pred.get("made_at")
+            if made_at:
+                try:
+                    if parse_ts(made_at) > cutoff:
+                        continue
+                except (ValueError, TypeError):
+                    pass
             if pred.get("status") == "open":
                 quote = pred.get("quote", pred.get("text", "")).lower()
                 for tn in playing_teams:
