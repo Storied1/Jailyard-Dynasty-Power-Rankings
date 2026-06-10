@@ -1272,11 +1272,15 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
     print(f"  Medium relevancy: {len(medium_relevancy)}")
 
     # --- Active arcs ---
-    active_arcs = find_active_arcs(arcs, week, season, week_data, roster_to_team)
+    active_arcs = find_active_arcs(
+        arcs, week, season, week_data, roster_to_team, window_end
+    )
     print(f"  Active arcs: {len(active_arcs)}")
 
     # --- Resolved predictions ---
-    resolved_preds = resolve_predictions(predictions, week, season, week_data)
+    resolved_preds = resolve_predictions(
+        predictions, week, season, week_data, window_end
+    )
     print(f"  Resolved predictions: {len(resolved_preds)}")
 
     # --- Sentiment snapshot ---
@@ -1299,7 +1303,7 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
 
     # --- Suggested callbacks ---
     callbacks = build_suggested_callbacks(
-        league_memory, arcs, predictions, week_data, roster_to_team
+        league_memory, arcs, predictions, week_data, roster_to_team, window_end
     )
     print(f"  Suggested callbacks: {len(callbacks)}")
 
@@ -1319,6 +1323,7 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
         "active_arcs_this_week": active_arcs,
         "resolved_predictions": resolved_preds,
         "sentiment_snapshot": sentiment,
+        "league_memory": sanitize_league_memory(league_memory, window_end),
         "this_weeks_chat_highlights": highlights,
         "suggested_callbacks": callbacks,
     }
