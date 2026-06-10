@@ -10,12 +10,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from extract_week_data import (  # noqa: E402
-    _annotate_matchup_momentum,
+from extract_week_data import _annotate_matchup_momentum  # noqa: E402
+from extract_week_data import (
     _compute_matchup_momentum,
     _is_upset,
     _stat_line,
     build_game_context,
+    compute_as_of_history,
 )
 
 # ---------------------------------------------------------------------------
@@ -301,3 +302,63 @@ def test_annotate_mixed_standings_produces_real_labels():
     # Beta (1.0) vs Gamma (-0.2) → edge 1.2, slight edge, Beta favored
     assert matchups[1]["momentum"]["label"] == "slight edge"
     assert matchups[1]["momentum"]["favorite_team_name"] == "Beta"
+
+
+# ---------------------------------------------------------------------------
+# compute_as_of_history (Phase 4 / 1c-F7 standings leak fix)
+# ---------------------------------------------------------------------------
+
+
+def _history_fixture():
+    oid = "OWNER1"
+    return {
+        "elo_current": {oid: 1561.1},  # season-END (the leak)
+        "elo_history": {
+            oid: [
+                {"season": 2025, "week": 1, "elo": 1500.0},
+                {"season": 2025, "week": 2, "elo": 1520.0},
+                {"season": 2025, "week": 3, "elo": 1540.0},
+                {"season": 2025, "week": 4, "elo": 1672.1},  # PEAK, future of wk3
+                {"season": 2025, "week": 5, "elo": 1561.1},
+            ]
+        },
+        "franchise_stats": {
+            oid: {
+                "all_time": {"wins": 39, "losses": 17},  # incl. full 2025
+                "championships": 2,
+                "best_win_streak": 11,
+                "peak_elo": 1672.1,
+                "season_results": [
+                    {"season": 2022, "wins": 7, "losses": 7},
+                    {"season": 2023, "wins": 11, "losses": 3},
+                    {"season": 2024, "wins": 7, "losses": 7},
+                    {"season": 2025, "wins": 14, "losses": 0},
+                ],
+            }
+        },
+    }
+
+
+def test_as_of_current_elo_is_week_n_not_season_end():
+    out = compute_as_of_history("OWNER1", 2025, 3, _history_fixture(), 3, 0)
+    assert out["current_elo"] == 1540.0  # NOT 1561.1
+
+
+def test_as_of_peak_elo_through_week_n_only():
+    out = compute_as_of_history("OWNER1", 2025, 3, _history_fixture(), 3, 0)
+    assert out["peak_elo"] == 1540.0  # wk4's 1672.1 is the future
+
+
+def test_as_of_all_time_record_excludes_future_2025():
+    # prior seasons 2022-24 = 25-17; 2025 through wk3 = 3-0  ->  28-17 (not 39-17)
+    out = compute_as_of_history("OWNER1", 2025, 3, _history_fixture(), 3, 0)
+    assert out["all_time_record"] == "28-17"
+
+
+def test_as_of_omits_unrecoverable_counters():
+    out = compute_as_of_history("OWNER1", 2025, 3, _history_fixture(), 3, 0)
+    assert "championships" not in out and "best_win_streak" not in out
+
+
+def test_as_of_empty_when_owner_missing():
+    assert compute_as_of_history("NOPE", 2025, 3, _history_fixture(), 3, 0) == {}

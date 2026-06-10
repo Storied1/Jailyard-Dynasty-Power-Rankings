@@ -579,6 +579,37 @@ def build_matchup_entry(
     return entry
 
 
+def compute_as_of_history(
+    oid, season, week_num, history_data, season_wins, season_losses
+):
+    """As-of-week-N franchise-history enrichment (no future leak).
+
+    Recomputes the three recoverable fields from the weekly Elo timeline and
+    per-season records; the through-week-N current-season record is passed in
+    (it is the already-correct standings W/L). Omits all-time counters that
+    have no per-week-N decomposition in league_history (championships,
+    best_win_streak) -- citing their frozen season-end value mid-season is the
+    leak (roadmap 1c-F7). Deferred: derive champions-by-season from brackets if
+    these are ever needed.
+    """
+    out = {}
+    if not history_data or not oid:
+        return out
+    series = history_data.get("elo_history", {}).get(oid, [])
+    upto = [e for e in series if (e["season"], e["week"]) <= (season, week_num)]
+    if upto:
+        upto.sort(key=lambda e: (e["season"], e["week"]))
+        out["current_elo"] = upto[-1]["elo"]
+        out["peak_elo"] = round(max(e["elo"] for e in upto), 1)
+    fstats = history_data.get("franchise_stats", {}).get(oid)
+    if fstats:
+        prior = [r for r in fstats.get("season_results", []) if r["season"] < season]
+        base_w = sum(r.get("wins", 0) for r in prior)
+        base_l = sum(r.get("losses", 0) for r in prior)
+        out["all_time_record"] = f"{base_w + season_wins}-{base_l + season_losses}"
+    return out
+
+
 def build_standing_entry(
     s,
     data,
