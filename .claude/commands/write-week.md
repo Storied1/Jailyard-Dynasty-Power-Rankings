@@ -11,7 +11,7 @@ Before writing, you MUST read these files:
 3. `content/weeks/week${WEEK}_data.json` — this week's data: matchups (with momentum), standings (with momentum + margin_this_week), awards (top_performer with game_context), top_scorers (with player_id + game_context.one_liner for narrative framing)
 4. Previous week content summaries (from the week data's `previous_weeks_summary`)
 5. `content/weeks/week${WEEK}_chat_context.json` — real chat context (if available)
-6. `content/chat/league-memory.json` — permanent league culture reference (if available)
+6. League culture / lexicon / running-jokes: use ONLY the `league_memory` block inside `content/weeks/week${WEEK}_chat_context.json` (sanitized as-of week N). Do not load the raw analytics files from `content/chat/` directly — they carry season-end knowledge.
 7. `content/weeks/week${WEEK}_draft.json` — **local LLM draft (if available)**
 
 ### Using Local Drafts
@@ -36,10 +36,10 @@ The `week_data.json` now includes enriched historical fields (when `data/league_
 - `matchups[].h2h` — head-to-head history between the two teams (`team1_wins`, `team2_wins`, `total_games`, `last_meeting`)
 - `matchups[].momentum.label` — matchup vibe: `coin flip`, `slight edge`, `heavy lean`, `upset brewing`, or `too early` (weeks 1-3). Use to frame matchup preview/recap tone.
 - `matchups[].momentum.favorite_team_name` — who trajectory favors (distinct from rank). On `upset brewing`, this is the hotter underdog. On `coin flip` / `too early`, this is `null` — do NOT fabricate a favorite.
-- `standings[].current_elo`, `peak_elo`, `elo_change` — Elo ratings and weekly movement
+- `standings[].current_elo`, `peak_elo`, `elo_change` — Elo ratings and weekly movement, all **as of week N** (current_elo is the week-N rating; peak_elo is the peak through week N, not season-end)
 - `standings[].momentum` — `{score, label}` where label is `opening | early | collapsing | cooling | steady | hot | surging`. Describe the trajectory, don't quote the label verbatim. Cite sparingly.
 - `standings[].margin_this_week` — signed float (points over opponent). Direct narrative fuel: "Legion won by 73 this week," "Chudders got blown out by 21."
-- `standings[].all_time_record`, `championships`, `best_win_streak` — franchise history
+- `standings[].all_time_record` — franchise all-time record **as of week N** (prior seasons + 2025 through week N, not the season-end total). `championships` and `best_win_streak` are intentionally **absent in-season** — do not cite them (the missing-field hard rule applies).
 - `top_scorers[].game_context.one_liner` — pre-rendered real-game stat line, e.g. "22 carries, 169 yd, 2 rush TD vs. the Bills." **Cite this directly** when writing about a top scorer — it saves you from inventing stat lines that might be wrong.
 - `top_scorers[].game_context.opponent` — NFL opponent abbreviation. Useful for narrating "your top player got his numbers against a tough defense."
 - `top_scorers[].player_id` — Sleeper player ID. Don't cite in prose; it's a join key for cross-week arcs.
