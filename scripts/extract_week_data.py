@@ -655,25 +655,16 @@ def build_standing_entry(
         "momentum": momentum,
     }
 
-    # Inject Elo + franchise stats if history data available
+    # Inject Elo + franchise stats AS OF WEEK N (no season-end leak; 1c-F7).
     if history_data:
         oid = rid_to_owner.get(rid, "")
-        elo_current = history_data.get("elo_current", {})
-        franchise_stats = history_data.get("franchise_stats", {})
+        as_of = compute_as_of_history(
+            oid, data["season"], week_num, history_data, s["wins"], s["losses"]
+        )
+        entry.update(as_of)  # current_elo, peak_elo, all_time_record (as-of-N)
+
+        # elo_change stays per-week (already as-of-N: this week minus last week).
         elo_history = history_data.get("elo_history", {})
-
-        if oid in elo_current:
-            entry["current_elo"] = elo_current[oid]
-
-        fstats = franchise_stats.get(oid)
-        if fstats:
-            entry["peak_elo"] = fstats.get("peak_elo")
-            at = fstats.get("all_time", {})
-            entry["all_time_record"] = f"{at.get('wins', 0)}-{at.get('losses', 0)}"
-            entry["championships"] = fstats.get("championships", 0)
-            entry["best_win_streak"] = fstats.get("best_win_streak", 0)
-
-        # Compute elo_change for this week
         elo_change = None
         if oid in elo_history:
             entries = [e for e in elo_history[oid] if e["season"] == data["season"]]
@@ -684,6 +675,7 @@ def build_standing_entry(
             if this_elo is not None and prev_elo is not None:
                 elo_change = round(this_elo - prev_elo, 1)
         entry["elo_change"] = elo_change
+        # championships + best_win_streak omitted (see compute_as_of_history).
 
     return entry
 
