@@ -35,7 +35,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `data/{year}/season_combined.json` — main season data file
 - `data/league_history.json` — cross-season analytics (Elo, H2H, records)
 - `data/{year}/nfl_stats_week{N}.json` — gitignored Sleeper stats cache, populated by `fetch_sleeper.py` step 8/8; required for `game_context` enrichment; use `--force` to refresh
-- `weekN_data.json` v2 enrichment: `matchups[].team{1,2}.top_scorers[].game_context` (NESTED — there is NO top-level `top_scorers[]`) + `awards.top_performer.game_context`; `standings[].{roster_id, margin_this_week, momentum}`, `matchups[].momentum`
+- `weekN_data.json` v2 enrichment: `matchups[].team{1,2}.top_scorers[].game_context` (NESTED — there is NO top-level `top_scorers[]`) + `awards.top_performer.game_context`; `standings[].{roster_id, margin_this_week, momentum}`, `matchups[].momentum`; standings Elo/franchise fields (`current_elo`/`peak_elo`/`all_time_record`) are **as-of-week-N** via `compute_as_of_history`; `championships`/`best_win_streak` intentionally absent in-season (M1 t1)
 - `weekN_data_expanded.json` — denormalized companion (Task 7): top-level `games{}` map keyed by game_id; holders reference by `game_context.game_id`. Idempotent via `data/2025/nfl_games/_expanded_manifest.json` (hashes inputs). Built by `scripts/generate_expanded_week.py`
 - `data/2025/nfl_games/{game_id}.json` — first-class NFLGame entity per game (scores, EPA `team_stats`, `key_injuries`, `rest_days`, `div_game`, `spread_line`, roof/temp/wind). Built by `scripts/generate_nfl_games.py` from `data/external/`; `game_context` references these by `game_id`
 - `data/2025/fantasy_rosters/week{1..17}.json` — per-week roster snapshots (`rosters[].{players[], starters[], reserve}`); all 17 weeks captured with real starters (the `derived:true` fallback would null starters — none shipped). Built by `scripts/derive_historical_rosters.py`
@@ -63,6 +63,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - **Content fixes require HTML re-render** — editing `weekN_content.json` does NOT update `weekN.html`. After any content fix, re-render the affected week's HTML before pushing.
 - **As-if-realtime law** — column bodies + week subtitles use only knowledge available at that point in the season (UTC chat cutoffs → writer temporal rule → verifier Tier-3 check → cumulative-through-N data). Site chrome (Vault, landing, meta) is exempt — present-day frame. Full law: `project_editorial_identity` memory + `docs/superpowers/specs/2026-06-04-jailyard-2025-catchup-design.md`.
 - **Running-blog continuity** — later weeks back-reference earlier ones. Produce chronologically so every piece lands on the FINAL version of its predecessors; `meta.threads` ledger (Phase 4+) makes continuity structural.
+- **Writers/drafters read only per-week sanitized artifacts** — never raw `content/chat/` analytics (league-memory/arcs/predictions carry season-end knowledge); `build_chat_context.py` sanitizes as-of-week at generation (M1 t1, 2026-06-09).
 
 ## Known Patterns
 
@@ -106,7 +107,7 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 | `content/team-profiles.json`            | All 12 teams: preseason rank, tier, roast, key players, full preseason essay text                                              |
 | `content/weeks/weekN_data.json`         | AI-ready data per week (matchups, standings, awards, context) — 18 files                                                       |
 | `content/weeks/weekN_content.json`      | Generated content per week (essay, rankings, mailbag, bits, picks)                                                             |
-| `content/weeks/weekN_chat_context.json` | WhatsApp chat quotes relevant to each week — 18 files                                                                          |
+| `content/weeks/weekN_chat_context.json` | WhatsApp chat quotes relevant to each week + sanitized as-of-week `league_memory` block — 18 files                             |
 | `content/chat/`                         | Chat analytics: `league-memory.json`, `arcs.json`, `predictions.json`, `relationships.json`, `consensus.json`, `personas/*.md` |
 | `content/chat/name-map.json`            | Identity chain: WhatsApp display name → real name, team, handle, roster_id                                                     |
 
@@ -134,7 +135,7 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 ```bash
 # Data pipeline
 python fetch_sleeper.py --season 2025
-python scripts/extract_week_data.py --all
+python scripts/extract_week_data.py --all --pretty  # always --pretty: compact default collapses the committed multi-line files
 
 # Chat pipeline
 python scripts/split_chat_months.py
@@ -187,7 +188,7 @@ Use `python` not `python3` on this machine. Python is at:
 - **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Run tests:** `python -m pytest scripts/tests/ -v` — 123 tests across momentum, extract_week_data (v1+v2), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, canonical save, and verifier
+- **Run tests:** `python -m pytest scripts/tests/ -v` — 138 tests across momentum, extract_week_data (v1+v2 + as-of history), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, chat-context sanitizer, canonical save, and verifier
 - **Regenerate dynasty layer:** `python scripts/generate_player_arcs.py` then `python scripts/generate_franchise_wings.py` (local only — needs gitignored `players.json` + stats caches; `--fetch-stats` backfills 2022-24 caches once)
 - **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
