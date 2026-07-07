@@ -895,7 +895,7 @@ def extract_chat_highlights(window_messages, scored_items, max_highlights=8):
                 category = "despair"
 
             # Build summary
-            summary_parts = list(senders)[:3]
+            summary_parts = sorted(senders)[:3]
             summary = f"{', '.join(summary_parts)} exchanging messages"
 
             highlights.append(
