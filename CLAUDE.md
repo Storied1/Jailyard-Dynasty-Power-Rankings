@@ -79,6 +79,9 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - **Momentum label sets** — Team `momentum.label`: `opening | early | cooling | collapsing | steady | hot | surging`. Matchup `momentum.label`: `too early | coin flip | slight edge | heavy lean | upset brewing`. Defined across `shared.py` (producer) + `extract_week_data.py` (matchup-second-pass) + `verify_week_content.py` (validator). **Label drift risk:** three separate sets in three files — when adding a label, update all three in the same commit.
 - **Script import pattern (sys.path bootstrap):** Scripts in `scripts/` that need to be runnable BOTH as modules under pytest AND directly via `python scripts/X.py` use a sys.path bootstrap pattern: insert `scripts/` into sys.path[0] before the `from shared import ...` line. See `scripts/fetch_nflreadpy.py:20-25` for the canonical pattern. Reason: Python adds the script's directory to sys.path when running a file directly (NOT the CWD), so `from scripts.shared import` fails. The bare `from shared import` only works after the bootstrap. Tests use `from scripts.X import` (pytest configures sys.path with the repo root). Acceptable side effect: `shared` may load twice in long-running processes — currently harmless because `shared.py` has no module-level mutable state.
 - **Idempotency convention (architect M6):** all new data generators write via `save_json_canonical` (sort_keys=True, ensure_ascii=False, indent=2, explicit DataFrame/list sort before serialization). Re-extraction idempotency rides input-hash manifests (e.g. `nfl_games/_expanded_manifest.json`), NOT byte-parity with the prettier-reformatted committed file. Canonical data-layer spec: `docs/superpowers/specs/2026-05-02-jailyard-content-depth-design.md`.
+- `shared.load_json(path, required=False)` (the default) returns `None` silently on a missing file rather than raising — pass `required=True` for a clean error instead of a confusing downstream crash on the `None`.
+- `build_chat_context.py` has no `--all`/batch mode (unlike `extract_week_data.py`) — regenerating multiple weeks means looping `--week N` per week.
+- Python gotcha: `list(some_set)` order is non-deterministic across process runs (`PYTHONHASHSEED` unpinned here) — use `sorted()` whenever a set's contents get written to output/committed files.
 
 ## Style Conventions
 
@@ -113,22 +116,23 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 
 ### Key Scripts
 
-| Script                                 | Purpose                                                                          |
-| -------------------------------------- | -------------------------------------------------------------------------------- |
-| `fetch_sleeper.py`                     | Fetch season data from Sleeper API                                               |
-| `scripts/extract_week_data.py`         | Transforms `season_combined.json` → per-week AI-ready JSON                       |
-| `scripts/verify_week_content.py`       | Content validator (Tier 1: structural, Tier 2: data, Tier 3: chat)               |
-| `scripts/parse_whatsapp.py`            | Phase 1: parse raw WhatsApp export → `chat/parsed_messages.json`                 |
-| `scripts/map_chat_deterministic.py`    | Phase 2 MAP: heuristic extraction from monthly chat chunks                       |
-| `scripts/reduce_chat_deterministic.py` | Phase 2 REDUCE: merge MAP outputs → analytics files                              |
-| `scripts/build_chat_context.py`        | Phase 3: per-week chat relevancy engine (`--no-ai` for deterministic)            |
-| `scripts/derive_historical_rosters.py` | Per-week roster snapshots wks 1-17 (Sleeper matchup backfill; reversal fallback) |
-| `scripts/fetch_draft_picks.py`         | One-time Sleeper draft-pick backfill → `data/{season}/draft_picks.json`          |
-| `scripts/generate_player_arcs.py`      | Cross-season player arcs (matchups = ground truth; `--fetch-stats` backfills)    |
-| `scripts/generate_franchise_wings.py`  | 12 franchise biography files keyed by roster_id + rename-map `_index.json`       |
-| `scripts/fetch_nflreadpy.py`           | Fetch nflreadpy caches → `data/external/*.parquet` (`--max-age-hours` refresh)   |
-| `scripts/generate_nfl_games.py`        | Per-game NFLGame entities → `data/2025/nfl_games/{game_id}.json` (EPA, injuries) |
-| `scripts/generate_expanded_week.py`    | `weekN_data_expanded.json` companion (games map); manifest-hash idempotent       |
+| Script                                 | Purpose                                                                                         |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `fetch_sleeper.py`                     | Fetch season data from Sleeper API                                                              |
+| `scripts/extract_week_data.py`         | Transforms `season_combined.json` → per-week AI-ready JSON                                      |
+| `scripts/verify_week_content.py`       | Content validator (Tier 1: structural, Tier 2: data, Tier 3: chat)                              |
+| `scripts/parse_whatsapp.py`            | Phase 1: parse raw WhatsApp export → `chat/parsed_messages.json`                                |
+| `scripts/map_chat_deterministic.py`    | Phase 2 MAP: heuristic extraction from monthly chat chunks                                      |
+| `scripts/reduce_chat_deterministic.py` | Phase 2 REDUCE: merge MAP outputs → analytics files                                             |
+| `scripts/build_chat_context.py`        | Phase 3: per-week chat relevancy engine (`--no-ai` for deterministic)                           |
+| `scripts/derive_historical_rosters.py` | Per-week roster snapshots wks 1-17 (Sleeper matchup backfill; reversal fallback)                |
+| `scripts/fetch_draft_picks.py`         | One-time Sleeper draft-pick backfill → `data/{season}/draft_picks.json`                         |
+| `scripts/generate_player_arcs.py`      | Cross-season player arcs (matchups = ground truth; `--fetch-stats` backfills)                   |
+| `scripts/generate_franchise_wings.py`  | 12 franchise biography files keyed by roster_id + rename-map `_index.json`                      |
+| `scripts/fetch_nflreadpy.py`           | Fetch nflreadpy caches → `data/external/*.parquet` (`--max-age-hours` refresh)                  |
+| `scripts/generate_nfl_games.py`        | Per-game NFLGame entities → `data/2025/nfl_games/{game_id}.json` (EPA, injuries)                |
+| `scripts/generate_expanded_week.py`    | `weekN_data_expanded.json` companion (games map); manifest-hash idempotent                      |
+| `scripts/canon_checks.py`              | Validates sanitizer source artifacts (league_memory presence, as-of-week field shape) pre-write |
 
 ### Workflow
 
@@ -168,19 +172,20 @@ Use `python` not `python3` on this machine. Python is at:
 
 ## Slash Commands (`.claude/commands/`)
 
-| Command             | Purpose                        |
-| ------------------- | ------------------------------ |
-| `/write-week N`     | Generate weekly column content |
-| `/edit-week N`      | Editor-in-Chief quality gate   |
-| `/render-week N`    | Render content JSON → HTML     |
-| `/render-preseason` | Render preseason page          |
-| `/pick-media N`     | Auto-pick GIFs for media slots |
-| `/review-media`     | Creative director media review |
-| `/data-refresh`     | Refresh data from Sleeper API  |
-| `/audit`            | Security and quality scan      |
-| `/review`           | Code review                    |
-| `/refactor`         | Behavior-preserving cleanup    |
-| `/test`             | Run tests and validation       |
+| Command             | Purpose                                                |
+| ------------------- | ------------------------------------------------------ |
+| `/write-week N`     | Generate weekly column content                         |
+| `/edit-week N`      | Editor-in-Chief quality gate                           |
+| `/canon-check N`    | Pre-render gate: sanitizer artifact + continuity check |
+| `/render-week N`    | Render content JSON → HTML                             |
+| `/render-preseason` | Render preseason page                                  |
+| `/pick-media N`     | Auto-pick GIFs for media slots                         |
+| `/review-media`     | Creative director media review                         |
+| `/data-refresh`     | Refresh data from Sleeper API                          |
+| `/audit`            | Security and quality scan                              |
+| `/review`           | Code review                                            |
+| `/refactor`         | Behavior-preserving cleanup                            |
+| `/test`             | Run tests and validation                               |
 
 ## Common Tasks
 
