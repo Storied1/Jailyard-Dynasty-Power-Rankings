@@ -16,14 +16,28 @@ Exit code 0 = pass (review printed to stderr as info).
 import json
 import subprocess
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Ensure shared.py is importable when run as a hook from any CWD
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from shared import OLLAMA_BASE, MODEL_LIGHT as REVIEW_MODEL
+from shared import MODEL_LIGHT as REVIEW_MODEL
+from shared import OLLAMA_BASE
+
+HOOK_FAILURE_LOG = Path.home() / ".claude" / "hook-failures.log"
+
+
+def _log_failure(context, exc):
+    """Best-effort append to ~/.claude/hook-failures.log — never raise."""
+    try:
+        ts = datetime.now(timezone.utc).isoformat()
+        with open(HOOK_FAILURE_LOG, "a", encoding="utf-8") as f:
+            f.write(f"{ts} local_review_hook.py {context}: {exc!r}\n")
+    except Exception:
+        pass
 
 
 def get_diff():
@@ -36,7 +50,8 @@ def get_diff():
             timeout=10,
         )
         return result.stdout.strip()
-    except Exception:
+    except Exception as e:
+        _log_failure("get_diff", e)
         return ""
 
 
@@ -76,8 +91,9 @@ def review_diff(diff):
             # Qwen 3 thinking mode: if response is empty, content was consumed
             # by thinking. That's fine — means the model had nothing to flag.
             return text if text else None
-    except Exception:
-        return None  # silently skip if Ollama is down
+    except Exception as e:
+        _log_failure("review_diff", e)
+        return None  # advisory only — Ollama being down shouldn't block the hook
 
 
 def main():
@@ -88,8 +104,8 @@ def main():
         raw = sys.stdin.read()
         if raw.strip():
             hook_input = json.loads(raw)
-    except Exception:
-        pass
+    except Exception as e:
+        _log_failure("main:stdin_parse", e)
 
     # Only run on Write/Edit tool completions
     tool_name = hook_input.get("tool_name", "")
