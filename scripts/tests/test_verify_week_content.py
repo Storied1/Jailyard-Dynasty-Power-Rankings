@@ -10,7 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from verify_week_content import _check_thread_shape  # noqa: E402
 from verify_week_content import check_game_context_presence  # noqa: E402
+from verify_week_content import _diff_thread_continuity, run_tier1
 
 
 def test_check_game_context_rejects_bogus_src_enum():
@@ -125,3 +127,76 @@ def test_check_game_context_awards_top_performer_validated():
     assert any(
         "BOGUS_AWARDS_SOURCE" in e or "is not one of" in e for e in errors
     ), f"awards.top_performer should be schema-validated, got errors: {errors}"
+
+
+# ---------------------------------------------------------------------------
+# Threads ledger (meta.threads) -- M1 t4
+# ---------------------------------------------------------------------------
+
+
+def test_check_thread_shape_valid_no_errors():
+    threads = [
+        {"id": "a", "status": "opened"},
+        {"id": "b", "status": "continued"},
+    ]
+    errors: list[str] = []
+    _check_thread_shape(threads, errors)
+    assert errors == []
+
+
+def test_check_thread_shape_invalid_status():
+    threads = [{"id": "a", "status": "bogus"}]
+    errors: list[str] = []
+    _check_thread_shape(threads, errors)
+    assert len(errors) == 1
+    assert "bogus" in errors[0]
+
+
+def test_check_thread_shape_duplicate_id():
+    threads = [
+        {"id": "a", "status": "opened"},
+        {"id": "a", "status": "continued"},
+    ]
+    errors: list[str] = []
+    _check_thread_shape(threads, errors)
+    assert any("Duplicate" in e and "'a'" in e for e in errors)
+
+
+def test_diff_thread_continuity_carried_forward_no_warning():
+    prev = [{"id": "a", "status": "opened"}]
+    current = [{"id": "a", "status": "continued"}]
+    warnings: list[str] = []
+    _diff_thread_continuity(current, prev, "week 1", warnings)
+    assert warnings == []
+
+
+def test_diff_thread_continuity_silently_dropped_warns():
+    prev = [{"id": "a", "status": "opened"}]
+    current: list[dict] = []
+    warnings: list[str] = []
+    _diff_thread_continuity(current, prev, "week 1", warnings)
+    assert len(warnings) == 1
+    assert "'a'" in warnings[0] and "week 1" in warnings[0]
+
+
+def test_diff_thread_continuity_terminal_status_not_flagged():
+    # A thread already paid_off/dropped in the predecessor is closed --
+    # its absence from the current week is expected, not a silent drop.
+    prev = [
+        {"id": "a", "status": "paid_off"},
+        {"id": "b", "status": "dropped"},
+    ]
+    current: list[dict] = []
+    warnings: list[str] = []
+    _diff_thread_continuity(current, prev, "week 1", warnings)
+    assert warnings == []
+
+
+def test_run_tier1_returns_warnings_key():
+    # Minimal content/data -- most of the other 10 checks legitimately fail
+    # against empty input; that's expected and irrelevant here. This test
+    # only locks the new warnings-channel shape and the updated tally.
+    result = run_tier1({}, {})
+    assert "warnings" in result and isinstance(result["warnings"], list)
+    assert "errors" in result and isinstance(result["errors"], list)
+    assert result["passed"] + result["failed"] == 11  # 10 existing + threads_continuity

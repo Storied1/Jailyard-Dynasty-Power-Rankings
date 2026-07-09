@@ -11,8 +11,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from build_chat_context import _month_le  # noqa: E402
 from build_chat_context import (
+    PRESEASON_END_2025,
+    PRESEASON_START_2025,
+    build_sentiment_snapshot,
     build_suggested_callbacks,
+    compute_preseason_window,
     find_active_arcs,
+    get_all_player_names,
+    get_all_team_names,
+    get_matchup_roster_pairs,
+    get_week_high_low_scorers,
     resolve_predictions,
     sanitize_league_memory,
 )
@@ -46,6 +54,10 @@ WEEK_DATA = {
         }
     ]
 }
+
+# Full 3-team league roster, used for preseason (week_data=None) fallback tests --
+# roster_id 3 ("Charlie") deliberately has no matchup in WEEK_DATA above.
+ROSTER_TO_TEAM = {1: "Alpha", 2: "Bravo", 3: "Charlie"}
 
 
 def test_find_active_arcs_includes_arc_that_resolves_later():
@@ -158,3 +170,96 @@ def test_build_suggested_callbacks_excludes_future_arc():
     arcs = [{"arc_id": "f1", "title": "Alpha future", "span": {"start": "2025-11"}}]
     cbs = build_suggested_callbacks({}, arcs, {}, WEEK_DATA, {}, CUTOFF)
     assert all(c["source"] != "arc" for c in cbs)
+
+
+# ---------------------------------------------------------------------------
+# Preseason mode (week_data=None) -- null-guards and graceful degrades
+# ---------------------------------------------------------------------------
+
+
+def test_compute_preseason_window_2025_matches_constants():
+    assert compute_preseason_window(2025) == (PRESEASON_START_2025, PRESEASON_END_2025)
+
+
+def test_get_matchup_roster_pairs_none_week_data_returns_empty():
+    assert get_matchup_roster_pairs(None) == []
+
+
+def test_get_week_high_low_scorers_none_week_data_returns_none_none():
+    assert get_week_high_low_scorers(None) == (None, None)
+
+
+def test_get_all_player_names_none_week_data_returns_empty_set():
+    assert get_all_player_names(None) == set()
+
+
+def test_get_all_team_names_none_week_data_falls_back_to_roster():
+    assert get_all_team_names(None, ROSTER_TO_TEAM) == {"alpha", "bravo", "charlie"}
+
+
+def test_get_all_team_names_none_week_data_no_roster_returns_empty():
+    assert get_all_team_names(None) == set()
+
+
+def test_get_all_team_names_with_week_data_ignores_roster_fallback():
+    # Regression: real week_data takes precedence, new param doesn't change it.
+    assert get_all_team_names(WEEK_DATA, ROSTER_TO_TEAM) == {"alpha", "bravo"}
+
+
+def test_find_active_arcs_preseason_full_roster_in_scope():
+    # roster_id 3 has no matchup anywhere -- only reachable via the full-roster
+    # fallback that preseason mode (week_data=None) is supposed to provide.
+    arcs = [
+        {
+            "arc_id": "p1",
+            "title": "Preseason arc",
+            "span": {"start": "2025-03"},
+            "participants": [3],
+        }
+    ]
+    out = find_active_arcs(arcs, 0, 2025, None, ROSTER_TO_TEAM, PRESEASON_END_2025)
+    assert len(out) == 1
+    assert out[0]["this_week_development"] == "Entering the 2025 season"
+
+
+def test_find_active_arcs_preseason_excludes_future_start():
+    arcs = [
+        {
+            "arc_id": "p2",
+            "title": "Late",
+            "span": {"start": "2025-10"},
+            "participants": [1],
+        }
+    ]
+    assert (
+        find_active_arcs(arcs, 0, 2025, None, ROSTER_TO_TEAM, PRESEASON_END_2025) == []
+    )
+
+
+def test_resolve_predictions_none_week_data_returns_empty():
+    preds = [
+        {"id": "p1", "made_at": "2025-03-01T00:00:00Z", "quote": "Mahomes is elite"}
+    ]
+    assert resolve_predictions(preds, 0, 2025, None, PRESEASON_END_2025) == []
+
+
+def test_build_sentiment_snapshot_none_week_data_still_computes_mood():
+    messages = [
+        {
+            "sender": "Alice",
+            "text": "lol let's go fire dub",
+            "timestamp_utc": "2025-03-01T00:00:00Z",
+        },
+    ]
+    name_to_roster = {"alice": 1}
+    out = build_sentiment_snapshot(messages, name_to_roster, ROSTER_TO_TEAM, None)
+    assert out["Alpha"]["mood"] == "hyped"
+    assert out["Alpha"]["activity"] == "low"
+
+
+def test_build_suggested_callbacks_none_week_data_uses_roster_fallback():
+    arcs = [{"arc_id": "a1", "title": "Alpha saga", "span": {"start": "2025-03"}}]
+    cbs = build_suggested_callbacks(
+        {}, arcs, {}, None, ROSTER_TO_TEAM, PRESEASON_END_2025
+    )
+    assert any(c["source"] == "arc" for c in cbs)

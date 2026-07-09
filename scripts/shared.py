@@ -5,6 +5,7 @@ that were previously copy-pasted across 17+ scripts.
 """
 
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -20,6 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "data"
 CONTENT_DIR = REPO_ROOT / "content"
 WEEKS_DIR = CONTENT_DIR / "weeks"
+PRESEASON_DIR = CONTENT_DIR / "preseason-2025"
 CHAT_DIR = REPO_ROOT / "chat"
 CONTENT_CHAT_DIR = CONTENT_DIR / "chat"
 MAP_CACHE_DIR = CONTENT_CHAT_DIR / ".map_cache"
@@ -145,6 +147,27 @@ def save_json_canonical(path, data, verbose=False):
         f.write("\n")
     if verbose:
         print(f"  Saved (canonical): {path.relative_to(REPO_ROOT)}")
+
+
+# ---------------------------------------------------------------------------
+# Identity / merge helpers
+# ---------------------------------------------------------------------------
+
+
+def normalize_username(name):
+    """Strip ALL whitespace + casefold, for owner/username identity joins
+    (e.g. the "kharlo w" vs "kharlow" drift)."""
+    return re.sub(r"\s+", "", name or "").casefold()
+
+
+def merge_allowlisted_fields(target, source, allowed_keys):
+    """Shallow copy of target with only allowed_keys overwritten from source
+    (when present); every other target key preserved verbatim."""
+    merged = dict(target)
+    for key in allowed_keys:
+        if key in source:
+            merged[key] = source[key]
+    return merged
 
 
 # ---------------------------------------------------------------------------

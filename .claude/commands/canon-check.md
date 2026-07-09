@@ -22,6 +22,11 @@ entries have `current_elo`/`peak_elo`/`all_time_record` present and
 is exactly the check that would have caught the weeks 7-18 league-culture gap
 before anyone ran `/write-week` against them.
 
+For the preseason artifact, run `python scripts/canon_checks.py --preseason`
+instead — validates `league_memory` plus the `meta.type == "preseason"`
+self-identification marker; no `--week`, no standings check (preseason has
+no week data yet).
+
 If this step reports FAIL, stop here — don't proceed to Step 2. The data isn't
 sanitized correctly; that has to be fixed at the source (`build_chat_context.py`
 / `extract_week_data.py`), not papered over in the content review.
@@ -45,6 +50,12 @@ callbacks/references against the `meta.threads` ledger (and previous weeks'
 published content) and flag anything inconsistent with what earlier weeks
 actually said — a callback to a joke, storyline, or prediction that doesn't
 match what was actually published.
+
+(`verify_week_content.py`'s Tier 1 already mechanically checks `meta.threads`
+shape — valid status enum, no duplicate ids, as a hard error — and flags a
+thread that silently disappears between weeks as a Tier-1 warning. This
+manual pass covers what that automation can't: whether a callback's _text_
+is actually consistent with what earlier weeks said.)
 
 ## Output
 

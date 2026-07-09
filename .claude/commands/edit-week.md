@@ -100,6 +100,20 @@ Score: [patterns found] / 12
 - [ ] Bits: 1-3 sentences each
 - [ ] Pick blurbs: 2-4 sentences each
 
+### 7. As-If-Realtime Compliance
+
+This is a **manual editorial judgment call** — the automated validator only
+catches literal post-cutoff timestamp strings (`check_chat_temporal_cutoff`);
+everything below requires you to actually read for it. Scope is the column
+**body and week subtitle only** — site chrome (Championship Vault, landing
+page, meta description) is exempt and may know the ending.
+
+- [ ] No week numbers greater than N are referenced (no "wait until week N+3" foreshadowing)
+- [ ] No prophecy idioms ("little did they know", "this would prove to be", "foreshadowing") applied to anything not yet resolved as of week N
+- [ ] No player-team pairs that only became true later than week N (cross-check `derived_confidence:"approximate"` roster snapshots — they're advisory, never cite as confirmed fact)
+- [ ] No post-cutoff knowledge: no chat quote, game result, standings figure, injury note, or Elo value dated after `meta.temporal_cutoff_utc`
+- [ ] No dynasty-layer leak beyond the as-of-week slice rules (`write-week.md`'s "As-of-week slice rules" section) — this overlaps with the Data Accuracy check above; flag here too if missed there
+
 ## Anti-Pattern Check
 
 Verify NONE of these appear:
@@ -134,6 +148,9 @@ Produce a review report:
 ### Tone: PASS / NEEDS WORK
 [Note any tone issues]
 
+### As-If-Realtime: PASS / FAIL
+[List any violations: week-number overshoot, prophecy idioms, future player-team pairs, post-cutoff knowledge]
+
 ### Specific Edits Required:
 1. [Line-by-line corrections if REVISE]
 2. ...
@@ -147,6 +164,55 @@ If **REVISE**, list specific changes needed and let the writer fix them.
 If **REJECT**, explain what needs to be completely rewritten and why.
 
 **IMPORTANT: There is no "APPROVE with notes."** If ANY fix is needed — even a single word — the verdict is REVISE. Fix it, re-verify, then re-review for APPROVE. Quality gates are binary.
+
+## Review-Log
+
+After producing the Output report above, append exactly one line to
+`content/review-log.jsonl` (create the file if it doesn't exist yet). Do this
+on **every** pass — REVISE and REJECT included, not just APPROVE. The log's
+value is tracking repeated-finding history across all 19 pieces (18 weeks +
+preseason) for the eventual M2→M3 calibration synthesis; a partial record is
+useless for that.
+
+1. Read `content/review-log.jsonl` if it exists. Find the highest
+   `pass_number` already recorded for this week's `piece` value. Your new
+   line's `pass_number` is that + 1 (or 1 if none exist yet).
+2. Emit **one single-line valid JSON object** (JSONL — no pretty-printing,
+   no trailing comma) with this schema:
+
+```json
+{
+  "piece": "week-3",
+  "pass_number": 1,
+  "reviewed_at_utc": "2026-07-08T00:00:00Z",
+  "verdict": "REVISE",
+  "data_accuracy": "FAIL",
+  "voice_score": "9/12",
+  "variety": "PASS",
+  "continuity": "PASS",
+  "tone": "PASS",
+  "as_if_realtime": "FAIL",
+  "violations": [
+    "[data_accuracy] rank 4 score cited as 134-118, week_data.json says 134-121"
+  ]
+}
+```
+
+- `piece`: always the string `"week-${WEEK}"` (e.g. `"week-3"`) — never a bare
+  number. `/edit-preseason` writes `"preseason-2025"` to this same file.
+- `reviewed_at_utc`: the real wall-clock time of this review pass. This is
+  process metadata, not column content — it is **not** subject to the
+  as-if-realtime law and should never be backdated to the week's in-story
+  date.
+- The six category fields mirror the Output report above exactly — this
+  file is a machine-readable distillation of that report, not a separate
+  invention. If a category wasn't applicable, use `"N/A"`.
+- `violations`: flat array of strings, each tagged `"[category] detail"`.
+  Empty array if the verdict is APPROVE with nothing to note.
+
+3. Append the line to the end of `content/review-log.jsonl` (create it if
+   missing). **Never rewrite or reformat existing lines** — this is an
+   append-only ledger.
 
 ## Usage
 

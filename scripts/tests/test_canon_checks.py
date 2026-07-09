@@ -1,4 +1,8 @@
-from scripts.canon_checks import check_as_of_week_fields, check_league_memory_present
+from scripts.canon_checks import (
+    check_as_of_week_fields,
+    check_league_memory_present,
+    check_preseason_type_marker,
+)
 
 
 def test_league_memory_present_pass():
@@ -46,3 +50,22 @@ def test_as_of_week_fields_season_end_leak():
     check_as_of_week_fields(entry, errors)
     assert len(errors) == 1
     assert "championships" in errors[0]
+
+
+def test_preseason_type_marker_pass():
+    errors = []
+    check_preseason_type_marker({"meta": {"type": "preseason"}}, errors)
+    assert errors == []
+
+
+def test_preseason_type_marker_wrong_type():
+    errors = []
+    check_preseason_type_marker({"meta": {"type": "week"}}, errors)
+    assert len(errors) == 1
+    assert "meta.type" in errors[0]
+
+
+def test_preseason_type_marker_missing_meta():
+    errors = []
+    check_preseason_type_marker({}, errors)
+    assert len(errors) == 1

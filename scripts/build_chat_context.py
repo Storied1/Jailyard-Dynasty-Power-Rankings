@@ -19,7 +19,15 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
-from shared import CHAT_DIR, CONTENT_CHAT_DIR, DATA_DIR, WEEKS_DIR, load_json, parse_ts
+from shared import (
+    CHAT_DIR,
+    CONTENT_CHAT_DIR,
+    DATA_DIR,
+    PRESEASON_DIR,
+    WEEKS_DIR,
+    load_json,
+    parse_ts,
+)
 from shared import save_json as _save_json
 
 MEDIA_CATALOG_PATH = CONTENT_CHAT_DIR / "media-catalog.json"
@@ -154,6 +162,8 @@ def resolve_sender(sender, name_to_roster, roster_to_team):
 
 def get_matchup_roster_pairs(week_data):
     """Return list of (roster_id_1, roster_id_2) from this week's matchups."""
+    if not week_data:
+        return []
     pairs = []
     for m in week_data.get("matchups", []):
         t1 = m.get("team1", {}).get("roster_id")
@@ -165,6 +175,8 @@ def get_matchup_roster_pairs(week_data):
 
 def get_week_high_low_scorers(week_data):
     """Return (high_scorer_roster_id, low_scorer_roster_id) for the week."""
+    if not week_data:
+        return None, None
     scores = []
     for m in week_data.get("matchups", []):
         for side in ("team1", "team2"):
@@ -181,6 +193,8 @@ def get_week_high_low_scorers(week_data):
 
 def get_all_player_names(week_data):
     """Return set of player names mentioned in matchups (top_scorers)."""
+    if not week_data:
+        return set()
     names = set()
     for m in week_data.get("matchups", []):
         for side in ("team1", "team2"):
@@ -189,14 +203,19 @@ def get_all_player_names(week_data):
     return names
 
 
-def get_all_team_names(week_data):
-    """Return set of team names from matchups."""
+def get_all_team_names(week_data, roster_to_team=None):
+    """Return set of team names from matchups. Falls back to the full
+    league roster when week_data is absent -- preseason has no per-week
+    matchups, but all teams are still in scope for keyword matching."""
     names = set()
-    for m in week_data.get("matchups", []):
-        for side in ("team1", "team2"):
-            tn = m.get(side, {}).get("team_name", "")
-            if tn:
-                names.add(tn.lower().strip())
+    if week_data:
+        for m in week_data.get("matchups", []):
+            for side in ("team1", "team2"):
+                tn = m.get(side, {}).get("team_name", "")
+                if tn:
+                    names.add(tn.lower().strip())
+    if not names and roster_to_team:
+        names = {tn.lower().strip() for tn in roster_to_team.values() if tn}
     return names
 
 
@@ -261,7 +280,7 @@ def build_keyword_index(
     keywords = {}
 
     # Team names
-    for tn in get_all_team_names(week_data):
+    for tn in get_all_team_names(week_data, roster_to_team):
         keywords[tn] = f"team:{tn}"
         # Also add shortened forms (first word if multi-word)
         parts = tn.split()
@@ -502,11 +521,15 @@ def find_active_arcs(arcs, week, season, week_data, roster_to_team, cutoff):
     active = []
     arc_list = arcs if isinstance(arcs, list) else arcs.get("arcs", [])
 
-    # Get roster_ids playing this week
-    playing_rids = set()
-    for m in week_data.get("matchups", []):
-        playing_rids.add(m.get("team1", {}).get("roster_id"))
-        playing_rids.add(m.get("team2", {}).get("roster_id"))
+    # Get roster_ids playing this week. Preseason (week_data=None): there's
+    # no matchup slate yet, so every team in the league is in scope.
+    if week_data:
+        playing_rids = set()
+        for m in week_data.get("matchups", []):
+            playing_rids.add(m.get("team1", {}).get("roster_id"))
+            playing_rids.add(m.get("team2", {}).get("roster_id"))
+    else:
+        playing_rids = set(roster_to_team.keys())
 
     for arc in arc_list:
         span = arc.get("span", {}) if isinstance(arc.get("span"), dict) else {}
@@ -535,26 +558,31 @@ def find_active_arcs(arcs, week, season, week_data, roster_to_team, cutoff):
         if not overlap:
             continue
 
-        # Build development note from matchup results
+        # Build development note from matchup results (preseason: no
+        # matchups exist yet, so there's nothing to report developing).
         developments = []
-        for m in week_data.get("matchups", []):
-            t1_rid = m.get("team1", {}).get("roster_id")
-            t2_rid = m.get("team2", {}).get("roster_id")
-            if t1_rid in participant_rids or t2_rid in participant_rids:
-                winner = m.get("winner", "")
-                margin = m.get("margin", 0)
-                developments.append(f"{winner} won by {margin}")
+        if week_data:
+            for m in week_data.get("matchups", []):
+                t1_rid = m.get("team1", {}).get("roster_id")
+                t2_rid = m.get("team2", {}).get("roster_id")
+                if t1_rid in participant_rids or t2_rid in participant_rids:
+                    winner = m.get("winner", "")
+                    margin = m.get("margin", 0)
+                    developments.append(f"{winner} won by {margin}")
+
+        if developments:
+            development_note = "; ".join(developments)
+        elif not week_data:
+            development_note = f"Entering the {season} season"
+        else:
+            development_note = "Participants active this week"
 
         active.append(
             {
                 "arc_id": arc.get("arc_id", arc.get("id", "")),
                 "title": arc.get("title", ""),
                 "status": as_of_status,
-                "this_week_development": (
-                    "; ".join(developments)
-                    if developments
-                    else "Participants active this week"
-                ),
+                "this_week_development": development_note,
                 "suggested_framing": arc.get(
                     "suggested_framing",
                     arc.get("framing", "Continue tracking this arc"),
@@ -577,6 +605,8 @@ def resolve_predictions(predictions, week, season, week_data, cutoff):
     """
     if not predictions:
         return []
+    if not week_data:
+        return []  # nothing to resolve against pre-week-1
 
     resolved = []
     pred_list = (
@@ -751,19 +781,21 @@ def build_sentiment_snapshot(
         counts[rid] = counts.get(rid, 0) + 1
         texts.setdefault(rid, []).append(msg.get("text", ""))
 
-    # Determine who won/lost
+    # Determine who won/lost (preseason: no matchups yet, both stay empty --
+    # the mood/activity heuristics below are still meaningful without them)
     winners = set()
     losers = set()
-    for m in week_data.get("matchups", []):
-        winner_name = m.get("winner", "")
-        for side in ("team1", "team2"):
-            t = m.get(side, {})
-            rid = t.get("roster_id")
-            tn = t.get("team_name", "").strip()
-            if tn == winner_name.strip():
-                winners.add(rid)
-            else:
-                losers.add(rid)
+    if week_data:
+        for m in week_data.get("matchups", []):
+            winner_name = m.get("winner", "")
+            for side in ("team1", "team2"):
+                t = m.get(side, {})
+                rid = t.get("roster_id")
+                tn = t.get("team_name", "").strip()
+                if tn == winner_name.strip():
+                    winners.add(rid)
+                else:
+                    losers.add(rid)
 
     snapshot = {}
 
@@ -952,7 +984,7 @@ def build_suggested_callbacks(
     callbacks = []
 
     # From league memory: find entries that mention teams playing this week
-    playing_teams = get_all_team_names(week_data)
+    playing_teams = get_all_team_names(week_data, roster_to_team)
 
     if league_memory:
         entries = (
@@ -1119,9 +1151,12 @@ def ai_rescore_candidates(candidates, week_data, api_key=None):
 # ---------------------------------------------------------------------------
 
 
-def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=False):
-    """Build the chat context JSON for a given week."""
-    print(f"\n=== Building chat context: Week {week}, Season {season} ===")
+def build_chat_context(
+    week=None, season=2025, preseason=False, no_ai=False, verbose=False
+):
+    """Build the chat context JSON for a given week, or for preseason."""
+    label = "Preseason" if preseason else f"Week {week}"
+    print(f"\n=== Building chat context: {label}, Season {season} ===")
     if preseason:
         print("  Mode: PRESEASON")
 
@@ -1137,7 +1172,12 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
         CONTENT_CHAT_DIR / "relationships.json", "relationships.json"
     )
     load_json(CONTENT_CHAT_DIR / "consensus.json", "consensus.json")
-    week_data = load_json(WEEKS_DIR / f"week{week}_data.json", f"week{week}_data.json")
+    # Preseason has no week's matchup data yet -- week_data stays None.
+    week_data = None
+    if not preseason:
+        week_data = load_json(
+            WEEKS_DIR / f"week{week}_data.json", f"week{week}_data.json"
+        )
     load_json(DATA_DIR / str(season) / "season_combined.json", "season_combined.json")
 
     # Validate required files
@@ -1147,7 +1187,7 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
     if identity_chain is None:
         print("ERROR: identity_chain.json is required. Run parse_whatsapp.py first.")
         sys.exit(1)
-    if week_data is None:
+    if not preseason and week_data is None:
         print(
             f"ERROR: week{week}_data.json is required. Run extract_week_data.py --week {week} first."
         )
@@ -1309,15 +1349,18 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
 
     # --- Assemble output ---
     total_context = len(high_relevancy) + len(medium_relevancy) + len(highlights)
+    meta = {
+        "type": "preseason" if preseason else "week",
+        "season": season,
+        "temporal_cutoff_utc": window_end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "window_start_utc": window_start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "messages_in_window": len(window_messages),
+        "total_context_items": total_context,
+    }
+    if not preseason:
+        meta["week"] = week
     output = {
-        "meta": {
-            "week": week,
-            "season": season,
-            "temporal_cutoff_utc": window_end.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "window_start_utc": window_start.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "messages_in_window": len(window_messages),
-            "total_context_items": total_context,
-        },
+        "meta": meta,
         "high_relevancy": high_relevancy,
         "medium_relevancy": medium_relevancy,
         "active_arcs_this_week": active_arcs,
@@ -1329,10 +1372,13 @@ def build_chat_context(week, season=2025, preseason=False, no_ai=False, verbose=
     }
 
     # --- Write output ---
-    out_path = WEEKS_DIR / f"week{week}_chat_context.json"
+    if preseason:
+        out_path = PRESEASON_DIR / "preseason_chat_context.json"
+    else:
+        out_path = WEEKS_DIR / f"week{week}_chat_context.json"
     save_json(out_path, output)
 
-    print(f"\n  DONE: {total_context} context items for Week {week}")
+    print(f"\n  DONE: {total_context} context items for {label}")
     print(f"  Output: {out_path}")
     return output
 
@@ -1347,7 +1393,10 @@ def main():
         description="Build per-week chat context for the AI column writer."
     )
     parser.add_argument(
-        "--week", type=int, required=True, help="NFL week number (1-18)"
+        "--week",
+        type=int,
+        default=None,
+        help="NFL week number (1-18); required unless --preseason",
     )
     parser.add_argument(
         "--season", type=int, default=2025, help="Season year (default: 2025)"
@@ -1364,9 +1413,19 @@ def main():
 
     args = parser.parse_args()
 
-    if args.week < 1 or args.week > 18:
-        print("ERROR: --week must be between 1 and 18")
-        sys.exit(1)
+    if args.preseason:
+        if args.week is not None:
+            print(
+                "ERROR: --week is not valid with --preseason (preseason has no week number)"
+            )
+            sys.exit(1)
+    else:
+        if args.week is None:
+            print("ERROR: --week is required unless --preseason is set")
+            sys.exit(1)
+        if args.week < 1 or args.week > 18:
+            print("ERROR: --week must be between 1 and 18")
+            sys.exit(1)
 
     build_chat_context(
         week=args.week,

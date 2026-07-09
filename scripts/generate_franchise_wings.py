@@ -8,7 +8,6 @@ generated player arcs; regenerable anywhere the repo is checked out.
 """
 
 import argparse
-import re
 import sys
 from pathlib import Path
 
@@ -18,7 +17,7 @@ if _SCRIPTS_DIR not in sys.path:
 
 # fmt: off
 from shared import (CONTENT_DIR, DATA_DIR, load_json,  # noqa: E402
-                    save_json_canonical)
+                    normalize_username, save_json_canonical)
 
 # fmt: on
 
@@ -28,10 +27,6 @@ OUT_DIR = DATA_DIR / "franchises"
 ARCS_DIR = DATA_DIR / "2025" / "player_arcs"
 SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "franchise.schema.json"
 PROFILE_SOURCE = "team-profiles.json (2025 preseason)"
-
-
-def normalize_username(name):
-    return re.sub(r"\s+", "", name or "").casefold()
 
 
 def championship_from_bracket(winners):

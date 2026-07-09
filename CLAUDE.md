@@ -8,7 +8,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 
 - HTML5 / CSS3 / Vanilla JS (no frameworks, no npm, no build)
 - Canvas 2D API for charts (scatter, stacked bar, trend, Elo)
-- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 22 scripts)
+- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 27 scripts)
 - GitHub Actions for automated weekly data fetches
 - Hosted as static files (GitHub Pages or direct)
 
@@ -43,6 +43,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `data/{year}/draft_picks.json` — Sleeper draft picks per season (round, pick_no; `roster_id` + `picked_by` both recorded verbatim)
 - `data/2025/player_arcs/{player_id}.json` + `_index.json` — cross-season player arcs 2022-2025 (ownership history, weekly timeline, season aggregates); 979 per-player files per the spec 3MB split rule; **regenerate locally only** (inputs include gitignored `players.json` + `nfl_stats_week{N}.json` caches — NOT in the CI idempotency gate)
 - `data/franchises/{roster_id}.json` + `_index.json` — franchise biographies (trophy case from brackets, h2h rekeyed to roster_id, roster lineage from arcs, historical team names per season). NOTE: `league_history.json` `franchise_stats.playoff_appearances` is now bracket-derived (was hardcoded 0; fixed in the 2026-suppression commit) and matches each wing's `trophy_case.playoff_appearances`
+- `content/preseason-2025/{preseason_chat_context,preseason_content}.json` + `content/review-log.jsonl` — M1 t2 preseason pipeline (2026-07-08): sanitized preseason chat context, `/write-preseason` output, shared JSONL editorial log (one line per `/edit-week`+`/edit-preseason` pass)
 - Sleeper API (`https://api.sleeper.app/v1`) as live fallback
 
 ## Critical Rules
@@ -82,6 +83,8 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `shared.load_json(path, required=False)` (the default) returns `None` silently on a missing file rather than raising — pass `required=True` for a clean error instead of a confusing downstream crash on the `None`.
 - `build_chat_context.py` has no `--all`/batch mode (unlike `extract_week_data.py`) — regenerating multiple weeks means looping `--week N` per week.
 - Python gotcha: `list(some_set)` order is non-deterministic across process runs (`PYTHONHASHSEED` unpinned here) — use `sorted()` whenever a set's contents get written to output/committed files.
+- `{{media:*}}` token validation must be `essay_tokens.issubset(slot_ids)`, not `==` — a `type:"custom"` hero slot renders separately (render-preseason.md's Hero Section) and is never referenced inline; strict equality false-fails on legitimately valid content.
+- `verify_week_content.py`'s Tier 1 has a `warnings` list alongside `errors` (M1 t4, threads continuity) — structural violations still count toward passed/failed; heuristic findings (e.g. a silently-dropped thread) go to warnings instead.
 
 ## Style Conventions
 
@@ -193,7 +196,7 @@ Use `python` not `python3` on this machine. Python is at:
 - **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Run tests:** `python -m pytest scripts/tests/ -v` — 138 tests across momentum, extract_week_data (v1+v2 + as-of history), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, chat-context sanitizer, canonical save, and verifier
+- **Run tests:** `python -m pytest scripts/tests/ -v` — 184 tests across momentum, extract_week_data (v1+v2 + as-of history), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, chat-context sanitizer (incl. preseason mode), canonical save, verifier (incl. threads ledger), and team-profiles merge
 - **Regenerate dynasty layer:** `python scripts/generate_player_arcs.py` then `python scripts/generate_franchise_wings.py` (local only — needs gitignored `players.json` + stats caches; `--fetch-stats` backfills 2022-24 caches once)
 - **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values

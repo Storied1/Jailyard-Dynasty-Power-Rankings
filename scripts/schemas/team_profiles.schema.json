@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Team Profiles",
+  "description": "content/team-profiles.json -- 12 hand-authored team preseason profiles, safely mergeable via merge_team_profiles.py.",
+  "type": "object",
+  "required": ["generated_from", "season", "teams"],
+  "additionalProperties": false,
+  "properties": {
+    "generated_from": { "type": "string" },
+    "season": { "type": "string" },
+    "teams": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "owner",
+          "initials",
+          "rank",
+          "tier",
+          "roast",
+          "overallValue",
+          "starterValue",
+          "avgAge",
+          "needs",
+          "ranks",
+          "draftValue",
+          "draftPicks",
+          "keyPlayers",
+          "weeklyPoints",
+          "scheduleRank",
+          "blurb",
+          "preseasonEssay",
+          "championshipHistory"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "owner": { "type": "string" },
+          "initials": { "type": "string" },
+          "rank": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "tier": { "type": "string" },
+          "roast": { "type": "string" },
+          "overallValue": { "type": "number" },
+          "starterValue": { "type": "number" },
+          "avgAge": { "type": "number" },
+          "needs": { "type": "array", "items": { "type": "string" } },
+          "ranks": {
+            "type": "object",
+            "required": ["qb", "rb", "wr", "te", "draft", "starter"],
+            "additionalProperties": false,
+            "properties": {
+              "qb": { "type": "integer" },
+              "rb": { "type": "integer" },
+              "wr": { "type": "integer" },
+              "te": { "type": "integer" },
+              "draft": { "type": "integer" },
+              "starter": { "type": "integer" }
+            }
+          },
+          "draftValue": { "type": "number" },
+          "draftPicks": { "type": "array", "items": { "type": "string" } },
+          "keyPlayers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "weeklyPoints": { "type": "number" },
+          "scheduleRank": { "type": "number" },
+          "blurb": { "type": "string" },
+          "preseasonEssay": { "type": "string" },
+          "championshipHistory": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

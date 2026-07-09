@@ -17,7 +17,7 @@ from pathlib import Path
 
 import jsonschema
 from shared import CONTENT_CHAT_DIR as CHAT_DIR
-from shared import REPO_ROOT, WEEKS_DIR
+from shared import PRESEASON_DIR, REPO_ROOT, WEEKS_DIR
 from shared import load_json as _load_json
 
 # Single source of truth for game_context shape (Phase 1a Task 3 schema).
@@ -492,6 +492,74 @@ def check_matchup_momentum_consistency(content, data, errors):
             )
 
 
+VALID_THREAD_STATUSES = {"opened", "continued", "paid_off", "dropped"}
+NON_TERMINAL_THREAD_STATUSES = {"opened", "continued"}
+
+
+def _check_thread_shape(threads: list, errors: list) -> None:
+    """Enum validity + id uniqueness within one file. Unambiguous -> ERROR."""
+    seen_ids = set()
+    for t in threads:
+        tid = t.get("id")
+        if tid in seen_ids:
+            errors.append(f"Duplicate thread id '{tid}' in meta.threads")
+        seen_ids.add(tid)
+        if t.get("status") not in VALID_THREAD_STATUSES:
+            errors.append(
+                f"Thread '{tid}': invalid status '{t.get('status')}' "
+                f"(expected one of {sorted(VALID_THREAD_STATUSES)})"
+            )
+
+
+def _diff_thread_continuity(
+    current: list, prev: list, prev_label: str, warnings: list
+) -> None:
+    """Flag a prev-week thread with non-terminal status that's missing from
+    the current week's meta.threads -- a silently dropped storyline. This is
+    a heuristic (a thread can legitimately fade without a formal 'dropped'
+    status) so it's a WARNING, not an error."""
+    current_ids = {t.get("id") for t in current}
+    for pt in prev:
+        if (
+            pt.get("status") in NON_TERMINAL_THREAD_STATUSES
+            and pt.get("id") not in current_ids
+        ):
+            warnings.append(
+                f"Thread '{pt.get('id')}' was '{pt.get('status')}' as of "
+                f"{prev_label} but is missing from this week's meta.threads "
+                f"(expected continued/paid_off/dropped)"
+            )
+
+
+def _load_predecessor_threads(week: int):
+    """(threads, label) for the immediate predecessor: preseason's seeded
+    threads for week<=1, otherwise the previous week's content. (None, "")
+    if nothing to diff against yet."""
+    if week <= 1:
+        path = PRESEASON_DIR / "preseason_content.json"
+        if not path.exists():
+            return None, ""
+        try:
+            pre = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return None, ""
+        return pre.get("meta", {}).get("threads", []), "preseason-2025"
+    prev_content = load_prev_content(week - 1)
+    if prev_content is None:
+        return None, ""
+    return prev_content.get("meta", {}).get("threads", []), f"week {week - 1}"
+
+
+def check_threads_continuity(content: dict, data: dict, errors: list, warnings: list):
+    """meta.threads shape (errors) + cross-week silent-drop heuristic (warnings)."""
+    meta = content.get("meta", {})
+    threads = meta.get("threads", [])
+    _check_thread_shape(threads, errors)
+    prev, prev_label = _load_predecessor_threads(meta.get("week", 0))
+    if prev is not None:
+        _diff_thread_continuity(threads, prev, prev_label, warnings)
+
+
 def run_tier1(content: dict, data: dict) -> dict:
     """Run all Tier 1 structural checks."""
     checks = [
@@ -520,7 +588,25 @@ def run_tier1(content: dict, data: dict) -> dict:
         else:
             passed += 1
 
-    return {"passed": passed, "failed": failed, "errors": all_errors}
+    # Threads continuity is the first Tier-1 check with a genuine warnings
+    # channel: its structural findings (bad enum, duplicate id) count toward
+    # passed/failed exactly like every other check above; only the cross-week
+    # silent-drop heuristic is a warning (plausible false positives).
+    thread_errors = []
+    all_warnings = []
+    check_threads_continuity(content, data, thread_errors, all_warnings)
+    if thread_errors:
+        failed += 1
+        all_errors.extend(thread_errors)
+    else:
+        passed += 1
+
+    return {
+        "passed": passed,
+        "failed": failed,
+        "errors": all_errors,
+        "warnings": all_warnings,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -1362,6 +1448,7 @@ def format_pretty(
 
     # Tier 1
     t1_total = tier1["passed"] + tier1["failed"]
+    t1_warnings = tier1.get("warnings", [])
     if tier1["failed"] == 0:
         lines.append(f"TIER 1 (Structural): {tier1['passed']}/{t1_total} PASS")
     else:
@@ -1371,6 +1458,8 @@ def format_pretty(
         )
         for e in tier1["errors"]:
             lines.append(f"  [FAIL] {e}")
+    for w in t1_warnings:
+        lines.append(f"  [WARN] {w}")
 
     lines.append("")
 
@@ -1408,7 +1497,7 @@ def format_pretty(
         lines.append("")
 
     total_errors = len(tier1["errors"]) + t2_errors + t3_errors
-    total_warnings = t2_warnings + t3_warnings
+    total_warnings = len(t1_warnings) + t2_warnings + t3_warnings
     verdict = "PASS" if total_errors == 0 else "FAIL"
     parts = []
     if total_errors:
@@ -1426,7 +1515,9 @@ def format_json(week: int, tier1: dict, tier2: dict, tier3: dict | None = None) 
     t3_errors = len(tier3["errors"]) if tier3 else 0
     t3_warnings = len(tier3["warnings"]) if tier3 else 0
     total_errors = len(tier1["errors"]) + len(tier2["errors"]) + t3_errors
-    total_warnings = len(tier2["warnings"]) + t3_warnings
+    total_warnings = (
+        len(tier1.get("warnings", [])) + len(tier2["warnings"]) + t3_warnings
+    )
     result = {
         "week": week,
         "verdict": "PASS" if total_errors == 0 else "FAIL",

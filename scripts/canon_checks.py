@@ -17,7 +17,17 @@ from pathlib import Path
 # (`from scripts.canon_checks import ...`).
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from shared import WEEKS_DIR, load_json  # noqa: E402
+from shared import PRESEASON_DIR, WEEKS_DIR, load_json  # noqa: E402
+
+
+def check_preseason_type_marker(chat_context: dict, errors: list) -> None:
+    """Preseason artifacts must self-identify via meta.type == 'preseason' so
+    downstream gates don't have to infer mode from stdout."""
+    if chat_context.get("meta", {}).get("type") != "preseason":
+        errors.append(
+            "meta.type is not 'preseason' -- preseason_chat_context.json must "
+            "self-identify (regenerate via build_chat_context.py --preseason)"
+        )
 
 
 def check_league_memory_present(chat_context: dict, errors: list) -> None:
@@ -51,18 +61,40 @@ def main():
     parser = argparse.ArgumentParser(
         description="Validate sanitizer source artifacts (pre-write) for a given week"
     )
-    parser.add_argument("--week", type=int, required=True)
+    parser.add_argument("--week", type=int, default=None)
+    parser.add_argument(
+        "--preseason", action="store_true", help="Validate the preseason artifact"
+    )
     args = parser.parse_args()
 
-    errors = []
-    chat_context = load_json(
-        WEEKS_DIR / f"week{args.week}_chat_context.json", required=True
-    )
-    check_league_memory_present(chat_context, errors)
+    if args.preseason:
+        if args.week is not None:
+            print("ERROR: --week is not valid with --preseason")
+            sys.exit(1)
+    elif args.week is None:
+        print("ERROR: --week is required unless --preseason is set")
+        sys.exit(1)
 
-    data = load_json(WEEKS_DIR / f"week{args.week}_data.json", required=True)
-    for entry in data["standings"]:
-        check_as_of_week_fields(entry, errors)
+    errors = []
+
+    if args.preseason:
+        chat_context = load_json(
+            PRESEASON_DIR / "preseason_chat_context.json", required=True
+        )
+        check_league_memory_present(chat_context, errors)
+        check_preseason_type_marker(chat_context, errors)
+        # Deliberately no data/standings load -- preseason has no week data.
+        label = "preseason"
+    else:
+        chat_context = load_json(
+            WEEKS_DIR / f"week{args.week}_chat_context.json", required=True
+        )
+        check_league_memory_present(chat_context, errors)
+
+        data = load_json(WEEKS_DIR / f"week{args.week}_data.json", required=True)
+        for entry in data["standings"]:
+            check_as_of_week_fields(entry, errors)
+        label = f"week {args.week}"
 
     if errors:
         print(f"FAIL ({len(errors)} issue(s)):")
@@ -70,7 +102,7 @@ def main():
             print(f"  - {e}")
         sys.exit(1)
     else:
-        print(f"PASS — week {args.week} artifacts are as-of-week compliant")
+        print(f"PASS — {label} artifacts are as-of-week compliant")
 
 
 if __name__ == "__main__":
