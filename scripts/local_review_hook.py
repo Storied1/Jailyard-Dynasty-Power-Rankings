@@ -46,10 +46,16 @@ def get_diff():
         result = subprocess.run(
             ["git", "diff", "--no-color", "--unified=3"],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
-        return result.stdout.strip()
+        # Defensive: subprocess's background reader thread can swallow a
+        # decode error and leave .stdout as None instead of raising here
+        # (observed on Windows when the default locale codec — e.g. cp1252 —
+        # can't decode a UTF-8 byte in the diff, such as an emoji). Explicit
+        # utf-8/replace above avoids the crash; this guard covers the rest.
+        return (result.stdout or "").strip()
     except Exception as e:
         _log_failure("get_diff", e)
         return ""
