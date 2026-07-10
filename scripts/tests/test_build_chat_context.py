@@ -129,8 +129,9 @@ def test_resolve_predictions_made_before_cutoff_resolves_without_baked_fields():
         {
             "id": "p3",
             "made_at": "2025-09-15T00:00:00Z",
-            "author": "Karim",
-            "quote": "Mahomes is elite",
+            "author_whatsapp": "Karim",
+            "subject": "Mahomes is elite",
+            "quote_block": [],
             "resolution": "wrong",
             "resolution_context": "leaked",
             "credibility_impact": -9,
@@ -140,6 +141,37 @@ def test_resolve_predictions_made_before_cutoff_resolves_without_baked_fields():
     assert len(out) == 1  # made before cutoff -> not filtered out
     assert out[0]["resolution"] == "right"  # recomputed locally (elite + 31 pts)
     assert "credibility_impact" not in out[0] and out[0].get("evidence")
+
+
+def test_resolve_predictions_reads_subject_and_author_whatsapp():
+    preds = [
+        {
+            "id": "pred-042",
+            "author_whatsapp": "Karim",
+            "subject": "Bijan Robinson is elite, top back this year",
+            "quote_block": [{"sender": "Karim", "text": "book it", "timestamp": "x"}],
+            "made_at": "2025-09-10T00:00:00Z",
+            "resolution": "right",  # baked season-end value -- must be IGNORED
+        }
+    ]
+    week_data = {
+        "matchups": [
+            {
+                "team1": {
+                    "team_name": "Chudders",
+                    "points": 100,
+                    "top_scorers": [{"name": "Bijan Robinson", "points": 28.4}],
+                },
+                "team2": {"team_name": "Kittler", "points": 90, "top_scorers": []},
+                "winner": "Chudders",
+            }
+        ]
+    }
+    out = resolve_predictions(preds, 5, 2025, week_data, CUTOFF)
+    assert len(out) == 1, "subject text names a 20+ pt scorer with a positive word"
+    assert out[0]["author"] == "Karim"
+    assert out[0]["prediction_id"] == "pred-042"
+    assert "Bijan Robinson".lower() in out[0]["original_quote"].lower()
 
 
 def test_sanitize_league_memory_drops_greatest_moments_and_meta():

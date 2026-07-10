@@ -649,10 +649,6 @@ def resolve_predictions(predictions, week, season, week_data, cutoff):
                     continue  # prediction not yet made as of week N
             except (ValueError, TypeError):
                 pass
-        status = pred.get("status", "open")
-        if status != "open":
-            continue
-
         # Check if prediction's resolve_by week has arrived
         resolve_week = pred.get("resolve_by_week")
         resolve_season = pred.get("resolve_by_season", season)
@@ -663,8 +659,12 @@ def resolve_predictions(predictions, week, season, week_data, cutoff):
         else:
             continue
 
-        quote = pred.get("quote", pred.get("text", ""))
-        author = pred.get("author", "")
+        # NOTE: the baked `resolution` field is season-end knowledge -- never
+        # gate on it (as-if-realtime). Outcomes are re-derived from week_data.
+        quote = pred.get("subject") or " ".join(
+            (q.get("text") or "") for q in pred.get("quote_block", [])
+        )
+        author = pred.get("author_whatsapp", "")
         resolution = None
         evidence = ""
         comedic_value = 5
