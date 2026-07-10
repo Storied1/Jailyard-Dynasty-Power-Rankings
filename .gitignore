@@ -51,6 +51,9 @@ Thumbs.db
 # WhatsApp raw export folder
 WhatsApp Chat*/
 
+# External AI review notes (Gemini) — reference only, never publish
+gemini-ignore/
+
 # MAP phase intermediate cache (regenerable from chat/parsed_messages.json)
 content/chat/.map_cache/
 
