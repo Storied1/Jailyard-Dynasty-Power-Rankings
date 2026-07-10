@@ -650,7 +650,7 @@
           #fde68a
         );
         box-shadow: 0 0 40px rgba(251, 191, 36, 0.35);
-        animation: ring-glow 3s ease-in-out infinite alternate;
+        animation: ring-glow 1.5s ease-in-out 1;
       }
       .ring-circle::before {
         content: "";
@@ -1377,7 +1377,7 @@
           { e: "🧠", t: "12 GMs battling for dynasty supremacy" },
           {
             e: "📋",
-            t: "60 picks made in the 2025 rookie draft across 5 rounds",
+            t: "72 picks made in the 2025 rookie draft across 6 rounds",
           },
           {
             e: "🤝",
@@ -1656,6 +1656,7 @@
                 ? "light"
                 : "dark",
             );
+            window.dispatchEvent(new Event("themechange"));
             return;
           }
           if (e.key === "Home") {

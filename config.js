@@ -93,7 +93,6 @@ const LEAGUE_CONFIG = {
       subtitle:
         "Kittler dethroned, trade bazaar erupts, Legion vs Ken-obi looms",
     },
-    { label: "2026 Preview", href: "preseason-2026.html" },
   ],
 
   // ─── Fun facts (scrolling ticker on index.html) ────────────
@@ -117,7 +116,7 @@ const LEAGUE_CONFIG = {
     { emoji: "🧠", text: "12 GMs battling for dynasty supremacy" },
     {
       emoji: "📋",
-      text: "60 picks made in the 2025 rookie draft across 5 rounds",
+      text: "72 picks made in the 2025 rookie draft across 6 rounds",
     },
     {
       emoji: "🤝",
@@ -576,4 +575,20 @@ function gradientFor(initials) {
   return (
     "linear-gradient(135deg, hsl(" + h1 + ",80%,55%), hsl(" + h2 + ",80%,55%))"
   );
+}
+
+/**
+ * Escape a string for safe interpolation into an innerHTML template.
+ * Use for any Sleeper-sourced free text (team_name, username) before
+ * embedding it in an HTML string — those fields are user-editable.
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

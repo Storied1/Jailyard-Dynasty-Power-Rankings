@@ -632,12 +632,12 @@ function buildFranchises(){
   owners.forEach(oid=>{
     const s=DATA.franchise_stats[oid];
     const f=DATA.franchise_map[oid]||{};
-    const name=displayName(f);
+    const name=escapeHtml(displayName(f));
     const totalG=s.all_time.wins+s.all_time.losses+s.all_time.ties;
     const wpct=totalG?(s.all_time.wins/totalG):0;
     const eloTier=s.current_elo>=1550?'elite':s.current_elo>=1450?'mid':'low';
     h+=`<div class="fran-card reveal" data-oid="${oid}" data-wins="${s.all_time.wins}" data-winpct="${wpct.toFixed(4)}" data-elo="${s.current_elo}" data-pf="${s.all_time.pf}" data-champs="${s.championships}">`;
-    h+=`<div class="fran-header"><div class="fran-elo ${eloTier}">${Math.round(s.current_elo)}</div><div class="fran-info"><div class="fran-name">${name}${s.championships?` <span class="fran-champ-badge" title="${s.championships}x Champion">👑</span>`:''}</div><div class="fran-user">@${s.username}</div></div><div class="fran-record">${s.all_time.wins}-${s.all_time.losses}${s.all_time.ties?'-'+s.all_time.ties:''}</div></div>`;
+    h+=`<div class="fran-header"><div class="fran-elo ${eloTier}">${Math.round(s.current_elo)}</div><div class="fran-info"><div class="fran-name">${name}${s.championships?` <span class="fran-champ-badge" title="${s.championships}x Champion">👑</span>`:''}</div><div class="fran-user">@${escapeHtml(s.username)}</div></div><div class="fran-record">${s.all_time.wins}-${s.all_time.losses}${s.all_time.ties?'-'+s.all_time.ties:''}</div></div>`;
     h+=`<div class="fran-stats">`;
     h+=`<div><div class="fran-stat-label">Win %</div><div class="fran-stat-val">${(wpct*100).toFixed(1)}%</div></div>`;
     h+=`<div><div class="fran-stat-label">Points For</div><div class="fran-stat-val">${s.all_time.pf.toLocaleString()}</div></div>`;
@@ -708,10 +708,10 @@ function buildH2H(){
   const short=names.map(n=>n.length>10?n.slice(0,9)+'…':n);
   let h=`<div class="reveal"><h2 class="sec-title">Head-to-Head Rivalry Matrix</h2><p class="sec-sub">All-time records between every pair of franchises. Green = winning record, red = losing.</p></div>`;
   h+=`<div class="h2h-scroll reveal"><table class="h2h-table"><thead><tr><th></th>`;
-  short.forEach(n=>{h+=`<th>${n}</th>`;});
+  short.forEach(n=>{h+=`<th>${escapeHtml(n)}</th>`;});
   h+=`</tr></thead><tbody>`;
   owners.forEach((o1,i)=>{
-    h+=`<tr><th class="row-head">${names[i]}</th>`;
+    h+=`<tr><th class="row-head">${escapeHtml(names[i])}</th>`;
     owners.forEach((o2,j)=>{
       if(i===j){h+=`<td class="self">—</td>`;return;}
       const k=`${o1}|${o2}`;
@@ -737,7 +737,7 @@ function buildH2H(){
       const k=`${o1}|${o2}`,rec=DATA.h2h[k];
       if(!rec)return;
       const pf=rec.pf.toFixed(1),pa=rec.pa.toFixed(1);
-      showTT(e.clientX,e.clientY,`<div class="tt-head">${n1} vs ${n2}</div><div>Record: <b>${rec.wins}-${rec.losses}</b></div><div>PF: ${pf} &nbsp; PA: ${pa}</div><div>Games: ${rec.games.length}</div>`);
+      showTT(e.clientX,e.clientY,`<div class="tt-head">${escapeHtml(n1)} vs ${escapeHtml(n2)}</div><div>Record: <b>${rec.wins}-${rec.losses}</b></div><div>PF: ${pf} &nbsp; PA: ${pa}</div><div>Games: ${rec.games.length}</div>`);
     });
     td.addEventListener('mousemove',e=>{const r=ttEl.getBoundingClientRect();let tx=e.clientX+12,ty=e.clientY+12;if(tx+r.width>innerWidth-8)tx=e.clientX-r.width-12;if(ty+r.height>innerHeight-8)ty=e.clientY-r.height-12;ttEl.style.left=tx+'px';ttEl.style.top=ty+'px';});
     td.addEventListener('mouseleave',hideTT);
@@ -753,7 +753,7 @@ function buildH2H(){
     const n1 = displayName(DATA.franchise_map[o1]||{});
     const n2 = displayName(DATA.franchise_map[o2]||{});
     const rec = DATA.h2h[k];
-    let gh = `<h3>${n1} vs ${n2} &mdash; ${rec.wins}-${rec.losses} (${rec.games.length} games)</h3>`;
+    let gh = `<h3>${escapeHtml(n1)} vs ${escapeHtml(n2)} &mdash; ${rec.wins}-${rec.losses} (${rec.games.length} games)</h3>`;
     rec.games.forEach(g => {
       const w = g.pts > g.opp_pts;
       gh += `<div class="game-row"><span>${g.season} Wk ${g.week}</span><span class="${w?'winner':'loser'}">${g.pts.toFixed(1)}</span><span>vs</span><span class="${w?'loser':'winner'}">${g.opp_pts.toFixed(1)}</span></div>`;
@@ -788,7 +788,7 @@ function buildElo(){
   h+=`<div class="elo-legend" id="eloLeg">`;
   owners.forEach((oid,i)=>{
     const f=DATA.franchise_map[oid]||{};
-    const name=displayName(f);
+    const name=escapeHtml(displayName(f));
     const cur=Math.round(DATA.elo_current[oid]||1500);
     const color=PALETTE[i%PALETTE.length];
     h+=`<div class="elo-leg-item" data-oid="${oid}" data-idx="${i}"><span class="elo-dot" style="background:${color}"></span><span class="elo-leg-name">${name}</span><span class="elo-leg-val">${cur}</span></div>`;
@@ -913,7 +913,7 @@ document.addEventListener('mousemove',e=>{
     if(!eloVisible.has(oid))return;
     const hist=DATA.elo_history[oid];
     if(gi>=hist.length)return;
-    const name=displayName(DATA.franchise_map[oid]||{});
+    const name=escapeHtml(displayName(DATA.franchise_map[oid]||{}));
     const color=PALETTE[idx%PALETTE.length];
     html+=`<div class="tt-row"><span class="tt-dot" style="background:${color}"></span>${name}: <b>${hist[gi].elo}</b></div>`;
   });

@@ -284,6 +284,9 @@ async function loadData(){
     });
     rosters.forEach(r => {
       const user = usersMap[r.owner_id] || {};
+      // .name/.username stay RAW here (never escapeHtml at this point) -- computePredictionRecord()
+      // does `t.name === p.pick` against the raw value pushed via weekPreds. Escape only at the
+      // innerHTML template-literal call sites, never on this object's fields directly.
       rosterMap[r.roster_id] = {
         roster_id: r.roster_id,
         owner_id: r.owner_id,
@@ -327,6 +330,7 @@ function initFromCache(){
   const d = seasonData;
   playoffWeekStart = d.playoff_week_start || 15;
   Object.entries(d.roster_map).forEach(([rid, info]) => {
+    // Keep .name/.username raw here too -- see the same note in loadLiveData() above.
     rosterMap[parseInt(rid)] = {
       roster_id: parseInt(rid),
       owner_id: info.owner_id,
@@ -575,19 +579,19 @@ function generateColdOpen(week, rankings, awards, matchups){
       `I'm going to need everyone to sit down for this one. Week ${week} didn't just shuffle the deck — it lit the deck on fire, scattered the ashes, and dared us to figure out what happened.`,
       `Every week I try to bring order to this league. Every week this league laughs in my face. Week ${week} featured ${numUpsets} upsets, a total points explosion, and at least one result I'm still processing 48 hours later.`,
     ], seed);
-    para2 = `${bigMover.name} ${bigMover.movement > 0 ? 'rocketed up' : 'cratered'} ${Math.abs(bigMover.movement)} spots. ${top.name} sits atop the rankings${top.movement === 0 ? ' — unmoved, unbothered' : ''}. Let's sort through the wreckage.`;
+    para2 = `${escapeHtml(bigMover.name)} ${bigMover.movement > 0 ? 'rocketed up' : 'cratered'} ${Math.abs(bigMover.movement)} spots. ${escapeHtml(top.name)} sits atop the rankings${top.movement === 0 ? ' — unmoved, unbothered' : ''}. Let's sort through the wreckage.`;
   } else if(chaosLevel === 'chalk' && !isEarly){
     para1 = pick([
       `If you had the favorites in a six-team parlay this week, congratulations — you might be the luckiest person in league history. Week ${week} was chalk city. The rich got richer, the poor got embarrassed, and the middle class continued to exist in the most unremarkable way possible.`,
       `Week ${week} was boring and I mean that as a compliment to the good teams. When the best rosters do exactly what they're supposed to, there's a certain elegance to it. Like watching a machine work. An expensive, well-oiled, extremely annoying machine.`,
     ], seed);
-    para2 = `${top.name} holds the top spot for ${top.movement === 0 ? 'another week' : 'the first time'}. Here's where everyone stands.`;
+    para2 = `${escapeHtml(top.name)} holds the top spot for ${top.movement === 0 ? 'another week' : 'the first time'}. Here's where everyone stands.`;
   } else if(isLate){
     para1 = pick([
       `The playoff picture is taking shape and I can already feel the desperation seeping through the group chat. Week ${week}: where bubble teams start making decisions they'll regret in January.`,
       `We're in the "win and you're in, lose and start googling mock draft tools" portion of the season. Week ${week} separated the real contenders from the teams that were just vibes and a prayer.`,
     ], seed);
-    para2 = `The race for the final playoff spot is a ${rankings.slice(4,8).map(t => t.name).join(', ')} knife fight. Let's see who's holding the sharper blade.`;
+    para2 = `The race for the final playoff spot is a ${rankings.slice(4,8).map(t => escapeHtml(t.name)).join(', ')} knife fight. Let's see who's holding the sharper blade.`;
   } else {
     para1 = pick([
       `Week ${week}. We're past the point of small samples and into the territory of actual trends. If your team is good, congratulations — it might actually be good. If your team is bad, well, the data is starting to agree with your nightmares.`,
@@ -595,7 +599,7 @@ function generateColdOpen(week, rankings, awards, matchups){
       `Here's the thing about Week ${week}: it's the perfect checkpoint. Early enough that nothing is decided. Late enough that we can stop pretending everyone has a chance. Let's get into it.`,
       `Week ${week} is in the books, and I've spent the last 48 hours doing what I always do — obsessively re-sorting these rankings, second-guessing every placement, and convincing myself that THIS week's order is finally correct. It never is. But here we go.`,
     ], seed);
-    para2 = `${top.name} ${top.movement > 0 ? 'climbs to' : top.movement < 0 ? 'drops to' : 'holds'} the top spot. ${awards?.highScorer ? awards.highScorer.name + ' dropped ' + awards.highPts.toFixed(1) + ' points to lead all scorers.' : ''} Let's rank them.`;
+    para2 = `${escapeHtml(top.name)} ${top.movement > 0 ? 'climbs to' : top.movement < 0 ? 'drops to' : 'holds'} the top spot. ${awards?.highScorer ? escapeHtml(awards.highScorer.name) + ' dropped ' + awards.highPts.toFixed(1) + ' points to lead all scorers.' : ''} Let's rank them.`;
   }
 
   return `<div class="cold-open"><div class="week-label">Week ${week} Column</div><p class="drop-cap">${para1}</p><p>${para2}</p></div>`;
@@ -880,14 +884,15 @@ function generatePreview(week){
     const bTeam = rankMap[b.roster_id] || {name: rosterMap[b.roster_id]?.name || '?', rank: 7, recentAvg: 0};
     const pickTeam = aTeam.powerScore >= bTeam.powerScore ? aTeam : bTeam;
     const seed = seedHash(aTeam.name + bTeam.name + nextWeek);
+    const pickTeamSafe = escapeHtml(pickTeam.name);
     const blurbs = [
-      `${pickTeam.name} has the edge in power score and recent form. Should be a good one.`,
-      `Lean ${pickTeam.name} here based on the numbers, but this one could go either way.`,
-      `${pickTeam.name} by a comfortable margin if they play to their average. Famous last words.`,
-      `Give me ${pickTeam.name}, but I wouldn't bet the house. Maybe the shed.`,
+      `${pickTeamSafe} has the edge in power score and recent form. Should be a good one.`,
+      `Lean ${pickTeamSafe} here based on the numbers, but this one could go either way.`,
+      `${pickTeamSafe} by a comfortable margin if they play to their average. Famous last words.`,
+      `Give me ${pickTeamSafe}, but I wouldn't bet the house. Maybe the shed.`,
     ];
     weekPreds.push({home: aTeam.name, away: bTeam.name, pick: pickTeam.name});
-    html += `<div class="preview-card"><div class="matchup-line"><span class="team">${aTeam.name} <span style="color:var(--muted);font-weight:400;font-size:.75rem">(${aTeam.wins}-${aTeam.losses})</span></span><span class="vs">VS</span><span class="team right">${bTeam.name} <span style="color:var(--muted);font-weight:400;font-size:.75rem">(${bTeam.wins}-${bTeam.losses})</span></span></div><div class="pick-line">Pick: ${pickTeam.name}</div><div class="blurb">${pick(blurbs, seed)}</div></div>`;
+    html += `<div class="preview-card"><div class="matchup-line"><span class="team">${escapeHtml(aTeam.name)} <span style="color:var(--muted);font-weight:400;font-size:.75rem">(${aTeam.wins}-${aTeam.losses})</span></span><span class="vs">VS</span><span class="team right">${escapeHtml(bTeam.name)} <span style="color:var(--muted);font-weight:400;font-size:.75rem">(${bTeam.wins}-${bTeam.losses})</span></span></div><div class="pick-line">Pick: ${pickTeamSafe}</div><div class="blurb">${pick(blurbs, seed)}</div></div>`;
   });
 
   predictions[nextWeek] = weekPreds;
@@ -935,8 +940,8 @@ function renderWeek(week){
   html += '<div class="damage-grid">';
   matchups.sort((a,b) => b.total - a.total);
   matchups.forEach(m => {
-    const aName = rosterMap[m.a.roster_id]?.name || 'Team A';
-    const bName = rosterMap[m.b.roster_id]?.name || 'Team B';
+    const aName = escapeHtml(rosterMap[m.a.roster_id]?.name || 'Team A');
+    const bName = escapeHtml(rosterMap[m.b.roster_id]?.name || 'Team B');
     const aWon = m.winner === m.a;
     const bWon = m.winner === m.b;
     const total = m.aPts + m.bPts;
@@ -961,11 +966,11 @@ function renderWeek(week){
   if(awards){
     html += `<div class="section-hdr"><span class="icon">🏆</span> Weekly Awards</div>`;
     html += '<div class="awards-grid">';
-    if(awards.highScorer) html += `<div class="award-card"><div class="award-icon">🔥</div><div class="award-label">MVP</div><div class="award-value">${awards.highScorer.name}</div><div class="award-meta">${awards.highPts.toFixed(1)} pts</div></div>`;
-    if(awards.lowScorer) html += `<div class="award-card"><div class="award-icon">🧊</div><div class="award-label">Bust of the Week</div><div class="award-value">${awards.lowScorer.name}</div><div class="award-meta">${awards.lowPts.toFixed(1)} pts</div></div>`;
-    if(awards.closestGame) html += `<div class="award-card"><div class="award-icon">😰</div><div class="award-label">Closest Game</div><div class="award-value">${awards.closestMargin.toFixed(1)} pts</div><div class="award-meta">${rosterMap[awards.closestGame.a.roster_id]?.name} vs ${rosterMap[awards.closestGame.b.roster_id]?.name}</div></div>`;
-    if(awards.biggestBlowout) html += `<div class="award-card"><div class="award-icon">💀</div><div class="award-label">Biggest Blowout</div><div class="award-value">${awards.blowoutMargin.toFixed(1)} pts</div><div class="award-meta">${rosterMap[awards.biggestBlowout.winner?.roster_id]?.name} dominates</div></div>`;
-    if(awards.biggestUpset) html += `<div class="award-card"><div class="award-icon">🚨</div><div class="award-label">Upset of the Week</div><div class="award-value">${rosterMap[awards.biggestUpset.winner?.roster_id]?.name}</div><div class="award-meta">over ${rosterMap[awards.biggestUpset.loser?.roster_id]?.name}</div></div>`;
+    if(awards.highScorer) html += `<div class="award-card"><div class="award-icon">🔥</div><div class="award-label">MVP</div><div class="award-value">${escapeHtml(awards.highScorer.name)}</div><div class="award-meta">${awards.highPts.toFixed(1)} pts</div></div>`;
+    if(awards.lowScorer) html += `<div class="award-card"><div class="award-icon">🧊</div><div class="award-label">Bust of the Week</div><div class="award-value">${escapeHtml(awards.lowScorer.name)}</div><div class="award-meta">${awards.lowPts.toFixed(1)} pts</div></div>`;
+    if(awards.closestGame) html += `<div class="award-card"><div class="award-icon">😰</div><div class="award-label">Closest Game</div><div class="award-value">${awards.closestMargin.toFixed(1)} pts</div><div class="award-meta">${escapeHtml(rosterMap[awards.closestGame.a.roster_id]?.name)} vs ${escapeHtml(rosterMap[awards.closestGame.b.roster_id]?.name)}</div></div>`;
+    if(awards.biggestBlowout) html += `<div class="award-card"><div class="award-icon">💀</div><div class="award-label">Biggest Blowout</div><div class="award-value">${awards.blowoutMargin.toFixed(1)} pts</div><div class="award-meta">${escapeHtml(rosterMap[awards.biggestBlowout.winner?.roster_id]?.name)} dominates</div></div>`;
+    if(awards.biggestUpset) html += `<div class="award-card"><div class="award-icon">🚨</div><div class="award-label">Upset of the Week</div><div class="award-value">${escapeHtml(rosterMap[awards.biggestUpset.winner?.roster_id]?.name)}</div><div class="award-meta">over ${escapeHtml(rosterMap[awards.biggestUpset.loser?.roster_id]?.name)}</div></div>`;
     html += '</div>';
   }
 
@@ -989,7 +994,7 @@ function renderWeek(week){
       const confessional = generateConfessional(team, week);
       const rec = `${team.wins}-${team.losses}${team.ties ? '-'+team.ties : ''}`;
 
-      html += `<div class="rank-entry"><div class="rank-head"><div class="rank-num ${numClass}">${team.rank}</div><div class="rank-team">${team.name}</div><div class="rank-record">${rec}</div>${moveHtml}</div><div class="rank-stats"><span>PF: ${team.pf.toFixed(0)}</span><span>This week: ${team.weekPts.toFixed(1)}</span><span>Avg: ${(team.pf / (team.wins+team.losses+team.ties || 1)).toFixed(1)}</span>${team.streak >= 2 ? '<span style="color:var(--good)">🔥 W'+team.streak+'</span>' : ''}${team.streak <= -2 ? '<span style="color:var(--bad)">❄️ L'+Math.abs(team.streak)+'</span>' : ''}</div><div class="rank-narrative">${narrative}</div>${confessional}</div>`;
+      html += `<div class="rank-entry"><div class="rank-head"><div class="rank-num ${numClass}">${team.rank}</div><div class="rank-team">${escapeHtml(team.name)}</div><div class="rank-record">${rec}</div>${moveHtml}</div><div class="rank-stats"><span>PF: ${team.pf.toFixed(0)}</span><span>This week: ${team.weekPts.toFixed(1)}</span><span>Avg: ${(team.pf / (team.wins+team.losses+team.ties || 1)).toFixed(1)}</span>${team.streak >= 2 ? '<span style="color:var(--good)">🔥 W'+team.streak+'</span>' : ''}${team.streak <= -2 ? '<span style="color:var(--bad)">❄️ L'+Math.abs(team.streak)+'</span>' : ''}</div><div class="rank-narrative">${narrative}</div>${confessional}</div>`;
     });
     html += '</div>';
   });
