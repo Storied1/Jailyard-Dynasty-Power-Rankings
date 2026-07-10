@@ -148,6 +148,8 @@ def build_identity_maps(identity_chain):
 
 def resolve_sender(sender, name_to_roster, roster_to_team):
     """Given a WhatsApp sender name, return (roster_id, team_name) or (None, None)."""
+    if not sender:
+        return None, None  # system messages / parser mis-splits have sender=None
     key = sender.strip().lower()
     rid = name_to_roster.get(key)
     if rid is None:

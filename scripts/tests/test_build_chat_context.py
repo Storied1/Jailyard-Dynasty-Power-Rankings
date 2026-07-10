@@ -22,6 +22,7 @@ from build_chat_context import (
     get_matchup_roster_pairs,
     get_week_high_low_scorers,
     resolve_predictions,
+    resolve_sender,
     sanitize_league_memory,
 )
 
@@ -263,3 +264,13 @@ def test_build_suggested_callbacks_none_week_data_uses_roster_fallback():
         {}, arcs, {}, None, ROSTER_TO_TEAM, PRESEASON_END_2025
     )
     assert any(c["source"] == "arc" for c in cbs)
+
+
+def test_resolve_sender_none_sender_returns_none_pair():
+    # system messages and parser mis-splits carry sender=None; the corpus has
+    # two inside the preseason window (2025-04-18, 2025-07-11)
+    assert resolve_sender(None, {"brent boone": 3}, {3: "Chudders"}) == (None, None)
+
+
+def test_resolve_sender_empty_sender_returns_none_pair():
+    assert resolve_sender("", {"brent boone": 3}, {3: "Chudders"}) == (None, None)
