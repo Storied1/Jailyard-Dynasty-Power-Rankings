@@ -515,7 +515,9 @@ def _month_le(month_str, cutoff_dt):
     return str(month_str)[:7] <= cutoff_dt.strftime("%Y-%m")
 
 
-def find_active_arcs(arcs, week, season, week_data, roster_to_team, cutoff):
+def find_active_arcs(
+    arcs, week, season, week_data, roster_to_team, cutoff, name_to_roster=None
+):
     """Find arcs relevant to this week and annotate with weekly development."""
     if not arcs:
         return []
@@ -553,6 +555,11 @@ def find_active_arcs(arcs, week, season, week_data, roster_to_team, cutoff):
                     participant_rids.add(p)
                 elif isinstance(p, dict):
                     participant_rids.add(p.get("roster_id"))
+                elif isinstance(p, str) and name_to_roster:
+                    # arcs.json stores WhatsApp display names -- resolve them
+                    rid = name_to_roster.get(p.strip().lower())
+                    if rid is not None:
+                        participant_rids.add(rid)
         else:
             participant_rids = set()
 
@@ -1315,7 +1322,13 @@ def build_chat_context(
 
     # --- Active arcs ---
     active_arcs = find_active_arcs(
-        arcs, week, season, week_data, roster_to_team, window_end
+        arcs,
+        week,
+        season,
+        week_data,
+        roster_to_team,
+        window_end,
+        name_to_roster=name_to_roster,
     )
     print(f"  Active arcs: {len(active_arcs)}")
 

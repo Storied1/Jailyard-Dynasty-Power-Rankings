@@ -266,6 +266,35 @@ def test_build_suggested_callbacks_none_week_data_uses_roster_fallback():
     assert any(c["source"] == "arc" for c in cbs)
 
 
+def test_find_active_arcs_resolves_string_participants():
+    # arcs.json participants are WhatsApp display names; they must resolve
+    # via name_to_roster or every arc is silently dropped (the shipped bug).
+    arcs = [
+        {
+            "title": "Trade activity surge",
+            "span": {"start": "2025-09"},
+            "participants": ["Brent Boone"],
+        }
+    ]
+    week_data = {
+        "matchups": [
+            {"team1": {"roster_id": 3}, "team2": {"roster_id": 7}},
+        ]
+    }
+    out = find_active_arcs(
+        arcs, 5, 2025, week_data, {}, CUTOFF, name_to_roster={"brent boone": 3}
+    )
+    assert len(out) == 1, "string participant should resolve to roster 3 (playing)"
+
+
+def test_find_active_arcs_string_participants_without_map_still_drop():
+    arcs = [
+        {"title": "x", "span": {"start": "2025-09"}, "participants": ["Brent Boone"]}
+    ]
+    week_data = {"matchups": [{"team1": {"roster_id": 3}, "team2": {"roster_id": 7}}]}
+    assert find_active_arcs(arcs, 5, 2025, week_data, {}, CUTOFF) == []
+
+
 def test_resolve_sender_none_sender_returns_none_pair():
     # system messages and parser mis-splits carry sender=None; the corpus has
     # two inside the preseason window (2025-04-18, 2025-07-11)
