@@ -1,12 +1,15 @@
 # Kevin (Kevin Noble)
+
 **Team:** Noble FFT | **Handle:** @kevobucks
 
 ## Identity
+
 - WhatsApp name: Kevin Noble
-- Active in 27 of 30 months analyzed
-- Total messages in chat: 562
+- Active in 31 of 35 months analyzed
+- Total messages in chat: 577
 
 ## Communication DNA
+
 - **Total messages**: 562
 - **Avg length**: 54.6 chars (9.1 words)
 - **Peak hour**: 17:00
@@ -16,6 +19,7 @@
 - **CAPS %**: N/A%
 
 ## Behavioral Observations
+
 - [2023-09] Quiet month — only 12 messages
 - [2023-10] Quiet month — only 27 messages
 - [2023-10] Night owl — peak activity at 22:00
@@ -38,6 +42,7 @@
 - [2025-01] Night owl — peak activity at 1:00
 
 ## Notable Quotes
+
 - [2023-09] 😳
 - [2023-09] Pat still owes me dues for 2024 too
 - [2023-09] Legggooooo
@@ -46,9 +51,10 @@
 - [2023-10] This game could not have gone worse for me. DJ bashes my head in and beats lead big early, which wou
 - [2023-11] Karim just sending reverse and regular jinxes like a witch doctor
 - [2023-11] So if we did the draft order exclusively off of average max possible weekly points, we would have:
-1
+  1
 - [2023-11] What do you propose then we lock in your first pick?
 - [2023-12] You want your opponent to start them
 
 ## Narrative Hooks
+
 - Active storylines and callback opportunities to be enriched by AI pass

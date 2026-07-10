@@ -26,7 +26,7 @@ if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-from shared import REPO_ROOT, NAME_MAP_PATH
+from shared import NAME_MAP_PATH, REPO_ROOT
 
 # WhatsApp line pattern: [M/D/YY, H:MM:SS AM/PM] Sender: message
 # The date can be M/D/YY or MM/DD/YY (single or double digit month/day)
@@ -148,7 +148,15 @@ def parse_chat(input_path: Path) -> dict:
 
             sender_match = SENDER_RE.match(rest)
             if sender_match:
-                sender = sender_match.group(1).strip()
+                # WhatsApp renders contact-less senders as "~ Name" (narrow
+                # no-break space); name-map/identity files use a regular space.
+                # Normalize all unicode spaces or Harlow/Patrick never resolve.
+                sender = (
+                    sender_match.group(1)
+                    .replace(" ", " ")  # narrow no-break space
+                    .replace(" ", " ")  # no-break space
+                    .strip()
+                )
                 # Normalize aliases to canonical WhatsApp name
                 sender = alias_map.get(sender, sender)
                 text = sender_match.group(2)
