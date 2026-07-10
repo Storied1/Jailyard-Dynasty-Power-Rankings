@@ -63,3 +63,21 @@ def test_detect_consensus_counts_members_only():
     assert (
         snapshots == []
     ), "non-member senders inflated the consensus count (operator-precedence bug)"
+
+
+def test_reduce_arcs_different_crews_stay_separate():
+    # Full-crew grouping: a different 4th participant means a DIFFERENT saga.
+    # (The pre-fix any-3-alphabetical key merged every month's trade cluster.)
+    base = {"title": "Trade activity surge", "type": "trade_saga", "key_moments": []}
+    out = reduce_arcs(
+        {
+            "2025-09": {
+                "candidate_arcs": [dict(base, participants=["a", "b", "c", "d"])]
+            },
+            "2025-10": {
+                "candidate_arcs": [dict(base, participants=["a", "b", "c", "e"])]
+            },
+        },
+        {},
+    )
+    assert len(out) == 2, f"different crews must stay separate arcs, got {len(out)}"

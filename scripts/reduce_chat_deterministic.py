@@ -172,10 +172,12 @@ def reduce_arcs(map_outputs, name_map):
             arc["source_month"] = month
             all_arcs.append(arc)
 
-    # Group by type and participants
+    # Group by type and the FULL participant crew: same crew across months =
+    # one ongoing saga; any-3-alphabetical over-merges (every month's trade
+    # cluster shares the same alphabetical top-3, collapsing 20 arcs into 1).
     arc_groups = defaultdict(list)
     for arc in all_arcs:
-        key = (arc.get("type", ""), tuple(sorted(arc.get("participants", []))[:3]))
+        key = (arc.get("type", ""), tuple(sorted(arc.get("participants", []))))
         arc_groups[key].append(arc)
 
     # Merge groups into narrative arcs
@@ -202,7 +204,7 @@ def reduce_arcs(map_outputs, name_map):
         title = Counter(titles).most_common(1)[0][0] if titles else "Unnamed arc"
 
         slug = (
-            f"{arc_type}-{'-'.join(p.lower().split()[0] for p in participants)}-{months[0]}"
+            f"{arc_type}-{'-'.join(p.lower().split()[0] for p in participants[:3])}-{months[0]}"
             if participants
             else f"{arc_type}-{months[0]}"
         )
