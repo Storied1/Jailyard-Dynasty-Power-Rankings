@@ -16,7 +16,7 @@ nflreadpy>=0.1.5,<0.2     # NFL schedule / play-by-play source (fetch_nflreadpy.
 polars>=1.40.1            # dataframe engine for NFLGame generation (generate_nfl_games.py)
 
 # --- Test runner (dev) ---
-pytest>=9.0.2             # python -m pytest scripts/tests/   (184 tests)
+pytest>=9.0.2             # python -m pytest scripts/tests/   (200 tests)
 
 # --- Optional / feature-specific (uncomment as needed) ---
 # anthropic>=0.86.0       # AI media descriptions + chat analysis (describe_media.py, analyze_chat.py, build_chat_context.py)

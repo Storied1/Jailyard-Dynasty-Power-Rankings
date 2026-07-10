@@ -107,15 +107,15 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 
 ### Content Files
 
-| Path                                    | Purpose                                                                                                                        |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `content/voice-bible.md`                | Master style guide — 12 Simmons DNA patterns, Jailyard lexicon, templates, anti-patterns                                       |
-| `content/team-profiles.json`            | All 12 teams: preseason rank, tier, roast, key players, full preseason essay text                                              |
-| `content/weeks/weekN_data.json`         | AI-ready data per week (matchups, standings, awards, context) — 18 files                                                       |
-| `content/weeks/weekN_content.json`      | Generated content per week (essay, rankings, mailbag, bits, picks)                                                             |
-| `content/weeks/weekN_chat_context.json` | WhatsApp chat quotes relevant to each week + sanitized as-of-week `league_memory` block — 18 files                             |
-| `content/chat/`                         | Chat analytics: `league-memory.json`, `arcs.json`, `predictions.json`, `relationships.json`, `consensus.json`, `personas/*.md` |
-| `content/chat/name-map.json`            | Identity chain: WhatsApp display name → real name, team, handle, roster_id                                                     |
+| Path                                    | Purpose                                                                                                                                                                                                              |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `content/voice-bible.md`                | Master style guide — 12 Simmons DNA patterns, Jailyard lexicon, templates, anti-patterns                                                                                                                             |
+| `content/team-profiles.json`            | All 12 teams: preseason rank, tier, roast, key players, full preseason essay text                                                                                                                                    |
+| `content/weeks/weekN_data.json`         | AI-ready data per week (matchups, standings, awards, context) — 18 files                                                                                                                                             |
+| `content/weeks/weekN_content.json`      | Generated content per week (essay, rankings, mailbag, bits, picks)                                                                                                                                                   |
+| `content/weeks/weekN_chat_context.json` | WhatsApp chat quotes + sanitized as-of-week `league_memory` + live `active_arcs_this_week`/`suggested_callbacks`/`resolved_predictions` layers (revived 2026-07-10 — empty in every artifact before then) — 18 files |
+| `content/chat/`                         | Chat analytics: `league-memory.json`, `arcs.json`, `predictions.json`, `relationships.json`, `consensus.json`, `personas/*.md`                                                                                       |
+| `content/chat/name-map.json`            | Identity chain: WhatsApp display name → real name, team, handle, roster_id                                                                                                                                           |
 
 ### Key Scripts
 
@@ -196,7 +196,7 @@ Use `python` not `python3` on this machine. Python is at:
 - **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Run tests:** `python -m pytest scripts/tests/ -v` — 184 tests across momentum, extract_week_data (v1+v2 + as-of history), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, chat-context sanitizer (incl. preseason mode), canonical save, verifier (incl. threads ledger), and team-profiles merge
+- **Run tests:** `python -m pytest scripts/tests/ -v` — 200 tests across momentum, extract_week_data (v1+v2 + as-of history), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, chat-context sanitizer (incl. preseason mode + null-sender guard + arc/prediction/callback field maps), chat determinism (map/reduce), shared helpers, media describe parsing, canonical save, verifier (incl. threads ledger), and team-profiles merge
 - **Regenerate dynasty layer:** `python scripts/generate_player_arcs.py` then `python scripts/generate_franchise_wings.py` (local only — needs gitignored `players.json` + stats caches; `--fetch-stats` backfills 2022-24 caches once)
 - **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
@@ -222,7 +222,8 @@ Use `python` not `python3` on this machine. Python is at:
 - Local dev: `python -m http.server 8000` or open HTML directly
 - Python: use `python` not `python3` (Windows)
 - Ollama: `localhost:11434` — must be running for MCP server and local scripts
-- GIPHY API key: stored in `.claude/settings.local.json` (gitignored) — needed for `/pick-media`
+- GIPHY API key: stored in `.claude/settings.local.json` (gitignored) — needed for `/pick-media`. **GIPHY search intermittently serves a canned junk set** ("GIF by Giphy QA" / hearts / Bonnie Tyler, identical across different queries) — re-fetch instead of trusting one bad batch.
+- `describe_media.py` `--backend claude-cli` (default) runs headless Claude Code on the Max subscription (Sonnet 5; `--model claude-opus-4-8` optional); `--backend api` uses `ANTHROPIC_API_KEY`. Resumable via gitignored `content/chat/.media_progress.json`; exits cleanly on a usage-window limit — re-run to resume.
 - GitHub Actions runs `fetch_sleeper.py` automatically on NFL Sundays
 - `chat/` directory and `content/chat/.map_cache/` are gitignored (privacy + intermediate data)
 - **Python deps:** `pip install -r requirements.txt` on fresh clones. Core: `jsonschema`, `nflreadpy`, `polars`, `pytest`. Optional AI/media deps (`anthropic`, `requests`, `opencv-python`, `playwright`) are commented in the file — uncomment as needed. The test CI (`.github/workflows/test.yml`) runs the suite on every push/PR to `main`, so a breaking dep release surfaces there.
