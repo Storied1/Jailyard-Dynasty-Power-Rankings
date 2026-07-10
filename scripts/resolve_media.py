@@ -55,8 +55,19 @@ def get_api_key() -> str:
     return key
 
 
+# GIPHY's search backend intermittently serves a canned fallback set --
+# identical results across unrelated queries, including a literal "Giphy QA"
+# test asset (observed 2026-07-10). Detect and re-fetch once.
+_GIPHY_JUNK_IDS = {"cCZIBp9U0MiuQ", "Z21HJj2kz9uBG", "l3fzQ9idfbdcqnExW"}
+
+
+def _is_junk_batch(results: list[dict]) -> bool:
+    """True when a result batch contains GIPHY's canned flake-fallback set."""
+    return bool(_GIPHY_JUNK_IDS & {r.get("giphy_id") for r in results})
+
+
 def search_giphy(
-    query: str, api_key: str, limit: int = 3, offset: int = 0
+    query: str, api_key: str, limit: int = 3, offset: int = 0, _retry: bool = True
 ) -> list[dict]:
     """Search Giphy and return simplified result list."""
     params = {
@@ -97,6 +108,9 @@ def search_giphy(
             }
         )
 
+    if _retry and _is_junk_batch(results):
+        print("    WARN: GIPHY served its canned junk set (search flake) -- retrying")
+        return search_giphy(query, api_key, limit=limit, offset=offset, _retry=False)
     return results
 
 

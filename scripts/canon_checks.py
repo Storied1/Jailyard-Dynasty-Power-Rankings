@@ -43,6 +43,21 @@ def check_league_memory_present(chat_context: dict, errors: list) -> None:
             errors.append(f"league_memory.{key} missing")
 
 
+def check_storyline_layers_populated(chat_context: dict, errors: list) -> None:
+    """Both storyline layers empty = the dead-integration class (2026-07-10):
+    every context file ever generated shipped empty arcs/callbacks until the
+    field-map revival. Legitimately quiet artifacts still populate at least
+    one layer, so both-empty means producer/consumer field drift."""
+    if not chat_context.get("active_arcs_this_week") and not chat_context.get(
+        "suggested_callbacks"
+    ):
+        errors.append(
+            "active_arcs_this_week AND suggested_callbacks both empty -- "
+            "storyline integration layer looks dead (field/key drift between "
+            "the chat analytics and build_chat_context?)"
+        )
+
+
 def check_as_of_week_fields(standings_entry: dict, errors: list) -> None:
     team = standings_entry.get("team_name", "<unknown>")
     for key in ("current_elo", "peak_elo", "all_time_record"):
@@ -83,6 +98,7 @@ def main():
         )
         check_league_memory_present(chat_context, errors)
         check_preseason_type_marker(chat_context, errors)
+        check_storyline_layers_populated(chat_context, errors)
         # Deliberately no data/standings load -- preseason has no week data.
         label = "preseason"
     else:
@@ -90,6 +106,7 @@ def main():
             WEEKS_DIR / f"week{args.week}_chat_context.json", required=True
         )
         check_league_memory_present(chat_context, errors)
+        check_storyline_layers_populated(chat_context, errors)
 
         data = load_json(WEEKS_DIR / f"week{args.week}_data.json", required=True)
         for entry in data["standings"]:

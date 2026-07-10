@@ -386,6 +386,15 @@ def print_stats(data: dict) -> None:
     print("\n  Messages per member:")
     for sender, count in counter.most_common():
         print(f"    {sender:25s} {count:>5}")
+
+    # Tripwire for the 2026-07 Harlow bug: unicode-space sender names never
+    # resolve against name-map (narrow no-break space vs regular space).
+    ghosts = [s for s in meta["members"] if chr(0x202F) in s or chr(0xA0) in s]
+    if ghosts:
+        print(
+            "WARNING: " + str(len(ghosts)) + " sender name(s) contain unicode "
+            "spaces and will NOT resolve against name-map: " + str(ghosts)
+        )
     print(f"{'='*50}\n")
 
 
