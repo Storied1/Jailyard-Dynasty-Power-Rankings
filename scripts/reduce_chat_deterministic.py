@@ -157,7 +157,6 @@ def reduce_league_memory(map_outputs, name_map, total_messages):
         "greatest_moments": greatest_moments,
         "lexicon": all_lexicon,
     }
-    _save_json(CHAT_DIR / "league-memory.json", result, verbose=True)
     return result
 
 
@@ -224,7 +223,6 @@ def reduce_arcs(map_outputs, name_map):
 
     # Sort by narrative potential
     merged_arcs.sort(key=lambda x: -x.get("narrative_potential", 0))
-    _save_json(CHAT_DIR / "arcs.json", merged_arcs[:30], verbose=True)
     return merged_arcs[:30]
 
 
@@ -276,7 +274,6 @@ def reduce_predictions(map_outputs, name_map):
         "predictions": unique_preds,
         "credibility_index": cred_index,
     }
-    _save_json(CHAT_DIR / "predictions.json", result, verbose=True)
     return result
 
 
@@ -352,7 +349,6 @@ def reduce_relationships(map_outputs, name_map):
         )
 
     result = {"pairs": pairs[:30]}
-    _save_json(CHAT_DIR / "relationships.json", result, verbose=True)
     return result
 
 
@@ -390,7 +386,6 @@ def reduce_consensus(map_outputs, name_map):
         "collective_wrongs": [],
         "lone_wolves": [],
     }
-    _save_json(CHAT_DIR / "consensus.json", result, verbose=True)
     return result
 
 
@@ -508,12 +503,29 @@ def main():
     total_messages = sum(d.get("message_count", 0) for d in map_outputs.values())
     print(f"  Total messages: {total_messages:,}")
 
-    # Run all REDUCE operations
-    reduce_league_memory(map_outputs, name_map, total_messages)
-    reduce_arcs(map_outputs, name_map)
-    reduce_predictions(map_outputs, name_map)
-    reduce_relationships(map_outputs, name_map)
-    reduce_consensus(map_outputs, name_map)
+    # Run all REDUCE operations. The reducers are PURE (no disk writes) so
+    # unit tests can call them safely -- all JSON output happens right here.
+    _save_json(
+        CHAT_DIR / "league-memory.json",
+        reduce_league_memory(map_outputs, name_map, total_messages),
+        verbose=True,
+    )
+    _save_json(CHAT_DIR / "arcs.json", reduce_arcs(map_outputs, name_map), verbose=True)
+    _save_json(
+        CHAT_DIR / "predictions.json",
+        reduce_predictions(map_outputs, name_map),
+        verbose=True,
+    )
+    _save_json(
+        CHAT_DIR / "relationships.json",
+        reduce_relationships(map_outputs, name_map),
+        verbose=True,
+    )
+    _save_json(
+        CHAT_DIR / "consensus.json",
+        reduce_consensus(map_outputs, name_map),
+        verbose=True,
+    )
     reduce_personas(map_outputs, name_map)
 
     print("\n" + "=" * 60)
