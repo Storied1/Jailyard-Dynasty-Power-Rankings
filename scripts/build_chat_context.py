@@ -996,22 +996,19 @@ def build_suggested_callbacks(
     playing_teams = get_all_team_names(week_data, roster_to_team)
 
     if league_memory:
-        entries = (
-            league_memory
-            if isinstance(league_memory, list)
-            else league_memory.get("entries", league_memory.get("memories", []))
-        )
-        for entry in entries:
-            text = json.dumps(entry).lower()
+        for joke in league_memory.get("running_jokes", []):
+            # as-of-week: only jokes already alive by the cutoff; never emit
+            # last_seen/still_active (season-end knowledge)
+            if not _month_le(joke.get("first_seen"), cutoff):
+                continue
+            text = json.dumps(joke).lower()
             for tn in playing_teams:
                 if tn in text:
                     callbacks.append(
                         {
                             "source": "league-memory",
-                            "content": entry.get(
-                                "summary", entry.get("text", str(entry)[:120])
-                            ),
-                            "from_when": entry.get("date", entry.get("season", "")),
+                            "content": joke.get("name", ""),
+                            "from_when": joke.get("first_seen", ""),
                             "connection_to_this_week": f"Involves {tn.title()}, who plays this week",
                         }
                     )
@@ -1056,21 +1053,21 @@ def build_suggested_callbacks(
                         continue
                 except (ValueError, TypeError):
                     pass
-            if pred.get("status") == "open":
-                quote = pred.get("quote", pred.get("text", "")).lower()
-                for tn in playing_teams:
-                    if tn in quote:
-                        callbacks.append(
-                            {
-                                "source": "prediction",
-                                "content": pred.get("quote", pred.get("text", "")),
-                                "from_when": pred.get(
-                                    "timestamp_local", pred.get("made_at", "")
-                                ),
-                                "connection_to_this_week": f"Open prediction about {tn.title()} — check if results confirm or deny",
-                            }
-                        )
-                        break
+            quote_text = (
+                pred.get("subject")
+                or " ".join((q.get("text") or "") for q in pred.get("quote_block", []))
+            ).lower()
+            for tn in playing_teams:
+                if tn in quote_text:
+                    callbacks.append(
+                        {
+                            "source": "prediction",
+                            "content": pred.get("subject", ""),
+                            "from_when": pred.get("made_at", ""),
+                            "connection_to_this_week": f"Open prediction about {tn.title()} — check if results confirm or deny",
+                        }
+                    )
+                    break
             if len(callbacks) >= 10:
                 break
 

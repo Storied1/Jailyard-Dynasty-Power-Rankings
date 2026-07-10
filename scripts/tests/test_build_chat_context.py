@@ -205,6 +205,43 @@ def test_build_suggested_callbacks_excludes_future_arc():
     assert all(c["source"] != "arc" for c in cbs)
 
 
+def test_callbacks_league_memory_uses_running_jokes_with_cutoff():
+    league_memory = {
+        "running_jokes": [
+            {
+                "name": "Alpha tank jokes",
+                "first_seen": "2025-09",
+                "sample_block": "alpha lol",
+            },
+            {
+                "name": "Future joke",
+                "first_seen": "2025-12",
+                "sample_block": "alpha again",
+            },
+        ]
+    }
+    out = build_suggested_callbacks(league_memory, None, None, WEEK_DATA, {}, CUTOFF)
+    contents = [c["content"] for c in out if c["source"] == "league-memory"]
+    assert "Alpha tank jokes" in contents, "in-window joke naming a playing team"
+    assert "Future joke" not in contents, "first_seen after cutoff must be excluded"
+
+
+def test_callbacks_prediction_branch_reads_subject():
+    preds = [
+        {
+            "id": "pred-007",
+            "author_whatsapp": "Oscar",
+            "subject": "Alpha will miss the playoffs, book it",
+            "quote_block": [],
+            "made_at": "2025-09-10T00:00:00Z",
+            "resolution": "pending",
+        }
+    ]
+    out = build_suggested_callbacks(None, None, preds, WEEK_DATA, {}, CUTOFF)
+    pred_cbs = [c for c in out if c["source"] == "prediction"]
+    assert pred_cbs and "Alpha" in pred_cbs[0]["content"]
+
+
 # ---------------------------------------------------------------------------
 # Preseason mode (week_data=None) -- null-guards and graceful degrades
 # ---------------------------------------------------------------------------
