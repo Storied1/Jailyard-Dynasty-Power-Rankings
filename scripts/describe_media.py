@@ -45,12 +45,12 @@ except ImportError:
     sys.exit(1)
 
 from shared import (
-    REPO_ROOT,
     CHAT_DIR,
     CONTENT_CHAT_DIR,
-    MAX_IMAGE_SIZE,
-    JPEG_QUALITY,
     DESCRIPTION_BATCH_SIZE,
+    JPEG_QUALITY,
+    MAX_IMAGE_SIZE,
+    REPO_ROOT,
 )
 
 PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"
@@ -430,7 +430,7 @@ def main():
 
         # Save progress after each batch
         progress = {
-            "completed_ids": list(completed_ids),
+            "completed_ids": sorted(completed_ids),
             "items": list(existing_items.values()),
         }
         save_progress(progress)

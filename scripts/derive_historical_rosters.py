@@ -160,7 +160,9 @@ def derive_week(
 
 
 def load_owner_map(season: int) -> dict[int, str]:
-    rosters = load_json(REPO_ROOT / "data" / str(season) / "rosters.json")
+    rosters = load_json(
+        REPO_ROOT / "data" / str(season) / "rosters.json", required=True
+    )
     return {r["roster_id"]: r["owner_id"] for r in rosters}
 
 
@@ -184,17 +186,21 @@ def main() -> int:
 
     import jsonschema  # deferred: only main() validates
 
-    schema = load_json(SCHEMA_PATH)
+    schema = load_json(SCHEMA_PATH, required=True)
     season_dir = REPO_ROOT / "data" / str(args.season)
     out_dir = season_dir / "fantasy_rosters"
 
     owner_map = load_owner_map(args.season)
-    league_id = load_json(season_dir / "season_combined.json")["league_id"]
+    league_id = load_json(season_dir / "season_combined.json", required=True)[
+        "league_id"
+    ]
 
     current_rosters = transactions = None
     if args.mode in ("auto", "derive"):
-        current_rosters = load_json(season_dir / "rosters.json")
-        transactions = flatten_transactions(load_json(season_dir / "transactions.json"))
+        current_rosters = load_json(season_dir / "rosters.json", required=True)
+        transactions = flatten_transactions(
+            load_json(season_dir / "transactions.json", required=True)
+        )
 
     written = 0
     for week in args.weeks:
