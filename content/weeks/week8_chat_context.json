@@ -1,23 +1,24 @@
 {
   "meta": {
-    "week": 8,
+    "type": "week",
     "season": 2025,
     "temporal_cutoff_utc": "2025-10-28T06:59:59Z",
     "window_start_utc": "2025-10-21T06:59:59Z",
     "messages_in_window": 171,
-    "total_context_items": 13
+    "total_context_items": 13,
+    "week": 8
   },
   "high_relevancy": [
     {
       "type": "callback_material",
       "block": [
         {
-          "sender": "~ Patrick Raue",
+          "sender": "~ Patrick Raue",
           "text": "https://x.com/aggregatesports/status/1982556380856000601?s=46&t=TapfWA1j6e3CYrnR_F20Ww",
           "timestamp_local": "2025-10-26T17:21:10-07:00"
         },
         {
-          "sender": "~ Patrick Raue",
+          "sender": "~ Patrick Raue",
           "text": "This dude has been a pleasant surprise for me",
           "timestamp_local": "2025-10-26T17:21:24-07:00"
         },
@@ -171,8 +172,284 @@
       "suggested_use": "Power ranking blurb"
     }
   ],
-  "active_arcs_this_week": [],
-  "resolved_predictions": [],
+  "active_arcs_this_week": [
+    {
+      "arc_id": "prediction_saga-neo-2023-10",
+      "title": "Neo's hot take machine",
+      "status": "resolved",
+      "this_week_development": "General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-karim-matt-2023-12",
+      "title": "Trade activity surge",
+      "status": "active",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-sacko-2024-02",
+      "title": "Trade activity surge",
+      "status": "active",
+      "this_week_development": "The Boonist Monks won by 6.06; MHJTIME won by 77.96",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-matt-sacko-2025-07",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "prediction_saga-brent-2023-12",
+      "title": "Brent Boone's hot take machine",
+      "status": "active",
+      "this_week_development": "The Boonist Monks won by 6.06",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "prediction_saga-zach-2024-04",
+      "title": "Zach's hot take machine",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "prediction_saga-sacko-2024-01",
+      "title": "Sacko's hot take machine",
+      "status": "resolved",
+      "this_week_development": "MHJTIME won by 77.96",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-ben-brent-kevin-2023-09",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; Father Time  won by 25.9; MHJTIME won by 77.96",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-ben-brent-neo-2023-10",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Father Time  won by 25.9; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-karim-zach-2023-11",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-oscar-sacko-2024-01",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; MHJTIME won by 77.96",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-karim-matt-2024-03",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-karim-neo-2024-04",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-kevin-neo-2024-05",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-karim-neo-zach-2024-07",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-karim-kevin-2024-08",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-matt-neo-2024-09",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-neo-oscar-2024-10",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-oscar-zach-2024-11",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; MHJTIME won by 77.96",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "prediction_saga-oscar-2024-11",
+      "title": "Oscar's hot take machine",
+      "status": "resolved",
+      "this_week_development": "MHJTIME won by 77.96",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-neo-sacko-2024-12",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-sacko-zach-2025-01",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; MHJTIME won by 77.96",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-ben-brent-kevin-2025-02",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; Father Time  won by 25.9; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-kevin-oscar-2025-03",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; Noble FFT won by 22.9; MHJTIME won by 77.96",
+      "suggested_framing": "Continue tracking this arc"
+    },
+    {
+      "arc_id": "trade_saga-brent-matt-oscar-2025-10",
+      "title": "Trade activity surge",
+      "status": "resolved",
+      "this_week_development": "The Boonist Monks won by 6.06; MHJTIME won by 77.96; General Ken-obi won by 93.4",
+      "suggested_framing": "Continue tracking this arc"
+    }
+  ],
+  "resolved_predictions": [
+    {
+      "prediction_id": "pred-001",
+      "author": "Karim",
+      "original_quote": "You soo high you think you got the second best team in the league rn",
+      "made_at_local": "2023-09-29T17:39:52Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-006",
+      "author": "~ Patrick Raue",
+      "original_quote": "In my other dynasty league, I went all in like Brent two years ago and I’m in hell right now. I lost in the championship two years ago, last year I was best team regular season, but got bounced in the",
+      "made_at_local": "2023-10-19T19:23:25Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-011",
+      "author": "Zach",
+      "original_quote": "I guess we know who the best team is for real now",
+      "made_at_local": "2023-11-03T23:10:23Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-021",
+      "author": "Sacko",
+      "original_quote": "He was on fire last week and beat the best team in the NFL. He's 28 years old.",
+      "made_at_local": "2023-11-15T16:43:23Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-038",
+      "author": "Brent Boone",
+      "original_quote": "Bro my team will be at the top again next year guarantee",
+      "made_at_local": "2024-01-05T17:37:52Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-043",
+      "author": "~ Patrick Raue",
+      "original_quote": "UConn consensus best team this year too. But the Madness don’t care",
+      "made_at_local": "2024-03-21T16:32:12Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-049",
+      "author": "Sacko",
+      "original_quote": "Even the best team in the league- General Ken-obi - could afford to make some moves. Dj moore and nico not going to see that elite volume anymore.",
+      "made_at_local": "2024-05-04T17:45:22Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-065",
+      "author": "Zach",
+      "original_quote": "Everyone knows that he has a really really good team. Probably the best team. They’re destined for another championship.",
+      "made_at_local": "2024-09-15T20:37:36Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-074",
+      "author": "Brent Boone",
+      "original_quote": "I think Ben’s team is the best team in the league rn tbh",
+      "made_at_local": "2024-11-05T16:06:02Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-079",
+      "author": "~ Patrick Raue",
+      "original_quote": "Best team in football",
+      "made_at_local": "2024-11-11T04:36:23Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    },
+    {
+      "prediction_id": "pred-082",
+      "author": "Brent Boone",
+      "original_quote": "I have to say that I think KARIM has the best team name",
+      "made_at_local": "2024-11-26T02:07:53Z",
+      "resolution": "aging_badly",
+      "evidence": "Chudders Football Team lost in Week 8 (103.08 pts)",
+      "comedic_value": 7
+    }
+  ],
   "sentiment_snapshot": {
     "The Boonist Monks": {
       "activity": "high",
@@ -185,9 +462,9 @@
       "notable": "Barely said a word after the loss"
     },
     "Burden of Etienne-y Woody": {
-      "activity": "silent",
-      "mood": "silent",
-      "notable": "Went completely silent after the loss"
+      "activity": "high",
+      "mood": "neutral",
+      "notable": "Most active chatter this week (19 messages)"
     },
     "Noble FFT": {
       "activity": "low",
@@ -200,8 +477,8 @@
       "notable": "Most active chatter this week (17 messages)"
     },
     "Rasheeing the Scene": {
-      "activity": "silent",
-      "mood": "neutral",
+      "activity": "medium",
+      "mood": "cocky",
       "notable": ""
     },
     "Chudders Football Team": {
@@ -241,7 +518,7 @@
       "communication_patterns": {
         "peak_activity_days": ["Tue", "Sun", "Fri"],
         "peak_hours": ["16:00-22:00 PT"],
-        "avg_daily_messages": 23.3,
+        "avg_daily_messages": 20.4,
         "media_vs_text_ratio": "~15% media"
       },
       "activity_triggers": [
@@ -255,13 +532,13 @@
       ]
     },
     "lexicon": {
-      "attached": "Used 64 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02",
-      "brent": "Used 54 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-03; also 2025-04; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12",
-      "photo": "Used 40 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02",
-      "nate": "Used 33 times this month; also 2023-11; also 2024-01; also 2024-02; also 2024-08; also 2024-10; also 2024-12; also 2025-03; also 2025-04; also 2025-10; also 2025-12",
-      "boone": "Used 31 times this month; also 2024-06; also 2024-09; also 2024-11; also 2025-01; also 2025-03; also 2025-04; also 2025-05; also 2025-11",
-      "league": "Used 30 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-03; also 2024-05; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-10",
-      "sacko": "Used 29 times this month; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-12; also 2025-01; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02",
+      "attached": "Used 64 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02; also 2026-03; also 2026-04; also 2026-05; also 2026-06",
+      "brent": "Used 54 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-03; also 2025-04; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-03; also 2026-05; also 2026-06",
+      "photo": "Used 40 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02; also 2026-03; also 2026-04; also 2026-05; also 2026-06",
+      "nate": "Used 33 times this month; also 2023-11; also 2024-01; also 2024-02; also 2024-08; also 2024-10; also 2024-12; also 2025-03; also 2025-04; also 2025-10; also 2025-12; also 2026-04; also 2026-05",
+      "boone": "Used 31 times this month; also 2024-06; also 2024-09; also 2024-11; also 2025-01; also 2025-03; also 2025-04; also 2025-05; also 2025-11; also 2026-03; also 2026-05; also 2026-06",
+      "league": "Used 30 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-01; also 2024-03; also 2024-05; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2024-12; also 2025-10; also 2026-04",
+      "sacko": "Used 29 times this month; also 2023-12; also 2024-01; also 2024-02; also 2024-03; also 2024-04; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-12; also 2025-01; also 2025-03; also 2025-04; also 2025-05; also 2025-06; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02; also 2026-03; also 2026-05; also 2026-06",
       "karim": "Used 29 times this month; also 2023-10; also 2023-11; also 2023-12; also 2024-03; also 2024-12; also 2025-07",
       "points": "Used 28 times this month; also 2023-11; also 2023-12; also 2024-08; also 2025-10; also 2025-12",
       "matt": "Used 22 times this month; also 2025-07",
@@ -284,10 +561,10 @@
       "love": "Used 6 times this month; also 2025-04; also 2025-12",
       "sure": "Used 5 times this month",
       "bracket": "Used 20 times this month; also 2025-03",
-      "sleeper": "Used 13 times this month",
+      "sleeper": "Used 13 times this month; also 2026-06",
       "better": "Used 12 times this month; also 2024-10; also 2024-11; also 2025-11; also 2026-01",
       "diggs": "Used 15 times this month",
-      "https": "Used 13 times this month; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02",
+      "https": "Used 13 times this month; also 2024-05; also 2024-06; also 2024-07; also 2024-08; also 2024-09; also 2024-10; also 2024-11; also 2025-01; also 2025-02; also 2025-03; also 2025-04; also 2025-05; also 2025-07; also 2025-08; also 2025-09; also 2025-10; also 2025-11; also 2025-12; also 2026-01; also 2026-02; also 2026-03; also 2026-05",
       "bills": "Used 12 times this month",
       "years": "Used 10 times this month; also 2024-06; also 2024-09",
       "butker": "Used 15 times this month",
@@ -298,11 +575,11 @@
       "wars": "Used 12 times this month",
       "star": "Used 11 times this month",
       "work": "Used 15 times this month",
-      "status": "Used 15 times this month",
+      "status": "Used 15 times this month; also 2026-03",
       "shit": "Used 14 times this month; also 2024-10; also 2025-11",
       "meeting": "Used 13 times this month",
       "august": "Used 13 times this month; also 2025-06",
-      "vote": "Used 21 times this month",
+      "vote": "Used 21 times this month; also 2026-04",
       "anti": "Used 17 times this month",
       "punishment": "Used 17 times this month",
       "damn": "Used 35 times this month",
@@ -338,12 +615,26 @@
       "high": "Used 7 times this month",
       "thunter": "Used 6 times this month",
       "happy": "Used 4 times this month",
-      "pats": "Used 3 times this month"
+      "pats": "Used 3 times this month",
+      "madness": "Used 6 times this month",
+      "fantasy": "Used 5 times this month",
+      "does": "Used 3 times this month",
+      "rookie": "Used 15 times this month",
+      "dynasty": "Used 12 times this month; also 2026-06",
+      "second": "Used 10 times this month",
+      "picks": "Used 8 times this month",
+      "pool": "Used 6 times this month",
+      "knicks": "Used 10 times this month",
+      "late": "Used 6 times this month",
+      "series": "Used 5 times this month",
+      "myles": "Used 14 times this month",
+      "sacks": "Used 12 times this month",
+      "garrett": "Used 7 times this month"
     },
     "running_jokes": [
       {
         "name": "Sacko punishment talk",
-        "total_frequency": 621,
+        "total_frequency": 664,
         "first_seen": "2023-09",
         "last_seen": "2025-10",
         "still_active": true,
@@ -686,7 +977,7 @@
           "timestamp_local": "2025-10-22T12:38:28-07:00"
         },
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "Dart 1.01",
           "timestamp_local": "2025-10-22T12:38:40-07:00"
         },
@@ -698,7 +989,7 @@
       ],
       "target_message_index": 2,
       "category": "debate",
-      "summary": "Brent Boone, Zach, ~ Harlow exchanging messages"
+      "summary": "Brent Boone, Zach, ~ Harlow exchanging messages"
     },
     {
       "block": [
@@ -718,7 +1009,7 @@
           "timestamp_local": "2025-10-22T12:40:15-07:00"
         },
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "Iol",
           "timestamp_local": "2025-10-22T12:40:24-07:00"
         },
@@ -730,17 +1021,17 @@
       ],
       "target_message_index": 2,
       "category": "celebration",
-      "summary": "Brent Boone, Zach, ~ Harlow exchanging messages"
+      "summary": "Brent Boone, Zach, ~ Harlow exchanging messages"
     },
     {
       "block": [
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "Moronic pick my Raiders, but that’s classic",
           "timestamp_local": "2025-10-22T12:41:56-07:00"
         },
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "A RB at 6 when you have the worst O line in the nfl",
           "timestamp_local": "2025-10-22T12:42:10-07:00"
         },
@@ -762,12 +1053,12 @@
       ],
       "target_message_index": 2,
       "category": "despair",
-      "summary": "Brent Boone, Sacko, ~ Harlow exchanging messages"
+      "summary": "Brent Boone, Sacko, ~ Harlow exchanging messages"
     },
     {
       "block": [
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "Both my TEs were on bye. I’m not dropping someone for 3 points, it doesn’t make sense for my dynasty team. I picked up WRs and a 10 point better LB that week.",
           "timestamp_local": "2025-10-23T12:04:39-07:00"
         },
@@ -777,7 +1068,7 @@
           "timestamp_local": "2025-10-23T12:04:59-07:00"
         },
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "I’m not intentionally tanking, I’m putting the best lineup I can",
           "timestamp_local": "2025-10-23T12:05:03-07:00"
         },
@@ -794,17 +1085,17 @@
       ],
       "target_message_index": 2,
       "category": "debate",
-      "summary": "Karim, Neo, ~ Harlow exchanging messages"
+      "summary": "Karim, Neo, ~ Harlow exchanging messages"
     },
     {
       "block": [
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "You were competing, it makes no sense for me. I’m still putting in my best effort for a lineup, but have my dynastic interest to plan for.",
           "timestamp_local": "2025-10-23T12:08:05-07:00"
         },
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "If you can’t see that I’m in no way intentionally tanking, idk what to say. Just not what I’m doing or would ever do.",
           "timestamp_local": "2025-10-23T12:08:40-07:00"
         },
@@ -814,7 +1105,7 @@
           "timestamp_local": "2025-10-23T12:08:54-07:00"
         },
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "I wouldn’t pick up a new LB that got me 18.5 pts if I was interested lowering my output ‎",
           "timestamp_local": "2025-10-23T12:09:44-07:00"
         },
@@ -826,12 +1117,12 @@
       ],
       "target_message_index": 2,
       "category": "reaction",
-      "summary": "Karim, Oscar, ~ Harlow exchanging messages"
+      "summary": "Karim, Oscar, ~ Harlow exchanging messages"
     },
     {
       "block": [
         {
-          "sender": "~ Harlow",
+          "sender": "~ Harlow",
           "text": "You can add the highest available TE’s score that to my max PF, I don’t care",
           "timestamp_local": "2025-10-23T12:12:47-07:00"
         },
@@ -867,6 +1158,12 @@
       "content": "Trade activity surge",
       "from_when": "",
       "connection_to_this_week": "Active arc involving The Legion Of Bouz"
+    },
+    {
+      "source": "prediction",
+      "content": "Even the best team in the league- General Ken-obi - could afford to make some moves. Dj moore and nico not going to see that elite volume anymore.",
+      "from_when": "2024-05-04T17:45:22Z",
+      "connection_to_this_week": "Open prediction about General Ken-Obi — check if results confirm or deny"
     }
   ]
 }

@@ -1,335 +1,310 @@
 {
   "meta": {
-    "type": "week",
+    "type": "preseason",
     "season": 2025,
-    "temporal_cutoff_utc": "2025-12-09T06:59:59Z",
-    "window_start_utc": "2025-12-02T06:59:59Z",
-    "messages_in_window": 41,
-    "total_context_items": 1,
-    "week": 14
+    "temporal_cutoff_utc": "2025-09-03T23:59:59Z",
+    "window_start_utc": "2025-02-10T00:00:00Z",
+    "messages_in_window": 1771,
+    "total_context_items": 10
   },
   "high_relevancy": [],
-  "medium_relevancy": [],
+  "medium_relevancy": [
+    {
+      "type": "callback_material",
+      "block": [
+        {
+          "sender": "David Hamburger",
+          "text": "Burgers have been cooked and finished",
+          "timestamp_local": "2025-07-10T20:21:08-07:00"
+        },
+        {
+          "sender": "Sacko",
+          "text": "Do you guys realize we are in an IDP league???",
+          "timestamp_local": "2025-07-10T20:33:59-07:00"
+        },
+        {
+          "sender": "Sacko",
+          "text": "There's only 1 guy in the history of dynasty fantasy football idp that has ever been designated in sleeper as a DB and a WR\n‎[7/10/25, 8:35:05 PM] Sacko: ‎<attached: 00018247-GIF-2025-07-10-20-35-05.mp4>",
+          "timestamp_local": "2025-07-10T20:34:34-07:00"
+        },
+        {
+          "sender": "Sacko",
+          "text": "Burger great pick with tet. Honestly hes a baller",
+          "timestamp_local": "2025-07-10T20:40:32-07:00"
+        }
+      ],
+      "target_message_index": 2,
+      "author": "Sacko",
+      "author_team": "MHJTIME",
+      "author_roster_id": 8,
+      "why_relevant": "Keyword match from Sacko",
+      "score": 5.5,
+      "suggested_use": "Overheard in the Chat"
+    },
+    {
+      "type": "callback_material",
+      "block": [
+        {
+          "sender": "Oscar",
+          "text": "I’ll give you a 2026 first",
+          "timestamp_local": "2025-07-29T11:43:41-07:00"
+        },
+        {
+          "sender": "Karim",
+          "text": "It’s all about Skattaboo highlights at giants practice… tell ‘em @⁨Zach⁩",
+          "timestamp_local": "2025-07-29T11:45:08-07:00"
+        },
+        {
+          "sender": "Sacko",
+          "text": "Skattebo* overated and about to be a bust. Giants have the #1 toughest schedule in the league this year.  Goodluck with that.\n‎[7/29/25, 11:48:12 AM] Sacko: Ron knows. Trap. ‎<attached: 00018972-PHOTO-2025-07-29-11-48-12.jpg>",
+          "timestamp_local": "2025-07-29T11:46:48-07:00"
+        },
+        {
+          "sender": "Karim",
+          "text": "Became starter in week 5 and still ended as a high end RB2? Skatt about to go gang busters!",
+          "timestamp_local": "2025-07-29T11:50:05-07:00"
+        }
+      ],
+      "target_message_index": 2,
+      "author": "Sacko",
+      "author_team": "MHJTIME",
+      "author_roster_id": 8,
+      "why_relevant": "Keyword match from Sacko",
+      "score": 5.5,
+      "suggested_use": "Overheard in the Chat"
+    }
+  ],
   "active_arcs_this_week": [
     {
       "arc_id": "prediction_saga-neo-2023-10",
       "title": "Neo's hot take machine",
       "status": "resolved",
-      "this_week_development": "General Ken-obi won by 16.02",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-karim-matt-2023-12",
       "title": "Trade activity surge",
-      "status": "resolved",
-      "this_week_development": "Burden of Etienne-y Woody won by 1.16; The Boonist Monks won by 6.86; Chudders Football Team won by 30.52; Sleeping Giants won by 46.42",
+      "status": "active",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-sacko-2024-02",
       "title": "Trade activity surge",
-      "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02",
+      "status": "active",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-matt-sacko-2025-07",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Chudders Football Team won by 30.52; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "prediction_saga-brent-2023-12",
       "title": "Brent Boone's hot take machine",
-      "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86",
+      "status": "active",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "prediction_saga-zach-2024-04",
       "title": "Zach's hot take machine",
       "status": "resolved",
-      "this_week_development": "Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "prediction_saga-sacko-2024-01",
       "title": "Sacko's hot take machine",
       "status": "resolved",
-      "this_week_development": "General Ken-obi won by 16.02",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-ben-brent-kevin-2023-09",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "Rasheeing the Scene won by 3.58; The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Chudders Football Team won by 30.52; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-ben-brent-neo-2023-10",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "Rasheeing the Scene won by 3.58; The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-karim-zach-2023-11",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-oscar-sacko-2024-01",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "Burden of Etienne-y Woody won by 1.16; The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-karim-matt-2024-03",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Chudders Football Team won by 30.52; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-karim-neo-2024-04",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "Burden of Etienne-y Woody won by 1.16; The Boonist Monks won by 6.86; General Ken-obi won by 16.02",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-kevin-neo-2024-05",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Chudders Football Team won by 30.52; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-karim-neo-zach-2024-07",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-karim-kevin-2024-08",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Chudders Football Team won by 30.52",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-matt-neo-2024-09",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Chudders Football Team won by 30.52; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-neo-oscar-2024-10",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "Burden of Etienne-y Woody won by 1.16; The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-oscar-zach-2024-11",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "Burden of Etienne-y Woody won by 1.16; The Boonist Monks won by 6.86; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "prediction_saga-oscar-2024-11",
       "title": "Oscar's hot take machine",
       "status": "resolved",
-      "this_week_development": "Burden of Etienne-y Woody won by 1.16",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-neo-sacko-2024-12",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-sacko-zach-2025-01",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-ben-brent-kevin-2025-02",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "Rasheeing the Scene won by 3.58; The Boonist Monks won by 6.86; Chudders Football Team won by 30.52",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     },
     {
       "arc_id": "trade_saga-brent-kevin-oscar-2025-03",
       "title": "Trade activity surge",
       "status": "resolved",
-      "this_week_development": "Burden of Etienne-y Woody won by 1.16; The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Chudders Football Team won by 30.52; Sleeping Giants won by 46.42",
-      "suggested_framing": "Continue tracking this arc"
-    },
-    {
-      "arc_id": "trade_saga-brent-matt-oscar-2025-10",
-      "title": "Trade activity surge",
-      "status": "resolved",
-      "this_week_development": "Burden of Etienne-y Woody won by 1.16; The Boonist Monks won by 6.86; General Ken-obi won by 16.02; Chudders Football Team won by 30.52; Sleeping Giants won by 46.42",
+      "this_week_development": "Entering the 2025 season",
       "suggested_framing": "Continue tracking this arc"
     }
   ],
-  "resolved_predictions": [
-    {
-      "prediction_id": "pred-006",
-      "author": "~ Patrick Raue",
-      "original_quote": "In my other dynasty league, I went all in like Brent two years ago and I’m in hell right now. I lost in the championship two years ago, last year I was best team regular season, but got bounced in the",
-      "made_at_local": "2023-10-19T19:23:25Z",
-      "resolution": "aging_badly",
-      "evidence": "Chudders Football Team won in Week 14 (113.36 pts)",
-      "comedic_value": 7
-    },
-    {
-      "prediction_id": "pred-020",
-      "author": "~ Patrick Raue",
-      "original_quote": "But he didn’t start his best roster. He dropped a legit LB to start and part time old coming off injury pass rusher. Is that not some sort of tanking?  I think it is, just not a full\nBlown tank",
-      "made_at_local": "2023-11-14T16:44:28Z",
-      "resolution": "aging_badly",
-      "evidence": "Father Time lost in Week 14 (88.48 pts)",
-      "comedic_value": 7
-    },
-    {
-      "prediction_id": "pred-021",
-      "author": "Sacko",
-      "original_quote": "He was on fire last week and beat the best team in the NFL. He's 28 years old.",
-      "made_at_local": "2023-11-15T16:43:23Z",
-      "resolution": "aging_badly",
-      "evidence": "Chudders Football Team won in Week 14 (113.36 pts)",
-      "comedic_value": 7
-    },
-    {
-      "prediction_id": "pred-051",
-      "author": "~ Patrick Raue",
-      "original_quote": "CA lemon law has always been consumer friendly (e.g. consumer is entitled to attorney fees in they “prevail”, but not the other way around; availability of civil penalties of up to two times actual da",
-      "made_at_local": "2024-05-30T01:49:32Z",
-      "resolution": "aging_badly",
-      "evidence": "Father Time lost in Week 14 (88.48 pts)",
-      "comedic_value": 7
-    },
-    {
-      "prediction_id": "pred-057",
-      "author": "Brent Boone",
-      "original_quote": "Absolute worst team gets first pick",
-      "made_at_local": "2024-08-24T23:42:27Z",
-      "resolution": "aging_badly",
-      "evidence": "Chudders Football Team won in Week 14 (113.36 pts)",
-      "comedic_value": 7
-    },
-    {
-      "prediction_id": "pred-068",
-      "author": "Neo",
-      "original_quote": "Yeah but the patriots are the worst team in the league. No RB is putting up good numbers with that team ‎",
-      "made_at_local": "2024-10-04T17:13:46Z",
-      "resolution": "aging_badly",
-      "evidence": "Chudders Football Team won in Week 14 (113.36 pts)",
-      "comedic_value": 7
-    },
-    {
-      "prediction_id": "pred-077",
-      "author": "Oscar",
-      "original_quote": "My heart is with that and that is what I support.  On the other hand, I see some logic in keeping it separate.  Like pick on max PF to improve the worst TEAM.  But sacko based on rankings to punish wo",
-      "made_at_local": "2024-11-06T23:43:44Z",
-      "resolution": "aging_badly",
-      "evidence": "Chudders Football Team won in Week 14 (113.36 pts)",
-      "comedic_value": 7
-    },
-    {
-      "prediction_id": "pred-078",
-      "author": "~ Harlow",
-      "original_quote": "Or lowest PF (non max)? Like actually worst team fielded throughout year",
-      "made_at_local": "2024-11-06T23:53:37Z",
-      "resolution": "aging_badly",
-      "evidence": "Chudders Football Team won in Week 14 (113.36 pts)",
-      "comedic_value": 7
-    },
-    {
-      "prediction_id": "pred-095",
-      "author": "Brent Boone",
-      "original_quote": "What’s makes a gm think hmmmm - Travis hunter played both ways in college and weighs buck 50 and only tore his acl once playing against shitty teams…but damn Charles Woodson? No chance he should play ",
-      "made_at_local": "2025-11-12T18:18:15Z",
-      "resolution": "aging_badly",
-      "evidence": "Chudders Football Team won in Week 14 (113.36 pts)",
-      "comedic_value": 7
-    }
-  ],
+  "resolved_predictions": [],
   "sentiment_snapshot": {
     "The Boonist Monks": {
-      "activity": "medium",
+      "activity": "high",
       "mood": "hyped",
-      "notable": "Posted 13 messages after the win"
+      "notable": "Most active chatter this week (464 messages)"
     },
     "Kittler on the Roof": {
-      "activity": "low",
+      "activity": "high",
       "mood": "hyped",
-      "notable": "Barely said a word after the loss"
+      "notable": "Most active chatter this week (23 messages)"
     },
     "Burden of Etienne-y Woody": {
-      "activity": "silent",
-      "mood": "neutral",
-      "notable": ""
+      "activity": "high",
+      "mood": "cocky",
+      "notable": "Most active chatter this week (94 messages)"
     },
     "Noble FFT": {
-      "activity": "silent",
-      "mood": "silent",
-      "notable": "Went completely silent after the loss"
+      "activity": "high",
+      "mood": "hyped",
+      "notable": "Most active chatter this week (102 messages)"
     },
     "The Legion of Bouz": {
-      "activity": "silent",
-      "mood": "silent",
-      "notable": "Went completely silent after the loss"
+      "activity": "high",
+      "mood": "hyped",
+      "notable": "Most active chatter this week (109 messages)"
     },
     "Rasheeing the Scene": {
-      "activity": "medium",
-      "mood": "cocky",
-      "notable": ""
+      "activity": "high",
+      "mood": "neutral",
+      "notable": "Most active chatter this week (33 messages)"
     },
     "Chudders Football Team": {
-      "activity": "silent",
-      "mood": "neutral",
-      "notable": ""
+      "activity": "high",
+      "mood": "hyped",
+      "notable": "Most active chatter this week (136 messages)"
     },
     "MHJTIME": {
-      "activity": "medium",
-      "mood": "neutral",
-      "notable": ""
+      "activity": "high",
+      "mood": "hyped",
+      "notable": "Most active chatter this week (351 messages)"
     },
     "Father Time": {
-      "activity": "silent",
-      "mood": "silent",
-      "notable": "Went completely silent after the loss"
+      "activity": "high",
+      "mood": "neutral",
+      "notable": "Most active chatter this week (19 messages)"
     },
     "General Ken-obi": {
-      "activity": "medium",
-      "mood": "neutral",
-      "notable": ""
+      "activity": "high",
+      "mood": "hyped",
+      "notable": "Most active chatter this week (67 messages)"
     },
     "Sleeping Giants": {
-      "activity": "low",
-      "mood": "neutral",
-      "notable": ""
+      "activity": "high",
+      "mood": "hyped",
+      "notable": "Most active chatter this week (148 messages)"
     },
     "Ghastly Grayskull Gang": {
-      "activity": "medium",
-      "mood": "neutral",
-      "notable": ""
+      "activity": "high",
+      "mood": "cocky",
+      "notable": "Most active chatter this week (223 messages)"
     }
   },
   "league_memory": {
@@ -456,7 +431,7 @@
         "name": "Sacko punishment talk",
         "total_frequency": 664,
         "first_seen": "2023-09",
-        "last_seen": "2025-12",
+        "last_seen": "2025-09",
         "still_active": true,
         "sample_block": [
           {
@@ -480,7 +455,7 @@
         "name": "Tanking accusations",
         "total_frequency": 311,
         "first_seen": "2023-10",
-        "last_seen": "2025-11",
+        "last_seen": "2025-09",
         "still_active": true,
         "sample_block": [
           {
@@ -499,7 +474,7 @@
         "name": "Bust performance",
         "total_frequency": 21,
         "first_seen": "2023-09",
-        "last_seen": "2025-11",
+        "last_seen": "2025-09",
         "still_active": true,
         "sample_block": [
           {
@@ -528,7 +503,7 @@
         "name": "Commissioner authority",
         "total_frequency": 14,
         "first_seen": "2023-10",
-        "last_seen": "2025-10",
+        "last_seen": "2025-09",
         "still_active": true,
         "sample_block": [
           {
@@ -557,7 +532,7 @@
         "name": "Cooked/done",
         "total_frequency": 13,
         "first_seen": "2023-09",
-        "last_seen": "2025-12",
+        "last_seen": "2025-09",
         "still_active": true,
         "sample_block": [
           {
@@ -719,33 +694,257 @@
       "block": [
         {
           "sender": "Brent Boone",
-          "text": "Ben aren’t you at this games\n‎[12/7/25, 3:59:54 PM] ~ Patrick Raue: Idk but this trade is looking better and better ‎<attached: 00021715-PHOTO-2025-12-07-15-59-54.jpg>",
-          "timestamp_local": "2025-12-07T15:59:07-08:00"
+          "text": "Wow jahan Dotson he was like +8000 first td lol",
+          "timestamp_local": "2025-02-09T16:02:43-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Not a td",
+          "timestamp_local": "2025-02-09T16:02:57-08:00"
         },
         {
           "sender": "~ Patrick Raue",
-          "text": "Hard to get a even decent trade result with Blake, super GM\n‎[12/7/25, 4:02:02 PM] Ben Chodos: Sure am! ‎<attached: 00021717-PHOTO-2025-12-07-16-02-02.jpg>\n‎[12/7/25, 4:02:04 PM] Ben Chodos: Sure am! ‎<attached: 00021718-PHOTO-2025-12-07-16-02-04.jpg>",
-          "timestamp_local": "2025-12-07T16:00:20-08:00"
+          "text": "But he was short. So it’s Saquan or Hurts time",
+          "timestamp_local": "2025-02-09T16:03:04-08:00"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "Brady is pretty vocal with the disagreement on the calls. I like it. But otherwise he’s meh",
+          "timestamp_local": "2025-02-09T16:03:33-08:00"
         },
         {
           "sender": "Brent Boone",
-          "text": "LFG!!!!",
-          "timestamp_local": "2025-12-07T16:02:19-08:00"
-        },
-        {
-          "sender": "Brent Boone",
-          "text": "Box status",
-          "timestamp_local": "2025-12-07T16:02:23-08:00"
-        },
-        {
-          "sender": "Brent Boone",
-          "text": "That’s so sick",
-          "timestamp_local": "2025-12-07T16:02:26-08:00"
+          "text": "Yeah Brady isn’t that good at announcer but I agree with him you gotta let the boys play",
+          "timestamp_local": "2025-02-09T16:03:56-08:00"
         }
       ],
       "target_message_index": 2,
-      "category": "debate",
-      "summary": "Ben Chodos, Brent Boone, Oscar exchanging messages"
+      "category": "trash_talk",
+      "summary": "Brent Boone, ~ Patrick Raue exchanging messages"
+    },
+    {
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Imagine calling Mahomes a choke",
+          "timestamp_local": "2025-02-09T17:07:33-08:00"
+        },
+        {
+          "sender": "Oscar",
+          "text": "I just read a comment that Nick Sorianni looks like your friends brother that never left your hometown and it’s so accurate lol",
+          "timestamp_local": "2025-02-09T17:08:12-08:00"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "You can be under pressure and not chuck the ball to the other team. 2 picks and a pick six. Mahomes not blameless.",
+          "timestamp_local": "2025-02-09T17:10:08-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "lol bro",
+          "timestamp_local": "2025-02-09T17:10:22-08:00"
+        },
+        {
+          "sender": "Neo",
+          "text": "Yeah this line has been god awful",
+          "timestamp_local": "2025-02-09T17:10:25-08:00"
+        }
+      ],
+      "target_message_index": 2,
+      "category": "reaction",
+      "summary": "Brent Boone, Neo, Oscar exchanging messages"
+    },
+    {
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "The line is getting absolutely punked",
+          "timestamp_local": "2025-02-09T17:11:09-08:00"
+        },
+        {
+          "sender": "Sacko",
+          "text": "Damn philli",
+          "timestamp_local": "2025-02-09T17:11:12-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Yeah hard to play qb when your ass is in the end zone the whole game and your line can’t block anyone",
+          "timestamp_local": "2025-02-09T17:11:28-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "That was also an amazing pick by Braun",
+          "timestamp_local": "2025-02-09T17:11:53-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Atrocious ass o line play",
+          "timestamp_local": "2025-02-09T17:13:56-08:00"
+        }
+      ],
+      "target_message_index": 2,
+      "category": "reaction",
+      "summary": "Brent Boone, Sacko exchanging messages"
+    },
+    {
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Chiefs are pretty cooked",
+          "timestamp_local": "2025-02-09T17:21:48-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Kendrick is fire",
+          "timestamp_local": "2025-02-09T17:32:27-08:00"
+        },
+        {
+          "sender": "~ Patrick Raue",
+          "text": "My youngest is feeling it.\n‎[2/9/25, 5:33:31 PM] ~ Patrick Raue: ‎<attached: 00017439-VIDEO-2025-02-09-17-33-31.mp4>",
+          "timestamp_local": "2025-02-09T17:33:18-08:00"
+        },
+        {
+          "sender": "Oscar",
+          "text": "Damn insights bro",
+          "timestamp_local": "2025-02-09T17:34:23-08:00"
+        },
+        {
+          "sender": "Oscar",
+          "text": "This game is like Kendrick v Drake tho so pretty fitting",
+          "timestamp_local": "2025-02-09T17:35:18-08:00"
+        }
+      ],
+      "target_message_index": 2,
+      "category": "reaction",
+      "summary": "Brent Boone, Oscar, ~ Patrick Raue exchanging messages"
+    },
+    {
+      "block": [
+        {
+          "sender": "Oscar",
+          "text": "This game is like Kendrick v Drake tho so pretty fitting",
+          "timestamp_local": "2025-02-09T17:35:18-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Wow that was fucking fire",
+          "timestamp_local": "2025-02-09T17:40:47-08:00"
+        },
+        {
+          "sender": "Sacko",
+          "text": "Kendrick 🔥 🔥",
+          "timestamp_local": "2025-02-09T17:43:09-08:00"
+        },
+        {
+          "sender": "Sacko",
+          "text": "People hating saying it was simple",
+          "timestamp_local": "2025-02-09T17:43:18-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "lol That was the best halftime shows I’ve I’ve ever seen",
+          "timestamp_local": "2025-02-09T17:47:22-08:00"
+        }
+      ],
+      "target_message_index": 2,
+      "category": "reaction",
+      "summary": "Brent Boone, Sacko exchanging messages"
+    },
+    {
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Who is that?",
+          "timestamp_local": "2025-02-09T17:48:28-08:00"
+        },
+        {
+          "sender": "Oscar",
+          "text": "Prince",
+          "timestamp_local": "2025-02-09T17:48:40-08:00"
+        },
+        {
+          "sender": "Oscar",
+          "text": "Right",
+          "timestamp_local": "2025-02-09T17:48:45-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "That’s who I thought but want sure",
+          "timestamp_local": "2025-02-09T17:48:56-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Wasn’t",
+          "timestamp_local": "2025-02-09T17:49:02-08:00"
+        }
+      ],
+      "target_message_index": 2,
+      "category": "reaction",
+      "summary": "Brent Boone, Oscar, Sacko exchanging messages"
+    },
+    {
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "Bro they can’t block anybody",
+          "timestamp_local": "2025-02-09T17:52:22-08:00"
+        },
+        {
+          "sender": "Oscar",
+          "text": "JLO and Shakira were sick.  They still got it",
+          "timestamp_local": "2025-02-09T17:52:22-08:00"
+        },
+        {
+          "sender": "Oscar",
+          "text": "Not saying the best but best at some things",
+          "timestamp_local": "2025-02-09T17:52:36-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "JLO is so overrated imo",
+          "timestamp_local": "2025-02-09T17:52:47-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I honestly couldn’t tell you the name of one JLO song",
+          "timestamp_local": "2025-02-09T17:53:18-08:00"
+        }
+      ],
+      "target_message_index": 2,
+      "category": "reaction",
+      "summary": "Brent Boone, Oscar exchanging messages"
+    },
+    {
+      "block": [
+        {
+          "sender": "Brent Boone",
+          "text": "She’s so bad",
+          "timestamp_local": "2025-02-09T17:54:56-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Yeah I didn’t listen to JLOs songs I’m not gay",
+          "timestamp_local": "2025-02-09T17:54:57-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "I just looked at her ass",
+          "timestamp_local": "2025-02-09T17:54:58-08:00"
+        },
+        {
+          "sender": "Brent Boone",
+          "text": "Lolololololol",
+          "timestamp_local": "2025-02-09T17:54:59-08:00"
+        },
+        {
+          "sender": "Oscar",
+          "text": "Makes sense slapping dudes asses in the locker room and spankin it to JLOs at home",
+          "timestamp_local": "2025-02-09T17:56:05-08:00"
+        }
+      ],
+      "target_message_index": 2,
+      "category": "reaction",
+      "summary": "Brent Boone, Oscar, ~ Patrick Raue exchanging messages"
     }
   ],
   "suggested_callbacks": [
