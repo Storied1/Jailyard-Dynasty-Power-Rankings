@@ -57,6 +57,12 @@ const LEAGUE_CONFIG = {
     { label: "Draft", href: "draft.html" },
     { label: "Trades", href: "trades.html" },
     {
+      label: "2025 Preview",
+      href: "preseason-2025.html",
+      group: "columns",
+      subtitle: "Three champs in three years and a tanking referendum",
+    },
+    {
       label: "Week 1",
       href: "week1.html",
       group: "columns",
