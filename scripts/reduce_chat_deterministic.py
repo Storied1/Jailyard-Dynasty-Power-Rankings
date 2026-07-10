@@ -16,14 +16,9 @@ import sys
 from collections import Counter, defaultdict
 from datetime import datetime
 
-from shared import (
-    REPO_ROOT,
-    MAP_CACHE_DIR,
-    CONTENT_CHAT_DIR as CHAT_DIR,
-    NAME_MAP_PATH,
-    load_json,
-    save_json as _save_json,
-)
+from shared import CONTENT_CHAT_DIR as CHAT_DIR
+from shared import MAP_CACHE_DIR, NAME_MAP_PATH, REPO_ROOT, load_json
+from shared import save_json as _save_json
 
 FINGERPRINTS_PATH = CHAT_DIR / "fingerprints.json"
 PERSONAS_DIR = CHAT_DIR / "personas"
@@ -180,7 +175,7 @@ def reduce_arcs(map_outputs, name_map):
     # Group by type and participants
     arc_groups = defaultdict(list)
     for arc in all_arcs:
-        key = (arc.get("type", ""), tuple(sorted(arc.get("participants", [])[:3])))
+        key = (arc.get("type", ""), tuple(sorted(arc.get("participants", []))[:3]))
         arc_groups[key].append(arc)
 
     # Merge groups into narrative arcs

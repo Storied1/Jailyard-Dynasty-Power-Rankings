@@ -15,14 +15,14 @@ from collections import Counter, defaultdict
 from datetime import timedelta
 
 from shared import (
+    CONSENSUS_MIN_SENDERS,
+    CONSENSUS_WINDOW_SIZE,
     MAP_CACHE_DIR,
     NAME_MAP_PATH,
-    load_json,
-    save_json,
-    parse_ts,
-    CONSENSUS_WINDOW_SIZE,
-    CONSENSUS_MIN_SENDERS,
     RAPID_BURST_SEC,
+    load_json,
+    parse_ts,
+    save_json,
 )
 
 # --- Prediction / hot-take detection patterns ---
@@ -515,7 +515,7 @@ def find_candidate_arcs(messages, predictions, relationships, name_map):
     ]
     if len(trade_msgs) >= 3:
         # Cluster trade messages
-        participants = list(
+        participants = sorted(
             set(m.get("sender") or "" for _, m in trade_msgs[:10]) & members
         )
         arcs.append(
