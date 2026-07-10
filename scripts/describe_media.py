@@ -2,15 +2,25 @@
 """
 Media vision analysis for Jailyard Dynasty WhatsApp media.
 
-Sends images/video frames to Claude's vision API for description, tagging,
+Sends images/video frames to Claude vision for description, tagging,
 and humor classification. Progress is cached so re-runs skip completed batches.
 
-Dependencies: anthropic, opencv-python-headless
+Two backends:
+  claude-cli (default) -- headless Claude Code (`claude -p`), billed against
+      the Max SUBSCRIPTION (no API credits). Default model: claude-sonnet-5.
+      On a usage-window limit it saves progress and exits cleanly; re-run to
+      resume.
+  api -- Anthropic API via ANTHROPIC_API_KEY (usage-billed). Default model:
+      claude-haiku-4-5.
+
+Dependencies: opencv-python-headless (+ anthropic for the api backend)
 Input: chat/parsed_messages.json + media files in 'WhatsApp Chat - The Jailyard/'
 Output: content/chat/media-catalog.json
 
 Usage:
     python scripts/describe_media.py
+    python scripts/describe_media.py --backend api
+    python scripts/describe_media.py --model claude-opus-4-8
     python scripts/describe_media.py --batch-size 5
     python scripts/describe_media.py --dry-run
     python scripts/describe_media.py --limit 20
@@ -21,7 +31,11 @@ import base64
 import io
 import json
 import os
+import re
+import shutil
+import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -33,8 +47,7 @@ if sys.stdout.encoding != "utf-8":
 try:
     import anthropic
 except ImportError:
-    print("ERROR: anthropic package required. Install with: pip install anthropic")
-    sys.exit(1)
+    anthropic = None  # only required for --backend api; checked in create_client()
 
 try:
     import cv2
@@ -58,10 +71,12 @@ MEDIA_DIR = REPO_ROOT / "WhatsApp Chat - The Jailyard"
 PROGRESS_PATH = CONTENT_CHAT_DIR / ".media_progress.json"
 OUTPUT_PATH = CONTENT_CHAT_DIR / "media-catalog.json"
 
-MODEL = "claude-haiku-4-5-20251001"
+API_MODEL_DEFAULT = "claude-haiku-4-5-20251001"  # gitleaks:allow -- model ID, not a key
+CLI_MODEL_DEFAULT = "claude-sonnet-5"
 MAX_TOKENS = 1024
 RATE_LIMIT_RETRIES = 5
 RATE_LIMIT_BASE_DELAY = 2.0
+CLI_TIMEOUT_SEC = 900  # per claude -p invocation (a batch of images + reads)
 
 
 # ── Image/Video Processing ───────────────────────────────────────────
@@ -154,13 +169,47 @@ def classify_media_type(filename: str) -> str:
 # ── AI Client ─────────────────────────────────────────────────────────
 
 
-def create_client() -> anthropic.Anthropic:
+def create_client() -> "anthropic.Anthropic":
     """Create an Anthropic client. Requires ANTHROPIC_API_KEY env var."""
+    if anthropic is None:
+        print(
+            "ERROR: anthropic package required for --backend api. pip install anthropic"
+        )
+        sys.exit(1)
     key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not key:
         print("ERROR: ANTHROPIC_API_KEY not set in environment.")
         sys.exit(1)
     return anthropic.Anthropic(api_key=key)
+
+
+def parse_model_json_array(raw: str, n_items: int) -> list[dict]:
+    """Parse a model response expected to be a JSON array of n_items objects.
+
+    Tolerates markdown code fences and surrounding prose. On failure returns
+    n_items 'Could not parse' placeholders (same convention both backends use).
+    """
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = re.sub(r"^```\w*\n?", "", raw)
+        raw = re.sub(r"\n?```$", "", raw)
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, list):
+            return parsed
+    except json.JSONDecodeError:
+        pass
+    match = re.search(r"\[[\s\S]*\]", raw)
+    if match:
+        try:
+            parsed = json.loads(match.group())
+            if isinstance(parsed, list):
+                return parsed
+        except json.JSONDecodeError:
+            pass
+    return [
+        {"description": "Could not parse", "tags": ["other"], "humor_type": "none"}
+    ] * n_items
 
 
 BATCH_SYSTEM_PROMPT = """You are analyzing images/GIF frames from a fantasy football league WhatsApp group chat called "The Jailyard Dynasty." These are memes, screenshots, reaction GIFs, and photos shared in group chat banter.
@@ -176,8 +225,10 @@ Respond with ONLY a JSON array, one object per image:
 Be specific about what you see — player names, team logos, stat lines, meme templates, etc. If it's a reaction GIF, describe the emotion/action. If it's a screenshot, note what app/site and what data is shown."""
 
 
-def describe_batch(client: anthropic.Anthropic, batch_items: list[dict]) -> list[dict]:
-    """Send a batch of images to Claude for description."""
+def describe_batch(
+    client: "anthropic.Anthropic", batch_items: list[dict], model: str
+) -> list[dict]:
+    """Send a batch of images to Claude for description (API backend)."""
     content = []
     for item in batch_items:
         b64, media_type = item["image_data"]
@@ -201,32 +252,13 @@ def describe_batch(client: anthropic.Anthropic, batch_items: list[dict]) -> list
     for attempt in range(RATE_LIMIT_RETRIES):
         try:
             response = client.messages.create(
-                model=MODEL,
+                model=model,
                 max_tokens=MAX_TOKENS,
                 system=BATCH_SYSTEM_PROMPT,
                 messages=[{"role": "user", "content": content}],
             )
             raw = response.content[0].text.strip()
-            # Parse JSON response
-            import re
-
-            if raw.startswith("```"):
-                raw = re.sub(r"^```\w*\n?", "", raw)
-                raw = re.sub(r"\n?```$", "", raw)
-            try:
-                return json.loads(raw)
-            except json.JSONDecodeError:
-                match = re.search(r"\[[\s\S]*\]", raw)
-                if match:
-                    return json.loads(match.group())
-                # Return empty descriptions
-                return [
-                    {
-                        "description": "Could not parse",
-                        "tags": ["other"],
-                        "humor_type": "none",
-                    }
-                ] * len(batch_items)
+            return parse_model_json_array(raw, len(batch_items))
         except anthropic.RateLimitError:
             delay = RATE_LIMIT_BASE_DELAY * (2**attempt)
             print(f"    Rate limited. Retrying in {delay:.0f}s...")
@@ -247,6 +279,110 @@ def describe_batch(client: anthropic.Anthropic, batch_items: list[dict]) -> list
     return [
         {"description": "Max retries exceeded", "tags": ["other"], "humor_type": "none"}
     ] * len(batch_items)
+
+
+# ── Claude Code CLI backend (subscription-billed) ────────────────────
+
+
+def find_claude_cli() -> str:
+    """Resolve the claude CLI binary, or exit with guidance."""
+    path = shutil.which("claude")
+    if not path:
+        print(
+            "ERROR: `claude` CLI not found on PATH. The claude-cli backend runs\n"
+            "headless Claude Code on your subscription. Install/login Claude Code,\n"
+            "or use --backend api with ANTHROPIC_API_KEY."
+        )
+        sys.exit(1)
+    return path
+
+
+def describe_batch_cli(
+    claude_bin: str, batch_items: list[dict], model: str
+) -> list[dict] | None:
+    """Describe a batch via headless Claude Code (`claude -p`).
+
+    Stages the already-resized JPEG frames as temp files (uniform handling for
+    photos AND video frames), asks Claude Code to Read each and return the
+    JSON array. Runs with cwd=tempdir so no project context/MCP servers load.
+
+    Returns None on a hard failure (likely a subscription usage-window limit)
+    so the caller can save progress and exit cleanly instead of poisoning
+    catalog entries.
+    """
+    # cwd is the stable %TEMP% root, NOT the per-batch dir: the claude child
+    # process would otherwise hold the dir as its cwd and Windows couldn't
+    # delete it. The batch dir is a child of cwd, so Read needs no --add-dir.
+    with tempfile.TemporaryDirectory(
+        prefix="jailyard-media-", ignore_cleanup_errors=True
+    ) as tmpdir:
+        lines = []
+        for i, item in enumerate(batch_items):
+            b64, _media_type = item["image_data"]
+            img_path = Path(tmpdir) / f"img_{i}.jpg"
+            img_path.write_bytes(base64.b64decode(b64))
+            lines.append(
+                f"Image {i} (from {item['sender']}, {item['media_type']}): {img_path}"
+            )
+
+        prompt = (
+            BATCH_SYSTEM_PROMPT
+            + "\n\nRead each of these image files and analyze them in order:\n"
+            + "\n".join(lines)
+            + "\n\nRespond with ONLY the JSON array, one object per image, same order."
+        )
+
+        cmd = [
+            claude_bin,
+            "-p",
+            prompt,
+            "--model",
+            model,
+            "--output-format",
+            "json",
+        ]
+        for attempt in range(RATE_LIMIT_RETRIES):
+            try:
+                res = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=CLI_TIMEOUT_SEC,
+                    cwd=tempfile.gettempdir(),
+                )
+            except subprocess.TimeoutExpired:
+                print(f"    CLI timeout ({CLI_TIMEOUT_SEC}s), attempt {attempt + 1}")
+                continue
+
+            envelope = None
+            if res.stdout:
+                try:
+                    envelope = json.loads(res.stdout)
+                except json.JSONDecodeError:
+                    pass
+
+            if (
+                res.returncode == 0
+                and isinstance(envelope, dict)
+                and not envelope.get("is_error")
+                and envelope.get("result")
+            ):
+                return parse_model_json_array(str(envelope["result"]), len(batch_items))
+
+            err_text = ""
+            if isinstance(envelope, dict):
+                err_text = str(envelope.get("result", ""))
+            err_text = (err_text or "") + (res.stderr or "")
+            print(f"    CLI error (attempt {attempt + 1}): {err_text[:200]}")
+            if "limit" in err_text.lower():
+                # Usage-window limit: retrying in-process won't outlast the
+                # window. Signal the caller to save progress and exit.
+                return None
+            time.sleep(RATE_LIMIT_BASE_DELAY * (2**attempt))
+
+    return None
 
 
 # ── Progress Management ──────────────────────────────────────────────
@@ -289,7 +425,24 @@ def main():
     parser.add_argument(
         "--reset", action="store_true", help="Reset progress and start over"
     )
+    parser.add_argument(
+        "--backend",
+        choices=("claude-cli", "api"),
+        default="claude-cli",
+        help="claude-cli = headless Claude Code on the Max subscription (default); "
+        "api = Anthropic API via ANTHROPIC_API_KEY",
+    )
+    parser.add_argument(
+        "--model",
+        default=None,
+        help=f"Model override (defaults: {CLI_MODEL_DEFAULT} for claude-cli, "
+        f"{API_MODEL_DEFAULT} for api)",
+    )
     args = parser.parse_args()
+
+    model = args.model or (
+        CLI_MODEL_DEFAULT if args.backend == "claude-cli" else API_MODEL_DEFAULT
+    )
 
     # ── Load parsed messages ──
     if not PARSED_MESSAGES.exists():
@@ -362,8 +515,14 @@ def main():
         write_catalog(progress, media_items, type_counts)
         return
 
-    # ── Create client ──
-    client = create_client()
+    # ── Create backend ──
+    print(f"  Backend: {args.backend} | model: {model}")
+    client = None
+    claude_bin = None
+    if args.backend == "api":
+        client = create_client()
+    else:
+        claude_bin = find_claude_cli()
 
     # ── Process in batches ──
     batches = [
@@ -412,7 +571,24 @@ def main():
             )
 
         if batch_with_images:
-            descriptions = describe_batch(client, batch_with_images)
+            if args.backend == "claude-cli":
+                descriptions = describe_batch_cli(claude_bin, batch_with_images, model)
+                if descriptions is None:
+                    # Usage-window limit or persistent CLI failure: keep these
+                    # items un-completed and exit cleanly -- re-run to resume.
+                    progress = {
+                        "completed_ids": sorted(completed_ids),
+                        "items": list(existing_items.values()),
+                    }
+                    save_progress(progress)
+                    print(
+                        "\n  Stopping: Claude Code usage limit (or persistent CLI "
+                        "error). Progress saved -- re-run this script after the "
+                        "usage window resets to resume."
+                    )
+                    sys.exit(0)
+            else:
+                descriptions = describe_batch(client, batch_with_images, model)
 
             for bi_item, desc in zip(batch_with_images, descriptions):
                 item = bi_item["item"]

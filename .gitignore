@@ -64,3 +64,6 @@ content/chat/.map_cache/
 # Local session-recovery logs (raw terminal transcripts saved before /compact;
 # preserve human-readable recovery insurance without entering source control).
 docs/sessions/
+
+# Media description progress cache (regenerable)
+content/chat/.media_progress.json
