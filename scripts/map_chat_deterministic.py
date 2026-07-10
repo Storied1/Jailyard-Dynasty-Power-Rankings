@@ -318,7 +318,7 @@ def detect_consensus(messages, name_map):
     for start in range(0, len(messages) - window, window // 2):
         chunk = messages[start : start + window]
         senders = set(
-            m.get("sender") or "" for m in chunk if m.get("sender") or "" in members
+            m.get("sender") or "" for m in chunk if (m.get("sender") or "") in members
         )
         if len(senders) >= CONSENSUS_MIN_SENDERS:
             # Find the most-mentioned topic keywords

@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from map_chat_deterministic import find_candidate_arcs  # noqa: E402
+from map_chat_deterministic import detect_consensus, find_candidate_arcs  # noqa: E402
 from reduce_chat_deterministic import reduce_arcs  # noqa: E402
 
 
@@ -45,3 +45,21 @@ def test_reduce_arcs_group_key_sorts_before_slice():
         {},
     )
     assert len(out) == 1, f"same participant set must merge to ONE arc, got {len(out)}"
+
+
+def test_detect_consensus_counts_members_only():
+    name_map = {"Alpha": {}, "Bravo": {}, "Carol": {}, "Dave": {}}
+    # Verified: CONSENSUS_MIN_SENDERS = 4, CONSENSUS_WINDOW_SIZE = 20
+    # (scripts/shared.py). Each 20-message chunk of this fixture contains all
+    # 6 rotating senders: only 3 are members (< 4 -> no fire with the fix);
+    # with the precedence bug non-members count too (6 >= 4 -> fires).
+    senders = ["Alpha", "Bravo", "Carol", "Nonmember1", "Nonmember2", "Nonmember3"]
+    messages = [
+        {"sender": senders[i % len(senders)], "text": "should I take this trade?"}
+        for i in range(60)
+    ]
+    snapshots = detect_consensus(messages, name_map)
+    # 3 unique members < CONSENSUS_MIN_SENDERS (4) -> no consensus should fire
+    assert (
+        snapshots == []
+    ), "non-member senders inflated the consensus count (operator-precedence bug)"

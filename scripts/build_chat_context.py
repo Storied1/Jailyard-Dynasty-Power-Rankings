@@ -1177,7 +1177,6 @@ def build_chat_context(
     relationships = load_json(
         CONTENT_CHAT_DIR / "relationships.json", "relationships.json"
     )
-    load_json(CONTENT_CHAT_DIR / "consensus.json", "consensus.json")
     # Preseason has no week's matchup data yet -- week_data stays None.
     week_data = None
     if not preseason:
