@@ -3,7 +3,11 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+pytest.importorskip("cv2")  # optional dep; describe_media hard-exits without it
 
 from describe_media import parse_model_json_array  # noqa: E402
 
