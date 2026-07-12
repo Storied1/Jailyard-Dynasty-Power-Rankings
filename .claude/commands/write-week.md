@@ -11,7 +11,7 @@ Before writing, you MUST read these files:
 3. `content/weeks/week${WEEK}_data.json` — this week's data: matchups (with momentum), standings (with momentum + margin_this_week), awards (top_performer with game_context), top_scorers (with player_id + game_context.one_liner for narrative framing)
 4. Previous week content summaries (from the week data's `previous_weeks_summary`)
 5. `content/weeks/week${WEEK}_chat_context.json` — real chat context (if available)
-6. League culture / lexicon / running-jokes: use ONLY the `league_memory` block inside `content/weeks/week${WEEK}_chat_context.json` (sanitized as-of week N). Do not load the raw analytics files from `content/chat/` directly — they carry season-end knowledge.
+6. League culture / lexicon / running-jokes: use ONLY the `league_memory` block inside `content/weeks/week${WEEK}_chat_context.json` (sanitized as-of week N). Do not load the raw analytics files from `content/chat/` directly — they carry season-end knowledge. **Joke time fields carry two deliberate lineages:** `first_seen`/`last_seen` are legacy month-grained MAP-selection compatibility fields — NOT exhaustive evidence bounds; never use them to infer recency (they can legitimately lag `last_observed_at` because a joke can match in a month without charting in that month's MAP detection). `count`/`first_seen_at`/`last_observed_at` are the authoritative through-cutoff raw-evidence count and exact instant bounds — **use `last_observed_at` for recency**.
 7. `content/weeks/week${WEEK}_draft.json` — **local LLM draft (if available)**
 
 ### Using Local Drafts
@@ -90,10 +90,10 @@ If `content/weeks/week${WEEK}_chat_context.json` exists, read it alongside the w
 
 1. **`high_relevancy` items (score 8+):** USE these verbatim. These are gold — real trash talk, predictions that aged badly, bets resolving. Attribute by WhatsApp name (the writer and readers know who everyone is).
 2. **`medium_relevancy` items (score 5-7.5):** Use selectively. Good for color but not essential.
-3. **`active_arcs_this_week`:** Use to frame the essay narrative. These are multi-week storylines happening in real time.
+3. **`active_arcs_this_week`:** Use to frame the essay narrative. These are multi-week storylines happening in real time. Each carries `arc_group_id` (a collision-free crew key — NOT durable thread identity; it changes when a crew gains a member), a through-cutoff `count`, and exact `first_seen_at` / `last_observed_at` instant bounds. There is **no `status` field** — the bounds carry recency, so describe momentum in your own prose. Every field is gated to on/before the cutoff.
 4. **`resolved_predictions`:** Perfect for "Overheard in the Chat" bits or mailbag references.
 5. **`sentiment_snapshot`:** Use to inform confessional tone (if someone went silent after a loss, that's material).
-6. **`suggested_callbacks`:** Use 1-2 per column for continuity.
+6. **`suggested_callbacks`:** Use 1-2 per column for continuity. `from_when` is the exact `first_seen_at` instant of the joke/arc (or the `made_at` of a prediction), all gated to on/before the cutoff.
 
 **Conversational blocks:** When a quote has a `block` with multiple messages, use the FULL BLOCK when the setup matters for comedy. Only quote the target message alone when it stands on its own.
 

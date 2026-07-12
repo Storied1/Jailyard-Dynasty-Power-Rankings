@@ -58,7 +58,16 @@ at all.
    there's no "this week's game" to hang them on. That's expected, not a
    bug — don't invent content to fill them. The `league_memory` block
    (`culture`, `lexicon`, `running_jokes`) works exactly like the weekly
-   version and IS meaningful — use it. If this file doesn't exist yet, fall
+   version and IS meaningful — use it. Each `running_jokes` entry carries a
+   through-cutoff `count` + exact `first_seen_at` / `last_observed_at` bounds
+   (no `still_active`); `active_arcs_this_week` entries carry `arc_group_id` +
+   `count` + those bounds and **no `status`**. All gated to on/before the cutoff.
+   **Joke time fields carry two deliberate lineages:** `first_seen`/`last_seen`
+   are legacy month-grained MAP-selection compatibility fields — NOT exhaustive
+   evidence bounds; never use them to infer recency (they can legitimately lag
+   `last_observed_at`). `count`/`first_seen_at`/`last_observed_at` are the
+   authoritative through-cutoff raw-evidence count and exact instant bounds —
+   **use `last_observed_at` for recency**. If this file doesn't exist yet, fall
    back to general league voice, same convention as `/write-week`.
 4. `content/preseason-2026/preseason_content.json` — **shape, tone, and
    length precedent only.** It is FORWARD-LOOKING chrome, not a data

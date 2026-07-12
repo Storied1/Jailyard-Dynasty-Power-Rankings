@@ -5,6 +5,7 @@ that were previously copy-pasted across 17+ scripts.
 """
 
 import json
+import os
 import re
 import sys
 import time
@@ -16,18 +17,63 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Paths — single source of truth for all project directories
 # ---------------------------------------------------------------------------
+#
+# Root contract (2d — determinism & provenance):
+#   SOURCE_ROOT — read-only TRUE sources: chat/_chat.txt, content/chat/name-map.json,
+#                 committed content/weeks/week{N}_data.json, and code. Never relocated.
+#   OUTPUT_ROOT — owns every DERIVED / generated node: parsed_messages.json,
+#                 identity_chain.json, fingerprints.json, .map_cache chunks + MAP
+#                 outputs, the analytics files, personas, the 19 chat contexts,
+#                 and provenance.json.
+# OUTPUT_ROOT defaults to REPO_ROOT, so production paths are byte-identical to
+# before. `generate_chat_provenance.py --rebuild-check` sets JAILYARD_OUTPUT_ROOT
+# to an external temp tree so the whole DAG rebuilds there without touching the
+# canonical repo; every DAG stage READS its intermediate inputs from OUTPUT_ROOT
+# (never the canonical copy), keeping a rebuild self-contained.
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+SOURCE_ROOT = REPO_ROOT
+OUTPUT_ROOT = Path(os.environ.get("JAILYARD_OUTPUT_ROOT") or REPO_ROOT).resolve()
+
 DATA_DIR = REPO_ROOT / "data"
 CONTENT_DIR = REPO_ROOT / "content"
-WEEKS_DIR = CONTENT_DIR / "weeks"
-PRESEASON_DIR = CONTENT_DIR / "preseason-2025"
-CHAT_DIR = REPO_ROOT / "chat"
-CONTENT_CHAT_DIR = CONTENT_DIR / "chat"
-MAP_CACHE_DIR = CONTENT_CHAT_DIR / ".map_cache"
+
+# Source dirs / files (read-only; anchored to SOURCE_ROOT)
+CHAT_DIR = SOURCE_ROOT / "chat"  # holds _chat.txt (private source)
+CHAT_TXT_PATH = CHAT_DIR / "_chat.txt"
+CONTENT_CHAT_DIR = CONTENT_DIR / "chat"  # holds name-map.json (source)
 NAME_MAP_PATH = CONTENT_CHAT_DIR / "name-map.json"
+WEEKS_DIR = CONTENT_DIR / "weeks"  # week{N}_data.json (committed source)
+PRESEASON_DIR = CONTENT_DIR / "preseason-2025"
 TEAM_PROFILES_PATH = CONTENT_DIR / "team-profiles.json"
 VOICE_BIBLE_PATH = CONTENT_DIR / "voice-bible.md"
+
+# Derived dirs / files (OUTPUT_ROOT-owned; identical to the source dirs when
+# OUTPUT_ROOT == REPO_ROOT, i.e. in production).
+CHAT_OUT_DIR = OUTPUT_ROOT / "chat"
+PARSED_MESSAGES_PATH = CHAT_OUT_DIR / "parsed_messages.json"
+IDENTITY_CHAIN_PATH = CHAT_OUT_DIR / "identity_chain.json"
+CONTENT_CHAT_OUT_DIR = OUTPUT_ROOT / "content" / "chat"
+MAP_CACHE_DIR = CONTENT_CHAT_OUT_DIR / ".map_cache"
+WEEKS_OUT_DIR = OUTPUT_ROOT / "content" / "weeks"
+PRESEASON_OUT_DIR = OUTPUT_ROOT / "content" / "preseason-2025"
+
+
+def rel_to_root(path):
+    """Root-aware repo-relative POSIX string for log lines.
+
+    Tries OUTPUT_ROOT then SOURCE_ROOT (they coincide in production); falls back
+    to the absolute POSIX path for anything under neither (e.g. a temp receipt).
+    Replaces bare ``path.relative_to(REPO_ROOT)``, which raises when a stage
+    writes under a temp OUTPUT_ROOT during --rebuild-check.
+    """
+    path = Path(path).resolve()
+    for root in (OUTPUT_ROOT, SOURCE_ROOT):
+        try:
+            return path.relative_to(root).as_posix()
+        except ValueError:
+            continue
+    return path.as_posix()
 
 
 # ---------------------------------------------------------------------------
@@ -116,6 +162,112 @@ def parse_ts(ts_str):
     return dt.astimezone(timezone.utc)
 
 
+# ---------------------------------------------------------------------------
+# Uniform temporal admitter — the exact-cutoff, fail-closed admission boundary
+# ---------------------------------------------------------------------------
+# The ONE admitter for every writer-facing temporal input across the chat
+# pipeline (messages, predictions + nested evidence, jokes, arcs, callbacks).
+# Implements the crosswalk Temporal Contract
+# (docs/superpowers/specs/2026-07-12-jailyard-governance-crosswalk.md,
+# "The Temporal Contract (uniform, exact-cutoff)"). It is DISTINCT from
+# parse_ts, which exists for non-gating parsing only and wrongly accepts
+# naive / date-only strings as UTC — never use parse_ts at an admission
+# boundary.
+
+_MONTH_ONLY_RE = re.compile(r"^\d{4}-\d{2}$")
+_DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def admissible(ts_str, cutoff):
+    """True iff ts_str is an exact tz-aware UTC instant at-or-before cutoff.
+
+    Fail-closed exact-cutoff rule: admit iff an exact tz-aware instant
+    ``<= cutoff``. Reject missing / malformed / naive / date-only / month-only
+    — an exact-event projection cannot bucket a coarse timestamp. Offset-aware
+    strings are converted to UTC; sub-second precision is preserved. ``cutoff``
+    is a tz-aware UTC datetime, or None for all-evidence (admit any exact
+    tz-aware instant). Month-granular comparison is banned.
+
+    Deliberately does NOT delegate to parse_ts, which would wrongly accept
+    naive/date-only strings as UTC and reopen the fail-open leak this replaces.
+    """
+    if not isinstance(ts_str, str):
+        return False
+    if _MONTH_ONLY_RE.match(ts_str):  # "2025-01" / "2025-13" -> reject
+        return False
+    if _DATE_ONLY_RE.match(ts_str):  # "2025-01-31" -> reject (no time-of-day)
+        return False
+    try:
+        dt = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+    except (ValueError, TypeError):  # malformed (incl. "2025-13-05T..")
+        return False
+    if dt.tzinfo is None:  # naive -> reject
+        return False
+    dt = dt.astimezone(timezone.utc)
+    if cutoff is None:
+        return True
+    return dt <= cutoff
+
+
+def month_key_strict(ts_str):
+    """Canonical ``%Y-%m`` for an exact tz-aware instant, else raise ValueError.
+
+    Fail-closed month bucketing: rejects missing / malformed / naive / date-only
+    / month-only timestamps rather than slicing a bad ``ts[:7]`` into a filesystem
+    path. Mirrors ``admissible``'s strictness. Used by split_chat_months to bucket
+    chunks and to derive the canonical month set the rebuild's month-set gate
+    asserts against (same parser on both sides -> expected and actual cannot drift).
+    """
+    if not isinstance(ts_str, str) or not ts_str:
+        raise ValueError(f"missing timestamp: {ts_str!r}")
+    if _MONTH_ONLY_RE.match(ts_str) or _DATE_ONLY_RE.match(ts_str):
+        raise ValueError(f"non-instant (date/month-only) timestamp: {ts_str!r}")
+    try:
+        dt = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+    except (ValueError, TypeError) as exc:
+        raise ValueError(f"malformed timestamp: {ts_str!r}") from exc
+    if dt.tzinfo is None:
+        raise ValueError(f"naive timestamp (no tz): {ts_str!r}")
+    return dt.astimezone(timezone.utc).strftime("%Y-%m")
+
+
+_SAFE_SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+def persona_slug(member):
+    """Deterministic, filesystem-SAFE persona slug.
+
+    Fail-closed: raises ValueError on any result that is empty or contains path
+    separators / dots / unsafe characters, so a hostile or malformed member name
+    can never escape the personas directory. Matches the historical slug for the
+    12 real members ('~ Harlow' -> 'harlow', 'Ben Chodos' -> 'ben-chodos').
+    """
+    if not isinstance(member, str):
+        raise ValueError(f"non-str persona member: {member!r}")
+    slug = member.lower().strip().replace(" ", "-").replace("~", "").strip("-")
+    while "--" in slug:
+        slug = slug.replace("--", "-")
+    if not _SAFE_SLUG_RE.fullmatch(slug):
+        raise ValueError(f"unsafe persona slug {slug!r} from member {member!r}")
+    return slug
+
+
+def roster_persona_slugs(name_map):
+    """Ordered {member: slug} over the roster (name_map keys); fail-closed on a
+    slug collision (two members mapping to the same filename)."""
+    mapping = {}
+    seen = {}
+    for member in name_map:
+        slug = persona_slug(member)
+        if slug in seen:
+            raise ValueError(
+                f"persona slug collision: {member!r} and {seen[slug]!r} both -> {slug!r}"
+            )
+        seen[slug] = member
+        mapping[member] = slug
+    return mapping
+
+
 def save_json(path, data, indent=2, ensure_ascii=False, verbose=False):
     """Write data to a JSON file with consistent formatting.
 
@@ -126,7 +278,7 @@ def save_json(path, data, indent=2, ensure_ascii=False, verbose=False):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=indent, ensure_ascii=ensure_ascii)
     if verbose:
-        print(f"  Saved: {path.relative_to(REPO_ROOT)}")
+        print(f"  Saved: {rel_to_root(path)}")
 
 
 def save_json_canonical(path, data, verbose=False):
@@ -146,7 +298,7 @@ def save_json_canonical(path, data, verbose=False):
         json.dump(data, f, indent=2, ensure_ascii=False, sort_keys=True)
         f.write("\n")
     if verbose:
-        print(f"  Saved (canonical): {path.relative_to(REPO_ROOT)}")
+        print(f"  Saved (canonical): {rel_to_root(path)}")
 
 
 # ---------------------------------------------------------------------------

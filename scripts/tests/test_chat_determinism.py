@@ -3,10 +3,19 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import reduce_chat_deterministic as rc  # noqa: E402
 from map_chat_deterministic import detect_consensus, find_candidate_arcs  # noqa: E402
 from reduce_chat_deterministic import reduce_arcs  # noqa: E402
+from reduce_chat_deterministic import (
+    reduce_consensus,
+    reduce_league_memory,
+    reduce_predictions,
+    reduce_relationships,
+)
 
 
 def _trade_msgs(senders):
@@ -81,3 +90,149 @@ def test_reduce_arcs_different_crews_stay_separate():
         {},
     )
     assert len(out) == 2, f"different crews must stay separate arcs, got {len(out)}"
+
+
+# ---------------------------------------------------------------------------
+# 2b — serialize-boundary order determinism. Each fixture is built so the
+# UNsorted (insertion / dict / hash) order differs from the sorted order, so
+# these fail before the sorted()/tie-break fix and pass after.
+# ---------------------------------------------------------------------------
+
+
+def test_reduce_league_memory_lexicon_sorted():
+    map_outputs = {
+        "2025-09": {"lexicon_candidates": {"zebra": "z", "apple": "a"}},
+        "2025-10": {"lexicon_candidates": {"mango": "m"}},
+    }
+    result = reduce_league_memory(map_outputs, {}, 100)
+    keys = list(result["lexicon"].keys())
+    assert keys == sorted(keys), f"lexicon keys not sorted: {keys}"
+
+
+def test_reduce_predictions_cred_index_sorted():
+    map_outputs = {
+        "2025-09": {
+            "predictions_and_bets": [
+                {"author": "Zed", "subject": "s1"},
+                {"author": "Amy", "subject": "s2"},
+                {"author": "Mo", "subject": "s3"},
+            ]
+        },
+    }
+    result = reduce_predictions(map_outputs, {})
+    keys = list(result["credibility_index"].keys())
+    assert keys == sorted(keys), f"cred_index keys not sorted: {keys}"
+
+
+def test_reduce_relationships_pairs_tiebroken_by_members():
+    # Equal interaction_count -> order must be deterministic by the sorted
+    # member-pair tuple, not dict-insertion (which is [Yara..] first here).
+    map_outputs = {
+        "2025-09": {
+            "relationship_interactions": [
+                {"pair": ["Yara", "Zane"], "interaction_count": 5, "tone": "neutral"},
+                {"pair": ["Amy", "Bob"], "interaction_count": 5, "tone": "neutral"},
+            ]
+        },
+    }
+    result = reduce_relationships(map_outputs, {})
+    members = [p["members"] for p in result["pairs"]]
+    assert members == sorted(
+        members
+    ), f"pairs not tie-broken deterministically: {members}"
+
+
+def test_reduce_consensus_topics_sorted():
+    map_outputs = {
+        "2025-09": {
+            "consensus_snapshots": [
+                {"topic": "zebra", "group_lean": "x"},
+                {"topic": "apple", "group_lean": "y"},
+            ]
+        },
+    }
+    result = reduce_consensus(map_outputs, {})
+    topics = [s["topic"] for s in result["snapshots"]]
+    assert topics == sorted(topics), f"consensus topics not sorted: {topics}"
+
+
+def test_reduce_arcs_preserves_chronological_tie_order():
+    # reduce_arcs ties are NOT alphabetical -- they preserve chronological
+    # encounter order (Sep crew before Oct crew), which is already
+    # PYTHONHASHSEED-independent. Guards against re-adding an alphabetical
+    # tie-break (which would also break test_tie_order_preservation).
+    base = {"title": "T", "type": "trade_saga", "key_moments": []}
+    out = reduce_arcs(
+        {
+            "2025-09": {"candidate_arcs": [dict(base, participants=["yara", "zane"])]},
+            "2025-10": {"candidate_arcs": [dict(base, participants=["amy", "bob"])]},
+        },
+        {},
+    )
+    assert [a["participants"] for a in out] == [["yara", "zane"], ["amy", "bob"]]
+
+
+# ---------------------------------------------------------------------------
+# 2i -- reduce_personas is roster-driven + fail-closed. PERSONAS_DIR is
+# monkeypatched to tmp so nothing writes into content/ (conftest purity).
+# ---------------------------------------------------------------------------
+
+
+def _patch_personas(monkeypatch, tmp_path):
+    monkeypatch.setattr(rc, "PERSONAS_DIR", tmp_path / "personas")
+    monkeypatch.setattr(rc, "FINGERPRINTS_PATH", tmp_path / "absent-fingerprints.json")
+
+
+def test_reduce_personas_rejects_wrong_member(tmp_path, monkeypatch):
+    _patch_personas(monkeypatch, tmp_path)
+    name_map = {"Neo": {"real_name": "Blake"}}
+    map_outputs = {
+        "2025-09": {
+            "persona_observations": [{"member": "Stranger", "observations": []}]
+        }
+    }
+    with pytest.raises(SystemExit):
+        rc.reduce_personas(map_outputs, name_map)
+    # detector-active: validation precedes any mkdir/write -> dir never created.
+    assert not (tmp_path / "personas").exists()
+
+
+def test_reduce_personas_rejects_slug_collision(tmp_path, monkeypatch):
+    _patch_personas(monkeypatch, tmp_path)
+    with pytest.raises(SystemExit):
+        rc.reduce_personas({}, {"Ben Chodos": {}, "ben chodos": {}})
+    assert not (tmp_path / "personas").exists()  # nothing written before rejection
+
+
+def test_reduce_personas_rejects_stale_extra(tmp_path, monkeypatch):
+    # A pre-existing (stale) persona file is an EXTRA -> post-write gate rejects.
+    _patch_personas(monkeypatch, tmp_path)
+    (tmp_path / "personas").mkdir()
+    (tmp_path / "personas" / "ghost.md").write_text("stale", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        rc.reduce_personas({}, {"Neo": {"real_name": "Blake"}})
+
+
+def test_reduce_personas_roster_exact_and_embeds_identity(tmp_path, monkeypatch):
+    _patch_personas(monkeypatch, tmp_path)
+    name_map = {
+        "Neo": {"real_name": "Blake", "sleeper_handle": "bLaker24"},
+        "Sacko": {"real_name": "Sam"},
+    }
+    # Observations only for Neo -> Sacko still gets a persona (roster-driven).
+    map_outputs = {
+        "2025-09": {
+            "persona_observations": [
+                {
+                    "member": "Neo",
+                    "observations": ["x"],
+                    "posting_stats": {"message_count": 3},
+                }
+            ]
+        }
+    }
+    rc.reduce_personas(map_outputs, name_map)
+    produced = sorted(p.stem for p in (tmp_path / "personas").glob("*.md"))
+    assert produced == ["neo", "sacko"]  # EXACTLY the roster
+    neo = (tmp_path / "personas" / "neo.md").read_text(encoding="utf-8")
+    assert "Blake" in neo and "bLaker24" in neo  # identity embedded

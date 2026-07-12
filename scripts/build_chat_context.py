@@ -19,12 +19,17 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
+from recompute_projection import recompute_projection
 from shared import (
-    CHAT_DIR,
     CONTENT_CHAT_DIR,
-    DATA_DIR,
-    PRESEASON_DIR,
+    CONTENT_CHAT_OUT_DIR,
+    IDENTITY_CHAIN_PATH,
+    NAME_MAP_PATH,
+    PARSED_MESSAGES_PATH,
+    PRESEASON_OUT_DIR,
     WEEKS_DIR,
+    WEEKS_OUT_DIR,
+    admissible,
     load_json,
     parse_ts,
 )
@@ -87,15 +92,33 @@ def compute_preseason_window(season=2025):
 
 
 def filter_messages_in_window(messages, window_start, window_end):
-    """Return messages whose timestamp_utc falls within [start, end]."""
+    """Return messages whose timestamp_utc is an exact instant in [start, end].
+
+    The UPPER bound is the as-if-realtime admission boundary: gated through the
+    uniform `admissible` admitter (exact-instant, fail-closed -- rejects
+    missing / malformed / naive / date-only / month-only / future). parse_ts is
+    used ONLY for the lower-bound arithmetic, on rows the admitter already
+    proved are exact instants -- never at the admission boundary itself."""
     result = []
     for msg in messages:
-        ts = parse_ts(msg.get("timestamp_utc"))
-        if ts is None:
+        ts_str = msg.get("timestamp_utc")
+        if not admissible(ts_str, window_end):
             continue
-        if window_start <= ts <= window_end:
-            result.append(msg)
+        if parse_ts(ts_str) < window_start:
+            continue
+        result.append(msg)
     return result
+
+
+def _member_messages(messages):
+    """Real member messages only -- drops is_system rows (joins, deletes, group
+    renames) which carry sender=None. Invariant on the returned rows: every row
+    is non-system AND has a non-null sender -- malformed non-system rows with a
+    null/empty sender are deliberately rejected too, so a downstream derivation
+    can never render a blank participant or leak a system row into a highlight
+    block. System rows stay in parsed_messages.json for auditability; they are
+    excluded only from writer-facing views here."""
+    return [m for m in messages if not m.get("is_system") and m.get("sender")]
 
 
 # ---------------------------------------------------------------------------
@@ -326,7 +349,6 @@ RELEVANCY_TYPES = [
     "prediction_aged_badly",
     "trash_talk",
     "bet_resolving",
-    "rivalry_heat",
     "milestone_reaction",
     "hot_take",
     "callback_material",
@@ -344,9 +366,7 @@ def score_message_relevancy(
     keywords,
     high_scorer_rid,
     low_scorer_rid,
-    relationships,
     media_catalog=None,
-    verbose=False,
 ):
     """
     Score a single message for relevancy to this week.
@@ -431,7 +451,11 @@ def score_message_relevancy(
 
     if player_mentions:
         score += 2.0
-        why = why or f"{sender} mentioned {player_mentions[0].split(':')[1]}"
+        # sorted(): a message that mentions 2+ players yields matches in
+        # keywords-dict insertion order, which is built from set iteration and
+        # so varies per process (PYTHONHASHSEED). Pick deterministically so the
+        # committed week context is byte-reproducible.
+        why = why or f"{sender} mentioned {sorted(player_mentions)[0].split(':')[1]}"
         suggested = suggested or "Power ranking blurb"
     if team_mentions:
         score += 1.5
@@ -456,16 +480,10 @@ def score_message_relevancy(
     if len(nearby_senders) >= 3:
         score += 1.0
 
-    # Rivalry heat: check relationships graph
-    if relationships and sender_rid is not None and matchup_opponent_rid is not None:
-        rivalry_pairs = relationships.get("rivalries", [])
-        for riv in rivalry_pairs:
-            riv_rids = {riv.get("roster_id_1"), riv.get("roster_id_2")}
-            if sender_rid in riv_rids and matchup_opponent_rid in riv_rids:
-                score += 3.0
-                rel_type = "rivalry_heat"
-                why = f"Rivalry matchup: {sender} vs their rival"
-                break
+    # (rivalry_heat scoring removed -- deliberate behavior contraction. The +3
+    # branch was DORMANT, not dead: it fires only on a relationships["rivalries"]
+    # payload the reducer never emits (only "pairs" exists). Recorded in the
+    # governance crosswalk, Phase 4/C.)
 
     # Media relevancy boost: described media mentioning players/teams
     if media_desc:
@@ -475,7 +493,9 @@ def score_message_relevancy(
             rel_type = rel_type or "media_relevant"
             why = (
                 why
-                or f"{sender} shared media about {media_kw_matches[0].split(':')[1]}"
+                # sorted(): same per-process ordering hazard as the text
+                # player-mention path above — pick deterministically.
+                or f"{sender} shared media about {sorted(media_kw_matches)[0].split(':')[1]}"
             )
             suggested = suggested or "Visual in Power ranking blurb"
 
@@ -504,29 +524,23 @@ def score_message_relevancy(
 # ---------------------------------------------------------------------------
 
 
-def _month_le(month_str, cutoff_dt):
-    """True if a 'YYYY-MM' month string is on/before the cutoff datetime.
+def find_active_arcs(proj_arcs, season, week_data, roster_to_team, name_to_roster):
+    """Surface recompute arcs relevant to this week.
 
-    Arc spans and key-moment dates are month-grained; the as-if-realtime
-    boundary only needs month resolution for them. None == not-future (True).
-    """
-    if not month_str:
-        return True
-    return str(month_str)[:7] <= cutoff_dt.strftime("%Y-%m")
-
-
-def find_active_arcs(
-    arcs, week, season, week_data, roster_to_team, cutoff, name_to_roster=None
-):
-    """Find arcs relevant to this week and annotate with weekly development."""
-    if not arcs:
+    `proj_arcs` come from recompute_projection(...) at window_end, so every arc
+    is ALREADY gated to on/through-cutoff evidence -- there is NO month-grained
+    span filter here (the exact-instant admitter did the gating; `_month_le` is
+    gone). Each arc is resolved to roster_ids (participants are WhatsApp display
+    names), kept only if a participant plays this week (preseason: the whole
+    league), annotated with this_week_development, and surfaced with the
+    enriched schema (arc_group_id, count, first_seen_at, last_observed_at -- NO
+    status; bounds carry recency). Arcs with a through-cutoff count of 0 are
+    dropped: no admissible evidence to surface = fail-closed."""
+    if not proj_arcs:
         return []
 
-    active = []
-    arc_list = arcs if isinstance(arcs, list) else arcs.get("arcs", [])
-
-    # Get roster_ids playing this week. Preseason (week_data=None): there's
-    # no matchup slate yet, so every team in the league is in scope.
+    # Roster_ids playing this week. Preseason (week_data=None): no slate yet, so
+    # the whole league is in scope.
     if week_data:
         playing_rids = set()
         for m in week_data.get("matchups", []):
@@ -535,50 +549,32 @@ def find_active_arcs(
     else:
         playing_rids = set(roster_to_team.keys())
 
-    for arc in arc_list:
-        span = arc.get("span", {}) if isinstance(arc.get("span"), dict) else {}
-        start = span.get("start") or arc.get("started")
-        # As-of-week-N: an arc that starts AFTER the cutoff is the future.
-        # Do NOT filter on the baked season-end status -- an arc that resolves
-        # later was still live earlier and must appear in those weeks.
-        if not _month_le(start, cutoff):
-            continue
-        end = span.get("end")
-        as_of_status = "resolved" if (end and _month_le(end, cutoff)) else "active"
+    active = []
+    for arc in proj_arcs:
+        if arc.get("count", 0) == 0:
+            continue  # no admissible evidence through the cutoff -> fail-closed
 
-        # Check if any arc participants are playing this week
-        participants = arc.get("roster_ids", arc.get("participants", []))
-        if isinstance(participants, list):
-            participant_rids = set()
-            for p in participants:
-                if isinstance(p, int):
-                    participant_rids.add(p)
-                elif isinstance(p, dict):
-                    participant_rids.add(p.get("roster_id"))
-                elif isinstance(p, str) and name_to_roster:
-                    # arcs.json stores WhatsApp display names -- resolve them
-                    rid = name_to_roster.get(p.strip().lower())
-                    if rid is not None:
-                        participant_rids.add(rid)
-        else:
-            participant_rids = set()
-
-        overlap = participant_rids & playing_rids
-        if not overlap:
+        # participants are WhatsApp display names (reduce_arcs); resolve them.
+        participant_rids = set()
+        for p in arc.get("participants", []):
+            if isinstance(p, str) and name_to_roster:
+                rid = name_to_roster.get(p.strip().lower())
+                if rid is not None:
+                    participant_rids.add(rid)
+            elif isinstance(p, int):
+                participant_rids.add(p)
+        if not (participant_rids & playing_rids):
             continue
 
-        # Build development note from matchup results (preseason: no
-        # matchups exist yet, so there's nothing to report developing).
         developments = []
         if week_data:
             for m in week_data.get("matchups", []):
                 t1_rid = m.get("team1", {}).get("roster_id")
                 t2_rid = m.get("team2", {}).get("roster_id")
                 if t1_rid in participant_rids or t2_rid in participant_rids:
-                    winner = m.get("winner", "")
-                    margin = m.get("margin", 0)
-                    developments.append(f"{winner} won by {margin}")
-
+                    developments.append(
+                        f"{m.get('winner', '')} won by {m.get('margin', 0)}"
+                    )
         if developments:
             development_note = "; ".join(developments)
         elif not week_data:
@@ -588,13 +584,14 @@ def find_active_arcs(
 
         active.append(
             {
-                "arc_id": arc.get("arc_id", arc.get("id", "")),
+                "arc_group_id": arc.get("arc_group_id", ""),
                 "title": arc.get("title", ""),
-                "status": as_of_status,
+                "count": arc.get("count", 0),
+                "first_seen_at": arc.get("first_seen_at"),
+                "last_observed_at": arc.get("last_observed_at"),
                 "this_week_development": development_note,
                 "suggested_framing": arc.get(
-                    "suggested_framing",
-                    arc.get("framing", "Continue tracking this arc"),
+                    "suggested_framing", "Continue tracking this arc"
                 ),
             }
         )
@@ -642,13 +639,11 @@ def resolve_predictions(predictions, week, season, week_data, cutoff):
                 player_scores[p.get("name", "").lower()] = p.get("points", 0)
 
     for pred in pred_list:
-        made_at = pred.get("made_at")
-        if made_at:
-            try:
-                if parse_ts(made_at) > cutoff:
-                    continue  # prediction not yet made as of week N
-            except (ValueError, TypeError):
-                pass
+        # As-of-week admission: a prediction is visible iff it was made at an
+        # exact instant on/before the cutoff. Uniform admitter -> fail-closed
+        # (missing/malformed/naive/date-only made_at is unknowable -> dropped).
+        if not admissible(pred.get("made_at"), cutoff):
+            continue
         # Check if prediction's resolve_by week has arrived
         resolve_week = pred.get("resolve_by_week")
         resolve_season = pred.get("resolve_by_season", season)
@@ -661,8 +656,14 @@ def resolve_predictions(predictions, week, season, week_data, cutoff):
 
         # NOTE: the baked `resolution` field is season-end knowledge -- never
         # gate on it (as-if-realtime). Outcomes are re-derived from week_data.
+        # Nested evidence is its OWN admission point (crosswalk contract): the
+        # quote_block context can post-date made_at (context_after messages), so
+        # re-cut it to the messages admissible at the cutoff before joining --
+        # fail-closed, never trusting the data to stay clean.
         quote = pred.get("subject") or " ".join(
-            (q.get("text") or "") for q in pred.get("quote_block", [])
+            (q.get("text") or "")
+            for q in pred.get("quote_block", [])
+            if admissible(q.get("timestamp"), cutoff)
         )
         author = pred.get("author_whatsapp", "")
         resolution = None
@@ -756,8 +757,13 @@ def resolve_predictions(predictions, week, season, week_data, cutoff):
                     "prediction_id": pred.get("prediction_id", pred.get("id", "")),
                     "author": author,
                     "original_quote": quote,
-                    "made_at_local": pred.get(
-                        "timestamp_local", pred.get("made_at", "")
+                    # made_at_local is an ungated local render -> gate it too;
+                    # fall back to the (already-admitted) made_at when it is not
+                    # an exact instant on/before the cutoff.
+                    "made_at_local": (
+                        pred.get("timestamp_local")
+                        if admissible(pred.get("timestamp_local"), cutoff)
+                        else pred.get("made_at", "")
                     ),
                     "resolution": resolution,
                     "evidence": evidence,
@@ -963,82 +969,100 @@ def extract_chat_highlights(window_messages, scored_items, max_highlights=8):
 # ---------------------------------------------------------------------------
 
 
-def sanitize_league_memory(league_memory, cutoff):
-    """As-of-week-N league memory: timeless culture/lexicon + running jokes
-    first seen on/before the cutoff. Excludes retrospective greatest_moments
-    and the post-season meta block (both encode the ending)."""
-    if not league_memory:
-        return {}
-    cutoff_month = cutoff.strftime("%Y-%m")
-    jokes = []
-    for j in league_memory.get("running_jokes", []):
-        if not _month_le(j.get("first_seen"), cutoff):
-            continue
-        jk = dict(j)
-        if jk.get("last_seen") and jk["last_seen"][:7] > cutoff_month:
-            jk["last_seen"] = cutoff_month
-            jk["still_active"] = True
-        jokes.append(jk)
+def sanitize_league_memory(league_memory, jokes):
+    """Writer-facing league memory: timeless culture + recompute jokes.
+
+    Fail-closed per the temporal contract
+    (docs/superpowers/specs/2026-07-12-jailyard-governance-crosswalk.md). The
+    full raw/all-time analytics stay in league-memory.json; the WRITER-FACING
+    projection:
+      - culture: only the timeless, evidence-free activity_triggers survive; the
+        retrospective summary and 35-month aggregates are dropped.
+      - lexicon: emitted EMPTY (fail-closed until a structured extractor computes
+        per-term through-cutoff values).
+      - running_jokes: sourced from the recompute at window_end (`jokes`, already
+        exact-instant gated), reduced to {name, first_seen, last_seen, count,
+        first_seen_at, last_observed_at}. The all-time total_frequency and the
+        unfiltered sample_block are dropped; a joke with a through-cutoff count
+        of 0 is dropped (no admissible evidence). NO still_active -- the bounds
+        already carry recency.
+    Also excludes retrospective greatest_moments and the post-season meta block.
+    """
+    culture = (league_memory or {}).get("culture", {})
+    safe_culture = {}
+    if isinstance(culture, dict) and culture.get("activity_triggers"):
+        safe_culture["activity_triggers"] = culture["activity_triggers"]
+
+    running_jokes = []
+    for j in jokes or []:
+        if j.get("count", 0) == 0:
+            continue  # no admissible evidence through the cutoff -> fail-closed
+        running_jokes.append(
+            {
+                "name": j.get("name"),
+                "first_seen": j.get("first_seen"),
+                "last_seen": j.get("last_seen"),
+                "count": j.get("count", 0),
+                "first_seen_at": j.get("first_seen_at"),
+                "last_observed_at": j.get("last_observed_at"),
+            }
+        )
     return {
-        "culture": league_memory.get("culture", {}),
-        "lexicon": league_memory.get("lexicon", {}),
-        "running_jokes": jokes,
+        "culture": safe_culture,
+        "lexicon": {},
+        "running_jokes": running_jokes,
     }
 
 
 def build_suggested_callbacks(
-    league_memory, arcs, predictions, week_data, roster_to_team, cutoff
+    jokes, arcs, predictions, week_data, roster_to_team, cutoff
 ):
-    """Suggest callbacks to past events that connect to this week."""
+    """Suggest callbacks connecting past events to this week.
+
+    `jokes` and `arcs` come from the recompute at window_end (already exact-
+    instant gated), so there is no month-grained re-gate here; `predictions`
+    still come from the committed predictions.json and are gated through the
+    uniform admitter by made_at. `from_when` carries the exact first_seen_at
+    (jokes / arcs) or made_at (predictions)."""
     callbacks = []
 
-    # From league memory: find entries that mention teams playing this week
+    # From league-memory jokes (recompute): entries that mention a playing team.
     playing_teams = get_all_team_names(week_data, roster_to_team)
 
-    if league_memory:
-        for joke in league_memory.get("running_jokes", []):
-            # as-of-week: only jokes already alive by the cutoff; never emit
-            # last_seen/still_active (season-end knowledge)
-            if not _month_le(joke.get("first_seen"), cutoff):
-                continue
-            text = json.dumps(joke).lower()
-            for tn in playing_teams:
-                if tn in text:
-                    callbacks.append(
-                        {
-                            "source": "league-memory",
-                            "content": joke.get("name", ""),
-                            "from_when": joke.get("first_seen", ""),
-                            "connection_to_this_week": f"Involves {tn.title()}, who plays this week",
-                        }
-                    )
-                    break
-            if len(callbacks) >= 5:
+    for joke in jokes or []:
+        text = json.dumps(joke).lower()
+        for tn in playing_teams:
+            if tn in text:
+                callbacks.append(
+                    {
+                        "source": "league-memory",
+                        "content": joke.get("name", ""),
+                        "from_when": joke.get("first_seen_at", ""),
+                        "connection_to_this_week": f"Involves {tn.title()}, who plays this week",
+                    }
+                )
                 break
+        if len(callbacks) >= 5:
+            break
 
-    # From arcs
-    if arcs:
-        arc_list = arcs if isinstance(arcs, list) else arcs.get("arcs", [])
-        for arc in arc_list:
-            span = arc.get("span", {}) if isinstance(arc.get("span"), dict) else {}
-            if not _month_le(span.get("start") or arc.get("started"), cutoff):
-                continue
-            arc_text = json.dumps(arc).lower()
-            for tn in playing_teams:
-                if tn in arc_text:
-                    callbacks.append(
-                        {
-                            "source": "arc",
-                            "content": arc.get("title", ""),
-                            "from_when": arc.get("started", arc.get("season", "")),
-                            "connection_to_this_week": f"Active arc involving {tn.title()}",
-                        }
-                    )
-                    break
-            if len(callbacks) >= 8:
+    # From arcs (recompute)
+    for arc in arcs or []:
+        arc_text = json.dumps(arc).lower()
+        for tn in playing_teams:
+            if tn in arc_text:
+                callbacks.append(
+                    {
+                        "source": "arc",
+                        "content": arc.get("title", ""),
+                        "from_when": arc.get("first_seen_at", ""),
+                        "connection_to_this_week": f"Active arc involving {tn.title()}",
+                    }
+                )
                 break
+        if len(callbacks) >= 8:
+            break
 
-    # From predictions (already aged)
+    # From predictions (committed; admitter-gated by made_at)
     if predictions:
         pred_list = (
             predictions
@@ -1046,16 +1070,17 @@ def build_suggested_callbacks(
             else predictions.get("predictions", [])
         )
         for pred in pred_list:
-            made_at = pred.get("made_at")
-            if made_at:
-                try:
-                    if parse_ts(made_at) > cutoff:
-                        continue
-                except (ValueError, TypeError):
-                    pass
+            if not admissible(pred.get("made_at"), cutoff):
+                continue
+            # Same nested-evidence gate as resolve_predictions: the quote_block
+            # can post-date made_at, so re-cut it at the cutoff before matching.
             quote_text = (
                 pred.get("subject")
-                or " ".join((q.get("text") or "") for q in pred.get("quote_block", []))
+                or " ".join(
+                    (q.get("text") or "")
+                    for q in pred.get("quote_block", [])
+                    if admissible(q.get("timestamp"), cutoff)
+                )
             ).lower()
             for tn in playing_teams:
                 if tn in quote_text:
@@ -1157,88 +1182,47 @@ def ai_rescore_candidates(candidates, week_data, api_key=None):
 # ---------------------------------------------------------------------------
 
 
-def build_chat_context(
-    week=None, season=2025, preseason=False, no_ai=False, verbose=False
-):
-    """Build the chat context JSON for a given week, or for preseason."""
-    label = "Preseason" if preseason else f"Week {week}"
-    print(f"\n=== Building chat context: {label}, Season {season} ===")
-    if preseason:
-        print("  Mode: PRESEASON")
+def _window_and_maps(messages, identity_chain, season, week, preseason, cutoff):
+    """Shared PURE setup: the identity maps + the windowed member messages.
 
-    # --- Load all inputs ---
-    messages = load_json(CHAT_DIR / "parsed_messages.json", "parsed_messages.json")
-    identity_chain = load_json(CHAT_DIR / "identity_chain.json", "identity_chain.json")
-    league_memory = load_json(
-        CONTENT_CHAT_DIR / "league-memory.json", "league-memory.json"
-    )
-    arcs = load_json(CONTENT_CHAT_DIR / "arcs.json", "arcs.json")
-    predictions = load_json(CONTENT_CHAT_DIR / "predictions.json", "predictions.json")
-    relationships = load_json(
-        CONTENT_CHAT_DIR / "relationships.json", "relationships.json"
-    )
-    # Preseason has no week's matchup data yet -- week_data stays None.
-    week_data = None
-    if not preseason:
-        week_data = load_json(
-            WEEKS_DIR / f"week{week}_data.json", f"week{week}_data.json"
-        )
-    load_json(DATA_DIR / str(season) / "season_combined.json", "season_combined.json")
-
-    # Validate required files
-    if messages is None:
-        print("ERROR: parsed_messages.json is required. Run parse_whatsapp.py first.")
-        sys.exit(1)
-    if identity_chain is None:
-        print("ERROR: identity_chain.json is required. Run parse_whatsapp.py first.")
-        sys.exit(1)
-    if not preseason and week_data is None:
-        print(
-            f"ERROR: week{week}_data.json is required. Run extract_week_data.py --week {week} first."
-        )
-        sys.exit(1)
-
-    # Normalize messages to a list
-    if isinstance(messages, dict):
-        messages = messages.get("messages", [])
-
-    print(f"  Loaded {len(messages)} total messages")
-
-    # --- Build identity maps ---
+    `cutoff` is window_end; the lower bound is the preseason start or cutoff - 1
+    week. filter_messages_in_window gates the upper bound through the uniform
+    admitter, so window_messages are exact instants on/before the cutoff."""
     roster_to_names, name_to_roster, roster_to_team = build_identity_maps(
         identity_chain
     )
-    print(
-        f"  Identity chain: {len(name_to_roster)} WhatsApp names -> {len(roster_to_team)} rosters"
+    if preseason:
+        window_start, _ = compute_preseason_window(season)
+    else:
+        window_start, _ = compute_week_cutoff(week, season)
+    window_messages = _member_messages(
+        filter_messages_in_window(messages, window_start, cutoff)
+    )
+    return (
+        window_messages,
+        window_start,
+        roster_to_names,
+        name_to_roster,
+        roster_to_team,
     )
 
-    # --- Compute temporal window ---
-    if preseason:
-        window_start, window_end = compute_preseason_window(season)
-    else:
-        window_start, window_end = compute_week_cutoff(week, season)
 
-    print(f"  Window: {window_start.isoformat()} -> {window_end.isoformat()}")
-
-    # --- Filter messages to window ---
-    window_messages = filter_messages_in_window(messages, window_start, window_end)
-    print(f"  Messages in window: {len(window_messages)}")
-
-    # --- Week data helpers ---
-    matchup_pairs = get_matchup_roster_pairs(week_data)
-    high_scorer_rid, low_scorer_rid = get_week_high_low_scorers(week_data)
+def score_relevancy(
+    window_messages,
+    week_data,
+    identity_chain,
+    roster_to_names,
+    name_to_roster,
+    roster_to_team,
+):
+    """PURE: deterministic relevancy scoring over the windowed member messages
+    -> the candidate list (pre-dedup, carrying `_source_idx`). No I/O. This is
+    the step the AI OUTER stage rescores before assembly."""
     keywords = build_keyword_index(
         week_data, identity_chain, roster_to_names, roster_to_team
     )
-
-    if verbose:
-        print(f"  Matchup pairs: {matchup_pairs}")
-        print(
-            f"  High scorer roster: {high_scorer_rid}, Low scorer roster: {low_scorer_rid}"
-        )
-        print(f"  Keywords indexed: {len(keywords)}")
-
-    # --- Score every message in the window ---
+    matchup_pairs = get_matchup_roster_pairs(week_data)
+    high_scorer_rid, low_scorer_rid = get_week_high_low_scorers(week_data)
     scored = []
     for idx, msg in enumerate(window_messages):
         result = score_message_relevancy(
@@ -1252,17 +1236,13 @@ def build_chat_context(
             keywords,
             high_scorer_rid,
             low_scorer_rid,
-            relationships,
-            verbose=verbose,
         )
         if result is None:
             continue
-
         score_val, rel_type, why, suggested = result
         block_data = extract_block(window_messages, idx)
         sender = msg.get("sender", "")
         sender_rid, sender_team = resolve_sender(sender, name_to_roster, roster_to_team)
-
         scored.append(
             {
                 "type": rel_type,
@@ -1277,18 +1257,52 @@ def build_chat_context(
                 "_source_idx": idx,  # internal, stripped before output
             }
         )
+    return scored
 
-    print(f"  Scored candidates: {len(scored)}")
 
-    # --- Optional AI rescoring ---
-    if not no_ai and scored:
-        print("  Running AI rescoring...")
-        scored = ai_rescore_candidates(scored, week_data)
+def build_context_dict(
+    messages,
+    name_map,
+    identity_chain,
+    league_memory,
+    week_data,
+    predictions_source,
+    season,
+    week,
+    preseason,
+    cutoff,
+    scored=None,
+):
+    """Pure, IO-free core: compute the chat-context dict for a week/preseason.
+
+    NO filesystem reads, NO network, NO stdout -- UNCONDITIONALLY. Every input
+    is injected and the only effect is the returned dict. `cutoff` is the exact
+    window_end. Arcs + jokes are RECOMPUTED here from raw `messages` + `name_map`
+    at `cutoff` via recompute_projection (exact-instant gated), not read from a
+    pre-derived file.
+
+    AI rescoring is a genuine OUTER stage -- this function NEVER calls it. On the
+    canonical --no-ai path `scored` is None and the deterministic candidates are
+    computed internally via score_relevancy. The AI path is composed in the CLI
+    shell: score_relevancy() -> ai_rescore_candidates() [network, CLI ONLY] ->
+    build_context_dict(scored=<rescored>). So the network lives outside this
+    function in BOTH branches, and the IO-free guard holds for the production
+    composition, not merely --no-ai."""
+    window_messages, window_start, roster_to_names, name_to_roster, roster_to_team = (
+        _window_and_maps(messages, identity_chain, season, week, preseason, cutoff)
+    )
+    if scored is None:
+        scored = score_relevancy(
+            window_messages,
+            week_data,
+            identity_chain,
+            roster_to_names,
+            name_to_roster,
+            roster_to_team,
+        )
 
     # --- Split into high / medium ---
-    scored.sort(key=lambda x: x["score"], reverse=True)
-
-    # Deduplicate: if two items share overlapping blocks, keep the higher-scored one
+    scored = sorted(scored, key=lambda x: x["score"], reverse=True)
     deduped = []
     used_msg_ranges = set()
     for item in scored:
@@ -1302,93 +1316,176 @@ def build_chat_context(
     high_relevancy = []
     medium_relevancy = []
     for item in deduped:
-        # Strip internal field
         clean = {k: v for k, v in item.items() if not k.startswith("_")}
         if item["score"] >= 7.5:
             high_relevancy.append(clean)
         elif item["score"] >= 5.0:
             medium_relevancy.append(clean)
-
-    # Cap at reasonable sizes
     high_relevancy = high_relevancy[:10]
     medium_relevancy = medium_relevancy[:15]
 
-    print(f"  High relevancy: {len(high_relevancy)}")
-    print(f"  Medium relevancy: {len(medium_relevancy)}")
+    # --- Recompute arcs + jokes at the cutoff (the producer, exact-instant
+    #     gated -- replaces the month-gated reads of arcs.json/league-memory) ---
+    proj = recompute_projection(messages, name_map, cutoff)
 
-    # --- Active arcs ---
     active_arcs = find_active_arcs(
-        arcs,
-        week,
-        season,
-        week_data,
-        roster_to_team,
-        window_end,
-        name_to_roster=name_to_roster,
+        proj["arcs"], season, week_data, roster_to_team, name_to_roster
     )
-    print(f"  Active arcs: {len(active_arcs)}")
-
-    # --- Resolved predictions ---
     resolved_preds = resolve_predictions(
-        predictions, week, season, week_data, window_end
+        predictions_source, week, season, week_data, cutoff
     )
-    print(f"  Resolved predictions: {len(resolved_preds)}")
-
-    # --- Sentiment snapshot ---
     sentiment = build_sentiment_snapshot(
         window_messages, name_to_roster, roster_to_team, week_data
     )
 
-    # --- Chat highlights ---
+    # --- Chat highlights (dedup against the scored items) ---
     all_scored_items = high_relevancy + medium_relevancy
-    # Restore _source_idx temporarily for dedup in highlights
     for item in deduped:
         for hi in all_scored_items:
             if hi.get("block") == item.get("block"):
                 hi["_source_idx"] = item.get("_source_idx")
     highlights = extract_chat_highlights(window_messages, all_scored_items)
-    # Strip internal fields from highlights dedup items
     for hi in all_scored_items:
         hi.pop("_source_idx", None)
-    print(f"  Chat highlights: {len(highlights)}")
 
-    # --- Suggested callbacks ---
     callbacks = build_suggested_callbacks(
-        league_memory, arcs, predictions, week_data, roster_to_team, window_end
+        proj["jokes"],
+        proj["arcs"],
+        predictions_source,
+        week_data,
+        roster_to_team,
+        cutoff,
     )
-    print(f"  Suggested callbacks: {len(callbacks)}")
 
-    # --- Assemble output ---
     total_context = len(high_relevancy) + len(medium_relevancy) + len(highlights)
     meta = {
         "type": "preseason" if preseason else "week",
         "season": season,
-        "temporal_cutoff_utc": window_end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "temporal_cutoff_utc": cutoff.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "window_start_utc": window_start.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "messages_in_window": len(window_messages),
         "total_context_items": total_context,
     }
     if not preseason:
         meta["week"] = week
-    output = {
+
+    return {
         "meta": meta,
         "high_relevancy": high_relevancy,
         "medium_relevancy": medium_relevancy,
         "active_arcs_this_week": active_arcs,
         "resolved_predictions": resolved_preds,
         "sentiment_snapshot": sentiment,
-        "league_memory": sanitize_league_memory(league_memory, window_end),
+        "league_memory": sanitize_league_memory(league_memory, proj["jokes"]),
         "this_weeks_chat_highlights": highlights,
         "suggested_callbacks": callbacks,
     }
 
+
+def build_chat_context(
+    week=None, season=2025, preseason=False, no_ai=False, verbose=False
+):
+    """CLI shell: load inputs, run the pure IO-free core, (optionally) AI-rescore
+    as an OUTER stage, then save. All disk + network lives here;
+    build_context_dict does the computation with no I/O."""
+    label = "Preseason" if preseason else f"Week {week}"
+    print(f"\n=== Building chat context: {label}, Season {season} ===")
+    if preseason:
+        print("  Mode: PRESEASON")
+
+    # --- Load all inputs ---
+    messages = load_json(PARSED_MESSAGES_PATH, "parsed_messages.json")
+    identity_chain = load_json(IDENTITY_CHAIN_PATH, "identity_chain.json")
+    name_map = load_json(NAME_MAP_PATH, "name-map.json")
+    league_memory = load_json(
+        CONTENT_CHAT_OUT_DIR / "league-memory.json", "league-memory.json"
+    )
+    predictions = load_json(
+        CONTENT_CHAT_OUT_DIR / "predictions.json", "predictions.json"
+    )
+    # Preseason has no week's matchup data yet -- week_data stays None.
+    week_data = None
+    if not preseason:
+        week_data = load_json(
+            WEEKS_DIR / f"week{week}_data.json", f"week{week}_data.json"
+        )
+
+    # Validate required files
+    if messages is None:
+        print("ERROR: parsed_messages.json is required. Run parse_whatsapp.py first.")
+        sys.exit(1)
+    if identity_chain is None:
+        print("ERROR: identity_chain.json is required. Run parse_whatsapp.py first.")
+        sys.exit(1)
+    if name_map is None:
+        print("ERROR: name-map.json is required (recompute producer input).")
+        sys.exit(1)
+    if not preseason and week_data is None:
+        print(
+            f"ERROR: week{week}_data.json is required. Run extract_week_data.py --week {week} first."
+        )
+        sys.exit(1)
+
+    # Normalize messages to a list
+    if isinstance(messages, dict):
+        messages = messages.get("messages", [])
+    print(f"  Loaded {len(messages)} total messages")
+
+    # Cutoff (window_end) = the as-of instant for this week/preseason.
+    if preseason:
+        _, cutoff = compute_preseason_window(season)
+    else:
+        _, cutoff = compute_week_cutoff(week, season)
+
+    # AI rescoring is a genuine OUTER stage: score (pure) -> ai_rescore (network,
+    # HERE only) -> build_context_dict(scored=...). --no-ai skips the middle and
+    # lets the pure core compute the candidates itself.
+    if no_ai:
+        output = build_context_dict(
+            messages,
+            name_map,
+            identity_chain,
+            league_memory,
+            week_data,
+            predictions,
+            season,
+            week,
+            preseason,
+            cutoff,
+        )
+    else:
+        print("  AI rescoring enabled (outer stage)")
+        window_messages, _ws, rtn, ntr, rtt = _window_and_maps(
+            messages, identity_chain, season, week, preseason, cutoff
+        )
+        scored = score_relevancy(
+            window_messages, week_data, identity_chain, rtn, ntr, rtt
+        )
+        scored = ai_rescore_candidates(scored, week_data)
+        output = build_context_dict(
+            messages,
+            name_map,
+            identity_chain,
+            league_memory,
+            week_data,
+            predictions,
+            season,
+            week,
+            preseason,
+            cutoff,
+            scored=scored,
+        )
+
     # --- Write output ---
     if preseason:
-        out_path = PRESEASON_DIR / "preseason_chat_context.json"
+        out_path = PRESEASON_OUT_DIR / "preseason_chat_context.json"
     else:
-        out_path = WEEKS_DIR / f"week{week}_chat_context.json"
+        out_path = WEEKS_OUT_DIR / f"week{week}_chat_context.json"
     save_json(out_path, output)
 
+    total_context = output["meta"]["total_context_items"]
+    print(f"  Active arcs: {len(output['active_arcs_this_week'])}")
+    print(f"  Suggested callbacks: {len(output['suggested_callbacks'])}")
     print(f"\n  DONE: {total_context} context items for {label}")
     print(f"  Output: {out_path}")
     return output
@@ -1397,6 +1494,169 @@ def build_chat_context(
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Noninterference machine gate (1h) -- post-cutoff evidence must not alter the
+# as-of-cutoff writer-facing projection.
+# ---------------------------------------------------------------------------
+
+NONINTERFERENCE_SECTIONS = (
+    "active_arcs_this_week",
+    "league_memory",
+    "suggested_callbacks",
+    "resolved_predictions",
+    "high_relevancy",
+    "medium_relevancy",
+    "sentiment_snapshot",
+    "this_weeks_chat_highlights",
+)
+
+
+def _truncate_predictions(predictions, cutoff):
+    """Drop predictions whose made_at is not admissible at `cutoff` -- the
+    prediction-axis analog of the message truncation. Pure."""
+    if not isinstance(predictions, dict):
+        return predictions
+    kept = [
+        p
+        for p in predictions.get("predictions", [])
+        if admissible(p.get("made_at"), cutoff)
+    ]
+    return {**predictions, "predictions": kept}
+
+
+def noninterference_divergences(
+    messages,
+    name_map,
+    identity_chain,
+    league_memory,
+    predictions,
+    season,
+    week,
+    preseason,
+    cutoff,
+    week_data,
+):
+    """Return the writer-facing sections that DIFFER between the context built
+    from the full corpus and the one built from ONLY the inputs admissible at
+    `cutoff` -- BOTH axes truncated: messages (>cutoff dropped) AND predictions
+    (made_at >cutoff dropped), so the prediction axis is exercised, not held
+    constant. A non-empty result = post-cutoff evidence leaked into the as-of
+    projection. Pure (no I/O)."""
+    full = build_context_dict(
+        messages,
+        name_map,
+        identity_chain,
+        league_memory,
+        week_data,
+        predictions,
+        season,
+        week,
+        preseason,
+        cutoff,
+    )
+    trunc_msgs = [m for m in messages if admissible(m.get("timestamp_utc"), cutoff)]
+    trunc_preds = _truncate_predictions(predictions, cutoff)
+    trunc = build_context_dict(
+        trunc_msgs,
+        name_map,
+        identity_chain,
+        league_memory,
+        week_data,
+        trunc_preds,
+        season,
+        week,
+        preseason,
+        cutoff,
+    )
+    return [s for s in NONINTERFERENCE_SECTIONS if full.get(s) != trunc.get(s)]
+
+
+def verify_noninterference(season=2025):
+    """Machine gate: 0 clean / 1 on any divergence OR missing input, over
+    preseason + weeks 1-18.
+
+    For every real cutoff, the writer-facing projection built from the full
+    corpus must be byte-identical to the one built from only the messages AND
+    predictions admissible at that cutoff -- otherwise post-cutoff evidence
+    leaked. FAIL-CLOSED: every required input (messages, name_map,
+    identity_chain, league_memory, predictions) must be present, and a week whose
+    week{N}_data.json is absent is a FAILURE (cannot be verified), never a silent
+    skip. Loads real inputs; the pure core computes."""
+    messages = load_json(PARSED_MESSAGES_PATH, "parsed_messages.json")
+    if isinstance(messages, dict):
+        messages = messages.get("messages", [])
+    name_map = load_json(NAME_MAP_PATH, "name-map.json")
+    identity_chain = load_json(IDENTITY_CHAIN_PATH, "identity_chain.json")
+    league_memory = load_json(
+        CONTENT_CHAT_OUT_DIR / "league-memory.json", "league-memory.json"
+    )
+    predictions = load_json(
+        CONTENT_CHAT_OUT_DIR / "predictions.json", "predictions.json"
+    )
+    required = {
+        "parsed_messages": messages,
+        "name-map": name_map,
+        "identity_chain": identity_chain,
+        "league-memory": league_memory,
+        "predictions": predictions,
+    }
+    missing = [n for n, v in required.items() if v is None]
+    if missing:
+        print(f"verify-noninterference: ERROR -- required inputs missing: {missing}")
+        return 1
+
+    problems = []
+    _, cutoff = compute_preseason_window(season)
+    problems += [
+        f"preseason: {s} diverges"
+        for s in noninterference_divergences(
+            messages,
+            name_map,
+            identity_chain,
+            league_memory,
+            predictions,
+            season,
+            None,
+            True,
+            cutoff,
+            None,
+        )
+    ]
+    for week in range(1, 19):
+        wd = load_json(WEEKS_DIR / f"week{week}_data.json", None, warn=False)
+        if wd is None:
+            problems.append(
+                f"week{week}: week_data.json MISSING -- cannot verify (fail-closed)"
+            )
+            continue
+        _, cutoff = compute_week_cutoff(week, season)
+        problems += [
+            f"week{week}: {s} diverges"
+            for s in noninterference_divergences(
+                messages,
+                name_map,
+                identity_chain,
+                league_memory,
+                predictions,
+                season,
+                week,
+                False,
+                cutoff,
+                wd,
+            )
+        ]
+
+    if problems:
+        print("verify-noninterference: FAIL")
+        for p in problems:
+            print(f"  {p}")
+        return 1
+    print(
+        "verify-noninterference: PASS -- no post-cutoff leak across preseason + weeks 1-18"
+    )
+    return 0
 
 
 def main():
@@ -1421,8 +1681,16 @@ def main():
     parser.add_argument(
         "--verbose", action="store_true", help="Print detailed scoring info"
     )
+    parser.add_argument(
+        "--verify-noninterference",
+        action="store_true",
+        help="Machine gate: post-cutoff evidence must not alter the as-of projection",
+    )
 
     args = parser.parse_args()
+
+    if args.verify_noninterference:
+        sys.exit(verify_noninterference(season=args.season))
 
     if args.preseason:
         if args.week is not None:

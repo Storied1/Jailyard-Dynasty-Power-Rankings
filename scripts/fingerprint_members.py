@@ -19,7 +19,6 @@ import json
 import re
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
 from pathlib import Path
 
 # Force UTF-8 stdout on Windows (avoids cp1252 UnicodeEncodeError)
@@ -28,21 +27,24 @@ if sys.stdout.encoding != "utf-8":
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 from shared import (
-    REPO_ROOT,
-    CHAT_DIR,
-    CONTENT_CHAT_DIR,
+    CONTENT_CHAT_OUT_DIR,
     CONVERSATION_GAP_SEC,
+    DISTINCTIVE_WORD_MIN_COUNT,
+    DISTINCTIVE_WORD_RATIO,
+    DISTINCTIVE_WORDS_KEEP,
+    PARSED_MESSAGES_PATH,
     REPLY_WINDOW_SEC,
     UPPERCASE_THRESHOLD,
-    DISTINCTIVE_WORD_RATIO,
     VOWEL_RATIO_MIN,
-    DISTINCTIVE_WORD_MIN_COUNT,
-    DISTINCTIVE_WORDS_KEEP,
     parse_ts,
+    rel_to_root,
 )
 
-DEFAULT_INPUT = CHAT_DIR / "parsed_messages.json"
-DEFAULT_OUTPUT = CONTENT_CHAT_DIR / "fingerprints.json"
+# parsed_messages.json is a DERIVED intermediate (OUTPUT_ROOT-owned); fingerprints
+# is a derived output. Reading the intermediate from OUTPUT_ROOT keeps a rebuild
+# self-contained (never touches the canonical copy).
+DEFAULT_INPUT = PARSED_MESSAGES_PATH
+DEFAULT_OUTPUT = CONTENT_CHAT_OUT_DIR / "fingerprints.json"
 
 # Emoji regex — matches most Unicode emoji ranges
 EMOJI_RE = re.compile(
@@ -353,7 +355,6 @@ def compute_fingerprints(messages):
 
     return {
         "metadata": {
-            "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "total_messages": len(messages),
             "member_count": len(fingerprints),
             "analysis_version": "1.0",
@@ -370,13 +371,13 @@ def main():
         "--input",
         type=Path,
         default=DEFAULT_INPUT,
-        help=f"Path to parsed_messages.json (default: {DEFAULT_INPUT.relative_to(REPO_ROOT)})",
+        help=f"Path to parsed_messages.json (default: {rel_to_root(DEFAULT_INPUT)})",
     )
     parser.add_argument(
         "--output",
         type=Path,
         default=DEFAULT_OUTPUT,
-        help=f"Output path (default: {DEFAULT_OUTPUT.relative_to(REPO_ROOT)})",
+        help=f"Output path (default: {rel_to_root(DEFAULT_OUTPUT)})",
     )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON")
 

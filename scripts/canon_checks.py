@@ -17,7 +17,8 @@ from pathlib import Path
 # (`from scripts.canon_checks import ...`).
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from shared import PRESEASON_DIR, WEEKS_DIR, load_json  # noqa: E402
+from shared import admissible  # noqa: E402
+from shared import PRESEASON_DIR, WEEKS_DIR, load_json, parse_ts
 
 
 def check_preseason_type_marker(chat_context: dict, errors: list) -> None:
@@ -72,6 +73,69 @@ def check_as_of_week_fields(standings_entry: dict, errors: list) -> None:
             )
 
 
+def check_arc_and_joke_semantics(chat_context: dict, errors: list) -> None:
+    """Semantic validation of the enriched recompute schema (Phase 1f).
+
+    Every surfaced arc and running-joke must carry exact-instant bounds ordered
+    within the exact cutoff, a positive NON-BOOLEAN int count, and (arcs) a
+    snapshot-unique NONEMPTY arc_group_id. A post-cutoff last_observed_at is a
+    leak; a coarse / naive / missing bound fails the uniform admitter. bool is a
+    subclass of int, so it is rejected explicitly. The cutoff itself must be an
+    exact aware instant -- else admissible(bound, None) would admit all evidence
+    and a post-cutoff bound would pass clean."""
+    cutoff_str = chat_context.get("meta", {}).get("temporal_cutoff_utc")
+    if not admissible(cutoff_str, None):
+        errors.append(
+            f"meta.temporal_cutoff_utc {cutoff_str!r} is not an exact aware instant "
+            f"(missing / malformed / naive / date-only / month-only)"
+        )
+        return  # cannot validate bounds without a valid cutoff -> fail-closed
+    cutoff = parse_ts(cutoff_str)
+
+    def _check(label, item):
+        cnt = item.get("count")
+        if isinstance(cnt, bool) or not isinstance(cnt, int) or cnt <= 0:
+            errors.append(
+                f"{label}: count must be a positive non-boolean int, got {cnt!r}"
+            )
+        fs = item.get("first_seen_at")
+        ls = item.get("last_observed_at")
+        if not admissible(fs, cutoff):
+            errors.append(
+                f"{label}: first_seen_at {fs!r} is not an exact instant on/before the cutoff"
+            )
+        if not admissible(ls, cutoff):
+            errors.append(
+                f"{label}: last_observed_at {ls!r} is not an exact instant "
+                f"on/before the cutoff (post-cutoff = leak)"
+            )
+        fs_dt, ls_dt = parse_ts(fs), parse_ts(ls)
+        if fs_dt and ls_dt and fs_dt > ls_dt:
+            errors.append(f"{label}: first_seen_at {fs} is after last_observed_at {ls}")
+
+    arcs = chat_context.get("active_arcs_this_week", []) or []
+    for i, a in enumerate(arcs):
+        gid = a.get("arc_group_id")
+        if not isinstance(gid, str) or not gid:
+            errors.append(
+                f"active_arcs[{i}]: arc_group_id must be a nonempty string, got {gid!r}"
+            )
+    valid_gids = [
+        a.get("arc_group_id")
+        for a in arcs
+        if isinstance(a.get("arc_group_id"), str) and a.get("arc_group_id")
+    ]
+    dupes = sorted({g for g in valid_gids if valid_gids.count(g) > 1})
+    if dupes:
+        errors.append(f"arc_group_id not unique in snapshot: {dupes}")
+    for i, a in enumerate(arcs):
+        _check(f"active_arcs[{i}] ({a.get('arc_group_id', '?')})", a)
+
+    jokes = (chat_context.get("league_memory", {}) or {}).get("running_jokes", []) or []
+    for i, j in enumerate(jokes):
+        _check(f"running_jokes[{i}] ({j.get('name', '?')})", j)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Validate sanitizer source artifacts (pre-write) for a given week"
@@ -99,6 +163,7 @@ def main():
         check_league_memory_present(chat_context, errors)
         check_preseason_type_marker(chat_context, errors)
         check_storyline_layers_populated(chat_context, errors)
+        check_arc_and_joke_semantics(chat_context, errors)
         # Deliberately no data/standings load -- preseason has no week data.
         label = "preseason"
     else:
@@ -107,6 +172,7 @@ def main():
         )
         check_league_memory_present(chat_context, errors)
         check_storyline_layers_populated(chat_context, errors)
+        check_arc_and_joke_semantics(chat_context, errors)
 
         data = load_json(WEEKS_DIR / f"week{args.week}_data.json", required=True)
         for entry in data["standings"]:

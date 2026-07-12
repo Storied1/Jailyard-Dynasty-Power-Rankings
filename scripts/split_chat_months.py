@@ -16,21 +16,25 @@ Each chunk file contains:
   - messages: list of message dicts (sender, text, timestamp_utc, media, etc.)
 """
 
+import shutil
 import sys
 from collections import defaultdict
 
 from shared import (
-    REPO_ROOT,
-    CHAT_DIR,
-    NAME_MAP_PATH,
-    CONTENT_CHAT_DIR,
+    CONTENT_CHAT_OUT_DIR,
     MAP_CACHE_DIR,
+    NAME_MAP_PATH,
+    PARSED_MESSAGES_PATH,
     load_json,
+    month_key_strict,
+    rel_to_root,
     save_json,
 )
 
-PARSED_MESSAGES = CHAT_DIR / "parsed_messages.json"
-FINGERPRINTS_PATH = CONTENT_CHAT_DIR / "fingerprints.json"
+# parsed_messages.json + fingerprints.json are DERIVED intermediates
+# (OUTPUT_ROOT-owned); read them from OUTPUT_ROOT so a rebuild is self-contained.
+PARSED_MESSAGES = PARSED_MESSAGES_PATH
+FINGERPRINTS_PATH = CONTENT_CHAT_OUT_DIR / "fingerprints.json"
 
 
 def main():
@@ -68,20 +72,33 @@ def main():
             }
         print(f"Fingerprints: {len(fingerprints)} members")
 
-    # Group messages by month
+    # Group messages by month -- STRICT, fail-closed: every message must carry an
+    # exact tz-aware instant. No bare ts[:7] path construction (a malformed ts
+    # would otherwise seed a bad month path). Corpus census: 22,884/22,884 clean.
     buckets = defaultdict(list)
-    for msg in messages:
-        ts = msg.get("timestamp_utc", "")
-        if ts:
-            month_key = ts[:7]  # YYYY-MM
-            buckets[month_key].append(msg)
+    for i, msg in enumerate(messages):
+        try:
+            month_key = month_key_strict(msg.get("timestamp_utc", ""))
+        except ValueError as exc:
+            print(
+                f"ERROR: message #{i} (id={msg.get('id')!r}) has a rejectable "
+                f"timestamp -- {exc}. Refusing to bucket into a bad path.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        buckets[month_key].append(msg)
 
     sorted_months = sorted(buckets.keys())
     print(
         f"Found {len(sorted_months)} months: {sorted_months[0]} to {sorted_months[-1]}"
     )
 
-    # Write each month's chunk
+    # Write each month's chunk into a FRESH candidate dir (2c): clear any prior
+    # {month}_raw.json / {month}.json so a removed month can't survive as a stale
+    # orphan that REDUCE would glob as if current (mixed lineage). The dir is a
+    # gitignored, fully-regenerated intermediate, so clearing it is safe.
+    if MAP_CACHE_DIR.exists():
+        shutil.rmtree(MAP_CACHE_DIR)
     MAP_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     for month in sorted_months:
         msgs = buckets[month]
@@ -97,7 +114,7 @@ def main():
         print(f"  {month}: {len(msgs):,} messages -> {out_path.name}")
 
     print(
-        f"\nDone. {len(sorted_months)} chunk files written to {MAP_CACHE_DIR.relative_to(REPO_ROOT)}"
+        f"\nDone. {len(sorted_months)} chunk files written to {rel_to_root(MAP_CACHE_DIR)}"
     )
 
     # Print volume tiers for planning

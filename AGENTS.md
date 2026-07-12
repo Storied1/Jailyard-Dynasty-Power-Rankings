@@ -99,6 +99,13 @@ Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsA
 | `scripts/reduce_chat_deterministic.py` | Phase 2 REDUCE: merge MAP outputs → analytics files                   |
 | `scripts/build_chat_context.py`        | Phase 3: per-week chat relevancy engine (`--no-ai` for deterministic) |
 
+### Chat Pipeline Invariants (do not violate)
+
+- **One admitter at every knowledge-cutoff boundary.** Every cutoff admission decision (messages, predictions + nested evidence, jokes, arcs, callbacks) goes through the uniform exact-instant admitter `shared.admissible` — admit iff an exact tz-aware instant `<=` the cutoff; missing/malformed/naive/date-only/month-only rejected. `shared.parse_ts` may do downstream arithmetic on an already-admitted exact instant (e.g. the lower recency-window bound, `build_chat_context.filter_messages_in_window`) but never decides cutoff admissibility. Month-granular comparison is banned.
+- **Provenance: `--verify` is the default gate; `--write` must be receipt-bound.** `python scripts/generate_chat_provenance.py` (no flags) verifies `content/chat/provenance.json` against disk. Never write the manifest except via `--write --receipt <path>` with a receipt emitted by a green `--rebuild-check` — a write is refused by design unless the ENTIRE six-role portable payload matches the receipt (`inputs_private`, `inputs_source`, `derived_intermediates`, `inputs_data`, `code`, `outputs_derived`, plus the private-derived `counts`); `normalized_source_root` is separate receipt-only authorization, never persisted. Do not work around a refusal.
+- **`arc_group_id` is NOT durable identity.** It is unique in-snapshot and stable only for an unchanged `(type, sorted participants)` crew — it changes when a crew gains a member. Never use it for cross-season/cross-snapshot thread continuity.
+- **Joke recency comes from `last_observed_at`,** never from the legacy month-grained `first_seen`/`last_seen` compatibility fields (see `.claude/commands/write-week.md`).
+
 ### Workflow
 
 ```bash

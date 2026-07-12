@@ -26,12 +26,48 @@ if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-from shared import NAME_MAP_PATH, REPO_ROOT
+from shared import (
+    CHAT_TXT_PATH,
+    IDENTITY_CHAIN_PATH,
+    NAME_MAP_PATH,
+    PARSED_MESSAGES_PATH,
+)
+
+# Left-to-right mark (U+200E). WhatsApp iOS prefixes machine-generated line
+# content with it — both attachment lines AND system notifications. It appears
+# in two positions that matter here:
+#   (1) at the START of the line, before "[" — on attachment/system message-start
+#       lines. The old LINE_RE anchored on "^\[" and so FAILED to match these,
+#       merging 1,475 real message-start lines into the prior message's text
+#       (wrong-sender attributions + swallowed media). LINE_RE now optionally
+#       consumes it (see below).
+#   (2) at the START of the text, right after "Sender: " — this is WhatsApp's
+#       signal that the line body is machine-generated. If it wraps "<attached:"
+#       it is real media; otherwise it is a system event (created/joined/added/
+#       pinned/renamed/phone-change/deleted) and must be flagged is_system.
+#       A POLL is NOT a system event -- it is a member action, so it keeps its
+#       sender and is flagged is_poll (with parsed poll_data) instead.
+LRM = "\u200e"  # left-to-right mark
+
+# Bidirectional formatting controls that pollute stored text with no semantic
+# value: LRM/RLM (U+200E/U+200F) plus the directional-isolate marks WhatsApp
+# wraps @mentions in (LRI/RLI/FSI/PDI = U+2066..U+2069). Stripped from every
+# stored message body. (Escapes, not literals — the repo's semgrep bidi rule.)
+BIDI_TABLE = {ord(c): None for c in "\u200e\u200f\u2066\u2067\u2068\u2069"}
 
 # WhatsApp line pattern: [M/D/YY, H:MM:SS AM/PM] Sender: message
-# The date can be M/D/YY or MM/DD/YY (single or double digit month/day)
+# The date can be M/D/YY or MM/DD/YY (single or double digit month/day).
+# The optional leading U+200E is consumed so attachment/system message-start
+# lines segment as their own records instead of being swallowed (DEFECT A).
 LINE_RE = re.compile(
-    r"^\[(\d{1,2}/\d{1,2}/\d{2},\s\d{1,2}:\d{2}:\d{2}\s[AP]M)\]\s(.*)$"
+    r"^\u200e?\[(\d{1,2}/\d{1,2}/\d{2},\s\d{1,2}:\d{2}:\d{2}\s[AP]M)\]\s(.*)$"
+)
+
+# Media placeholder text (some exports emit "image omitted" instead of an
+# <attached: file> marker). These are real member media, NOT system events.
+OMITTED_MEDIA_RE = re.compile(
+    r"^(image|video|audio|GIF|sticker|document|Contact card) omitted\b",
+    re.IGNORECASE,
 )
 
 # Sender separator — first ": " after the timestamp bracket
@@ -46,8 +82,13 @@ EDITED_MARKER = "<This message was edited>"
 # Poll detection
 POLL_PREFIX = "POLL:"
 
-# @mention extraction — WhatsApp @mentions use phone numbers or display names.
-# Match: @+1 234 567 8900 (phone) or @First Last (up to 2 words)
+# @mention extraction. WhatsApp wraps almost all @mentions in directional
+# isolates: @<U+2068>Display Name<U+2069>. The closing isolate is an exact
+# boundary, so ISOLATE_MENTION_RE captures multi-word names ("Brent Boone")
+# cleanly — mentions must therefore be pulled from the RAW body BEFORE the bidi
+# controls are stripped. MENTION_RE is the fallback for the handful of plain
+# "@Name" mentions (and phone numbers) with no isolate wrapper.
+ISOLATE_MENTION_RE = re.compile("@\u2068([^\u2069]+)\u2069")
 MENTION_RE = re.compile(r"@(\+?\d[\d\s\-]+\d|[A-Za-z~]\w*(?:\s[A-Za-z~]\w*)?)")
 
 # Pacific timezone
@@ -98,8 +139,16 @@ def format_local(dt: datetime) -> str:
 
 
 def extract_mentions(text: str) -> list[str]:
-    """Extract @mentions from message text."""
-    return [m.strip() for m in MENTION_RE.findall(text)]
+    """Extract @mentions from RAW message text (isolate marks still present).
+
+    Isolate-wrapped mentions (@<FSI>Name<PDI>) are captured exactly, including
+    multi-word display names. The plain fallback runs on the remainder so the
+    handful of non-isolate "@Name" mentions still register.
+    """
+    mentions = [m.strip() for m in ISOLATE_MENTION_RE.findall(text)]
+    remainder = ISOLATE_MENTION_RE.sub(" ", text)
+    mentions += [m.strip() for m in MENTION_RE.findall(remainder)]
+    return mentions
 
 
 def parse_poll(text: str) -> dict | None:
@@ -117,6 +166,10 @@ def parse_poll(text: str) -> dict | None:
         line = line.strip()
         if not line:
             continue
+        # WhatsApp prefixes each poll choice with "OPTION: " — strip it so the
+        # stored option text is just the choice ("Matt (Chudders)").
+        if line.startswith("OPTION:"):
+            line = line[len("OPTION:") :].strip()
         m = option_re.match(line)
         if m:
             opt_text = m.group(1).strip()
@@ -164,6 +217,28 @@ def parse_chat(input_path: Path) -> dict:
                 if sender == GROUP_NAME:
                     is_system = True
                     sender = None
+                elif (
+                    text.startswith(LRM)
+                    and "<attached:" not in text
+                    and not OMITTED_MEDIA_RE.match(text.lstrip(LRM).lstrip())
+                    and not text.lstrip(LRM).lstrip().startswith(POLL_PREFIX)
+                ):
+                    # DEFECT B: WhatsApp stamps TRUE system events (created,
+                    # joined, added, pinned, group icon/settings change, group
+                    # rename, phone-number change, "message was deleted") under a
+                    # member name with a leading U+200E in the body. A leading
+                    # U+200E that does NOT wrap an attachment, an "image omitted"
+                    # placeholder, or a POLL is the system signal. Flag it — don't
+                    # attribute it to the member — so it's excluded from
+                    # member-message analytics. Text is preserved (not deleted);
+                    # only classification and attribution change.
+                    #
+                    # Polls are the deliberate exception: a poll IS a real member
+                    # action, so it falls through to the member branch below and
+                    # is surfaced as a poll record (sender kept, is_poll/poll_data
+                    # set in the output loop) rather than buried as a system line.
+                    is_system = True
+                    sender = None
                 else:
                     is_system = False
             else:
@@ -193,23 +268,34 @@ def parse_chat(input_path: Path) -> dict:
     senders = set()
 
     for idx, msg in enumerate(messages, start=1):
-        text = msg["text"]
+        # Strip bidi formatting controls (LRM/RLM + @mention isolates) — they
+        # carry no semantic content and otherwise leak into lexicon/embeddings.
+        text = msg["text"].translate(BIDI_TABLE)
 
         # Check edited
         is_edited = EDITED_MARKER in text
         if is_edited:
             text = text.replace(EDITED_MARKER, "").strip()
 
-        # Check media
+        # Check media. Pull the attachment filename into the media field, then
+        # strip the "<attached: ...>" marker out of the prose so it never
+        # pollutes word-frequency analytics (DEFECT D lexicon residue). A caption
+        # that accompanied the attachment is kept.
         media_match = MEDIA_RE.search(text)
-        media = media_match.group(1) if media_match else None
+        if media_match:
+            media = media_match.group(1).strip()
+            text = MEDIA_RE.sub("", text).strip()
+        else:
+            media = None
 
         # Check poll
         is_poll = text.startswith(POLL_PREFIX) if not msg["is_system"] else False
         poll_data = parse_poll(text) if is_poll else None
 
-        # Extract mentions
-        mentions = extract_mentions(text) if not msg["is_system"] else []
+        # Extract mentions from the RAW body (msg["text"]) — the isolate marks
+        # that delimit @mentions are still present there; `text` has had them
+        # stripped, which would let a mention run into the following word.
+        mentions = extract_mentions(msg["text"]) if not msg["is_system"] else []
 
         if msg["sender"]:
             senders.add(msg["sender"])
@@ -405,19 +491,19 @@ def main():
     parser.add_argument(
         "--input",
         type=Path,
-        default=REPO_ROOT / "chat" / "_chat.txt",
+        default=CHAT_TXT_PATH,  # private raw SOURCE (SOURCE_ROOT)
         help="Path to WhatsApp export text file (default: chat/_chat.txt)",
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=REPO_ROOT / "chat" / "parsed_messages.json",
+        default=PARSED_MESSAGES_PATH,  # DERIVED intermediate (OUTPUT_ROOT)
         help="Output path for parsed messages (default: chat/parsed_messages.json)",
     )
     parser.add_argument(
         "--identity-output",
         type=Path,
-        default=REPO_ROOT / "chat" / "identity_chain.json",
+        default=IDENTITY_CHAIN_PATH,  # DERIVED intermediate (OUTPUT_ROOT)
         help="Output path for identity chain (default: chat/identity_chain.json)",
     )
     parser.add_argument(
@@ -451,7 +537,7 @@ def main():
     print(f"Wrote: {args.output}")
 
     # Build and write identity chain
-    name_map_path = REPO_ROOT / "content" / "chat" / "name-map.json"
+    name_map_path = NAME_MAP_PATH  # source (SOURCE_ROOT)
     if name_map_path.exists():
         identity = build_identity_chain(name_map_path)
         args.identity_output.parent.mkdir(parents=True, exist_ok=True)

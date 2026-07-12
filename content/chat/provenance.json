@@ -1,0 +1,100 @@
+{
+  "schema": "chat-provenance/3",
+  "note": "Provenance for the chat pipeline. Hashes only -- no message bodies. Code/text hashes are LF-normalized (== the git blob); JSON hashes are canonical (prettier-invariant). Portable: logical repo-relative keys, no absolute checkout path. normalized_source_root lives only in the rebuild receipt (authorization), never here.",
+  "generation": {
+    "season": 2025,
+    "weeks": "1-18 + preseason",
+    "declared_parameters": {
+      "no_ai": true
+    },
+    "declared_parameters_note": "Operator-declared build flags, NOT independently verified: no_ai records the committed artifacts were built with --no-ai."
+  },
+  "inputs_source": {
+    "content/chat/name-map.json": "sha256:80986cb7663122b8cbdb83545c297c515223c5885c11412cdef60ac13637a542"
+  },
+  "inputs_data": {
+    "content/weeks/week1_data.json": "sha256:fc8807accb255ee085da071d43292f929654794b4b3eedcb53ebc5389d7c553f",
+    "content/weeks/week2_data.json": "sha256:bfb6e232481b2ed5ab1bc26bbb516491e7d1d289479aae903aaa4f4031f4a099",
+    "content/weeks/week3_data.json": "sha256:1236778857d6d5986ae06eb3ceed6b9ea1a2b5543be1926b5e00335792150cb8",
+    "content/weeks/week4_data.json": "sha256:38c37772a1225a12f76f84f4db7753414515b0e034311e6d0fb8a1c31818fc37",
+    "content/weeks/week5_data.json": "sha256:697b6ddc953b6d3fa1acbd2be4f3ded0690c8fe482302dfbe7a71bfbda031835",
+    "content/weeks/week6_data.json": "sha256:ec9a8c396a480bc1e5978b8550bed9d3f0d10ec36069d7b1298b003c1126bba0",
+    "content/weeks/week7_data.json": "sha256:6be683832f467f8ffbe8f53278d2ee6958e8cd0bd3630cbc91017dae5fce19a4",
+    "content/weeks/week8_data.json": "sha256:4d0e02c08e494dc372f895a032486c9586d165fe7a56fc335b51c15d30846a13",
+    "content/weeks/week9_data.json": "sha256:7023deff857e2698edee5b2e24a1f6f5bd21ad5292fa5bbe9636c934a46d7a04",
+    "content/weeks/week10_data.json": "sha256:cdd0cd33d6377244adbcb9636bd7f98402ef7e35c11b93c0578baf05e0a22cc7",
+    "content/weeks/week11_data.json": "sha256:4947a421d5ea75fba214c38d427f58b61bd9ab923daea779fc2ce8418b07c232",
+    "content/weeks/week12_data.json": "sha256:d2cc0bd880d6849a283f96aea203eb3a563d3f24ef123b80f5f0d39c8225060f",
+    "content/weeks/week13_data.json": "sha256:2a1c51eaae725d709f58d1e21ed44fccd25b64f9c35913ca73c6d737bc9bc4bb",
+    "content/weeks/week14_data.json": "sha256:e901cf992f692d30472b4e902b426a26b5c4f22e5564ad3373afd008a76d0c00",
+    "content/weeks/week15_data.json": "sha256:3e0a08026422acc4c33624705d633a8793036831cd146fca5d5d0418c229b0d8",
+    "content/weeks/week16_data.json": "sha256:96d507a7e1a88e2c93b6d78cc8d2369648ae651da7d5d1edfb8cd85ba873714e",
+    "content/weeks/week17_data.json": "sha256:7c0c39a7b244ff8a725adcaa61310ff5cc596c913c4997b13e25a03074cd6a83",
+    "content/weeks/week18_data.json": "sha256:e4949449d5796499cea231919d7f03219bd8d6be46d23babb451e7596f2faa2a"
+  },
+  "code": {
+    "scripts/shared.py": "sha256:c36eb42f1987bedc66d09b6ce56364fa784a61299a952321e89c2e94df57147a",
+    "scripts/parse_whatsapp.py": "sha256:e62dd6be52ddcafaaeee978c5c57f8cf2a42c36f79e8fe8b9296991a5668e811",
+    "scripts/fingerprint_members.py": "sha256:ddbf925dd77be824abe22726e527c9d0c5671d47f6c5e6155107e3725be541ba",
+    "scripts/split_chat_months.py": "sha256:970912f5d89479dcc66a08cd9ef98618e1640e46fce0491cb155c4daae0460d6",
+    "scripts/map_chat_deterministic.py": "sha256:d68759afd9a46b0271131e21fecedfb7e23576ca1afa1f220d92470d0e13dcef",
+    "scripts/reduce_chat_deterministic.py": "sha256:7fdfcc9acc643832ead923906f4b9110010a87f5da252fd8ce5da0a172e71bdc",
+    "scripts/recompute_projection.py": "sha256:d502347de2c1420480fadc9ef65c571ef12b094d097ab816b10346885617bbc8",
+    "scripts/build_chat_context.py": "sha256:dc27afa64a69c46f75951ffd70d7c6e40b1412a3b3022a4816c2cf64a72c2b1e",
+    "scripts/generate_chat_provenance.py": "sha256:63830081634edec3b1a604f9cf9d27d670d12d5cbef32a9755c8c3bde21b1349"
+  },
+  "outputs_derived": {
+    "content/chat/arcs.json": "sha256:3e81adbd68420069ad8e68d529718641295ca8a68622c960ede83d0e25874c8c",
+    "content/chat/consensus.json": "sha256:724e242a8cb9bc237f4f896ccfa9d21ffecd01bc53e4a4a0f2689c08a5f6294e",
+    "content/chat/fingerprints.json": "sha256:4d793aefd95f794bea913585431fd53f2cf3ee8fcdf73f2b0f08a02e50ea13c2",
+    "content/chat/league-memory.json": "sha256:98bbf73755b8ac9ecc6d5d84dc81f2c3b1e9030a8b81152b438b475b895cc3f9",
+    "content/chat/predictions.json": "sha256:df24a07cb60a5712e013f7a0b642ad7d6fabd3b39a84a11d9523331fce2f862c",
+    "content/chat/relationships.json": "sha256:e356bfb35ffdffd8b62073fb883269bc0b9ee397e22a6f75638ee173cdfa1c90",
+    "content/chat/personas/ben-chodos.md": "sha256:2e8fa17986c9c38abb715ed52e09edab735f94e98bc7e0b8e5412e3ea9fb01c7",
+    "content/chat/personas/brent-boone.md": "sha256:0167339efbf191c06f3f174bc63e5d251af25d14e493df30514cb143fa126b44",
+    "content/chat/personas/david-hamburger.md": "sha256:9938a51f76250c1519f5dae1dc79a4e485588170f3d73c376948e4df5d4c40ff",
+    "content/chat/personas/harlow.md": "sha256:5ef473e1bc44a1a57fb7ab086ddc6f26aaab742d909c7f14441dc0620b2fa181",
+    "content/chat/personas/karim.md": "sha256:2adb9122787358a111fa0bcba397121cc5fabd07e5719c4755b992473ffabfae",
+    "content/chat/personas/kevin-noble.md": "sha256:5013936f759e6a9854fc3f2ac5d6147e8d466facab2d84141d737525d83c6249",
+    "content/chat/personas/matt-russell.md": "sha256:1ce4650def2c401f9e0a3de0f46da00847bcb60534452ab52d749b3aa0a90bbe",
+    "content/chat/personas/neo.md": "sha256:2485c0a433a25a11e355b2669f9f04d0b4e4037991dfd1e0702f1ae142077aa7",
+    "content/chat/personas/oscar.md": "sha256:a79ecdd92c0a6da3db73572fbfe56c62a1445daea9b9b072d6ffcea9b58d4f4c",
+    "content/chat/personas/patrick-raue.md": "sha256:d7efde6b430a6aab408285582b95c50da573cb9296ef4e5e79dc7838f4342bd4",
+    "content/chat/personas/sacko.md": "sha256:c07c17e75fcd88cdb8d427a8b3612073a1a1fe2fff4154becee3c9cb923b9881",
+    "content/chat/personas/zach.md": "sha256:43855bf189b9cc2e0dbb40c631999353cd6a5ebeaa22121c97ecf91ec4e1ca05",
+    "content/weeks/week1_chat_context.json": "sha256:bdb2b3e709d7f5fdbcb74aeb4d9c374ed679b2879051c3c14a1c942a0332bfcb",
+    "content/weeks/week2_chat_context.json": "sha256:4d7993d5aaccbf92d1b6cca63ab383b8b40d5fa24162172cd2d4bd31d1fa1be3",
+    "content/weeks/week3_chat_context.json": "sha256:06d1d3f399e1491bf1f2710d0c5c12f7e349b1ea0c3a17af88b810dbd997264f",
+    "content/weeks/week4_chat_context.json": "sha256:8e1a3e405cb48ba12e44796687125d456d1930f59b85a66e39b17f570cb37d96",
+    "content/weeks/week5_chat_context.json": "sha256:5e2225aaeb20c182ce0bd501c9507e7881956695b34f288f38f58aeb0f4e161e",
+    "content/weeks/week6_chat_context.json": "sha256:9735e8f9240020a58f838ceb8122f917a968837fa5e1b24cccf66e7d1a1b84df",
+    "content/weeks/week7_chat_context.json": "sha256:5dff040e323556d121720e568b30bf886eed8f3fec8e504cc52f54c5d05f8f50",
+    "content/weeks/week8_chat_context.json": "sha256:c0da2d6bccd40ea762984bf6ed0955cbd3c8a027089b6ee783577112fdc3ead1",
+    "content/weeks/week9_chat_context.json": "sha256:062a26be8ec87582460825efa1780a53b236ea62606cb80e31584c49ca3820b3",
+    "content/weeks/week10_chat_context.json": "sha256:8d3974d504b59d1a1270fd8a8d5fa0f720eb584e601c617cc33df3eb326c3e05",
+    "content/weeks/week11_chat_context.json": "sha256:31b4553835b12555754db38959f5245d09ef7bee1dbdb9b87d42434873f6a286",
+    "content/weeks/week12_chat_context.json": "sha256:149ea87efca11ebc5abc2797fd997c930203d42be57b16cf53a9d6b3bf2f3dd7",
+    "content/weeks/week13_chat_context.json": "sha256:157f765d9e300ad08a6d6943561ad6c44a951294280673c2d9155d5608e3df1c",
+    "content/weeks/week14_chat_context.json": "sha256:ee0c01b06977538120ce05dd359f63b75e434eb82e313b9b46bc4d08175a7993",
+    "content/weeks/week15_chat_context.json": "sha256:c1c3dbb727a307dfa278a4c26b78f8bd64b46ca7d1150df1bacf16557629f6f9",
+    "content/weeks/week16_chat_context.json": "sha256:fba8211f9c2e5bce85682bc3006accfca9d3deb54d197375e0740ed32f0cd069",
+    "content/weeks/week17_chat_context.json": "sha256:27dec16969e2987ba491a9ad1cc400b90e44e83705d0f94d6c82a808a8d132ce",
+    "content/weeks/week18_chat_context.json": "sha256:4636b4177e3ceb612211e09083bea9c40cc6ea9024ab38ee99166bd894a23ac5",
+    "content/preseason-2025/preseason_chat_context.json": "sha256:5d1f9f62d91089b121516c1e0e57f8dcbe3f773d3766bd9bac62652e6e9616d7"
+  },
+  "counts": {
+    "messages": 22884,
+    "is_system": 119,
+    "is_poll": 29,
+    "u200e_residue": 0,
+    "media": 1460,
+    "members": 12
+  },
+  "inputs_private": {
+    "chat/_chat.txt": "sha256:a6dfeae7d413c10b73975498e5c7da1bc40f046fdaa4d62bc4c9361b0cedf1a3"
+  },
+  "derived_intermediates": {
+    "chat/parsed_messages.json": "sha256:1accbd4590c04a7214df3aacc5f44f18c1c198ca5e62380c6edf4716ac90e026",
+    "chat/identity_chain.json": "sha256:c12fd9a6bedb835753bedcf92bf3f8652532f542161beeb17faf058e2754646b"
+  }
+}

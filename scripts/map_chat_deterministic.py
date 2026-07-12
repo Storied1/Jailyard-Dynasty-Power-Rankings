@@ -584,7 +584,14 @@ def find_candidate_arcs(messages, predictions, relationships, name_map):
 def process_month(month, chunk_path, name_map):
     """Process a single month's chunk into MAP output."""
     chunk = load_json(chunk_path)
-    messages = chunk.get("messages", [])
+    # Analytics run on real member messages only. System/automated lines
+    # (joins, adds, group renames, "message was deleted") are flagged is_system
+    # by the parser; excluding them from the INPUT keeps a group-JOIN
+    # notification from ranking as a "greatest moment" and stops system residue
+    # from polluting personas/relationships. This is an input filter only — the
+    # extractors' OUTPUT contracts are unchanged (their redesign is a separate,
+    # unlanded proposal). Polls are NOT system: they stay as member messages.
+    messages = [m for m in chunk.get("messages", []) if not m.get("is_system")]
     msg_count = len(messages)
 
     # Group messages by sender
@@ -711,17 +718,15 @@ def main():
             sys.exit(1)
 
     total = len(raw_files)
-    success = 0
+    expected_months = {f.stem.replace("_raw", "") for f in raw_files}
+    failures = []
     for i, raw_path in enumerate(raw_files, 1):
         month = raw_path.stem.replace("_raw", "")
         out_path = MAP_CACHE_DIR / f"{month}.json"
 
-        # Skip if already processed
-        if out_path.exists():
-            print(f"  [{i}/{total}] {month} -- cached")
-            success += 1
-            continue
-
+        # No stale-skip: always regenerate. Reusing a cached {month}.json is the
+        # stale-MAP bug -- a prior partial run could leave one month's output
+        # stale while REDUCE globs it as if fresh (mixed lineage).
         print(f"  [{i}/{total}] {month} -- processing...", end="", flush=True)
         try:
             result = process_month(month, raw_path, name_map)
@@ -733,11 +738,38 @@ def main():
                 f" {result['message_count']} msgs, {len(stats)} members, "
                 f"{len(preds)} predictions, {len(arcs)} arcs"
             )
-            success += 1
         except Exception as e:
             print(f" ERROR: {e}")
+            failures.append(month)
 
-    print(f"\nDone. {success}/{total} months processed successfully.")
+    # Fail-closed: ANY month that errored makes the whole MAP exit nonzero, so a
+    # partial candidate can never feed REDUCE (closes the swallow-and-exit-0 hole).
+    if failures:
+        print(
+            f"\nFAILED: {len(failures)}/{total} months errored "
+            f"({', '.join(sorted(failures))}). Refusing to exit clean.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Full-run completeness + orphan gate (skipped in single --month mode): the
+    # produced {month}.json set must equal EXACTLY the expected month set -- no
+    # missing month, no orphan output whose _raw chunk is gone (mixed lineage).
+    if not args.month:
+        produced = {
+            p.stem for p in MAP_CACHE_DIR.glob("*.json") if not p.stem.endswith("_raw")
+        }
+        missing = expected_months - produced
+        orphan = produced - expected_months
+        if missing or orphan:
+            print(
+                f"\nFAILED month-set gate: missing={sorted(missing)} "
+                f"orphan={sorted(orphan)} (expected {len(expected_months)}).",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+    print(f"\nDone. {total}/{total} months processed successfully.")
 
 
 if __name__ == "__main__":

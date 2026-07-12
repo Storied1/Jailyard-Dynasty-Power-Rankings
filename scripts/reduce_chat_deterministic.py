@@ -14,10 +14,17 @@ No AI calls — pure aggregation, ranking, and formatting.
 
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime
 
-from shared import CONTENT_CHAT_DIR as CHAT_DIR
-from shared import MAP_CACHE_DIR, NAME_MAP_PATH, REPO_ROOT, load_json
+from shared import (
+    CONTENT_CHAT_OUT_DIR as CHAT_DIR,
+)  # derived analytics/personas dir (OUTPUT_ROOT)
+from shared import (
+    MAP_CACHE_DIR,
+    NAME_MAP_PATH,
+    load_json,
+    rel_to_root,
+    roster_persona_slugs,
+)
 from shared import save_json as _save_json
 
 FINGERPRINTS_PATH = CHAT_DIR / "fingerprints.json"
@@ -28,7 +35,7 @@ def save_text(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
-    print(f"  Saved: {path.relative_to(REPO_ROOT)}")
+    print(f"  Saved: {rel_to_root(path)}")
 
 
 def load_map_outputs():
@@ -122,7 +129,6 @@ def reduce_league_memory(map_outputs, name_map, total_messages):
 
     result = {
         "meta": {
-            "generated": datetime.utcnow().isoformat() + "Z",
             "message_count": total_messages,
             "analysis_version": "1.0-deterministic",
             "months_analyzed": len(map_outputs),
@@ -155,7 +161,7 @@ def reduce_league_memory(map_outputs, name_map, total_messages):
         },
         "running_jokes": running_jokes,
         "greatest_moments": greatest_moments,
-        "lexicon": all_lexicon,
+        "lexicon": dict(sorted(all_lexicon.items())),
     }
     return result
 
@@ -221,7 +227,11 @@ def reduce_arcs(map_outputs, name_map):
             }
         )
 
-    # Sort by narrative potential
+    # Sort by narrative potential. Ties intentionally preserve arc_groups
+    # insertion order, which is chronological (first-encounter across the
+    # sorted-month iteration) -- already PYTHONHASHSEED-independent (no set in
+    # the ordering path) and semantically meaningful (earlier sagas first).
+    # Do NOT add an alphabetical tie-break: it breaks test_tie_order_preservation.
     merged_arcs.sort(key=lambda x: -x.get("narrative_potential", 0))
     return merged_arcs[:30]
 
@@ -261,7 +271,7 @@ def reduce_predictions(map_outputs, name_map):
     # Build credibility index
     cred_index = {}
     author_counts = Counter(p["author_whatsapp"] for p in unique_preds)
-    for author, total in author_counts.items():
+    for author, total in sorted(author_counts.items()):
         cred_index[author] = {
             "total": total,
             "correct": 0,
@@ -297,7 +307,9 @@ def reduce_relationships(map_outputs, name_map):
                 pair_data[pair]["exchanges"].append(ex)
 
     pairs = []
-    for pair, info in sorted(pair_data.items(), key=lambda x: -x[1]["count"]):
+    # Sort by interaction count; the sorted member-pair tuple breaks ties so the
+    # serialized order and the [:30] cut are PYTHONHASHSEED-independent.
+    for pair, info in sorted(pair_data.items(), key=lambda x: (-x[1]["count"], x[0])):
         # Determine overall tone
         tone_counter = Counter(info["tones"])
         overall_tone = tone_counter.most_common(1)[0][0] if tone_counter else "neutral"
@@ -368,7 +380,7 @@ def reduce_consensus(map_outputs, name_map):
         topic_groups[snap.get("topic", "general")].append(snap)
 
     snapshots = []
-    for topic, snaps in topic_groups.items():
+    for topic, snaps in sorted(topic_groups.items()):
         for snap in snaps[:3]:
             snapshots.append(
                 {
@@ -390,25 +402,62 @@ def reduce_consensus(map_outputs, name_map):
 
 
 def reduce_personas(map_outputs, name_map):
-    """Produce persona markdown files from aggregated observations."""
+    """Produce persona markdown files -- one per ROSTER member, fail-closed.
+
+    The roster (name_map) is authoritative: slugs are validated for collisions +
+    filesystem safety BEFORE any write, a persona is generated for every roster
+    member, and an observation attributed to a non-roster member is rejected."""
     print("\n  Reducing: persona profiles...")
-    PERSONAS_DIR.mkdir(parents=True, exist_ok=True)
+    if not name_map:
+        print(
+            "ERROR: name-map is empty -- cannot validate the persona roster.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    personas_root = PERSONAS_DIR.resolve()
 
-    # Load fingerprints
-    fingerprints = {}
-    if FINGERPRINTS_PATH.exists():
-        fp_data = load_json(FINGERPRINTS_PATH)
-        fingerprints = fp_data.get("members", fp_data)
-
-    # Collect all persona observations by member
+    # Collect observations (in-memory) so the wrong-member check is part of the
+    # pre-write validation.
     member_data = defaultdict(list)
     for month, data in map_outputs.items():
         for obs in data.get("persona_observations", []):
             member = obs.get("member", "Unknown")
             member_data[member].append({"month": month, **obs})
 
-    total = len(member_data)
-    for i, (member, observations) in enumerate(sorted(member_data.items()), 1):
+    # COMPLETE fail-closed validation BEFORE any mkdir/write: slug collisions +
+    # safety, wrong-member, and containment for EVERY destination -- so an escape
+    # on the Nth persona can never land after 0..N-1 were already written.
+    try:
+        slug_map = roster_persona_slugs(name_map)
+    except ValueError as exc:
+        print(f"ERROR: persona slug validation failed -- {exc}", file=sys.stderr)
+        sys.exit(1)
+    wrong = sorted(set(member_data) - set(name_map))
+    if wrong:
+        print(
+            f"ERROR: persona_observations reference non-roster members: {wrong}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    dest_map = {}
+    for member, slug in slug_map.items():
+        dest = (PERSONAS_DIR / f"{slug}.md").resolve()
+        if dest.parent != personas_root:  # containment (slug is already safe)
+            print(
+                f"ERROR: persona path escapes {personas_root}: {dest}", file=sys.stderr
+            )
+            sys.exit(1)
+        dest_map[member] = PERSONAS_DIR / f"{slug}.md"
+
+    # All validation passed -- NOW create the dir + load fingerprints.
+    PERSONAS_DIR.mkdir(parents=True, exist_ok=True)
+    fingerprints = {}
+    if FINGERPRINTS_PATH.exists():
+        fp_data = load_json(FINGERPRINTS_PATH)
+        fingerprints = fp_data.get("members", fp_data)
+
+    for member in sorted(name_map):
+        observations = member_data.get(member, [])
         identity = name_map.get(member, {})
         real_name = identity.get("real_name", member)
         team = identity.get("team_name", "Unknown")
@@ -477,10 +526,19 @@ def reduce_personas(map_outputs, name_map):
 ## Narrative Hooks
 - Active storylines and callback opportunities to be enriched by AI pass
 """
-        slug = member.lower().strip().replace(" ", "-").replace("~", "").strip("-")
-        save_text(PERSONAS_DIR / f"{slug}.md", profile)
+        save_text(dest_map[member], profile)  # destination pre-validated (containment)
 
-    print(f"  {total} persona profiles generated")
+    # Post-write EXACT-set gate: the .md files on disk == the roster slugs.
+    produced = {p.stem for p in PERSONAS_DIR.glob("*.md")}
+    expected = set(slug_map.values())
+    if produced != expected:
+        print(
+            f"ERROR: persona set mismatch missing={sorted(expected - produced)} "
+            f"extra={sorted(produced - expected)}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    print(f"  {len(expected)} persona profiles generated (roster-exact)")
 
 
 def main():
