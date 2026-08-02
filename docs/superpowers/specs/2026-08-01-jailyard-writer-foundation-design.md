@@ -116,12 +116,12 @@ the fields that carry no timestamp to ask with.
 **The cutoff is an exact UTC instant, declared per edition** — not a week number. Week numbers
 cannot express "before the Thursday opener," which is exactly where the preview lives.
 
-| Edition                    | Cutoff                         | Week N results | Week N H2H meeting |
-| -------------------------- | ------------------------------ | -------------- | ------------------ |
-| Preseason                  | before any 2025 game           | excluded       | excluded           |
-| Week 1 pre-kickoff preview | first 2025 kickoff instant     | excluded       | excluded           |
-| Week N recap               | after week N games conclude    | included       | included           |
-| Finale (week 18)           | after the week 17 championship | n/a (no games) | included thru 17   |
+| Edition                    | Cutoff                            | Week N results | Week N H2H meeting |
+| -------------------------- | --------------------------------- | -------------- | ------------------ |
+| Preseason                  | before any 2025 game              | excluded       | excluded           |
+| Week 1 pre-kickoff preview | **strictly before** first kickoff | excluded       | excluded           |
+| Week N recap               | after week N games conclude       | included       | included           |
+| Finale (week 18)           | after the week 17 championship    | n/a (no games) | included thru 17   |
 
 **Every source class is qualified, not only markets.** For each source: what temporal primitive
 establishes its `known_at`, how it is recomputed at a cutoff, what provenance is required, and
@@ -129,6 +129,13 @@ what happens when it cannot be established (the answer is "unavailable," never "
 
 Transaction reconstruction uses the **effective completion instant**, not `created` — some
 transactions are created before a kickoff and complete after it.
+
+**The preview cutoff is strictly before kickoff.** `shared.admissible` is inclusive (`ts <=
+cutoff`), so a descriptor whose `cutoff_utc` _equals_ the qualified first-kickoff instant would
+admit evidence at kickoff — which is not pre-kickoff. The week-1 preview descriptor sets
+`cutoff_utc` to an instant strictly prior to the qualified first kickoff, so the inclusive
+comparison still yields pre-kickoff semantics. The same descriptor cutoff governs rebound league
+media.
 
 ## The ranking decision contract — the product proof
 
@@ -215,8 +222,22 @@ Every row is captured append-only; existing snapshots are never overwritten.
 | Chat + media export             | manual export                   | on export                            | message timestamp                          | **private** |
 
 Every captured artifact records: `source`, `captured_at`, `known_at` semantics, content hash,
-and privacy boundary. Private-class artifacts never leave the local machine and never enter a
-public projection.
+and privacy boundary.
+
+### The private-source boundary
+
+Stated carelessly, "private artifacts never enter a public projection" would forbid the culture
+layer — chat receipts and league media are among the richest intended inputs, and the week-1
+preview explicitly consumes cutoff-projected chat. The boundary is about _wholesale copying_, not
+about derivation:
+
+- **Raw private captures** — chat exports, media originals — never leave their protected local
+  boundary and are never copied wholesale into public artifacts.
+- **Derived projections, quotations, and media selections may reach writer bundles and
+  publication** when they are explicitly policy-approved and provenance-bound.
+- **Publication eligibility remains separate from temporal admissibility.** A quote can be
+  perfectly in-window and still be unpublishable; the 147 `personal`-tagged assets are the same
+  case in media form.
 
 **In scope for Phase 0:** prospective preseason roster and source capture, including the
 offseason-capable transaction path.
@@ -298,8 +319,11 @@ coverage is driven by editions, not built speculatively ahead of them.
   - **Bundle manifest** — binds the edition descriptor, raw-source hashes, projection code and
     policy version, and a **separately calculated bundle-payload hash**.
   - **Authoring manifest** — binds the bundle manifest, approved predecessor hashes,
-    desk/writer/editor rule versions, the produced content hash, and (once selected) the media
-    manifest.
+    desk/writer/editor rule versions, the produced content hash, and the final ranking decision
+    record. **Content and ranking only — no media.** Editorial approval binds this object, and
+    approval happens before media exists.
+  - **Publication record** — written after media and render; binds the approved authoring
+    manifest, the media-manifest hash, the rendered-HTML hash, and the publication result.
 
   Components carry edition and build identity; only the manifests carry final hashes.
 
@@ -311,10 +335,22 @@ coverage is driven by editions, not built speculatively ahead of them.
 
 ### Media catalog — rebind before it can be a source
 
-`content/chat/media-catalog.json` holds 1,205 items with exact `timestamp_utc`, and **239
-postdate the week-1 kickoff, including 77 from 2026** — with no cutoff filtering anywhere in
-`pick-media.md` or `resolve_media.py`. Nothing today prevents a week-1 column from being
-illustrated with a 2026 screenshot.
+**Current state, stated precisely.** `content/chat/media-catalog.json` holds 1,205 items with
+`timestamp_utc`, of which **239 postdate the week-1 kickoff, including 77 from 2026**. This is a
+**source-level exposure**, counted separately from the 46 packet contaminations.
+
+It is **not** a confirmed catalog-to-picker leak today: `pick-media.md` and `resolve_media.py`
+contain no reference to `media-catalog.json`. An earlier revision of this document implied they
+read it; they do not.
+
+What the catalog _is_ today is a **stale indirect analytics source**, and that path is live:
+`build_chat_context.py:381-382` calls `media_catalog.get(msg_id)` while building writer-facing
+chat contexts. That join uses `message_id` — the key that resolves to the correct file **0 times
+out of 1,205**. So the catalog's broken provenance already reaches writer inputs, through
+enrichment rather than selection.
+
+What it _becomes_ under this design is a selectable-media corpus — which is why rebinding is a
+precondition, not a cleanup.
 
 **But the catalog cannot simply be filtered on that timestamp.** It was committed at `9ae72e3`
 (2026-07-10) and never touched since; the parser repair landed at `c751b22` (2026-07-20). Its
@@ -342,11 +378,86 @@ Filtering on `timestamp_utc` would therefore gate on a field that is wrong 1,202
   are missing or whose asset changed. The descriptions are expensive and mostly still valid;
   it is the _provenance_ that is broken, not the prose.
 - Treat the **255 uncatalogued assets as unavailable** until classified.
+- **No `message_id` join is trusted without a verified source binding.**
 - Only after rebinding does the catalog become a per-edition bundle source, projected on the
   repaired timestamp.
 
-Externally fetched media (GIPHY) is undated third-party content, not league evidence — exempt
-from cutoff filtering, but it must remain distinguishable from league media in the bundle.
+### Publication eligibility is not temporal admissibility
+
+These are independent properties and both must hold. A cutoff-safe attachment is not thereby
+publishable: **147 catalog entries are tagged `personal`.** A photo of someone's kid from 2023 is
+perfectly admissible at any 2025 cutoff and must never be embedded in a public column.
+
+- Rebound league-media items default to **unreviewed**. Only explicitly approved items may be
+  embedded.
+- Kept lean: review D1 candidates and selections as they arise rather than classifying all 1,205
+  assets up front. Classification is demand-driven.
+
+**No blanket GIPHY exemption.** GIPHY and custom media may carry an explicit
+`non_evidentiary_decoration` policy **only** when they communicate no post-cutoff Jailyard or NFL
+fact. A generic reaction GIF qualifies; a GIF captioned with a week-14 result does not, and a
+screenshot of a later standings page never does. Anything else requires ordinary temporal
+qualification. The prior revision's blanket exemption is withdrawn — "third-party" describes
+where an asset came from, not what it discloses.
+
+### Media enforcement through the rendered artifact
+
+Bundle admission proves what media was _available_. It proves nothing about what was _selected_
+or what the HTML _embeds_. Those are three different facts and only the last one ships.
+
+**Per-edition media manifest — tracked, and the sole authority.** Bound to the edition ID, the
+approved authoring-manifest/content hash, and the media-policy version. Each selected slot
+records:
+
+| Field                | league_media                   | giphy                                            | custom                        |
+| -------------------- | ------------------------------ | ------------------------------------------------ | ----------------------------- |
+| source class         | `league_media`                 | `giphy`                                          | `custom`                      |
+| stable identity      | asset SHA-256                  | exact GIPHY ID                                   | asset SHA-256                 |
+| selection provenance | why this slot, from what query | same                                             | same                          |
+| temporal             | rebound `timestamp_utc`        | cutoff-qualified or `non_evidentiary_decoration` | same                          |
+| publication decision | approved / unreviewed / barred | policy applied                                   | policy applied                |
+| location             | —                              | persisted resolved-result metadata               | authorized repo-relative path |
+
+`media_picks.json` and `media_cache.json` are gitignored (`.gitignore:29-30`) and **may remain
+derivative caches, but neither can authorize publication**. The verifier never consults them. No
+raw-catalog reference, free-form custom path, or shared ignored cache authorizes anything.
+
+**GIPHY results are persisted, not re-resolved.** Live search is dynamic — the same query returns
+different assets on different days, and this project has already recorded GIPHY serving an
+identical canned junk set across unrelated queries. The resolved result is captured in the
+manifest so the artifact is reproducible.
+
+**Custom assets** must live inside an authorized media root and hash-match the manifest.
+
+**Both render paths** — weekly and preseason — and the resolver consume the per-edition manifest.
+A referenced but unresolved slot **fails**; it does not silently disappear.
+
+**Render verifier:** extract every media URL and path from the final HTML and prove a
+**one-to-one match** with the manifest. No missing nodes, no extra nodes. This is the only check
+that speaks to what actually shipped.
+
+### Approval lifecycle — content first, publication last
+
+The previous revision put the media manifest inside the authoring manifest. That is wrong:
+**editorial approval happens before media exists**, so binding media into the approved object
+would make every approval stale the instant art was added.
+
+- **Authoring manifest** stays **content and ranking only**. Editorial approval binds this.
+- **Publication record** is created after media selection and render, binding: the approved
+  authoring manifest, the media-manifest hash, the rendered-HTML hash, and the final publication
+  result.
+
+This preserves the existing content-first workflow while still making publication provable.
+
+**On whether a smaller mechanism would do:** I looked for one and don't believe it exists. The
+manifest and the publication record sit at different times in the pipeline — the renderer
+_consumes_ the manifest, and the publication record can only be written once the HTML it hashes
+exists — so they cannot collapse into a single artifact. Promoting the existing
+`media_picks.json` instead of adding a manifest saves nothing real: it would need edition
+binding, hashes, and policy version added, which is the manifest, and it would fuse cache
+semantics with authority semantics, which is the failure being prevented. Dropping the render
+verifier would leave every other control unable to speak about the artifact that actually
+publishes.
 
 ### Week 1 pre-kickoff preview inputs
 
@@ -432,9 +543,25 @@ picks, spreads, and tags; that data exists in no generated file. An edition's `m
 cannot be authored before the picks exist. Threads must be opened before being advanced.
 Callbacks quote prose that must exist.
 
-**Per-edition loop:** descriptor declared → bundle compiled → desks brief → columnist writes →
-ranking decision record produced → `verify_week_content.py` exits 0 → `/edit-week` APPROVE
-(review-log line bound to the authoring manifest) → media → render → commit.
+**Per-edition loop:**
+
+```
+descriptor declared → bundle compiled → desks brief
+  → RANKING DECISION RECORD produced
+  → columnist writes FROM that judgment
+  → verify_week_content.py exits 0
+  → /edit-week APPROVE  (review-log line bound to the authoring manifest)
+  → media manifest → render → render verifier → publication record → commit
+```
+
+**The ranking record precedes the prose, and this ordering is load-bearing.** Writing first and
+recording the rationale afterward permits an arbitrary order followed by a plausible
+justification — which would read exactly like judgment while containing none. The record is the
+deliberative input to the ranking prose, not retrospective paperwork.
+
+The record and the ordering may be revised _together_ during editing — judgment is allowed to
+change when the writing exposes a weak call. What is not allowed is manufacturing the reasoning
+after the order is already fixed. The final record binds with the authoring manifest.
 
 **Serial, owned by the lead context, never delegated:** `check_picks_ledger`,
 `verify_prev_rank_claims`, and appends to `content/review-log.jsonl`.
@@ -487,8 +614,10 @@ beyond the D1 set are built as the editions that need them arrive.
 - **Phase 0:** every row of the minimum capture table has a working capture path — including an
   **offseason-capable transaction path**, which `fetch_sleeper.py:172` cannot provide; each
   artifact records `source`, `captured_at`, `known_at` semantics, content hash, and privacy
-  boundary; re-running capture never overwrites a prior snapshot; private-class artifacts never
-  enter a public projection. A single snapshot of one source does **not** satisfy this phase.
+  boundary; re-running capture never overwrites a prior snapshot; raw private captures never
+  leave their protected local boundary and are never copied wholesale into public artifacts,
+  while policy-approved provenance-bound derivations may. A single snapshot of one source does
+  **not** satisfy this phase.
 - **Phase A:** the read-path census is reviewed and approved before any file changes; no active
   writing path can reach barred prose, proven by test — including generated artifacts
   (`team_profiles_summary`, `voice_bible_callbacks`); abstract grammar, templates, and
@@ -498,20 +627,28 @@ beyond the D1 set are built as the editions that need them arrive.
   and fires on planted leaks of each class including an undated aggregate; noninterference is
   byte-identical with detector-active positive controls; a clean rebuild reproduces every bundle;
   no consumer reads a full-season store directly; a legal week-1 preview bundle exists containing
-  no week-1 outcomes and no final starters; **no bundle offers league media postdating its
-  cutoff**, measured on rebound timestamps — the pre-rebind figure of 966 of 1,205 is computed
-  from a field that is wrong 1,202 times and is **not** a valid acceptance target; the invariant
-  is "zero items whose rebound `timestamp_utc` postdates the edition cutoff," whatever count that
-  yields; at least one non-2025
+  no week-1 outcomes and no final starters, on a descriptor cutoff **strictly before** the
+  qualified first kickoff; **no bundle offers league media postdating its cutoff** — the
+  invariant is "zero items whose _rebound_ `timestamp_utc` postdates the edition cutoff,"
+  whatever count that yields (the pre-rebind figure of 966 of 1,205 is computed from a field
+  wrong 1,202 times and is **not** a valid target); at least one non-2025
   canary edition compiles; `verify_h2h_claims` errors; suite green against the measured baseline
   of **343 passed / 2 skipped** (run at `c751b22` on 2026-08-01, 167s — verified, not inherited
   from memory); CI green on HEAD's own SHA.
 - **Phase C:** twelve repertoires committed and Blake-approved; desks exist as committed commands
   reading only bundles; bake-off run and outcome recorded — scored on **ranking quality as well
   as prose**, and a candidate with better prose but weaker ranking judgment loses.
-- **Media rebind:** the catalog joins the repaired corpus on asset content hash plus
-  filename/source provenance, with `message_id` unused as a join key; preserved descriptions
-  rebind cleanly; the 255 uncatalogued assets are marked unavailable; only then is the catalog
+- **Media, end to end:** every rendered media node maps **one-to-one** to an approved
+  per-edition manifest entry — no missing nodes, no extra nodes; league assets are source-bound,
+  cutoff-safe, and publication-approved; GIPHY and custom entries either satisfy the edition
+  cutoff or carry an explicit `non_evidentiary_decoration` policy; GIPHY resolved results are
+  persisted rather than re-resolved; custom assets hash-match and sit inside the authorized media
+  root; a referenced but unresolved slot **fails**; no gitignored cache authorizes publication;
+  and final publication binds the approved content, the media manifest, and the rendered artifact.
+- **Media rebind (precondition to the above):** the catalog joins the repaired corpus on asset
+  content hash plus filename/source provenance, with `message_id` unused as a join key; preserved
+  descriptions rebind cleanly; the 255 uncatalogued assets are marked unavailable; rebound league
+  media defaults to unreviewed with only approved items embeddable; only then is the catalog
   admitted as a bundle source.
 - **Phase D — every edition:** passes the global content gate — verifier 0 errors AND
   `/edit-week` APPROVE AND renders clean AND as-if-realtime checklist clean, with approval bound
@@ -530,12 +667,8 @@ beyond the D1 set are built as the editions that need them arrive.
 
 - Whether the audit surfaces leak classes beyond H2H, `historical_context`, and undated
   aggregates. If so, repair scope grows before Phase C.
-- **Two review items from 2026-08-01 are unresolved and this design is incomplete without them.**
-  The instruction listing six revisions was truncated: item 5 ends mid-sentence at "No
-  message-ID", and item 6 was never received. Item 5 is implemented as far as it was stated
-  (rebind on asset hash + filename provenance, regenerate only missing/changed, 255 assets
-  unavailable). The remainder of 5 and all of 6 must be supplied before the implementation plan
-  is written.
+- Which media-policy decisions the D1 editions actually force. Classification is demand-driven by
+  design, so the first real answer arrives during D1 rather than before it.
 - Beyond the minimum capture table, which _additional_ 2026 sources are worth preserving, and
   their `known_at` semantics. Capture is broad by policy; this question is about reach, not
   admission.
