@@ -1,8 +1,9 @@
 # Jailyard — Writer Foundation + Newsroom Design
 
 **Date:** 2026-08-01
-**Status:** DRAFT — awaiting Blake review. Not approved. Nothing here is authorized for
-implementation.
+**Status:** **APPROVED** by Blake 2026-08-02 as written at `072f4ea`. This is the design
+authority for the 2025 replay program; implementation plans are written against this document,
+and material changes require re-approval.
 **Relationship to prior work:** replaces the "weeks 1-6 next" sequencing in
 `2026-06-04-jailyard-2025-catchup-design.md`. That document's data → content → design ordering
 still holds; its claim that the data layer is complete does not.
