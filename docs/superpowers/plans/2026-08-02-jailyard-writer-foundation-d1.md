@@ -1024,10 +1024,13 @@ def test_undated_aggregates_cutoff_correct():
 
 ```bash
 python scripts/extract_week_data.py --all --pretty
-python scripts/generate_expanded_week.py --all
+python scripts/generate_expanded_week.py            # bare run covers weeks 1-18
 python -m pytest scripts/tests/test_packet_cutoff_clean.py -v
 python -m pytest scripts/tests/ -q
 ```
+
+`generate_expanded_week.py` accepts only `--week` (default: all 1-18) and `--season`. Passing
+`--all` exits nonzero on an unrecognized argument.
 
 Regenerating companions in the same pass is mandatory — `c5b6b50` regenerated week data alone and
 left 32 season-end Elo values leaking in the companions.
@@ -1971,25 +1974,52 @@ MSGS = [{"id": 999, "timestamp_utc": "2024-01-02T03:04:05Z", "sender": "Right",
         {"id": 1000, "timestamp_utc": "2024-02-02T03:04:05Z", "sender": "Other",
          "media": ["b.mp4"]}]
 
-def test_binds_by_filename_not_message_id():
-    e = rebind(CAT, MSGS)["entries"][0]
+@pytest.fixture
+def assets(tmp_path):
+    (tmp_path / "a.mp4").write_bytes(b"asset-a")
+    return str(tmp_path)
+
+def test_binds_by_filename_not_message_id(assets):
+    e = rebind(CAT, MSGS, assets)["entries"][0]
     assert e["message_id"] == 999 and e["sender"] == "Right"
     assert e["timestamp_utc"] == "2024-01-02T03:04:05Z"
 
-def test_description_preserved():
-    assert rebind(CAT, MSGS)["entries"][0]["description"] == "keep me"
+def test_description_preserved(assets):
+    assert rebind(CAT, MSGS, assets)["entries"][0]["description"] == "keep me"
 
-def test_uncatalogued_reported():
-    assert "b.mp4" in rebind(CAT, MSGS)["uncatalogued"]
+def test_uncatalogued_reported(assets):
+    assert "b.mp4" in rebind(CAT, MSGS, assets)["uncatalogued"]
 
-def test_all_rebound_items_unreviewed():
-    assert rebind(CAT, MSGS)["entries"][0]["publication"] == "unreviewed"
+def test_all_rebound_items_unreviewed(assets):
+    assert rebind(CAT, MSGS, assets)["entries"][0]["publication"] == "unreviewed"
 
-def test_ambiguous_binding_fails():
+def test_bound_entries_always_carry_a_content_hash(assets):
+    for e in rebind(CAT, MSGS, assets)["entries"]:
+        assert e["asset_sha256"] and e["asset_sha256"].startswith("sha256:")
+
+def test_asset_root_is_required():
+    with pytest.raises(ValueError):
+        rebind(CAT, MSGS, None)
+
+def test_missing_asset_is_unbound_not_null_hashed(tmp_path):
+    out = rebind(CAT, MSGS, str(tmp_path))      # a.mp4 absent from disk
+    assert not out["entries"]
+    assert out["unbound"][0]["reason"].startswith("asset absent")
+
+def test_ambiguous_filename_binding_fails(assets):
     dupes = MSGS + [{"id": 1001, "timestamp_utc": "2024-03-03T00:00:00Z",
                      "sender": "Third", "media": ["a.mp4"]}]
     with pytest.raises(AmbiguousBinding):
-        rebind(CAT, dupes)
+        rebind(CAT, dupes, assets)
+
+def test_ambiguous_content_hash_fails(tmp_path):
+    (tmp_path / "a.mp4").write_bytes(b"same")
+    (tmp_path / "c.mp4").write_bytes(b"same")          # identical bytes, two names
+    cat = CAT + [{"filename": "c.mp4", "description": "dup", "tags": []}]
+    msgs = MSGS + [{"id": 1002, "timestamp_utc": "2024-04-04T00:00:00Z",
+                    "sender": "Fourth", "media": ["c.mp4"]}]
+    with pytest.raises(AmbiguousBinding):
+        rebind(cat, msgs, str(tmp_path))
 ```
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
@@ -2030,11 +2060,20 @@ def _names(msg):
 
 
 def asset_sha256(path):
+    """Content hash of the asset on disk, or None when the asset is absent."""
     p = Path(path)
     return "sha256:" + hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None
 
 
-def rebind(catalog, messages, asset_root=None):
+def rebind(catalog, messages, asset_root):
+    """Bind on (asset content hash, filename/source provenance).
+
+    asset_root is REQUIRED. An entry whose asset is absent from disk cannot be
+    content-bound and is reported unbound -- it never ships with a null hash.
+    """
+    if asset_root is None:
+        raise ValueError("asset_root is required: binding needs the asset content hash")
+
     by_file = {}
     for m in messages:
         for n in _names(m):
@@ -2043,34 +2082,44 @@ def rebind(catalog, messages, asset_root=None):
         if len(msgs) > 1:
             raise AmbiguousBinding(f"{fn} binds to {len(msgs)} messages -- refuse to guess")
 
+    by_hash = {}
     entries, unbound = [], []
     for item in catalog:
         fn = item.get("filename")
         live = by_file.get(fn)
         if not live:
-            unbound.append(fn)
+            unbound.append({"filename": fn, "reason": "no live message carries this filename"})
             continue
+        sha = asset_sha256(Path(asset_root) / fn)
+        if sha is None:
+            unbound.append({"filename": fn, "reason": "asset absent from disk; cannot content-bind"})
+            continue
+        if sha in by_hash and by_hash[sha] != fn:
+            raise AmbiguousBinding(
+                f"content hash {sha} claimed by both {by_hash[sha]} and {fn}")
+        by_hash[sha] = fn
         m = live[0]
         entries.append({
             "filename": fn,
+            "asset_sha256": sha,                 # never None for a bound entry
             "message_id": m.get("id"),
             "timestamp_utc": m.get("timestamp_utc"),
             "sender": m.get("sender"),
             "description": item.get("description"),
             "tags": sorted(item.get("tags") or []),
-            "asset_sha256": asset_sha256(Path(asset_root) / fn) if asset_root else None,
             "publication": "unreviewed",
         })
     catalogued = {i.get("filename") for i in catalog}
     return {"entries": sorted(entries, key=lambda e: e["filename"]),
-            "unbound": sorted(unbound),
+            "unbound": sorted(unbound, key=lambda u: u["filename"]),
             "uncatalogued": sorted(set(by_file) - catalogued)}
 
 
 def main():
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--asset-root")
+    ap.add_argument("--asset-root", required=True,
+                    help="directory holding the media assets; binding needs their hashes")
     args = ap.parse_args()
     cat = json.load(open(ROOT / "content" / "chat" / "media-catalog.json", encoding="utf-8"))
     cat = cat if isinstance(cat, list) else cat.get("items", [])
@@ -2091,11 +2140,16 @@ if __name__ == "__main__":
 
 ```bash
 python -m pytest scripts/tests/test_rebind_media_catalog.py -v
-python scripts/rebind_media_catalog.py
+python scripts/rebind_media_catalog.py --asset-root <path/to/media/assets>
 ```
 
-Expected: 5 passed; `rebound=1205 unbound=0 uncatalogued=255`, exit 0, and
-`content/chat/media-catalog-rebound.json` written.
+Expected: 9 passed; `rebound=1205 unbound=0 uncatalogued=255`, exit 0, and
+`content/chat/media-catalog-rebound.json` written with a non-null `asset_sha256` on every entry.
+
+If any asset is absent from `--asset-root`, that entry lands in `unbound` with reason
+`asset absent from disk` and the command exits 1. **That is correct behavior** — an entry that
+cannot be content-bound must not ship with a null hash, because the whole point of the rebind is
+that the pre-repair provenance is untrustworthy.
 
 - [ ] **Step 5: Commit the rebound corpus**
 
