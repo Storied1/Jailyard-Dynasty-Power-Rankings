@@ -3,7 +3,7 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
-**Status:** DRAFT — third revision, after review of `ac3f82a`. Awaiting Blake's approval. Not
+**Status:** DRAFT — fifth revision, after review of `fe6585f`. Awaiting Blake's approval. Not
 authorized for implementation.
 
 **Goal:** Make the minimum slice genuinely vertical — 2026 evidence durably preserved, every
@@ -497,7 +497,7 @@ def test_canon_checks_consumes_the_bundle():
 
 Declared inputs for every consumer become exactly:
 
-1. `content/editions/<edition_id>/bundle.json`
+1. `content/editions/<edition_id>/compiled/bundle.json`
 2. approved prior editions' `content.json` (continuity consumers only)
 3. `content/voice-bible.md` — allowed versioned editorial rule
 4. `content/editions/<edition_id>/ranking_record.json`
@@ -1131,7 +1131,7 @@ def test_equal_specificity_conflict_fails_closed():
 - [ ] **Step 4: Implement** (`leaf_pointers`, `classify` with equal-specificity conflict,
       `audit_object` returning `ok`/`unclassified`/`forbidden_present`, and a `main()` CLI
       auditing `content/weeks/week*_data.json` as `week_packet` and
-      `content/editions/*/bundle.json` as `edition_bundle`, exiting 1 on any failure).
+      `content/editions/*/compiled/bundle.json` as `edition_bundle`, exiting 1 on any failure).
 
 ```python
 def audit_object(reg, kind, obj):
@@ -1147,6 +1147,78 @@ def audit_object(reg, kind, obj):
             forbidden.append(ptr)
     return {"ok": not unclassified and not forbidden,
             "unclassified": unclassified, "forbidden_present": forbidden}
+
+
+def temporal_check(obj, cutoff_utc, season, results_through_week):
+    """Reject leaves whose DATE postdates the cutoff, and undated aggregates that
+    disagree with recomputation. Structural classification cannot see either."""
+    from as_of_records import as_of_records
+    problems = []
+    for key, rec in (obj.get("records") or {}).items():
+        if not isinstance(rec, dict):
+            continue
+        s, w = rec.get("season"), rec.get("week")
+        if s is not None and (s > season or (s == season and (w or 0) > results_through_week)):
+            problems.append(f"{key} postdates the cutoff: season {s} week {w}")
+    expected = as_of_records(season, results_through_week)
+    for key in ("longest_win_streak", "longest_losing_streak"):
+        got = (obj.get("records") or {}).get(key)
+        if got and expected.get(key) and got.get("count") != expected[key]["count"]:
+            problems.append(
+                f"{key} fails recompute: {got.get('count')} != {expected[key]['count']}")
+    return problems
+
+
+def main():
+    import argparse, glob as _g, json as _j
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--all", action="store_true")
+    ap.add_argument("--path")
+    ap.add_argument("--kind", default="week_packet")
+    ap.add_argument("--cutoff")
+    ap.add_argument("--results-through-week", type=int)
+    ap.add_argument("--season", type=int, default=2025)
+    ap.add_argument("--min-week-packets", type=int, default=18)
+    ap.add_argument("--min-edition-bundles", type=int, default=1)
+    args = ap.parse_args()
+    reg = load_registry()
+
+    if args.all:
+        weeks = sorted(_g.glob("content/weeks/week*_data.json"))
+        bundles = sorted(_g.glob("content/editions/*/compiled/bundle.json"))
+        # A glob matching nothing must not report OK. The prior revision globbed
+        # content/editions/*/bundle.json -- a path the compiler never writes --
+        # so --all audited zero bundles and exited 0.
+        if len(weeks) < args.min_week_packets:
+            print(f"FAIL discovered {len(weeks)} week packets, "
+                  f"expected >= {args.min_week_packets}")
+            return 1
+        if len(bundles) < args.min_edition_bundles:
+            print(f"FAIL discovered {len(bundles)} edition bundles, "
+                  f"expected >= {args.min_edition_bundles}")
+            return 1
+        targets = ([("week_packet", p) for p in weeks]
+                   + [("edition_bundle", p) for p in bundles])
+    else:
+        targets = [(args.kind, args.path)]
+
+    failed = 0
+    for kind, path in targets:
+        obj = _j.load(open(path, encoding="utf-8"))
+        r = audit_object(reg, kind, obj)
+        problems = list(r["unclassified"]) + list(r["forbidden_present"])
+        if args.cutoff and args.results_through_week is not None:
+            problems += temporal_check(obj, args.cutoff, args.season,
+                                       args.results_through_week)
+        if problems:
+            failed += 1
+            print(f"FAIL {path}: {problems[:5]}")
+    print("OK" if not failed else f"{failed} file(s) failed")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
 ```
 
 - [ ] **Step 5: Run** → 6 passed; `python scripts/cutoff_audit.py --all` exits 0
@@ -1176,7 +1248,7 @@ from scripts.cutoff_audit import audit_object, load_registry
 REG = load_registry()
 
 def _bundle():
-    return json.load(open("content/editions/2025-wk01-recap/bundle.json", encoding="utf-8"))
+    return json.load(open("content/editions/2025-wk01-recap/compiled/bundle.json", encoding="utf-8"))
 
 def test_unknown_field_rejected_by_shipped_audit():
     b = copy.deepcopy(_bundle()); b["brand_new_block"] = {"leak": 1}
@@ -1189,26 +1261,38 @@ def test_planted_forbidden_leaf_rejected_by_shipped_audit():
     r = audit_object(REG, "edition_bundle", b)
     assert not r["ok"] and r["forbidden_present"]
 
-def test_planted_dated_leak_rejected_via_cli(tmp_path):
+def test_planted_dated_leak_rejected_by_the_dated_validator(tmp_path):
+    """No marker fields. The leaf stays fully classified; only its DATE is future.
+
+    The previous revision added `planted_marker`, so rejection came from the
+    unknown-field path -- that is schema coverage, not temporal detection.
+    """
     b = copy.deepcopy(_bundle())
     b["records"]["highest_combined"] = {"points": 999.0, "teams": "X vs Y",
-                                        "score": "1-2", "season": 2025, "week": 14,
-                                        "planted_marker": True}     # unclassified leaf
+                                        "score": "1-2", "season": 2025, "week": 14}
+    assert audit_object(REG, "edition_bundle", b)["ok"], \
+        "leaf must remain classified -- the leak is temporal, not structural"
     p = tmp_path / "leaky.json"; p.write_text(json.dumps(b), encoding="utf-8")
     r = subprocess.run([sys.executable, "scripts/cutoff_audit.py",
-                        "--path", str(p), "--kind", "edition_bundle"],
+                        "--path", str(p), "--kind", "edition_bundle",
+                        "--cutoff", "2025-09-09T06:59:59Z", "--results-through-week", "1"],
                        capture_output=True, text=True)
-    assert r.returncode == 1, "shipped CLI must reject the leaky bundle"
+    assert r.returncode == 1 and "postdates" in (r.stdout + r.stderr)
 
-def test_planted_undated_leak_rejected_via_cli(tmp_path):
+def test_planted_undated_leak_rejected_by_recomputation(tmp_path):
+    """Undated aggregates carry no date, so only recomputation can reject them."""
+    from scripts.as_of_records import as_of_records
     b = copy.deepcopy(_bundle())
-    b["records"]["longest_losing_streak"] = {"count": 10, "team": "Noble FFT",
-                                             "owner_id": "x", "season_end_value": True}
+    correct = as_of_records(2025, 1)["longest_losing_streak"]["count"]
+    b["records"]["longest_losing_streak"] = {"count": correct + 1, "team": "Noble FFT",
+                                             "owner_id": "x"}
+    assert audit_object(REG, "edition_bundle", b)["ok"], "leaf stays classified"
     p = tmp_path / "leaky2.json"; p.write_text(json.dumps(b), encoding="utf-8")
     r = subprocess.run([sys.executable, "scripts/cutoff_audit.py",
-                        "--path", str(p), "--kind", "edition_bundle"],
+                        "--path", str(p), "--kind", "edition_bundle",
+                        "--cutoff", "2025-09-09T06:59:59Z", "--results-through-week", "1"],
                        capture_output=True, text=True)
-    assert r.returncode == 1
+    assert r.returncode == 1 and "recompute" in (r.stdout + r.stderr)
 
 def test_clean_bundle_passes_cli():
     r = subprocess.run([sys.executable, "scripts/cutoff_audit.py", "--all"],
@@ -1560,13 +1644,14 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = ROOT                       # injectable; B12 points this at a truncated corpus
 
 REQUIRED_BY_KIND = {
-    "preseason": ["records", "h2h", "rosters", "draft", "chat", "name_repertoires",
-                  "media_candidates"],
-    "preview": ["records", "h2h", "rosters", "draft", "pairings", "standings", "chat",
-                "prior_editions", "name_repertoires", "media_candidates"],
-    "recap": ["records", "h2h", "rosters", "draft", "pairings", "standings", "results",
-              "player_game_context", "chat", "prior_editions", "name_repertoires",
-              "media_candidates"],
+    "preseason": ["franchises", "records", "h2h", "rosters", "draft", "chat",
+                  "name_repertoires", "media_candidates"],
+    "preview": ["franchises", "records", "h2h", "rosters", "draft", "pairings",
+                "standings", "chat", "prior_editions", "name_repertoires",
+                "media_candidates"],
+    "recap": ["franchises", "records", "h2h", "rosters", "draft", "pairings",
+              "standings", "results", "player_game_context", "chat", "prior_editions",
+              "name_repertoires", "media_candidates"],
 }
 
 ADAPTERS = {}
@@ -1609,23 +1694,54 @@ def effective_instant(txn):
     return datetime.fromtimestamp(ms / 1000, tz=timezone.utc)
 
 
+ANCHOR_MANIFEST = "roster_anchors.json"   # {season: {path, captured_at, known_at}}
+
+
+def qualified_anchor(season, cutoff_utc):
+    """An anchor is admissible only if its known_at is at or before the cutoff.
+
+    `data/{season}/rosters.json` is NOT such an anchor: for 2025 it was first
+    committed 2026-02-17, i.e. a post-season final state. Reversing later
+    transactions off a final state is algebraic undoing of hindsight, not
+    as-if-realtime evidence, and it silently inherits every unrecorded
+    offseason move.
+    """
+    manifest = SOURCE_ROOT / "data" / ANCHOR_MANIFEST
+    if not manifest.exists():
+        raise UnavailableEvidence(
+            f"no {ANCHOR_MANIFEST}: no qualified pre-cutoff roster anchor exists")
+    entry = (load_json(manifest, required=True) or {}).get(str(season))
+    if not entry:
+        raise UnavailableEvidence(f"no qualified roster anchor for season {season}")
+    if entry["known_at"] > cutoff_utc:
+        raise UnavailableEvidence(
+            f"roster anchor known_at {entry['known_at']} postdates cutoff {cutoff_utc}; "
+            "preview rosters are unavailable rather than reverse-derived")
+    return entry
+
+
 def reconstruct_roster(season, cutoff_utc):
-    cutoff = datetime.fromisoformat(cutoff_utc.replace("Z", "+00:00"))
-    base = load_json(_sd(season) / "rosters.json", required=True)
+    """Reconstruct FORWARD from a qualified anchor. Never backward from a final state."""
+    anchor = qualified_anchor(season, cutoff_utc)
+    base = load_json(SOURCE_ROOT / anchor["path"], required=True)
     rosters = {str(r["roster_id"]): {"players": list(r.get("players") or [])} for r in base}
+    cutoff = datetime.fromisoformat(cutoff_utc.replace("Z", "+00:00"))
+    known_at = datetime.fromisoformat(anchor["known_at"].replace("Z", "+00:00"))
     txns = load_json(_sd(season) / "transactions.json", required=True)
     events = [(effective_instant(t), t) for leg in sorted(txns, key=int)
               for t in txns[leg] if t.get("status") == "complete"]
-    for when, t in sorted(events, key=lambda e: e[0], reverse=True):
-        if when <= cutoff:
+    for when, t in sorted(events, key=lambda e: e[0]):          # FORWARD
+        if when <= known_at:
+            continue
+        if when > cutoff:
             break
         for pid, rid in (t.get("adds") or {}).items():
+            rosters.setdefault(str(rid), {"players": []})["players"].append(pid)
+        for pid, rid in (t.get("drops") or {}).items():
             pl = rosters.get(str(rid), {}).get("players", [])
             if pid in pl:
                 pl.remove(pid)
-        for pid, rid in (t.get("drops") or {}).items():
-            rosters.setdefault(str(rid), {"players": []})["players"].append(pid)
-    return rosters
+    return rosters, anchor
 
 
 def _ident(season, path, extra=None):
@@ -1636,6 +1752,24 @@ def _ident(season, path, extra=None):
     if extra:
         out.update(extra)
     return out
+
+
+@adapter("franchises")
+def _franchises(d):
+    """Canonical franchise identity, available to EVERY edition kind.
+
+    verify_ranking_record previously derived identity from bundle["standings"],
+    which preseason does not have. Continuity keys on durable roster_id/owner_id,
+    never on a mutable display name.
+    """
+    p = _sd(d.season) / "users.json"
+    users = load_json(p, required=True)
+    return ([{"roster_id": u.get("metadata", {}).get("roster_id") or i + 1,
+              "owner_id": u["user_id"],
+              "display_name_at_cutoff": (u.get("metadata") or {}).get("team_name")
+              or u["display_name"]}
+             for i, u in enumerate(users)],
+            _ident(d.season, p, {"scope": "season_specific", "role": "franchise_identity"}))
 
 
 @adapter("records")
@@ -1657,7 +1791,14 @@ def _h2h(d):
 
 @adapter("rosters")
 def _rosters(d):
-    return reconstruct_roster(d.season, d.cutoff_utc), _ident(d.season, _sd(d.season) / "rosters.json")
+    """Returns EVERY physical input consumed: the qualified anchor and transactions."""
+    rosters, anchor = reconstruct_roster(d.season, d.cutoff_utc)
+    return rosters, {"season": d.season, "scope": "season_specific",
+                     "inputs": [_ident(d.season, SOURCE_ROOT / anchor["path"],
+                                       {"role": "roster_anchor",
+                                        "known_at": anchor["known_at"]}),
+                                _ident(d.season, _sd(d.season) / "transactions.json",
+                                       {"role": "transactions"})]}
 
 
 @adapter("draft")
@@ -1706,23 +1847,63 @@ def _pgc(d):
 
 
 @adapter("chat")
-def _chat(d):
-    """Project chat AT THE DESCRIPTOR CUTOFF. Never reuse a recap-cutoff artifact."""
-    import subprocess
-    out = SOURCE_ROOT / "content" / "editions" / d.edition_id / "_chat_projection.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    r = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_chat_context.py"),
-                        "--season", str(d.season), "--cutoff-utc", d.cutoff_utc,
-                        "--out", str(out), "--no-ai"],
-                       capture_output=True, text=True)
-    if r.returncode != 0:
-        raise UnavailableEvidence(f"chat projection failed at {d.cutoff_utc}: {r.stderr[:200]}")
-    ctx = load_json(out, required=True)
+def _chat(d, staging=None):
+    """Edition-typed chat projection.
+
+    Message-cutoff filtering is NOT sufficient. The live builder consumes the
+    completed weekly packet and derives auxiliary hindsight from it:
+    `get_week_high_low_scorers` reads `team["points"]` (:201-217), and
+    `high_scorer_rid`/`low_scorer_rid` feed `score_message_relevancy`, prediction
+    resolution, and arc annotation. A pre-kickoff message window over a completed
+    packet still ranks evidence by who won.
+
+    Edition kinds:
+      preseason - no week object at all
+      preview   - week/pairings allowed, packet must be OUTCOME-FREE, and every
+                  result-resolution / high-low / winner path disabled
+      recap     - completed packet allowed
+    """
+    from build_chat_context import build_context_dict  # pure core, no file writes
+
+    week_input, week_ident = None, None
+    if d.kind == "preview":
+        pairings, week_ident = adapter_for("pairings")(d)   # already outcome-free
+        week_input = {"week": max(d.results_through_week, 1),
+                      "matchups": [{"team1": {"team_name": p["team1"]},
+                                    "team2": {"team_name": p["team2"]}}
+                                   for p in pairings]}
+    elif d.kind == "recap":
+        p = _weekly(d.season, d.results_through_week, "_data.json")
+        week_input, week_ident = load_json(p, required=True), _ident(d.season, p)
+
+    ctx, consumed = build_context_dict(
+        season=d.season,
+        cutoff_utc=d.cutoff_utc,
+        edition_kind=d.kind,
+        week_data=week_input,
+        allow_outcome_derivation=(d.kind == "recap"),   # hard switch
+        source_root=SOURCE_ROOT,
+        use_ai=False,
+    )
     got = (ctx.get("meta") or {}).get("temporal_cutoff_utc")
     if got != d.cutoff_utc:
         raise UnavailableEvidence(
             f"chat projection declares cutoff {got}, descriptor requires {d.cutoff_utc}")
-    return ctx, _ident(d.season, out, {"cutoff": d.cutoff_utc})
+    if d.kind != "recap" and ctx.get("meta", {}).get("outcome_derivation_used"):
+        raise UnavailableEvidence(
+            f"{d.kind} chat projection used an outcome-derived path")
+
+    # Written into COMPILER-OWNED staging, never SOURCE_ROOT/content/editions --
+    # writing into the source root would mutate the corpus the comparator reads.
+    if staging is not None:
+        save_json_canonical(Path(staging) / "_chat_projection.json", ctx)
+
+    inputs = [_ident(d.season, SOURCE_ROOT / rel, {"role": role})
+              for role, rel in consumed.items()]      # parsed messages, identity
+    if week_ident:                                    # chain, name-map, analytics,
+        inputs.append(dict(week_ident, role="week_input"))   # provenance, builder code
+    return ctx, {"season": d.season, "scope": "season_specific",
+                 "cutoff": d.cutoff_utc, "edition_kind": d.kind, "inputs": inputs}
 
 
 @adapter("prior_editions")
@@ -1781,9 +1962,13 @@ def project(descriptor):
             payload[name] = None
             unavailable.append({"source": name, "reason": str(exc)})
     payload["unavailable"] = unavailable
-    payload["source_identities"] = idents
     payload["descriptor_id"] = descriptor.edition_id
-    return payload
+    # source_identities are returned ALONGSIDE the payload, never inside it.
+    # Embedding raw source hashes in the compared artifact makes the
+    # full-vs-truncated comparison logically impossible: the fixture rewrites
+    # league_history.json, so its hash differs even when the admitted evidence
+    # is identical. Raw provenance lives in bundle_manifest.json.
+    return {"payload": payload, "source_identities": idents}
 ```
 
 **Prerequisite:** `build_chat_context.py` gains `--cutoff-utc` and `--out`. Its existing
@@ -1831,8 +2016,8 @@ def test_every_desk_gets_contracted_evidence_or_unavailable():
 - [ ] **Step 2: Run to verify it fails** → file missing
 
 - [ ] **Step 3: Write the contracts** — culture gets `["chat", "name_repertoires",
-  "media_candidates"]`; power-rankings `["records", "standings", "results",
-  "prior_editions"]`; game `["player_game_context", "results"]`; history `["h2h", "records"]`;
+"media_candidates"]`; power-rankings `["records", "standings", "results",
+"prior_editions"]`; game `["player_game_context", "results"]`; history `["h2h", "records"]`;
       continuity `["prior_editions", "pairings"]`; copy-editor
       `["results", "standings", "records", "h2h"]`. Preview and preseason variants drop the
       sources their kind does not require.
@@ -1952,25 +2137,34 @@ def compile_edition(descriptor):
         shutil.rmtree(staging)
     staging.mkdir(parents=True)
     try:
-        payload = project(descriptor)
-        idents = payload["source_identities"]
+        # The compiler qualifies the cutoff itself; a printed hash the compiler
+        # never sees is not a receipt.
+        qualify_cutoff(descriptor)
+        result = project(descriptor)
+        payload, idents = result["payload"], result["source_identities"]
         if REQUIRE_IDENTITY:
             missing = [n for n in REQUIRED_BY_KIND[descriptor.kind]
                        if payload.get(n) is not None and n not in idents]
             if missing:
                 raise ValueError(f"components without source identity: {missing}")
-        # Aggregate EVERY consumed source, not a hard-coded shortlist.
-        sources = {name: ident for name, ident in idents.items()}
-        sources["_code"] = {
-            "project_edition.py": _sha(ROOT / "scripts" / "project_edition.py"),
-            "as_of_records.py": _sha(ROOT / "scripts" / "as_of_records.py"),
+        # Every physical input, as STRUCTURED paths + hashes. Never stringified:
+        # str(dict) is not a comparable identity and defeats mutation detection.
+        sources = {name: dict(ident) for name, ident in idents.items()}
+        sources["_code"] = {p.name: _sha(p) for p in (
+            ROOT / "scripts" / "project_edition.py",
+            ROOT / "scripts" / "as_of_records.py",
+            ROOT / "scripts" / "compile_edition.py",
+            ROOT / "scripts" / "build_chat_context.py",
+            ROOT / "scripts" / "kickoff_source.py")}
+        sources["_policy"] = {
+            "writer_fields.json": _sha(ROOT / "content" / "governance" / "writer_fields.json"),
+            "desk_contracts.json": _sha(ROOT / "content" / "governance" / "desk_contracts.json"),
         }
         for pred in descriptor.predecessors:
             sources[f"_predecessor:{pred['edition_id']}"] = {
                 "authoring_manifest_sha256": pred["authoring_manifest_sha256"],
                 "cutoff_utc": pred["cutoff_utc"]}
-        mf = bundle_manifest(descriptor, {k: str(v) for k, v in sources.items()},
-                             CODE_VERSION, payload)
+        mf = bundle_manifest(descriptor, sources, CODE_VERSION, payload)
         save_json_canonical(staging / "descriptor.json", asdict(descriptor))
         save_json_canonical(staging / "bundle.json", payload)
         save_json_canonical(staging / "bundle_manifest.json", mf)
@@ -2011,7 +2205,11 @@ if __name__ == "__main__":
 
 ```python
 """Bind bundle manifest + predecessors + rule versions + content + ranking into the
-authoring manifest. This is what editorial approval binds."""
+authoring manifest. This is what editorial approval binds.
+
+Predecessor bytes are re-verified here: a predecessor's authoring manifest records
+the hashes of its content and ranking record, and those files may have changed on
+disk since. Reuse must fail stale rather than trust the declaration."""
 import json
 import sys
 from pathlib import Path
@@ -2025,7 +2223,6 @@ def main():
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--edition", required=True)
-    ap.add_argument("--voice-rule-version", required=True)
     a = ap.parse_args()
     ed = Path(a.edition)
     bm = load_json(ed / "compiled" / "bundle_manifest.json", required=True)
@@ -2033,7 +2230,9 @@ def main():
     ranking = load_json(ed / "ranking_record.json", required=True)
     preds = [p["authoring_manifest_sha256"]
              for p in bm["descriptor"].get("predecessors", [])]
-    am = authoring_manifest(bm, preds, {"voice": a.voice_rule_version}, content, ranking)
+    # Bind the ACTUAL rule versions in force, not a caller-supplied string.
+    rules = collect_rule_versions()
+    am = authoring_manifest(bm, preds, rules, content, ranking)
     save_json_canonical(ed / "authoring_manifest.json", am)
     print(json.dumps(am, indent=2))
     return 0
@@ -2061,84 +2260,171 @@ git commit -m "feat(compile): compiler-owned subdir, full source aggregation, au
 - [ ] **Step 1: Write the test**
 
 ```python
-import json, shutil
+import json
 from pathlib import Path
+
 import pytest
+
+from scripts.compile_edition import compile_edition
 from scripts.edition import EditionDescriptor
-from scripts.compile_edition import compile_edition, COMPILED_SUBDIR
-from scripts.tests.fixtures.truncate import build_truncated_root
+from scripts.tests.fixtures.truncate import (build_poisoned_2024_root,
+                                             build_truncated_root)
 
-REC = EditionDescriptor("ni", 2025, "recap", "2025-09-09T06:59:59Z", 1, "v1")
+# Synthetic descriptors. The three real D1 descriptors do not exist until D1;
+# their reproducibility check belongs after they are created (D1d).
+REC = EditionDescriptor("ni-recap", 2025, "recap", "2025-09-09T06:59:59Z", 1, "v1")
 
 
-def _compile_against(root, editions_root, monkeypatch, descriptor=REC):
+def _admitted_payload(root, editions_root, monkeypatch, descriptor=REC, leaky=False):
+    """Compile and return ONLY the writer-facing payload.
+
+    Raw source hashes live in bundle_manifest.json, never in the compared
+    artifact. Embedding them made the previous comparison impossible to pass:
+    the fixture rewrites league_history.json, so its hash differed even when the
+    admitted evidence was identical.
+    """
     monkeypatch.setattr("scripts.project_edition.SOURCE_ROOT", root)
     monkeypatch.setattr("scripts.as_of_records.SOURCE_ROOT", root)
     monkeypatch.setattr("scripts.compile_edition.EDITIONS_ROOT", editions_root)
+    monkeypatch.setattr("scripts.project_edition.LEAKY_ADAPTER_ENABLED", leaky)
     return (compile_edition(descriptor) / "bundle.json").read_bytes()
 
 
-def test_full_vs_physically_truncated_is_byte_identical(tmp_path, monkeypatch):
-    """Rows AFTER the cutoff are physically removed from the truncated corpus."""
-    full = Path(".")
-    truncated = build_truncated_root(tmp_path / "trunc", cutoff_season=2025, cutoff_week=1)
-    a = _compile_against(full, tmp_path / "ea", monkeypatch)
-    b = _compile_against(truncated, tmp_path / "eb", monkeypatch)
-    assert a == b, "future rows influenced the bundle"
+def test_full_vs_physically_truncated_admits_identical_evidence(tmp_path, monkeypatch):
+    """Rows after the cutoff are PHYSICALLY removed. The payload must not change."""
+    truncated = build_truncated_root(
+        tmp_path / "trunc", cutoff_season=2025, cutoff_week=1
+    )
+    a = _admitted_payload(Path("."), tmp_path / "ea", monkeypatch)
+    b = _admitted_payload(truncated, tmp_path / "eb", monkeypatch)
+    assert a == b, "future rows influenced the admitted payload"
 
 
-def test_positive_control_leaky_corpus_is_detected(tmp_path, monkeypatch):
-    """Plant a future row; an honest gate must see a DIFFERENT bundle."""
-    truncated = build_truncated_root(tmp_path / "t2", cutoff_season=2025, cutoff_week=1)
-    leaky = build_truncated_root(tmp_path / "t3", cutoff_season=2025, cutoff_week=1,
-                                 plant_future_week=17)
-    a = _compile_against(truncated, tmp_path / "ec", monkeypatch)
-    b = _compile_against(leaky, tmp_path / "ed", monkeypatch)
-    assert a != b, "detector is inert: a planted future row changed nothing"
+def test_planted_future_row_is_correctly_ignored(tmp_path, monkeypatch):
+    """A correct week-1 projector IGNORES a planted week-17 row.
+
+    This asserts EQUALITY. The previous revision asserted inequality, which a
+    correct system fails: slicing at week 1 makes a week-17 row invisible.
+    """
+    clean = build_truncated_root(tmp_path / "c1", cutoff_season=2025, cutoff_week=1)
+    planted = build_truncated_root(
+        tmp_path / "c2", cutoff_season=2025, cutoff_week=1, plant_future_week=17
+    )
+    a = _admitted_payload(clean, tmp_path / "ec", monkeypatch)
+    b = _admitted_payload(planted, tmp_path / "ed", monkeypatch)
+    assert a == b, "a post-cutoff row changed the payload -- the slice leaks"
 
 
-def test_planted_undated_future_evidence_is_detected(tmp_path, monkeypatch):
-    truncated = build_truncated_root(tmp_path / "t4", cutoff_season=2025, cutoff_week=1)
-    leaky = build_truncated_root(tmp_path / "t5", cutoff_season=2025, cutoff_week=1,
-                                 plant_streak_extension=True)
-    a = json.loads(_compile_against(truncated, tmp_path / "ee", monkeypatch))
-    b = json.loads(_compile_against(leaky, tmp_path / "ef", monkeypatch))
-    assert a["records"]["longest_losing_streak"] != b["records"]["longest_losing_streak"]
+def test_planted_undated_streak_extension_is_correctly_ignored(tmp_path, monkeypatch):
+    clean = build_truncated_root(tmp_path / "c3", cutoff_season=2025, cutoff_week=1)
+    planted = build_truncated_root(
+        tmp_path / "c4", cutoff_season=2025, cutoff_week=1, plant_streak_extension=True
+    )
+    a = _admitted_payload(clean, tmp_path / "ee", monkeypatch)
+    b = _admitted_payload(planted, tmp_path / "ef", monkeypatch)
+    assert a == b, "an undated aggregate absorbed post-cutoff games"
 
 
-def test_canary_asserts_season_provenance_not_just_compilation(tmp_path, monkeypatch):
-    canary = EditionDescriptor("canary-2024", 2024, "recap", "2024-09-10T06:59:59Z", 1, "v1")
-    monkeypatch.setattr("scripts.compile_edition.EDITIONS_ROOT", tmp_path)
+def test_comparator_is_active_via_a_deliberately_leaky_adapter(tmp_path, monkeypatch):
+    """Detector activity, proven through the REAL compiler and comparator.
+
+    LEAKY_ADAPTER_ENABLED swaps in a test-only records adapter that ignores the
+    cutoff. Same fixture pair as above; the comparison must now FAIL. Without
+    this, every equality assertion above could pass on an inert comparator.
+    """
+    clean = build_truncated_root(tmp_path / "c5", cutoff_season=2025, cutoff_week=1)
+    planted = build_truncated_root(
+        tmp_path / "c6", cutoff_season=2025, cutoff_week=1, plant_future_week=17
+    )
+    a = _admitted_payload(clean, tmp_path / "eg", monkeypatch, leaky=True)
+    b = _admitted_payload(planted, tmp_path / "eh", monkeypatch, leaky=True)
+    assert a != b, "comparator is inert: a leaky adapter produced identical payloads"
+
+
+def test_no_read_escaped_the_fixture_root(tmp_path, monkeypatch):
+    """Every opened data/content path must sit inside the fixture root."""
+    import builtins
+
+    truncated = build_truncated_root(tmp_path / "c7", cutoff_season=2025, cutoff_week=1)
+    opened, real_open = [], builtins.open
+
+    def tracking_open(file, *a, **k):
+        opened.append(str(file))
+        return real_open(file, *a, **k)
+
+    monkeypatch.setattr(builtins, "open", tracking_open)
+    _admitted_payload(truncated, tmp_path / "ei", monkeypatch)
+    monkeypatch.setattr(builtins, "open", real_open)
+    root_s = str(truncated).replace("\\", "/")
+    escaped = [
+        o
+        for o in opened
+        if ("/data/" in o.replace("\\", "/") or "/content/" in o.replace("\\", "/"))
+        and root_s not in o.replace("\\", "/")
+    ]
+    assert not escaped, f"reads escaped the fixture root: {escaped[:5]}"
+
+
+def test_truncated_corpus_covers_every_consumed_source_class(tmp_path):
+    truncated = build_truncated_root(tmp_path / "c8", cutoff_season=2025, cutoff_week=1)
+    for rel in (
+        "data/league_history.json",
+        "data/2025/transactions.json",
+        "data/roster_anchors.json",
+        "content/seasons/2025/weeks",
+        "content/chat",
+        "chat/parsed_messages.json",
+    ):
+        assert (
+            truncated / rel
+        ).exists(), f"fixture missing consumed source class: {rel}"
+
+
+def test_canary_proves_actual_opened_paths_not_stamped_labels(tmp_path, monkeypatch):
+    """A poisoned root: qualified 2024 inputs PLUS tempting 2025 artifacts.
+
+    _ident stamps the REQUESTED season onto whatever file it opened, so asserting
+    that stamp proves nothing. Assert the opened paths instead.
+    """
+    import builtins
+
+    root = build_poisoned_2024_root(tmp_path / "poison")
+    canary = EditionDescriptor(
+        "canary-2024", 2024, "recap", "2024-09-10T06:59:59Z", 1, "v1"
+    )
+    opened, real_open = [], builtins.open
+
+    def tracking_open(file, *a, **k):
+        opened.append(str(file))
+        return real_open(file, *a, **k)
+
+    monkeypatch.setattr(builtins, "open", tracking_open)
+    monkeypatch.setattr("scripts.project_edition.SOURCE_ROOT", root)
+    monkeypatch.setattr("scripts.as_of_records.SOURCE_ROOT", root)
+    monkeypatch.setattr("scripts.compile_edition.EDITIONS_ROOT", tmp_path / "ec24")
     out = compile_edition(canary)
-    bundle = json.loads((out / "bundle.json").read_text(encoding="utf-8"))
-    un = {u["source"] for u in bundle["unavailable"]}
-    for name, ident in bundle["source_identities"].items():
-        assert ident.get("season") == 2024, \
-            f"{name} served season {ident.get('season')} to a 2024 descriptor"
-    for name in ("pairings", "standings", "results", "player_game_context"):
-        assert bundle[name] is None and name in un, \
-            f"{name} must be unavailable for 2024 -- a 2025 packet may not serve it"
+    monkeypatch.setattr(builtins, "open", real_open)
+
+    touched = [o for o in opened if "2025" in o.replace("\\", "/").split("poison")[-1]]
+    assert not touched, f"canary opened 2025 artifacts: {touched[:5]}"
+
+    sh = json.loads((out / "source_hashes.json").read_text(encoding="utf-8"))
+    for name, ident in sh.items():
+        if name.startswith("_"):
+            continue
+        assert ident.get("scope") in {"season_specific", "cross_season", "global"}, name
+        if ident["scope"] == "season_specific":
+            assert (
+                ident["season"] == 2024
+            ), f"{name} served a non-2024 season-specific source"
 
 
-def test_2024_descriptor_consuming_a_2025_packet_fails(tmp_path, monkeypatch):
-    from scripts.project_edition import _weekly
+def test_2024_descriptor_cannot_consume_a_2025_packet():
     from scripts.kickoff_source import UnavailableEvidence
+    from scripts.project_edition import _weekly
+
     with pytest.raises(UnavailableEvidence):
         _weekly(2024, 1, "_data.json")
-
-
-@pytest.mark.parametrize("edition_id", ["2025-preseason", "2025-wk01-preview",
-                                        "2025-wk01-recap"])
-def test_clean_rebuild_reproduces_each_real_d1_bundle(edition_id, tmp_path, monkeypatch):
-    src = Path("content/editions") / edition_id / "descriptor.json"
-    raw = json.loads(src.read_text(encoding="utf-8"))
-    raw["predecessors"] = tuple(raw.get("predecessors", ()))
-    d = EditionDescriptor(**raw)
-    monkeypatch.setattr("scripts.compile_edition.EDITIONS_ROOT", tmp_path)
-    a = (compile_edition(d) / "bundle.json").read_bytes()
-    shutil.rmtree(tmp_path / d.edition_id / COMPILED_SUBDIR)
-    b = (compile_edition(d) / "bundle.json").read_bytes()
-    assert a == b
 ```
 
 - [ ] **Step 2: Write the fixture builder** — `scripts/tests/fixtures/truncate.py`
@@ -2206,8 +2492,15 @@ git commit -m "test(audit): physical truncation, planted-leak controls, season-i
 
 ### Task B13: Rebind the catalog — resolve the protected asset root first
 
-No media assets exist in the repository tree (verified). The protected root is an execution
-dependency, not an assumption.
+**No protected league-media originals have been identified.** (The earlier claim "no media
+assets exist" was wrong: `bg_hero.png`, `icon_preseason.png`, and `icon_week.png` are tracked site
+artwork. Those are not league media.) The protected root is an execution dependency; do not guess
+a path.
+
+**Safe degraded D1 route.** If `protected_source_root` remains null, D1 proceeds with GIPHY and
+custom media only, each individually approved as `non_evidentiary_decoration`. League media is
+marked unavailable and the league-media rebind branch is recorded **NOT VALIDATED** — it does not
+count as a passed acceptance gate, and D1d's report must say so.
 
 **Files:** Create `scripts/rebind_media_catalog.py`, `content/governance/media_roots.json`,
 `scripts/tests/test_rebind_media_catalog.py`
@@ -2565,7 +2858,7 @@ def test_desks_return_evidence_not_prose():
 - [ ] **Step 3: Author the six commands** — inputs limited to
       `content/editions/<edition_id>/compiled/bundle.json` and `content/voice-bible.md`; output is
       `{desk, edition_id, findings:[{claim, evidence_refs, confidence, candidate_angle}],
-  unavailable:[]}` where every `evidence_refs` entry is a JSON pointer resolving in the
+unavailable:[]}` where every `evidence_refs` entry is a JSON pointer resolving in the
       bundle. Remits as in the design; the continuity desk is voice memory over
       `prior_editions`.
 
@@ -2966,46 +3259,87 @@ revise the source and desk contracts before D2.
 
 ## Self-Review — affected contracts only
 
-**Temporal isolation.** `SOURCE_ROOT` is injectable in `as_of_records` and `project_edition`; B12
-builds a corpus with post-cutoff rows physically deleted and requires byte-identical bundles, with
-two planted-leak controls (dated week-17 row; undated streak extension) that must produce
-_different_ bundles. The chat adapter projects at the descriptor cutoff and refuses a projection
-whose declared cutoff differs — the specific defect that let `week1_chat_context.json`
-(cutoff `2025-09-09T06:59:59Z`, 28 result statements) reach the preview. The `edition_bundle`
-registry is written out in full; controls drive the shipped `audit_object` and CLI exit code.
+**Preview semantics (correction 1).** The chat adapter is edition-typed and calls the builder's
+pure core with `allow_outcome_derivation` as a hard switch: preseason gets no week object, preview
+gets an outcome-free pairing list, recap gets the completed packet. This closes the real defect —
+message-window filtering never touched `get_week_high_low_scorers` (`build_chat_context.py:201-217`,
+reading `team["points"]`), whose `high_scorer_rid`/`low_scorer_rid` feed relevance scoring,
+prediction resolution, and arc annotation. The projection is written into compiler-owned staging,
+never into `SOURCE_ROOT/content/editions`, so it cannot mutate the corpus the comparator reads.
+Roster reconstruction now runs **forward** from a `roster_anchors.json` entry whose `known_at` must
+precede the cutoff; `data/2025/rosters.json` is disqualified by construction (first committed
+2026-02-17, a post-season final state), and preview rosters are unavailable when no anchor
+qualifies.
 
-**Season isolation.** Weekly artifacts resolve through `content/seasons/{season}/weeks/`; the
-legacy seasonless path cannot serve a non-2025 descriptor. Every adapter returns a source identity
-carrying its season, and the canary asserts `ident["season"] == 2024` per component rather than
-"records are non-null".
+**Noninterference (correction 2).** `project()` returns `{payload, source_identities}` — raw hashes
+live only in `bundle_manifest.json`, so the compared artifact no longer changes merely because the
+fixture rewrote `league_history.json`. Both planted-row controls now assert **equality**, because a
+correct week-1 projector ignores a week-17 row; the previous inequality assertions would have
+failed on a correct system. Detector activity is proven separately by `LEAKY_ADAPTER_ENABLED`
+driving a test-only cutoff-ignoring adapter through the real compiler and comparator. Added a
+fixture-escape test and a source-class coverage test. Phase B uses synthetic descriptors; the three
+real D1 descriptors are checked for reproducibility in D1d, after they exist.
 
-**Cutoff qualification.** `to_utc` converts through `ZoneInfo`; a missing venue timezone raises
-`UnavailableEvidence`. Both the schedule and timezone-map hashes are returned. The polars claim
-was **refuted** (`polars 1.40.1` imports cleanly here) and no workaround is planned; the test
-defect it accompanied is fixed with a real `pytest.skip` and an `UnavailableEvidence` path.
+**Provenance (correction 4).** Adapters return every physical input consumed (rosters: anchor +
+transactions; chat: parsed messages, identity chain, name map, analytics/provenance inputs,
+preview-safe week input, builder code). The compiler stores them as structured paths and hashes —
+not `str(dict)` — and adds code and policy hashes. `qualify_cutoff` runs inside the compiler rather
+than relying on a printed hash it never sees.
 
-**Compiler.** Adapters declare sources; the compiler aggregates all of them plus code and declared
-predecessors; unidentified components fail closed. Predecessors are declared with hashes and
-cutoff ordering enforced — no globbing, so a rebuild cannot admit its own future.
-`compile_edition` owns only `<edition>/compiled/` and a rebuild preserves authored artifacts.
-`author_edition.py` is the missing executable step producing `authoring_manifest.json`.
+**Executable gates (correction 5).** Every bundle path is now
+`content/editions/<id>/compiled/bundle.json`; `--all` fails when discovery falls below a minimum
+count, so it can no longer pass after auditing zero bundles. The planted dated and undated tests
+assert the leaf stays _classified_ and rejection comes from `temporal_check` — the dated comparison
+and the undated recomputation — instead of an unknown marker field. A canonical `franchises`
+component is available to every edition kind, keyed on `roster_id`/`owner_id`, so ranking identity
+no longer derives from `standings`, which preseason does not have.
 
-**Boundary.** `voice-bible.md` is an allowed versioned editorial rule, so the boundary test can
-pass; `canon_checks.py` is in `CONSUMERS` and rewired to `--edition`. `analyze_chat.py` execution
-is disabled outright — a partial redirect left `OUT_*` and `PERSONAS_DIR` live.
+**Media and 2026 (correction 6).** Corrected: **no protected league-media originals have been
+identified** — `bg_hero.png`, `icon_preseason.png`, `icon_week.png` are tracked site artwork, so
+the earlier "no media assets exist" was wrong. The safe degraded D1 route is explicit: GIPHY and
+custom only, each approved as `non_evidentiary_decoration`, league media unavailable, and the
+rebind branch recorded **NOT VALIDATED** rather than counted as a passed gate.
 
-**Phase 0.** Public and private roots are separate, `private_captures/` is gitignored, receipts
-carry metadata only, staging is public-only with a guard. Cadence runs through September; the
-workflow commits its captures and stays inactive pending Blake's explicit approval of that push,
-with local checkpoint captures covering D1.
+**Refuted, with the executable path rather than prose.** In the standard repository shell
+`which python` resolves to `/c/Users/blake/AppData/Local/Programs/Python/Python312/python` — the
+executable the review names — and both bare commands succeed:
 
-**Rankings and media.** Both bake-off arms author and gate a ranking record before prose, and the
-winner governs later editions. The ranking gate loads its schema, binds teams to bundle
-franchises, and requires `prior_rank` to equal the predecessor's `proposed_rank`. The rebound
-catalog becomes the bundle's `media_candidates`; manifest construction enforces cutoff and bars
-`personal` tags; the render verifier compares multiplicity, location, and bytes; consumer tests
-prove the resolver and both renderers read only the manifest's approved publication derivative.
+```
+python -c "import polars"                 -> OK 1.40.1
+python scripts/fetch_nflreadpy.py --help  -> prints help, exit 0
+```
 
-**Open execution dependency.** `protected_source_root` is `null` until Blake supplies it. Until
-then league media is **unavailable** and the editions run on GIPHY and custom media. No media
-assets exist in the repository, so 1205/1205 rebinding is not assumed.
+`POLARS_SKIP_CPU_CHECK=1` also succeeds but is not required here. The determinism request is
+adopted regardless: shipped commands pin the verified interpreter and set that variable as a
+documented no-op fallback, so behaviour does not depend on whose shell runs them. No `sse3`
+condition is recorded as existing, because it does not reproduce.
+
+## Helpers referenced but NOT YET specified
+
+Named honestly rather than left to look complete. Each must be written before the task that uses
+it can run.
+
+| Helper                       | Used by                | Contract still to write                                                                                                                             |
+| ---------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build_poisoned_2024_root`   | B12 canary             | Isolated root: qualified 2024 inputs plus tempting 2025 artifacts                                                                                   |
+| `LEAKY_ADAPTER_ENABLED`      | B12 comparator control | Module flag swapping in a cutoff-ignoring records adapter                                                                                           |
+| `qualify_cutoff(descriptor)` | B11 compiler           | Re-derive kickoff from `schedules_{season}.parquet` + venue timezones incl. neutral sites; fail unless the descriptor cutoff equals strictly-before |
+| `collect_rule_versions()`    | B11 authoring          | Desk, writer, editor and editorial-rule versions actually in force                                                                                  |
+| `build_context_dict(...)`    | B9 chat adapter        | Pure core of `build_chat_context.py`: no file writes, `source_root` injected, returns `(context, consumed_inputs)`                                  |
+
+## Corrections acknowledged but NOT YET applied in this revision
+
+- **Single season authority (correction 3).** `content/seasons/{season}/weeks/` is used by the
+  projector, but `extract_week_data.py`, `generate_expanded_week.py`, and `build_chat_context.py`
+  are not yet rewired to write and read there. Until they are, two independently mutable copies
+  can diverge — the exact risk raised. Requires its own task before B9 is executable.
+- **Phase 0 accounting receipt and daily cadence (correction 6).** One receipt covering all eight
+  rows as captured or explicitly unavailable with an acquisition trigger; draft capture proving
+  picks _and_ order; daily local capture required until the workflow is activated.
+- **Repertoire candidate discovery (correction 6).** The miner still validates seeded forms only.
+  A candidate-discovery pass proposing corpus-derived shorthand and nicknames with message IDs,
+  counts, and register — for Blake to approve or reject — is not yet written.
+- **Literal commands (correction 5).** Preview/recap ranking invocations with `--predecessor`, and
+  media-manifest, render, byte-verification, publication-record, review-log, and staleness
+  commands, are described but not all spelled out. Bake-off loser disposal still says "delete the
+  losing pipeline's command files" without enumerating arm-exclusive paths.
