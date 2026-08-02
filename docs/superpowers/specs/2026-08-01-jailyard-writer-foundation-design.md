@@ -343,14 +343,36 @@ It is **not** a confirmed catalog-to-picker leak today: `pick-media.md` and `res
 contain no reference to `media-catalog.json`. An earlier revision of this document implied they
 read it; they do not.
 
-What the catalog _is_ today is a **stale indirect analytics source**, and that path is live:
-`build_chat_context.py:381-382` calls `media_catalog.get(msg_id)` while building writer-facing
-chat contexts. That join uses `message_id` — the key that resolves to the correct file **0 times
-out of 1,205**. So the catalog's broken provenance already reaches writer inputs, through
-enrichment rather than selection.
+**Current committed writer contexts are NOT proven contaminated by the catalog.** An earlier
+revision of this document asserted that they were, via `build_chat_context.py`. That claim was
+wrong and is retracted. The live call graph, checked by AST across `scripts/`:
 
-What it _becomes_ under this design is a selectable-media corpus — which is why rebinding is a
-precondition, not a cleanup.
+- `build_chat_context.py:38` declares `MEDIA_CATALOG_PATH` as an **assignment target only** —
+  zero load references anywhere in the module. It never opens the catalog.
+- `score_message_relevancy` (`:358`) takes `media_catalog=None` as its last parameter, and the
+  conditional lookup at `:381-382` sits behind that default.
+- Its **sole production caller (`:1228`) passes ten positional arguments and no keywords**, so
+  the parameter is always `None` and the branch is unreachable. **Dead code, not a leak.**
+- `generate_chat_provenance.py:102-103` classifies `media-catalog.json` as
+  `KNOWN_NON_PIPELINE_CHAT_JSON`, and `CODE_FILES` (`:79-89`) excludes `analyze_chat.py` from the
+  canonical set. `--verify` currently reports `OK ... matches recomputed (full)`.
+- The canonical workflow is `map_chat_deterministic.py` → `reduce_chat_deterministic.py` →
+  `build_chat_context.py`.
+
+**The actual unsafe reader is `analyze_chat.py`**, which genuinely loads the stale catalog
+(`load_json(MEDIA_CATALOG_PATH)` at `:145` and `:988`) and message-ID-joins it into legacy AI MAP
+prompts and persona generation. Its risk is different in kind: it is a **noncanonical,
+overwrite-capable legacy producer** that can rewrite the same analytics filenames the canonical
+builder later consumes. That is a contamination _route_, not evidence of contamination _today_.
+
+**Phase A obligations:** quarantine or retire `analyze_chat.py` as an active producer, or require
+it to use the rebound catalog and enter the provenance contract before it may run
+authoritatively. The dormant `build_chat_context` enrichment is either removed or intentionally
+activated — and only after rebind.
+
+What the catalog _becomes_ under this design is a selectable-media corpus. Rebinding remains
+required before that corpus is authorized, and the 239 stays a **source-corpus exposure**,
+separate from the 46 packet contaminations.
 
 **But the catalog cannot simply be filtered on that timestamp.** It was committed at `9ae72e3`
 (2026-07-10) and never touched since; the parser repair landed at `c751b22` (2026-07-20). Its
@@ -409,14 +431,30 @@ or what the HTML _embeds_. Those are three different facts and only the last one
 approved authoring-manifest/content hash, and the media-policy version. Each selected slot
 records:
 
-| Field                | league_media                   | giphy                                            | custom                        |
-| -------------------- | ------------------------------ | ------------------------------------------------ | ----------------------------- |
-| source class         | `league_media`                 | `giphy`                                          | `custom`                      |
-| stable identity      | asset SHA-256                  | exact GIPHY ID                                   | asset SHA-256                 |
-| selection provenance | why this slot, from what query | same                                             | same                          |
-| temporal             | rebound `timestamp_utc`        | cutoff-qualified or `non_evidentiary_decoration` | same                          |
-| publication decision | approved / unreviewed / barred | policy applied                                   | policy applied                |
-| location             | —                              | persisted resolved-result metadata               | authorized repo-relative path |
+| Field                | league_media                                     | giphy                                            | custom                        |
+| -------------------- | ------------------------------------------------ | ------------------------------------------------ | ----------------------------- |
+| source class         | `league_media`                                   | `giphy`                                          | `custom`                      |
+| source identity      | protected source locator + **source SHA-256**    | exact GIPHY ID                                   | asset SHA-256                 |
+| selection provenance | why this slot, from what query                   | same                                             | same                          |
+| temporal             | rebound `timestamp_utc`                          | cutoff-qualified or `non_evidentiary_decoration` | same                          |
+| transformation       | redaction / crop / none — the decision, recorded | n/a                                              | n/a                           |
+| publication decision | approved / unreviewed / barred                   | policy applied                                   | policy applied                |
+| **publish identity** | **derivative SHA-256**                           | persisted resolved-result metadata               | asset SHA-256                 |
+| **publish location** | **authorized repo-relative path or URL**         | persisted resolved URL                           | authorized repo-relative path |
+
+**League media binds both sides of the endpoint.** A source SHA identifies the _protected
+original_; it tells the renderer nothing about what it may embed. Each league-media entry
+therefore carries a second, separate identity: the **approved publication derivative** — its own
+SHA-256 and its authorized publication location — plus the transformation or redaction decision
+that produced it.
+
+**The renderer consumes only the approved publication derivative.** The final-HTML verifier
+checks **both its location and its bytes** against the manifest.
+
+Where publication approval permits the original unchanged, the source and publish hashes may be
+equal — but the manifest must still name an **authorized publication location**, never exposing
+or depending on the protected raw-source path. Equal hashes are a permitted outcome; a missing
+publish location is not.
 
 `media_picks.json` and `media_cache.json` are gitignored (`.gitignore:29-30`) and **may remain
 derivative caches, but neither can authorize publication**. The verifier never consults them. No
@@ -621,7 +659,11 @@ beyond the D1 set are built as the editions that need them arrive.
 - **Phase A:** the read-path census is reviewed and approved before any file changes; no active
   writing path can reach barred prose, proven by test — including generated artifacts
   (`team_profiles_summary`, `voice_bible_callbacks`); abstract grammar, templates, and
-  anti-patterns intact; twelve handles match `data/2025/users.json`.
+  anti-patterns intact; twelve handles match `data/2025/users.json`; **`analyze_chat.py` cannot
+  run authoritatively** — quarantined or retired as a producer, or else using the rebound catalog
+  and inside the provenance contract, so it can no longer overwrite analytics filenames the
+  canonical builder consumes; the dormant `build_chat_context` media enrichment is removed or
+  deliberately activated post-rebind, not left latent.
 - **Phase B:** census reports 0 confirmed future entries (from 46) across both passes, and 0
   structurally unsliced H2H blocks (from 98); the leaf census reports zero unclassified fields
   and fires on planted leaks of each class including an undated aggregate; noninterference is
@@ -639,12 +681,18 @@ beyond the D1 set are built as the editions that need them arrive.
   reading only bundles; bake-off run and outcome recorded — scored on **ranking quality as well
   as prose**, and a candidate with better prose but weaker ranking judgment loses.
 - **Media, end to end:** every rendered media node maps **one-to-one** to an approved
-  per-edition manifest entry — no missing nodes, no extra nodes; league assets are source-bound,
-  cutoff-safe, and publication-approved; GIPHY and custom entries either satisfy the edition
-  cutoff or carry an explicit `non_evidentiary_decoration` policy; GIPHY resolved results are
-  persisted rather than re-resolved; custom assets hash-match and sit inside the authorized media
-  root; a referenced but unresolved slot **fails**; no gitignored cache authorizes publication;
-  and final publication binds the approved content, the media manifest, and the rendered artifact.
+  per-edition manifest entry — no missing nodes, no extra nodes — matching on **both location
+  and bytes**; every league-media entry binds **both** a protected source locator plus source
+  SHA-256 **and** an approved publication derivative SHA-256 plus authorized publication location,
+  with its transformation/redaction decision recorded; the renderer embeds only the publication
+  derivative and no protected raw-source path appears in any rendered artifact (equal source and
+  publish hashes are permitted where approval allows the original unchanged; a missing publish
+  location is not); league assets are cutoff-safe and publication-approved; GIPHY and custom
+  entries either satisfy the edition cutoff or carry an explicit `non_evidentiary_decoration`
+  policy; GIPHY resolved results are persisted rather than re-resolved; custom assets hash-match
+  and sit inside the authorized media root; a referenced but unresolved slot **fails**; no
+  gitignored cache authorizes publication; and final publication binds the approved content, the
+  media manifest, and the rendered artifact.
 - **Media rebind (precondition to the above):** the catalog joins the repaired corpus on asset
   content hash plus filename/source provenance, with `message_id` unused as a join key; preserved
   descriptions rebind cleanly; the 255 uncatalogued assets are marked unavailable; rebound league
