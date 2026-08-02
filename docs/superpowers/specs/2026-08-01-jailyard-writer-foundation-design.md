@@ -130,6 +130,48 @@ what happens when it cannot be established (the answer is "unavailable," never "
 Transaction reconstruction uses the **effective completion instant**, not `created` — some
 transactions are created before a kickoff and complete after it.
 
+## The ranking decision contract — the product proof
+
+Power rankings are not one desk among six. They are the artifact this system exists to produce,
+and the only one that can demonstrate the league model becoming more informed. Everything else —
+temporal correctness, provenance, reproducibility — is subordinate infrastructure.
+
+**This is not a statistical ranking model.** No formula, no weights, no validated predictor. It is
+a _decision record_: the columnist's dated judgment, with its reasoning exposed for audit and
+later grading.
+
+Per team, per edition:
+
+```json
+{
+  "team": "General Ken-obi",
+  "prior_rank": 4,
+  "proposed_rank": 2,
+  "movement": "up_2",
+  "decisive_evidence": ["<bundle evidence refs>"],
+  "contrary_evidence": "<what argues against this, or the uncertainty accepted>",
+  "coherence": "<why this order holds together -- addressing whoever was passed>"
+}
+```
+
+**Preseason claims become receipts.** A ranking rationale is a dated claim; later editions grade
+it rather than forget it. This generalizes the `picks_ledger` pattern from predictions to
+judgments — and unlike picks, a ranking rationale can be wrong in an _interesting_ way, which is
+what makes learning visible.
+
+**Ranking quality is a first-class gate**, in the Phase C bake-off and in every edition's
+acceptance:
+
+- **Evidence-driven ordering** — every movement traces to evidence in that edition's bundle.
+- **Explained movement** — no silent moves; a changed rank carries a rationale.
+- **No unexplained inversions** — if A passes B, the rationale addresses B.
+- **Continuity with prior judgment** — contradicting an earlier call requires acknowledging it,
+  not quietly reversing.
+- **Blake approves the ranking itself**, separately from the prose.
+
+The design must be unable to pass with stylish columns and arbitrary rankings. An edition with
+clean facts, strong voice, and unjustified ordering is a **failed** edition.
+
 ## Phase 0 — 2026 evidence preservation (parallel lane, starts immediately)
 
 The point of rebuilding 2025 is to exercise the system that will write the 2026 preseason and
@@ -140,15 +182,46 @@ week-1 preview. That evidence is disappearing now:
   September.
 - `fetch_sleeper.py` overwrites current rosters and projections with no append-only capture
   identity.
+- **The existing fetcher cannot capture the offseason at all.** `fetch_sleeper.py:172` iterates
+  `range(1, len(all_matchups) + 1)`; before any scored matchup exists, that is `range(1, 1)` and
+  **zero transactions are fetched**. Offseason preservation is not merely untested — it is
+  structurally impossible with the current code. Phase 0 needs its own capture path.
 
 Spending the summer rebuilding 2025 while volatile 2026 preseason evidence evaporates would
 force us to reconstruct another pre-kickoff state after the fact — the exact failure class this
 design exists to eliminate.
 
-**Scope:** timestamped, append-only snapshots of the 2026 sources we qualify, each with a content
-hash and explicit capture-time and `known_at` semantics. Existing snapshots are never overwritten.
+### Capture is not admission
 
-This is evidence preservation, not 2026 authoring. No 2026 prose is written.
+Preservation is deliberately **broad**; edition admission stays **strict**. Capturing a
+projection feed now does not make it admissible evidence later — admission still requires a
+qualified `known_at` and an adapter. Capturing costs little and is irreversible if skipped;
+admitting is a separate, revocable decision. Conflating them is what makes preservation
+programs stall on qualification debates until the evidence is gone.
+
+### Minimum capture table
+
+Every row is captured append-only; existing snapshots are never overwritten.
+
+| Source                          | Mechanism                       | Cadence / trigger                    | Known-at semantics                         | Privacy     |
+| ------------------------------- | ------------------------------- | ------------------------------------ | ------------------------------------------ | ----------- |
+| Sleeper league settings         | API                             | weekly + on change                   | capture instant                            | public      |
+| Sleeper users / franchise names | API                             | weekly + on change                   | capture instant                            | public      |
+| Rosters (prospective, pre-lock) | API                             | daily through preseason              | capture instant; roster state as-of        | public      |
+| Draft (picks + order)           | API                             | on completion, then weekly           | pick timestamp where available             | public      |
+| Transactions                    | API, **offseason-capable path** | daily; keyed on effective completion | effective completion instant               | public      |
+| Projections / markets           | source-dependent                | weekly through preseason             | publication instant; unqualified if absent | public      |
+| Injuries / availability         | source-dependent                | weekly through preseason             | publication instant; unqualified if absent | public      |
+| Chat + media export             | manual export                   | on export                            | message timestamp                          | **private** |
+
+Every captured artifact records: `source`, `captured_at`, `known_at` semantics, content hash,
+and privacy boundary. Private-class artifacts never leave the local machine and never enter a
+public projection.
+
+**In scope for Phase 0:** prospective preseason roster and source capture, including the
+offseason-capable transaction path.
+**Out of scope:** 2026 authoring, and live in-season capture operations (roster capture _during_
+the 2026 season, current-week detection). Phase 0 preserves the pre-kickoff window only.
 
 ## Phase A — Authority and read-path census
 
@@ -192,7 +265,8 @@ packets **and the `_expanded` companions in the same pass**; commit `c5b6b50` re
 data without the companions and left 32 season-end Elo values leaking there.
 
 **Role change.** The repaired per-week packet stops being a direct writer input and becomes a
-**component of its edition's bundle**, carrying the bundle's cutoff and hash. This keeps the
+**component of its edition's bundle**, carrying the edition's `edition_id`, `cutoff_utc`, and
+build identity — **not** the enclosing bundle's final hash, which cannot exist yet. This keeps the
 existing verifier and renderer working against a familiar shape while still satisfying the
 writer-access boundary — the packet a consumer reads is the one the projector compiled, not a
 file it opened for itself. Its prose fields (`team_profiles_summary.essay_snippet`, `roast`) are
@@ -203,6 +277,10 @@ reading published data directly; the boundary governs writing decisions, not sit
 
 Lightweight, file-backed, no database and no full typed evidence hierarchy — but a real contract,
 not an ephemeral subset.
+
+**Built to a minimum, not to completion.** Only the adapters the first three editions (D1)
+require are implemented; every other source fails closed until an edition needs it. Adapter
+coverage is driven by editions, not built speculatively ahead of them.
 
 - **Edition descriptor:** `edition_id`, `season`, edition kind, `cutoff_utc`, results-through
   week, policy version.
@@ -215,19 +293,60 @@ not an ephemeral subset.
 - **Consumers** — writer, desks, editor, local drafter, media picker, content verifier — read
   only the edition bundle, approved prior editions, and editorial rules. Direct reads of
   full-season stores become test failures.
-- **The media catalog is a bundle source, not a free-standing store.**
-  `content/chat/media-catalog.json` holds 1,205 items each carrying an exact `timestamp_utc`.
-  **239 of them postdate the week-1 kickoff, including 77 from 2026**, and no cutoff filtering
-  exists anywhere in `pick-media.md` or `resolve_media.py`. Nothing today prevents a week-1
-  column from being illustrated with a 2026 screenshot. The catalog is projected per edition on
-  `timestamp_utc`, and media selection is subject to the same boundary as prose. Externally
-  fetched media (GIPHY) is undated third-party content, not league evidence, and is exempt from
-  cutoff filtering but must remain distinguishable from league media in the bundle.
-- **Bundle identity** binds descriptor, source hashes, projection code, policy, and output hash.
-- **The review record binds the exact bundle hash** it was approved against; a changed bundle
-  makes the approval stale.
+- **Two identities, not one** — a single hash binding both the inputs and its own output is
+  circular:
+  - **Bundle manifest** — binds the edition descriptor, raw-source hashes, projection code and
+    policy version, and a **separately calculated bundle-payload hash**.
+  - **Authoring manifest** — binds the bundle manifest, approved predecessor hashes,
+    desk/writer/editor rule versions, the produced content hash, and (once selected) the media
+    manifest.
+
+  Components carry edition and build identity; only the manifests carry final hashes.
+
+- **Editorial approval binds the authoring manifest and content**, not the evidence bundle alone.
+  This distinguishes the two ways an approval goes stale — the evidence changed, or the rules
+  that interpreted it changed — which one hash cannot express.
 - **Season-parameterized from the start**, with at least one non-2025 canary edition, so 2025
   genuinely tests a reusable system rather than a 2025-shaped one.
+
+### Media catalog — rebind before it can be a source
+
+`content/chat/media-catalog.json` holds 1,205 items with exact `timestamp_utc`, and **239
+postdate the week-1 kickoff, including 77 from 2026** — with no cutoff filtering anywhere in
+`pick-media.md` or `resolve_media.py`. Nothing today prevents a week-1 column from being
+illustrated with a 2026 screenshot.
+
+**But the catalog cannot simply be filtered on that timestamp.** It was committed at `9ae72e3`
+(2026-07-10) and never touched since; the parser repair landed at `c751b22` (2026-07-20). Its
+provenance does not survive that repair. Measured against the repaired corpus:
+
+| Check                                            | Result          |
+| ------------------------------------------------ | --------------- |
+| `message_id` differs from the live message       | **1205 / 1205** |
+| `timestamp_utc` differs                          | **1202**        |
+| `sender` differs                                 | **742**         |
+| Live attachments absent from the catalog         | **255**         |
+| `message_id` joins resolving to the correct file | **0 of 1205**   |
+
+The 742 sender mismatches are the known unicode-space bug (Harlow and Patrick, 742+ messages
+never resolved before the repair).
+
+Filtering on `timestamp_utc` would therefore gate on a field that is wrong 1,202 times out of
+1,205 — promoting a stale catalog into authority rather than containing it.
+
+**Rebind first:**
+
+- Join on **asset content hash plus filename/source provenance**. `message_id` is not a valid
+  join key — every one of its 1,205 joins resolves to the wrong file.
+- Preserve existing descriptions where the asset rebinds cleanly; regenerate only entries that
+  are missing or whose asset changed. The descriptions are expensive and mostly still valid;
+  it is the _provenance_ that is broken, not the prose.
+- Treat the **255 uncatalogued assets as unavailable** until classified.
+- Only after rebinding does the catalog become a per-edition bundle source, projected on the
+  repaired timestamp.
+
+Externally fetched media (GIPHY) is undated third-party content, not league evidence — exempt
+from cutoff filtering, but it must remain distinguishable from league media in the bundle.
 
 ### Week 1 pre-kickoff preview inputs
 
@@ -314,13 +433,42 @@ cannot be authored before the picks exist. Threads must be opened before being a
 Callbacks quote prose that must exist.
 
 **Per-edition loop:** descriptor declared → bundle compiled → desks brief → columnist writes →
-`verify_week_content.py` exits 0 → `/edit-week` APPROVE (review-log line bound to the bundle
-hash) → media → render → commit.
-
-**Checkpoint after week 6:** synthesize `review-log.jsonl` into standing writer rules.
+ranking decision record produced → `verify_week_content.py` exits 0 → `/edit-week` APPROVE
+(review-log line bound to the authoring manifest) → media → render → commit.
 
 **Serial, owned by the lead context, never delegated:** `check_picks_ledger`,
 `verify_prev_rank_claims`, and appends to `content/review-log.jsonl`.
+
+### D1 — First three editions, then STOP for review
+
+**Do not build every adapter, every desk, and the rest of the infrastructure before finding out
+whether the intelligence improves the work.**
+
+Once the source census and a _minimum safe projector_ exist, run three editions through the
+complete loop:
+
+**preseason → week-1 pre-kickoff preview → week-1 recap.**
+
+That sequence is the smallest slice that exercises everything that matters: predictions made,
+pre-kickoff exclusion enforced, first results absorbed, first ranking movement justified,
+continuity carried, editing, media, rendering — and whether the league model visibly becomes more
+informed across three consecutive editions.
+
+**Build only the adapters those three editions require. Everything else fails closed.**
+
+These become the first canonical editions if they pass. This is a vertical slice, not a
+disposable benchmark.
+
+**Then stop for review.** If the slice is not materially richer than what the old pipeline
+produced, revise the source and desk contracts _before_ building the rest. This is the mechanism
+that keeps temporal correctness subordinate to the product instead of becoming the project.
+
+### D2 — Remaining archive
+
+Weeks 2-17 recaps and the week-18 finale, sequentially, on the contracts D1 validated. Adapters
+beyond the D1 set are built as the editions that need them arrive.
+
+**Checkpoint after week 6:** synthesize `review-log.jsonl` into standing writer rules.
 
 ## Out of scope
 
@@ -329,14 +477,18 @@ hash) → media → render → commit.
   validated ranking model with a selection gate, disposable benchmark editions, and a clean-room
   2026 rehearsal. Revisit if the audit finds classes the adopted contract cannot address.
 - v2 redesign (deferred to in-season 2026).
-- 2026 live-season readiness: live roster capture, preseason-2026 authoring,
+- 2026 **in-season** readiness: live roster capture during the season and current-week detection
+  (Phase 0 covers the pre-kickoff window only), preseason-2026 authoring,
   `compute_preseason_window` constants.
 - `feat/analytics-owner-edge` — parked, unmerged, shadow-only.
 
 ## Acceptance
 
-- **Phase 0:** append-only 2026 snapshots exist with hashes and explicit capture/`known_at`
-  semantics; re-running capture never overwrites a prior snapshot.
+- **Phase 0:** every row of the minimum capture table has a working capture path — including an
+  **offseason-capable transaction path**, which `fetch_sleeper.py:172` cannot provide; each
+  artifact records `source`, `captured_at`, `known_at` semantics, content hash, and privacy
+  boundary; re-running capture never overwrites a prior snapshot; private-class artifacts never
+  enter a public projection. A single snapshot of one source does **not** satisfy this phase.
 - **Phase A:** the read-path census is reviewed and approved before any file changes; no active
   writing path can reach barred prose, proven by test — including generated artifacts
   (`team_profiles_summary`, `voice_bible_callbacks`); abstract grammar, templates, and
@@ -347,21 +499,46 @@ hash) → media → render → commit.
   byte-identical with detector-active positive controls; a clean rebuild reproduces every bundle;
   no consumer reads a full-season store directly; a legal week-1 preview bundle exists containing
   no week-1 outcomes and no final starters; **no bundle offers league media postdating its
-  cutoff — a week-1 bundle exposes 966 of 1,205 catalog items, not 1,205**; at least one non-2025
+  cutoff**, measured on rebound timestamps — the pre-rebind figure of 966 of 1,205 is computed
+  from a field that is wrong 1,202 times and is **not** a valid acceptance target; the invariant
+  is "zero items whose rebound `timestamp_utc` postdates the edition cutoff," whatever count that
+  yields; at least one non-2025
   canary edition compiles; `verify_h2h_claims` errors; suite green against the measured baseline
   of **343 passed / 2 skipped** (run at `c751b22` on 2026-08-01, 167s — verified, not inherited
   from memory); CI green on HEAD's own SHA.
 - **Phase C:** twelve repertoires committed and Blake-approved; desks exist as committed commands
-  reading only bundles; bake-off run and outcome recorded.
-- **Phase D:** each edition passes the global content gate — verifier 0 errors AND `/edit-week`
-  APPROVE AND renders clean AND as-if-realtime checklist clean, with the approval bound to a
-  bundle hash. Binary; no "APPROVE with notes."
+  reading only bundles; bake-off run and outcome recorded — scored on **ranking quality as well
+  as prose**, and a candidate with better prose but weaker ranking judgment loses.
+- **Media rebind:** the catalog joins the repaired corpus on asset content hash plus
+  filename/source provenance, with `message_id` unused as a join key; preserved descriptions
+  rebind cleanly; the 255 uncatalogued assets are marked unavailable; only then is the catalog
+  admitted as a bundle source.
+- **Phase D — every edition:** passes the global content gate — verifier 0 errors AND
+  `/edit-week` APPROVE AND renders clean AND as-if-realtime checklist clean, with approval bound
+  to the **authoring manifest** (not the evidence bundle alone). Binary; no "APPROVE with notes."
+- **Phase D — ranking gate, every edition:** a decision record exists for all twelve teams; every
+  movement traces to evidence in that edition's bundle; no unexplained inversions; contradictions
+  of prior judgment are acknowledged rather than silent; prior-edition ranking claims are graded
+  rather than dropped; **Blake approves the ranking itself, separately from the prose.** An
+  edition with clean facts and strong voice but unjustified ordering fails.
+- **D1 product gate:** the three editions are produced end-to-end and reviewed **before** any
+  further adapters, desks, or editions are built. If the slice is not materially richer than the
+  old pipeline produced, source and desk contracts are revised before D2 begins. Passing D1 on
+  temporal correctness alone is not passing.
 
 ## Open items
 
 - Whether the audit surfaces leak classes beyond H2H, `historical_context`, and undated
   aggregates. If so, repair scope grows before Phase C.
-- Which 2026 sources qualify for Phase 0 capture, and their `known_at` semantics.
+- **Two review items from 2026-08-01 are unresolved and this design is incomplete without them.**
+  The instruction listing six revisions was truncated: item 5 ends mid-sentence at "No
+  message-ID", and item 6 was never received. Item 5 is implemented as far as it was stated
+  (rebind on asset hash + filename provenance, regenerate only missing/changed, 255 assets
+  unavailable). The remainder of 5 and all of 6 must be supplied before the implementation plan
+  is written.
+- Beyond the minimum capture table, which _additional_ 2026 sources are worth preserving, and
+  their `known_at` semantics. Capture is broad by policy; this question is about reach, not
+  admission.
 - Whether any pre-kickoff forward-looking source has a defensible `known_at`. If none does, the
   week-1 preview runs on reconstructed roster, draft, 2022-2024 history, pairings, chat, and
   preseason receipts only.
