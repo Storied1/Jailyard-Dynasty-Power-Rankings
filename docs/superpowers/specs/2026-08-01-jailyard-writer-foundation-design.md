@@ -28,6 +28,10 @@ by accident of scheduling, not by construction.
 | `historical_context.longest_losing_streak` | 1      | Undated aggregate; week 1 carries 10, correct value is 9 |
 | **Total**                                  | **46** |                                                          |
 
+This counts **week-packet fields only**. A separate source-level exposure — 239 of 1,205 media
+catalog items postdating the week-1 cutoff, with no filtering in any media tool — is documented
+under the projection compiler and is not included in the 46.
+
 ### Reproducing census
 
 Two passes are required, and the second is the one that was originally missed.
@@ -76,6 +80,14 @@ order, truncated at each edition cutoff, tracking `best_l` per owner
 
 So exactly one packet (week 1) is contaminated on this field today. That the number is small is
 irrelevant — the field was invisible to the detector entirely, which is the real defect.
+
+**The sibling is accidentally safe, not structurally safe.** `longest_win_streak` was tested the
+same way and leaks in **0 packets**: the 11-game streak completed before 2025 week 1, so the
+committed value is correct at every cutoff. It is nonetheless produced by the same unsliced
+computation from the same undated shape. It reads correctly by accident of when that streak
+happened — exactly as the 66 currently-clean H2H blocks read correctly by accident of scheduling.
+Both undated aggregates are structurally exposed; one is confirmed contaminated. Treating the
+clean one as safe is what produced this class of defect in the first place.
 
 ### Root cause
 
@@ -203,6 +215,14 @@ not an ephemeral subset.
 - **Consumers** — writer, desks, editor, local drafter, media picker, content verifier — read
   only the edition bundle, approved prior editions, and editorial rules. Direct reads of
   full-season stores become test failures.
+- **The media catalog is a bundle source, not a free-standing store.**
+  `content/chat/media-catalog.json` holds 1,205 items each carrying an exact `timestamp_utc`.
+  **239 of them postdate the week-1 kickoff, including 77 from 2026**, and no cutoff filtering
+  exists anywhere in `pick-media.md` or `resolve_media.py`. Nothing today prevents a week-1
+  column from being illustrated with a 2026 screenshot. The catalog is projected per edition on
+  `timestamp_utc`, and media selection is subject to the same boundary as prose. Externally
+  fetched media (GIPHY) is undated third-party content, not league evidence, and is exempt from
+  cutoff filtering but must remain distinguishable from league media in the bundle.
 - **Bundle identity** binds descriptor, source hashes, projection code, policy, and output hash.
 - **The review record binds the exact bundle hash** it was approved against; a changed bundle
   makes the approval stale.
@@ -234,7 +254,10 @@ opened threads. External forecasts are optional evidence, not what makes it a pr
 `static-legal`, `cutoff-filtered`, or `forbidden`. Unknown fails closed. Undated aggregates
 cannot be classified `static-legal` by default — absence of a timestamp triggers recomputation,
 not exemption. Reuse the coverage pattern in
-`docs/superpowers/plans/2026-07-11-governance-foundation.md` Task 5.
+`docs/superpowers/plans/2026-07-11-governance-foundation.md` Task 5 — the mechanism only
+(`_leaf_pointers`, `coverage_check`, equal-specificity conflicts failing closed, tests globbing
+real files). That plan remains DRAFT and NOT APPROVED; borrowing its pattern does not ratify its
+governance program.
 
 **Noninterference:** did future evidence actually influence a classified field? Full-input versus
 cutoff-truncated runs must produce byte-identical bundles, with detector-active positive controls
@@ -323,9 +346,11 @@ hash) → media → render → commit.
   and fires on planted leaks of each class including an undated aggregate; noninterference is
   byte-identical with detector-active positive controls; a clean rebuild reproduces every bundle;
   no consumer reads a full-season store directly; a legal week-1 preview bundle exists containing
-  no week-1 outcomes and no final starters; at least one non-2025 canary edition compiles;
-  `verify_h2h_claims` errors; suite green (baseline 343 passed / 2 skipped at `c751b22`); CI green
-  on HEAD's own SHA.
+  no week-1 outcomes and no final starters; **no bundle offers league media postdating its
+  cutoff — a week-1 bundle exposes 966 of 1,205 catalog items, not 1,205**; at least one non-2025
+  canary edition compiles; `verify_h2h_claims` errors; suite green against the measured baseline
+  of **343 passed / 2 skipped** (run at `c751b22` on 2026-08-01, 167s — verified, not inherited
+  from memory); CI green on HEAD's own SHA.
 - **Phase C:** twelve repertoires committed and Blake-approved; desks exist as committed commands
   reading only bundles; bake-off run and outcome recorded.
 - **Phase D:** each edition passes the global content gate — verifier 0 errors AND `/edit-week`
