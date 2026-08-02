@@ -14,31 +14,32 @@ session proved it against disk.
 
 ### The defect, stated at two levels
 
-These are different claims and both matter.
-
 **Structural exposure: 98 of 98 H2H blocks are unsafe.** Every `matchups[].h2h` block in every
-week packet is sourced from `league_history.json`'s season-end aggregate with no cutoff slice
-applied — `wins`, `losses`, and `last_meeting` are all-time values. The blocks that happen to
-read correctly today do so by accident of scheduling, not by construction. Any re-extraction,
-any schedule difference, any new season turns an accidentally-safe block into a leaking one.
+week packet is sourced from `league_history.json`'s season-end aggregate with no cutoff slice —
+`wins`, `losses`, and `last_meeting` are all-time values. Blocks that read correctly today do so
+by accident of scheduling, not by construction.
 
-**Confirmed contamination: 45 entries currently carry future values** — 32 H2H blocks whose
-`last_meeting` postdates their packet's week, plus 13 `historical_context` entries. Only one
-`historical_context` record leaks (`highest_combined`, 2025 week 14), appearing in packets 1
-through 13.
+**Confirmed contamination: 46 entries currently carry future values.**
 
-The worst single case: `week1_data.json` tells a week-1 columnist the score of a game played in
-week 17.
+| Class                                      | Count  | Detail                                                   |
+| ------------------------------------------ | ------ | -------------------------------------------------------- |
+| H2H `last_meeting` postdating the packet   | 32     | Worst case: `week1_data.json` carries a week-17 score    |
+| `historical_context.highest_combined`      | 13     | 2025 week 14 record, present in packets 1-13             |
+| `historical_context.longest_losing_streak` | 1      | Undated aggregate; week 1 carries 10, correct value is 9 |
+| **Total**                                  | **46** |                                                          |
 
 ### Reproducing census
+
+Two passes are required, and the second is the one that was originally missed.
+
+**Pass 1 — dated entries.** Compare `season`/`week` against the edition cutoff:
 
 ```python
 import json, glob, re
 def wkof(p): return int(re.search(r'week(\d+)_', p).group(1))
-files = sorted(glob.glob('content/weeks/week*_data.json'), key=wkof)
 
 h2h_struct = 0; h2h_future = []; hc_future = []
-for fp in files:
+for fp in sorted(glob.glob('content/weeks/week*_data.json'), key=wkof):
     wk = wkof(fp); d = json.load(open(fp, encoding='utf-8'))
     for m in d.get('matchups', []):
         h = m.get('h2h') or {}
@@ -46,26 +47,41 @@ for fp in files:
         h2h_struct += 1                      # sourced from the unsliced aggregate
         lm = h.get('last_meeting') or {}
         s, w = lm.get('season'), lm.get('week')
-        if s is None: continue
-        if s > 2025 or (s == 2025 and w is not None and w > wk):   # recap semantics
-            h2h_future.append((wk, s, w))
+        if s is not None and (s > 2025 or (s == 2025 and w is not None and w > wk)):
+            h2h_future.append((wk, s, w))    # recap semantics: week N's own meeting is legal
     for key, rec in (d.get('historical_context') or {}).items():
         if not isinstance(rec, dict): continue
         s, w = rec.get('season'), rec.get('week')
-        if s is None: continue
-        if s > 2025 or (s == 2025 and w is not None and w > wk):
+        if s is not None and (s > 2025 or (s == 2025 and w is not None and w > wk)):
             hc_future.append((wk, key, s, w))
 ```
 
-Expected: `h2h_struct == 98`, `len(h2h_future) == 32`, `len(hc_future) == 13`, total confirmed
-`45`. Note the comparison is `w > wk`, not `w >= wk` — see temporal semantics below. Using `>=`
-reports 98 confirmed leaks, which conflates structural exposure with actual contamination.
+Expected: `h2h_struct == 98`, `len(h2h_future) == 32`, `len(hc_future) == 13`.
+
+The comparison is `w > wk`, not `w >= wk`. Using `>=` reports 98 H2H leaks, which conflates
+structural exposure with actual contamination.
+
+**Pass 2 — undated aggregates.** `longest_win_streak` and `longest_losing_streak` carry only
+`count`, `team`, `owner_id`. **A missing `season`/`week` cannot mean safe, and cannot mean
+skipped.** Undated aggregates are recomputed from temporal primitives and compared to the
+committed value. For streaks: replay non-playoff games from `data/*/season_combined.json` in
+order, truncated at each edition cutoff, tracking `best_l` per owner
+(`fetch_sleeper.py:962-1002`). Verified results:
+
+| Cutoff            | Correct `longest_losing_streak` | Committed value |
+| ----------------- | ------------------------------- | --------------- |
+| through 2024      | 8                               | 10              |
+| through 2025 wk 1 | 9                               | 10              |
+| through 2025 wk 2 | 10                              | 10              |
+
+So exactly one packet (week 1) is contaminated on this field today. That the number is small is
+irrelevant — the field was invisible to the detector entirely, which is the real defect.
 
 ### Root cause
 
 `extract_week_data.py:559-567` reads `history_data["h2h"]` and takes `games[-1]` as
-`last_meeting`. No cutoff filter. The correct helper, `compute_as_of_history`, already exists in
-the same file and is already used by the standings path.
+`last_meeting`. No cutoff filter. `compute_as_of_history` — the correct helper — already exists
+in the same file and is already used by the standings path.
 
 `verify_h2h_claims` (`verify_week_content.py:892-949`) validates writer prose _against_ the
 contaminated field, and only warns. A column faithfully reporting the leaked number is certified
@@ -73,210 +89,256 @@ correct.
 
 ### What is NOT broken
 
-This bounds the work. `standings` are genuinely as-of-week: between weeks 1 and 10, zero of
-twelve standings blocks are identical (`record` 0-1 → 2-8, `current_elo` 1429.4 → 1351.7,
-`all_time_record` 19-24 → 21-31). The M1 `compute_as_of_history` fix works as claimed. The chat
-layer's temporal admissibility and provenance were hardened and pushed 2026-07-20 (`c751b22`,
-CI green).
+`standings` are genuinely cutoff-correct: between weeks 1 and 10, zero of twelve standings blocks
+are identical (`record` 0-1 → 2-8, `current_elo` 1429.4 → 1351.7, `all_time_record` 19-24 →
+21-31). The chat layer's temporal admissibility and provenance were hardened and pushed
+2026-07-20 (`c751b22`, CI green).
 
-The defect is not "the foundation is incomplete." One fix landed on one field family and
-silently missed its siblings — the fourth documented instance of that pathology here, the first
-three unnoticed for weeks or months each. **Nothing walks the writer-facing surface and asks
-every field whether it is cutoff-legal.** That missing instrument, not the two leaking blocks,
-is the finding.
+The defect is not "the foundation is incomplete." One fix landed on one field family and silently
+missed its siblings — the fourth documented instance of that pathology here. **Nothing walks the
+writer-facing surface and asks every field whether it is cutoff-legal**, and nothing recomputes
+the fields that carry no timestamp to ask with.
 
-## Temporal semantics by edition type
+## Temporal semantics
 
-"Strictly before week N" cannot govern every edition. The cutoff is a property of the edition,
-not of the field.
+**The cutoff is an exact UTC instant, declared per edition** — not a week number. Week numbers
+cannot express "before the Thursday opener," which is exactly where the preview lives.
 
-| Edition                    | Cutoff                      | Week N's own results | Week N's own H2H meeting |
-| -------------------------- | --------------------------- | -------------------- | ------------------------ |
-| Preseason                  | before any 2025 game        | excluded             | excluded                 |
-| Week 1 pre-kickoff preview | before week 1 kickoff       | excluded             | excluded                 |
-| Week N recap               | after week N games conclude | included             | included                 |
-| Finale (week 18)           | after week 17 championship  | n/a (no games)       | included through 17      |
+| Edition                    | Cutoff                         | Week N results | Week N H2H meeting |
+| -------------------------- | ------------------------------ | -------------- | ------------------ |
+| Preseason                  | before any 2025 game           | excluded       | excluded           |
+| Week 1 pre-kickoff preview | first 2025 kickoff instant     | excluded       | excluded           |
+| Week N recap               | after week N games conclude    | included       | included           |
+| Finale (week 18)           | after the week 17 championship | n/a (no games) | included thru 17   |
 
-Every temporal check takes its boundary from the edition's declared cutoff. A preview and a
-recap for the same week are different editions with different legal evidence, and the audit must
-evaluate each against its own cutoff rather than a global rule.
+**Every source class is qualified, not only markets.** For each source: what temporal primitive
+establishes its `known_at`, how it is recomputed at a cutoff, what provenance is required, and
+what happens when it cannot be established (the answer is "unavailable," never "assume safe").
 
-## Phase A — Instruction census: keep / replace / delete
+Transaction reconstruction uses the **effective completion instant**, not `created` — some
+transactions are created before a kickoff and complete after it.
 
-Not blanket deletion. The goal is removing stale material without destroying the operative
-instruction system. **No authoritative surface is deleted until its replacement is identified
-and exists.** History needs no tombstones: git covers repo files, and the daily
-ClaudeMemorySnapshot covers the memory tree.
+## Phase 0 — 2026 evidence preservation (parallel lane, starts immediately)
 
-| Surface                                            | Verdict        | Replacement / rationale                                                                                                                                                        |
-| -------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `voice-bible.md` §1 patterns, §4 anti-patterns     | **KEEP**       | Abstract voice rules; the operative charter. Review, don't discard.                                                                                                            |
-| `voice-bible.md` §2 handle table                   | **REPLACE**    | Superseded by the chat-mined name repertoire (Phase C). `@kharlo_w` is wrong — `data/2025/users.json` says `kharlow`.                                                          |
-| `voice-bible.md` §5 exemplars                      | **DELETE**     | Filler excerpts from prose now classified as non-authoritative. Repopulated from the first edition that passes the final system — the charter carries no exemplars until then. |
-| `voice-bible.md` §3 templates                      | **KEEP**       | Section contracts still describe the stable sections.                                                                                                                          |
-| `project_jailyard_roadmap.md` SUPERSEDED blocks    | **DELETE**     | Git + memory backup hold the history.                                                                                                                                          |
-| `project_jailyard_roadmap.md` current-state claims | **REPLACE**    | "Data layer complete" and "weeks 1-6 next" are disproved. Replacement is this spec once approved.                                                                              |
-| `project_jailyard_roadmap.md.bak.*` (4 files)      | **DELETE**     | Redundant with git and the snapshot backup.                                                                                                                                    |
-| `CLAUDE.md` stale counts                           | **REPLACE**    | States 200 tests; suite is 343. Correct in place.                                                                                                                              |
-| `CLAUDE.md` rules and patterns                     | **KEEP**       | Operative. Amend only where this design changes a rule.                                                                                                                        |
-| `team-profiles.json` structured fields             | **RECLASSIFY** | Ranks, needs, values, projections beside prose become untrusted until independently sourced or regenerated. Not deleted.                                                       |
-| Feedback memories, vault notes                     | **AUDIT**      | Per-file verdict; same rule — no deletion without an identified replacement.                                                                                                   |
+The point of rebuilding 2025 is to exercise the system that will write the 2026 preseason and
+week-1 preview. That evidence is disappearing now:
 
-The census is produced and reviewed before any file is modified.
+- `data/2026` is still the 2026-04-04 snapshot.
+- `.github/workflows/fetch-sleeper-data.yml` cron is `0 6 * 9-12 0` — nothing runs before
+  September.
+- `fetch_sleeper.py` overwrites current rosters and projections with no append-only capture
+  identity.
 
-## Phase B — Data integrity, the audit, and the writer-access boundary
+Spending the summer rebuilding 2025 while volatile 2026 preseason evidence evaporates would
+force us to reconstruct another pre-kickoff state after the fact — the exact failure class this
+design exists to eliminate.
 
-**Repair.** Slice `h2h_entry["games"]` by the edition's cutoff (not a fixed "before week N") and
-recompute `wins`/`losses`/`last_meeting` from that slice. Same for `historical_context`.
-Re-extract all packets **and the `_expanded` companions in the same pass** — commit `c5b6b50`
-regenerated week data without the companions and left 32 season-end Elo values leaking there.
-Repeating that inside this fix would reproduce the bug being fixed.
+**Scope:** timestamped, append-only snapshots of the 2026 sources we qualify, each with a content
+hash and explicit capture-time and `known_at` semantics. Existing snapshots are never overwritten.
 
-**Audit.** Walk every leaf of every writer-facing artifact; every field must be classified.
-Unknown fields fail closed.
+This is evidence preservation, not 2026 authoring. No 2026 prose is written.
 
-- `static-legal` — cannot vary by cutoff and encodes nothing after it. Only valid where
-  "identical across editions" is the _correct_ answer — precisely the test `historical_context`
-  fails today.
-- `cutoff-filtered` — varies by edition cutoff; must be derived through `compute_as_of_history`
-  or an equivalent slice.
-- `forbidden` — must not reach a writer-facing artifact.
+## Phase A — Authority and read-path census
 
-Scope is every consumer, not only week packets: `weekN_data.json`, `weekN_data_expanded.json`,
-`weekN_chat_context.json`, `data/franchises/*`, `data/2025/player_arcs/*`,
-`content/team-profiles.json`.
+Not a file table. An audit of **every path by which prose reaches a writing decision**: prompts,
+local drafts, generators, editors, media tools, renderers, and derived artifacts.
 
-Reuse the coverage pattern in `docs/superpowers/plans/2026-07-11-governance-foundation.md`
-Task 5 — `_leaf_pointers()`, `coverage_check()`, equal-specificity conflicts failing closed,
-tests globbing real files. Written for content governance; the mechanism transfers to data
-unchanged.
+Confirmed contaminated read paths:
 
-**Prove it fires.** Plant leaks of each class and confirm the audit reports them before trusting
-any green result. A check that has never failed has not been tested.
+| Path                                      | Finding                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| `voice-bible.md` §1 patterns              | Excerpts at :16-20, :38-46, :64-70, :100-106, :122-126, :148-152          |
+| `voice-bible.md` §5 exemplars             | Entirely excerpts from superseded prose                                   |
+| `write-week.md:7-25`                      | Requires the whole voice bible, team-profile essays, optional local draft |
+| `write-preseason.md:47-53`                | "use as inspiration" for team-profile prose                               |
+| `write-preseason.md:72-75`                | 2026 prose as "shape, tone, and length precedent"                         |
+| `weekN_data.json` `team_profiles_summary` | Carries `essay_snippet` and `roast`                                       |
+| `generate_franchise_wings.py:294-301`     | Compiles `roast` into `voice_bible_callbacks` in franchise data           |
 
-**Writer-access boundary.** Full-season artifacts — franchise wings, player arcs, team profiles,
-chat analytics — cannot remain direct writer or desk inputs governed by prose instructions to
-"slice carefully." A rule a human must remember is not a boundary. Writers and desks consume
-**cutoff-safe projections** of these stores; direct reads of full-season aggregates become test
-failures.
+**Keep:** abstract voice grammar (pattern definitions), section templates, anti-patterns.
+**Remove or block:** every current prose excerpt, wherever it appears — including inside
+generated data.
+**Preserve:** old prose as git fixtures that no active path can read.
 
-The projection is the minimum needed to serve an edition: the subset of each store legally
-knowable at that edition's cutoff, with unavailable data represented explicitly rather than
-omitted silently. This is a slicing contract, not a new storage layer or database.
+**No replacement exemplar is required for the first edition.** The "no deletion before
+replacement" rule applies to authoritative _instruction surfaces_, not to illustrative excerpts;
+the voice grammar is fully operative without examples. The first approved edition becomes the
+first canonical exemplar afterward.
 
-**Week 1 pre-kickoff preview input contract.** `week1_data.json` contains week 1 outcomes and is
-therefore not a legal preview input. The preview requires its own packet, which is the strictest
-instance of the projection contract above:
+The handle table in §2 is replaced by the chat-mined name repertoire (Phase C); `@kharlo_w` is
+wrong — `data/2025/users.json` says `kharlow`. Roadmap SUPERSEDED blocks and the four `.bak`
+copies are deleted; git and the daily ClaudeMemorySnapshot preserve history. `CLAUDE.md` stale
+counts corrected in place (states 200 tests; suite is 343).
 
-- Standings at 0-0; no week 1 results, scores, margins, or awards.
-- H2H sliced to meetings before week 1 of 2025 — 2022-2024 only.
-- Week 1 matchup pairings (schedule is known pre-kickoff).
-- Rosters and availability as of lock, from `fantasy_rosters/week1.json` and pre-kickoff injury
-  data.
-- Preseason receipts: the predictions and threads that edition opened.
-- Forward-looking evidence must be a genuine pre-kickoff projection, not a back-derived one.
-  Any projection or market snapshot admitted must carry a `known_at` no later than kickoff.
+## Phase B — Repair, projection compiler, and audit
 
-The projection mechanism is adopted because the preview cannot exist without it, independent of
-the larger proposal it also appeared in.
+### Repair
 
-**Gate.** Promote `verify_h2h_claims` from warning to error, evaluated against the edition's
-cutoff.
+Slice `h2h_entry["games"]` by the edition cutoff and recompute `wins`/`losses`/`last_meeting`.
+Recompute `historical_context` — including undated aggregates — at each cutoff. Re-extract all
+packets **and the `_expanded` companions in the same pass**; commit `c5b6b50` regenerated week
+data without the companions and left 32 season-end Elo values leaking there.
+
+**Role change.** The repaired per-week packet stops being a direct writer input and becomes a
+**component of its edition's bundle**, carrying the bundle's cutoff and hash. This keeps the
+existing verifier and renderer working against a familiar shape while still satisfying the
+writer-access boundary — the packet a consumer reads is the one the projector compiled, not a
+file it opened for itself. Its prose fields (`team_profiles_summary.essay_snippet`, `roast`) are
+stripped per Phase A. Pages outside the writing path (`season.html`, `history.html`) may continue
+reading published data directly; the boundary governs writing decisions, not site rendering.
+
+### Projection compiler
+
+Lightweight, file-backed, no database and no full typed evidence hierarchy — but a real contract,
+not an ephemeral subset.
+
+- **Edition descriptor:** `edition_id`, `season`, edition kind, `cutoff_utc`, results-through
+  week, policy version.
+- **One canonical, persisted writer-facing bundle per edition.** Persisted because the archive is
+  definitive; an ephemeral slice cannot be re-audited.
+- **Per-source adapters**, each naming its temporal primitive, recomputation rule, provenance
+  requirement, and unavailable behavior. Final aggregates — streaks, player arcs, records —
+  cannot be made safe by generic field filtering and require explicit recomputation rules.
+- **The projector is the sole trusted reader** of raw and full-season stores.
+- **Consumers** — writer, desks, editor, local drafter, media picker, content verifier — read
+  only the edition bundle, approved prior editions, and editorial rules. Direct reads of
+  full-season stores become test failures.
+- **Bundle identity** binds descriptor, source hashes, projection code, policy, and output hash.
+- **The review record binds the exact bundle hash** it was approved against; a changed bundle
+  makes the approval stale.
+- **Season-parameterized from the start**, with at least one non-2025 canary edition, so 2025
+  genuinely tests a reusable system rather than a 2025-shaped one.
+
+### Week 1 pre-kickoff preview inputs
+
+`data/2025/fantasy_rosters/week1.json` is **not** a legal preview source. Proof: transaction
+`1269785739084701696` added player `6949` to roster 6 at `2025-09-05T20:10:20.977Z`, after the
+September 4 opener; that player appears in both `players` and `starters` in the backfilled week-1
+file. The file records what week 1 became, not what was knowable before it.
+
+The preview roster is **reconstructed to the exact cutoff instant** from transactions (using
+effective completion instants) plus an admissible anchor — or marked unavailable.
+
+**Unavailable unless separately proven:** final starters (inherently later knowledge), injuries,
+availability, betting lines, market projections. No historical injury or availability artifact
+currently proves a pre-kickoff `known_at`.
+
+The preview is not thereby empty. It builds original forecasts from: the reconstructed roster,
+the completed draft, 2022-2024 history and H2H, week-1 pairings stripped of outcomes,
+cutoff-projected chat, and the newly approved preseason edition's rankings, predictions, and
+opened threads. External forecasts are optional evidence, not what makes it a preview.
+
+### Audit — two distinct questions
+
+**Leaf census:** did we classify every field? Every leaf of every writer-facing artifact must be
+`static-legal`, `cutoff-filtered`, or `forbidden`. Unknown fails closed. Undated aggregates
+cannot be classified `static-legal` by default — absence of a timestamp triggers recomputation,
+not exemption. Reuse the coverage pattern in
+`docs/superpowers/plans/2026-07-11-governance-foundation.md` Task 5.
+
+**Noninterference:** did future evidence actually influence a classified field? Full-input versus
+cutoff-truncated runs must produce byte-identical bundles, with detector-active positive controls
+proving the comparison can fail. The existing chat-context noninterference and provenance code is
+the local pattern.
+
+Both are required; neither substitutes for the other. A clean rebuild must reproduce the same
+bundle.
+
+**Gate:** promote `verify_h2h_claims` from warning to error, evaluated against the edition cutoff.
 
 ## Phase C — The writing room
 
-**Name repertoires.** Mine the chat corpus for how each of the twelve owners is actually
-referred to. Produce twelve rows — first name, surname, Sleeper handle, team, shorthand, earned
-nicknames — with usage notes on which form fits which register. Blake approves once; ships as
-committed data the Culture desk serves.
+**Name repertoires.** Mine the chat corpus for how each of the twelve owners is actually referred
+to. Twelve rows — first name, surname, handle, team, shorthand, earned nicknames — with usage
+notes on register. Blake approves once; ships as committed data the Culture desk serves.
 
-"Brent Boone" in every sentence is not a style failure — it is what happens when the writer holds
-a database row instead of a relationship. A person you know has a name that moves with context.
+"Brent Boone" in every sentence is what happens when the writer holds a database row instead of a
+relationship. A person you know has a name that moves with context.
 
 **Desks**, as committed commands so 2026 reuses them: Power Rankings, Game/NFL, History, Culture,
 Continuity, plus a Data/Copy Editor. Desks return structured evidence and candidate angles, never
-prose. One columnist owns voice, pacing, and argument. Desks consume projections, not full-season
-stores.
+prose. Desks read the edition bundle only.
 
-**Continuity desk carries voice memory** — reads what has been published and reports what has
+**Continuity desk carries voice memory** — reads approved prior editions and reports what has
 been spent: jokes, comparisons, openers, name-forms per owner. The only mechanism that catches
 semantic repeats, which a string-matching ledger cannot.
 
 Columns go stale because each edition is written cold — independent draws from one distribution,
-each reaching for the most probable phrasing. `picks_ledger` and `meta.threads` already make an
-edition conditional on its predecessors for _facts_. Nothing does so for _voice_.
+each reaching for the most probable phrasing. `picks_ledger` and `meta.threads` make an edition
+conditional on predecessors for _facts_. Nothing does so for _voice_.
 
-**Bake-off.** Write the first edition both ways — desks and the existing single-writer pipeline
-— and compare under the editor rubric: factual corrections required, unique evidence used, phrase
-repetition, owner specificity, how much prose survives Blake's edit. Keep the winner, delete the
-loser.
+**Bake-off.** Write the first edition both ways — desks and single-writer — and compare under the
+editor rubric: factual corrections required, unique evidence used, phrase repetition, owner
+specificity, how much survives Blake's edit. Keep the winner, delete the loser.
 
 ## Phase D — Twenty fresh canonical editions
 
-**All existing prose is filler.** Preseason-2025, weeks 1-6, current rankings, threads, media
-choices, and 2026 prose carry zero editorial authority. They are preserved through git as
-fixtures and are **not** used as inspiration, exemplars, continuity, rankings, or factual
-evidence. Preseason-2025 is written fresh through the final system, not re-gated.
+**All existing prose is filler with zero editorial authority** — preseason-2025, weeks 1-6,
+current rankings, threads, media choices, 2026 prose. Preserved as inaccessible git fixtures;
+never inspiration, exemplars, continuity, rankings, or factual evidence. Preseason-2025 is
+written fresh through the final system, not re-gated.
 
 **The corpus:** preseason-2025, a standalone week-1 pre-kickoff preview, week 1-17 recaps, and a
-week-18 finale (no week-18 fantasy games were played). Twenty editions, all produced from a blank
-editorial page.
+week-18 finale (no week-18 fantasy games were played).
 
 **Shape: story-first within stable sections.** Sections remain available and the renderer and
-verifier stay simple, but each edition leads with its strongest story and sections flex in
-weight. A thin section may be two lines or absent. Playoff weeks (15-17) and the finale get their
-own contracts.
+verifier stay simple; each edition leads with its strongest story and sections flex in weight.
+Playoff weeks (15-17) and the finale get their own contracts.
 
-**Order is strictly sequential — a hard dependency, not a preference.** The prior edition's
-writer _invents_ the picks, spreads, and Lock / Upset Watch / Stay Away tags; that data exists in
-no generated file. An edition's `meta.picks_ledger` cannot be authored before the picks exist.
-Threads must be opened before being advanced. Callbacks quote prose that must exist. Concurrent
-writers produce N copies of edition one.
+**Order is strictly sequential — a hard dependency.** The prior edition's writer _invents_ the
+picks, spreads, and tags; that data exists in no generated file. An edition's `meta.picks_ledger`
+cannot be authored before the picks exist. Threads must be opened before being advanced.
+Callbacks quote prose that must exist.
 
-**Per-edition loop:** cutoff declared → projection built → desks brief → columnist writes →
-`verify_week_content.py` exits 0 → `/edit-week` APPROVE (one `review-log.jsonl` line per pass) →
-media → render → commit.
+**Per-edition loop:** descriptor declared → bundle compiled → desks brief → columnist writes →
+`verify_week_content.py` exits 0 → `/edit-week` APPROVE (review-log line bound to the bundle
+hash) → media → render → commit.
 
-**Checkpoint after week 6:** synthesize `review-log.jsonl` into standing writer rules before
-continuing.
+**Checkpoint after week 6:** synthesize `review-log.jsonl` into standing writer rules.
 
-**Serial, owned by the lead context, never delegated:** `check_picks_ledger` (transitive over all
-prior content), `verify_prev_rank_claims`, and appends to `content/review-log.jsonl` — one shared
-unlocked ledger with a read-modify-write on `pass_number`.
+**Serial, owned by the lead context, never delegated:** `check_picks_ledger`,
+`verify_prev_rank_claims`, and appends to `content/review-log.jsonl`.
 
 ## Out of scope
 
-- The remainder of the larger evidence-reconciliation proposal beyond the projection contract
-  adopted above: EditionSpec/SeasonSnapshot/EvidenceBundle/RankingSnapshot as formal typed
-  layers, a validated ranking model with a selection gate, disposable benchmark editions, and a
-  clean-room 2026 rehearsal. Revisit if the widened audit finds classes the targeted repair
-  cannot address.
+- **2026 authoring.** Phase 0 preserves 2026 evidence; it writes no 2026 prose.
+- Formal typed evidence hierarchies beyond the descriptor/bundle/adapter contract above, a
+  validated ranking model with a selection gate, disposable benchmark editions, and a clean-room
+  2026 rehearsal. Revisit if the audit finds classes the adopted contract cannot address.
 - v2 redesign (deferred to in-season 2026).
-- 2026 readiness: live roster capture, preseason-2026, `compute_preseason_window` constants.
+- 2026 live-season readiness: live roster capture, preseason-2026 authoring,
+  `compute_preseason_window` constants.
 - `feat/analytics-owner-edge` — parked, unmerged, shadow-only.
 
 ## Acceptance
 
-- **Phase A:** the keep/replace/delete census is reviewed and approved before any file changes;
-  every DELETE verdict names an existing replacement or an explicit "no replacement needed";
-  all twelve handles match `data/2025/users.json`.
-- **Phase B:** the census script reports 0 confirmed future entries (from 45) and 0 structurally
-  unsliced H2H blocks (from 98); the audit reports zero unclassified fields across all consumers
-  **and** is demonstrated to fire on planted leaks of each class; no consumer reads a full-season
-  store directly; a legal week-1 preview packet exists and contains no week 1 outcomes;
-  `verify_h2h_claims` errors; suite green (baseline 343 passed / 2 skipped at `c751b22`); CI
-  green on HEAD's own SHA.
-- **Phase C:** twelve name repertoires committed and Blake-approved; desks exist as committed
-  commands; bake-off run and outcome recorded in `review-log.jsonl`.
+- **Phase 0:** append-only 2026 snapshots exist with hashes and explicit capture/`known_at`
+  semantics; re-running capture never overwrites a prior snapshot.
+- **Phase A:** the read-path census is reviewed and approved before any file changes; no active
+  writing path can reach barred prose, proven by test — including generated artifacts
+  (`team_profiles_summary`, `voice_bible_callbacks`); abstract grammar, templates, and
+  anti-patterns intact; twelve handles match `data/2025/users.json`.
+- **Phase B:** census reports 0 confirmed future entries (from 46) across both passes, and 0
+  structurally unsliced H2H blocks (from 98); the leaf census reports zero unclassified fields
+  and fires on planted leaks of each class including an undated aggregate; noninterference is
+  byte-identical with detector-active positive controls; a clean rebuild reproduces every bundle;
+  no consumer reads a full-season store directly; a legal week-1 preview bundle exists containing
+  no week-1 outcomes and no final starters; at least one non-2025 canary edition compiles;
+  `verify_h2h_claims` errors; suite green (baseline 343 passed / 2 skipped at `c751b22`); CI green
+  on HEAD's own SHA.
+- **Phase C:** twelve repertoires committed and Blake-approved; desks exist as committed commands
+  reading only bundles; bake-off run and outcome recorded.
 - **Phase D:** each edition passes the global content gate — verifier 0 errors AND `/edit-week`
-  APPROVE AND renders clean AND as-if-realtime checklist clean. Binary; no "APPROVE with notes."
+  APPROVE AND renders clean AND as-if-realtime checklist clean, with the approval bound to a
+  bundle hash. Binary; no "APPROVE with notes."
 
 ## Open items
 
-- Whether the widened audit surfaces leak classes beyond `h2h` and `historical_context`. If so,
-  repair scope grows before Phase C.
-- Playoff (weeks 15-17) and finale content contracts — needed before week 15, not before the
-  first edition.
-- Which pre-kickoff forward-looking evidence is admissible for the week-1 preview, and whether a
-  qualifying source with a defensible `known_at` exists at all. If none does, the preview relies
-  on roster, schedule, and preseason receipts only.
+- Whether the audit surfaces leak classes beyond H2H, `historical_context`, and undated
+  aggregates. If so, repair scope grows before Phase C.
+- Which 2026 sources qualify for Phase 0 capture, and their `known_at` semantics.
+- Whether any pre-kickoff forward-looking source has a defensible `known_at`. If none does, the
+  week-1 preview runs on reconstructed roster, draft, 2022-2024 history, pairings, chat, and
+  preseason receipts only.
+- Playoff (weeks 15-17) and finale contracts — needed before week 15, not before the first
+  edition.
