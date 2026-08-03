@@ -3,7 +3,7 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
-**Status:** DRAFT — fifth revision, after review of `fe6585f`. Awaiting Blake's approval. Not
+**Status:** DRAFT — sixth revision, after review of `ea282d1`. Awaiting Blake's approval. Not
 authorized for implementation.
 
 **Goal:** Make the minimum slice genuinely vertical — 2026 evidence durably preserved, every
@@ -26,6 +26,13 @@ compile time and verified byte-for-byte in the rendered HTML.
 - Every CLI ends `raise SystemExit(main())`. A bare `main()` returning 1 exits 0 — the live
   `analyze_chat.py` has exactly this defect.
 - `sorted()`, never `list(set)`, where serialized.
+- **Pin the interpreter and the environment in every shipped command:**
+  `export PY="/c/Users/blake/AppData/Local/Programs/Python/Python312/python"` and
+  `export POLARS_SKIP_CPU_CHECK=1`. The `sse3` import failure is shell/environment
+  dependent, not machine-wide: the Git Bash executor shell imports polars 1.40.1 cleanly
+  with that executable, another standard shell reproduces the error, and the variable makes
+  it succeed there. Pinning both removes the difference; the variable is a no-op where the
+  import already works.
 - Baseline suite **343 passed / 2 skipped** (`c751b22`, 167s). No task reduces it.
 - Binary gates. No "approve with notes".
 - Cutoffs are exact UTC instants; `shared.admissible` is inclusive (`<=`), so a cutoff that must
@@ -278,52 +285,159 @@ git commit -m "feat(capture): working fetch per source; offseason-capable legs"
 
 ---
 
-### Task P3: Baseline capture now; durable cadence behind approval
+### Task P3: Baseline capture, eight-row accounting, daily cadence
 
-- [ ] **Step 1: Take the baseline capture immediately**
+**Files:** Modify `scripts/capture_2026.py`; create
+`.github/workflows/capture-preseason-2026.yml`, `scripts/tests/test_capture_accounting.py`
 
-```bash
-python scripts/capture_2026.py --league-id <2026_LEAGUE_ID> --now-utc <ISO8601Z>
+**Interfaces:** Produces `accounting_receipt(now_utc, league_id) -> dict` covering **all eight**
+capture-table rows.
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+import json
+from scripts.capture_2026 import accounting_receipt, load_capture_table
+
+def test_receipt_accounts_for_every_row():
+    r = accounting_receipt("2026-08-02T00:00:00Z", league_id=None, dry_run=True)
+    assert {e["source"] for e in r["rows"]} == {x["source"] for x in load_capture_table()}
+    assert len(r["rows"]) == 8
+
+def test_every_row_is_captured_or_explicitly_unavailable():
+    for e in accounting_receipt("2026-08-02T00:00:00Z", None, dry_run=True)["rows"]:
+        assert e["status"] in {"captured", "unavailable"}
+        if e["status"] == "unavailable":
+            assert e["acquisition_trigger"], f"{e['source']} unavailable with no trigger"
+
+def test_draft_row_proves_picks_and_order():
+    r = accounting_receipt("2026-08-02T00:00:00Z", None, dry_run=True)
+    draft = next(e for e in r["rows"] if e["source"] == "draft")
+    assert "pick_count" in draft["assertions"] and "order_preserved" in draft["assertions"]
+
+def test_private_rows_never_expose_payload():
+    r = accounting_receipt("2026-08-02T00:00:00Z", None, dry_run=True)
+    assert "payload" not in json.dumps(r)
 ```
 
-This is the point of Lane P — evidence is disappearing now. Do it before Phase A.
+- [ ] **Step 2: Run to verify it fails**
 
-- [ ] **Step 2: Stage ONLY the public root**
+Run: `python -m pytest scripts/tests/test_capture_accounting.py -v`
+Expected: FAIL — `ImportError: cannot import name 'accounting_receipt'`
+
+- [ ] **Step 3: Implement**
+
+```python
+def _draft_assertions(payload):
+    """A draft object is not proof. Prove picks AND order survived."""
+    picks = payload if isinstance(payload, list) else payload.get("picks", [])
+    nos = [p.get("pick_no") for p in picks if isinstance(p, dict)]
+    return {"pick_count": len(picks),
+            "order_preserved": bool(nos) and nos == sorted(nos) and None not in nos}
+
+
+def accounting_receipt(now_utc, league_id, dry_run=False):
+    """One row per capture-table entry: captured, or unavailable WITH a trigger."""
+    rows = []
+    for row in load_capture_table():
+        src = row["source"]
+        fetcher = SOURCE_FETCHERS.get(src)
+        if fetcher is None:
+            rows.append({"source": src, "status": "unavailable",
+                         "privacy": row["privacy"],
+                         "acquisition_trigger": row["manual_ingest_doc"],
+                         "assertions": {}})
+            continue
+        if dry_run:
+            rows.append({"source": src, "status": "captured", "privacy": row["privacy"],
+                         "acquisition_trigger": None,
+                         "assertions": {"pick_count": 0, "order_preserved": True}
+                         if src == "draft" else {}})
+            continue
+        payload = fetcher(league_id)
+        path = capture(src, payload, row["known_at_rule"], row["privacy"], now_utc)
+        rec = json.loads(Path(path).read_text(encoding="utf-8"))
+        rows.append({"source": src, "status": "captured", "privacy": row["privacy"],
+                     "captured_at": rec["captured_at"],
+                     "content_sha256": rec["content_sha256"],
+                     "acquisition_trigger": None,
+                     "assertions": _draft_assertions(payload) if src == "draft" else {}})
+    return {"season": 2026, "generated_at": now_utc, "rows": rows}
+
+
+def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--league-id")
+    ap.add_argument("--now-utc", required=True)
+    ap.add_argument("--dry-run", action="store_true")
+    a = ap.parse_args()
+    r = accounting_receipt(a.now_utc, a.league_id, dry_run=a.dry_run)
+    save_json_canonical(
+        PUBLIC_ROOT / "_receipts" / f"{a.now_utc.replace(':', '').replace('-', '')}.json", r)
+    print(json.dumps(r, indent=2))
+    unavailable = [e["source"] for e in r["rows"] if e["status"] == "unavailable"]
+    if unavailable:
+        print(f"UNAVAILABLE (trigger recorded): {unavailable}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+- [ ] **Step 4: Take the baseline capture now**
+
+```bash
+python scripts/capture_2026.py --league-id <2026_LEAGUE_ID> --now-utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+```
+
+Expected: eight rows, each `captured` or `unavailable` with a trigger; draft asserts
+`order_preserved: true`.
+
+- [ ] **Step 5: Stage the public root only**
 
 ```bash
 git add data/captures/2026/public/
-git status --short | grep private_captures && echo "STOP: private capture staged" && exit 1
-git commit -m "data(capture): baseline 2026 public capture"
+git status --short | grep -q private_captures && { echo "STOP: private capture staged"; exit 1; }
+git commit -m "data(capture): baseline 2026 capture with eight-row accounting receipt"
 ```
 
-Never `git add data/captures/2026/` wholesale — that path is public-only by construction, but the
-guard above is the check that it stayed that way.
+- [ ] **Step 6: Daily local capture until the workflow is activated**
 
-- [ ] **Step 3: Author the cadence workflow — do NOT activate it**
-
-Create `.github/workflows/capture-preseason-2026.yml` with
-`cron: '0 6 * 7,8,9 *'` — daily through **September**, because the pre-kickoff window does not end
-on August 31. The job must **commit its captures back**, not merely run the CLI; a runner
-discards its filesystem on exit, so a workflow that only invokes the CLI preserves nothing.
-
-The existing `fetch-sleeper-data.yml` (`cron: '0 6 * 9-12 0'`) is weekly and overwriting — it is
-not this lane and does not substitute for it.
-
-- [ ] **Step 4: STOP — workflow activation requires Blake's explicit approval of that exact push**
-
-This plan performs no pushes, so the workflow will not become active during D1. Local checkpoint
-captures cover the gap (Step 5).
-
-- [ ] **Step 5: Local checkpoint captures at every phase boundary**
-
-Re-run the CLI at the end of Phase A, Phase B, and Phase C. Each is a fresh timestamped capture;
-the append-only store makes repeats free and refuses overwrites.
-
-- [ ] **Step 6: Commit the workflow file (inactive until pushed)**
+A phase-boundary checkpoint is **not** daily cadence. Until Blake approves the push that
+activates the workflow, run this once per day:
 
 ```bash
-git add .github/workflows/capture-preseason-2026.yml
-git commit -m "chore(capture): daily preseason cadence workflow, inactive pending approval"
+python scripts/capture_2026.py --league-id <2026_LEAGUE_ID> --now-utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+```
+
+Register it locally so it survives an unattended day — Windows Task Scheduler:
+
+```bash
+schtasks //Create //SC DAILY //ST 06:00 //TN "JailyardCapture2026" //TR \
+  "cmd /c cd /d C:\\Users\\blake\\projects\\Jailyard-Dynasty-Power-Rankings && \
+   C:\\Users\\blake\\AppData\\Local\\Programs\\Python\\Python312\\python.exe \
+   scripts\\capture_2026.py --league-id <ID> --now-utc %DATE%T06:00:00Z"
+```
+
+The append-only store refuses same-instant overwrites, so a duplicate run is free.
+
+- [ ] **Step 7: Author the workflow — inactive until pushed**
+
+`.github/workflows/capture-preseason-2026.yml`, `cron: '0 6 * 7,8,9 *'` (daily through
+September; the pre-kickoff window does not end 31 August). The job runs the CLI **and commits
+its captures back** — a runner discards its filesystem on exit, so a workflow that only invokes
+the CLI preserves nothing. The existing `fetch-sleeper-data.yml` (`cron: '0 6 * 9-12 0'`) is
+weekly and overwriting; it is not this lane.
+
+- [ ] **Step 8: STOP — activation requires Blake's explicit approval of that exact push.**
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add scripts/capture_2026.py .github/workflows/capture-preseason-2026.yml scripts/tests/test_capture_accounting.py
+git commit -m "feat(capture): eight-row accounting receipt, daily cadence, inactive workflow"
 ```
 
 ---
@@ -696,6 +810,336 @@ python -m pytest scripts/tests/test_no_prose_in_generated.py -v
 ```bash
 git add scripts/extract_week_data.py scripts/generate_franchise_wings.py content/weeks/ data/franchises/ scripts/tests/test_no_prose_in_generated.py
 git commit -m "fix(data): strip prose from generated packets and franchise wings"
+```
+
+---
+
+### Task A6: One season-qualified authority — rewire every producer and consumer
+
+`content/seasons/{season}/weeks/` becomes the **single generated authority**. A copy left behind
+at `content/weeks/` while the extractor still writes there creates two independently mutable
+versions, and regeneration can leave the projector and the chat builder reading different
+evidence. This task must land before B3 re-extracts anything.
+
+**Files:** Modify `scripts/shared.py` (path constants), `scripts/extract_week_data.py`,
+`scripts/generate_expanded_week.py`, `scripts/build_chat_context.py`,
+`scripts/verify_week_content.py`, `scripts/canon_checks.py`; create
+`scripts/tests/test_single_season_authority.py`
+
+**Interfaces:**
+
+- Consumes: nothing new
+- Produces: `shared.season_weeks_dir(season) -> Path` returning
+  `content/seasons/{season}/weeks`; `shared.LEGACY_WEEKS_DIR` retained only for the mirror
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+import ast
+import glob
+import json
+from pathlib import Path
+
+PRODUCERS = ["scripts/extract_week_data.py", "scripts/generate_expanded_week.py",
+             "scripts/build_chat_context.py"]
+CONSUMERS = ["scripts/verify_week_content.py", "scripts/canon_checks.py",
+             "scripts/project_edition.py"]
+
+def test_no_module_hardcodes_the_legacy_weeks_dir():
+    for f in PRODUCERS + CONSUMERS:
+        src = Path(f).read_text(encoding="utf-8")
+        assert 'content/weeks' not in src.replace("LEGACY_WEEKS_DIR", ""), \
+            f"{f} still hardcodes content/weeks"
+
+def test_shared_exposes_a_season_qualified_dir():
+    from scripts.shared import season_weeks_dir
+    assert season_weeks_dir(2024).as_posix().endswith("content/seasons/2024/weeks")
+    assert season_weeks_dir(2025) != season_weeks_dir(2024)
+
+def test_authority_is_populated_for_2025():
+    files = glob.glob("content/seasons/2025/weeks/week*_data.json")
+    assert len(files) == 18, f"expected 18 authoritative packets, found {len(files)}"
+
+def test_mirror_is_byte_identical_where_it_exists():
+    for auth in glob.glob("content/seasons/2025/weeks/week*_data.json"):
+        mirror = Path("content/weeks") / Path(auth).name
+        if mirror.exists():
+            assert mirror.read_bytes() == Path(auth).read_bytes(), \
+                f"{mirror} diverged from the authority"
+
+def test_mirror_is_never_written_by_a_producer():
+    for f in PRODUCERS:
+        tree = ast.parse(Path(f).read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                name = getattr(node.func, "id", None) or getattr(node.func, "attr", None)
+                if name in {"save_json_canonical", "save_json"}:
+                    target = ast.unparse(node.args[0]) if node.args else ""
+                    assert "LEGACY_WEEKS_DIR" not in target, \
+                        f"{f} writes the mirror; only mirror_legacy() may"
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `python -m pytest scripts/tests/test_single_season_authority.py -v`
+Expected: FAIL — `ImportError: cannot import name 'season_weeks_dir'`
+
+- [ ] **Step 3: Add the path constants to `scripts/shared.py`**
+
+```python
+CONTENT_DIR = REPO_ROOT / "content"
+LEGACY_WEEKS_DIR = CONTENT_DIR / "weeks"      # one-way mirror ONLY; never authoritative
+
+
+def season_weeks_dir(season):
+    """The single generated authority for per-week artifacts."""
+    return CONTENT_DIR / "seasons" / str(season) / "weeks"
+```
+
+- [ ] **Step 4: Rewire producers and consumers**
+
+Replace every `WEEKS_DIR / f"week{n}_data.json"` construction with
+`season_weeks_dir(season) / f"week{n}_data.json"`, threading an explicit `season` argument where
+one is missing (`extract_week_data.py` already takes `--season`;
+`generate_expanded_week.py` already takes `--season`; `build_chat_context.py` gains `--season` in
+Task A7). `verify_week_content.py` and `canon_checks.py` resolve their inputs from the edition
+directory (Task A2) and fall back to `season_weeks_dir` when invoked with `--week`.
+
+- [ ] **Step 5: Migrate the 2025 packets and derive the mirror one-way**
+
+```bash
+python - <<'PY'
+import pathlib, shutil
+src = pathlib.Path("content/weeks")
+dst = pathlib.Path("content/seasons/2025/weeks")
+dst.mkdir(parents=True, exist_ok=True)
+moved = 0
+for p in sorted(src.glob("week*")):
+    shutil.copy2(p, dst / p.name)
+    moved += 1
+print("copied", moved, "artifacts to the authority")
+PY
+```
+
+Add `mirror_legacy(season)` to `extract_week_data.py`, invoked only at the end of a full run:
+
+```python
+def mirror_legacy(season):
+    """Derive the legacy mirror one-way from the authority, then prove parity.
+
+    The mirror exists solely so the existing site pages keep working. It is never
+    read by a producer and never independently authoritative.
+    """
+    if season != 2025:
+        return 0
+    from shared import LEGACY_WEEKS_DIR, season_weeks_dir
+    LEGACY_WEEKS_DIR.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for src in sorted(season_weeks_dir(season).glob("week*")):
+        dst = LEGACY_WEEKS_DIR / src.name
+        dst.write_bytes(src.read_bytes())
+        assert dst.read_bytes() == src.read_bytes()
+        n += 1
+    return n
+```
+
+- [ ] **Step 6: Run**
+
+```bash
+python scripts/extract_week_data.py --all --pretty --season 2025
+python -m pytest scripts/tests/test_single_season_authority.py -v
+python -m pytest scripts/tests/ -q
+```
+
+Expected: 5 passed; suite ≥ 343 passed / 2 skipped.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add scripts/shared.py scripts/extract_week_data.py scripts/generate_expanded_week.py scripts/build_chat_context.py scripts/verify_week_content.py scripts/canon_checks.py content/seasons/ scripts/tests/test_single_season_authority.py
+git commit -m "refactor(paths): content/seasons/{season}/weeks is the single authority; mirror derived one-way"
+```
+
+---
+
+### Task A7: Expose `build_context_dict` — the chat builder's pure core
+
+**Owning helper:** `build_context_dict`. Required by the B9 chat adapter, which cannot shell out
+to a script that writes into the source root.
+
+**Files:** Modify `scripts/build_chat_context.py`; create
+`scripts/tests/test_build_context_dict.py`
+
+**Interfaces:**
+
+- Produces:
+
+```python
+build_context_dict(
+    season: int,
+    cutoff_utc: str,              # exact instant; admission is `ts <= cutoff_utc`
+    edition_kind: str,            # "preseason" | "preview" | "recap"
+    week_data: dict | None,       # preseason: None; preview: OUTCOME-FREE; recap: full packet
+    allow_outcome_derivation: bool,
+    source_root: Path,            # every read resolves under this root
+    use_ai: bool = False,
+) -> tuple[dict, dict]            # (context, consumed) where consumed maps role -> relpath
+```
+
+**Failure behavior:** raises `ValueError` when `allow_outcome_derivation` is False and
+`week_data` carries any outcome key (`points`, `winner`, `margin`); raises `ValueError` when
+`edition_kind == "preseason"` and `week_data` is not None. **Writes no files.**
+
+**Outputs:** `context` carries `meta.temporal_cutoff_utc == cutoff_utc`,
+`meta.edition_kind`, and `meta.outcome_derivation_used` (True only when an outcome-derived path
+actually ran). `consumed` names every physical input: `parsed_messages`, `identity_chain`,
+`name_map`, `analytics`, `provenance`, `week_input` (when present), `builder_code`.
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+import pytest
+from pathlib import Path
+from scripts.build_chat_context import build_context_dict
+
+PREVIEW_WEEK = {"week": 1, "matchups": [
+    {"team1": {"team_name": "Alpha"}, "team2": {"team_name": "Beta"}}]}
+RECAP_WEEK = {"week": 1, "matchups": [
+    {"team1": {"team_name": "Alpha", "points": 120.0},
+     "team2": {"team_name": "Beta", "points": 99.0}, "winner": 1}]}
+
+def _call(kind, week, allow, **kw):
+    return build_context_dict(season=2025, cutoff_utc="2025-09-04T23:19:59Z",
+                              edition_kind=kind, week_data=week,
+                              allow_outcome_derivation=allow,
+                              source_root=Path("."), use_ai=False, **kw)
+
+def test_writes_no_files(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    before = set(tmp_path.rglob("*"))
+    try:
+        _call("preview", PREVIEW_WEEK, False)
+    except Exception:
+        pass
+    assert set(tmp_path.rglob("*")) == before, "pure core must not write files"
+
+def test_preview_rejects_outcome_bearing_week_data():
+    with pytest.raises(ValueError):
+        _call("preview", RECAP_WEEK, False)
+
+def test_preseason_rejects_any_week_object():
+    with pytest.raises(ValueError):
+        _call("preseason", PREVIEW_WEEK, False)
+
+def test_preview_marks_no_outcome_derivation():
+    ctx, consumed = _call("preview", PREVIEW_WEEK, False)
+    assert ctx["meta"]["outcome_derivation_used"] is False
+    assert ctx["meta"]["edition_kind"] == "preview"
+    assert ctx["meta"]["temporal_cutoff_utc"] == "2025-09-04T23:19:59Z"
+
+def test_recap_may_derive_outcomes():
+    ctx, _ = build_context_dict(season=2025, cutoff_utc="2025-09-09T06:59:59Z",
+                                edition_kind="recap", week_data=RECAP_WEEK,
+                                allow_outcome_derivation=True,
+                                source_root=Path("."), use_ai=False)
+    assert ctx["meta"]["outcome_derivation_used"] is True
+
+def test_consumed_names_every_physical_input():
+    _, consumed = _call("preview", PREVIEW_WEEK, False)
+    for role in ("parsed_messages", "identity_chain", "name_map", "analytics",
+                 "provenance", "builder_code"):
+        assert role in consumed, role
+
+def test_reads_resolve_under_the_injected_root(tmp_path):
+    with pytest.raises(Exception):
+        build_context_dict(season=2025, cutoff_utc="2025-09-04T23:19:59Z",
+                           edition_kind="preview", week_data=PREVIEW_WEEK,
+                           allow_outcome_derivation=False,
+                           source_root=tmp_path, use_ai=False)
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `python -m pytest scripts/tests/test_build_context_dict.py -v`
+Expected: FAIL — `ImportError: cannot import name 'build_context_dict'`
+
+- [ ] **Step 3: Implement**
+
+```python
+OUTCOME_KEYS = ("points", "winner", "margin", "high_scorer", "low_scorer")
+
+
+def _carries_outcomes(week_data):
+    import json as _j
+    blob = _j.dumps(week_data or {})
+    return any(f'"{k}"' in blob for k in OUTCOME_KEYS)
+
+
+def build_context_dict(season, cutoff_utc, edition_kind, week_data,
+                       allow_outcome_derivation, source_root, use_ai=False):
+    """Pure core. No file writes; every read resolves under source_root."""
+    if edition_kind == "preseason" and week_data is not None:
+        raise ValueError("preseason takes no week object")
+    if not allow_outcome_derivation and _carries_outcomes(week_data):
+        raise ValueError(
+            f"{edition_kind} received outcome-bearing week_data; "
+            "filtering messages does not remove auxiliary hindsight")
+
+    consumed = {
+        "parsed_messages": "chat/parsed_messages.json",
+        "identity_chain": "content/chat/fingerprints.json",
+        "name_map": "content/chat/name-map.json",
+        "analytics": "content/chat/league-memory.json",
+        "provenance": "content/chat/provenance.json",
+        "builder_code": "scripts/build_chat_context.py",
+    }
+    messages = load_json(source_root / consumed["parsed_messages"], required=True)["messages"]
+    name_map = load_json(source_root / consumed["name_map"], required=True)
+
+    in_window = [m for m in messages if admissible(m.get("timestamp_utc"), cutoff_utc)]
+
+    high_rid = low_rid = None
+    outcome_used = False
+    if allow_outcome_derivation and week_data:
+        high_rid, low_rid = get_week_high_low_scorers(week_data)
+        outcome_used = high_rid is not None or low_rid is not None
+
+    ctx = assemble_context(
+        messages=in_window, name_map=name_map, week_data=week_data,
+        high_scorer_rid=high_rid, low_scorer_rid=low_rid,
+        resolve_predictions=allow_outcome_derivation,
+        annotate_arcs_with_results=allow_outcome_derivation,
+        use_ai=use_ai)
+    ctx.setdefault("meta", {}).update({
+        "temporal_cutoff_utc": cutoff_utc,
+        "edition_kind": edition_kind,
+        "outcome_derivation_used": outcome_used,
+        "season": season,
+    })
+    if week_data is not None:
+        consumed["week_input"] = "<supplied by caller>"
+    return ctx, consumed
+```
+
+`main()` becomes a thin CLI wrapper: parse args, call `build_context_dict`, then
+`save_json_canonical`. All existing `--week`-driven behaviour is preserved by deriving
+`cutoff_utc` from `compute_week_cutoff(week)` and passing `edition_kind="recap"`.
+
+- [ ] **Step 4: Run**
+
+```bash
+python -m pytest scripts/tests/test_build_context_dict.py -v
+python scripts/generate_chat_provenance.py --verify
+```
+
+Expected: 7 passed. `build_chat_context.py` is in `CODE_FILES`, so its hash changed — rebuild the
+receipt with `--rebuild-check` green, then `--write --receipt <path>`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add scripts/build_chat_context.py content/chat/provenance.json scripts/tests/test_build_context_dict.py
+git commit -m "refactor(chat): pure build_context_dict core with edition-typed outcome gating"
 ```
 
 ---
@@ -1219,6 +1663,91 @@ def main():
 
 if __name__ == "__main__":
     raise SystemExit(main())
+```
+
+- [ ] **Step 5: Write `scripts/verify_staleness.py`**
+
+Publication and predecessor reuse must fail stale when the compiled bundle changes. Preserving
+authored files across a rebuild (Step 3) is correct, but it means an authored edition can drift
+away from the evidence it was approved against.
+
+```python
+"""Fail stale when the compiled bundle no longer matches what was approved."""
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from author_edition import verify_predecessor  # noqa: E402
+from compile_edition import compile_edition  # noqa: E402
+from edition import EditionDescriptor, payload_hash  # noqa: E402
+from shared import load_json  # noqa: E402
+
+
+def verify_staleness(edition_dir):
+    ed = Path(edition_dir)
+    am = load_json(ed / "authoring_manifest.json", required=True)
+    raw = load_json(ed / "compiled" / "descriptor.json", required=True)
+    raw["predecessors"] = tuple(raw.get("predecessors", ()))
+    problems = []
+
+    with tempfile.TemporaryDirectory() as tmp:
+        import compile_edition as ce
+        saved, ce.EDITIONS_ROOT = ce.EDITIONS_ROOT, Path(tmp)
+        try:
+            fresh = compile_edition(EditionDescriptor(**raw))
+        finally:
+            ce.EDITIONS_ROOT = saved
+        fresh_mf = load_json(fresh / "bundle_manifest.json", required=True)
+    if payload_hash(fresh_mf) != am["bundle_manifest_sha256"]:
+        problems.append("compiled bundle differs from the one the approval was bound to")
+
+    for name, key in (("content.json", "content_sha256"),
+                      ("ranking_record.json", "ranking_record_sha256")):
+        if payload_hash(load_json(ed / name, required=True)) != am[key]:
+            problems.append(f"{name} changed since approval")
+
+    for pred in raw["predecessors"]:
+        try:
+            verify_predecessor(ed.parent, pred)
+        except ValueError as exc:
+            problems.append(str(exc))
+    return (not problems), problems
+
+
+def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--edition", required=True)
+    a = ap.parse_args()
+    ok, problems = verify_staleness(a.edition)
+    for p in problems:
+        print(f"STALE {p}")
+    print("FRESH" if ok else f"{len(problems)} staleness problem(s)")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+```python
+def test_editing_content_after_approval_is_stale(tmp_path):
+    """Mutation: any approved artifact drifting must fail."""
+    from scripts.verify_staleness import verify_staleness
+    ed = _authored_edition(tmp_path)          # helper builds a compiled+authored edition
+    assert verify_staleness(ed)[0]
+    (ed / "content.json").write_text('{"essay": "EDITED"}', encoding="utf-8")
+    ok, problems = verify_staleness(ed)
+    assert not ok and any("content.json changed" in p for p in problems)
+
+def test_recompiled_bundle_change_is_stale(tmp_path, monkeypatch):
+    from scripts.verify_staleness import verify_staleness
+    ed = _authored_edition(tmp_path)
+    monkeypatch.setattr("scripts.compile_edition.CODE_VERSION", "projector-v2")
+    ok, problems = verify_staleness(ed)
+    assert not ok and any("compiled bundle differs" in p for p in problems)
 ```
 
 - [ ] **Step 5: Run** → 6 passed; `python scripts/cutoff_audit.py --all` exits 0
@@ -1988,6 +2517,63 @@ git add scripts/project_edition.py scripts/build_chat_context.py content/seasons
 git commit -m "feat(projector): season-qualified adapters, declared sources, cutoff-projected chat"
 ```
 
+#### Helper spec: `LEAKY_ADAPTER_ENABLED` (owned by this task)
+
+**Contract:** a module-level flag in `project_edition.py`, default `False`, that swaps the
+`records` adapter for a deliberately cutoff-ignoring twin. It exists so B12 can prove the
+comparator is active through the **real** compiler rather than by asserting arithmetic in a test.
+
+- **Inputs:** none beyond the descriptor.
+- **Outputs:** when enabled, `records` returns `as_of_records(season, 99)` — the full season —
+  regardless of the descriptor cutoff.
+- **Failure behavior:** `compile_edition` raises `RuntimeError` if the flag is True while
+  `os.environ.get("PYTEST_CURRENT_TEST")` is unset, so a leaky build can never be produced
+  outside a test session.
+
+```python
+LEAKY_ADAPTER_ENABLED = False       # test-only; see B12 comparator control
+
+
+@adapter("records")
+def _records(d):
+    if LEAKY_ADAPTER_ENABLED:
+        import os
+        if not os.environ.get("PYTEST_CURRENT_TEST"):
+            raise RuntimeError("LEAKY_ADAPTER_ENABLED outside a test session")
+        # Deliberately ignores the cutoff. Never reachable in production.
+        return (aor.as_of_records(d.season, 99, inclusive=True),
+                {"season": d.season, "scope": "season_specific", "leaky": True})
+    return (aor.as_of_records(d.season, d.results_through_week,
+                              inclusive=(d.kind != "preview")),
+            {"season": d.season, "scope": "season_specific",
+             "inputs": [_ident(d.season, p, {"role": "season_combined"})
+                        for p in sorted(
+                            (SOURCE_ROOT / "data").glob("*/season_combined.json"))]})
+```
+
+**Tests** (add to `scripts/tests/test_project_edition.py`):
+
+```python
+def test_leaky_adapter_refuses_outside_a_test_session(monkeypatch):
+    import pytest
+    import scripts.project_edition as pe
+    monkeypatch.setattr(pe, "LEAKY_ADAPTER_ENABLED", True)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    with pytest.raises(RuntimeError):
+        pe.adapter_for("records")(RECAP)
+
+def test_leaky_adapter_ignores_the_cutoff_when_enabled(monkeypatch):
+    import scripts.project_edition as pe
+    honest, _ = pe.adapter_for("records")(RECAP)
+    monkeypatch.setattr(pe, "LEAKY_ADAPTER_ENABLED", True)
+    leaky, ident = pe.adapter_for("records")(RECAP)
+    assert ident["leaky"] is True
+    assert leaky != honest, "the leaky twin must actually differ, or the control is inert"
+```
+
+Note the second test is itself a control: if the leaky twin produced identical records, B12's
+comparator proof would be vacuous.
+
 ---
 
 ### Task B10: Desk evidence coverage
@@ -2040,7 +2626,7 @@ The prior compiler `rmtree`'d the whole edition directory, destroying `ranking_r
 rebuild.
 
 **Files:** Create `scripts/compile_edition.py`, `scripts/author_edition.py`,
-`scripts/tests/test_compile_edition.py`
+`scripts/verify_staleness.py`, `scripts/tests/test_compile_edition.py`
 
 **Interfaces:** `compile_edition(descriptor) -> Path` writing only into `<edition>/compiled/`;
 `author_edition(...)` writing `authoring_manifest.json`
@@ -2249,6 +2835,181 @@ if __name__ == "__main__":
 ```bash
 git add scripts/compile_edition.py scripts/author_edition.py scripts/tests/test_compile_edition.py
 git commit -m "feat(compile): compiler-owned subdir, full source aggregation, authoring step"
+```
+
+#### Helper spec: `qualify_cutoff` (owned by this task)
+
+**Contract:** `qualify_cutoff(descriptor) -> dict` — re-derives the kickoff instant from the
+season's own schedule and venue-timezone evidence, then asserts the descriptor's cutoff. The
+compiler calls it; a hash printed to a terminal the compiler never reads is not a receipt.
+
+- **Inputs:** `data/external/schedules_{season}.parquet`,
+  `content/governance/venue_timezones.json` (both under `SOURCE_ROOT`).
+- **Outputs:** `{"kickoff_utc", "required_cutoff_utc", "source_hashes": {...}}`.
+- **Failure:** raises `UnavailableEvidence` when either source is missing, when a venue has no
+  timezone, when a neutral-site game has no explicit `stadium_id` timezone override, or when
+  `descriptor.cutoff_utc != strictly_before(kickoff_utc)` for a `preview` descriptor.
+- **Applies to:** `preview` descriptors assert equality; `preseason`, `recap`, and `finale`
+  record the receipt without asserting.
+
+```python
+NEUTRAL_SITE_OVERRIDES = "by_stadium"   # venue_timezones.json key for neutral sites
+
+
+def qualify_cutoff(descriptor):
+    from kickoff_source import first_kickoff_instant, strictly_before, UnavailableEvidence
+    q = first_kickoff_instant(descriptor.season)          # raises if unqualified
+    required = strictly_before(q["instant_utc"])
+    if descriptor.kind == "preview" and descriptor.cutoff_utc != required:
+        raise UnavailableEvidence(
+            f"preview cutoff {descriptor.cutoff_utc} != strictly-before qualified kickoff "
+            f"{q['instant_utc']} (required {required})")
+    return {"kickoff_utc": q["instant_utc"], "required_cutoff_utc": required,
+            "source_hashes": q["source_hashes"]}
+```
+
+`first_kickoff_instant` resolves each game's zone as
+`by_stadium[stadium_id]` when present, else `by_team[home_team]`, and raises when neither exists —
+a neutral-site game may not silently inherit the home team's zone.
+
+**Tests** (add to `scripts/tests/test_compile_edition.py`):
+
+```python
+def test_qualify_cutoff_rejects_a_wrong_preview_cutoff(monkeypatch):
+    import pytest
+    from scripts.compile_edition import qualify_cutoff
+    from scripts.edition import EditionDescriptor
+    from scripts.kickoff_source import UnavailableEvidence
+    monkeypatch.setattr("scripts.kickoff_source.first_kickoff_instant",
+                        lambda s: {"instant_utc": "2025-09-05T00:20:00Z",
+                                   "source_hashes": {"schedules": "sha256:a",
+                                                     "venue_timezones": "sha256:b"}})
+    bad = EditionDescriptor("p", 2025, "preview", "2025-09-04T23:19:59Z", 0, "v1")
+    with pytest.raises(UnavailableEvidence):
+        qualify_cutoff(bad)
+
+def test_qualify_cutoff_accepts_strictly_before(monkeypatch):
+    from scripts.compile_edition import qualify_cutoff
+    from scripts.edition import EditionDescriptor
+    monkeypatch.setattr("scripts.kickoff_source.first_kickoff_instant",
+                        lambda s: {"instant_utc": "2025-09-05T00:20:00Z",
+                                   "source_hashes": {"schedules": "sha256:a",
+                                                     "venue_timezones": "sha256:b"}})
+    good = EditionDescriptor("p", 2025, "preview", "2025-09-05T00:19:59Z", 0, "v1")
+    assert qualify_cutoff(good)["required_cutoff_utc"] == "2025-09-05T00:19:59Z"
+
+def test_receipt_enters_the_manifest(tmp_path, monkeypatch):
+    import json
+    monkeypatch.setattr("scripts.compile_edition.EDITIONS_ROOT", tmp_path)
+    out = compile_edition(D)
+    sh = json.loads((out / "source_hashes.json").read_text(encoding="utf-8"))
+    assert "_cutoff_receipt" in sh and sh["_cutoff_receipt"]["source_hashes"]
+```
+
+The compiler stores the return value at `sources["_cutoff_receipt"]`, so the schedule and
+timezone hashes enter the bundle manifest rather than being calculated and discarded.
+
+#### Helper spec: `collect_rule_versions` (owned by this task)
+
+**Contract:** `collect_rule_versions(source_root=ROOT) -> dict` — the actual rule versions in
+force, not a caller-supplied string.
+
+- **Inputs:** `content/voice-bible.md` (`rule_version:` header, added in A3), every
+  `.claude/commands/desk-*.md`, `write-*.md`, `edit-*.md`, and
+  `content/governance/{writer_fields,desk_contracts}.json`.
+- **Outputs:** `{"voice": "voice-v1", "desks": {"culture": "sha256:…", …},
+"writer": "sha256:…", "editor": "sha256:…", "policy": {…}}`.
+- **Failure:** raises `ValueError` when `voice-bible.md` carries no `rule_version:` header or a
+  required command file is absent — an unversioned rule cannot be bound.
+
+```python
+def collect_rule_versions(source_root=ROOT):
+    import re
+    vb = (source_root / "content" / "voice-bible.md").read_text(encoding="utf-8")
+    m = re.search(r"^rule_version:\s*(\S+)", vb, re.M)
+    if not m:
+        raise ValueError("voice-bible.md carries no rule_version: header")
+    cmds = source_root / ".claude" / "commands"
+    desks = {p.stem.removeprefix("desk-"): _sha(p) for p in sorted(cmds.glob("desk-*.md"))}
+    if not desks:
+        raise ValueError("no desk command files found; rule versions cannot be bound")
+    return {
+        "voice": m.group(1),
+        "desks": desks,
+        "writer": {p.stem: _sha(p) for p in sorted(cmds.glob("write-*.md"))},
+        "editor": {p.stem: _sha(p) for p in sorted(cmds.glob("edit-*.md"))},
+        "policy": {p.name: _sha(p) for p in
+                   sorted((source_root / "content" / "governance").glob("*.json"))},
+    }
+```
+
+**Tests** (add to `scripts/tests/test_compile_edition.py`):
+
+```python
+def test_rule_versions_bind_actual_files():
+    from scripts.author_edition import collect_rule_versions
+    rv = collect_rule_versions()
+    assert rv["voice"].startswith("voice-")
+    assert len(rv["desks"]) == 6
+    assert all(v.startswith("sha256:") for v in rv["desks"].values())
+
+def test_missing_rule_version_header_fails(tmp_path):
+    import pytest
+    from scripts.author_edition import collect_rule_versions
+    (tmp_path / "content").mkdir()
+    (tmp_path / "content" / "voice-bible.md").write_text("# no header", encoding="utf-8")
+    with pytest.raises(ValueError):
+        collect_rule_versions(tmp_path)
+
+def test_editing_a_desk_changes_the_authoring_manifest(tmp_path):
+    """Mutation test: a policy/code input must invalidate the manifest."""
+    from scripts.author_edition import collect_rule_versions
+    from scripts.edition import payload_hash
+    before = payload_hash(collect_rule_versions())
+    p = Path(".claude/commands/desk-culture.md")
+    original = p.read_text(encoding="utf-8")
+    try:
+        p.write_text(original + "\n<!-- mutation -->\n", encoding="utf-8")
+        assert payload_hash(collect_rule_versions()) != before
+    finally:
+        p.write_text(original, encoding="utf-8")
+```
+
+#### Predecessor staleness (owned by this task)
+
+`author_edition.py` re-verifies each declared predecessor before binding:
+
+```python
+def verify_predecessor(ed_root, pred):
+    """A predecessor's authoring manifest records its content and ranking hashes.
+    Those files may have changed on disk since. Reuse must fail stale."""
+    from edition import payload_hash
+    ed = ed_root / pred["edition_id"]
+    am = load_json(ed / "authoring_manifest.json", required=True)
+    for name, key in (("content.json", "content_sha256"),
+                      ("ranking_record.json", "ranking_record_sha256")):
+        actual = payload_hash(load_json(ed / name, required=True))
+        if actual != am[key]:
+            raise ValueError(
+                f"predecessor {pred['edition_id']} {name} is stale: {actual} != {am[key]}")
+    return am
+```
+
+```python
+def test_predecessor_with_edited_content_fails_stale(tmp_path):
+    import pytest
+    from scripts.author_edition import verify_predecessor
+    ed = tmp_path / "pred"; ed.mkdir()
+    (ed / "content.json").write_text('{"essay": "original"}', encoding="utf-8")
+    (ed / "ranking_record.json").write_text('{"entries": []}', encoding="utf-8")
+    from scripts.edition import payload_hash
+    (ed / "authoring_manifest.json").write_text(json.dumps({
+        "content_sha256": payload_hash({"essay": "original"}),
+        "ranking_record_sha256": payload_hash({"entries": []})}), encoding="utf-8")
+    assert verify_predecessor(tmp_path, {"edition_id": "pred"})
+    (ed / "content.json").write_text('{"essay": "EDITED"}', encoding="utf-8")
+    with pytest.raises(ValueError):
+        verify_predecessor(tmp_path, {"edition_id": "pred"})
 ```
 
 ---
@@ -2488,6 +3249,62 @@ git add scripts/tests/test_noninterference.py scripts/tests/fixtures/truncate.py
 git commit -m "test(audit): physical truncation, planted-leak controls, season-isolating canary"
 ```
 
+#### Helper spec: `build_poisoned_2024_root` (owned by this task)
+
+**Contract:** `build_poisoned_2024_root(dest) -> Path` — an isolated source root holding
+**qualified 2024 inputs plus tempting 2025 artifacts**. `_ident` stamps the _requested_ season
+onto whatever file it opened, so asserting that stamp proves nothing; the canary must assert the
+paths actually opened.
+
+- **Inputs:** the live repo, read-only.
+- **Outputs:** a root containing `data/2024/*`, `data/league_history.json` (cross-season),
+  `data/roster_anchors.json` with a 2024 entry, `content/seasons/2024/weeks/` **empty**, and
+  `content/seasons/2025/weeks/` **populated** — the temptation. Also `content/weeks/` populated,
+  because that legacy mirror is the path a careless adapter would reach for.
+- **Failure behavior:** raises `FileNotFoundError` if 2024 season data is absent, so the canary
+  cannot silently degrade into a no-op.
+
+```python
+def build_poisoned_2024_root(dest):
+    """2024 inputs that SHOULD be used, beside 2025 artifacts that must NOT be."""
+    import json
+    import shutil
+    from pathlib import Path
+    dest = Path(dest)
+    if dest.exists():
+        shutil.rmtree(dest)
+    (dest / "data").mkdir(parents=True)
+
+    src2024 = REPO / "data" / "2024"
+    if not src2024.exists():
+        raise FileNotFoundError("no 2024 season data; the canary would be a no-op")
+    shutil.copytree(src2024, dest / "data" / "2024")
+    shutil.copy2(REPO / "data" / "league_history.json", dest / "data")
+
+    # Qualified 2024 roster anchor.
+    (dest / "data" / "roster_anchors.json").write_text(json.dumps({
+        "2024": {"path": "data/2024/rosters.json",
+                 "captured_at": "2024-09-01T00:00:00Z",
+                 "known_at": "2024-09-01T00:00:00Z"}}), encoding="utf-8")
+
+    # 2024 authority exists but is EMPTY -> weekly components must be unavailable.
+    (dest / "content" / "seasons" / "2024" / "weeks").mkdir(parents=True)
+
+    # The temptations: a populated 2025 authority and the legacy mirror.
+    shutil.copytree(REPO / "content" / "seasons" / "2025" / "weeks",
+                    dest / "content" / "seasons" / "2025" / "weeks")
+    if (REPO / "content" / "weeks").exists():
+        shutil.copytree(REPO / "content" / "weeks", dest / "content" / "weeks")
+    shutil.copytree(REPO / "content" / "chat", dest / "content" / "chat")
+    (dest / "chat").mkdir(exist_ok=True)
+    shutil.copy2(REPO / "chat" / "parsed_messages.json", dest / "chat")
+    return dest
+```
+
+**Failure the canary must produce if the projector regresses:** any read under
+`content/seasons/2025/` or `content/weeks/` appears in the tracked open list and
+`test_canary_proves_actual_opened_paths_not_stamped_labels` fails naming the offending path.
+
 ---
 
 ### Task B13: Rebind the catalog — resolve the protected asset root first
@@ -2610,7 +3427,7 @@ git commit -m "feat(media): rebind with resolved protected root or explicit unav
 ### Task B14: Media admission and byte-level render verification
 
 **Files:** Create `scripts/media_manifest.py`, `scripts/verify_rendered_media.py`,
-`scripts/tests/test_media_manifest.py`
+`scripts/publish_edition.py`, `scripts/tests/test_media_manifest.py`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2715,6 +3532,58 @@ def test_publication_record_binds_three():
       result. `build_manifest` rejects any entry not `approved`. `verify_render` compares
       multiplicity (`Counter`), location, protected-path leakage, and **actual bytes**.
 
+- [ ] **Step 5: Write `scripts/publish_edition.py`**
+
+```python
+"""Bind approved content, media manifest, and the rendered artifact."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from media_manifest import publication_record  # noqa: E402
+from shared import load_json, save_json_canonical  # noqa: E402
+from verify_rendered_media import verify_render  # noqa: E402
+
+
+def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--edition", required=True)
+    ap.add_argument("--html", required=True)
+    ap.add_argument("--root", default=".")
+    a = ap.parse_args()
+    ed = Path(a.edition)
+    am = load_json(ed / "authoring_manifest.json", required=True)
+    mf = load_json(ed / "media_manifest.json", required=True)
+    html = Path(a.html).read_text(encoding="utf-8")
+
+    # Publication may never outrun the render verifier.
+    ok, problems = verify_render(html, mf, root=a.root)
+    if not ok:
+        for p in problems:
+            print(f"FAIL {p}")
+        return 1
+
+    save_json_canonical(ed / "publication.json", publication_record(am, mf, html))
+    print(f"published {ed.name}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+````python
+def test_publish_refuses_when_render_verification_fails(tmp_path):
+    import subprocess, sys
+    ed = _edition_with_manifest(tmp_path)     # manifest declares media/2025/a.png
+    (tmp_path / "rogue.html").write_text('<img src="media/2025/rogue.png">', encoding="utf-8")
+    r = subprocess.run([sys.executable, "scripts/publish_edition.py",
+                        "--edition", str(ed), "--html", str(tmp_path / "rogue.html")],
+                       capture_output=True, text=True)
+    assert r.returncode == 1
+    assert not (ed / "publication.json").exists(), "no publication record on a failed render"
+
 - [ ] **Step 4: Add the consumer tests** — `scripts/tests/test_media_consumers.py`:
 
 ```python
@@ -2732,7 +3601,7 @@ def test_resolver_and_renderers_read_only_the_manifest():
 def test_renderers_embed_publish_location_not_source_locator():
     src = Path("scripts/resolve_media.py").read_text(encoding="utf-8")
     assert "publish" in src and "source_locator" not in src
-```
+````
 
 - [ ] **Step 5: Run** → 12 + 2 passed
 
@@ -2815,6 +3684,110 @@ wince.** The repertoire reaches desks only through the bundle's `name_repertoire
 git add scripts/mine_name_repertoires.py content/chat/name-repertoires.json scripts/tests/test_name_repertoires.py
 git commit -m "feat(voice): occurrence-validated repertoire plus authored forms, bundle-served"
 ```
+
+#### Candidate discovery (owned by this task)
+
+Seed validation alone is not the chat-mined relationship model the design called for, and Blake
+should not have to discover the relationship layer from a blank `manual_forms` list. The miner
+**proposes** corpus-derived candidates with evidence; Blake approves or rejects each.
+
+**Contract:** `discover_candidates(messages, name_map, seeds) -> dict[roster_id, list[dict]]`
+
+- **Inputs:** the repaired corpus, the identity map, and the seeded form set.
+- **Outputs:** per owner, candidates each carrying `form`, `count`, `example_message_ids` (up to
+  three), `co_occurrence` (share of appearances within 2 messages of a seeded form for that
+  owner), and a proposed `register` (`roast` / `sincere` / `neutral`) inferred from surrounding
+  sentiment markers.
+- **Failure:** raises `ValueError` when `seeds` is empty for any owner — a candidate is only
+  meaningful relative to a known anchor.
+
+```python
+CAND_RE = re.compile(r"\b[A-Z][a-z]{2,14}\b|\b[a-z]{3,12}\b")
+STOP = {"the", "you", "your", "and", "for", "that", "this", "with", "have", "just",
+        "like", "team", "week", "game", "trade", "waiver", "start", "bench"}
+
+
+def discover_candidates(messages, name_map, seeds, window=2, min_count=3):
+    """Propose unseeded shorthand and nicknames, each backed by message evidence."""
+    if any(not v for v in seeds.values()):
+        raise ValueError("every owner needs at least one seeded anchor form")
+    by_owner = {rid: Counter() for rid in seeds}
+    examples = {rid: {} for rid in seeds}
+    near = {rid: Counter() for rid in seeds}
+
+    for i, m in enumerate(messages):
+        text = m.get("text") or ""
+        tokens = {t for t in CAND_RE.findall(text)
+                  if t.lower() not in STOP and len(t) > 2}
+        ctx = messages[max(0, i - window): i + window + 1]
+        ctx_blob = " ".join((c.get("text") or "") for c in ctx).lower()
+        for rid, forms in seeds.items():
+            anchored = any(f.lower() in ctx_blob for f in forms)
+            for tok in tokens:
+                if any(tok.lower() == f.lower() for f in forms):
+                    continue                      # already a seed
+                by_owner[rid][tok] += 1
+                examples[rid].setdefault(tok, []).append(m.get("id"))
+                if anchored:
+                    near[rid][tok] += 1
+
+    out = {}
+    for rid, counts in by_owner.items():
+        cands = []
+        for form, n in counts.most_common(40):
+            if n < min_count or not near[rid][form]:
+                continue
+            share = near[rid][form] / n
+            if share < 0.5:                        # weakly associated -> drop
+                continue
+            cands.append({"form": form, "count": n,
+                          "example_message_ids": examples[rid][form][:3],
+                          "co_occurrence": round(share, 2),
+                          "register": "neutral",
+                          "status": "proposed"})
+        out[rid] = sorted(cands, key=lambda c: (-c["co_occurrence"], -c["count"]))[:8]
+    return out
+```
+
+**Tests** (add to `scripts/tests/test_name_repertoires.py`):
+
+```python
+def test_candidates_require_message_evidence():
+    import json
+    rep = json.load(open("content/chat/name-repertoires.json", encoding="utf-8"))
+    for o in rep["owners"]:
+        for c in o["candidates"]:
+            assert c["count"] >= 3 and c["example_message_ids"]
+            assert 0 < c["co_occurrence"] <= 1
+            assert c["status"] in {"proposed", "approved", "rejected"}
+
+def test_candidates_exclude_seeded_forms():
+    import json
+    rep = json.load(open("content/chat/name-repertoires.json", encoding="utf-8"))
+    for o in rep["owners"]:
+        seeded = {o["handle"], o["team"], o["first"], o["surname"]}
+        for c in o["candidates"]:
+            assert c["form"] not in seeded
+
+def test_no_candidate_ships_unreviewed():
+    """After Blake's pass, nothing may remain 'proposed' in an approved repertoire."""
+    import json
+    rep = json.load(open("content/chat/name-repertoires.json", encoding="utf-8"))
+    if rep.get("approved_at"):
+        assert not [c for o in rep["owners"] for c in o["candidates"]
+                    if c["status"] == "proposed"]
+
+def test_empty_seeds_fail():
+    import pytest
+    from scripts.mine_name_repertoires import discover_candidates
+    with pytest.raises(ValueError):
+        discover_candidates([], {}, {1: []})
+```
+
+The generated file carries `method: "occurrence_validated_seeds_plus_discovered_candidates"`.
+Blake's review flips each candidate to `approved` (with a real `register`) or `rejected`, and sets
+`approved_at`. Only `approved` candidates and validated seeds reach the bundle's
+`name_repertoires` component.
 
 ---
 
@@ -3118,66 +4091,182 @@ git commit -m "feat(verify): edition mode replaces the nonexistent week-0 path"
 
 ## D1 — Three editions, then STOP
 
-**Exact sequence per edition:**
+**Exact sequence per edition.** Every command below is literal and runs in this order.
 
 ```
-descriptor → compile_edition → bundle_manifest
+descriptor → compile_edition → (bundle_manifest emitted)
   → desks (bake-off on the first, ranking-first in BOTH arms)
-  → RANKING RECORD → verify_ranking_record → prose written FROM it
+  → ranking record → verify_ranking_record → prose written FROM it
   → author_edition (authoring_manifest.json)
   → Blake's separate ranking approval
-  → editorial approval bound to that authoring manifest (review-log line)
-  → media manifest → render → verify_rendered_media (bytes) → publication record → commit
+  → editorial approval bound to that manifest (review-log line)
+  → media manifest → render → verify_rendered_media → publication record
+  → staleness verification → commit
 ```
 
-### Task D1a: Preseason
+**Interpreter pinning.** Every command uses `$PY`, exported once per session:
 
-- [ ] **Step 1: Descriptor** at `content/editions/2025-preseason/descriptor.json` —
-      `kind: "preseason"`, `cutoff_utc: "2025-09-03T23:59:59Z"`, `results_through_week: 0`,
-      `predecessors: []`.
+```bash
+export PY="/c/Users/blake/AppData/Local/Programs/Python/Python312/python"
+export POLARS_SKIP_CPU_CHECK=1     # no-op where polars already imports; see Global Constraints
+```
+
+### Task D1a: Preseason edition
+
+- [ ] **Step 1: Write the descriptor** — `content/editions/2025-preseason/descriptor.json`
+
+```json
+{
+  "edition_id": "2025-preseason",
+  "season": 2025,
+  "kind": "preseason",
+  "cutoff_utc": "2025-09-03T23:59:59Z",
+  "results_through_week": 0,
+  "policy_version": "v1",
+  "predecessors": []
+}
+```
 
 - [ ] **Step 2: Compile and audit**
 
 ```bash
-python scripts/compile_edition.py --descriptor content/editions/2025-preseason/descriptor.json
-python scripts/cutoff_audit.py --all
-python scripts/canon_checks.py --edition content/editions/2025-preseason
+$PY scripts/compile_edition.py --descriptor content/editions/2025-preseason/descriptor.json
+$PY scripts/cutoff_audit.py --all --min-edition-bundles 1
+$PY scripts/cutoff_audit.py --path content/editions/2025-preseason/compiled/bundle.json \
+    --kind edition_bundle --cutoff 2025-09-03T23:59:59Z --results-through-week 0 --season 2025
+$PY scripts/canon_checks.py --edition content/editions/2025-preseason
 ```
 
-- [ ] **Step 3: Bake-off** (`/bakeoff`) — each arm authors and gates its ranking record, then
-      writes prose. Record the decision; delete the loser; note which pipeline D1b/D1c follow.
-
-- [ ] **Step 4: Gate the ranking**
+- [ ] **Step 3: Bake-off — ranking-first in both arms**
 
 ```bash
-python scripts/verify_ranking_record.py \
-  --record content/editions/2025-preseason/ranking_record.json \
-  --bundle content/editions/2025-preseason/compiled/bundle.json
+# Arm A (desks) and Arm B (single writer). Each authors its ranking FIRST.
+$PY scripts/verify_ranking_record.py \
+    --record content/editions/_bakeoff/armA/ranking_record.json \
+    --bundle content/editions/2025-preseason/compiled/bundle.json
+$PY scripts/verify_ranking_record.py \
+    --record content/editions/_bakeoff/armB/ranking_record.json \
+    --bundle content/editions/2025-preseason/compiled/bundle.json
+# Only after both gates pass does either arm write prose.
 ```
 
-`prior_rank` is `null` throughout; **evidence is still required**.
+Record the decision at `content/editions/_bakeoff/decision.json`, including
+`pipeline_for_later_editions`.
 
-- [ ] **Step 5: Verify content, then bind the authoring manifest**
+- [ ] **Step 4: Dispose of the losing arm — enumerated, not "the command files"**
+
+Arm-exclusive paths, with shared and winning dependencies explicitly excluded:
+
+| Arm           | Exclusive disposal targets                                                                                                                                                                                                                                           | Never touched (shared)                                                                                                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| desks         | `.claude/commands/desk-power-rankings.md`, `desk-game.md`, `desk-history.md`, `desk-culture.md`, `desk-continuity.md`, `desk-copy-editor.md`, `content/governance/desk_contracts.json`, `scripts/tests/test_desk_commands.py`, `scripts/tests/test_desk_coverage.py` | `verify_ranking_record.py`, `compile_edition.py`, `project_edition.py`, `media_manifest.py`, `voice-bible.md`, `name-repertoires.json`, all render/verify commands |
+| single writer | `.claude/commands/write-week.md`, `write-preseason.md`                                                                                                                                                                                                               | everything above, plus the desk files if desks won                                                                                                                 |
 
 ```bash
-python scripts/verify_week_content.py --edition content/editions/2025-preseason --pretty
-python scripts/author_edition.py --edition content/editions/2025-preseason --voice-rule-version voice-v1
+# Archive rather than delete, so the bake-off remains auditable.
+mkdir -p docs/superpowers/archive/bakeoff-loser
+
+# If the SINGLE WRITER lost (desks won) -- exactly two files:
+git mv .claude/commands/write-week.md      docs/superpowers/archive/bakeoff-loser/
+git mv .claude/commands/write-preseason.md docs/superpowers/archive/bakeoff-loser/
+
+# If the DESKS lost (single writer won) -- exactly nine files:
+git mv .claude/commands/desk-power-rankings.md docs/superpowers/archive/bakeoff-loser/
+git mv .claude/commands/desk-game.md           docs/superpowers/archive/bakeoff-loser/
+git mv .claude/commands/desk-history.md        docs/superpowers/archive/bakeoff-loser/
+git mv .claude/commands/desk-culture.md        docs/superpowers/archive/bakeoff-loser/
+git mv .claude/commands/desk-continuity.md     docs/superpowers/archive/bakeoff-loser/
+git mv .claude/commands/desk-copy-editor.md    docs/superpowers/archive/bakeoff-loser/
+git mv content/governance/desk_contracts.json  docs/superpowers/archive/bakeoff-loser/
+git mv scripts/tests/test_desk_commands.py     docs/superpowers/archive/bakeoff-loser/
+git mv scripts/tests/test_desk_coverage.py     docs/superpowers/archive/bakeoff-loser/
+
+# Prove nothing shared or winning was removed.
+$PY -m pytest scripts/tests/ -q
+$PY scripts/compile_edition.py --descriptor content/editions/2025-preseason/descriptor.json
 ```
 
-- [ ] **Step 6: Blake approves the ranking separately from the prose**, then `/edit-preseason` →
-      APPROVE with a `review-log.jsonl` line bound to `authoring_manifest.json`'s hash.
+If the single writer wins, `desk_contracts.json` and the desk coverage tests are archived with
+it, and `REQUIRED_BY_KIND` keeps every component — the bundle contract is pipeline-independent.
 
-- [ ] **Step 7: Media, render, byte-verify, publish**
+- [ ] **Step 5: Gate the winning ranking record**
 
 ```bash
-python scripts/verify_rendered_media.py preseason-2025.html \
-  content/editions/2025-preseason/media_manifest.json
+$PY scripts/verify_ranking_record.py \
+    --record content/editions/2025-preseason/ranking_record.json \
+    --bundle content/editions/2025-preseason/compiled/bundle.json
 ```
 
-- [ ] **Step 8: Commit**
+No `--predecessor`: preseason has none. `prior_rank` is `null` for all twelve; **evidence is
+still required for every ordering judgment.**
+
+- [ ] **Step 6: Verify content, then bind the authoring manifest**
 
 ```bash
-git add content/editions/2025-preseason/ preseason-2025.html content/review-log.jsonl
+$PY scripts/verify_week_content.py --edition content/editions/2025-preseason --pretty
+$PY scripts/author_edition.py --edition content/editions/2025-preseason
+```
+
+`author_edition` collects the real rule versions itself — there is no `--voice-rule-version`.
+
+- [ ] **Step 7: Blake approves the ranking separately, then the editor approves the prose**
+
+`/edit-preseason` writes one `review-log.jsonl` line bound to the authoring manifest:
+
+```bash
+$PY - <<'PY'
+import hashlib, json, pathlib
+ed = pathlib.Path("content/editions/2025-preseason")
+am = ed / "authoring_manifest.json"
+line = {"piece": "preseason-2025", "pass_number": 1,
+        "reviewed_at_utc": "<real wall clock, never backdated>",
+        "verdict": "APPROVE", "data_accuracy": "PASS", "voice_score": "<n>/12",
+        "variety": "PASS", "continuity": "PASS", "tone": "PASS",
+        "as_if_realtime": "PASS", "ranking_approved_by_blake": True,
+        "authoring_manifest_sha256":
+            "sha256:" + hashlib.sha256(am.read_bytes()).hexdigest(),
+        "violations": []}
+with open("content/review-log.jsonl", "a", encoding="utf-8") as f:
+    f.write(json.dumps(line) + "\n")
+print("appended", line["authoring_manifest_sha256"])
+PY
+```
+
+- [ ] **Step 8: Media manifest, render, byte verification, publication record**
+
+```bash
+# Media manifest is built from the bundle's media_candidates at the descriptor cutoff.
+$PY scripts/media_manifest.py --edition content/editions/2025-preseason \
+    --policy-version policy-v1
+$PY -m json.tool content/editions/2025-preseason/media_manifest.json > /dev/null
+
+/render-preseason 2025            # writes preseason-2025.html
+
+$PY scripts/verify_rendered_media.py preseason-2025.html \
+    content/editions/2025-preseason/media_manifest.json --root .
+
+$PY scripts/publish_edition.py --edition content/editions/2025-preseason \
+    --html preseason-2025.html
+```
+
+`publish_edition.py` writes `publication.json` binding the approved authoring manifest, the media
+manifest hash, and the rendered-HTML hash.
+
+- [ ] **Step 9: Staleness verification — the compiled bundle must still match**
+
+```bash
+$PY scripts/verify_staleness.py --edition content/editions/2025-preseason
+```
+
+Recompiles into a temporary root and fails if the bundle payload differs from the one the
+authoring manifest was bound to, or if any predecessor's `content.json` / `ranking_record.json`
+no longer matches its recorded hash. Exit 1 = stale; re-author before publishing.
+
+- [ ] **Step 10: Commit**
+
+```bash
+git add content/editions/2025-preseason/ preseason-2025.html content/review-log.jsonl \
+        docs/superpowers/archive/bakeoff-loser/
 git commit -m "content(2025-preseason): first canonical edition through the full system"
 ```
 
@@ -3185,48 +4274,103 @@ git commit -m "content(2025-preseason): first canonical edition through the full
 
 ### Task D1b: Week-1 pre-kickoff preview
 
-- [ ] **Step 1: Qualify the cutoff through the compiler, not by hand**
+- [ ] **Step 1: Qualify the cutoff, then write it into the descriptor**
 
 ```bash
-python scripts/fetch_nflreadpy.py
-python -c "
+$PY scripts/fetch_nflreadpy.py --season 2025
+$PY - <<'PY'
 from scripts.kickoff_source import first_kickoff_instant, strictly_before
 r = first_kickoff_instant(2025)
-print(strictly_before(r['instant_utc']), r['source_hashes'])"
+print("kickoff:", r["instant_utc"])
+print("cutoff :", strictly_before(r["instant_utc"]))
+print("hashes :", r["source_hashes"])
+PY
 ```
 
-Write the returned instant into the descriptor. **Do not hand-write source hashes into
-`source_hashes.json`** — compilation regenerates that file; the kickoff identity travels through
-the descriptor and is aggregated by the compiler.
+Write the printed cutoff into `descriptor.json`. **Do not write the hashes anywhere by hand** —
+`qualify_cutoff` re-derives them inside the compiler and stores the receipt at
+`source_hashes._cutoff_receipt`. If `UnavailableEvidence` is raised, stop: a preview cutoff may
+not be guessed.
 
-Declare `predecessors: [{edition_id: "2025-preseason", authoring_manifest_sha256: <hash>,
-cutoff_utc: "2025-09-03T23:59:59Z"}]`.
+Descriptor `predecessors`:
+
+```bash
+$PY - <<'PY'
+import hashlib, json, pathlib
+am = pathlib.Path("content/editions/2025-preseason/authoring_manifest.json")
+print(json.dumps([{"edition_id": "2025-preseason",
+                   "authoring_manifest_sha256":
+                       "sha256:" + hashlib.sha256(am.read_bytes()).hexdigest(),
+                   "cutoff_utc": "2025-09-03T23:59:59Z"}], indent=2))
+PY
+```
 
 - [ ] **Step 2: Compile and assert emptiness**
 
 ```bash
-python scripts/compile_edition.py --descriptor content/editions/2025-wk01-preview/descriptor.json
-python -m pytest scripts/tests/test_project_edition.py -v
+$PY scripts/compile_edition.py --descriptor content/editions/2025-wk01-preview/descriptor.json
+$PY -m pytest scripts/tests/test_project_edition.py -v
+$PY scripts/cutoff_audit.py --path content/editions/2025-wk01-preview/compiled/bundle.json \
+    --kind edition_bundle --cutoff "$(jq -r .cutoff_utc content/editions/2025-wk01-preview/descriptor.json)" \
+    --results-through-week 0 --season 2025
 ```
 
-The preview chat must declare the preview cutoff and contain none of the 28 result statements.
+The preview chat must declare the preview cutoff, carry
+`meta.outcome_derivation_used == false`, and contain none of the 28 result statements.
 
-- [ ] **Steps 3-8:** desks (winning pipeline) → ranking record → gate → prose → `author_edition`
-      → ranking approval → editorial approval → media → render → byte verify → publish → commit.
-      Add the nav entry to `config.js`.
+- [ ] **Step 3: Ranking record with its predecessor**
+
+```bash
+$PY scripts/verify_ranking_record.py \
+    --record content/editions/2025-wk01-preview/ranking_record.json \
+    --bundle content/editions/2025-wk01-preview/compiled/bundle.json \
+    --predecessor content/editions/2025-preseason/ranking_record.json
+```
+
+- [ ] **Steps 4-9:** prose from that judgment → `author_edition` → ranking approval → editorial
+      approval (review-log bound to the manifest) → media manifest → `/render-week` →
+      `verify_rendered_media.py week1-preview.html …` → `publish_edition.py` →
+      `verify_staleness.py`. Add the nav entry to `config.js`.
+
+```bash
+git add content/editions/2025-wk01-preview/ week1-preview.html config.js content/review-log.jsonl
+git commit -m "content(2025-wk01-preview): preview on a qualified strictly-prior cutoff"
+```
 
 ---
 
 ### Task D1c: Week-1 recap
 
 - [ ] **Step 1: Descriptor** — `kind: "recap"`, `results_through_week: 1`,
-      `cutoff_utc: "2025-09-09T06:59:59Z"`, `predecessors: [preseason, preview]` with their
-      authoring-manifest hashes and cutoffs.
+      `cutoff_utc: "2025-09-09T06:59:59Z"`, `predecessors` listing **both** the preseason and the
+      preview with their authoring-manifest hashes and cutoffs.
 
-- [ ] **Step 2: Compile.** Week-1 results present; week-2 absent; predecessor ordering enforced.
+- [ ] **Step 2: Compile and audit**
 
-- [ ] **Steps 3-8:** as D1b. The continuity desk grades the preview's picks and the preseason's
-      claims — the first edition where receipts resolve.
+```bash
+$PY scripts/compile_edition.py --descriptor content/editions/2025-wk01-recap/descriptor.json
+$PY scripts/cutoff_audit.py --path content/editions/2025-wk01-recap/compiled/bundle.json \
+    --kind edition_bundle --cutoff 2025-09-09T06:59:59Z --results-through-week 1 --season 2025
+```
+
+Week-1 results present; week-2 absent; predecessor cutoff ordering enforced by the compiler.
+
+- [ ] **Step 3: Ranking record against the preview**
+
+```bash
+$PY scripts/verify_ranking_record.py \
+    --record content/editions/2025-wk01-recap/ranking_record.json \
+    --bundle content/editions/2025-wk01-recap/compiled/bundle.json \
+    --predecessor content/editions/2025-wk01-preview/ranking_record.json
+```
+
+- [ ] **Steps 4-9:** as D1b, rendering to `week1.html`. The continuity desk grades the preview's
+      picks and the preseason's claims — the first edition where receipts resolve.
+
+```bash
+git add content/editions/2025-wk01-recap/ week1.html content/review-log.jsonl
+git commit -m "content(2025-wk01-recap): preview picks graded, threads advanced"
+```
 
 ---
 
@@ -3235,111 +4379,98 @@ The preview chat must declare the preview cutoff and contain none of the 28 resu
 - [ ] **Step 1: Full sweep**
 
 ```bash
-python -m pytest scripts/tests/ -q
-python scripts/cutoff_audit.py --all
-python scripts/generate_chat_provenance.py --verify
-python -m pytest scripts/tests/test_noninterference.py -v
+$PY -m pytest scripts/tests/ -q
+$PY scripts/cutoff_audit.py --all --min-week-packets 18 --min-edition-bundles 3
+$PY scripts/generate_chat_provenance.py --verify
+$PY -m pytest scripts/tests/test_noninterference.py -v
+for e in 2025-preseason 2025-wk01-preview 2025-wk01-recap; do
+  $PY scripts/verify_staleness.py --edition "content/editions/$e" || exit 1
+done
 ```
 
-- [ ] **Step 2: Review packet** — census 46 → 0; 0 structurally unsliced H2H (from 98); three
-      ranking records with gate output; `review-log.jsonl`; byte-verifier output per edition; the
-      bake-off decision; truncation and canary results; a side-by-side against the old week-1
-      filler.
+- [ ] **Step 2: Clean-rebuild reproducibility for the three real descriptors**
 
-- [ ] **Step 3: Answer in writing**
+Deferred here from Phase B, because these descriptors do not exist until now:
+
+```bash
+$PY -m pytest scripts/tests/test_noninterference.py::test_clean_rebuild_reproduces_real_d1 -v
+```
+
+- [ ] **Step 3: Review packet** — census 46 → 0; 0 structurally unsliced H2H (from 98); three
+      ranking records with gate output; `review-log.jsonl` lines bound to authoring manifests;
+      byte-verifier output per edition; the bake-off decision and archived loser; truncation,
+      leaky-comparator and canary results; media route taken (full or degraded, with the
+      league-media branch marked NOT VALIDATED if degraded); a side-by-side against the old
+      week-1 filler.
+
+- [ ] **Step 4: Answer in writing**
 
 > **Did the model become visibly more informed across the three editions?**
 
 Cite specific ranking movements justified by evidence absent from the prior edition. If no,
 revise the source and desk contracts before D2.
 
-- [ ] **Step 4: STOP.**
+- [ ] **Step 5: STOP.**
 
 ---
 
-## Self-Review — affected contracts only
+## Self-Review — fifth-revision corrections and the full-plan sweep
 
-**Preview semantics (correction 1).** The chat adapter is edition-typed and calls the builder's
-pure core with `allow_outcome_derivation` as a hard switch: preseason gets no week object, preview
-gets an outcome-free pairing list, recap gets the completed packet. This closes the real defect —
-message-window filtering never touched `get_week_high_low_scorers` (`build_chat_context.py:201-217`,
-reading `team["points"]`), whose `high_scorer_rid`/`low_scorer_rid` feed relevance scoring,
-prediction resolution, and arc annotation. The projection is written into compiler-owned staging,
-never into `SOURCE_ROOT/content/editions`, so it cannot mutate the corpus the comparator reads.
-Roster reconstruction now runs **forward** from a `roster_anchors.json` entry whose `known_at` must
-precede the cutoff; `data/2025/rosters.json` is disqualified by construction (first committed
-2026-02-17, a post-season final state), and preview rosters are unavailable when no anchor
-qualifies.
+**Unresolved helpers: none.** All five now live in an owning task with a contract, inputs,
+outputs, failure behavior, and tests: `build_context_dict` (Task A7), `qualify_cutoff` (B11),
+`collect_rule_versions` (B11), `LEAKY_ADAPTER_ENABLED` (B9), `build_poisoned_2024_root` (B12).
+The helper registry is gone; it was a table of promises standing in for an executable plan.
 
-**Noninterference (correction 2).** `project()` returns `{payload, source_identities}` — raw hashes
-live only in `bundle_manifest.json`, so the compared artifact no longer changes merely because the
-fixture rewrote `league_history.json`. Both planted-row controls now assert **equality**, because a
-correct week-1 projector ignores a week-17 row; the previous inequality assertions would have
-failed on a correct system. Detector activity is proven separately by `LEAKY_ADAPTER_ENABLED`
-driving a test-only cutoff-ignoring adapter through the real compiler and comparator. Added a
-fixture-escape test and a source-class coverage test. Phase B uses synthetic descriptors; the three
-real D1 descriptors are checked for reproducibility in D1d, after they exist.
+**"Not yet applied" sections: none.** All four carried corrections are implemented —
+single season authority (A6), Phase 0 eight-row accounting plus daily cadence (P3), repertoire
+candidate discovery (C1), and literal commands with enumerated bake-off disposal (D1).
 
-**Provenance (correction 4).** Adapters return every physical input consumed (rosters: anchor +
-transactions; chat: parsed messages, identity chain, name map, analytics/provenance inputs,
-preview-safe week input, builder code). The compiler stores them as structured paths and hashes —
-not `str(dict)` — and adds code and policy hashes. `qualify_cutoff` runs inside the compiler rather
-than relying on a printed hash it never sees.
+**Duplicate authorities: none.** `content/seasons/{season}/weeks/` is the sole generated
+authority. `content/weeks/` survives only as a one-way mirror derived by `mirror_legacy()` and
+proven byte-identical; an AST test fails if any producer writes it, and no consumer reads it.
+The poisoned canary root deliberately populates both, so a regression opens a path the tracked
+open-list catches by name.
 
-**Executable gates (correction 5).** Every bundle path is now
-`content/editions/<id>/compiled/bundle.json`; `--all` fails when discovery falls below a minimum
-count, so it can no longer pass after auditing zero bundles. The planted dated and undated tests
-assert the leaf stays _classified_ and rejection comes from `temporal_check` — the dated comparison
-and the undated recomputation — instead of an unknown marker field. A canonical `franchises`
-component is available to every edition kind, keyed on `roster_id`/`owner_id`, so ranking identity
-no longer derives from `standings`, which preseason does not have.
+**Nonexistent paths.** Every path a command touches is either created by an earlier task in the
+same phase or asserted to exist by that task's tests. `content/seasons/2025/weeks/` is populated
+in A6 Step 5, before B3 re-extracts and before B9 reads it. `content/editions/<id>/compiled/` is
+created by B11 before D1 audits it. `data/roster_anchors.json` has no producer in this plan —
+**this is the one genuinely open execution dependency**, recorded below.
 
-**Media and 2026 (correction 6).** Corrected: **no protected league-media originals have been
-identified** — `bg_hero.png`, `icon_preseason.png`, `icon_week.png` are tracked site artwork, so
-the earlier "no media assets exist" was wrong. The safe degraded D1 route is explicit: GIPHY and
-custom only, each approved as `non_evidentiary_decoration`, league media unavailable, and the
-rebind branch recorded **NOT VALIDATED** rather than counted as a passed gate.
+**Execution order.** Verified forward: A6 (authority) → A7 (pure core) → B1-B3 (repair, writing
+to the authority) → B5-B7 (audit, identity) → B8 (kickoff) → B9 (adapters, needs A7's core and
+A6's paths) → B10-B11 (coverage, compiler) → B12 (isolation, needs a compiled bundle) → B13-B14
+(media) → C1-C5 → D1a-D1d. Two ordering fixes made in this pass: B6's controls open a real
+compiled bundle, so B6 now runs after B11 rather than before it; and B12's clean-rebuild check
+for the three real descriptors moved to D1d Step 2, because those descriptors do not exist
+during Phase B.
 
-**Refuted, with the executable path rather than prose.** In the standard repository shell
-`which python` resolves to `/c/Users/blake/AppData/Local/Programs/Python/Python312/python` — the
-executable the review names — and both bare commands succeed:
+**Polars, recorded precisely — no machine-wide claim in either direction.**
 
-```
-python -c "import polars"                 -> OK 1.40.1
-python scripts/fetch_nflreadpy.py --help  -> prints help, exit 0
-```
+| Shell                                                                                                     | Command                                    | Result                                           |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------ |
+| Git Bash executor shell, `which python` → `/c/Users/blake/AppData/Local/Programs/Python/Python312/python` | `python -c "import polars"`                | **OK 1.40.1**                                    |
+| same                                                                                                      | `python scripts/fetch_nflreadpy.py --help` | **prints help, exit 0**                          |
+| another standard shell (Blake's)                                                                          | same two commands                          | **`RuntimeError: unknown feature flag: 'sse3'`** |
+| that shell                                                                                                | `POLARS_SKIP_CPU_CHECK=1` + same commands  | **succeeds, 1.40.1**                             |
 
-`POLARS_SKIP_CPU_CHECK=1` also succeeds but is not required here. The determinism request is
-adopted regardless: shipped commands pin the verified interpreter and set that variable as a
-documented no-op fallback, so behaviour does not depend on whose shell runs them. No `sse3`
-condition is recorded as existing, because it does not reproduce.
+The condition is shell/environment dependent, not a property of the machine or of the package.
+Neither result is generalized. The shipped invocation therefore pins both the interpreter and the
+environment (`$PY` plus `POLARS_SKIP_CPU_CHECK=1`, a no-op where the import already succeeds), so
+D1 runs identically in either shell. This is recorded in Global Constraints and used by every D1
+command.
 
-## Helpers referenced but NOT YET specified
+**Remaining open execution dependencies — stated, not hidden.**
 
-Named honestly rather than left to look complete. Each must be written before the task that uses
-it can run.
+1. **`data/roster_anchors.json` has no producer in this plan.** B9 requires an anchor whose
+   `known_at` precedes the cutoff, and `data/2025/rosters.json` is disqualified (first committed
+   2026-02-17). If no qualified pre-kickoff roster snapshot can be located for 2025, preview and
+   preseason rosters are **unavailable** and those editions run without a roster component. That
+   is the designed fail-closed behavior, not a blocker — but it is a real reduction in preview
+   evidence and Blake should decide whether to hunt for an anchor first.
+2. **`protected_source_root` is null.** League media stays unavailable; D1 takes the degraded
+   route (GIPHY and custom only, each approved as `non_evidentiary_decoration`) and the
+   league-media rebind branch is recorded **NOT VALIDATED** rather than counted as passed.
 
-| Helper                       | Used by                | Contract still to write                                                                                                                             |
-| ---------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `build_poisoned_2024_root`   | B12 canary             | Isolated root: qualified 2024 inputs plus tempting 2025 artifacts                                                                                   |
-| `LEAKY_ADAPTER_ENABLED`      | B12 comparator control | Module flag swapping in a cutoff-ignoring records adapter                                                                                           |
-| `qualify_cutoff(descriptor)` | B11 compiler           | Re-derive kickoff from `schedules_{season}.parquet` + venue timezones incl. neutral sites; fail unless the descriptor cutoff equals strictly-before |
-| `collect_rule_versions()`    | B11 authoring          | Desk, writer, editor and editorial-rule versions actually in force                                                                                  |
-| `build_context_dict(...)`    | B9 chat adapter        | Pure core of `build_chat_context.py`: no file writes, `source_root` injected, returns `(context, consumed_inputs)`                                  |
-
-## Corrections acknowledged but NOT YET applied in this revision
-
-- **Single season authority (correction 3).** `content/seasons/{season}/weeks/` is used by the
-  projector, but `extract_week_data.py`, `generate_expanded_week.py`, and `build_chat_context.py`
-  are not yet rewired to write and read there. Until they are, two independently mutable copies
-  can diverge — the exact risk raised. Requires its own task before B9 is executable.
-- **Phase 0 accounting receipt and daily cadence (correction 6).** One receipt covering all eight
-  rows as captured or explicitly unavailable with an acquisition trigger; draft capture proving
-  picks _and_ order; daily local capture required until the workflow is activated.
-- **Repertoire candidate discovery (correction 6).** The miner still validates seeded forms only.
-  A candidate-discovery pass proposing corpus-derived shorthand and nicknames with message IDs,
-  counts, and register — for Blake to approve or reject — is not yet written.
-- **Literal commands (correction 5).** Preview/recap ranking invocations with `--predecessor`, and
-  media-manifest, render, byte-verification, publication-record, review-log, and staleness
-  commands, are described but not all spelled out. Bake-off loser disposal still says "delete the
-  losing pipeline's command files" without enumerating arm-exclusive paths.
+Both are decisions for Blake, not defects in the plan, and both fail closed rather than
+degrading silently.
