@@ -65,31 +65,37 @@ same interface). No new services.
 
 ## File Structure
 
-| File                                        | Responsibility                                                       |
-| ------------------------------------------- | -------------------------------------------------------------------- |
-| `scripts/capture_2026.py`                   | Lane P: split-root append-only capture, fetchers, accounting receipt |
-| `scripts/fact_schema.py`                    | `Fact` dataclass, the 15 fields, validation, canonical hashing       |
-| `scripts/fact_store.py`                     | Append, coalesce, supersede, load; JSONL substrate                   |
-| `scripts/normalize_facts.py`                | Per-source normalizers for the 9 bridge fact types                   |
-| `scripts/temporal_state.py`                 | `state_at`, scope lattice, supersession resolution, reducers         |
-| `scripts/decision_history.py`               | `decision_history_at`, `SealedDecision`, seal/verify                 |
-| `scripts/claims_ledger.py`                  | Claim records, resolution rules, resolver                            |
-| `scripts/decision_run.py`                   | Decision-run receipts, `runner_kind`                                 |
-| `scripts/eval_contrast.py`                  | Frozen evidence-family manifest, contrast integrity                  |
-| `scripts/eval_arms.py`                      | The five arms, inertia comparator, chronological driver              |
-| `scripts/eval_scoring.py`                   | Per-claim-type scoring, fixed aggregation                            |
-| `content/governance/fact_types.json`        | Fact-type registry: reducer, access scope, `known_at` basis          |
-| `content/governance/evidence_families.json` | Frozen manifest for the K3 contrast                                  |
-| `content/governance/capture_table.json`     | Lane P's eight rows                                                  |
+| File                                        | Responsibility                                                 |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| ~~`scripts/capture_2026.py`~~               | **SUPERSEDED** — owned by the P-only contract, not this plan   |
+| `scripts/fact_schema.py`                    | `Fact` dataclass, the 15 fields, validation, canonical hashing |
+| `scripts/fact_store.py`                     | Append, coalesce, supersede, load; JSONL substrate             |
+| `scripts/normalize_facts.py`                | Per-source normalizers for the 9 bridge fact types             |
+| `scripts/temporal_state.py`                 | `state_at`, scope lattice, supersession resolution, reducers   |
+| `scripts/decision_history.py`               | `decision_history_at`, `SealedDecision`, seal/verify           |
+| `scripts/claims_ledger.py`                  | Claim records, resolution rules, resolver                      |
+| `scripts/decision_run.py`                   | Decision-run receipts, `runner_kind`                           |
+| `scripts/eval_contrast.py`                  | Frozen evidence-family manifest, contrast integrity            |
+| `scripts/eval_arms.py`                      | The five arms, inertia comparator, chronological driver        |
+| `scripts/eval_scoring.py`                   | Per-claim-type scoring, fixed aggregation                      |
+| `content/governance/fact_types.json`        | Fact-type registry: reducer, access scope, `known_at` basis    |
+| `content/governance/evidence_families.json` | Frozen manifest for the K3 contrast                            |
+| `content/governance/capture_table.json`     | Lane P's eight rows                                            |
 
 ---
 
-## Lane P — 2026 capture (starts FIRST, runs throughout)
+## Lane P — 2026 capture — SUPERSEDED 2026-08-03, DO NOT EXECUTE
+
+**This entire section is superseded by
+`docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`.** Tasks P1-P3 below are retained
+only as the record of what Blake's eight-accounting-groups ruling replaced. Executing them would
+create a second, divergent `capture_2026.py` against a different table.
 
 Verified 2026-08-02: no capture script, no capture table, no capture directories, no capture
 workflow. `data/2026` is the 2026-04-04 snapshot. The only scheduled job is
 `fetch-sleeper-data.yml` (`cron: '0 6 * 9-12 0'`) — September onward, weekly, overwriting. **The
-perishable evidence is being lost now**, which is why P precedes K1.
+perishable evidence is being lost now**, which is why the capture lane precedes K1 — it now runs
+under the P-only contract rather than here.
 
 ### Task P1: Split-root append-only capture store
 
@@ -3803,8 +3809,9 @@ including "lift demonstrated," terminates at Blake's separate explicit decision.
 
 ## Self-Review
 
-**Spec coverage.** Phase P → P1-P3 (split roots, per-row fetchers, eight-row accounting, daily
-cadence, inactive workflow). K1 → K1.1-K1.7 (15-field schema, idempotent store, `state_at` with
+**Spec coverage.** Phase P is **no longer in this plan** — P1-P3 are SUPERSEDED by
+`2026-08-03-jailyard-p-only-fallback.md`, which owns capture, cutoff qualification, bundles and
+seals. This document covers K1-K3 only. K1 → K1.1-K1.7 (15-field schema, idempotent store, `state_at` with
 required scope and vantage, recomputed aggregates, `decision_history_at`, nine normalizers, seven
 discriminating tests with mutation controls). K2 → K2.1-K2.3 (three states, qualified kickoff,
 migration checks). K3 → K3.1-K3.8 (claims, decision-runs, frozen manifest and contrast, five arms
@@ -3916,12 +3923,13 @@ not a producer.
     no body to show. Runner config, `persist_run`, and content locators on `SealedDecision` close
     the chain from state through seal to blind-review packet.
 
-**Placeholder scan — honest version.** No TBD/TODO. Fully specified with runnable code: P1, P3,
-K1.1-K1.5, K1.7, K3.3. Specified as a named contract plus a worked example, with the remaining
-cases following the same shape: K1.6's `SOURCES` iteration, K2.1's compiler internals, K2.3's leaf
-walk, K3.5's `RUNNERS` bodies. **Blocked pending Blake's decision:** P2/P3's capture-row set.
-Earlier revisions claimed "every code step carries runnable code" — that was not true then and is
-not claimed now.
+**Placeholder scan — honest version.** No TBD/TODO. Scope is K1-K3; the P tasks are superseded and
+excluded from this scan. Fully specified with code: K1.1-K1.5, K1.7, K3.3. Specified as a named
+contract plus a worked example, with the remaining cases following the same shape: K1.6's `SOURCES`
+iteration, K2.1's compiler internals, K2.3's leaf walk, K3.5's `RUNNERS` bodies. Earlier revisions
+claimed "every code step carries runnable code" — that was not true then and is not claimed now.
+**None of the code in this plan has been executed**, which is the condition the eight outstanding
+findings below were produced under and the reason they are not corrected in this pass.
 
 **Type consistency.** `Fact`/`FACT_FIELDS` (K1.1) are consumed by `FactStore` (K1.2), `state_at`
 (K1.3), and the normalizers (K1.6); the payload attachment rides alongside, outside the contract
@@ -3931,7 +3939,9 @@ comparator and K3.5's driver. `EditionDescriptor` (K2.1) is consumed by K3.4's c
 K3.5's driver. `ARMS` (K3.4) is consumed by K3.6's report and matches K3.7's loop and the design's
 five. `load_claims` (K3.1) is the single ledger reader for K3.5 and K3.6.
 
-**Ordering.** P precedes K1 because the evidence is perishable and nothing is currently running.
+**Ordering.** The 2026 capture lane still precedes this work because the evidence is perishable and
+nothing is currently running — but it is now delivered by the P-only contract, not by this plan, and
+the two proceed independently. Within this plan:
 K1.6 depends on K1.1-K1.2; K2.1 depends on K1.3-K1.4; K2.2 must precede the preview descriptor's
 cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **and K2.1**
 (it consumes `EditionDescriptor`); K3.6 depends on K3.4 for `runner_kind`.
