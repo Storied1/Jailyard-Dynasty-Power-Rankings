@@ -102,57 +102,143 @@ chat layer's temporal admissibility and provenance were hardened and pushed 2026
 
 Every observation admitted to D1 is a typed fact carrying:
 
-| Field            | Meaning                                                                      |
-| ---------------- | ---------------------------------------------------------------------------- |
-| `fact_id`        | Stable identity for this observation                                         |
-| `entity_ref`     | `{type, id}` — franchise, player, matchup, transaction, message, media, game |
-| `source_ref`     | Which capture or legacy artifact produced it                                 |
-| `fact_type`      | Governs which reducer applies                                                |
-| `effective_at`   | When the thing was **true**                                                  |
-| `known_at`       | When it was **publicly knowable**                                            |
-| `known_at_basis` | How `known_at` was established, or the versioned inference policy id         |
-| `captured_at`    | When **this repository** first held it                                       |
-| `content_sha256` | Hash of the fact payload                                                     |
-| `privacy`        | `public` \| `private`                                                        |
-| `schema_version` | Fact schema version                                                          |
-| `supersedes`     | `fact_id` this correction replaces, or null                                  |
+| Field                | Meaning                                                                                 |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `fact_id`            | Stable identity for this observation                                                    |
+| `source_record_id`   | **Semantic identity of the underlying record** — the thing a repeat capture re-observes |
+| `entity_ref`         | `{type, id}` — franchise, player, matchup, transaction, message, media, game            |
+| `source_ref`         | Which capture or legacy artifact produced it                                            |
+| `fact_type`          | Governs which reducer applies                                                           |
+| `effective_at`       | When the thing was **true**                                                             |
+| `known_at`           | When it became **defensibly available to `access_scope`**                               |
+| `access_scope`       | `public` \| `league_private` — the epistemic scope `known_at` is asserted against       |
+| `known_at_basis`     | How `known_at` was established, or the versioned inference policy id                    |
+| `captured_at`        | When **this repository** first held it                                                  |
+| `content_sha256`     | Hash of the fact payload                                                                |
+| `privacy`            | `public` \| `private` — custody class, independent of `access_scope`                    |
+| `normalizer_version` | Which normalizer produced this fact                                                     |
+| `schema_version`     | Fact schema version                                                                     |
+| `supersedes`         | `fact_id` this correction replaces, or null                                             |
 
 **Never equate the three times.** A backfilled 2025 result has `effective_at` in September 2025,
-`known_at` at the conclusion of that game, and `captured_at` in 2026. Collapsing them is precisely
-how `rosters.json` — a February 2026 final state — came to be treated as a September 2025 anchor.
+`known_at` at that game's conclusion, and `captured_at` in 2026. Collapsing them is exactly how
+`rosters.json` — a February 2026 final state — came to be treated as a September 2025 anchor.
 
-**Corrections are supersessions, not mutations.** A fact is never edited in place; a superseding
-fact carries its own `known_at`, so a state built at an earlier cutoff still sees the original.
+### Idempotency and replay determinism
 
-**Unknown historical availability fails closed**, or admits under an explicit, approved, versioned
-inference policy recorded in `known_at_basis`. There is no silent default.
+Daily captures are **complete snapshots**, so the same transaction, draft pick, or roster row
+recurs in every capture. Without semantic identity the fact store grows a duplicate per day.
+
+- **`source_record_id`** is the semantic identity of the underlying record (e.g. Sleeper
+  `transaction_id`, `(draft_id, pick_no)`, `(roster_id, week)`).
+- **Identical repeats coalesce.** A re-observation whose payload hash matches an existing fact
+  for the same `source_record_id` updates nothing and creates no new fact. It may extend an
+  observation log, which is not part of state.
+- **Changed records supersede.** A re-observation with a different payload creates a new fact
+  carrying `supersedes` and its own `known_at` — so a state built at an earlier cutoff still sees
+  the original value.
+- **`normalizer_version`** is bound into every fact, because a normalizer change is a change in
+  meaning even when the capture bytes are identical.
+- **Deterministic replay:** normalizing the same capture set twice must produce **byte-identical
+  facts and byte-identical `state_at` output**. This is the fact-layer analogue of the bundle
+  reproducibility already proven downstream.
+
+### Knowledge scope
+
+`known_at` cannot mean "publicly knowable" while chat and media are the richest evidence and are
+private by construction. It means **defensibly available to a named epistemic scope**:
+
+- `access_scope: public` — knowable to anyone (NFL results, published schedules).
+- `access_scope: league_private` — knowable to the league (chat messages, shared media).
+
+A league-private fact is legitimately admissible at a cutoff the public did not share. **Custody
+and publication remain separate axes:** `privacy` governs where raw bytes may live and whether a
+derived quotation may be published, and neither is decided by `access_scope`. A chat message can
+be admissible evidence and unpublishable at the same time.
+
+### Replay vantage
+
+`state_at(season, cutoff)` as first drafted ignores `captured_at`, which silently conflates two
+different questions:
+
+- **Latest best-known reconstruction** — everything we now know was true and knowable by the
+  cutoff, including facts captured afterward. Correct for a 2025 backtest.
+- **As-recorded replay** — only facts this repository actually held at a stated vantage. Required
+  for any prospective claim.
+
+The interface therefore takes a vantage:
+
+```
+state_at(season, cutoff, as_recorded_at=None) -> LeagueState
+```
+
+`as_recorded_at=None` yields the latest reconstruction. A prospective seal **must** pin
+`as_recorded_at` (or an equivalent fact-set identity hash), so a 2026 decision can never
+retroactively acquire a late-captured fact.
+
+### Schedule provenance
+
+Stripping outcomes from a completed weekly packet does not prove the pairing was knowable before
+kickoff — it proves only that we can hide what we already have. A `schedule_pairing` fact requires
+either an **independently qualified schedule source** with its own `known_at`, or an **explicit
+versioned availability policy** recorded in `known_at_basis`. Absent both, the schedule fact is
+**unavailable** and the edition proceeds without it.
+
+**Corrections are supersessions, not mutations.** Unknown availability fails closed, or admits
+under an approved versioned inference policy named in `known_at_basis`. There is no silent
+default.
 
 ---
 
-## 2. One temporal authority
+## 2. One temporal authority, and one decision-history boundary
 
-A single interface replaces every ad-hoc slice:
+Two authorities, deliberately separate. Conflating them is what lets an arm read another arm's
+judgments.
+
+### League-world truth
 
 ```
-state_at(season: int, cutoff: str) -> LeagueState
+state_at(season, cutoff, as_recorded_at=None) -> LeagueState
 ```
 
-- **Admission is principally `known_at <= cutoff`.** One rule, one comparison, one place.
+- **Admission is principally `known_at <= cutoff`**, evaluated against the fact's `access_scope`.
+  One rule, one comparison, one place.
 - **Fact-type reducers use `effective_at`** to fold admitted facts into current values.
 - **Aggregates are recomputed from admitted facts** — never read from a stored season-end value.
-  Records, streaks, H2H, standings, and Elo all become derivations, so the
-  dated/undated distinction that produced the 46 stops existing as a category.
-- **Schedule and result are separate facts.** A week-1 pairing is knowable in the preseason; its
-  result is not. The approved design entangled them in one weekly packet, which is why the
-  preview needed an "outcome-free" variant of a completed artifact.
+  Records, streaks, H2H, standings, and Elo become derivations, so the dated/undated distinction
+  that produced the 46 stops existing as a category.
+- **Schedule and result are separate facts.** A week-1 pairing may be knowable in the preseason;
+  its result is not.
 - **Edition kind selects presentation components. It must not decide whether a fact existed.**
-  The prior `allow_outcome_derivation` switch is a symptom: a projector reaching for outcomes and
-  being told not to, rather than a state that does not contain them.
+  The `allow_outcome_derivation` switch was a symptom: a projector reaching for outcomes and being
+  told not to, rather than a state that does not contain them.
 - **`results_through_week` is derived from — or mechanically checked against — the temporal
   state.** It stops being a competing clock.
 
+`state_at` contains **no decisions**. It is the world, not our judgments about the world.
+
+### Decision history
+
+Sealed prior judgments are a separate, canonically time-qualified boundary:
+
+```
+decision_history_at(season, cutoff, arm_id, trial_id) -> [SealedDecision]
+```
+
+- Returns only decisions **sealed by that same `arm_id` and `trial_id`** at a cutoff strictly
+  before the requested one.
+- **No consumer improvises continuity.** The preview does not glob prior editions; it asks this
+  interface. (The plan's `prior_editions` adapter globbed published editions, which let a rebuild
+  admit its own future — the same class of defect one level up.)
+- A `SealedDecision` is immutable once sealed, carries its own `decision_hash`, and records the
+  `state_hash` it was made from.
+
+**No arm may consume another arm's decision history.** A no-chat arm's preview must build on the
+no-chat arm's preseason seal, not on the full-bundle arm's. Otherwise every arm inherits the best
+arm's continuity and the comparison measures nothing.
+
 **Storage is secondary.** Rebuildable SQLite, typed JSONL, or Parquet/Polars all work at this
-scale. Explicitly excluded: Kafka, Feast, XTDB, OpenLineage, graph databases, or any new service.
+scale. Explicitly excluded: Kafka, Feast, XTDB, OpenLineage, graph databases, any new service.
 
 ---
 
@@ -189,85 +275,175 @@ guarantee: they answer "did every legacy field find a fact type," not "is this f
 
 ## 4. Measurable decisions
 
-The ranking record from the approved revision grounds an ordering in evidence. It does not say
-**what the ordering predicts**, so it cannot be scored — and an unscoreable judgment cannot
-demonstrate a model becoming more informed.
+The ranking record grounds an ordering in evidence. It does not say **what the ordering
+predicts**, so it cannot be scored — and an unscoreable judgment cannot demonstrate a model
+becoming more informed.
 
 Add a first-class **claims and forecast ledger**. Each claim carries:
 
-| Field               | Meaning                                                        |
-| ------------------- | -------------------------------------------------------------- |
-| `claim_id`          | Stable identity                                                |
-| `target`            | Entity the claim is about                                      |
-| `horizon`           | `next_week` \| `rest_of_season` \| `championship` \| `dynasty` |
-| `assertion`         | Rank, probability, or bounded quantity                         |
-| `confidence`        | Stated, not implied                                            |
-| `decisive_evidence` | Bundle pointers that drove it                                  |
-| `contrary_evidence` | What argues against it                                         |
-| `cutoff_utc`        | The state it was made from                                     |
-| `resolution_rule`   | Fixed **before** the outcome — rule, source, and date          |
-| `outcome`           | Filled by the resolver, later                                  |
-| `score`             | Computed from the fixed rule                                   |
+| Field                                     | Meaning                                                        |
+| ----------------------------------------- | -------------------------------------------------------------- |
+| `claim_id`                                | Stable identity                                                |
+| `target`                                  | Entity the claim is about                                      |
+| `claim_type`                              | `ordinal_rank` \| `binary_probability` \| `bounded_quantity`   |
+| `horizon`                                 | `next_week` \| `rest_of_season` \| `championship` \| `dynasty` |
+| `assertion`                               | Rank, probability, or quantity                                 |
+| `confidence`                              | Stated, not implied                                            |
+| `decisive_evidence` / `contrary_evidence` | Bundle pointers                                                |
+| `cutoff_utc`, `state_hash`                | The state it was made from                                     |
+| `arm_id`, `trial_id`, `decision_run_id`   | Which run produced it                                          |
+| `resolution_rule`                         | Fixed **before** the outcome — rule, source, and date          |
+| `outcome`, `score`                        | Filled by the resolver, later                                  |
 
-**The published ranking may synthesize horizons** — weekly strength, rest-of-season equity,
-championship equity, dynasty value — but each underlying horizon stays explicit and separately
-scoreable. A single blended number that cannot be graded is the thing this replaces.
+The published ranking may synthesize horizons — weekly strength, rest-of-season equity,
+championship equity, dynasty value — but each stays explicit and separately scoreable.
 
-The `resolution_rule` is fixed at claim time. A rule written after the outcome is known is not a
-forecast.
+### Precommitted scoring
 
----
+Defined before any arm runs, so no metric is chosen after seeing results.
 
-## 5. Model-run and evaluation contract
+| `claim_type`         | Scoring rule                                            | Aggregation                    |
+| -------------------- | ------------------------------------------------------- | ------------------------------ |
+| `ordinal_rank`       | Spearman footrule against realized end-of-horizon order | Mean per edition, then per arm |
+| `binary_probability` | Brier score                                             | Mean per edition, then per arm |
+| `bounded_quantity`   | Absolute error normalized by the claim's stated bound   | Mean per edition, then per arm |
 
-Every intelligence run binds:
-
-model and provider, version, reasoning setting, prompt and rule hashes, tools and browsing
-policy, bundle and predecessor hashes, budget, retries or a recorded deterministic policy, start
-and end timestamps, and the output decision hash.
-
-Without this, two runs that differ are uninterpretable — you cannot tell whether the evidence, the
-model, or the sampling changed.
-
-### Matched arms
-
-The approved single bake-off — desks versus one writer, both on the same rich bundle — cannot
-isolate data-layer lift. It compares two prose pipelines over identical evidence. Replace with:
-
-| Arm                           | Tests                                    |
-| ----------------------------- | ---------------------------------------- |
-| Prior ranking unchanged       | Does anything beat inertia?              |
-| Simple record/points baseline | Does the model beat arithmetic?          |
-| Minimal legal bundle          | How much does the floor deliver?         |
-| Full rich bundle              | Marginal value of the enriched layer     |
-| No-chat ablation              | Does culture evidence change decisions?  |
-| No-history ablation           | Does the dynasty layer change decisions? |
-| Full bundle + desks           | Marginal value of the newsroom           |
-
-Use repeated trials or a recorded deterministic policy, and **randomized blind Blake review** —
-arms unlabeled at review time.
-
-This is the mechanism that answers the D1 product question with evidence instead of impression.
+- **Unresolved claims** (horizon not yet reached) are excluded from scoring and **counted
+  separately**; an arm producing fewer resolvable claims is not thereby better.
+- **Missing outcomes** (resolution source unavailable) mark the claim `unresolvable` and are
+  reported, never silently dropped.
+- **Aggregation order is fixed:** claim → team → edition → trial → arm. Reporting a different
+  order after the fact is a post-hoc metric choice.
+- **Randomized blind review is a separate, non-substitutable signal.** Blake ranks unlabeled arm
+  outputs on prose and judgment quality. It never overwrites the computed scores; where the two
+  disagree, both are reported and the disagreement is the finding.
+- **Repeated trials:** any arm whose runner is not deterministic requires **at least three
+  trials**, and its reported score is the median with the range shown. A single sample from a
+  stochastic runner is not a measurement.
 
 ---
 
-## 6. The 2025 versus 2026 claim boundary
+## 5. Decision-run contract and evaluation arms
+
+### Decision-run, not model-run
+
+Two arms are deterministic baselines and cannot satisfy a receipt demanding a provider and model.
+The contract generalizes:
+
+```
+runner_kind: deterministic | model
+```
+
+**Both kinds bind:** `decision_run_id`, `edition_id`, `arm_id`, `trial_id`, `state_hash`,
+`bundle_hash`, `predecessor_decision_hash`, start and end timestamps, and `output_decision_hash`.
+
+**Deterministic arms additionally bind:** code hash, configuration hash, and input hashes. Given
+identical inputs they must reproduce an identical `output_decision_hash`.
+
+**Model arms additionally bind:** provider, model, version, reasoning setting, prompt and rule
+hashes, tools and browsing policy, budget, retries, and sampling policy.
+
+`predecessor_decision_hash` is what makes cross-arm contamination detectable: it must resolve to
+a seal from the **same** `arm_id` and `trial_id`.
+
+### The six K3 data-layer arms
+
+| Arm                    | Runner        | Tests                                    | Preseason meaning                                                                                                     |
+| ---------------------- | ------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Prior unchanged        | deterministic | Does anything beat inertia?              | Preseason has no prior; arm is **N/A at preseason** and enters at preview, carrying the preseason seal of its own arm |
+| Record/points baseline | deterministic | Does the model beat arithmetic?          | No 2025 results exist; ranks by **prior-season final standings**, stated as the preseason variant                     |
+| Minimal legal bundle   | model         | What does the floor deliver?             | Franchise identity, draft, roster facts only                                                                          |
+| Full rich bundle       | model         | Marginal value of enrichment             | All available evidence families                                                                                       |
+| No-chat ablation       | model         | Does culture evidence change decisions?  | Full minus `chat_message` facts                                                                                       |
+| No-history ablation    | model         | Does the dynasty layer change decisions? | Full minus pre-2025 facts                                                                                             |
+
+**"Full bundle + desks" is not a K3 arm.** It compares two prose pipelines over identical
+evidence and cannot isolate data-layer lift. It moves to S1a, after the desks exist — correcting
+a sequencing contradiction where §5 required desks that §7 did not build until after the STOP.
+
+### Longitudinal execution
+
+K2 may compile the immutable league states in advance. **K3 must execute each arm's chain
+chronologically**, and each arm's chain is closed:
+
+```
+preseason state → seal THIS arm's decision + claims
+  → preview consumes THIS arm's preseason seal → seal preview
+  → recap resolves and grades THIS arm's prior claims
+```
+
+An arm never sees another arm's judgments. A **cross-arm predecessor poison test** deliberately
+feeds arm B's seal into arm A's preview and requires the run to fail on the
+`predecessor_decision_hash` check.
+
+### Contrast integrity
+
+A null result is only interpretable if the arms genuinely differed.
+
+- The full rich bundle must meet a **declared minimum evidence-family coverage** — roster,
+  history, chat, and game context all present and non-empty.
+- It must **demonstrably differ** from the minimal bundle: a computed diff over admitted fact
+  types, recorded per edition.
+- If a required family is unavailable — no qualified roster anchor, no protected media root, no
+  admissible schedule source — the comparison is **degraded** or **inconclusive**.
+
+**A degraded contrast is never evidence that richer data failed to add value, and never grounds
+for terminating the architecture.** This matters concretely: two evidence families are open
+questions right now (roster anchor, protected media root), and without this gate their absence
+would masquerade as a finding.
+
+---
+
+## 6. The 2025 / 2026 claim boundary, and prospective sealing
+
+### 2025 is a backtest
 
 **A cutoff-clean bundle does not stop a model running in 2026 from already knowing public 2025
-NFL outcomes.** This is a limit of retrospective evaluation, not a bug to be engineered away, and
-the approved design did not acknowledge it at all.
+NFL outcomes.** This is a limit of retrospective evaluation, not a bug to engineer away.
 
-For the 2025 ranking-evaluation arm:
+For the 2025 evaluation arms: browsing and non-bundle tools disabled; opaque league and player
+identities where practical; **the decision locked before names return** for prose; outcomes
+exposed only to the resolver; and every artifact labeled **retrospective replay / backtest**.
 
-- Disable browsing and all non-bundle tools.
-- Use opaque league and player identities where practical.
-- **Lock the decision before names return** for prose generation.
-- Expose outcomes only to the resolver, never to the decider.
-- **Label 2025 as retrospective replay / backtest** in every artifact and every report.
+### 2026 prospective sealing is in scope — capture alone is not the experiment
 
-The **prospective 2026 ledger** — decisions sealed before outcomes exist — is the first
-definitive forecasting test. This is the strongest argument for Phase 0 capture continuing at
-full priority: it is not archival housekeeping, it is the only clean experiment available.
+Verified 2026-08-02: there is **no capture script, no capture table, no capture directory, and no
+capture workflow**. `data/2026` is the 2026-04-04 snapshot, four months stale. The only scheduled
+job is `fetch-sleeper-data.yml` (`cron: '0 6 * 9-12 0'`) — September onward, weekly, overwriting.
+**Phase P is not running.** Everything describing it lives in the frozen implementation plan.
+
+And capture alone would not be enough. If a decision is generated after the outcome exists, the
+model may already know 2026 exactly as it may know 2025. **The seal, not the capture, is what
+makes the experiment prospective.** A minimum sealing lane is therefore in scope:
+
+1. **Start the capture and accounting lane** — eight-row receipt, append-only, public/private
+   root split.
+2. **Before the applicable real-world cutoff, seal the 2026 preseason and week-1 preview ranking
+   and claims.** Prose is out of scope; the sealed decision is not.
+3. **Each seal binds:** its contemporaneous fact set (`as_recorded_at` or fact-set identity
+   hash), the bundle hash, the decision-run receipt, and the cutoff.
+4. **Late writes are rejected**, or admitted and **labeled retrospective** — never silently
+   accepted as prospective.
+
+### Deadline mechanism and fallback
+
+| Deadline              | Governs        | Mechanism                                                                                                                |
+| --------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 2026 preseason cutoff | preseason seal | `qualify_cutoff` derives it from the qualified first-kickoff instant; a seal attempted after it is rejected or relabeled |
+| 2026 week-1 kickoff   | preview seal   | Strictly-before the qualified kickoff, same derivation                                                                   |
+
+**Fallback if the kernel is not ready in time.** The definitive test must not expire while the
+backtest is perfected. If K1-K2 will not complete before a cutoff, a **minimal, separately
+reviewable preservation-and-sealing path** is authorized:
+
+- capture the eight rows with full receipts;
+- freeze a fact-set identity hash over exactly those captures;
+- seal a ranking and claims ledger against that hash with a decision-run receipt;
+- defer normalization into the fact schema until the kernel exists, then **re-derive** the state
+  from the same frozen captures and verify the seal still resolves.
+
+That path buys a genuine prospective seal without the full kernel, and is reviewed on its own
+rather than folded into K1.
 
 ---
 
@@ -275,26 +451,45 @@ full priority: it is not archival housekeeping, it is the only clean experiment 
 
 **Prove the kernel before investing in surfaces.**
 
-| Phase    | Content                                                                           | Gate                                                                                             |
-| -------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| **P**    | 2026 capture lane (unchanged, continues throughout)                               | Eight-row accounting receipt                                                                     |
-| **K1**   | Temporal fact schema + `state_at` + minimum normalization for the three D1 states | Truncation, poison, season-isolation, preview-outcome, leaky-control all pass through `state_at` |
-| **K2**   | Three D1 states compiled: preseason, week-1 pre-kickoff, week-1 recap             | Each state reproducible; no future fact admitted                                                 |
-| **K3**   | Claims ledger + model-run contract + matched-arm evaluation                       | Arms run, blind review recorded, lift measured                                                   |
-| **STOP** | **Judge whether richer evidence actually changed decisions**                      | Blake's call                                                                                     |
-| **S1**   | Six desks, media rebind, full render and publication lifecycle                    | Only if K3 justified it                                                                          |
+| Phase    | Content                                                                                                   | Gate                                                                                                     |
+| -------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **P**    | 2026 capture + prospective sealing lane. **Starts first; runs throughout.**                               | Eight-row accounting receipt; preseason and week-1 seals bound to fact-set identity before their cutoffs |
+| **K1**   | Temporal fact schema + `state_at` + `decision_history_at` + minimum normalization for the three D1 states | The seven discriminating tests below all pass                                                            |
+| **K2**   | Three D1 states compiled: preseason, week-1 pre-kickoff, week-1 recap                                     | Each state reproducible; no future fact admitted; deterministic replay byte-identical                    |
+| **K3**   | Claims ledger + decision-run contract + **six data-layer arms**, executed chronologically per arm         | All six arms complete; contrast integrity satisfied; blind review recorded; lift measured                |
+| **STOP** | **Judge data-layer lift**                                                                                 | Blake's call                                                                                             |
+| **S1a**  | Build the six desks; run **full bundle + one writer vs. full bundle + desks**                             | Newsroom lift measured on identical evidence                                                             |
+| **S1b**  | Media rebind, render, publication lifecycle                                                               | Only if S1a justified it                                                                                 |
 
-Everything after the STOP is contingent. If the rich bundle does not change decisions relative to
-the minimal legal bundle, building six desks to enrich it further is investment against a
-disproven hypothesis.
+### K1's discriminating tests — exercised, not asserted
+
+Acceptance prose is not a gate. K1 ships with tests that **fail when the rule is absent**:
+
+1. **Duplicate capture** — the same record captured twice produces one fact, not two.
+2. **Revised duplicate** — a changed record supersedes rather than mutating; the earlier state is
+   unchanged.
+3. **Late capture** — a fact captured after a stated `as_recorded_at` is excluded from the
+   as-recorded replay and included in the latest reconstruction.
+4. **Private-scope exclusion** — a `league_private` fact is admissible to a league-scope state and
+   excluded from a public-scope projection; custody and publication remain separately governed.
+5. **Schedule-provenance failure** — a pairing derived only from a completed packet, with no
+   independent source and no versioned policy, is **unavailable**.
+6. **Correction chains** — a three-step supersession resolves to the correct value at each of the
+   three cutoffs.
+7. **Cross-arm predecessor poisoning** — feeding arm B's seal into arm A's preview fails the
+   `predecessor_decision_hash` check.
+
+Plus **deterministic replay:** normalizing the same captures twice yields byte-identical facts
+and byte-identical `state_at` output.
 
 ### Preserved without change
 
-The capture lane, exact-instant cutoffs, bundle and manifest identity, provenance and staleness
-binding, ranking-before-prose ordering, noninterference proof, approval lifecycle, media
-admission and byte-level render verification, and publication records all carry forward. They
-were hard-won and none of them is displaced by this revision — they move from being the whole
-architecture to being the publication half of it.
+Exact-instant cutoffs, bundle and manifest identity, provenance and staleness binding,
+ranking-before-prose ordering, noninterference proof, approval lifecycle, media admission and
+byte-level render verification, and publication records all carry forward. They move from being
+the whole architecture to being the publication half of it. The source census and leaf registry
+become **migration checks** — "did every legacy field find a fact type" — rather than the primary
+temporal guarantee.
 
 ---
 
@@ -310,21 +505,34 @@ architecture to being the publication half of it.
 
 ## Acceptance
 
-- **Facts:** every D1 observation carries the full temporal-fact field set; no fact conflates
-  `effective_at`, `known_at`, and `captured_at`; corrections supersede rather than mutate;
-  unknown availability fails closed or cites a versioned inference policy.
-- **Authority:** exactly one `state_at` implementation; no consumer slices its own history;
-  schedule and result are separate fact types; `results_through_week` is derived or mechanically
-  checked, never an independent clock; every aggregate is recomputed from admitted facts.
-- **Bridge:** only the D1-required fact types are normalized; the projector reads solely from
-  `state_at`; the existing truncation, poison, season-isolation, preview-outcome, and
-  leaky-control tests pass through that path.
-- **Decisions:** every published ranking position has at least one scoreable claim with a
-  resolution rule fixed before the outcome; horizons are explicit.
-- **Evaluation:** all seven arms run under a recorded model-run contract; blind review completed;
-  measured lift reported per arm.
-- **Boundary:** the 2025 arm ran with browsing disabled and decisions locked before names
-  returned; every 2025 artifact is labeled retrospective replay.
+- **Facts:** every D1 observation carries the full field set including `source_record_id`,
+  `access_scope`, `normalizer_version`, and `captured_at`; no fact conflates `effective_at`,
+  `known_at`, and `captured_at`; corrections supersede rather than mutate; unknown availability
+  fails closed or cites a versioned inference policy.
+- **Idempotency:** normalizing the same capture set twice produces byte-identical facts and
+  byte-identical `state_at` output; identical repeats coalesce; changed records supersede.
+- **Authority:** exactly one `state_at`; exactly one `decision_history_at`; `state_at` contains no
+  decisions; no consumer slices its own history or globs prior editions; schedule and result are
+  separate fact types; `results_through_week` is derived or mechanically checked; every aggregate
+  is recomputed from admitted facts.
+- **Vantage:** a prospective seal pins `as_recorded_at` (or a fact-set identity hash) and cannot
+  retroactively acquire a late-captured fact.
+- **Schedule provenance:** every admitted `schedule_pairing` cites an independent qualified source
+  or a versioned availability policy; otherwise it is unavailable.
+- **K1 tests:** all seven discriminating tests pass, each demonstrated to fail when its rule is
+  removed.
+- **Decisions:** every published ranking position carries at least one scoreable claim with a
+  resolution rule fixed before the outcome; horizons are explicit; scoring rules, aggregation
+  order, and trial counts are precommitted.
+- **Evaluation:** all **six** K3 data-layer arms run under decision-run receipts of the correct
+  `runner_kind`; every arm's chain is chronological and closed; the cross-arm poison test fails as
+  designed; contrast integrity is satisfied or the result is reported degraded/inconclusive; blind
+  review recorded separately from computed scores.
+- **Boundary:** the 2025 arms ran with browsing disabled and decisions locked before names
+  returned; every 2025 artifact is labeled retrospective replay; the 2026 preseason and week-1
+  seals exist, bound to their fact sets, before their cutoffs.
+- **Newsroom (S1a, after the STOP):** full-bundle-one-writer versus full-bundle-desks measured on
+  identical evidence.
 - **Census carried:** 46 confirmed future entries → 0; 98 structurally unsliced H2H blocks → 0,
   by construction rather than by patch.
 
@@ -332,62 +540,74 @@ architecture to being the publication half of it.
 
 ## Corrections the implementation plan must absorb
 
-Recorded here so the plan's revision has a source. **The plan itself is unmodified** pending
-approval of this design.
+Recorded here so the plan's future revision has a source. **The plan at `df7c1ea` is unmodified.**
 
-1. **`bundle["source_identities"]` KeyError.** Plan `:2671` (Task B11 test) reads
-   `bundle["source_identities"]`, but `project()` returns identities _alongside_ the semantic
-   payload (`:2500`) and `compile_edition()` writes only the payload to `bundle.json` (`:2755`).
-   Identities must stay outside the semantic bundle — that separation is what makes the
-   noninterference comparison valid — so the test inspects `source_hashes.json` or the manifest.
-2. Task A6's season-qualified authority becomes a **migration step** toward fact normalization
-   rather than the temporal fix itself.
+1. **`bundle["source_identities"]` KeyError.** Plan `:2671` reads `bundle["source_identities"]`,
+   but `project()` returns identities _alongside_ the payload (`:2500`) and `compile_edition()`
+   writes only the payload to `bundle.json` (`:2755`). Identities stay outside the semantic
+   bundle — that separation is what makes the noninterference comparison valid — so the test must
+   read `source_hashes.json` or the manifest.
+2. Task A6's season-qualified authority becomes a **migration step** toward fact normalization,
+   not the temporal fix itself.
 3. Task A7's `allow_outcome_derivation` switch is **replaced** by state composition: a preview
    state contains no result facts, so there is nothing to switch off.
+4. The plan's `prior_editions` adapter is replaced by `decision_history_at`, scoped to
+   `arm_id`/`trial_id`.
 
 ---
 
 ## Open items
 
-- **`data/roster_anchors.json` has no producer.** Without a qualified pre-kickoff roster
-  snapshot, preview and preseason roster facts are unavailable and those states carry no roster
-  component. Fail-closed and correct, but a real reduction in preview evidence.
-- **`protected_source_root` is null.** League media stays unavailable; D1 runs the degraded route
-  (GIPHY and custom only, approved as non-evidentiary decoration) and the league-media rebind
-  branch is recorded NOT VALIDATED.
-- **Storage substrate for facts** — SQLite, JSONL, or Parquet. Deliberately deferred; all three
-  satisfy the contract at this scale and the choice does not gate design approval.
-- **`known_at` inference policies** for legacy 2025 sources that carry no publication instant.
-  Each needs an explicit versioned policy or a fail-closed decision, per fact type.
+- **`data/roster_anchors.json` has no producer.** Without a qualified pre-kickoff roster snapshot,
+  roster facts are unavailable for preview and preseason states. Fail-closed and correct — but it
+  removes an evidence family, so the **contrast-integrity gate applies** and a full-bundle arm
+  missing rosters yields a degraded comparison, not a finding.
+- **`protected_source_root` is null.** League media unavailable; same contrast-integrity
+  consequence.
+- **Storage substrate** — SQLite, JSONL, or Parquet. Deferred; all three satisfy the contract and
+  the choice does not gate approval.
+- **`known_at` inference policies** for legacy 2025 sources carrying no publication instant. Each
+  needs an explicit versioned policy or a fail-closed decision, per fact type.
+- **2026 league id and cutoff dates** are needed before the prospective sealing lane can run.
 
 ---
 
-## Self-review — the capture → fact → state → decision → publication path
+## Self-review — fact → state → decision-history → evaluation → prospective seal
 
-**Capture → fact.** Every fact type in §3 names both a 2025 legacy source and a 2026 capture
-source, so the bridge is defined in both directions and the 2026 lane is not orphaned. Private
-classes (`chat_message`, `media_item`) carry the privacy flag from §1 through to publication
-eligibility, which remains independent of temporal admissibility.
+**Fact.** The contract now carries semantic identity (`source_record_id`) alongside observation
+identity (`fact_id`), which is what makes complete daily snapshots idempotent instead of
+duplicative. `access_scope` resolves the contradiction between "publicly knowable" and private
+chat being the richest evidence, and it is deliberately orthogonal to `privacy`: a message can be
+admissible at a league-scope cutoff and still unpublishable. `normalizer_version` is bound because
+a normalizer change alters meaning even when capture bytes do not.
 
-**Fact → state.** Admission is one rule (`known_at <= cutoff`), applied in one place. Reducers
-key on `effective_at`. Aggregates are recomputed, which is what dissolves the dated/undated
-distinction that produced the 46 rather than patching each field.
+**State.** `state_at` gained a vantage parameter, closing a gap I had not seen: without
+`as_recorded_at` the interface cannot express "what we actually held then," which is the only
+form a prospective claim can be made from. Schedule provenance is now a precondition rather than
+an assumption — stripping outcomes from a finished packet proves concealment, not availability.
 
-**State → decision.** The ranking record binds to a state hash; each position yields at least one
-claim with a pre-fixed resolution rule. The ranking-before-prose ordering is preserved, and it
-now has a stronger justification: a claim made after prose is written is a description, not a
-forecast.
+**Decision history.** Split from `state_at` entirely. `state_at` is the world; `decision_history_at`
+is our judgments about it, scoped to `arm_id` and `trial_id`. This is what makes the six arms
+independent: without it, every arm's preview would inherit whichever preseason seal happened to be
+on disk, and the comparison would measure nothing. The plan's globbing `prior_editions` adapter is
+the same defect one level up and is superseded.
 
-**Decision → publication.** Unchanged from the approved revision — authoring manifest binds
-content and ranking, publication record binds authoring manifest plus media manifest plus
-rendered HTML, and the render verifier compares multiplicity, location, and bytes.
+**Evaluation.** `runner_kind` resolves a real contradiction — two arms are deterministic and
+cannot bind a provider. Arm applicability is now stated per edition, including the two genuinely
+awkward cases: "prior unchanged" has no preseason meaning and enters at preview, and
+"record/points" uses prior-season standings at preseason because no 2025 results exist. Scoring
+rules, aggregation order, unresolved handling, and trial counts are precommitted so no metric can
+be selected after seeing results. The desks arm moved to S1a, resolving the contradiction where
+§5 required desks that §7 built only after the STOP.
 
-**Publication → grading.** New, and the reason the ledger exists. The resolver reads outcomes the
-decider never saw and scores each claim against its fixed rule. For 2025 this is a backtest; for
-2026 it is a genuine prospective test.
+**Prospective seal.** The correction I would have missed: capture is necessary and not sufficient.
+A decision generated after the outcome exists is retrospective regardless of how clean the bundle
+is, so the _seal_ is the experiment. Deadlines derive from the same qualified-kickoff machinery as
+the 2025 preview cutoff, and the fallback path exists because the definitive test can expire while
+the backtest is perfected.
 
-**Gap I could not close in this revision:** the 2025 arm's contamination boundary is mitigated,
-not eliminated. Browsing disabled, opaque identities, and locked decisions reduce leakage through
-the model's pretrained knowledge of public 2025 NFL outcomes — they cannot prove it absent. That
-is why 2025 is labeled replay and 2026 is labeled the definitive test, and why nothing in the
-acceptance criteria claims otherwise.
+**Gap I could not close.** The 2025 contamination boundary remains mitigated, not eliminated —
+disabled browsing, opaque identities, and locked-before-names decisions reduce leakage through
+pretrained knowledge of public 2025 outcomes; they cannot prove it absent. That asymmetry is why
+2025 is labeled replay, why 2026 is the definitive test, and why Phase P now starts first rather
+than running "throughout" — verification showed nothing was running at all.
