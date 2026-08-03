@@ -169,12 +169,33 @@ different questions:
 The interface therefore takes a vantage:
 
 ```
-state_at(season, cutoff, as_recorded_at=None) -> LeagueState
+state_at(season, cutoff, access_scope, as_recorded_at=None) -> LeagueState
 ```
 
 `as_recorded_at=None` yields the latest reconstruction. A prospective seal **must** pin
 `as_recorded_at` (or an equivalent fact-set identity hash), so a 2026 decision can never
 retroactively acquire a late-captured fact.
+
+### Requested knowledge scope
+
+`access_scope` is a **required parameter**, not an attribute the caller may ignore. "Admission is
+evaluated against the fact's `access_scope`" does not say which facts _this caller_ may receive —
+it leaves a later projection to improvise access control, which is the improvisation this kernel
+exists to remove.
+
+The lattice, in full:
+
+| Requested `access_scope` | Receives                                |
+| ------------------------ | --------------------------------------- |
+| `public`                 | `public` facts only                     |
+| `league_private`         | `public` **and** `league_private` facts |
+
+**Fail closed:** an omitted or unrecognized scope is an error, never a default. A fact carrying no
+`access_scope` is inadmissible at every scope. Publication eligibility stays a separate axis — a
+`league_private` fact admitted to a league-scope state may still be unpublishable.
+
+The K1 private-scope test calls this shipped signature. It does not assert the rule against a
+downstream projection.
 
 ### Schedule provenance
 
@@ -198,7 +219,7 @@ judgments.
 ### League-world truth
 
 ```
-state_at(season, cutoff, as_recorded_at=None) -> LeagueState
+state_at(season, cutoff, access_scope, as_recorded_at=None) -> LeagueState
 ```
 
 - **Admission is principally `known_at <= cutoff`**, evaluated against the fact's `access_scope`.
@@ -247,17 +268,18 @@ scale. Explicitly excluded: Kafka, Feast, XTDB, OpenLineage, graph databases, an
 Normalize **only** what the three D1 editions need, plus the corresponding prospective 2026
 captures. Nothing speculative.
 
-| Fact type            | 2025 source                      | 2026 source   | Notes                             |
-| -------------------- | -------------------------------- | ------------- | --------------------------------- |
-| `franchise_identity` | `data/2025/users.json`           | capture       | durable `roster_id`/`owner_id`    |
-| `schedule_pairing`   | weekly packet, outcomes stripped | capture       | separate from result              |
-| `matchup_result`     | weekly packet                    | capture       | `known_at` = game conclusion      |
-| `roster_membership`  | anchor + transactions            | capture       | forward from a qualified anchor   |
-| `transaction`        | `transactions.json`              | capture       | `known_at` = effective completion |
-| `draft_pick`         | `draft_picks.json`               | capture       | pick order preserved              |
-| `chat_message`       | parsed corpus                    | manual export | private-class                     |
-| `media_item`         | rebound catalog                  | manual export | private-class original            |
-| `nfl_game`           | `nfl_games/` + schedules         | capture       | kickoff needs venue timezone      |
+| Fact type            | 2025 source                                                                               | 2026 source   | Notes                                                                                                                  |
+| -------------------- | ----------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `franchise_identity` | `data/2025/users.json`                                                                    | capture       | durable `roster_id`/`owner_id`                                                                                         |
+| `schedule_pairing`   | **qualified schedule source, or a versioned availability policy — otherwise unavailable** | capture       | a completed packet with outcomes stripped is not a source (§1)                                                         |
+| `matchup_result`     | weekly packet                                                                             | capture       | `known_at` = game conclusion                                                                                           |
+| `roster_membership`  | anchor + transactions                                                                     | capture       | forward from a qualified anchor                                                                                        |
+| `transaction`        | `transactions.json`                                                                       | capture       | `known_at` = effective completion                                                                                      |
+| `draft_pick`         | `draft_picks.json`                                                                        | capture       | pick order preserved                                                                                                   |
+| `chat_message`       | parsed corpus                                                                             | manual export | private-class                                                                                                          |
+| `media_item`         | rebound catalog                                                                           | manual export | private-class original                                                                                                 |
+| `historical_matchup` | `data/{2022,2023,2024}/season_combined.json`, `known_at` = each game's conclusion         | n/a           | required by the no-history arm and by contrast integrity; absent this row the arm is **unavailable**, not merely empty |
+| `nfl_game`           | `nfl_games/` + schedules                                                                  | capture       | kickoff needs venue timezone                                                                                           |
 
 **The projector shapes bundles only from `state_at` output.** It stops being a collection of
 source-specific adapters that each improvise a slice. Its remaining job is presentation selection
@@ -346,16 +368,33 @@ hashes, tools and browsing policy, budget, retries, and sampling policy.
 `predecessor_decision_hash` is what makes cross-arm contamination detectable: it must resolve to
 a seal from the **same** `arm_id` and `trial_id`.
 
-### The six K3 data-layer arms
+### The five K3 data-layer arms
 
-| Arm                    | Runner        | Tests                                    | Preseason meaning                                                                                                     |
-| ---------------------- | ------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Prior unchanged        | deterministic | Does anything beat inertia?              | Preseason has no prior; arm is **N/A at preseason** and enters at preview, carrying the preseason seal of its own arm |
-| Record/points baseline | deterministic | Does the model beat arithmetic?          | No 2025 results exist; ranks by **prior-season final standings**, stated as the preseason variant                     |
-| Minimal legal bundle   | model         | What does the floor deliver?             | Franchise identity, draft, roster facts only                                                                          |
-| Full rich bundle       | model         | Marginal value of enrichment             | All available evidence families                                                                                       |
-| No-chat ablation       | model         | Does culture evidence change decisions?  | Full minus `chat_message` facts                                                                                       |
-| No-history ablation    | model         | Does the dynasty layer change decisions? | Full minus pre-2025 facts                                                                                             |
+| Arm                    | Runner        | Tests                                    | Preseason meaning                                                                                 |
+| ---------------------- | ------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Record/points baseline | deterministic | Does the model beat arithmetic?          | No 2025 results exist; ranks by **prior-season final standings**, stated as the preseason variant |
+| Minimal legal bundle   | model         | What does the floor deliver?             | Franchise identity, draft, roster facts only                                                      |
+| Full rich bundle       | model         | Marginal value of enrichment             | All available evidence families                                                                   |
+| No-chat ablation       | model         | Does culture evidence change decisions?  | Full minus `chat_message` facts                                                                   |
+| No-history ablation    | model         | Does the dynasty layer change decisions? | Full minus pre-2025 facts                                                                         |
+
+### Inertia is a comparator, not an arm
+
+The previous revision made "prior unchanged" an arm that was N/A at preseason yet entered at
+preview "carrying the preseason seal of its own arm" — a seal an arm that never ran preseason
+cannot have. Inertia has no independent lineage to carry.
+
+It is therefore a **deterministic transition comparator** evaluated inside each eligible arm:
+
+- an arm's **preview** decision is scored against an unchanged copy of **that same arm's**
+  preseason seal;
+- its **recap** decision is scored against an unchanged copy of **that same arm's** preview seal;
+- **no comparator exists where no qualified predecessor exists** — so there is nothing to compute
+  at preseason, and nothing is invented to fill the gap.
+
+The comparator carries the arm's own `arm_id` and `trial_id`, so it cannot borrow another arm's
+continuity. "Does anything beat inertia?" is answered five times, once per arm, rather than by a
+sixth arm with no origin.
 
 **"Full bundle + desks" is not a K3 arm.** It compares two prose pipelines over identical
 evidence and cannot isolate data-layer lift. It moves to S1a, after the desks exist — correcting
@@ -380,17 +419,35 @@ feeds arm B's seal into arm A's preview and requires the run to fail on the
 
 A null result is only interpretable if the arms genuinely differed.
 
-- The full rich bundle must meet a **declared minimum evidence-family coverage** — roster,
-  history, chat, and game context all present and non-empty.
+**The evidence-family manifest is frozen before any arm runs.** No source may be added after
+seeing output; changing the manifest invalidates every completed arm and restarts the comparison.
+Otherwise a disappointing result invites one more source, and the experiment becomes a search for
+a configuration that produces the desired answer.
+
+**Required families for the K1/K3 data-layer contrast:**
+
+| Family               | Required          | Rationale                                                                                                                                                                                                                                                                                                                      |
+| -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `roster_membership`  | yes               | Directly informs strength judgments                                                                                                                                                                                                                                                                                            |
+| `historical_matchup` | yes               | The no-history arm ablates exactly this                                                                                                                                                                                                                                                                                        |
+| `chat_message`       | yes               | The no-chat arm ablates exactly this                                                                                                                                                                                                                                                                                           |
+| `nfl_game` context   | yes               | Distinguishes rich from minimal                                                                                                                                                                                                                                                                                                |
+| `media_item`         | **no — excluded** | Media is deferred to S1b and classified non-evidentiary decoration. It cannot be decoration and also load-bearing for a ranking decision. Its absence must not degrade the data-layer experiment. If league media is ever argued to change a ranking decision, that exact decision path must be shown before it moves earlier. |
+
+- The full rich bundle must meet the coverage above, all present and non-empty.
 - It must **demonstrably differ** from the minimal bundle: a computed diff over admitted fact
   types, recorded per edition.
-- If a required family is unavailable — no qualified roster anchor, no protected media root, no
-  admissible schedule source — the comparison is **degraded** or **inconclusive**.
+- If a required family is unavailable — no qualified roster anchor, no qualified historical
+  source, no admissible schedule source — the comparison is **degraded**.
 
-**A degraded contrast is never evidence that richer data failed to add value, and never grounds
-for terminating the architecture.** This matters concretely: two evidence families are open
-questions right now (roster anchor, protected media root), and without this gate their absence
-would masquerade as a finding.
+**Degraded contrast is bounded, not open-ended.** A degraded result permits **one** explicitly
+approved remediation cycle to qualify the missing family. If it remains degraded after that
+cycle, the outcome is **STOP — NO DECISION, NO EXPANSION**: no data-layer verdict is recorded,
+S1a does not begin, and prospective 2026 capture and sealing continue regardless.
+
+"Inconclusive" is not an unlimited infrastructure license. A degraded contrast is never evidence
+that richer data failed to add value — and equally, it is never a reason to keep building until
+the contrast becomes measurable.
 
 ---
 
@@ -432,18 +489,24 @@ makes the experiment prospective.** A minimum sealing lane is therefore in scope
 | 2026 preseason cutoff | preseason seal | `qualify_cutoff` derives it from the qualified first-kickoff instant; a seal attempted after it is rejected or relabeled |
 | 2026 week-1 kickoff   | preview seal   | Strictly-before the qualified kickoff, same derivation                                                                   |
 
-**Fallback if the kernel is not ready in time.** The definitive test must not expire while the
-backtest is perfected. If K1-K2 will not complete before a cutoff, a **minimal, separately
-reviewable preservation-and-sealing path** is authorized:
+**Fallback if the kernel is not ready in time — a required design option, not an authorization.**
+The definitive test must not expire while the backtest is perfected. If K1-K2 will not complete
+before a cutoff, this design **requires** a minimal preservation-and-sealing path to exist as an
+option. It **may run only through a separately approved P-only implementation plan.**
 
-- capture the eight rows with full receipts;
-- freeze a fact-set identity hash over exactly those captures;
-- seal a ranking and claims ledger against that hash with a decision-run receipt;
-- defer normalization into the fact schema until the kernel exists, then **re-derive** the state
-  from the same frozen captures and verify the seal still resolves.
+That plan must bind:
 
-That path buys a genuine prospective seal without the full kernel, and is reviewed on its own
-rather than folded into K1.
+- the eight capture rows with full receipts;
+- **the exact frozen decision-input bundle** the seal was made from, and the permitted
+  transformations from captures to that bundle — not merely the hashes of raw captures. A hash of
+  inputs does not pin what the decider actually saw;
+- a decision-run receipt of the correct `runner_kind`;
+- deferred normalization: when the kernel exists, **re-derive** the state from the same frozen
+  captures and verify the seal still resolves.
+
+**A missed deadline is never backdated.** A seal attempted after its cutoff is labeled
+**retrospective**, and prospective work moves to the next uncontaminated cutoff. There is no
+mechanism to reclassify a late seal as prospective, and none may be added.
 
 ---
 
@@ -451,15 +514,15 @@ rather than folded into K1.
 
 **Prove the kernel before investing in surfaces.**
 
-| Phase    | Content                                                                                                   | Gate                                                                                                     |
-| -------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **P**    | 2026 capture + prospective sealing lane. **Starts first; runs throughout.**                               | Eight-row accounting receipt; preseason and week-1 seals bound to fact-set identity before their cutoffs |
-| **K1**   | Temporal fact schema + `state_at` + `decision_history_at` + minimum normalization for the three D1 states | The seven discriminating tests below all pass                                                            |
-| **K2**   | Three D1 states compiled: preseason, week-1 pre-kickoff, week-1 recap                                     | Each state reproducible; no future fact admitted; deterministic replay byte-identical                    |
-| **K3**   | Claims ledger + decision-run contract + **six data-layer arms**, executed chronologically per arm         | All six arms complete; contrast integrity satisfied; blind review recorded; lift measured                |
-| **STOP** | **Judge data-layer lift**                                                                                 | Blake's call                                                                                             |
-| **S1a**  | Build the six desks; run **full bundle + one writer vs. full bundle + desks**                             | Newsroom lift measured on identical evidence                                                             |
-| **S1b**  | Media rebind, render, publication lifecycle                                                               | Only if S1a justified it                                                                                 |
+| Phase    | Content                                                                                                                              | Gate                                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| **P**    | 2026 capture + prospective sealing lane. **Starts first; runs throughout.**                                                          | Eight-row accounting receipt; preseason and week-1 seals bound to fact-set identity before their cutoffs                  |
+| **K1**   | Temporal fact schema + `state_at` + `decision_history_at` + minimum normalization for the three D1 states                            | The seven discriminating tests below all pass                                                                             |
+| **K2**   | Three D1 states compiled: preseason, week-1 pre-kickoff, week-1 recap                                                                | Each state reproducible; no future fact admitted; deterministic replay byte-identical                                     |
+| **K3**   | Claims ledger + decision-run contract + **five data-layer arms**, executed chronologically per arm, each with its inertia comparator | All five arms complete with their inertia comparators; contrast integrity satisfied; blind review recorded; lift measured |
+| **STOP** | **Judge data-layer lift**                                                                                                            | Blake's call                                                                                                              |
+| **S1a**  | Build the six desks; run **full bundle + one writer vs. full bundle + desks**                                                        | Newsroom lift measured on identical evidence                                                                              |
+| **S1b**  | Media rebind, render, publication lifecycle                                                                                          | Only if S1a justified it                                                                                                  |
 
 ### K1's discriminating tests — exercised, not asserted
 
@@ -490,6 +553,20 @@ byte-level render verification, and publication records all carry forward. They 
 the whole architecture to being the publication half of it. The source census and leaf registry
 become **migration checks** — "did every legacy field find a fact type" — rather than the primary
 temporal guarantee.
+
+---
+
+## What approving this design does NOT do
+
+Stated plainly so approval cannot be read as a start signal:
+
+- It **does not start Phase P.** Capture and sealing begin only under an approved P-only
+  implementation plan.
+- It **does not approve the frozen `df7c1ea` implementation plan**, which remains a requirements
+  inventory pending its own revision and review.
+- It **does not authorize any repository change** — no implementation, no push, no deletion.
+
+Approval of this document authorizes exactly one thing: writing implementation plans against it.
 
 ---
 
@@ -524,7 +601,7 @@ temporal guarantee.
 - **Decisions:** every published ranking position carries at least one scoreable claim with a
   resolution rule fixed before the outcome; horizons are explicit; scoring rules, aggregation
   order, and trial counts are precommitted.
-- **Evaluation:** all **six** K3 data-layer arms run under decision-run receipts of the correct
+- **Evaluation:** all **five** K3 data-layer arms run under decision-run receipts, each with its inertia comparator where a qualified predecessor exists of the correct
   `runner_kind`; every arm's chain is chronological and closed; the cross-arm poison test fails as
   designed; contrast integrity is satisfied or the result is reported degraded/inconclusive; blind
   review recorded separately from computed scores.
@@ -562,8 +639,9 @@ Recorded here so the plan's future revision has a source. **The plan at `df7c1ea
   roster facts are unavailable for preview and preseason states. Fail-closed and correct — but it
   removes an evidence family, so the **contrast-integrity gate applies** and a full-bundle arm
   missing rosters yields a degraded comparison, not a finding.
-- **`protected_source_root` is null.** League media unavailable; same contrast-integrity
-  consequence.
+- **`protected_source_root` is null.** League media unavailable. This **does not** degrade the
+  K1/K3 contrast — `media_item` is excluded from the required evidence families, because media is
+  deferred to S1b and classified non-evidentiary decoration.
 - **Storage substrate** — SQLite, JSONL, or Parquet. Deferred; all three satisfy the contract and
   the choice does not gate approval.
 - **`known_at` inference policies** for legacy 2025 sources carrying no publication instant. Each
@@ -587,7 +665,7 @@ form a prospective claim can be made from. Schedule provenance is now a precondi
 an assumption — stripping outcomes from a finished packet proves concealment, not availability.
 
 **Decision history.** Split from `state_at` entirely. `state_at` is the world; `decision_history_at`
-is our judgments about it, scoped to `arm_id` and `trial_id`. This is what makes the six arms
+is our judgments about it, scoped to `arm_id` and `trial_id`. This is what makes the five arms
 independent: without it, every arm's preview would inherit whichever preseason seal happened to be
 on disk, and the comparison would measure nothing. The plan's globbing `prior_editions` adapter is
 the same defect one level up and is superseded.
