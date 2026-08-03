@@ -3,7 +3,9 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
-**Status:** DRAFT — awaiting Blake review. Not authorized for implementation.
+**Status:** DRAFT — awaiting Blake review. Not authorized for implementation. Revised 2026-08-03
+after an execution-level binary review (see Self-Review): ten defects corrected, all within the
+approved design. Still DRAFT; the revision does not constitute approval.
 
 **Design authority:** `docs/superpowers/specs/2026-08-01-jailyard-writer-foundation-design.md`,
 APPROVED at `9805426`. Material deviation requires design re-approval.
@@ -130,6 +132,7 @@ Run: `$PY -m pytest scripts/tests/test_capture_2026.py -v` → `ModuleNotFoundEr
 """Append-only capture store. Public and private roots are physically separate."""
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -140,6 +143,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_ROOT = ROOT / "data" / "captures" / "2026" / "public"
 PRIVATE_ROOT = ROOT / "private_captures" / "2026"      # gitignored, never staged
 VALID_PRIVACY = {"public", "private"}
+INSTANT_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")   # same shape as fact_schema
 
 
 def content_sha256(obj) -> str:
@@ -409,11 +413,19 @@ def accounting_receipt(now_utc, league_id, dry_run=False):
 
 def main():
     import argparse
+    from datetime import datetime, timezone
     ap = argparse.ArgumentParser()
     ap.add_argument("--league-id")
-    ap.add_argument("--now-utc", required=True)
+    # Optional: an unattended scheduler cannot compute a UTC instant in its own
+    # command string. Stamping captured_at at capture time is the documented rule
+    # ("captured_at comes from the capture record"); the wall-clock ban applies to
+    # normalizers, which must never invent one.
+    ap.add_argument("--now-utc",
+                    default=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
+    if not INSTANT_RE.match(a.now_utc):
+        raise SystemExit(f"--now-utc must be YYYY-MM-DDTHH:MM:SSZ, got {a.now_utc!r}")
     r = accounting_receipt(a.now_utc, a.league_id, dry_run=a.dry_run)
     save_json_canonical(
         PUBLIC_ROOT / "_receipts" / f"{a.now_utc.replace(':', '').replace('-', '')}.json", r)
@@ -425,6 +437,16 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
+- [ ] **Step 3b: Run to verify it passes** → 4 passed
+
+```bash
+$PY -m pytest scripts/tests/test_capture_accounting.py -q || exit 1
+```
+
+The next step writes real capture files into the repository. Do not reach it on unproven code —
+P3 previously went straight from implementation to a live baseline capture without ever running
+its own tests green.
+
 - [ ] **Step 4: Take the baseline capture — do this before starting K1**
 
 ```bash
@@ -435,9 +457,18 @@ $PY scripts/capture_2026.py --league-id <2026_LEAGUE_ID> --now-utc "$(date -u +%
 
 ```bash
 git add data/captures/2026/public/
-git status --short | grep -q private_captures && { echo "STOP: private capture staged"; exit 1; }
+# Check the INDEX, not `git status`: private_captures/ is gitignored, so it never
+# appears in status and that guard could never fire. Only `git add -f` can stage it,
+# and only the index shows that.
+git diff --cached --name-only | grep -q '^private_captures/' \
+  && { echo "STOP: private capture staged"; exit 1; }
+git diff --cached --name-only | grep -q '^data/captures/2026/public/' \
+  || { echo "STOP: nothing staged; the capture did not run"; exit 1; }
 git commit -m "data(capture): baseline 2026 public capture with accounting receipt"
 ```
+
+The second check is the one that catches a silent no-op: an empty stage means the capture produced
+nothing, and committing it would record coverage that does not exist.
 
 - [ ] **Step 6: Daily local capture until the workflow is activated**
 
@@ -447,10 +478,23 @@ A phase-boundary checkpoint is not a cadence. Register it so it survives an unat
 schtasks //Create //SC DAILY //ST 06:00 //TN "JailyardCapture2026" //TR \
   "cmd /c cd /d C:\\Users\\blake\\projects\\Jailyard-Dynasty-Power-Rankings && \
    C:\\Users\\blake\\AppData\\Local\\Programs\\Python\\Python312\\python.exe \
-   scripts\\capture_2026.py --league-id <ID> --now-utc %DATE%T06:00:00Z"
+   scripts\\capture_2026.py --league-id <ID>"
 ```
 
+`--now-utc` is deliberately omitted: cmd's `%DATE%` expands to a locale-dependent local date
+(`Sat 08/02/2026`), which is neither UTC nor an ISO instant. The script stamps its own UTC instant
+instead, and rejects any explicitly supplied value that is not `YYYY-MM-DDTHH:MM:SSZ` — so a
+malformed instant fails at capture rather than surfacing later as a validation error on a fact.
+
 The append-only store refuses same-instant overwrites, so a duplicate run is free.
+
+Verify the task actually runs before trusting the cadence — a registered task that fails silently
+is worse than no task, because it reads as coverage:
+
+```bash
+schtasks //Run //TN "JailyardCapture2026"
+schtasks //Query //TN "JailyardCapture2026" //V //FO LIST | grep -i "last result\|last run"
+```
 
 - [ ] **Step 7: Author the workflow — inactive until pushed**
 
@@ -478,8 +522,17 @@ git commit -m "feat(capture): eight-row accounting, daily cadence, inactive work
 
 **Interfaces:**
 
-- Produces: `Fact` (frozen dataclass, 15 fields), `validate(fact) -> list[str]`,
-  `fact_hash(payload) -> str`, `load_fact_types() -> dict`, `FACT_FIELDS`
+- Produces: `Fact` (frozen dataclass — the 15 contract fields **plus a non-contract `payload`
+  attachment**), `validate(fact) -> list[str]`, `fact_hash(payload) -> str`,
+  `load_fact_types() -> dict`, `FACT_FIELDS`
+
+**Why `payload` is an attachment, not a sixteenth field.** The design's fact contract is exactly
+fifteen fields, and `content_sha256` is defined as the hash **of the fact payload** — so a payload
+is presupposed but is not itself contract metadata. The aggregates in K1.4 are recomputed from
+admitted facts, which is impossible unless the observation body is reachable from the `Fact` the
+reducer holds. `FACT_FIELDS` is therefore declared explicitly as the fifteen contract names rather
+than derived from `dataclasses.fields()`, so `payload` rides along without entering the contract,
+the identity hash, or the serialized fact record.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -500,6 +553,12 @@ def mk(**over):
 
 def test_all_fifteen_fields_present():
     assert len(FACT_FIELDS) == 15
+    assert "payload" not in FACT_FIELDS, "the body is an attachment, never a contract field"
+
+def test_payload_is_reachable_but_outside_the_contract():
+    """K1.4's reducers read f.payload; the contract stays at fifteen fields."""
+    assert mk().payload is None
+    assert mk(payload={"home_pts": 120.5}).payload["home_pts"] == 120.5
     for f in ("fact_id", "source_record_id", "entity_ref", "source_ref", "fact_type",
               "effective_at", "known_at", "access_scope", "known_at_basis", "captured_at",
               "content_sha256", "privacy", "normalizer_version", "schema_version", "supersedes"):
@@ -629,9 +688,19 @@ class Fact:
     normalizer_version: str
     schema_version: int
     supersedes: str | None
+    # Non-contract attachment: the observation body that content_sha256 hashes.
+    # Excluded from FACT_FIELDS, from fact identity, and from the serialized record.
+    payload: dict | None = None
 
 
-FACT_FIELDS = tuple(f.name for f in fields(Fact))
+# Declared, not derived: `payload` is deliberately absent.
+FACT_FIELDS = (
+    "fact_id", "source_record_id", "entity_ref", "source_ref", "fact_type",
+    "effective_at", "known_at", "access_scope", "known_at_basis", "captured_at",
+    "content_sha256", "privacy", "normalizer_version", "schema_version", "supersedes",
+)
+assert len(FACT_FIELDS) == 15
+assert set(FACT_FIELDS) == {f.name for f in fields(Fact)} - {"payload"}
 
 
 def load_fact_types():
@@ -668,7 +737,7 @@ def validate(fact) -> list:
     return problems
 ```
 
-- [ ] **Step 5: Run to verify it passes** → 8 passed
+- [ ] **Step 5: Run to verify it passes** → 9 passed
 
 - [ ] **Step 6: Commit**
 
@@ -734,7 +803,22 @@ def test_write_is_byte_stable(tmp_path):
     s.observe(payload={"v": 2}, **dict(OBS, source_record_id="txn:2"))
     s.write(); first = (tmp_path / "f.jsonl").read_bytes()
     s.write(); assert (tmp_path / "f.jsonl").read_bytes() == first
+
+def test_payload_survives_a_write_reload_round_trip(tmp_path):
+    """K1.4's aggregates are recomputed from admitted facts. A store that drops
+    the body makes every reducer inoperable on production data."""
+    p = tmp_path / "f.jsonl"
+    s = FactStore(p)
+    s.observe(payload={"home": "A", "home_pts": 120.5}, **OBS)
+    s.write()
+    reloaded = FactStore(p).load()[0]
+    assert reloaded.payload == {"home": "A", "home_pts": 120.5}
+    assert reloaded.content_sha256.startswith("sha256:")
 ```
+
+The store persists one JSON object per line carrying the fifteen contract fields **plus** a
+sibling `payload` key. `payload` never enters `fact_id`, and `content_sha256` already covers it,
+so round-tripping cannot change identity.
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
 
@@ -759,7 +843,9 @@ class FactStore:
         if self.path.exists():
             for line in self.path.read_text(encoding="utf-8").splitlines():
                 if line.strip():
-                    self._facts.append(Fact(**json.loads(line)))
+                    rec = json.loads(line)
+                    body = rec.pop("payload", None)
+                    self._facts.append(Fact(**rec, payload=body))
 
     def load(self):
         return list(self._facts)
@@ -781,6 +867,7 @@ class FactStore:
                                "known_at": meta["known_at"]}).replace("sha256:", "fact:"),
             content_sha256=digest, schema_version=SCHEMA_VERSION,
             supersedes=(prior.fact_id if prior is not None else None),
+            payload=payload,          # attachment; excluded from identity and FACT_FIELDS
             **{k: v for k, v in meta.items() if k in FACT_FIELDS})
         problems = validate(fact)
         if problems:
@@ -793,13 +880,13 @@ class FactStore:
         ordered = sorted(self._facts, key=lambda f: (f.fact_type, f.source_record_id,
                                                      f.known_at, f.fact_id))
         body = "\n".join(
-            json.dumps({k: getattr(f, k) for k in FACT_FIELDS},
+            json.dumps({**{k: getattr(f, k) for k in FACT_FIELDS}, "payload": f.payload},
                        sort_keys=True, separators=(",", ":"), ensure_ascii=False)
             for f in ordered)
         self.path.write_text(body + ("\n" if body else ""), encoding="utf-8", newline="\n")
 ```
 
-- [ ] **Step 4: Run to verify it passes** → 5 passed
+- [ ] **Step 4: Run to verify it passes** → 6 passed
 
 - [ ] **Step 5: Commit**
 
@@ -987,10 +1074,13 @@ from scripts.temporal_state import state_at
 from scripts.tests.test_temporal_state import F
 
 def M(rid, season, week, known_at, home, away, hp, ap):
+    # season and week are payload keys: h2h() and records() sort on them and
+    # last_meeting reports them. Omitting them raises KeyError in every reducer.
     return F(fact_id=f"m{rid}", source_record_id=f"match:{season}:{week}:{rid}",
              fact_type="matchup_result", entity_ref={"type": "matchup", "id": str(rid)},
              effective_at=known_at, known_at=known_at,
-             payload_for_test={"home": home, "away": away, "home_pts": hp, "away_pts": ap})
+             payload={"season": season, "week": week, "home": home, "away": away,
+                      "home_pts": hp, "away_pts": ap})
 
 def test_h2h_counts_only_admitted_meetings():
     facts = [M(1, 2022, 9, "2022-11-01T00:00:00Z", "A", "B", 140.3, 153.1),
@@ -1023,8 +1113,10 @@ def test_no_record_postdates_its_cutoff():
     assert r["highest_score"]["points"] == 300.0, "the week-14 record must be invisible"
 ```
 
-`F` gains a `payload_for_test` passthrough so reducer tests can carry a body; production facts
-carry their payload in the store beside the hash.
+`F` (K1.3) needs no change: `Fact.payload` defaults to `None`, so `F(payload=...)` already reaches
+the dataclass through `base.update(over)`. Production facts carry the same attachment — written
+and reloaded by `FactStore` (K1.2) — so a reducer sees the identical shape in tests and in
+production.
 
 - [ ] **Step 2: Run to verify it fails** → `AttributeError: 'LeagueState' object has no attribute 'h2h'`
 
@@ -1574,6 +1666,12 @@ def test_clean_rebuild_is_byte_identical(tmp_path, monkeypatch):
       code, fact-type registry, predecessor seals) as **structured** paths and hashes, never
       `str(dict)`.
 
+      **`EDITIONS_ROOT` must be read from the module global at call time**, never captured in a
+      default argument or bound at import. The tests above relocate the whole compile tree by
+      monkeypatching `scripts.compile_state.EDITIONS_ROOT`; a bound default would silently ignore
+      the patch and write into the real repository, so the isolation the tests appear to prove
+      would not exist.
+
 - [ ] **Step 4: Write the three descriptors**
 
 ```json
@@ -1799,7 +1897,18 @@ git commit -m "feat(migration): legacy-field coverage check and state leak censu
 `scripts/tests/test_claims_ledger.py`
 
 **Interfaces:** `Claim` (frozen), `make_claim(...)`, `validate_claim(claim) -> list[str]`,
-`CLAIM_TYPES`, `HORIZONS`
+`CLAIM_TYPES`, `HORIZONS`, `save_claims(claims, root=None)`, `load_claims(root=None) -> list[Claim]`
+
+**One loader, named once.** K3.5's driver and K3.6's report both read the ledger; both use
+`load_claims`. An earlier draft had K3.6 call an otherwise-undeclared `load_all_claims`, so the two
+consumers named two functions and neither had a creating task. `root=None` means the real ledger
+root; K3.5's tests pass `root=tmp_path`.
+
+**Fields beyond the design table that the tests exercise:** `bound` (required when
+`claim_type == "bounded_quantity"`, per the design's "absolute error normalized by the claim's
+stated bound") and `resolution_failed` (set by the resolver when the resolution source is
+unavailable — the design's `unresolvable` class, reported and never silently dropped). `outcome`
+and `score` start `None`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1941,16 +2050,43 @@ git commit -m "feat(runs): decision-run receipts for deterministic and model run
 **Files:** Create `scripts/eval_contrast.py`, `content/governance/evidence_families.json`,
 `scripts/tests/test_eval_contrast.py`
 
-**Interfaces:** `load_manifest()`, `freeze_manifest()`, `assess_contrast(manifest, full, minimal,
-remediation_cycles_used) -> ContrastResult` with `.status` in
-`{"ok", "degraded", "stop_no_decision"}`
+**Interfaces:** `load_manifest(path=MANIFEST_PATH)`, `freeze_manifest(path=MANIFEST_PATH, frozen_at)`,
+`family_counts(arm_id, editions_root=EDITIONS_ROOT) -> dict[str, int]`,
+`assess_contrast(manifest, full, minimal, remediation_cycles_used) -> ContrastResult` with
+`.status` in `{"ok", "degraded", "stop_no_decision"}`, `.missing`, `.reason`, `.per_edition`
+
+**Every function takes an explicit path.** The manifest ships **unfrozen** (`frozen_at: null`), and
+`assess_contrast` refuses an unfrozen manifest — so a test calling a no-argument `load_manifest()`
+against the committed file could never reach an assessment. The tests freeze a temporary copy;
+`K3.7` Step 1 freezes the committed one, exactly once, before any arm runs.
+
+`family_counts` is the design's **computed diff over admitted fact types, recorded per edition**:
+it reads each compiled edition's bundle for that arm and returns admitted counts per family.
+Without it the CLI below has nothing to assess.
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
-from scripts.eval_contrast import load_manifest, assess_contrast
+import json
+import shutil
+import pytest
+from pathlib import Path
+from scripts.eval_contrast import (load_manifest, freeze_manifest, assess_contrast,
+                                   MANIFEST_PATH)
 
 REQUIRED = {"roster_membership", "historical_matchup", "chat_message", "nfl_game"}
+
+@pytest.fixture
+def frozen(tmp_path):
+    """A frozen copy. The committed manifest stays unfrozen until K3.7 Step 1."""
+    p = tmp_path / "evidence_families.json"
+    shutil.copyfile(MANIFEST_PATH, p)
+    freeze_manifest(path=p, frozen_at="2026-08-02T00:00:00Z")
+    return load_manifest(path=p)
+
+def test_shipped_manifest_is_unfrozen():
+    m = load_manifest()
+    assert m["frozen_at"] is None and m["manifest_sha256"] is None
 
 def test_manifest_requires_exactly_the_four_families():
     m = load_manifest()
@@ -1961,31 +2097,41 @@ def test_media_is_explicitly_excluded():
     media = next(f for f in m["families"] if f["family"] == "media_item")
     assert media["required"] is False and "S1b" in media["rationale"]
 
-def test_missing_required_family_is_degraded():
+def test_assessing_an_unfrozen_manifest_is_refused():
+    with pytest.raises(ValueError):
+        assess_contrast(load_manifest(), {"roster_membership": 12}, {}, 0)
+
+def test_freezing_twice_is_refused(tmp_path):
+    p = tmp_path / "m.json"
+    shutil.copyfile(MANIFEST_PATH, p)
+    freeze_manifest(path=p, frozen_at="2026-08-02T00:00:00Z")
+    with pytest.raises(ValueError):
+        freeze_manifest(path=p, frozen_at="2026-08-03T00:00:00Z")
+
+def test_missing_required_family_is_degraded(frozen):
     full = {"roster_membership": 12, "historical_matchup": 0, "chat_message": 900, "nfl_game": 16}
-    r = assess_contrast(load_manifest(), full, {"roster_membership": 12}, 0)
+    r = assess_contrast(frozen, full, {"roster_membership": 12}, 0)
     assert r.status == "degraded" and "historical_matchup" in r.missing
 
-def test_absent_media_does_not_degrade():
+def test_absent_media_does_not_degrade(frozen):
     full = {"roster_membership": 12, "historical_matchup": 400, "chat_message": 900,
             "nfl_game": 16, "media_item": 0}
-    r = assess_contrast(load_manifest(), full, {"roster_membership": 12}, 0)
+    r = assess_contrast(frozen, full, {"roster_membership": 12}, 0)
     assert r.status == "ok"
 
-def test_identical_bundles_are_degraded_even_when_complete():
+def test_identical_bundles_are_degraded_even_when_complete(frozen):
     full = {"roster_membership": 12, "historical_matchup": 400, "chat_message": 900, "nfl_game": 16}
-    r = assess_contrast(load_manifest(), full, dict(full), 0)
+    r = assess_contrast(frozen, full, dict(full), 0)
     assert r.status == "degraded" and "no measurable difference" in r.reason
 
-def test_second_degraded_cycle_stops():
+def test_second_degraded_cycle_stops(frozen):
     full = {"roster_membership": 12, "historical_matchup": 0, "chat_message": 900, "nfl_game": 16}
-    r = assess_contrast(load_manifest(), full, {"roster_membership": 12}, 1)
+    r = assess_contrast(frozen, full, {"roster_membership": 12}, 1)
     assert r.status == "stop_no_decision"
     assert "S1a does not begin" in r.reason
 
-def test_manifest_hash_is_frozen_before_arms_run():
-    m = load_manifest()
-    assert m.get("frozen_at") and m.get("manifest_sha256", "").startswith("sha256:")
+def test_freeze_stamps_an_instant_and_a_hash(frozen):
+    assert frozen["frozen_at"] and frozen["manifest_sha256"].startswith("sha256:")
 ```
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
@@ -2027,34 +2173,65 @@ def test_manifest_hash_is_frozen_before_arms_run():
 }
 ```
 
-`freeze_manifest()` stamps `frozen_at` and `manifest_sha256` and refuses to run if already frozen;
-`assess_contrast` refuses an unfrozen manifest.
+`freeze_manifest(path, frozen_at)` stamps `frozen_at` and `manifest_sha256` (the hash computed over
+the manifest with both stamp fields excluded, so the hash is stable) and raises `ValueError` if
+already frozen. `assess_contrast` raises `ValueError` on an unfrozen manifest. `frozen_at` is
+passed in rather than read from the clock, so the freeze is reproducible and testable.
 
-- [ ] **Step 4: Run** → 7 passed
+- [ ] **Step 4: Run** → 10 passed
 
-- [ ] **Step 4b: Add the CLI** — K3.7 Step 4 invokes this script
+- [ ] **Step 4b: Add the CLI** — K3.7 Steps 1 and 4 invoke this script
 
 ```python
 def main():
     import argparse, json
     ap = argparse.ArgumentParser()
-    ap.add_argument("--assess", action="store_true")
-    ap.add_argument("--freeze", action="store_true")
+    mode = ap.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--assess", action="store_true")
+    mode.add_argument("--freeze", action="store_true")
+    ap.add_argument("--frozen-at", help="exact UTC instant; required with --freeze")
     ap.add_argument("--full-arm", default="full_rich")
     ap.add_argument("--minimal-arm", default="minimal_legal")
     ap.add_argument("--remediation-cycles-used", type=int, default=0)
     a = ap.parse_args()
     if a.freeze:
-        print(json.dumps(freeze_manifest(), indent=2))
+        if not a.frozen_at:
+            ap.error("--freeze requires --frozen-at")
+        print(json.dumps(freeze_manifest(frozen_at=a.frozen_at), indent=2))
         return 0
     r = assess_contrast(load_manifest(), family_counts(a.full_arm),
                         family_counts(a.minimal_arm), a.remediation_cycles_used)
-    print(json.dumps({"status": r.status, "missing": r.missing, "reason": r.reason}, indent=2))
-    return {"ok": 0, "degraded": 1, "stop_no_decision": 2}[r.status]
+    print(json.dumps({"status": r.status, "missing": r.missing,
+                      "reason": r.reason, "per_edition": r.per_edition},
+                     indent=2, sort_keys=True))
+    # 2 is deliberately skipped: argparse exits 2 on a usage error, and a gate that
+    # branched on 2 would read a mistyped flag as a stop-no-decision verdict.
+    return {"ok": 0, "degraded": 1, "stop_no_decision": 3}[r.status]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
 ```
 
-Exit codes are distinct: **0** ok, **1** degraded (one remediation cycle permitted), **2**
-stop-no-decision. K3.7 Step 4 branches on them.
+**The entry guard is load-bearing, not boilerplate.** Without
+`if __name__ == "__main__": raise SystemExit(main())` this module defines `main()` and never calls
+it: `$PY scripts/eval_contrast.py --assess` would import the module, print nothing, and **exit 0**.
+A gate branching on that exit code reads `ok` — so contrast integrity would go **unmeasured** while
+appearing to pass, and the K3.8 review packet would be invalid. This is the one CLI of the six that
+lacked the guard; a `def main():` census counts 6/6 clean while the guard census is 5/6, which is
+why the check must be on **execution**, not presence.
+
+Mode selection is a required mutually-exclusive group, so a bare invocation errors (exit 2) instead
+of silently assessing. Verify before relying on it:
+
+```bash
+$PY scripts/eval_contrast.py --help >/dev/null; echo "help exit=$?"   # 0, with output
+$PY scripts/eval_contrast.py;            echo "bare exit=$?"          # 2, usage error
+```
+
+Exit codes from `--assess` are distinct: **0** ok, **1** degraded (one remediation cycle
+permitted), **3** stop-no-decision. **2 is reserved for argparse usage errors** and is never a
+verdict. K3.7 Step 4 branches on all four outcomes, including the unexpected one.
 
 - [ ] **Step 5: Commit**
 
@@ -2067,16 +2244,76 @@ git commit -m "feat(eval): frozen evidence manifest, bounded degradation, media 
 
 ### Task K3.4: The five arms and the inertia comparator
 
-**Files:** Create `scripts/eval_arms.py`, `scripts/tests/test_eval_arms.py`
+**Files:** Create `scripts/eval_arms.py`, `scripts/tests/test_eval_arms.py`,
+`scripts/tests/conftest_eval.py`; modify `scripts/tests/conftest.py`
 
-**Interfaces:** `ARMS` (five), `bundle_for(arm_id, state)`, `inertia_comparator(arm_id, trial_id,
-edition_kind, root) -> SealedDecision | None`, `ArmUnavailable`
+**Interfaces:** `ARMS` (five), `bundle_for(arm_id, state)`,
+`inertia_comparator(arm_id, trial_id, edition, root) -> SealedDecision | None`, `ArmUnavailable`
+
+**The comparator does not derive its own cutoff.** It receives the `EditionDescriptor` and uses
+`edition.season` and `edition.cutoff_utc`. An earlier draft called an undefined `_cutoff_for(kind)`
+and hardcoded season 2025 — a consumer improvising the temporal rule that `state_at` and the
+descriptors exist to own, and the exact class of defect this kernel removes.
+
+**Fixtures have a producer.** `fake_state`, `fake_state_without_history`, `seeded_seals` and
+K3.6's `claim_factory` are defined in a new `scripts/tests/conftest_eval.py` and re-exported from
+`scripts/tests/conftest.py` (which today holds only the session-scoped content-purity gate — leave
+that gate intact). Without this step every test below errors with `fixture not found` rather than
+failing on the rule it is meant to prove.
+
+- [ ] **Step 0: Create the fixtures**
+
+```python
+# scripts/tests/conftest_eval.py — imported by scripts/tests/conftest.py
+import pytest
+from scripts.temporal_state import state_at
+from scripts.tests.test_temporal_state import F
+
+FAMILIES = ("franchise_identity", "draft_pick", "roster_membership",
+            "historical_matchup", "chat_message", "nfl_game",
+            "matchup_result", "schedule_pairing")
+
+def _state(families):
+    facts = [F(fact_id=t, source_record_id=t, fact_type=t,
+               access_scope="league_private" if t == "chat_message" else "public")
+             for t in families]
+    return state_at(2025, "2025-12-01T00:00:00Z", "league_private", facts=facts)
+
+@pytest.fixture
+def fake_state():
+    return _state(FAMILIES)
+
+@pytest.fixture
+def fake_state_without_history():
+    return _state([t for t in FAMILIES if t != "historical_matchup"])
+
+@pytest.fixture
+def seeded_seals(tmp_path):
+    """A full_rich preseason seal only — no_chat deliberately has none, so
+    test_comparator_absent_without_a_qualified_predecessor is a real negative."""
+    from scripts.decision_history import seal
+    seal(root=tmp_path, edition_id="2025-preseason", season=2025,
+         cutoff_utc="2025-09-03T23:59:59Z", arm_id="full_rich", trial_id=1,
+         state_hash="sha256:" + "a" * 64, ranking={"entries": []}, claims=[],
+         run_id="run-seed")
+    return tmp_path
+```
+
+`chat_message` is registered `league_private`, so the fixture requests a `league_private` state —
+a `public` state would silently drop it and `test_no_chat_bundle_omits_chat` would pass for the
+wrong reason.
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 import pytest
+from scripts.compile_state import EditionDescriptor
 from scripts.eval_arms import ARMS, bundle_for, inertia_comparator, ArmUnavailable
+
+PRESEASON = EditionDescriptor("2025-preseason", 2025, "preseason", "2025-09-03T23:59:59Z",
+                              "league_private", None, ())
+PREVIEW = EditionDescriptor("2025-wk01-preview", 2025, "preview", "2025-09-05T00:19:59Z",
+                            "league_private", None, ("2025-preseason",))
 
 def test_exactly_five_arms():
     assert set(ARMS) == {"record_points", "minimal_legal", "full_rich", "no_chat", "no_history"}
@@ -2103,15 +2340,17 @@ def test_minimal_bundle_is_a_strict_subset_of_full(fake_state):
     assert set(bundle_for("minimal_legal", fake_state)["families"]) < \
            set(bundle_for("full_rich", fake_state)["families"])
 
-def test_no_inertia_comparator_at_preseason(tmp_path):
-    assert inertia_comparator("full_rich", 1, "preseason", root=tmp_path) is None
+def test_no_inertia_comparator_at_preseason(seeded_seals):
+    assert inertia_comparator("full_rich", 1, PRESEASON, root=seeded_seals) is None
 
-def test_comparator_uses_the_same_arms_predecessor(tmp_path, seeded_seals):
-    c = inertia_comparator("full_rich", 1, "preview", root=tmp_path)
+def test_comparator_uses_the_same_arms_predecessor(seeded_seals):
+    c = inertia_comparator("full_rich", 1, PREVIEW, root=seeded_seals)
     assert c is not None and c.arm_id == "full_rich" and c.trial_id == 1
+    assert c.edition_id == "2025-preseason"
 
-def test_comparator_absent_without_a_qualified_predecessor(tmp_path):
-    assert inertia_comparator("no_chat", 1, "preview", root=tmp_path) is None
+def test_comparator_absent_without_a_qualified_predecessor(seeded_seals):
+    """no_chat has no seal in the same root: absent, never borrowed from full_rich."""
+    assert inertia_comparator("no_chat", 1, PREVIEW, root=seeded_seals) is None
 
 def test_unavailable_family_makes_its_arm_unavailable(fake_state_without_history):
     with pytest.raises(ArmUnavailable):
@@ -2138,21 +2377,43 @@ ARMS = {
 }
 
 
-def inertia_comparator(arm_id, trial_id, edition_kind, root):
-    """The unchanged prior seal of THIS arm, or None where no qualified predecessor exists."""
+def inertia_comparator(arm_id, trial_id, edition, root):
+    """The unchanged prior seal of THIS arm, or None where no qualified predecessor exists.
+
+    `edition` is the EditionDescriptor. Season and cutoff come from it — this consumer
+    derives no temporal rule of its own.
+    """
     from decision_history import decision_history_at
-    if edition_kind == "preseason":
+    if edition.kind == "preseason":
         return None                      # nothing to carry forward; invent nothing
-    prior = decision_history_at(2025, _cutoff_for(edition_kind), arm_id, trial_id, root=root)
+    prior = decision_history_at(edition.season, edition.cutoff_utc, arm_id, trial_id, root=root)
     return prior[-1] if prior else None
 ```
+
+`bundle_for(arm_id, state)` returns `{"families": [...], "facts": {...}}`. For `record_points`,
+`minimal_legal` and `full_rich` the family list is the arm's declared `families`; for the two
+ablation arms it is `full_rich`'s families minus the arm's `ablates` entries — so an ablation is
+defined by subtraction from the full bundle and cannot drift from it.
+
+`ArmUnavailable` is raised in two distinct cases, both meaning the arm cannot measure what it
+exists to measure:
+
+- a family **in** the arm's bundle for which the state admits **zero** facts — the arm is missing
+  evidence it is defined to carry;
+- a family the arm **ablates** for which the state admits **zero** facts — removing nothing is not
+  an ablation, and scoring it as one reports a null result the experiment never tested.
+
+The second case is what `test_unavailable_family_makes_its_arm_unavailable` proves: with no
+`historical_matchup` facts admitted, `no_history` is **unavailable**, not silently identical to
+`full_rich`. This is the arm-level counterpart of the design's rule that a missing required family
+makes the contrast **degraded** rather than a finding.
 
 - [ ] **Step 4: Run** → 11 passed
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/eval_arms.py scripts/tests/test_eval_arms.py
+git add scripts/eval_arms.py scripts/tests/test_eval_arms.py scripts/tests/conftest_eval.py scripts/tests/conftest.py
 git commit -m "feat(eval): five arms with per-arm inertia comparators"
 ```
 
@@ -2162,7 +2423,20 @@ git commit -m "feat(eval): five arms with per-arm inertia comparators"
 
 **Files:** Modify `scripts/eval_arms.py`; create `scripts/tests/test_chronological.py`
 
-**Interfaces:** `run_arm_chain(arm_id, trial_id, editions) -> list[SealedDecision]`
+**Interfaces:**
+`run_arm_chain(arm_id, trial_id, editions, root=None, _force_predecessor_arm=None) -> list[SealedDecision]`
+
+**`root` is an explicit parameter, not a monkeypatched module global.** `decision_history_at`
+binds `root=SEALS_ROOT` as a **default argument**, evaluated once at import — so
+`monkeypatch.setattr("scripts.decision_history.SEALS_ROOT", tmp_path)` does not redirect it. An
+earlier draft relied on exactly that patch: the tests would have written real seals into
+`content/decisions/`, and since a seal is immutable, the second run of the suite would fail
+permanently on `FileExistsError` from repository state rather than from the rule under test.
+`run_arm_chain` threads `root` through to `seal`, `decision_history_at` and the claims ledger;
+`root=None` means the real roots.
+
+`_force_predecessor_arm` is a test-only injection hook that makes the cross-arm poison test
+possible. It is declared here rather than appearing only at a call site.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2173,45 +2447,54 @@ from scripts.decision_history import CrossArmContamination
 
 EDITIONS = ["2025-preseason", "2025-wk01-preview", "2025-wk01-recap"]
 
-def test_chain_seals_in_order(tmp_path, monkeypatch):
-    monkeypatch.setattr("scripts.decision_history.SEALS_ROOT", tmp_path)
-    seals = run_arm_chain("full_rich", 1, EDITIONS)
+def test_chain_seals_in_order(tmp_path):
+    seals = run_arm_chain("full_rich", 1, EDITIONS, root=tmp_path)
     assert [s.edition_id for s in seals] == EDITIONS
     assert seals[0].cutoff_utc < seals[1].cutoff_utc < seals[2].cutoff_utc
 
-def test_preview_consumes_its_own_preseason_seal(tmp_path, monkeypatch):
-    monkeypatch.setattr("scripts.decision_history.SEALS_ROOT", tmp_path)
-    seals = run_arm_chain("full_rich", 1, EDITIONS)
+def test_preview_consumes_its_own_preseason_seal(tmp_path):
+    seals = run_arm_chain("full_rich", 1, EDITIONS, root=tmp_path)
     assert all(s.arm_id == "full_rich" and s.trial_id == 1 for s in seals)
 
-def test_arm_cannot_consume_another_arms_seal(tmp_path, monkeypatch):
-    monkeypatch.setattr("scripts.decision_history.SEALS_ROOT", tmp_path)
-    run_arm_chain("no_chat", 1, EDITIONS[:1])
+def test_arm_cannot_consume_another_arms_seal(tmp_path):
+    run_arm_chain("no_chat", 1, EDITIONS[:1], root=tmp_path)
+    run_arm_chain("full_rich", 1, EDITIONS[:1], root=tmp_path)
     with pytest.raises(CrossArmContamination):
-        run_arm_chain("full_rich", 1, EDITIONS[1:], _force_predecessor_arm="no_chat")
+        run_arm_chain("full_rich", 1, EDITIONS[1:], root=tmp_path,
+                      _force_predecessor_arm="no_chat")
 
-def test_recap_grades_this_arms_prior_claims(tmp_path, monkeypatch):
-    monkeypatch.setattr("scripts.decision_history.SEALS_ROOT", tmp_path)
-    seals = run_arm_chain("full_rich", 1, EDITIONS)
+def test_recap_grades_this_arms_prior_claims(tmp_path):
+    run_arm_chain("full_rich", 1, EDITIONS, root=tmp_path)
     from scripts.claims_ledger import load_claims
     graded = [c for c in load_claims(root=tmp_path) if c.outcome is not None]
     assert graded and all(c.arm_id == "full_rich" for c in graded)
 
-def test_a_seal_cannot_be_overwritten(tmp_path, monkeypatch):
-    monkeypatch.setattr("scripts.decision_history.SEALS_ROOT", tmp_path)
-    run_arm_chain("full_rich", 1, EDITIONS[:1])
+def test_a_seal_cannot_be_overwritten(tmp_path):
+    run_arm_chain("full_rich", 1, EDITIONS[:1], root=tmp_path)
     with pytest.raises(FileExistsError):
-        run_arm_chain("full_rich", 1, EDITIONS[:1])
+        run_arm_chain("full_rich", 1, EDITIONS[:1], root=tmp_path)
+
+def test_root_isolation_leaves_the_repository_untouched(tmp_path):
+    """Control: the tests above must not be writing into content/decisions/."""
+    from pathlib import Path
+    before = sorted(p.name for p in Path("content/decisions").glob("**/*")) \
+        if Path("content/decisions").exists() else []
+    run_arm_chain("no_history", 1, EDITIONS[:1], root=tmp_path)
+    after = sorted(p.name for p in Path("content/decisions").glob("**/*")) \
+        if Path("content/decisions").exists() else []
+    assert before == after
 ```
 
 - [ ] **Step 2: Run to verify it fails** → `ImportError: cannot import name 'run_arm_chain'`
 
-- [ ] **Step 3: Implement** — for each edition in order: load the compiled state, build the arm's
-      bundle, resolve the predecessor via `decision_history_at` + `verify_predecessor`, open a
-      decision run, produce ranking + claims, grade any resolvable prior claims, seal, close the
-      run.
+- [ ] **Step 3: Implement** — for each edition in order: load its descriptor and compiled state,
+      build the arm's bundle, resolve the predecessor via `decision_history_at` +
+      `verify_predecessor`, compute the inertia comparator via
+      `inertia_comparator(arm_id, trial_id, descriptor, root)`, open a decision run, produce
+      ranking + claims, grade any resolvable prior claims, seal, close the run. Every root-taking
+      call receives the `root` argument explicitly.
 
-- [ ] **Step 4: Run** → 5 passed
+- [ ] **Step 4: Run** → 6 passed
 
 - [ ] **Step 4b: Add the CLI** — K3.7 Step 3 invokes this script
 
@@ -2248,10 +2531,37 @@ git commit -m "feat(eval): chronological per-arm chains with closed decision lin
 
 ### Task K3.6: Scoring and fixed aggregation
 
-**Files:** Create `scripts/eval_scoring.py`, `scripts/tests/test_eval_scoring.py`
+**Files:** Create `scripts/eval_scoring.py`, `scripts/tests/test_eval_scoring.py`; modify
+`scripts/tests/conftest_eval.py`
 
 **Interfaces:** `score_claim(claim) -> float | None`, `aggregate(claims) -> dict`,
-`AGGREGATION_ORDER`, `MIN_TRIALS_NONDETERMINISTIC`
+`combine_trials(trials, runner_kind) -> dict`, `AGGREGATION_ORDER`,
+`MIN_TRIALS_NONDETERMINISTIC`
+
+- Consumes: `Claim`, `make_claim`, `load_claims` (K3.1); `ARMS` (K3.4) for each arm's
+  `runner_kind`. `eval_scoring` imports `ARMS` rather than restating which arms are
+  deterministic — a second copy of that list is a second thing to drift.
+
+- [ ] **Step 0: Add the `claim_factory` fixture** to `scripts/tests/conftest_eval.py`
+
+```python
+@pytest.fixture
+def claim_factory():
+    """Minimal scoreable claims. Every field the scorer reads, nothing it doesn't."""
+    from scripts.claims_ledger import make_claim
+    def make(claim_type="ordinal_rank", assertion=1, outcome=None, bound=None,
+             resolution_failed=False, arm_id="full_rich", trial_id=1):
+        return make_claim(
+            target="T", claim_type=claim_type, horizon="rest_of_season",
+            assertion=assertion, confidence=0.6, decisive_evidence=[],
+            contrary_evidence="", cutoff_utc="2025-09-09T06:59:59Z",
+            state_hash="sha256:" + "a" * 64, arm_id=arm_id, trial_id=trial_id,
+            decision_run_id="run-1", bound=bound, outcome=outcome,
+            resolution_failed=resolution_failed,
+            resolution_rule={"rule": "final_regular_season_rank", "source": "standings",
+                             "resolve_on": "2026-01-06T00:00:00Z"})
+    return make
+```
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2319,10 +2629,16 @@ def test_single_trial_model_arm_is_rejected(claim_factory):
 def main():
     import argparse, json
     ap = argparse.ArgumentParser()
-    ap.add_argument("--report", action="store_true")
+    ap.add_argument("--report", action="store_true", required=True)
     ap.add_argument("--arm")
     a = ap.parse_args()
-    claims = load_all_claims()
+    claims = load_claims()
+    if not claims:
+        # stderr: K3.7 Step 5 redirects stdout into scores.json, and a diagnostic
+        # written there would become the artifact.
+        print("FAIL no claims found; --report must not emit an empty measurement",
+              file=sys.stderr)
+        return 1
     if a.arm:
         claims = [c for c in claims if c.arm_id == a.arm]
     by_arm = {}
@@ -2353,14 +2669,27 @@ git commit -m "feat(eval): precommitted scoring rules and fixed aggregation orde
 
 ### Task K3.7: Run the arms and record blind review
 
+- [ ] **Step 0: Prove every gate CLI actually executes**
+
+A `main()` that is never called exits 0, and a gate branching on that reads success. Confirm all
+six entry points before any of them is trusted:
+
+```bash
+for s in capture_2026 compile_state migration_census eval_contrast eval_arms eval_scoring; do
+  out=$($PY "scripts/$s.py" --help 2>&1); rc=$?
+  [ $rc -eq 0 ] && [ -n "$out" ] || { echo "FAIL $s: rc=$rc, output=${#out} bytes"; exit 1; }
+done
+echo "all six entry points execute"
+```
+
 - [ ] **Step 1: Freeze the manifest before anything runs**
 
 ```bash
-$PY -c "from scripts.eval_contrast import freeze_manifest; print(freeze_manifest())"
+$PY scripts/eval_contrast.py --freeze --frozen-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" || exit 1
 ```
 
 Records `frozen_at` and `manifest_sha256`. **No source may be added after this point** — a
-manifest change invalidates every completed arm.
+manifest change invalidates every completed arm. A second freeze is refused.
 
 - [ ] **Step 2: Compile the three states**
 
@@ -2368,8 +2697,12 @@ manifest change invalidates every completed arm.
 for e in 2025-preseason 2025-wk01-preview 2025-wk01-recap; do
   $PY scripts/compile_state.py --descriptor "content/editions/$e/descriptor.json" || exit 1
 done
-$PY scripts/migration_census.py --all
+$PY scripts/migration_census.py --all || exit 1
 ```
+
+The census is a **gate**, not a report: it returns 1 on any unmapped legacy field, any future
+entry, or a vacuous zero-edition discovery. Without `|| exit 1` a failing census would print FAIL
+and the arms would run anyway on states it just rejected.
 
 - [ ] **Step 3: Run each arm's chain, three trials for model arms**
 
@@ -2383,19 +2716,38 @@ for arm in record_points minimal_legal full_rich no_chat no_history; do
 done
 ```
 
-- [ ] **Step 4: Assess contrast integrity**
+- [ ] **Step 4: Assess contrast integrity — and branch on the result**
 
 ```bash
-$PY scripts/eval_contrast.py --assess --full-arm full_rich --minimal-arm minimal_legal
+mkdir -p content/editions/_evaluation
+$PY scripts/eval_contrast.py --assess --full-arm full_rich --minimal-arm minimal_legal \
+    --remediation-cycles-used "${REMEDIATION_CYCLES_USED:-0}" \
+    > content/editions/_evaluation/contrast.json
+rc=$?
+case $rc in
+  0) echo "contrast ok -> continue to Step 5" ;;
+  1) echo "contrast DEGRADED -> STOP. One approved remediation cycle is permitted."
+     echo "Blake approves the cycle, it runs, then re-enter Step 4 with"
+     echo "REMEDIATION_CYCLES_USED=1. Do not proceed to Step 5."
+     exit 1 ;;
+  3) echo "STOP - NO DECISION, NO EXPANSION. Go to K3.8 and record the verdict."
+     echo "S1a does not begin. Prospective capture and sealing continue."
+     exit 3 ;;
+  *) echo "unexpected exit $rc from eval_contrast (2 = usage error); treat as a failed gate"
+     exit "$rc" ;;
+esac
 ```
 
-If this returns `degraded`, **one** approved remediation cycle is permitted. If it returns
-`stop_no_decision`, go directly to K3.8 and record NO DECISION.
+The exit code **is** the gate. `0` continues, `1` halts for the single approved remediation cycle,
+`3` routes to K3.8 with NO DECISION, and anything else — including argparse's `2` — is a failed
+gate rather than a verdict. The remediation counter is passed in explicitly so a second degraded
+result cannot be re-read as a first.
 
 - [ ] **Step 5: Score and aggregate**
 
 ```bash
-$PY scripts/eval_scoring.py --report > content/editions/_evaluation/scores.json
+mkdir -p content/editions/_evaluation
+$PY scripts/eval_scoring.py --report > content/editions/_evaluation/scores.json || exit 1
 ```
 
 - [ ] **Step 6: Randomized blind review**
@@ -2421,21 +2773,28 @@ git commit -m "eval(k3): five arms, three trials each for model runners, scored 
 - [ ] **Step 1: Full sweep**
 
 ```bash
-$PY -m pytest scripts/tests/ -q
-$PY scripts/migration_census.py --all
-$PY scripts/generate_chat_provenance.py --verify
+$PY -m pytest scripts/tests/ -q || exit 1
+$PY scripts/migration_census.py --all || exit 1
+$PY scripts/generate_chat_provenance.py --verify || exit 1
 ```
+
+Each is a gate. An ungated sweep reports its own failure and then hands Blake a packet built on it.
 
 - [ ] **Step 2: Assemble the review packet**
 
+- **entry-point proof:** the K3.7 Step 0 output showing all six CLIs execute — without it, a green
+  contrast verdict may be a `main()` that never ran;
 - state leak census: 0 future entries across all three states; legacy packets unchanged at 46 and
   no longer decision inputs;
 - the seven K1 discriminating tests with their mutation controls;
 - deterministic replay: facts and state byte-identical across two normalizations;
 - per-arm scores with medians and ranges, unresolved and unresolvable counts;
-- contrast-integrity verdict and the frozen manifest hash;
+- contrast-integrity verdict, its **exit code**, and the frozen manifest hash;
 - blind review versus computed scores, including any disagreement;
 - the 2026 capture accounting receipt and current seal status.
+
+**The packet is invalid if the contrast was not actually measured.** A `contrast.json` that is
+absent, empty, or produced by a process that exited without assessing does not satisfy this step.
 
 - [ ] **Step 3: Answer in writing**
 
@@ -2451,6 +2810,15 @@ ranking movements and claim scores.
 | Lift demonstrated                             | S1a is authorized by Blake — desks built, writer-vs-desks comparison run      |
 | No lift                                       | S1a is not authorized; revise source and desk contracts before proposing more |
 | Contrast degraded after one remediation cycle | **NO DECISION, NO EXPANSION**; prospective capture and sealing continue       |
+
+**What the verdict does not govern.** The definitive 2025 archive remains the mission and is **not
+contingent on measured lift**. The verdict decides the _mechanism_ and the _investment path_ —
+whether desks are worth building, and how much evidence machinery earns its keep — not whether the
+2025 archive gets finished. Only **S1a/S1b expansion** is gated by it. A no-lift or degraded result
+means the archive is produced by a simpler mechanism, never that it is abandoned or deferred.
+
+**S1a never starts automatically.** No exit code, verdict, or gate in this plan begins S1a.
+Every path — including "lift demonstrated" — terminates at Blake's explicit decision.
 
 - [ ] **Step 5: STOP.** Await Blake's decision.
 
@@ -2472,34 +2840,79 @@ is gone: a preview state contains no `matchup_result` facts, so there is nothing
 work is subsumed — facts carry their season, so `content/weeks/` never becomes a competing
 authority.
 
-**Census findings fixed in this pass.** A grep of every `$PY scripts/*.py` invocation against
+**Census findings fixed in the first pass.** A grep of every `$PY scripts/*.py` invocation against
 its creating task found **five scripts invoked with flags and no CLI at all** — `compile_state`,
 `migration_census`, `eval_arms`, `eval_contrast`, `eval_scoring`. Every K3.7 command would have
 died on an unrecognized argument. Each now has a `main()` in its owning task, and
 `migration_census --all` fails rather than passing vacuously when it discovers no compiled state.
-`eval_contrast` returns distinct exit codes (0 ok / 1 degraded / 2 stop-no-decision) so K3.7 Step
-4 can branch on them, and `eval_arms --arm` is constrained to the five registered arms so a typo
-cannot invent a sixth.
+`eval_arms --arm` is constrained to the five registered arms so a typo cannot invent a sixth.
+
+**Execution-level review pass (2026-08-03).** Presence is not execution. Ten further defects, each
+one a command, test, or signature that could not have worked:
+
+1. **`eval_contrast.py` had no `if __name__ == "__main__"` guard** — the only one of six. Direct
+   execution would import the module, never call `main()`, and **exit 0**, leaving contrast
+   integrity unmeasured while the gate read success and the K3.8 packet stood on nothing. Guard
+   added; K3.7 Step 0 now proves all six entry points execute before any is trusted.
+2. **K3.7 Step 4 did not branch**, despite this section and K3.3 both claiming it did. The literal
+   command ran and discarded its exit code. It now branches on every outcome.
+3. **Exit code `2` collided with argparse's usage error**, so a mistyped flag would have been read
+   as a `stop_no_decision` verdict. Stop-no-decision moved to **3**; `2` is reserved and treated as
+   a failed gate.
+4. **The fact payload was unreachable.** K1.4's reducers read `f.payload`, but `Fact` carried only
+   the fifteen contract fields and `FactStore.write()` serialized exactly those — the body was
+   hashed into `content_sha256` and discarded. Every recomputed aggregate, the whole mechanism that
+   retires the 46 by construction, would have failed on the first production fact. `payload` is now
+   a non-contract attachment that round-trips through the store; `FACT_FIELDS` stays at fifteen.
+5. **K1.4's reducer tests could not pass**: they passed a `payload_for_test` kwarg no dataclass
+   accepted, on a helper living in a file the task never declared modifying, with payloads missing
+   the `season`/`week` keys every reducer sorts on.
+6. **Four test fixtures had no producer** — `fake_state`, `fake_state_without_history`,
+   `seeded_seals`, `claim_factory`. Every K3.4 and K3.6 test would have errored `fixture not
+found` instead of failing on its rule. A `conftest_eval.py` now creates them.
+7. **Three helpers were invoked and never declared** — `family_counts`, `_cutoff_for`,
+   `load_all_claims`. `family_counts` is now a declared interface, `_cutoff_for` is deleted in
+   favor of the edition descriptor, and the two claim loaders are unified as `load_claims`.
+8. **`run_arm_chain`'s tests monkeypatched `SEALS_ROOT`**, which `decision_history_at` binds as a
+   default argument at import — an inert patch. The suite would have written immutable seals into
+   the real `content/decisions/` and then failed permanently on rerun. `root` is now an explicit
+   parameter, with a control test asserting the repository is untouched.
+9. **`inertia_comparator` improvised its own temporal rule** — hardcoded season 2025 and an
+   undefined `_cutoff_for(kind)`. It takes the `EditionDescriptor` now. A consumer inventing "as
+   of" is the exact defect this kernel exists to remove.
+10. **K3.3's tests could not pass against the shipped manifest.** It ships unfrozen, and
+    `assess_contrast` refuses an unfrozen manifest, so seven assertions were unreachable. The tests
+    freeze a temporary copy; K3.7 Step 1 freezes the committed one exactly once.
+
+Also corrected: the `schtasks` cadence passed `%DATE%` (a locale-dependent local date, never an
+ISO instant); the private-capture staging guard read `git status`, where a gitignored path can
+never appear; and `--assess`/`--report` were decorative flags a bare invocation ignored.
 
 **Placeholder scan.** No TBD/TODO. Every code step carries runnable code; every test step carries
 real assertions; every command is interpreter-pinned and exact.
 
 **Type consistency.** `Fact`/`FACT_FIELDS` (K1.1) are consumed by `FactStore` (K1.2), `state_at`
-(K1.3), and the normalizers (K1.6). `fact_hash` (K1.1) is consumed by K1.5 and K2.1.
-`SealedDecision` (K1.5) is consumed by K3.4's comparator and K3.5's driver. `ARMS` keys (K3.4)
-match the arms in K3.7's loop and the design's five.
+(K1.3), and the normalizers (K1.6); `payload` rides alongside and is excluded from all three.
+`fact_hash` (K1.1) is consumed by K1.5 and K2.1. `SealedDecision` (K1.5) is consumed by K3.4's
+comparator and K3.5's driver. `EditionDescriptor` (K2.1) is consumed by K3.4's comparator and
+K3.5's driver. `ARMS` (K3.4) is consumed by K3.6's report and matches K3.7's loop and the design's
+five. `load_claims` (K3.1) is the single ledger reader for K3.5 and K3.6.
 
 **Ordering.** P precedes K1 because the evidence is perishable and nothing is currently running.
 K1.6 depends on K1.1-K1.2; K2.1 depends on K1.3-K1.4; K2.2 must precede the preview descriptor's
-cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5.
+cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **and K2.1**
+(it consumes `EditionDescriptor`); K3.6 depends on K3.4 for `runner_kind`.
 
 **Open execution dependencies — fail closed, Blake's call.**
 
 1. **2026 league id and the prospective sealing deadline.** P captures, but the design's
    prospective _seal_ needs K3's ledger. If the 2026 preseason cutoff arrives before K3, the
    design's fallback applies — and it **requires its own separately approved P-only plan**, which
-   this document does not write. Given today is 2026-08-02 and kickoff is roughly five weeks out,
-   **this is the most time-sensitive decision in the plan.**
+   this document does not write. As of **2026-08-03** kickoff is roughly five weeks out, and P has
+   still not started. **This is the most time-sensitive decision in the plan** — and it is a
+   decision about the fallback, not about this plan's approval. Every day of review is a day of
+   perishable 2026 evidence not captured, which is the argument for commissioning the P-only plan
+   in parallel rather than after K1-K3 conclude.
 2. **`schedule_pairing` may be unavailable for 2025.** No qualified pre-kickoff schedule source is
    identified. If none exists, the preview state carries no pairings and the editions proceed
    without them.
