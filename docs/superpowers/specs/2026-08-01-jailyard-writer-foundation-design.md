@@ -23,7 +23,7 @@ decision-evaluation system**, of which prose is one downstream surface:
 ```
 immutable captures
   → typed temporal facts
-  → state_at(season, cutoff)
+  → state_at(season, cutoff, access_scope)
   → ranking and forecast decisions
   → prose and publication
   → later outcome grading
@@ -145,11 +145,11 @@ recurs in every capture. Without semantic identity the fact store grows a duplic
 
 ### Knowledge scope
 
-`known_at` cannot mean "publicly knowable" while chat and media are the richest evidence and are
-private by construction. It means **defensibly available to a named epistemic scope**:
+`known_at` cannot mean "publicly knowable" while league chat — a substantial evidence family —
+is private by construction. It means **defensibly available to a named epistemic scope**:
 
 - `access_scope: public` — knowable to anyone (NFL results, published schedules).
-- `access_scope: league_private` — knowable to the league (chat messages, shared media).
+- `access_scope: league_private` — knowable to the league (chat messages).
 
 A league-private fact is legitimately admissible at a cutoff the public did not share. **Custody
 and publication remain separate axes:** `privacy` governs where raw bytes may live and whether a
@@ -268,6 +268,9 @@ scale. Explicitly excluded: Kafka, Feast, XTDB, OpenLineage, graph databases, an
 Normalize **only** what the three D1 editions need, plus the corresponding prospective 2026
 captures. Nothing speculative.
 
+**`media_item` is not in this bridge.** Media admission, rebind, and publication are preserved
+under S1b; they are not K1 normalization work and not part of the data-layer contrast.
+
 | Fact type            | 2025 source                                                                               | 2026 source   | Notes                                                                                                                  |
 | -------------------- | ----------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `franchise_identity` | `data/2025/users.json`                                                                    | capture       | durable `roster_id`/`owner_id`                                                                                         |
@@ -277,7 +280,6 @@ captures. Nothing speculative.
 | `transaction`        | `transactions.json`                                                                       | capture       | `known_at` = effective completion                                                                                      |
 | `draft_pick`         | `draft_picks.json`                                                                        | capture       | pick order preserved                                                                                                   |
 | `chat_message`       | parsed corpus                                                                             | manual export | private-class                                                                                                          |
-| `media_item`         | rebound catalog                                                                           | manual export | private-class original                                                                                                 |
 | `historical_matchup` | `data/{2022,2023,2024}/season_combined.json`, `known_at` = each game's conclusion         | n/a           | required by the no-history arm and by contrast integrity; absent this row the arm is **unavailable**, not merely empty |
 | `nfl_game`           | `nfl_games/` + schedules                                                                  | capture       | kickoff needs venue timezone                                                                                           |
 
@@ -349,8 +351,9 @@ Defined before any arm runs, so no metric is chosen after seeing results.
 
 ### Decision-run, not model-run
 
-Two arms are deterministic baselines and cannot satisfy a receipt demanding a provider and model.
-The contract generalizes:
+The record/points arm is a deterministic baseline, and the per-arm inertia comparators are
+deterministic too — none of them can satisfy a receipt demanding a provider and model. (The
+comparators are deterministic _computations_, not arms.) The contract therefore generalizes:
 
 ```
 runner_kind: deterministic | model
@@ -514,15 +517,15 @@ mechanism to reclassify a late seal as prospective, and none may be added.
 
 **Prove the kernel before investing in surfaces.**
 
-| Phase    | Content                                                                                                                              | Gate                                                                                                                      |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| **P**    | 2026 capture + prospective sealing lane. **Starts first; runs throughout.**                                                          | Eight-row accounting receipt; preseason and week-1 seals bound to fact-set identity before their cutoffs                  |
-| **K1**   | Temporal fact schema + `state_at` + `decision_history_at` + minimum normalization for the three D1 states                            | The seven discriminating tests below all pass                                                                             |
-| **K2**   | Three D1 states compiled: preseason, week-1 pre-kickoff, week-1 recap                                                                | Each state reproducible; no future fact admitted; deterministic replay byte-identical                                     |
-| **K3**   | Claims ledger + decision-run contract + **five data-layer arms**, executed chronologically per arm, each with its inertia comparator | All five arms complete with their inertia comparators; contrast integrity satisfied; blind review recorded; lift measured |
-| **STOP** | **Judge data-layer lift**                                                                                                            | Blake's call                                                                                                              |
-| **S1a**  | Build the six desks; run **full bundle + one writer vs. full bundle + desks**                                                        | Newsroom lift measured on identical evidence                                                                              |
-| **S1b**  | Media rebind, render, publication lifecycle                                                                                          | Only if S1a justified it                                                                                                  |
+| Phase    | Content                                                                                                                              | Gate                                                                                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **P**    | 2026 capture + prospective sealing lane. **Starts first; runs throughout.**                                                          | Eight-row accounting receipt; preseason and week-1 seals bound to fact-set identity before their cutoffs                                                                       |
+| **K1**   | Temporal fact schema + `state_at` + `decision_history_at` + minimum normalization for the three D1 states                            | The seven discriminating tests below all pass                                                                                                                                  |
+| **K2**   | Three D1 states compiled: preseason, week-1 pre-kickoff, week-1 recap                                                                | Each state reproducible; no future fact admitted; deterministic replay byte-identical                                                                                          |
+| **K3**   | Claims ledger + decision-run contract + **five data-layer arms**, executed chronologically per arm, each with its inertia comparator | All five arms complete; each eligible transition carries its inertia comparator (none exists at preseason); contrast integrity satisfied; blind review recorded; lift measured |
+| **STOP** | **Judge data-layer lift**                                                                                                            | Blake's call                                                                                                                                                                   |
+| **S1a**  | Build the six desks; run **full bundle + one writer vs. full bundle + desks**                                                        | Newsroom lift measured on identical evidence                                                                                                                                   |
+| **S1b**  | Media rebind, render, publication lifecycle                                                                                          | Only if S1a justified it                                                                                                                                                       |
 
 ### K1's discriminating tests — exercised, not asserted
 
@@ -533,8 +536,10 @@ Acceptance prose is not a gate. K1 ships with tests that **fail when the rule is
    unchanged.
 3. **Late capture** — a fact captured after a stated `as_recorded_at` is excluded from the
    as-recorded replay and included in the latest reconstruction.
-4. **Private-scope exclusion** — a `league_private` fact is admissible to a league-scope state and
-   excluded from a public-scope projection; custody and publication remain separately governed.
+4. **Private-scope exclusion** — the same fact is present in
+   `state_at(..., access_scope="league_private")` and absent from
+   `state_at(..., access_scope="public")`. The test calls the shipped interface; **no downstream
+   projection performs access admission.** Custody and publication remain separately governed.
 5. **Schedule-provenance failure** — a pairing derived only from a completed packet, with no
    independent source and no versioned policy, is **unavailable**.
 6. **Correction chains** — a three-step supersession resolves to the correct value at each of the
@@ -601,10 +606,16 @@ Approval of this document authorizes exactly one thing: writing implementation p
 - **Decisions:** every published ranking position carries at least one scoreable claim with a
   resolution rule fixed before the outcome; horizons are explicit; scoring rules, aggregation
   order, and trial counts are precommitted.
-- **Evaluation:** all **five** K3 data-layer arms run under decision-run receipts, each with its inertia comparator where a qualified predecessor exists of the correct
-  `runner_kind`; every arm's chain is chronological and closed; the cross-arm poison test fails as
-  designed; contrast integrity is satisfied or the result is reported degraded/inconclusive; blind
-  review recorded separately from computed scores.
+- **Evaluation:** all **five** K3 data-layer arms run under decision-run receipts of the correct
+  `runner_kind`; every arm's chain is chronological and closed; an inertia comparator runs at each
+  eligible transition where a qualified same-arm predecessor exists, and nowhere else; the
+  cross-arm poison test fails as designed; blind review is recorded separately from computed
+  scores.
+- **Contrast:** the evidence-family manifest was frozen before any arm ran. If the contrast is
+  degraded, **one** explicitly approved remediation cycle is permitted. If it remains degraded
+  after that cycle the outcome is **STOP — NO DECISION, NO EXPANSION**: no data-layer verdict is
+  recorded, **S1a does not begin**, and prospective 2026 capture and sealing continue. There is no
+  generic "inconclusive" path that authorizes further evidence expansion.
 - **Boundary:** the 2025 arms ran with browsing disabled and decisions locked before names
   returned; every 2025 artifact is labeled retrospective replay; the 2026 preseason and week-1
   seals exist, bound to their fact sets, before their cutoffs.
@@ -670,13 +681,16 @@ independent: without it, every arm's preview would inherit whichever preseason s
 on disk, and the comparison would measure nothing. The plan's globbing `prior_editions` adapter is
 the same defect one level up and is superseded.
 
-**Evaluation.** `runner_kind` resolves a real contradiction — two arms are deterministic and
-cannot bind a provider. Arm applicability is now stated per edition, including the two genuinely
-awkward cases: "prior unchanged" has no preseason meaning and enters at preview, and
-"record/points" uses prior-season standings at preseason because no 2025 results exist. Scoring
-rules, aggregation order, unresolved handling, and trial counts are precommitted so no metric can
-be selected after seeing results. The desks arm moved to S1a, resolving the contradiction where
-§5 required desks that §7 built only after the STOP.
+**Evaluation.** `runner_kind` resolves a real contradiction — the record/points arm and the
+per-arm inertia comparators are deterministic and cannot bind a provider. Arm applicability is
+now stated per edition, including the one genuinely awkward case: "record/points" uses
+prior-season standings at preseason because no 2025 results exist. **Inertia is not an arm.** It is a per-arm transition comparator that simply does not
+exist at preseason, where no qualified same-arm predecessor does — which is why the earlier
+"prior unchanged" arm, N/A at preseason yet entering at preview with a seal it never produced,
+could not be made coherent as an arm at all. Scoring rules, aggregation order, unresolved
+handling, and trial counts are precommitted so no metric can be selected after seeing results.
+The desks arm moved to S1a, resolving the contradiction where §5 required desks that §7 built
+only after the STOP.
 
 **Prospective seal.** The correction I would have missed: capture is necessary and not sufficient.
 A decision generated after the outcome exists is retrospective regardless of how clean the bundle
