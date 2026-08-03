@@ -1,9 +1,9 @@
 # Jailyard — Temporal League-Intelligence and Decision-Evaluation Design
 
 **Date:** 2026-08-01, revised 2026-08-02
-**Status:** **DRAFT — awaiting Blake review.** Not approved. Supersedes the APPROVED revision at
-`072f4ea`, whose approval is preserved in git history and remains the authority until this
-revision is approved.
+**Status:** **APPROVED** by Blake 2026-08-02 as written at `9805426`. Supersedes the prior
+approved revision at `072f4ea` (preserved in git history) and is now the design authority.
+Implementation plans are written against this document; material changes require re-approval.
 **Why a new revision rather than a plan correction:** a clean-room review of the product
 objective found that this document's own explicit exclusions — typed temporal evidence,
 measurable ranking evaluation, and clean-room prospective testing — conflict with what is
