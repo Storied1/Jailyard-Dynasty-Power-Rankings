@@ -9,10 +9,16 @@ Revised twice on 2026-08-03. Round one (execution-level): ten unrunnable paths. 
 (source-graph): ten more, all of the class _interfaces describing a system the producer graph
 cannot build_. Both rounds' corrections stay inside the approved design. See Self-Review.
 
-**One item is BLOCKED on Blake and cannot be resolved in this plan:** the capture-row set covers
-only six of the nine bridge fact types. See "Open design decision: capture-row coverage" — P2 and
-P3 must not execute until it is ruled on. Everything else is reviewable as written. Still DRAFT;
-neither revision constitutes approval.
+**Capture-row coverage: RESOLVED 2026-08-03** by Blake's eight-accounting-groups ruling. No design
+change was required. **Lane P moved out of this plan** — Tasks P1-P3 are SUPERSEDED by
+`docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`, which delivers the capture and
+sealing lane with executed, mutation-tested code. This document is now **K1-K3 only**.
+
+**Outstanding against this plan:** the 2026-08-03 adversarial review returned NO-SHIP with one
+critical and seven high findings against K1-K3 — a disconnected `SOURCES`/`normalize_all` producer
+graph, fact-identity and coalescing defects, an all-seasons `standings()`, a seal/body glob
+collision, receipt ordering, contrast-control contradictions, and non-durable review artifacts.
+**None are corrected here.** Still DRAFT; no revision constitutes approval.
 
 **Design authority:** `docs/superpowers/specs/2026-08-01-jailyard-writer-foundation-design.md`,
 APPROVED at `9805426`. Material deviation requires design re-approval.
@@ -242,11 +248,12 @@ zero transactions. Lane P needs its own leg range.
 **Interfaces:** Produces `SOURCE_FETCHERS`, `TRANSACTION_LEGS`, `load_capture_table()`,
 `FetchFailed`, `_fetch_draft`, `_fetch_transactions`
 
-> **BLOCKED — see "Open design decision: capture-row coverage" below.** The eight rows written in
-> Step 3 cover only **six of the nine** bridge fact types. `schedule_pairing`, `matchup_result`
-> and `nfl_game` have **no 2026 capture producer**, while `projections` and `injuries` serve no
-> bridge fact type at all. The row set below is the current draft, not a resolved contract; do not
-> execute P2/P3 against it until Blake rules. Everything else in Phase P is unaffected.
+> **SUPERSEDED 2026-08-03 — DO NOT EXECUTE.** Blake's eight-accounting-groups ruling resolved the
+> coverage blocker, and Lane P now lives in
+> `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md` (Tasks F1-F3), whose capture code
+> is verified by execution. Executing the tasks below would create a second, divergent
+> `capture_2026.py` against a different table. Retained only as the record of what the ruling
+> replaced.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -741,52 +748,31 @@ git commit -m "feat(capture): eight-row accounting, daily cadence, inactive work
 
 ---
 
-## Open design decision: capture-row coverage — BLOCKS P2/P3 EXECUTION
+## RESOLVED 2026-08-03: capture-row coverage — eight accounting GROUPS
 
-**This is Blake's call. The plan does not guess, and does not silently add or drop a row.**
+**Blake ruled. This is no longer blocking, and no design change was required.**
 
-Tracing every approved bridge fact type whose 2026 source is `capture` back to a producer in the
-plan's eight rows:
+The blocker was that eight capture rows covered only six of the nine bridge fact types while
+`projections` and `injuries` covered none. The framing was wrong: the approved design fixes the
+**accounting** count at eight, never the number of sources. The ruling separates the two —
 
-| Bridge fact type     | 2026 source (design) | Producing capture row             | Covered |
-| -------------------- | -------------------- | --------------------------------- | ------- |
-| `franchise_identity` | capture              | `sleeper_league`, `sleeper_users` | yes     |
-| `roster_membership`  | capture              | `rosters`                         | yes     |
-| `transaction`        | capture              | `transactions`                    | yes     |
-| `draft_pick`         | capture              | `draft`                           | yes     |
-| `chat_message`       | manual export        | `chat_media_export`               | yes     |
-| `schedule_pairing`   | capture              | **none**                          | **NO**  |
-| `matchup_result`     | capture              | **none**                          | **NO**  |
-| `nfl_game`           | capture              | **none**                          | **NO**  |
-| `historical_matchup` | n/a (2025 and prior) | —                                 | n/a     |
+> Keep eight top-level accounting groups while preserving every required component. These are
+> reporting/control groups, not provenance atoms. Every component retains an independent source
+> identity, status, `captured_at`/`known_at` basis, freshness/due state, content hash, and failure.
+> A composite group passes only when every required component passes.
 
-Conversely, `projections` and `injuries` occupy two of the eight rows and normalize to **no bridge
-fact type at all** — the design's §3 admits only what the three D1 editions need, "nothing
-speculative."
+— which satisfies the approved eight, covers all eight 2026 bridge fact types, and keeps
+projections and injuries. Options A (drop evidence), B (ten rows, needs re-approval) and C (accept
+the gap) are all superseded and were not taken.
 
-**Why this is a design decision and not a plan fix.** The approved design fixes the count at
-**eight** in three places (§6.1, §6 fallback, §7 Phase P gate) but never names the rows. So the row
-_identities_ are plan-level — but no choice of eight rows can both (a) keep `projections` and
-`injuries` and (b) cover the three missing types. The arithmetic is exact: six rows currently do
-real bridge work, Sleeper `/league/{id}/matchups/{week}` would cover `schedule_pairing` **and**
-`matchup_result` in one row, and an NFL schedule/results row would cover `nfl_game`. Six plus two
-is eight — but only by dropping the other two.
+**The capture lane now lives in `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`**,
+which specifies the eight groups, their components, component-level provenance, freshness/due
+semantics, and the accounting gate — with its code verified by execution.
 
-| Option                                                                              | Keeps the approved count | Cost                                                                                                                                 |
-| ----------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **A** — swap `projections` + `injuries` out; add `league_matchups` + `nfl_schedule` | yes, still eight         | 2026 in-season projections are never captured. **Irreversible** — they are perishable and no retrospective source reconstructs them. |
-| **B** — keep all eight and add the two → **ten rows**                               | **no**                   | Contradicts an approved number; needs design re-approval before Phase P can claim its gate.                                          |
-| **C** — accept that three bridge types have no 2026 producer                        | yes                      | The 2026 prospective arm cannot build the same bundle as 2025. The definitive test measures something narrower than the backtest.    |
-
-Note in A's favor: the repo's `nfl_games/{id}.json` entity already carries `key_injuries` from
-nflreadpy, so an `nfl_schedule` row plausibly subsumes the standalone `injuries` row. That argument
-does **not** extend to `projections`, which nothing else captures.
-
-**Until this is ruled on:** P1 is executable as written; P2 and P3 are not, because their row set
-is unresolved. Add a `required: true|false` field per row when the set is settled — the accounting
-gate above reads it, and every current row defaults to required.
-
----
+**Consequence for this plan: Tasks P1, P2 and P3 are SUPERSEDED.** Do not execute them; they would
+create a second, divergent `capture_2026.py` against a different table. Lane P is delivered by the
+P-only plan. This document resumes at K1, and its dependency on Phase P is satisfied by that plan's
+F1-F3 rather than by its own P tasks.
 
 ## K1 — The temporal kernel
 
@@ -3968,10 +3954,10 @@ cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **
    the contrast **degraded** — one remediation cycle, then STOP with no decision.
 4. **Legacy packets keep their 46 leaks.** They stop being decision inputs, and K2.3 asserts this
    explicitly rather than silently. Whether to repair them for site rendering is out of scope here.
-5. **Capture-row coverage — BLOCKING, Blake's decision.** Three bridge fact types have no 2026
-   capture producer and two capture rows serve no bridge fact type. Options A/B/C are laid out in
-   "Open design decision: capture-row coverage." **P2 and P3 do not execute until this is ruled
-   on.** Note the interaction with (2) and (3): if the answer adds a `league_matchups` row, that
-   row is also the most plausible qualified 2026 source for `schedule_pairing`, which would leave
-   2025 degraded while 2026 is clean — a legitimate outcome, but one worth choosing deliberately
-   rather than discovering at K3.
+5. **Capture-row coverage — RESOLVED 2026-08-03**, eight accounting groups; Lane P moved to the
+   P-only plan. One consequence to carry into K3: that lane's `league_matchups` group is also the
+   most plausible qualified 2026 source for `schedule_pairing`, so **2026 may be clean where 2025
+   is degraded** (see (2) and (3)). That is a legitimate asymmetry, but it should be chosen
+   deliberately at K3 rather than discovered during contrast assessment.
+6. **K1-K3 adversarial findings are open.** One critical, seven high, from the 2026-08-03 review.
+   They are recorded and uncorrected; this plan is not executable until they are addressed.
