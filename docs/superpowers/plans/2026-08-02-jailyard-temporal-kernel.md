@@ -1,4 +1,4 @@
-# Jailyard Temporal Kernel — Implementation Plan (P → K1 → K2 → K3 → STOP)
+# Jailyard Temporal Kernel — Implementation Plan (K1 → K2 → K3 → STOP)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
@@ -65,22 +65,22 @@ same interface). No new services.
 
 ## File Structure
 
-| File                                        | Responsibility                                                 |
-| ------------------------------------------- | -------------------------------------------------------------- |
-| ~~`scripts/capture_2026.py`~~               | **SUPERSEDED** — owned by the P-only contract, not this plan   |
-| `scripts/fact_schema.py`                    | `Fact` dataclass, the 15 fields, validation, canonical hashing |
-| `scripts/fact_store.py`                     | Append, coalesce, supersede, load; JSONL substrate             |
-| `scripts/normalize_facts.py`                | Per-source normalizers for the 9 bridge fact types             |
-| `scripts/temporal_state.py`                 | `state_at`, scope lattice, supersession resolution, reducers   |
-| `scripts/decision_history.py`               | `decision_history_at`, `SealedDecision`, seal/verify           |
-| `scripts/claims_ledger.py`                  | Claim records, resolution rules, resolver                      |
-| `scripts/decision_run.py`                   | Decision-run receipts, `runner_kind`                           |
-| `scripts/eval_contrast.py`                  | Frozen evidence-family manifest, contrast integrity            |
-| `scripts/eval_arms.py`                      | The five arms, inertia comparator, chronological driver        |
-| `scripts/eval_scoring.py`                   | Per-claim-type scoring, fixed aggregation                      |
-| `content/governance/fact_types.json`        | Fact-type registry: reducer, access scope, `known_at` basis    |
-| `content/governance/evidence_families.json` | Frozen manifest for the K3 contrast                            |
-| `content/governance/capture_table.json`     | Lane P's eight rows                                            |
+| File                                        | Responsibility                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| ~~`scripts/capture_2026.py`~~               | **SUPERSEDED** — owned by the P-only contract, not this plan        |
+| `scripts/fact_schema.py`                    | `Fact` dataclass, the 15 fields, validation, canonical hashing      |
+| `scripts/fact_store.py`                     | Append, coalesce, supersede, load; JSONL substrate                  |
+| `scripts/normalize_facts.py`                | Per-source normalizers for the 9 bridge fact types                  |
+| `scripts/temporal_state.py`                 | `state_at`, scope lattice, supersession resolution, reducers        |
+| `scripts/decision_history.py`               | `decision_history_at`, `SealedDecision`, seal/verify                |
+| `scripts/claims_ledger.py`                  | Claim records, resolution rules, resolver                           |
+| `scripts/decision_run.py`                   | Decision-run receipts, `runner_kind`                                |
+| `scripts/eval_contrast.py`                  | Frozen evidence-family manifest, contrast integrity                 |
+| `scripts/eval_arms.py`                      | The five arms, inertia comparator, chronological driver             |
+| `scripts/eval_scoring.py`                   | Per-claim-type scoring, fixed aggregation                           |
+| `content/governance/fact_types.json`        | Fact-type registry: reducer, access scope, `known_at` basis         |
+| `content/governance/evidence_families.json` | Frozen manifest for the K3 contrast                                 |
+| ~~`content/governance/capture_table.json`~~ | **SUPERSEDED** — the P-only contract owns `capture_table_2026.json` |
 
 ---
 
@@ -3948,14 +3948,13 @@ cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **
 
 **Open execution dependencies — fail closed, Blake's call.**
 
-1. **2026 league id and the prospective sealing deadline.** P captures, but the design's
-   prospective _seal_ needs K3's ledger. If the 2026 preseason cutoff arrives before K3, the
-   design's fallback applies — and it **requires its own separately approved P-only plan**, which
-   this document does not write. As of **2026-08-03** kickoff is roughly five weeks out, and P has
-   still not started. **This is the most time-sensitive decision in the plan** — and it is a
-   decision about the fallback, not about this plan's approval. Every day of review is a day of
-   perishable 2026 evidence not captured, which is the argument for commissioning the P-only plan
-   in parallel rather than after K1-K3 conclude.
+1. **2026 prospective sealing — no longer this plan's dependency.** The design's fallback has been
+   written and is under review as
+   `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`, whose tranche A seals a
+   deterministic prospective baseline before the **2026-09-03T00:20:00Z** preseason cutoff without
+   waiting on this kernel. The 2026 league id is `1312884727480352768`, already present in
+   `fetch_sleeper.py:38`, `config.js` and `data/2026/league.json` — it was never a Blake input.
+   K1-K3 therefore no longer carry the prospective deadline; they are judged on the backtest alone.
 2. **`schedule_pairing` may be unavailable for 2025.** No qualified pre-kickoff schedule source is
    identified. If none exists, the preview state carries no pairings and the editions proceed
    without them.
