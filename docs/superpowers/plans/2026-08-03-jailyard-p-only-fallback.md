@@ -21,16 +21,19 @@ P1–P3 are superseded by this document. This plan neither unblocks nor depends 
 
 ## 1. Verified facts (checked against the repo, not assumed)
 
-| Fact                                    | Value                                             | Evidence                                                                                                                |
-| --------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 2026 league id                          | `1312884727480352768`                             | `fetch_sleeper.py:38`, `config.js`, `data/2026/league.json` — **not a Blake input**; verify against the fetched payload |
-| First regular-season kickoff            | `2026-09-10T00:20:00Z`                            | **Official NFL schedule.** Fixture value only; production derives it from a verified `nfl_schedules` capture            |
-| Preseason cutoff                        | `2026-09-03T00:20:00Z`                            | kickoff − 7d. **31 days from 2026-08-03**                                                                               |
-| Preview cutoff                          | `2026-09-10T00:19:59Z`                            | strictly before kickoff                                                                                                 |
-| 2025 `playoff_week_start`               | `15` ⇒ regular season = weeks 1–14                | `data/2025/league.json`, and carried in `data/2025/season_combined.json`                                                |
-| 2026 schedule on disk                   | **absent**                                        | `data/external/` stops at 2025 — acquisition is real work                                                               |
-| `private_captures/`, `private_bundles/` | **NOT currently gitignored**                      | `.gitignore` — must be added before any private write                                                                   |
-| polars / nflreadpy                      | import cleanly **with** `POLARS_SKIP_CPU_CHECK=1` | verified in this shell                                                                                                  |
+| Fact                                    | Value                                                                                                                            | Evidence                                                                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 2026 league id                          | `1312884727480352768`                                                                                                            | `fetch_sleeper.py:38`, `config.js`, `data/2026/league.json` — **not a Blake input**; verify against the fetched payload |
+| First regular-season kickoff            | `2026-09-10T00:20:00Z`                                                                                                           | **Official NFL schedule.** Fixture value only; production derives it from a verified `nfl_schedules` capture            |
+| Preseason cutoff                        | `2026-09-03T00:20:00Z`                                                                                                           | kickoff − 7d. **31 days from 2026-08-03**                                                                               |
+| Preview cutoff                          | `2026-09-10T00:19:59Z`                                                                                                           | strictly before kickoff                                                                                                 |
+| 2025 `playoff_week_start`               | `15` ⇒ regular season = weeks 1–14                                                                                               | `data/2025/league.json`, and carried in `data/2025/season_combined.json`                                                |
+| 2026 schedule on disk                   | **absent**                                                                                                                       | `data/external/` stops at 2025 — acquisition is real work                                                               |
+| `private_captures/`, `private_bundles/` | **NOT currently gitignored**                                                                                                     | `.gitignore` — must be added before any private write                                                                   |
+| polars / nflreadpy                      | import cleanly **with** `POLARS_SKIP_CPU_CHECK=1`                                                                                | verified in this shell                                                                                                  |
+| 2025 regular-season standings           | **recomputable** — `weeks[13].standings` carries cumulative `wins`/`pf` per `roster_id`; `is_playoff` false wks 1–14, true 15–18 | `data/2025/season_combined.json`                                                                                        |
+| 2025→2026 franchise join key            | **`owner_id`** — `roster_map` carries `{roster_id, owner_id, final_record{wins, fpts}}`; 2026 rosters carry `owner_id`           | both artifacts inspected                                                                                                |
+| Owner overlap 2025↔2026                 | **12 of 12**, 0 unmatched                                                                                                        | `data/2026/rosters.json` (2026-04-04 snapshot — evidence, not a guarantee at capture time)                              |
 
 ## 2. Rulings recorded (Blake, 2026-08-03)
 
@@ -78,44 +81,62 @@ descending, then `roster_id` ascending** as the deterministic final tie-break. Q
 **Tranche A — prospective safeguard (first vertical slice).** Operate as soon as it passes; do not
 wait for projections, chat, or the model arms.
 
-1. capture-envelope core and accounting receipt — which may **honestly show unfinished rich
-   components** rather than blocking;
-2. verified schedule acquisition and cutoff-qualification receipt;
-3. exact qualified 2025 final-standings input (R5);
-4. deterministic `record_points` ranking and scoreable claims;
-5. bundle, closed run receipt, seal, reload verification, and rederivation;
-6. **operate**: seal the preseason and preview baselines before their cutoffs.
+1. capture-envelope core and **its own frozen baseline policy `v1`** (A1b) — A never depends on a
+   policy that a later tranche creates;
+2. accounting receipt — which may **honestly show unfinished non-baseline components** rather than
+   blocking;
+3. verified schedule acquisition and cutoff-qualification receipt;
+4. exact qualified 2025 final-standings input (R5);
+5. deterministic `record_points` ranking and scoreable claims;
+6. bundle, closed run receipt, seal, reload verification, and rederivation;
+7. **operate**: seal the preseason and preview baselines before their cutoffs.
 
 **Tranche B — rich prospective contrast.**
 
 1. remaining component producers (all twelve);
-2. `minimal_legal` and `full_rich` bundles;
-3. Blake-approved **frozen** runner, source-policy/arm-membership, transformation, and evaluation
-   configurations;
+2. Blake-approved **frozen** model-arm policy `v2`, runner, transformation and evaluation
+   configurations — `v2` is a **new version alongside** `v1`, never an edit to it;
+3. `minimal_legal` and `full_rich` bundles;
 4. three paired trials per model arm;
 5. exact preseason and preview success-or-R3-fallback operation.
 
-**A's accounting gate is scoped to A's components** (I16a). A rich component still `due` does not
-block the safeguard — it is reported honestly and blocks only B.
+**Policy lifecycle — the correction that makes A independent.** The prior revision had B2 create and
+freeze the single `source_policy_2026.json`, while A3's accounting, A5's bundles and A7's seals all
+required a frozen matrix. A could not run without an artifact only B produced. Resolved by **two
+separately versioned, immutable policy files**:
+
+| Version                      | Scope        | Frozen in                | Governs                      |
+| ---------------------------- | ------------ | ------------------------ | ---------------------------- |
+| `source_policy_2026.v1.json` | `baseline`   | **A1b**, before A2/A3/A5 | `record_points`              |
+| `source_policy_2026.v2.json` | `model_arms` | B2                       | `minimal_legal`, `full_rich` |
+
+Each run binds the **locator and hash of the version in force for its arm**. `v2` may set different
+values for a source it shares with `v1` — those govern only B's arms — but it **must not modify
+`v1`'s bytes and must not change the verification result of any seal already bound to `v1`**
+(I47–I49). A's seals cite `v1` permanently.
+
+**A's accounting gate is scoped to A's components** (I16a). A non-baseline component still `due` does
+not block the safeguard — it is reported honestly and blocks only B.
 
 ## 4. Files
 
-| Path                                                                                                                                                      | Responsibility                                              | Git            |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------- |
-| `.gitignore`                                                                                                                                              | ignore private roots — **authorized surface for A1 and A5** | tracked        |
-| `scripts/capture_2026.py`                                                                                                                                 | envelope write/verify, producers, accounting                | tracked        |
-| `scripts/cutoff_2026.py`                                                                                                                                  | kickoff qualification, cutoff receipt                       | tracked        |
-| `scripts/bundle_2026.py`                                                                                                                                  | payload projection, bundle compiler, capture manifest       | tracked        |
-| `scripts/seal_2026.py`                                                                                                                                    | run receipts, claims, seals, reload verify, rederive        | tracked        |
-| `scripts/tests/test_capture_2026.py`, `test_cutoff_2026.py`, `test_bundle_2026.py`, `test_seal_2026.py`, `test_privacy_boundary.py`, `test_p_only_e2e.py` | §7                                                          | tracked        |
-| `content/governance/capture_table_2026.json`                                                                                                              | eight groups, twelve components                             | tracked        |
-| `content/governance/source_policy_2026.json`                                                                                                              | **frozen** source-policy + arm-membership matrix (S3)       | tracked        |
-| `content/governance/runner_config_2026.json`                                                                                                              | **frozen** shared model-arm binding (S7)                    | tracked        |
-| `content/governance/evaluation_config_2026.json`                                                                                                          | **frozen** scoring + aggregation (S10)                      | tracked        |
-| `data/captures/2026/public/`, `data/captures/2026/_receipts/`                                                                                             | public envelopes, accounting + cutoff receipts              | tracked        |
-| `content/seals/2026/{edition_id}/{arm_id}/trial{n}/`                                                                                                      | seals, decisions, claims, run receipts                      | tracked        |
-| `private_captures/2026/`, `private_bundles/2026/`                                                                                                         | private envelopes and private bundles                       | **gitignored** |
-| `docs/superpowers/plans/capture-manual-ingest.md`                                                                                                         | chat ingestion procedure                                    | tracked        |
+| Path                                                                                                                                                      | Responsibility                                                    | Git            |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | -------------- |
+| `.gitignore`                                                                                                                                              | ignore private roots — **authorized surface for A1 and A5**       | tracked        |
+| `scripts/capture_2026.py`                                                                                                                                 | envelope write/verify, producers, accounting                      | tracked        |
+| `scripts/cutoff_2026.py`                                                                                                                                  | kickoff qualification, cutoff receipt                             | tracked        |
+| `scripts/bundle_2026.py`                                                                                                                                  | payload projection, bundle compiler, capture manifest             | tracked        |
+| `scripts/seal_2026.py`                                                                                                                                    | run receipts, claims, seals, reload verify, rederive              | tracked        |
+| `scripts/tests/test_capture_2026.py`, `test_cutoff_2026.py`, `test_bundle_2026.py`, `test_seal_2026.py`, `test_privacy_boundary.py`, `test_p_only_e2e.py` | §7                                                                | tracked        |
+| `content/governance/capture_table_2026.json`                                                                                                              | eight groups, twelve components                                   | tracked        |
+| `content/governance/source_policy_2026.v1.json`                                                                                                           | **frozen in A1b** — baseline policy, governs `record_points` (S3) | tracked        |
+| `content/governance/source_policy_2026.v2.json`                                                                                                           | **frozen in B2** — model-arm policy; never edits `v1` (S3)        | tracked        |
+| `content/governance/runner_config_2026.json`                                                                                                              | **frozen** shared model-arm binding (S7)                          | tracked        |
+| `content/governance/evaluation_config_2026.json`                                                                                                          | **frozen** scoring + aggregation (S10)                            | tracked        |
+| `data/captures/2026/public/`, `data/captures/2026/_receipts/`                                                                                             | public envelopes, accounting + cutoff receipts                    | tracked        |
+| `content/seals/2026/{edition_id}/{arm_id}/trial{n}/`                                                                                                      | seals, decisions, claims, run receipts                            | tracked        |
+| `private_captures/2026/`, `private_bundles/2026/`                                                                                                         | private envelopes and private bundles                             | **gitignored** |
+| `docs/superpowers/plans/capture-manual-ingest.md`                                                                                                         | chat ingestion procedure                                          | tracked        |
 
 `CAPTURE_TABLE_PATH` **must be defined** as a module constant resolving to
 `content/governance/capture_table_2026.json`. The prior revision referenced it without defining it.
@@ -134,29 +155,37 @@ independently: `{source_id, required_for[], mechanism, cadence, availability_win
 status ∈ {captured, due, not_due, error}, captured_at, payload_sha256, envelope_sha256, error,
 acquisition_trigger}`.
 
-**S3 — Source-policy and arm-membership matrix** (`source_policy_2026.json`) — **frozen and hashed
-before any run.** One row per source, covering all twelve capture components **plus** the
-non-capture qualified sources:
+**S3 — Source-policy and arm-membership matrix** — **a versioned family**, each version frozen and
+hashed before any run that cites it. `v1` (scope `baseline`) is frozen in **A1b**; `v2` (scope
+`model_arms`) in **B2**. A version is written once and never edited. One row per source, covering
+the twelve capture components **plus** the non-capture qualified sources. Header fields:
+`policy_version`, `scope ∈ {baseline, model_arms}`, `frozen_at`, `policy_sha256`. Rows:
 
-| Row field                         | Meaning                                                                                             |
-| --------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `source_id`                       | the twelve components, plus `standings_2025`, `league_history_{2022,2023,2024}`, `player_crosswalk` |
-| `kind`                            | `capture` \| `qualified_artifact`                                                                   |
-| `locator_or_endpoint`             | exact path or endpoint                                                                              |
-| `arms`                            | subset of `{record_points, minimal_legal, full_rich}` — **exact** membership                        |
-| `editions`                        | subset of `{2026-preseason, 2026-wk01-preview}`                                                     |
-| `required_for`                    | arms for which absence is fatal                                                                     |
-| `availability_window`             | `{opens_at_rule, closes_at_rule}`                                                                   |
-| `freshness`                       | max age for `captured`; `null` = existence suffices                                                 |
-| `empty_valid`                     | whether a legitimately empty payload counts as `captured`                                           |
-| `known_at_basis`                  | how `known_at` is defensibly established                                                            |
-| `chat_refresh`                    | `initial` and `subsequent` rules (chat row only)                                                    |
-| `policy_version`, `matrix_sha256` | freeze identity                                                                                     |
+| Row field                                  | Meaning                                                                                             |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `source_id`                                | the twelve components, plus `standings_2025`, `league_history_{2022,2023,2024}`, `player_crosswalk` |
+| `kind`                                     | `capture` \| `qualified_artifact`                                                                   |
+| `locator_or_endpoint`                      | exact path or endpoint                                                                              |
+| `arms`                                     | subset of `{record_points, minimal_legal, full_rich}` — **exact** membership                        |
+| `editions`                                 | subset of `{2026-preseason, 2026-wk01-preview}`                                                     |
+| `required_for`                             | arms for which absence is fatal                                                                     |
+| `availability_window`                      | `{opens_at_rule, closes_at_rule}`                                                                   |
+| `freshness`                                | max age for `captured`; `null` = existence suffices                                                 |
+| `empty_valid`                              | whether a legitimately empty payload counts as `captured`                                           |
+| `known_at_basis`                           | how `known_at` is defensibly established                                                            |
+| `chat_refresh`                             | `initial` and `subsequent` rules (chat row only)                                                    |
+| `policy_version`, `scope`, `policy_sha256` | freeze identity                                                                                     |
 
 `player_crosswalk` is the **shared player-identity source used identically by both model arms** —
 same locator, same hash, in both bundles. `standings_2025` is R5's source.
 `league_history_{2022,2023,2024}` are `full_rich`-only. **"All available" and "required rich family"
-are not admissible descriptions**; membership is whatever this matrix says and nothing else.
+are not admissible descriptions**; membership is whatever the cited policy version says.
+
+**Version scope.** `v1` rows carry `arms ⊆ {record_points}` and are sufficient on their own for
+baseline accounting, bundle construction, sealing and rederivation — that sufficiency is A1b's gate.
+`v2` rows carry `arms ⊆ {minimal_legal, full_rich}`. Where a source appears in both, each version
+governs only its own arms; the versions need not agree, and a `v2` value never reaches a `v1`-bound
+seal.
 
 **S4 — Cutoff-qualification receipt.** `{season, kickoff_utc, kickoff_game_id,
 kickoff_source_locator, kickoff_source_envelope_sha256, derivation_version, preseason_cutoff_utc,
@@ -173,7 +202,7 @@ not only capture identities:
 | `decision_input_payload`                          | the **canonical rendered payload** handed to the runner                                             |
 | `decision_input_sha256`                           | hash of that payload                                                                                |
 | `projection`                                      | `{ordering_version, redaction_version, projection_version, code_sha256, config_sha256, parameters}` |
-| `matrix_sha256`                                   | the frozen source policy in force                                                                   |
+| `policy_locator`, `matrix_sha256`                 | the **exact policy version** in force for this arm                                                  |
 | `contains_private`                                | true ⇒ written under `private_bundles/`                                                             |
 | `bundle_sha256`                                   | computed from content; **never caller-supplied**                                                    |
 
@@ -192,7 +221,8 @@ every model receipt**, identical across `minimal_legal` and `full_rich`.
 
 **S8 — Decision-run receipt.** `decision_run_id, edition_id, arm_id, trial_id, runner_kind,
 bundle_sha256, decision_input_sha256, capture_manifest_sha256, cutoff_receipt_locator,
-cutoff_receipt_sha256, matrix_sha256, predecessor_decision_hash, predecessor_null_reason,
+cutoff_receipt_sha256, policy_locator, matrix_sha256, predecessor_decision_hash,
+predecessor_null_reason,
 started_at, ended_at, output_decision_sha256`. `state_hash` is **null with a recorded reason** — no
 `state_at` exists pre-kernel. Deterministic adds `code_sha256, config_sha256, input_hashes`. Model
 adds `runner_config_sha256` (S7).
@@ -211,7 +241,8 @@ non-deterministic runners; `evaluation_config_sha256`.
 
 **S11 — Seal.** `{edition_id, kind, season, arm_id, trial_id, cutoff_utc, cutoff_receipt_locator,
 cutoff_receipt_sha256, ended_at, sealed_at, label ∈ {prospective, retrospective}, bundle_sha256,
-bundle_locator, decision_input_sha256, capture_manifest_sha256, matrix_sha256, decision_sha256,
+bundle_locator, decision_input_sha256, capture_manifest_sha256, policy_locator, matrix_sha256,
+decision_sha256,
 decision_locator, claims_sha256, claims_locator, receipt_sha256, receipt_locator,
 predecessor_decision_hash, runner_kind, decision_hash}`. `decision_hash` covers every other field;
 nothing binds `decision_hash` — the chain is acyclic.
@@ -336,7 +367,33 @@ experiment_status ∈ {complete, unavailable}, reason, computed_at}`. `experimen
 - **I35** `experiment_status` is **derived** from the seven verified prospective seals per edition
   (S12), never manually asserted. Preseason and preview are computed independently.
 - **I46** R5's baseline is reproducible: regular season = weeks `1 .. playoff_week_start − 1`;
-  ordering wins ↓, points-for ↓, `roster_id` ↑; source locator and hash bound into bundle and seal.
+  wins and points-for are **recomputed** from `weeks[playoff_week_start − 2].standings` and
+  **cross-checked** against `roster_map[*].final_record`, failing closed on disagreement — a stored
+  season-end aggregate is corroboration, never the input; ordering wins ↓, points-for ↓,
+  `roster_id` ↑; source locator and hash bound into bundle and seal.
+
+**Policy lifecycle**
+
+- **I47** A policy version is **immutable once frozen**. `freeze` writes exactly one version file,
+  refuses an already-frozen version, and never writes or modifies another version's file.
+- **I48** Every bundle, run receipt and seal binds `policy_locator` + `matrix_sha256` of the version
+  in force **for that arm**; reload re-reads that locator and verifies it still hashes to the bound
+  value.
+- **I49** Freezing `v2` leaves `v1`'s bytes unchanged **and** leaves the verification result of every
+  `v1`-bound seal unchanged. A `v2` value never reaches a `v1`-bound seal.
+- **I52** `v1` alone is **sufficient** for baseline accounting, bundle construction, sealing and
+  rederivation: with only `v1` present and no `v2` on disk, A3 through A7 complete. This is A1b's
+  gate and the thing the prior lifecycle got backwards.
+
+**Tranche A independence**
+
+- **I50** A7's required-source set is **exactly** the four sources enumerated in §8; the status of
+  any other component — `due`, `not_due` or `error` — cannot block A7. Non-baseline producers may
+  run, fail, and be reported during A without affecting the safeguard.
+- **I51** Baseline franchise continuity joins 2025 → 2026 by **`owner_id`**, not by `roster_id`
+  (the two seasons are different Sleeper leagues, so `roster_id` is not durable across them). A 2026
+  franchise whose owner has no 2025 record sorts **last** under R5's stated ordering — 0 wins, 0
+  points-for, `roster_id` ascending — which is a consequence of R5, not an additional rule.
 
 ## 7. Named tests
 
@@ -393,6 +450,16 @@ Every test must be **observed failing** with its rule removed. A green suite alo
 | `test_experiment_status_derived_from_seven_seals` / `test_manual_status_assertion_rejected` / `test_preseason_failure_does_not_contaminate_preview`                                                 | I35    |
 | `test_baseline_uses_playoff_week_start_and_tiebreaks` / `test_baseline_source_locator_and_hash_bound`                                                                                               | I46    |
 | `test_matrix_frozen_before_any_run` / `test_matrix_drift_invalidates_runs`                                                                                                                          | S3     |
+| `test_baseline_recomputes_wins_and_pf_and_crosschecks_final_record`                                                                                                                                 | I46    |
+| `test_policy_version_immutable_and_freeze_refuses_overwrite`                                                                                                                                        | I47    |
+| `test_freeze_never_writes_another_version_file`                                                                                                                                                     | I47    |
+| `test_bundle_receipt_seal_bind_policy_locator_and_hash`                                                                                                                                             | I48    |
+| `test_freezing_v2_leaves_v1_bytes_and_v1_bound_seals_unchanged`                                                                                                                                     | I49    |
+| `test_v1_alone_completes_accounting_bundle_seal_and_rederive`                                                                                                                                       | I52    |
+| `test_a7_required_set_is_exactly_the_four_named_sources`                                                                                                                                            | I50    |
+| `test_nonbaseline_component_due_or_error_cannot_block_a7`                                                                                                                                           | I50    |
+| `test_baseline_joins_2025_to_2026_by_owner_id`                                                                                                                                                      | I51    |
+| `test_unmatched_2026_franchise_sorts_last_deterministically`                                                                                                                                        | I51    |
 
 **End-to-end** — `test_p_only_e2e.py`, two tests:
 
@@ -414,25 +481,48 @@ with its rule removed** → commit. Binary gates.
 
 ### Tranche A — prospective safeguard
 
-| Task   | Delivers                                                                                                                                                            | Gate                                                  |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| **A1** | `.gitignore` private roots, envelope schema, write/verify, `CAPTURE_TABLE_PATH`, capture table                                                                      | I1–I5, I9, I37–I41 green **before any private write** |
-| **A2** | A-scoped producers (`sleeper_league`, `sleeper_users`, `sleeper_rosters`, `draft_meta`, `draft_picks`, `sleeper_transactions`, `sleeper_matchups`, `nfl_schedules`) | I7, I8 green                                          |
-| **A3** | tranche-scoped accounting receipt + CLI                                                                                                                             | I10–I13, I16a, I16b green                             |
-| **A4** | cutoff qualification + receipt                                                                                                                                      | I17, I18, I42, R1 green                               |
-| **A5** | projection rules, bundle compiler, capture manifest, R5 baseline input                                                                                              | I19–I23, I43, I46 green                               |
-| **A6** | deterministic run receipt, claims, seal, reload verify, rederive                                                                                                    | I24–I32, I44 green; E2E-A green                       |
-| **A7** | **operate**: seal preseason + preview baselines before their cutoffs                                                                                                | seals verify `prospective`                            |
+| Task    | Delivers                                                                                                                                                                                                                                                                                                                                                                                             | Gate                                                         |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **A1**  | `.gitignore` private roots, envelope schema, write/verify, `CAPTURE_TABLE_PATH`, capture table                                                                                                                                                                                                                                                                                                       | I1–I5, I9, I37–I41 green **before any private write**        |
+| **A1b** | **freeze baseline policy `v1`** — the four A7-required sources plus every component A attempts, scoped `arms: [record_points]`                                                                                                                                                                                                                                                                       | I47–I49, I52 green; `v1` sufficient with **no `v2` on disk** |
+| **A2**  | producers: the **three A7-required captures first** (`sleeper_rosters`, `sleeper_league`, `nfl_schedules`; the fourth required source, `standings_2025`, is a qualified artifact already on disk and needs no producer), then the other prospective captures (`sleeper_users`, `draft_meta`, `draft_picks`, `sleeper_transactions`, `sleeper_matchups`) — attempted and reported, **never blocking** | I7, I8, I50 green                                            |
+| **A3**  | tranche-scoped accounting receipt + CLI                                                                                                                                                                                                                                                                                                                                                              | I10–I13, I16a, I16b green                                    |
+| **A4**  | cutoff qualification + receipt                                                                                                                                                                                                                                                                                                                                                                       | I17, I18, I42, R1 green                                      |
+| **A5**  | projection rules, bundle compiler, capture manifest, R5 baseline input                                                                                                                                                                                                                                                                                                                               | I19–I23, I43, I46, I48, I51 green                            |
+| **A6**  | deterministic run receipt, claims, seal, reload verify, rederive                                                                                                                                                                                                                                                                                                                                     | I24–I32, I44 green; E2E-A green                              |
+| **A7**  | **operate**: seal preseason + preview baselines before their cutoffs                                                                                                                                                                                                                                                                                                                                 | seals verify `prospective`                                   |
+
+### A7 required-source set — exhaustive
+
+Derived from what the `record_points` decision payload actually consumes, not from group membership.
+**These four, and nothing else, can block A7** (I50):
+
+| Source                                              | Why fatal                                                                                                                                                                                                           | In the decision payload?      |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `standings_2025` (`data/2025/season_combined.json`) | the ordering input: `weeks[..playoff_week_start−2].standings` for recomputed wins/points-for, `roster_map` for `roster_id → owner_id` and the `final_record` cross-check, and `playoff_week_start` for the boundary | **yes**                       |
+| `sleeper_rosters` (2026)                            | defines which franchises exist to rank and carries the `owner_id` join key                                                                                                                                          | **yes**                       |
+| `sleeper_league` (2026)                             | league-identity verification (I9); the seal must bind the league it is about                                                                                                                                        | no — verification and binding |
+| `nfl_schedules` (2026)                              | cutoff qualification (A4), which A7 depends on                                                                                                                                                                      | no — determines the cutoff    |
+
+**Explicitly not fatal to A** — attempted and reported, blocking only B: `sleeper_users`,
+`draft_meta`, `draft_picks`, `sleeper_transactions`, `sleeper_matchups`, `sleeper_projections`,
+`nfl_team_context`, `nfl_injuries`, `chat_export`.
+
+`sleeper_users` is the instructive one. It sits in the same `league_identity` group as
+`sleeper_league`, but the 2025→2026 join is by `owner_id`, which `sleeper_rosters` already carries;
+`sleeper_users` adds display names, which are presentation, not decision. Group membership is
+therefore not a proxy for requiredness — which is why S3 carries `required_for` **per component**
+and I11 evaluates the tranche in scope.
 
 ### Tranche B — rich prospective contrast
 
-| Task   | Delivers                                                                                       | Gate                                          |
-| ------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| **B1** | remaining producers (`sleeper_projections`, `nfl_team_context`, `nfl_injuries`, `chat_export`) | I36 green — all twelve                        |
-| **B2** | frozen `source_policy_2026.json`, `runner_config_2026.json`, `evaluation_config_2026.json`     | Blake-approved, hashed, frozen before any run |
-| **B3** | `minimal_legal` + `full_rich` bundles                                                          | I23 green                                     |
-| **B4** | 3 paired trials per model arm                                                                  | I33, I34, I45 green                           |
-| **B5** | derived experiment status + R3 fallback                                                        | I35 green; E2E-B green                        |
+| Task   | Delivers                                                                                       | Gate                                                                                                      |
+| ------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **B1** | remaining producers (`sleeper_projections`, `nfl_team_context`, `nfl_injuries`, `chat_export`) | I36 green — all twelve                                                                                    |
+| **B2** | frozen **model-arm policy `v2`**, `runner_config_2026.json`, `evaluation_config_2026.json`     | Blake-approved, hashed, frozen before any B run; **I49 re-run: `v1` and every `v1`-bound seal unchanged** |
+| **B3** | `minimal_legal` + `full_rich` bundles                                                          | I23 green                                                                                                 |
+| **B4** | 3 paired trials per model arm                                                                  | I33, I34, I45 green                                                                                       |
+| **B5** | derived experiment status + R3 fallback                                                        | I35 green; E2E-B green                                                                                    |
 
 ### Commands
 
@@ -444,6 +534,8 @@ $PY -m pytest scripts/tests/ -q                                    # >= 343 pass
 $PY scripts/capture_2026.py --help                                 # exit 0 WITH output
 $PY scripts/capture_2026.py --season 2026 --tranche A              # league id read + verified
 $PY scripts/cutoff_2026.py --season 2026 --write-receipt
+$PY scripts/bundle_2026.py --edition 2026-preseason --arm record_points \
+    --policy content/governance/source_policy_2026.v1.json   # policy version is explicit
 $PY scripts/seal_2026.py --verify-all
 $PY scripts/seal_2026.py --rederive-all                            # regenerates decision-input payloads
 $PY scripts/seal_2026.py --experiment-status --edition 2026-preseason
@@ -456,16 +548,23 @@ depends on its exit code — a `main()` that is never called exits 0 while doing
 
 ```bash
 # A7 -- safeguard. Runs as soon as A6 passes; does NOT wait for tranche B.
+# Gate on the FOUR required sources only. Any other component may be due or error.
+$PY scripts/capture_2026.py --season 2026 --tranche A || exit 1
 for ed in 2026-preseason 2026-wk01-preview; do
-  $PY scripts/bundle_2026.py --edition "$ed" --arm record_points || exit 1
+  $PY scripts/bundle_2026.py --edition "$ed" --arm record_points \
+      --policy content/governance/source_policy_2026.v1.json || exit 1
   $PY scripts/seal_2026.py   --edition "$ed" --arm record_points --trial 1 || exit 1
 done
+# Independence check: A must complete with NO v2 on disk (I52).
+test ! -f content/governance/source_policy_2026.v2.json \
+  || echo "note: v2 exists; A still cites v1 and its seals are unaffected (I49)"
 
 # B5 -- full experiment: 7 runs per edition (1 + 3 + 3).
 for ed in 2026-preseason 2026-wk01-preview; do
   for arm in minimal_legal full_rich; do
     for t in 1 2 3; do
-      $PY scripts/bundle_2026.py --edition "$ed" --arm "$arm" || exit 1
+      $PY scripts/bundle_2026.py --edition "$ed" --arm "$arm" \
+          --policy content/governance/source_policy_2026.v2.json || exit 1
       $PY scripts/seal_2026.py   --edition "$ed" --arm "$arm" --trial "$t" || exit 1
     done
   done
@@ -487,40 +586,76 @@ explicit approval of that exact action and are **not** authorized by approving t
 
 ## 9. Open items
 
-1. **B2 configurations require Blake's approval before freezing** — runner, source policy,
-   transformations, evaluation. B cannot start without them; A is unaffected.
+1. **B2 configurations require Blake's approval before freezing** — model-arm policy `v2`, runner,
+   transformations, evaluation. B cannot start without them; **A is unaffected**, because A freezes
+   its own `v1` at A1b.
+   1b. **`v1`'s contents require Blake's approval at A1b** — it is immutable once frozen and every A
+   seal cites it permanently. Its scope is small (the four required sources plus the components A
+   attempts), but a mistake in it cannot be corrected in place, only superseded by a `v3` that A's
+   existing seals will not cite.
 2. **Sleeper projections endpoint shape** for 2026 is unverified against a live response (B1).
 3. **Preseason cutoff is 31 days out** (`2026-09-03T00:20:00Z`). Tranche A exists so this date is met
    by the safeguard regardless of B's progress.
 
 ## 10. Self-review
 
-**Sequencing corrected.** The prior revision made every seal wait on F2's full producer set, so a
-projections or `nfl_context` delay would have removed the very safeguard R3 promises. A now depends
-only on the eight components it needs, its accounting gate is tranche-scoped (I16a), and A7 operates
-without B. R3 is executable.
+Scoped to the two traces requested; no other section reopened.
 
-**Bounded corrections applied.** Twelve components, not eleven, with I36 and a producer-enumeration
-test. `.gitignore` added to A1/A5's authorized surface with five privacy-boundary invariants
-(I37–I41) proven by `git check-ignore`, `git ls-files`, resolved-path containment, traversal/reparse
-rejection, and the index guard — all required **before** any private write. Frozen source-policy and
-arm-membership matrix (S3) naming all twelve components plus `standings_2025`,
-`league_history_{2022,2023,2024}` and the shared `player_crosswalk`, with requiredness, windows,
-freshness, empty-valid, known-at basis and chat-refresh rules. S5 now binds the canonical
-decision-input payload with versioned ordering/redaction/projection and their code/config hashes,
-and I21 requires rederivation to regenerate it. Cutoff receipt bound through S5/S8/S11 with
-cross-verification on reload (I42); kickoff attributed to the **official NFL schedule**. Run and
-experiment binding completed: one immutable `runner_config_sha256` in every model receipt (I33),
-bundle and manifest identity in every claim (I32), frozen evaluation config (I45), latest-qualified
-predecessor with a reasoned null (I44), and derived experiment status (I35, S12). F8 replaced by a
-literal edition-run matrix covering all seven runs per edition and the R3 fallback.
+### 1. Policy creation → accounting → baseline bundle → seal
 
-**Length.** ~500 lines, still code-free: 0 `def`/`class`, no implementation bodies. The overage is
-governing matrices and invariants, which is what the guardrail was protecting, not pseudocode.
+| Step                                        | Cites                                                                        | Exists by  |
+| ------------------------------------------- | ---------------------------------------------------------------------------- | ---------- |
+| **A1b** freeze `source_policy_2026.v1.json` | — writes it                                                                  | A1b        |
+| **A3** accounting, `--tranche A`            | `v1` rows: `required_for`, `availability_window`, `freshness`, `empty_valid` | A1b ✅     |
+| **A5** baseline bundle                      | `v1` for arm membership; binds `policy_locator` + `matrix_sha256` = `v1`     | A1b ✅     |
+| **A6/A7** run receipt + seal                | binds the same `v1` locator + hash                                           | A1b ✅     |
+| **A7** rederivation                         | re-reads `v1` at the bound locator, re-verifies its hash                     | A1b ✅     |
+| **B2** freeze `v2`                          | writes a **new file**; `v1` untouched                                        | after A ✅ |
 
-**Known gap.** The 2026 projections endpoint shape is unverified (open item 2) — a B1 risk only, and
-A is designed so it cannot become an A risk.
+The cycle is broken: nothing in A cites an artifact that B creates. I52 states the sufficiency
+claim directly — with **no `v2` on disk**, A3 through A7 complete — and A1b's gate is that test, so
+the independence is verified rather than asserted. I47 makes each version write-once and forbids a
+freeze from touching another version's file; I49 requires that freezing `v2` change neither `v1`'s
+bytes nor the verification result of any `v1`-bound seal, re-run as a B2 gate. I48 makes every
+bundle, receipt and seal name **which version** it was cut under, so a two-version world is never
+ambiguous.
 
-**What would make this contract wrong.** If A7 has not sealed by `2026-09-03T00:20:00Z`, the
-preseason baseline is `retrospective` by construction and that edition's prospective record is lost.
-Per I26 nothing backdates it. That date is the reason tranche A exists.
+Residual risk, stated: `v1` is immutable, so an error in it is not correctable in place — only
+supersedable by a version A's existing seals will not cite. That is the intended property, and it is
+why open item 1b asks for Blake's approval of `v1`'s contents at A1b rather than treating it as
+mechanical.
+
+### 2. The exact A7 required-source set
+
+Four, derived from what the `record_points` payload consumes:
+
+| Source                   | Role                                                                     | In payload |
+| ------------------------ | ------------------------------------------------------------------------ | ---------- |
+| `standings_2025`         | recomputed wins/points-for, `roster_id → owner_id`, `playoff_week_start` | yes        |
+| `sleeper_rosters` (2026) | the franchise set to rank; carries the `owner_id` join key               | yes        |
+| `sleeper_league` (2026)  | league-identity verification (I9); the seal binds the league             | no         |
+| `nfl_schedules` (2026)   | cutoff qualification, which A7 depends on                                | no         |
+
+Nine components cannot block A7: `sleeper_users`, `draft_meta`, `draft_picks`,
+`sleeper_transactions`, `sleeper_matchups`, `sleeper_projections`, `nfl_team_context`,
+`nfl_injuries`, `chat_export`. They are implemented and attempted during A — the evidence is
+perishable and B needs it — and reported honestly as `due`/`not_due`/`error`. I50 makes that a
+test, not a convention.
+
+Two findings from tracing rather than assuming:
+
+- **`sleeper_users` is not fatal**, though it shares a group with `sleeper_league`. The 2025→2026
+  join is by `owner_id`, which `sleeper_rosters` already carries; users adds display names, which
+  are presentation. Group membership is not a proxy for requiredness — hence per-component
+  `required_for` in S3.
+- **The join must be `owner_id`, not `roster_id`** (I51): 2025 and 2026 are different Sleeper
+  leagues (`1180228858937966592` vs `1312884727480352768`), so `roster_id` is not durable across
+  them. Verified: all twelve 2026 owners match 2025 in the current snapshot — evidence the join
+  works, not a guarantee, since the snapshot predates capture. An unmatched owner sorts last under
+  R5's stated ordering (0 wins, 0 points-for, `roster_id` ↑), a consequence of R5 rather than a new
+  rule.
+
+I also tightened I46 while tracing: `final_record` is a **stored season-end aggregate**, and trusting
+one is the exact defect that produced this project's 46 leaks. Wins and points-for are recomputed
+from `weeks[playoff_week_start − 2].standings` and the stored value is used only as a cross-check
+that fails closed.
