@@ -67,3 +67,8 @@ docs/sessions/
 
 # Media description progress cache (regenerable)
 content/chat/.media_progress.json
+
+# P-only 2026 private capture/bundle roots (league-private evidence — I37;
+# never tracked, never `git add -f`; staging guard I41 backstops the index)
+private_captures/
+private_bundles/

@@ -1,0 +1,19 @@
+{
+  "season": 2026,
+  "groups": [
+    {
+      "group": "league_identity",
+      "components": ["sleeper_league", "sleeper_users"]
+    },
+    { "group": "rosters", "components": ["sleeper_rosters"] },
+    { "group": "draft", "components": ["draft_meta", "draft_picks"] },
+    { "group": "transactions", "components": ["sleeper_transactions"] },
+    { "group": "league_matchups", "components": ["sleeper_matchups"] },
+    { "group": "projections", "components": ["sleeper_projections"] },
+    {
+      "group": "nfl_context",
+      "components": ["nfl_schedules", "nfl_team_context", "nfl_injuries"]
+    },
+    { "group": "chat", "components": ["chat_export"] }
+  ]
+}
