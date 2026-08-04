@@ -694,6 +694,7 @@ def freeze_policy(
     candidate_path,
     version,
     *,
+    expected_candidate_sha256=None,
     governance_dir=None,
     capture_table_path=None,
     now=None,
@@ -703,6 +704,11 @@ def freeze_policy(
     The candidate carries policy_version, scope and rows; freeze stamps
     frozen_at + policy_sha256 and writes the canonical bytes. An already-
     frozen version refuses; no other version's file is ever touched.
+
+    The freeze boundary is also the APPROVAL boundary: the caller must pass
+    the sha256 of the canonical unstamped candidate that was approved, and a
+    missing or mismatched value fails closed BEFORE any file is created — a
+    merely schema-valid candidate is not an approved candidate.
     """
     if not isinstance(version, str) or not _POLICY_VERSION_RE.fullmatch(version):
         raise CaptureError(f"version must match v<N>, got {version!r}")
@@ -721,6 +727,18 @@ def freeze_policy(
         raise CaptureError(
             f"candidate policy_version {candidate.get('policy_version')!r} "
             f"!= freeze version {version!r}"
+        )
+
+    if not expected_candidate_sha256:
+        raise CaptureError(
+            "freeze requires expected_candidate_sha256 — the hash of the "
+            "approved canonical candidate; refusing to freeze unbound (fail closed)"
+        )
+    actual_candidate_sha256 = sha256_hex(canonical_bytes(candidate))
+    if actual_candidate_sha256 != expected_candidate_sha256:
+        raise CaptureError(
+            f"candidate is not the approved one: approved "
+            f"{expected_candidate_sha256}, actual {actual_candidate_sha256}"
         )
 
     target = policy_path(version, governance_dir)
@@ -1209,6 +1227,13 @@ def run_tranche(
     policy = load_policy(
         policy_path if policy_path is not None else PRODUCTION_V1_POLICY_PATH
     )
+    # Producers receive the CALLER'S clock argument, not a pre-resolved one:
+    # in production that is None, so each producer stamps captured_at AFTER
+    # its acquisition completes — a fetch that starts before a cutoff and
+    # finishes after it can never be recorded as pre-cutoff. An explicitly
+    # injected fixture clock stays deterministic. The resolved instant below
+    # is only the accounting/receipt clock.
+    producer_clock = now
     now = now if now is not None else datetime.now(timezone.utc)
     public = Path(public_root) if public_root is not None else PUBLIC_CAPTURE_ROOT
     private = Path(private_root) if private_root is not None else PRIVATE_CAPTURE_ROOT
@@ -1221,7 +1246,7 @@ def run_tranche(
                     source_id,
                     league_json_path=league_json_path,
                     public_root=public,
-                    now=now,
+                    now=producer_clock,
                 )
             except Exception as exc:  # noqa: BLE001 — receipt MUST still
                 # be written (I16b); nflreadpy/polars/OS errors become honest
@@ -1257,6 +1282,14 @@ def main(argv=None) -> int:
         "--version",
         metavar="vN",
         help="policy version to freeze, e.g. v1 (required with --freeze-policy)",
+    )
+    parser.add_argument(
+        "--expected-candidate-sha256",
+        metavar="SHA256",
+        help=(
+            "sha256 of the approved canonical candidate (required with "
+            "--freeze-policy; the freeze boundary is the approval boundary)"
+        ),
     )
     parser.add_argument("--season", type=int, help="season (2026 only)")
     parser.add_argument(
@@ -1307,8 +1340,19 @@ def main(argv=None) -> int:
         if not args.version:
             print("--freeze-policy requires --version vN", file=sys.stderr)
             return 2
+        if not args.expected_candidate_sha256:
+            print(
+                "--freeze-policy requires --expected-candidate-sha256 "
+                "(the approved candidate's canonical hash)",
+                file=sys.stderr,
+            )
+            return 2
         try:
-            target = freeze_policy(args.freeze_policy, args.version)
+            target = freeze_policy(
+                args.freeze_policy,
+                args.version,
+                expected_candidate_sha256=args.expected_candidate_sha256,
+            )
         except CaptureError as exc:
             print(f"freeze refused: {exc}", file=sys.stderr)
             return 1

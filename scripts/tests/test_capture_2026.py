@@ -239,11 +239,20 @@ def write_candidate(tmp_path: Path, doc=None, name="candidate.json") -> Path:
     return path
 
 
+def candidate_sha(doc) -> str:
+    """The approval identity: sha256 of the canonical unstamped candidate."""
+    from scripts.capture_2026 import canonical_bytes, sha256_hex
+
+    return sha256_hex(canonical_bytes(doc))
+
+
 def freeze_v1(tmp_path: Path, **overrides):
     gov = overrides.pop("governance_dir", tmp_path / "governance")
+    doc = build_candidate_policy_v1()
     return freeze_policy(
-        write_candidate(tmp_path),
+        write_candidate(tmp_path, doc),
         "v1",
+        expected_candidate_sha256=candidate_sha(doc),
         governance_dir=gov,
         now=FIXED_NOW,
         **overrides,
@@ -262,10 +271,12 @@ def test_policy_version_immutable_and_freeze_refuses_overwrite(tmp_path):
     assert doc["policy_sha256"] == compute_policy_sha256(doc)
 
     # freezing the same version again is refused and the bytes are untouched
+    doc2 = build_candidate_policy_v1()
     with pytest.raises(CaptureError):
         freeze_policy(
-            write_candidate(tmp_path, name="candidate2.json"),
+            write_candidate(tmp_path, doc2, name="candidate2.json"),
             "v1",
+            expected_candidate_sha256=candidate_sha(doc2),
             governance_dir=gov,
             now=FIXED_NOW,
         )
@@ -289,6 +300,7 @@ def test_freeze_never_writes_another_version_file(tmp_path):
     frozen_v2 = freeze_policy(
         write_candidate(tmp_path, v2_doc, name="candidate_v2.json"),
         "v2",
+        expected_candidate_sha256=candidate_sha(v2_doc),
         governance_dir=gov,
         now=FIXED_NOW,
     )
@@ -340,7 +352,124 @@ def test_v1_matches_schema_and_contains_exactly_the_declared_rows(tmp_path):
         encoding="utf-8",
     )
     with pytest.raises(CaptureError):
-        freeze_policy(dup, "v3", governance_dir=tmp_path / "gov3", now=FIXED_NOW)
+        freeze_policy(
+            dup,
+            "v3",
+            expected_candidate_sha256="0" * 64,  # strict load refuses first
+            governance_dir=tmp_path / "gov3",
+            now=FIXED_NOW,
+        )
+
+
+def test_freeze_requires_and_verifies_approved_candidate_hash(tmp_path):
+    """The freeze boundary IS the approval boundary: absence or mismatch of
+    the approved candidate's canonical sha256 fails closed before any file
+    is created — a merely schema-valid candidate is not an approved one."""
+    doc = build_candidate_policy_v1()
+    path = write_candidate(tmp_path, doc)
+    gov = tmp_path / "gov"
+
+    with pytest.raises(CaptureError, match="fail closed"):
+        freeze_policy(path, "v1", governance_dir=gov, now=FIXED_NOW)
+    assert not gov.exists() or not list(gov.iterdir())
+
+    different = build_candidate_policy_v1()
+    for row in different["rows"]:
+        if row["source_id"] == "sleeper_rosters":
+            row["freshness"] = 999999
+    with pytest.raises(CaptureError, match="not the approved one"):
+        freeze_policy(
+            write_candidate(tmp_path, different, name="different.json"),
+            "v1",
+            expected_candidate_sha256=candidate_sha(doc),  # approved != supplied
+            governance_dir=gov,
+            now=FIXED_NOW,
+        )
+    assert not gov.exists() or not list(gov.iterdir())
+
+    frozen = freeze_policy(
+        path,
+        "v1",
+        expected_candidate_sha256=candidate_sha(doc),
+        governance_dir=gov,
+        now=FIXED_NOW,
+    )
+    assert frozen.exists()
+
+
+def test_capture_timestamp_sampled_after_acquisition(tmp_path):
+    """Production timestamping happens only AFTER successful acquisition: a
+    fetch that starts before a cutoff and completes after it can never be
+    recorded as pre-cutoff (capture-time backdating)."""
+    import time
+    from datetime import datetime as real_datetime
+
+    (tmp_path / "league.json").write_text(
+        '{"league_id": "1312884727480352768"}', encoding="utf-8"
+    )
+    marks = {}
+
+    def slow_fetch(endpoint, **_):
+        marks["cutoff"] = real_datetime.now(timezone.utc)  # cutoff mid-fetch
+        time.sleep(0.002)
+        marks["completed"] = real_datetime.now(timezone.utc)
+        return {"league_id": "1312884727480352768"}
+
+    from scripts.capture_2026 import produce_sleeper_league
+
+    path = produce_sleeper_league(
+        fetch=slow_fetch,
+        league_json_path=tmp_path / "league.json",
+        public_root=tmp_path / "public",
+        now=None,  # PRODUCTION mode: no injected clock
+    )
+    env = json.loads(path.read_text(encoding="utf-8"))
+    stamped = datetime.fromisoformat(env["captured_at"].replace("Z", "+00:00"))
+    assert stamped >= marks["completed"] > marks["cutoff"]
+
+    # the cutoff-crossing consequence: selection at the mid-fetch cutoff
+    # must NOT admit this envelope
+    from scripts.bundle_2026 import _latest_envelope_at_or_before
+
+    cutoff_iso = marks["cutoff"].isoformat().replace("+00:00", "Z")
+    assert (
+        _latest_envelope_at_or_before(
+            "sleeper_league", [tmp_path / "public"], cutoff_iso
+        )
+        is None
+    )
+
+
+def test_run_tranche_passes_unresolved_clock_to_producers(tmp_path, monkeypatch):
+    """run_tranche must not inject a pre-resolved clock into producers:
+    production (now=None) reaches producers as None so they stamp
+    post-acquisition; an explicit fixture clock still reaches them intact."""
+    import scripts.capture_2026 as cap
+
+    seen = []
+
+    def spy_producer(source_id, **kwargs):
+        seen.append(kwargs.get("now"))
+        raise cap.CaptureError("spy: no envelope")
+
+    monkeypatch.setattr(cap, "_run_producer", spy_producer)
+    policy = freeze_v1(tmp_path)
+
+    run_tranche_kwargs = dict(
+        policy_path=policy,
+        public_root=tmp_path / "public",
+        private_root=tmp_path / "private",
+        league_json_path=tmp_path / "league.json",
+        run_producers=True,
+    )
+    from scripts.capture_2026 import run_tranche
+
+    run_tranche("A", receipts_root=tmp_path / "r1", now=None, **run_tranche_kwargs)
+    assert seen == [None, None, None]  # production: producers self-clock
+
+    seen.clear()
+    run_tranche("A", receipts_root=tmp_path / "r2", now=FIXED_NOW, **run_tranche_kwargs)
+    assert seen == [FIXED_NOW, FIXED_NOW, FIXED_NOW]  # fixtures deterministic
 
 
 # ---------------------------------------------------------------------------
@@ -670,6 +799,7 @@ def test_not_due_before_window_due_after(tmp_path):
     policy = freeze_policy(
         write_candidate(tmp_path, candidate),
         "v1",
+        expected_candidate_sha256=candidate_sha(candidate),
         governance_dir=tmp_path / "governance",
         now=FIXED_NOW,
     )

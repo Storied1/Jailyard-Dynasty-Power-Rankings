@@ -281,12 +281,13 @@ def open_run(
     trial_id,
     *,
     bundle,
-    cutoff_receipt_path,
-    policy_path,
     seals_root,
     started_at,
-    repo_root=None,
 ):
+    """Open one run receipt. The FROZEN BUNDLE is authoritative for the
+    cutoff-receipt and policy locators — a caller-supplied path could bind a
+    newer locator to the bundle's older hash and mint a seal that can never
+    verify."""
     if bundle["bundle_sha256"] != compute_bundle_sha256(bundle):
         raise CaptureError("bundle hash does not recompute; refusing to open a run")
     predecessor_hash, null_reason = find_predecessor(
@@ -310,9 +311,9 @@ def open_run(
         "bundle_sha256": bundle["bundle_sha256"],
         "decision_input_sha256": bundle["decision_input_sha256"],
         "source_manifest_sha256": bundle["source_manifest_sha256"],
-        "cutoff_receipt_locator": portable_locator(cutoff_receipt_path, repo_root),
+        "cutoff_receipt_locator": bundle["cutoff_receipt_locator"],
         "cutoff_receipt_sha256": bundle["cutoff_receipt_sha256"],
-        "policy_locator": portable_locator(policy_path, repo_root),
+        "policy_locator": bundle["policy_locator"],
         "matrix_sha256": bundle["matrix_sha256"],
         "predecessor_decision_hash": predecessor_hash,
         "predecessor_null_reason": null_reason,
@@ -428,6 +429,29 @@ def _crosscheck_run_artifacts(receipt, decision, claims, bundle, trial_key, erro
                 errors.append(f"claim for {row.get('owner_id')}: {name} mismatch")
 
 
+def _rederive_equality_check(receipt, decision, claims, bundle, errors):
+    """For the deterministic arm the sealed decision must equal
+    run_record_points(bundle) canonically, and the sealed claims must equal
+    build_claims(decision, bundle, run_id, trial) — a coordinated forgery of
+    decision+claims+receipt (all hashes mutually consistent) cannot survive
+    a re-derivation from the bound bundle. Enforced before sealing AND at
+    reload; model arms (Tranche B) get their own discipline."""
+    if receipt.get("runner_kind") != "deterministic":
+        return
+    expected_decision = run_record_points(bundle)
+    if canonical_json_v1(decision) != canonical_json_v1(expected_decision):
+        errors.append("decision does not rederive from the bundle's decision input")
+        return
+    expected_claims = build_claims(
+        expected_decision,
+        bundle,
+        receipt.get("decision_run_id"),
+        receipt.get("trial_id"),
+    )
+    if canonical_json_v1(claims) != canonical_json_v1(expected_claims):
+        errors.append("claims do not rederive from the decision and bundle")
+
+
 def seal_trial(trial_dir, *, repo_root=None, now=None) -> Path:
     """Seal one CLOSED run (I27). Never double-seals; completing a partial
     trial after a crash is safe because the closed receipt is the input."""
@@ -464,9 +488,29 @@ def seal_trial(trial_dir, *, repo_root=None, now=None) -> Path:
     _crosscheck_run_artifacts(
         receipt, decision, claims, bundle, trial_key, binding_errors
     )
+    _rederive_equality_check(receipt, decision, claims, bundle, binding_errors)
     if binding_errors:
         raise CaptureError(
             "refusing to seal inconsistent run artifacts: " + "; ".join(binding_errors)
+        )
+
+    # every BOUND input must resolve and hash-match BEFORE the exclusive
+    # seal write — a locator/hash split (e.g. a bundle compiled against an
+    # older cutoff receipt while a newer one exists) must never mint an
+    # immutable seal that can only fail verification later
+    input_root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    cutoff_receipt_doc = load_cutoff_receipt(
+        _resolve_locator(receipt["cutoff_receipt_locator"], input_root)
+    )
+    if cutoff_receipt_doc["receipt_sha256"] != receipt["cutoff_receipt_sha256"]:
+        raise CaptureError(
+            "bound cutoff receipt does not hash to the bundle's bound value; "
+            "refusing to seal"
+        )
+    policy_doc = load_policy(_resolve_locator(receipt["policy_locator"], input_root))
+    if policy_doc["policy_sha256"] != receipt["matrix_sha256"]:
+        raise CaptureError(
+            "bound policy does not hash to the bundle's matrix value; refusing to seal"
         )
 
     sealed = now if now is not None else datetime.now(timezone.utc)
@@ -575,11 +619,8 @@ def run_trial(
         arm_id,
         trial_id,
         bundle=bundle,
-        cutoff_receipt_path=cutoff_receipt_path,
-        policy_path=policy_path,
         seals_root=seals,
         started_at=now,
-        repo_root=repo_root,
     )
     decision = run_record_points(bundle)
     closed = close_run(receipt, decision, ended_at=now)
@@ -711,6 +752,9 @@ def verify_seal_dir(trial_dir, *, repo_root=None) -> tuple[bool, list, list]:
         (seal["edition_id"], seal["arm_id"], seal["trial_id"]),
         errors,
     )
+    # …and the deterministic decision/claims must still REDERIVE from the
+    # bound bundle — even a fully re-hashed coordinated forgery fails here
+    _rederive_equality_check(receipt, decision, claims, bundle, errors)
 
     started = _parse_z(receipt["started_at"])
     ended = _parse_z(seal["ended_at"])
@@ -1006,10 +1050,26 @@ def main(argv=None) -> int:
                 return 1
             paths = _production_paths()
             trial_dir = run_trial(args.edition, args.arm, args.trial, **paths)
+            # success is REPORTED only after reload verification and
+            # source-based rederivation both pass on the freshly written seal
+            ok, verify_errors, _ = verify_seal_dir(trial_dir)
+            if not ok:
+                print(
+                    f"sealed but FAILED reload verification: {verify_errors}",
+                    file=sys.stderr,
+                )
+                return 1
+            rederived = rederive_trial(trial_dir)
+            if not rederived["ok"]:
+                print(
+                    f"sealed but FAILED rederivation: {rederived['errors']}",
+                    file=sys.stderr,
+                )
+                return 1
         except CaptureError as exc:
             print(f"trial failed closed: {exc}", file=sys.stderr)
             return 1
-        print(f"sealed: {trial_dir}")
+        print(f"sealed and verified: {trial_dir}")
         return 0
 
     parser.print_usage(sys.stderr)

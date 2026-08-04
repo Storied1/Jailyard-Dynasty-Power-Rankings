@@ -151,7 +151,11 @@ def store_envelope(tmp_path, source_id, payload, captured_at, now=None):
 def make_fixture_policy(tmp_path, repo: Path) -> Path:
     """Freeze a baseline policy whose standings locator points into the
     fixture repo (repo-relative, as production points into the real repo)."""
-    from scripts.capture_2026 import build_candidate_policy_v1
+    from scripts.capture_2026 import (
+        build_candidate_policy_v1,
+        canonical_bytes,
+        sha256_hex,
+    )
 
     candidate = build_candidate_policy_v1()
     for row in candidate["rows"]:
@@ -160,7 +164,11 @@ def make_fixture_policy(tmp_path, repo: Path) -> Path:
     path = tmp_path / "candidate.json"
     path.write_text(json.dumps(candidate), encoding="utf-8")
     return freeze_policy(
-        path, "v1", governance_dir=tmp_path / "governance", now=FIXED_NOW
+        path,
+        "v1",
+        expected_candidate_sha256=sha256_hex(canonical_bytes(candidate)),
+        governance_dir=tmp_path / "governance",
+        now=FIXED_NOW,
     )
 
 

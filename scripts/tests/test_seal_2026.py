@@ -103,8 +103,6 @@ def test_timestamp_ordering_enforced(tmp_path):
                 world["seals_root"] / "2026-preseason" / "record_points" / "bundle.json"
             ).read_text(encoding="utf-8")
         ),
-        cutoff_receipt_path=world["cutoff_receipt_path"],
-        policy_path=world["policy_path"],
         seals_root=world["seals_root"],
         started_at=SEAL_NOW,
     )
@@ -176,8 +174,6 @@ def test_sealing_an_open_run_refused(tmp_path):
         "record_points",
         9,
         bundle=bundle,
-        cutoff_receipt_path=world["cutoff_receipt_path"],
-        policy_path=world["policy_path"],
         seals_root=world["seals_root"],
         started_at=SEAL_NOW,
     )
@@ -793,3 +789,180 @@ def test_production_seal_requires_green_tranche_a_gate(tmp_path, monkeypatch):
     )
     assert seal_mod.main(["--edition", "2026-preseason"]) == 1
     assert calls["paths"] == 1
+
+
+# ---------------------------------------------------------------------------
+# HOLD/VERIFY regressions — findings F2 and F3
+# ---------------------------------------------------------------------------
+
+
+def test_existing_bundle_with_newer_receipt_binds_bundles_receipt(tmp_path):
+    """F2 — the frozen bundle is authoritative for its cutoff-receipt
+    locator: a later trial run given a NEWER receipt path must bind the
+    bundle's original receipt (locator AND hash) and verify green, never a
+    new locator against the old hash."""
+    from scripts.cutoff_2026 import build_cutoff_receipt, write_cutoff_receipt
+    from scripts.tests.test_bundle_2026 import CUTOFF_GAMES, store_envelope
+
+    world, trial1 = sealed_trial(tmp_path)
+    seal1 = json.loads((trial1 / "seal.sealed.json").read_text(encoding="utf-8"))
+
+    env_b = store_envelope(
+        tmp_path,
+        "nfl_schedules",
+        {"dataset": "schedules", "season": 2026, "games": CUTOFF_GAMES},
+        "2026-08-25T10:00:00Z",
+    )
+    receipt_b_path = write_cutoff_receipt(
+        build_cutoff_receipt(env_b, now=SEAL_NOW), receipts_root=tmp_path / "receipts"
+    )
+
+    world_b = dict(world, cutoff_receipt_path=receipt_b_path)
+    trial2 = run_trial("2026-preseason", "record_points", 2, now=SEAL_NOW, **world_b)
+    seal2 = json.loads((trial2 / "seal.sealed.json").read_text(encoding="utf-8"))
+    assert seal2["cutoff_receipt_locator"] == seal1["cutoff_receipt_locator"]
+    assert seal2["cutoff_receipt_sha256"] == seal1["cutoff_receipt_sha256"]
+    ok, errors, _ = verify_seal_dir(trial2, repo_root=world["repo_root"])
+    assert ok, errors
+
+
+def test_seal_refuses_tampered_bound_cutoff_receipt_pre_write(tmp_path):
+    """F2 — every bound input must resolve and hash-match BEFORE the
+    exclusive seal write; a doctored cutoff receipt refuses the seal instead
+    of minting an unverifiable one."""
+    world = build_world(tmp_path)
+    trial_dir = run_trial(
+        "2026-preseason",
+        "record_points",
+        1,
+        now=SEAL_NOW,
+        stop_before_seal=True,
+        **world,
+    )
+    receipt_path = Path(world["cutoff_receipt_path"])
+    doc = json.loads(receipt_path.read_text(encoding="utf-8"))
+    doc["preseason_cutoff_utc"] = "2026-09-09T00:00:00Z"
+    receipt_path.write_text(json.dumps(doc), encoding="utf-8")
+
+    with pytest.raises(CaptureError, match="cutoff receipt"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+    assert not (trial_dir / "seal.sealed.json").exists()
+
+
+def _forge_decision_and_claims(trial_dir, bundle, receipt):
+    """A coordinated forgery with REAL identity fields (edition/arm/cutoff)
+    and mutually consistent claims — only the substance (owners, order) is
+    forged, so structural cross-checks alone cannot catch it."""
+    from scripts.seal_2026 import build_claims
+
+    forged_decision = {
+        "decision_version": "record_points_v1",
+        "edition_id": bundle["edition_id"],
+        "arm_id": bundle["arm_id"],
+        "cutoff_utc": bundle["cutoff_utc"],
+        "ranking": [
+            {
+                "rank": r,
+                "roster_id": r,
+                "owner_id": f"forged_{r}",
+                "wins_2025": 14 - r,
+                "points_for_2025": 100.0,
+            }
+            for r in range(1, 5)
+        ],
+    }
+    forged_claims = build_claims(
+        forged_decision, bundle, receipt["decision_run_id"], receipt["trial_id"]
+    )
+    return forged_decision, forged_claims
+
+
+def test_coordinated_forgery_refused_at_seal(tmp_path):
+    """F3 — decision+claims+receipt forged consistently in the crash window
+    must be refused at seal: the deterministic decision must REDERIVE from
+    the bundle."""
+    from scripts.capture_2026 import canonical_bytes, sha256_hex
+
+    world = build_world(tmp_path)
+    trial_dir = run_trial(
+        "2026-preseason",
+        "record_points",
+        1,
+        now=SEAL_NOW,
+        stop_before_seal=True,
+        **world,
+    )
+    bundle = json.loads((trial_dir.parent / "bundle.json").read_text(encoding="utf-8"))
+    receipt = json.loads((trial_dir / "receipt.json").read_text(encoding="utf-8"))
+    forged_decision, forged_claims = _forge_decision_and_claims(
+        trial_dir, bundle, receipt
+    )
+    receipt["output_decision_sha256"] = sha256_hex(canonical_bytes(forged_decision))
+
+    (trial_dir / "decision.json").write_bytes(canonical_bytes(forged_decision))
+    (trial_dir / "claims.json").write_bytes(canonical_bytes(forged_claims))
+    (trial_dir / "receipt.json").write_bytes(canonical_bytes(receipt))
+
+    with pytest.raises(CaptureError, match="rederive"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+    assert not (trial_dir / "seal.sealed.json").exists()
+
+
+def test_fully_rehashed_coordinated_forgery_fails_reload(tmp_path):
+    """F3 — even a POST-seal forgery that rewrites decision, claims, receipt
+    AND the seal with every hash recomputed consistently must fail reload:
+    the bound bundle rederives the true decision."""
+    from scripts.capture_2026 import canonical_bytes, sha256_hex
+
+    world, trial_dir = sealed_trial(tmp_path)
+    bundle = json.loads((trial_dir.parent / "bundle.json").read_text(encoding="utf-8"))
+    receipt = json.loads((trial_dir / "receipt.json").read_text(encoding="utf-8"))
+    forged_decision, forged_claims = _forge_decision_and_claims(
+        trial_dir, bundle, receipt
+    )
+    receipt["output_decision_sha256"] = sha256_hex(canonical_bytes(forged_decision))
+
+    seal_path = trial_dir / "seal.sealed.json"
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    seal["decision_sha256"] = receipt["output_decision_sha256"]
+    seal["claims_sha256"] = sha256_hex(canonical_bytes(forged_claims))
+    seal["receipt_sha256"] = sha256_hex(canonical_bytes(receipt))
+    body = {k: v for k, v in seal.items() if k != "decision_hash"}
+    seal["decision_hash"] = sha256_hex(canonical_bytes(body))
+
+    (trial_dir / "decision.json").write_bytes(canonical_bytes(forged_decision))
+    (trial_dir / "claims.json").write_bytes(canonical_bytes(forged_claims))
+    (trial_dir / "receipt.json").write_bytes(canonical_bytes(receipt))
+    seal_path.write_bytes(canonical_bytes(seal))
+
+    ok, errors, _ = verify_seal_dir(trial_dir, repo_root=world["repo_root"])
+    assert not ok
+    assert any("rederive" in e for e in errors)
+
+
+def test_production_seal_success_requires_green_reload(tmp_path, monkeypatch):
+    """F2 — the CLI reports success only after reload verification AND
+    rederivation pass on the freshly written seal."""
+    import scripts.seal_2026 as seal_mod
+
+    monkeypatch.setattr(
+        seal_mod, "run_tranche", lambda tranche: (tmp_path / "r.json", 0)
+    )
+    monkeypatch.setattr(seal_mod, "_production_paths", lambda: {})
+    monkeypatch.setattr(seal_mod, "run_trial", lambda *a, **k: tmp_path / "trial1")
+
+    monkeypatch.setattr(
+        seal_mod, "verify_seal_dir", lambda d, **k: (False, ["boom"], [])
+    )
+    assert seal_mod.main(["--edition", "2026-preseason"]) == 1
+
+    monkeypatch.setattr(seal_mod, "verify_seal_dir", lambda d, **k: (True, [], []))
+    monkeypatch.setattr(
+        seal_mod, "rederive_trial", lambda d, **k: {"ok": False, "errors": ["boom"]}
+    )
+    assert seal_mod.main(["--edition", "2026-preseason"]) == 1
+
+    monkeypatch.setattr(
+        seal_mod, "rederive_trial", lambda d, **k: {"ok": True, "errors": []}
+    )
+    assert seal_mod.main(["--edition", "2026-preseason"]) == 0
