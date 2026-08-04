@@ -301,6 +301,178 @@ def load_capture_table(path=CAPTURE_TABLE_PATH) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# A2 — the three A7-required producers (sole producer predecessor of A3-A7).
+# Optional-lane producers live in capture_optional_2026.py, which this module
+# NEVER imports at module level (I59): the baseline path must run with that
+# module absent.
+# ---------------------------------------------------------------------------
+
+LEAGUE_JSON_PATH = REPO_ROOT / "data" / "2026" / "league.json"
+
+
+def _default_fetch():
+    """The audited constant-host Sleeper fetcher (I1 cites its None contract)."""
+    from fetch_sleeper import fetch_json
+
+    return fetch_json
+
+
+def read_expected_league_id(league_json_path=None) -> str:
+    path = Path(league_json_path) if league_json_path is not None else LEAGUE_JSON_PATH
+    if not path.exists():
+        raise CaptureError(f"league id source missing: {path}")
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    league_id = doc.get("league_id")
+    if not isinstance(league_id, str) or not league_id.isdigit():
+        raise CaptureError(
+            f"league_id in {path} must be a digit string, got {league_id!r}"
+        )
+    return league_id
+
+
+def produce_sleeper_league(
+    *, fetch=None, league_json_path=None, public_root=None, now=None
+) -> Path:
+    """Capture /league/{id}; I9: fetched league_id must equal the on-disk id."""
+    fetch = fetch if fetch is not None else _default_fetch()
+    expected = read_expected_league_id(league_json_path)
+    endpoint = f"/league/{expected}"
+    payload = fetch(endpoint)
+    if payload is None:
+        raise CaptureError(
+            f"fetch failed for {endpoint}; refusing to write an envelope"
+        )
+    if not isinstance(payload, dict):
+        raise CaptureError(
+            f"league payload must be an object, got {type(payload).__name__}"
+        )
+    if payload.get("league_id") != expected:
+        raise CaptureError(
+            f"league id verification failed (I9): disk {expected!r} != "
+            f"fetched {payload.get('league_id')!r}"
+        )
+    captured_dt = now if now is not None else datetime.now(timezone.utc)
+    return capture(
+        "sleeper_league",
+        payload,
+        request={"endpoint_or_dataset": endpoint, "params": {}},
+        season=2026,
+        league_id=expected,
+        captured_at=captured_dt.isoformat().replace("+00:00", "Z"),
+        known_at_basis="Sleeper league object read live at captured_at",
+        access_scope="public",
+        privacy="public",
+        public_root=public_root,
+        now=captured_dt,
+    )
+
+
+def produce_sleeper_rosters(
+    *, fetch=None, league_json_path=None, public_root=None, now=None
+) -> Path:
+    """Capture /league/{id}/rosters wrapped as an object payload."""
+    fetch = fetch if fetch is not None else _default_fetch()
+    expected = read_expected_league_id(league_json_path)
+    endpoint = f"/league/{expected}/rosters"
+    rosters = fetch(endpoint)
+    if rosters is None:
+        raise CaptureError(
+            f"fetch failed for {endpoint}; refusing to write an envelope"
+        )
+    if not isinstance(rosters, list) or not rosters:
+        raise CaptureError(f"rosters payload must be a nonempty list, got {rosters!r}")
+    for entry in rosters:
+        if (
+            not isinstance(entry, dict)
+            or "roster_id" not in entry
+            or "owner_id" not in entry
+        ):
+            raise CaptureError(f"roster entry missing roster_id/owner_id: {entry!r}")
+        if entry.get("league_id") != expected:
+            raise CaptureError(
+                f"roster {entry.get('roster_id')} bound to league "
+                f"{entry.get('league_id')!r}, expected {expected!r}"
+            )
+    payload = {"rosters": rosters, "count": len(rosters)}
+    captured_dt = now if now is not None else datetime.now(timezone.utc)
+    return capture(
+        "sleeper_rosters",
+        payload,
+        request={"endpoint_or_dataset": endpoint, "params": {}},
+        season=2026,
+        league_id=expected,
+        captured_at=captured_dt.isoformat().replace("+00:00", "Z"),
+        known_at_basis="Sleeper rosters read live at captured_at",
+        access_scope="public",
+        privacy="public",
+        public_root=public_root,
+        now=captured_dt,
+    )
+
+
+SCHEDULE_ROW_FIELDS = (
+    "game_id",
+    "season",
+    "game_type",
+    "week",
+    "gameday",
+    "gametime",
+    "away_team",
+    "home_team",
+)
+
+
+def _load_schedule_rows(season: int):
+    """Production loader: nflreadpy schedules (lazy import; heavy dep)."""
+    import nflreadpy as nfl
+
+    frame = nfl.load_schedules(seasons=[season])
+    return frame.to_dicts()
+
+
+def produce_nfl_schedules(
+    *, load_rows=None, league_json_path=None, public_root=None, now=None
+) -> Path:
+    """Capture the nflverse schedules dataset for 2026 (cutoff source, I17)."""
+    load_rows = load_rows if load_rows is not None else _load_schedule_rows
+    rows = load_rows(2026)
+    if rows is None:
+        raise CaptureError("schedules load failed; refusing to write an envelope")
+    if not isinstance(rows, list) or not rows:
+        raise CaptureError("schedules payload must be a nonempty list of games")
+    for row in rows:
+        missing = [f for f in SCHEDULE_ROW_FIELDS if f not in row]
+        if missing:
+            raise CaptureError(
+                f"schedule row missing {missing}: {row.get('game_id')!r}"
+            )
+        if row["season"] != 2026:
+            raise CaptureError(
+                f"schedule row {row['game_id']!r} has season {row['season']!r}, "
+                "expected 2026"
+            )
+    payload = {"dataset": "schedules", "season": 2026, "games": rows}
+    expected = read_expected_league_id(league_json_path)
+    captured_dt = now if now is not None else datetime.now(timezone.utc)
+    return capture(
+        "nfl_schedules",
+        payload,
+        request={
+            "endpoint_or_dataset": "nflreadpy:schedules",
+            "params": {"season": 2026},
+        },
+        season=2026,
+        league_id=expected,
+        captured_at=captured_dt.isoformat().replace("+00:00", "Z"),
+        known_at_basis="nflverse schedules dataset read at captured_at",
+        access_scope="public",
+        privacy="public",
+        public_root=public_root,
+        now=captured_dt,
+    )
+
+
+# ---------------------------------------------------------------------------
 # S3 policy family — versioned, immutable once frozen (A1b: I47, I57)
 # ---------------------------------------------------------------------------
 

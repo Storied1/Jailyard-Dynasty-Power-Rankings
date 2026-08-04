@@ -343,6 +343,233 @@ def test_v1_matches_schema_and_contains_exactly_the_declared_rows(tmp_path):
         freeze_policy(dup, "v3", governance_dir=tmp_path / "gov3", now=FIXED_NOW)
 
 
+# ---------------------------------------------------------------------------
+# A2 — required producers (I9, I50a) and the optional lane (I7, I8)
+# ---------------------------------------------------------------------------
+
+
+def fake_fetch(mapping):
+    """Endpoint -> payload map; a missing endpoint returns None (failed fetch)."""
+
+    def fetch(endpoint, **_):
+        return mapping.get(endpoint)
+
+    return fetch
+
+
+def league_json(tmp_path: Path, league_id="1312884727480352768") -> Path:
+    path = tmp_path / "league.json"
+    path.write_text(json.dumps({"league_id": league_id}), encoding="utf-8")
+    return path
+
+
+LEAGUE_PAYLOAD = {
+    "league_id": "1312884727480352768",
+    "season": "2026",
+    "status": "in_season",
+}
+
+
+def test_league_id_verified_against_fetched_payload(tmp_path):
+    from scripts.capture_2026 import produce_sleeper_league
+
+    good = fake_fetch({"/league/1312884727480352768": LEAGUE_PAYLOAD})
+    path = produce_sleeper_league(
+        fetch=good,
+        league_json_path=league_json(tmp_path),
+        public_root=tmp_path / "public",
+        now=FIXED_NOW,
+    )
+    ok, errors = verify_envelope(path)
+    assert ok, errors
+
+    # fetched payload disagreeing with the on-disk league id is refused
+    mismatched = fake_fetch(
+        {"/league/1312884727480352768": {**LEAGUE_PAYLOAD, "league_id": "999"}}
+    )
+    with pytest.raises(CaptureError):
+        produce_sleeper_league(
+            fetch=mismatched,
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public2",
+            now=FIXED_NOW,
+        )
+    assert written_files(tmp_path / "public2") == []
+
+    # a failed fetch (None) is never an envelope
+    with pytest.raises(CaptureError):
+        produce_sleeper_league(
+            fetch=fake_fetch({}),
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public3",
+            now=FIXED_NOW,
+        )
+    assert written_files(tmp_path / "public3") == []
+
+
+def test_a7_required_set_is_exactly_the_four_named_sources(tmp_path):
+    doc = load_policy(freeze_v1(tmp_path))
+    required = {
+        row["source_id"]
+        for row in doc["rows"]
+        if "record_points" in row["required_for"]
+    }
+    assert required == {
+        "standings_2025",
+        "sleeper_rosters",
+        "sleeper_league",
+        "nfl_schedules",
+    }
+    assert required == set(A7_REQUIRED_SOURCES)
+
+
+def test_rosters_producer_wraps_and_verifies(tmp_path):
+    from scripts.capture_2026 import produce_sleeper_rosters
+
+    rosters = [
+        {"roster_id": i, "owner_id": f"owner{i}", "league_id": "1312884727480352768"}
+        for i in range(1, 13)
+    ]
+    path = produce_sleeper_rosters(
+        fetch=fake_fetch({"/league/1312884727480352768/rosters": rosters}),
+        league_json_path=league_json(tmp_path),
+        public_root=tmp_path / "public",
+        now=FIXED_NOW,
+    )
+    ok, errors = verify_envelope(path)
+    assert ok, errors
+    env = json.loads(path.read_text(encoding="utf-8"))
+    assert env["payload"]["count"] == 12
+    assert env["payload"]["rosters"][0]["owner_id"] == "owner1"
+
+    # a roster row bound to a different league is refused
+    foreign = [dict(rosters[0], league_id="999")] + rosters[1:]
+    with pytest.raises(CaptureError):
+        produce_sleeper_rosters(
+            fetch=fake_fetch({"/league/1312884727480352768/rosters": foreign}),
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public2",
+            now=FIXED_NOW,
+        )
+
+
+SCHED_ROW = {
+    "game_id": "2026_01_DAL_PHI",
+    "season": 2026,
+    "game_type": "REG",
+    "week": 1,
+    "gameday": "2026-09-09",
+    "weekday": "Wednesday",
+    "gametime": "20:20",
+    "away_team": "DAL",
+    "home_team": "PHI",
+}
+
+
+def test_schedules_producer_validates_season_and_shape(tmp_path):
+    from scripts.capture_2026 import produce_nfl_schedules
+
+    path = produce_nfl_schedules(
+        load_rows=lambda season: [SCHED_ROW],
+        public_root=tmp_path / "public",
+        now=FIXED_NOW,
+    )
+    ok, errors = verify_envelope(path)
+    assert ok, errors
+    env = json.loads(path.read_text(encoding="utf-8"))
+    assert env["payload"]["season"] == 2026
+    assert env["payload"]["games"][0]["game_id"] == "2026_01_DAL_PHI"
+
+    with pytest.raises(CaptureError):
+        produce_nfl_schedules(
+            load_rows=lambda season: [],
+            public_root=tmp_path / "public2",
+            now=FIXED_NOW,
+        )
+    with pytest.raises(CaptureError):
+        produce_nfl_schedules(
+            load_rows=lambda season: [dict(SCHED_ROW, season=2025)],
+            public_root=tmp_path / "public3",
+            now=FIXED_NOW,
+        )
+
+
+# --- optional lane (I7, I8) — written with the lane, gate at B1 -------------
+
+
+def test_partial_leg_failure_is_not_an_empty_week(tmp_path):
+    from scripts.capture_optional_2026 import produce_sleeper_transactions
+
+    legs = {f"/league/1312884727480352768/transactions/{w}": [] for w in range(1, 19)}
+    legs["/league/1312884727480352768/transactions/7"] = None  # outage, not quiet
+    with pytest.raises(CaptureError):
+        produce_sleeper_transactions(
+            fetch=fake_fetch(legs),
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public",
+            now=FIXED_NOW,
+        )
+    assert written_files(tmp_path / "public") == []
+
+
+def test_all_legs_read_and_empty_is_valid(tmp_path):
+    from scripts.capture_optional_2026 import produce_sleeper_transactions
+
+    legs = {f"/league/1312884727480352768/transactions/{w}": [] for w in range(1, 19)}
+    path = produce_sleeper_transactions(
+        fetch=fake_fetch(legs),
+        league_json_path=league_json(tmp_path),
+        public_root=tmp_path / "public",
+        now=FIXED_NOW,
+    )
+    ok, errors = verify_envelope(path)
+    assert ok, errors
+    env = json.loads(path.read_text(encoding="utf-8"))
+    assert env["payload"]["weeks_requested"] == list(range(1, 19))
+    assert all(env["payload"]["transactions"][str(w)] == [] for w in range(1, 19))
+
+
+def test_draft_reaches_picks_and_fails_on_metadata_only(tmp_path):
+    from scripts.capture_optional_2026 import produce_draft_picks
+
+    drafts = [{"draft_id": "1312884727488737280", "status": "complete"}]
+    picks = [
+        {"pick_no": n, "round": (n - 1) // 12 + 1, "player_id": str(n)}
+        for n in range(1, 73)
+    ]
+    mapping = {
+        "/league/1312884727480352768/drafts": drafts,
+        "/draft/1312884727488737280/picks": picks,
+    }
+    path = produce_draft_picks(
+        fetch=fake_fetch(mapping),
+        league_json_path=league_json(tmp_path),
+        public_root=tmp_path / "public",
+        now=FIXED_NOW,
+    )
+    env = json.loads(path.read_text(encoding="utf-8"))
+    assert env["payload"]["pick_count"] == 72
+    assert [p["pick_no"] for p in env["payload"]["picks"]] == list(range(1, 73))
+
+    # metadata resolves but picks are empty -> the component FAILS
+    with pytest.raises(CaptureError):
+        produce_draft_picks(
+            fetch=fake_fetch({**mapping, "/draft/1312884727488737280/picks": []}),
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public2",
+            now=FIXED_NOW,
+        )
+    # out-of-order picks -> order not preserved -> refused
+    shuffled = [picks[1], picks[0]] + picks[2:]
+    with pytest.raises(CaptureError):
+        produce_draft_picks(
+            fetch=fake_fetch({**mapping, "/draft/1312884727488737280/picks": shuffled}),
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public3",
+            now=FIXED_NOW,
+        )
+
+
 def test_gate_reachability_census_reports_zero_violations():
     """I58 — parse section 8's gate cells and section 10.B's census from the
     contract file; assert full coverage, ordering, and zero unreachable rows."""
