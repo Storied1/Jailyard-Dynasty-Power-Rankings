@@ -77,28 +77,33 @@ STANDINGS_DOC = {
             ],
         },
     ],
-    "roster_map": [
-        {
+    # PRODUCTION SHAPE: the real season_combined.json stores roster_map as an
+    # object keyed by roster-id strings, not a list (verifier finding 1 —
+    # the list-shaped fixture hid a TypeError on the real artifact)
+    "roster_map": {
+        "1": {
             "roster_id": 1,
             "owner_id": "owner_a",
             "final_record": {"wins": 2, "fpts": 200.5},
         },
-        {
+        "2": {
             "roster_id": 2,
             "owner_id": "owner_b",
             "final_record": {"wins": 1, "fpts": 180.25},
         },
-        {
+        "3": {
             "roster_id": 3,
             "owner_id": "owner_c",
-            "final_record": {"wins": 1, "fpts": 180.25},
+            # float-accumulation drift as in the real artifact (5/12 rosters):
+            # weekly pf is 180.25 while the stored aggregate reads 180.2500000001
+            "final_record": {"wins": 1, "fpts": 180.2500000001},
         },
-        {
+        "4": {
             "roster_id": 4,
             "owner_id": "owner_d",
             "final_record": {"wins": 0, "fpts": 160.0},
         },
-    ],
+    },
 }
 
 # 2026 franchises: owner_c got LOW roster_id 1, owner_b got 2 (tie broken by
@@ -405,9 +410,14 @@ def test_baseline_recomputes_wins_and_pf_and_crosschecks_final_record():
 
     # a stored aggregate that disagrees with the recomputation fails closed
     doctored = json.loads(json.dumps(STANDINGS_DOC))
-    doctored["roster_map"][0]["final_record"]["wins"] = 9
+    doctored["roster_map"]["1"]["final_record"]["wins"] = 9
     with pytest.raises(CaptureError):
         build_baseline_standings(doctored, ROSTERS_2026)
+    # ...and a points-for disagreement beyond scoring granularity also fails
+    doctored2 = json.loads(json.dumps(STANDINGS_DOC))
+    doctored2["roster_map"]["1"]["final_record"]["fpts"] = 199.9
+    with pytest.raises(CaptureError):
+        build_baseline_standings(doctored2, ROSTERS_2026)
 
 
 def test_baseline_joins_2025_to_2026_by_owner_id():
@@ -417,6 +427,29 @@ def test_baseline_joins_2025_to_2026_by_owner_id():
     assert by_owner["owner_c"]["roster_id"] == 1
     assert by_owner["owner_c"]["wins_2025"] == 1
     assert by_owner["owner_c"]["points_for_2025"] == 180.25
+
+
+def test_baseline_builds_from_real_2025_artifact():
+    """Regression net for the two production-shape findings: the COMMITTED
+    2025 artifact (dict roster_map, float drift on 5/12 rosters) and the
+    committed 2026 rosters must build end to end — fixtures can no longer
+    diverge from reality without this failing."""
+    from scripts.shared import REPO_ROOT
+
+    standings = json.loads(
+        (REPO_ROOT / "data" / "2025" / "season_combined.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    rosters = json.loads(
+        (REPO_ROOT / "data" / "2026" / "rosters.json").read_text(encoding="utf-8")
+    )
+    rows = build_baseline_standings(standings, rosters)
+    assert len(rows) == 12
+    assert [r["rank"] for r in rows] == list(range(1, 13))
+    assert all(r["matched"] for r in rows)  # owner overlap is 12/12
+    wins = [r["wins_2025"] for r in rows]
+    assert wins == sorted(wins, reverse=True)
 
 
 def test_unmatched_2026_franchise_sorts_last_deterministically():

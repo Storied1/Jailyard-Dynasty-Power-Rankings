@@ -94,6 +94,43 @@ def content_sha256_of(raw: bytes) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Portable locators — repository-owned artifacts must never persist a
+# machine-absolute path (host/user leak + unverifiable on any other clone;
+# the seals tree is TRACKED per section 4, so these bytes get committed)
+# ---------------------------------------------------------------------------
+
+
+def portable_locator(path, repo_root=None) -> str:
+    """Repo-relative POSIX locator for anything under the repo root; absolute
+    POSIX otherwise (test-fixture roots outside any repo). Repository-owned
+    artifacts may persist ONLY the relative form — write_bundle and
+    seal_trial enforce that fail-closed."""
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    resolved = Path(path).resolve()
+    try:
+        return resolved.relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return resolved.as_posix()
+
+
+def is_machine_absolute(locator: str) -> bool:
+    text = str(locator)
+    return Path(text).is_absolute() or (len(text) > 1 and text[1] == ":")
+
+
+def assert_portable_locators(fields: dict, context: str) -> None:
+    """Fail closed when a repository-owned artifact would persist a
+    machine-absolute locator (no such path may enter a production seal or
+    its decision_hash)."""
+    for name, value in fields.items():
+        if value is not None and is_machine_absolute(value):
+            raise CaptureError(
+                f"{context}: locator {name}={value!r} is machine-absolute; "
+                "repository-owned artifacts must carry repo-relative locators"
+            )
+
+
+# ---------------------------------------------------------------------------
 # Qualified-artifact identity (I54 freeze, I55 verify)
 # ---------------------------------------------------------------------------
 
@@ -275,16 +312,34 @@ def build_baseline_standings(standings_doc: dict, rosters_2026: list) -> list:
             "pf": float(row["pf"]),
         }
 
+    # The real artifact stores roster_map as an object keyed by roster-id
+    # strings; older fixtures use a list. Normalize both, fail-closed on
+    # anything else (a TypeError here must never escape as a non-CaptureError).
+    roster_map = standings_doc.get("roster_map")
+    if isinstance(roster_map, dict):
+        entries = list(roster_map.values())
+    elif isinstance(roster_map, list):
+        entries = roster_map
+    else:
+        raise CaptureError(
+            f"roster_map must be an object or list, got {type(roster_map).__name__}"
+        )
+
     owner_records = {}
-    for entry in standings_doc.get("roster_map", []):
+    for entry in entries:
+        if not isinstance(entry, dict) or "roster_id" not in entry:
+            raise CaptureError(f"malformed roster_map entry: {entry!r}")
         rid = entry["roster_id"]
         if rid not in recomputed:
             raise CaptureError(f"2025 roster {rid} missing from final-week standings")
         final_record = entry.get("final_record") or {}
-        if (
-            final_record.get("wins") != recomputed[rid]["wins"]
-            or float(final_record.get("fpts", -1)) != recomputed[rid]["pf"]
-        ):
+        # points-for cross-check at fantasy scoring granularity (2 decimals):
+        # the committed artifact carries float-accumulation drift on 5/12
+        # rosters (e.g. weekly 2124.7000000000003 vs stored 2124.7), so exact
+        # binary-float equality would fail closed on legitimate data
+        if final_record.get("wins") != recomputed[rid]["wins"] or round(
+            float(final_record.get("fpts", -1)), 2
+        ) != round(recomputed[rid]["pf"], 2):
             raise CaptureError(
                 f"final_record cross-check failed for roster {rid}: recomputed "
                 f"{recomputed[rid]}, stored {final_record} (I46 fails closed)"
@@ -384,8 +439,29 @@ def _capture_manifest_entry(envelope: dict) -> dict:
     }
 
 
+# S6 marks the worktree observations as NON-GATING DIAGNOSTICS; keeping them
+# inside the hashed surface would make two clean machines (CRLF vs LF
+# worktrees) emit different bundle identities from identical sources. The
+# stored manifest keeps them for the record; every gating hash is computed
+# over this projection.
+DIAGNOSTIC_MANIFEST_FIELDS = (
+    "observed_worktree_bytes_sha256",
+    "byte_count",
+    "eol_profile",
+)
+
+
+def gating_manifest(manifest: list) -> list:
+    return [
+        {k: v for k, v in entry.items() if k not in DIAGNOSTIC_MANIFEST_FIELDS}
+        for entry in manifest
+    ]
+
+
 def compute_bundle_sha256(bundle: dict) -> str:
     body = {k: v for k, v in bundle.items() if k != "bundle_sha256"}
+    if "source_manifest" in body:
+        body = dict(body, source_manifest=gating_manifest(body["source_manifest"]))
     return sha256_hex(canonical_json_v1(body))
 
 
@@ -485,10 +561,12 @@ def compile_bundle(
         "edition_id": edition_id,
         "arm_id": arm_id,
         "cutoff_utc": cutoff_utc,
-        "cutoff_receipt_locator": str(cutoff_receipt_path),
+        "cutoff_receipt_locator": portable_locator(cutoff_receipt_path, root),
         "cutoff_receipt_sha256": receipt["receipt_sha256"],
         "source_manifest": manifest,
-        "source_manifest_sha256": sha256_hex(canonical_json_v1(manifest)),
+        "source_manifest_sha256": sha256_hex(
+            canonical_json_v1(gating_manifest(manifest))
+        ),
         "decision_input_payload": decision_input,
         "decision_input_sha256": sha256_hex(canonical_json_v1(decision_input)),
         "projection": {
@@ -506,7 +584,7 @@ def compile_bundle(
             ),
             "parameters": {"season": 2026, "join_key": "owner_id"},
         },
-        "policy_locator": str(policy_path),
+        "policy_locator": portable_locator(policy_path, root),
         "matrix_sha256": policy["policy_sha256"],
         "contains_private": contains_private,
     }
@@ -528,14 +606,34 @@ def bundle_path_for(bundle: dict, public_bundles_root=None, private_bundles_root
     return root / bundle["edition_id"] / bundle["arm_id"] / "bundle.json"
 
 
-def write_bundle(bundle: dict, *, public_bundles_root=None, private_bundles_root=None):
+def write_bundle(
+    bundle: dict,
+    *,
+    public_bundles_root=None,
+    private_bundles_root=None,
+    repo_root=None,
+):
     """I22 — a bundle containing any private component lands under
-    private_bundles/; append-only like every other artifact."""
+    private_bundles/; append-only like every other artifact. A repository-
+    owned bundle refuses to persist any machine-absolute locator."""
     target = bundle_path_for(bundle, public_bundles_root, private_bundles_root)
+    guard_root = (Path(repo_root) if repo_root is not None else REPO_ROOT).resolve()
+    if target.resolve().is_relative_to(guard_root):
+        fields = {
+            "cutoff_receipt_locator": bundle.get("cutoff_receipt_locator"),
+            "policy_locator": bundle.get("policy_locator"),
+        }
+        for entry in bundle.get("source_manifest", []):
+            fields[f"manifest:{entry.get('source_id')}"] = entry.get("locator")
+        assert_portable_locators(fields, f"repository-owned bundle {target.name}")
     if target.exists():
         raise CaptureError(f"append-only bundles: {target} already exists")
     target.parent.mkdir(parents=True, exist_ok=True)
-    with open(target, "wb") as f:
+    try:
+        handle = open(target, "xb")
+    except FileExistsError as exc:
+        raise CaptureError(f"append-only artifact already exists: {target}") from exc
+    with handle as f:
         f.write(canonical_json_v1(bundle))
     return target
 

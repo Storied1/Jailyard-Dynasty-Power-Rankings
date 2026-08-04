@@ -29,50 +29,64 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 try:
     from scripts.bundle_2026 import EDITION_CUTOFF_FIELD  # noqa: E402
+    from scripts.bundle_2026 import SEALS_ROOT  # noqa: E402
     from scripts.bundle_2026 import (
-        SEALS_ROOT,
         _build_decision_input,
         _git_blob_bytes,
+        assert_portable_locators,
         build_baseline_standings,
         canonical_json_v1,
         compile_bundle,
         compute_bundle_sha256,
+        gating_manifest,
+        portable_locator,
         verify_qualified_artifact,
         write_bundle,
     )
     from scripts.capture_2026 import PRIVATE_CAPTURE_ROOT  # noqa: E402
+    from scripts.capture_2026 import PRODUCTION_V1_POLICY_PATH  # noqa: E402
     from scripts.capture_2026 import (
-        PRODUCTION_V1_POLICY_PATH,
         PUBLIC_CAPTURE_ROOT,
         CaptureError,
         load_json_bytes_strict,
+        load_policy,
+        run_tranche,
         sha256_hex,
         verify_envelope,
     )
+    from scripts.cutoff_2026 import DERIVATION_VERSION  # noqa: E402
     from scripts.cutoff_2026 import load_cutoff_receipt  # noqa: E402
+    from scripts.cutoff_2026 import derive_cutoffs, qualify_kickoff
 except ImportError:  # pragma: no cover — direct-run fallback
+    from bundle_2026 import EDITION_CUTOFF_FIELD  # noqa: E402
     from bundle_2026 import SEALS_ROOT  # noqa: E402
     from bundle_2026 import (
-        EDITION_CUTOFF_FIELD,
         _build_decision_input,
         _git_blob_bytes,
+        assert_portable_locators,
         build_baseline_standings,
         canonical_json_v1,
         compile_bundle,
         compute_bundle_sha256,
+        gating_manifest,
+        portable_locator,
         verify_qualified_artifact,
         write_bundle,
     )
     from capture_2026 import PRIVATE_CAPTURE_ROOT  # noqa: E402
+    from capture_2026 import PRODUCTION_V1_POLICY_PATH  # noqa: E402
     from capture_2026 import (
-        PRODUCTION_V1_POLICY_PATH,
         PUBLIC_CAPTURE_ROOT,
         CaptureError,
         load_json_bytes_strict,
+        load_policy,
+        run_tranche,
         sha256_hex,
         verify_envelope,
     )
+    from cutoff_2026 import derive_cutoffs  # noqa: E402
     from cutoff_2026 import load_cutoff_receipt  # noqa: E402
+    from cutoff_2026 import DERIVATION_VERSION, qualify_kickoff
 
 try:
     from scripts.shared import REPO_ROOT  # noqa: E402
@@ -122,11 +136,15 @@ def _parse_z(value: str) -> datetime:
 
 
 def _write_json_once(path: Path, doc) -> Path:
-    if path.exists():
-        raise CaptureError(f"append-only artifact already exists: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(canonical_json_v1(doc))
+    try:
+        # exclusive creation: append-only holds even under concurrent writers
+        # (a check-then-"wb" pair can truncate a racing writer's file)
+        handle = open(path, "xb")
+    except FileExistsError as exc:
+        raise CaptureError(f"append-only artifact already exists: {path}") from exc
+    with handle:
+        handle.write(canonical_json_v1(doc))
     return path
 
 
@@ -229,6 +247,13 @@ def find_predecessor(
     if root.is_dir():
         for seal_path in root.glob(f"*/{arm_id}/trial{trial_id}/seal{SEAL_SUFFIX}"):
             seal = load_seal(seal_path)
+            # a candidate must SELF-VERIFY before its hash may be chained —
+            # an altered decision_hash field must scream, not propagate
+            body = {k: v for k, v in seal.items() if k != "decision_hash"}
+            if sha256_hex(canonical_json_v1(body)) != seal["decision_hash"]:
+                raise CaptureError(
+                    f"candidate predecessor fails self-verification: {seal_path}"
+                )
             if seal["arm_id"] != arm_id or seal["trial_id"] != trial_id:
                 raise CaptureError(
                     f"seal at {seal_path} carries foreign identity "
@@ -260,6 +285,7 @@ def open_run(
     policy_path,
     seals_root,
     started_at,
+    repo_root=None,
 ):
     if bundle["bundle_sha256"] != compute_bundle_sha256(bundle):
         raise CaptureError("bundle hash does not recompute; refusing to open a run")
@@ -284,9 +310,9 @@ def open_run(
         "bundle_sha256": bundle["bundle_sha256"],
         "decision_input_sha256": bundle["decision_input_sha256"],
         "source_manifest_sha256": bundle["source_manifest_sha256"],
-        "cutoff_receipt_locator": str(cutoff_receipt_path),
+        "cutoff_receipt_locator": portable_locator(cutoff_receipt_path, repo_root),
         "cutoff_receipt_sha256": bundle["cutoff_receipt_sha256"],
-        "policy_locator": str(policy_path),
+        "policy_locator": portable_locator(policy_path, repo_root),
         "matrix_sha256": bundle["matrix_sha256"],
         "predecessor_decision_hash": predecessor_hash,
         "predecessor_null_reason": null_reason,
@@ -339,6 +365,69 @@ def load_seal(path) -> dict:
     return seal
 
 
+def _crosscheck_run_artifacts(receipt, decision, claims, bundle, trial_key, errors):
+    """S8/S9 cross-bindings + I32 claim coverage — enforced BOTH before
+    sealing and at reload, so a crash-window edit to any body cannot be
+    blessed into a verified seal."""
+    edition_id, arm_id, trial_id = trial_key
+    for name, expected in (
+        ("edition_id", edition_id),
+        ("arm_id", arm_id),
+        ("trial_id", trial_id),
+    ):
+        if receipt.get(name) != expected:
+            errors.append(f"receipt.{name}={receipt.get(name)!r} != {expected!r}")
+    for field in (
+        "bundle_sha256",
+        "decision_input_sha256",
+        "source_manifest_sha256",
+        "matrix_sha256",
+        "cutoff_receipt_sha256",
+    ):
+        if receipt.get(field) != bundle.get(field):
+            errors.append(f"receipt.{field} disagrees with the bundle")
+
+    rows = decision.get("ranking") if isinstance(decision, dict) else None
+    claim_list = claims.get("claims") if isinstance(claims, dict) else None
+    if not isinstance(rows, list) or not rows:
+        errors.append("decision carries no ranking")
+        return
+    if not isinstance(claim_list, list) or len(claim_list) != len(rows):
+        errors.append(
+            f"claims count {len(claim_list) if isinstance(claim_list, list) else 'invalid'} "
+            f"!= ranking positions {len(rows)} (I32)"
+        )
+        return
+    by_target = {c.get("target"): c for c in claim_list}
+    for row in rows:
+        claim = by_target.get(row.get("owner_id"))
+        if claim is None:
+            errors.append(
+                f"rank {row.get('rank')} ({row.get('owner_id')}) has no claim (I32)"
+            )
+            continue
+        if claim.get("assertion", {}).get("predicted_rank") != row.get("rank"):
+            errors.append(
+                f"claim for {row.get('owner_id')} disagrees with the decision rank"
+            )
+        if claim.get("bundle_sha256") != bundle.get("bundle_sha256") or claim.get(
+            "source_manifest_sha256"
+        ) != bundle.get("source_manifest_sha256"):
+            errors.append(f"claim for {row.get('owner_id')} not bound to this bundle")
+        rule = claim.get("resolution_rule") or {}
+        if not (rule.get("rule") and rule.get("source") and rule.get("resolve_on")):
+            errors.append(
+                f"claim for {row.get('owner_id')} lacks a fixed resolution rule"
+            )
+        for name, expected in (
+            ("edition_id", edition_id),
+            ("arm_id", arm_id),
+            ("trial_id", trial_id),
+        ):
+            if claim.get(name) != expected:
+                errors.append(f"claim for {row.get('owner_id')}: {name} mismatch")
+
+
 def seal_trial(trial_dir, *, repo_root=None, now=None) -> Path:
     """Seal one CLOSED run (I27). Never double-seals; completing a partial
     trial after a crash is safe because the closed receipt is the input."""
@@ -363,6 +452,22 @@ def seal_trial(trial_dir, *, repo_root=None, now=None) -> Path:
 
     bundle_path = trial_dir.parent / "bundle.json"
     bundle = load_json_bytes_strict(bundle_path.read_bytes())
+    if bundle.get("bundle_sha256") != compute_bundle_sha256(bundle):
+        raise CaptureError("bundle fails recompute; refusing to seal")
+
+    trial_key = (
+        trial_dir.parent.parent.name,
+        trial_dir.parent.name,
+        int(trial_dir.name.removeprefix("trial")),
+    )
+    binding_errors: list[str] = []
+    _crosscheck_run_artifacts(
+        receipt, decision, claims, bundle, trial_key, binding_errors
+    )
+    if binding_errors:
+        raise CaptureError(
+            "refusing to seal inconsistent run artifacts: " + "; ".join(binding_errors)
+        )
 
     sealed = now if now is not None else datetime.now(timezone.utc)
     ended = _parse_z(receipt["ended_at"])
@@ -386,21 +491,40 @@ def seal_trial(trial_dir, *, repo_root=None, now=None) -> Path:
         "sealed_at": _iso_z(sealed),
         "label": label,
         "bundle_sha256": bundle["bundle_sha256"],
-        "bundle_locator": str(bundle_path),
+        "bundle_locator": portable_locator(bundle_path, repo_root),
         "decision_input_sha256": bundle["decision_input_sha256"],
         "source_manifest_sha256": bundle["source_manifest_sha256"],
         "policy_locator": receipt["policy_locator"],
         "matrix_sha256": receipt["matrix_sha256"],
         "decision_sha256": receipt["output_decision_sha256"],
-        "decision_locator": str(decision_path),
+        "decision_locator": portable_locator(decision_path, repo_root),
         "claims_sha256": sha256_hex(canonical_json_v1(claims)),
-        "claims_locator": str(claims_path),
+        "claims_locator": portable_locator(claims_path, repo_root),
         "receipt_sha256": sha256_hex(canonical_json_v1(receipt)),
-        "receipt_locator": str(receipt_path),
+        "receipt_locator": portable_locator(receipt_path, repo_root),
         "predecessor_decision_hash": receipt["predecessor_decision_hash"],
         "runner_kind": receipt["runner_kind"],
     }
     seal["decision_hash"] = sha256_hex(canonical_json_v1(seal))
+
+    # a repository-owned seal must never persist a machine-absolute locator
+    # (the seals tree is TRACKED; these bytes and decision_hash get committed)
+    guard_root = (Path(repo_root) if repo_root is not None else REPO_ROOT).resolve()
+    if seal_path.resolve().is_relative_to(guard_root):
+        assert_portable_locators(
+            {
+                name: seal[name]
+                for name in (
+                    "cutoff_receipt_locator",
+                    "policy_locator",
+                    "bundle_locator",
+                    "decision_locator",
+                    "claims_locator",
+                    "receipt_locator",
+                )
+            },
+            f"repository-owned seal {seal_path.name}",
+        )
     return _write_json_once(seal_path, seal)
 
 
@@ -444,7 +568,7 @@ def run_trial(
             private_root=private_root,
             repo_root=repo_root,
         )
-        write_bundle(bundle, public_bundles_root=seals)
+        write_bundle(bundle, public_bundles_root=seals, repo_root=repo_root)
 
     receipt = open_run(
         edition_id,
@@ -455,6 +579,7 @@ def run_trial(
         policy_path=policy_path,
         seals_root=seals,
         started_at=now,
+        repo_root=repo_root,
     )
     decision = run_record_points(bundle)
     closed = close_run(receipt, decision, ended_at=now)
@@ -535,6 +660,20 @@ def verify_seal_dir(trial_dir, *, repo_root=None) -> tuple[bool, list, list]:
     except (OSError, CaptureError) as exc:
         return False, [f"seal body unreadable: {exc}"], diagnostics
 
+    # the seal's identity must match the directory being verified — a copied
+    # trial dir must never satisfy another (edition, arm, trial) slot
+    if trial_dir.name != f"trial{seal['trial_id']}":
+        errors.append(f"seal trial_id {seal['trial_id']} != directory {trial_dir.name}")
+    if trial_dir.parent.name != seal["arm_id"]:
+        errors.append(
+            f"seal arm_id {seal['arm_id']!r} != directory {trial_dir.parent.name!r}"
+        )
+    if trial_dir.parent.parent.name != seal["edition_id"]:
+        errors.append(
+            f"seal edition_id {seal['edition_id']!r} != directory "
+            f"{trial_dir.parent.parent.name!r}"
+        )
+
     if sha256_hex(canonical_json_v1(decision)) != seal["decision_sha256"]:
         errors.append("decision_sha256 mismatch")
     if sha256_hex(canonical_json_v1(claims)) != seal["claims_sha256"]:
@@ -543,18 +682,35 @@ def verify_seal_dir(trial_dir, *, repo_root=None) -> tuple[bool, list, list]:
         errors.append("receipt_sha256 mismatch")
     if compute_bundle_sha256(bundle) != seal["bundle_sha256"]:
         errors.append("bundle_sha256 mismatch")
+    # the RECORDED self-hash fields must equal the recomputation too — an
+    # edited recorded value must not survive just because the seal's copy is
+    # what gets compared
+    if bundle.get("bundle_sha256") != seal["bundle_sha256"]:
+        errors.append("bundle's recorded bundle_sha256 differs from the sealed value")
     if (
         sha256_hex(canonical_json_v1(bundle.get("decision_input_payload")))
         != seal["decision_input_sha256"]
     ):
         errors.append("decision_input_sha256 mismatch")
     if (
-        sha256_hex(canonical_json_v1(bundle.get("source_manifest")))
+        sha256_hex(
+            canonical_json_v1(gating_manifest(bundle.get("source_manifest", [])))
+        )
         != seal["source_manifest_sha256"]
     ):
         errors.append("source_manifest_sha256 mismatch")
     if receipt.get("output_decision_sha256") != seal["decision_sha256"]:
         errors.append("receipt/decision disagreement")
+
+    # S8/S9 cross-bindings + claim coverage, re-enforced at reload (I31/I32)
+    _crosscheck_run_artifacts(
+        receipt,
+        decision,
+        claims,
+        bundle,
+        (seal["edition_id"], seal["arm_id"], seal["trial_id"]),
+        errors,
+    )
 
     started = _parse_z(receipt["started_at"])
     ended = _parse_z(seal["ended_at"])
@@ -584,20 +740,86 @@ def verify_seal_dir(trial_dir, *, repo_root=None) -> tuple[bool, list, list]:
             errors.append("bundle cutoff disagrees with the seal")
         if receipt.get("cutoff_receipt_sha256") != seal["cutoff_receipt_sha256"]:
             errors.append("run receipt cutoff binding disagrees with the seal")
+        if cutoff_receipt.get("derivation_version") != DERIVATION_VERSION:
+            errors.append(
+                f"cutoff derivation_version {cutoff_receipt.get('derivation_version')!r} "
+                f"is not the supported {DERIVATION_VERSION!r}"
+            )
+        # I42's "selected schedule game agrees": resolve the receipt's OWN
+        # qualification envelope, verify it, and re-derive the cutoffs from it
+        try:
+            source_path = _resolve_locator(
+                cutoff_receipt["kickoff_source_locator"], root
+            )
+            ok_env, env_errors = verify_envelope(source_path)
+            if not ok_env:
+                errors.append(
+                    "cutoff qualification source envelope failed verification: "
+                    + "; ".join(env_errors)
+                )
+            else:
+                source_env = load_json_bytes_strict(source_path.read_bytes())
+                if (
+                    source_env["envelope_sha256"]
+                    != cutoff_receipt["kickoff_source_envelope_sha256"]
+                ):
+                    errors.append(
+                        "cutoff qualification source envelope hash differs from "
+                        "the receipt's bound value"
+                    )
+                else:
+                    requalified = qualify_kickoff(source_path)
+                    re_pre, re_view = derive_cutoffs(
+                        _parse_z(requalified["kickoff_utc"])
+                    )
+                    if (
+                        requalified["kickoff_utc"] != cutoff_receipt["kickoff_utc"]
+                        or requalified["kickoff_game_id"]
+                        != cutoff_receipt["kickoff_game_id"]
+                        or _iso_z(re_pre) != cutoff_receipt["preseason_cutoff_utc"]
+                        or _iso_z(re_view) != cutoff_receipt["preview_cutoff_utc"]
+                    ):
+                        errors.append(
+                            "cutoff re-derivation from the bound schedule envelope "
+                            "disagrees with the qualification receipt"
+                        )
+        except (OSError, CaptureError) as exc:
+            errors.append(f"cutoff qualification source unavailable: {exc}")
     except CaptureError as exc:
         errors.append(f"cutoff receipt failed reload: {exc}")
 
-    # policy: re-read the locator; it must still hash to the bound value (I48)
+    # policy: re-read the locator through load_policy so the RECORDED
+    # policy_sha256, schema and hash are all re-verified (I48), then compare
+    # against the sealed matrix binding
     try:
-        policy_raw = _resolve_locator(seal["policy_locator"], root).read_bytes()
-        policy = load_json_bytes_strict(policy_raw)
-        policy_body = {k: v for k, v in policy.items() if k != "policy_sha256"}
-        if sha256_hex(canonical_json_v1(policy_body)) != seal["matrix_sha256"]:
+        policy = load_policy(_resolve_locator(seal["policy_locator"], root))
+        if policy["policy_sha256"] != seal["matrix_sha256"]:
             errors.append(
                 "policy/matrix drift: locator no longer hashes to bound value"
             )
     except (OSError, CaptureError) as exc:
-        errors.append(f"policy unreadable at bound locator: {exc}")
+        errors.append(f"policy failed reload at bound locator: {exc}")
+
+    # predecessor chain (I29/I44): the bound hash must match the actual
+    # latest qualified predecessor, and a bound-null must mean none exists
+    try:
+        seals_root = trial_dir.parent.parent.parent
+        chained_hash, chain_reason = find_predecessor(
+            seals_root,
+            arm_id=seal["arm_id"],
+            trial_id=seal["trial_id"],
+            before_cutoff_utc=seal["cutoff_utc"],
+            expected_arm=seal["arm_id"],
+            expected_trial=seal["trial_id"],
+        )
+        if chained_hash != seal["predecessor_decision_hash"]:
+            errors.append(
+                "predecessor chain mismatch: bound "
+                f"{seal['predecessor_decision_hash']!r}, store yields "
+                f"{chained_hash!r} ({chain_reason or 'qualified predecessor found'})"
+            )
+    except CaptureError as exc:
+        errors.append(f"predecessor chain unverifiable: {exc}")
 
     _verify_manifest_entries(bundle.get("source_manifest", []), root, errors)
 
@@ -770,6 +992,18 @@ def main(argv=None) -> int:
 
     if args.edition:
         try:
+            # the contract's A7 matrix sequences `--tranche A || exit 1`
+            # BEFORE bundling and sealing; enforce that sequence here rather
+            # than trusting the operator's shell (a red accounting gate must
+            # make sealing impossible, not merely inadvisable)
+            gate_receipt_path, gate_code = run_tranche("A")
+            if gate_code != 0:
+                print(
+                    f"tranche-A accounting gate is RED ({gate_receipt_path}); "
+                    "sealing refused",
+                    file=sys.stderr,
+                )
+                return 1
             paths = _production_paths()
             trial_dir = run_trial(args.edition, args.arm, args.trial, **paths)
         except CaptureError as exc:

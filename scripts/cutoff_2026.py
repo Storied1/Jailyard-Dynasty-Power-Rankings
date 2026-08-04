@@ -150,7 +150,11 @@ def write_cutoff_receipt(receipt: dict, receipts_root=None) -> Path:
     if target.exists():
         raise CaptureError(f"append-only receipts: {target} already exists")
     target.parent.mkdir(parents=True, exist_ok=True)
-    with open(target, "wb") as f:
+    try:
+        handle = open(target, "xb")
+    except FileExistsError as exc:
+        raise CaptureError(f"append-only artifact already exists: {target}") from exc
+    with handle as f:
         f.write(canonical_bytes(receipt))
     return target
 

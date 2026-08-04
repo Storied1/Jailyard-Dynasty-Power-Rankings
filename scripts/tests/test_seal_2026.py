@@ -549,3 +549,247 @@ def test_matrix_drift_invalidates_runs(tmp_path):
     Path(world["policy_path"]).write_text(json.dumps(policy), encoding="utf-8")
     ok, errors, _ = verify_seal_dir(trial_dir, repo_root=world["repo_root"])
     assert not ok
+
+
+# ---------------------------------------------------------------------------
+# Consolidated-repair discriminating tests (verifier + Codex findings)
+# ---------------------------------------------------------------------------
+
+
+def _build_in_repo_world(tmp_path, monkeypatch):
+    """A world whose store, governance, receipts and seals ALL live inside
+    the fixture repo root, so every persisted locator is repo-relative."""
+    import sys as _sys
+
+    repo = make_repo(tmp_path)
+    # shared loads twice (package form for tests, bare form via the scripts
+    # bootstrap); rel_to_root reads OUTPUT_ROOT from ITS OWN module globals,
+    # so both instances must be patched for envelope locators to relativize
+    for mod_name in ("scripts.shared", "shared"):
+        mod = _sys.modules.get(mod_name)
+        if mod is not None:
+            monkeypatch.setattr(mod, "OUTPUT_ROOT", repo)
+    full_store(repo)
+    policy_path = make_fixture_policy(repo, repo)
+    receipt_path = make_cutoff_receipt(repo)
+    return {
+        "policy_path": policy_path,
+        "cutoff_receipt_path": receipt_path,
+        "seals_root": repo / "seals",
+        "public_root": repo / "public",
+        "private_root": repo / "private",
+        "repo_root": repo,
+    }
+
+
+def test_seal_verifies_after_repo_relocation(tmp_path, monkeypatch):
+    """No machine-absolute path in a repository-owned seal: the same seal
+    must verify and rederive after the whole tree moves to another root."""
+    import shutil
+
+    world = _build_in_repo_world(tmp_path, monkeypatch)
+    repo = world["repo_root"]
+    trial_dir = run_trial("2026-preseason", "record_points", 1, now=SEAL_NOW, **world)
+
+    seal = json.loads((trial_dir / "seal.sealed.json").read_text(encoding="utf-8"))
+    for field in (
+        "cutoff_receipt_locator",
+        "policy_locator",
+        "bundle_locator",
+        "decision_locator",
+        "claims_locator",
+        "receipt_locator",
+    ):
+        value = seal[field]
+        assert ":" not in value and not value.startswith("/"), (field, value)
+
+    ok, errors, _ = verify_seal_dir(trial_dir, repo_root=repo)
+    assert ok, errors
+
+    moved = tmp_path / "moved"
+    shutil.copytree(repo, moved)
+    moved_trial = moved / "seals" / "2026-preseason" / "record_points" / "trial1"
+    ok, errors, _ = verify_seal_dir(moved_trial, repo_root=moved)
+    assert ok, errors
+    result = rederive_trial(moved_trial, repo_root=moved)
+    assert result["ok"], result["errors"]
+
+
+def test_repo_owned_seal_refuses_machine_absolute_locator(tmp_path):
+    """The fail-closed guard: seals inside the repo root refuse to persist
+    any machine-absolute locator (here: store/policy live OUTSIDE it)."""
+    world = build_world(tmp_path)
+    world["seals_root"] = world["repo_root"] / "seals"  # repo-owned seals
+    with pytest.raises(CaptureError, match="machine-absolute"):
+        run_trial("2026-preseason", "record_points", 1, now=SEAL_NOW, **world)
+
+
+def test_doctored_claims_in_crash_window_refused_at_seal(tmp_path):
+    world = build_world(tmp_path)
+    trial_dir = run_trial(
+        "2026-preseason",
+        "record_points",
+        1,
+        now=SEAL_NOW,
+        stop_before_seal=True,
+        **world,
+    )
+    claims_path = trial_dir / "claims.json"
+    claims = json.loads(claims_path.read_text(encoding="utf-8"))
+    claims["claims"] = claims["claims"][:1]  # 4 positions, 1 claim
+    claims_path.write_text(json.dumps(claims), encoding="utf-8")
+    with pytest.raises(CaptureError, match="I32|inconsistent"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+
+
+def test_doctored_receipt_binding_in_crash_window_refused_at_seal(tmp_path):
+    world = build_world(tmp_path)
+    trial_dir = run_trial(
+        "2026-preseason",
+        "record_points",
+        1,
+        now=SEAL_NOW,
+        stop_before_seal=True,
+        **world,
+    )
+    receipt_path = trial_dir / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["bundle_sha256"] = "0" * 64
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    with pytest.raises(CaptureError, match="inconsistent"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+
+
+def test_reload_fails_when_qualification_envelope_missing(tmp_path):
+    world, trial_dir = sealed_trial(tmp_path)
+    cutoff = json.loads(Path(world["cutoff_receipt_path"]).read_text(encoding="utf-8"))
+    Path(cutoff["kickoff_source_locator"]).unlink()
+    ok, errors, _ = verify_seal_dir(trial_dir, repo_root=world["repo_root"])
+    assert not ok
+    assert any("qualification source" in e for e in errors)
+
+
+def test_corrupt_predecessor_refuses_to_chain(tmp_path):
+    from scripts.seal_2026 import find_predecessor
+
+    world, preseason_dir = sealed_trial(tmp_path)
+    preview_dir = run_trial(
+        "2026-wk01-preview", "record_points", 1, now=SEAL_NOW, **world
+    )
+
+    # corrupt the predecessor's decision_hash FIELD without re-hashing
+    seal_path = preseason_dir / "seal.sealed.json"
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    seal["decision_hash"] = "0" * 64
+    seal_path.write_text(json.dumps(seal), encoding="utf-8")
+
+    with pytest.raises(CaptureError, match="self-verification"):
+        find_predecessor(
+            world["seals_root"],
+            arm_id="record_points",
+            trial_id=1,
+            before_cutoff_utc="2026-09-10T00:19:59Z",
+            expected_arm="record_points",
+            expected_trial=1,
+        )
+    # and the successor's reload flags its now-unverifiable chain
+    ok, errors, _ = verify_seal_dir(preview_dir, repo_root=world["repo_root"])
+    assert not ok
+    assert any("predecessor" in e for e in errors)
+
+
+def test_copied_trial_dir_fails_identity_check(tmp_path):
+    import shutil
+
+    from scripts.seal_2026 import derive_experiment_status
+
+    world, trial_dir = sealed_trial(tmp_path)
+    arm_dir = trial_dir.parent
+
+    # copy the valid trial into a different trial slot and a different arm
+    shutil.copytree(trial_dir, arm_dir / "trial2")
+    foreign_arm = arm_dir.parent / "minimal_legal"
+    (foreign_arm).mkdir(parents=True)
+    shutil.copytree(trial_dir, foreign_arm / "trial1")
+
+    ok, errors, _ = verify_seal_dir(arm_dir / "trial2", repo_root=world["repo_root"])
+    assert not ok and any("trial_id" in e for e in errors)
+    ok, errors, _ = verify_seal_dir(
+        foreign_arm / "trial1", repo_root=world["repo_root"]
+    )
+    assert not ok and any("arm_id" in e for e in errors)
+
+    status = derive_experiment_status(
+        "2026-preseason",
+        seals_root=world["seals_root"],
+        repo_root=world["repo_root"],
+        now=SEAL_NOW,
+    )
+    assert status["experiment_status"] == "unavailable"
+    assert status["verified_prospective_seals"] == ["record_points/trial1"]
+
+
+def test_recorded_bundle_self_hash_tamper_detected(tmp_path):
+    world, trial_dir = sealed_trial(tmp_path)
+    bundle_path = trial_dir.parent / "bundle.json"
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    bundle["bundle_sha256"] = "0" * 64  # ONLY the recorded self-hash field
+    bundle_path.write_text(json.dumps(bundle), encoding="utf-8")
+    ok, errors, _ = verify_seal_dir(trial_dir, repo_root=world["repo_root"])
+    assert not ok
+    assert any("recorded bundle_sha256" in e for e in errors)
+
+
+def test_worktree_diagnostics_are_non_gating(tmp_path):
+    """S6's 'non-gating diagnostics only' made literal: mutating eol_profile
+    or worktree observations changes NO gating hash, while mutating a gating
+    manifest field still fails the reload."""
+    from scripts.bundle_2026 import compute_bundle_sha256
+
+    world, trial_dir = sealed_trial(tmp_path)
+    bundle_path = trial_dir.parent / "bundle.json"
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    standings = next(
+        e for e in bundle["source_manifest"] if e["source_id"] == "standings_2025"
+    )
+    original_hash = bundle["bundle_sha256"]
+
+    standings["eol_profile"] = "crlf" if standings["eol_profile"] != "crlf" else "lf"
+    standings["byte_count"] = standings["byte_count"] + 7
+    standings["observed_worktree_bytes_sha256"] = "f" * 64
+    assert compute_bundle_sha256(bundle) == original_hash  # diagnostics don't gate
+    bundle_path.write_text(json.dumps(bundle), encoding="utf-8")
+    ok, errors, _ = verify_seal_dir(trial_dir, repo_root=world["repo_root"])
+    assert ok, errors
+
+    standings["content_sha256"] = "0" * 64  # a GATING field still gates
+    bundle_path.write_text(json.dumps(bundle), encoding="utf-8")
+    ok, errors, _ = verify_seal_dir(trial_dir, repo_root=world["repo_root"])
+    assert not ok
+
+
+def test_production_seal_requires_green_tranche_a_gate(tmp_path, monkeypatch):
+    import scripts.seal_2026 as seal_mod
+
+    calls = {"paths": 0}
+
+    monkeypatch.setattr(
+        seal_mod, "run_tranche", lambda tranche: (tmp_path / "r.json", 1)
+    )
+
+    def paths_sentinel():
+        calls["paths"] += 1
+        raise CaptureError("production paths reached")
+
+    monkeypatch.setattr(seal_mod, "_production_paths", paths_sentinel)
+
+    # RED gate -> refuse before any production path is touched
+    assert seal_mod.main(["--edition", "2026-preseason"]) == 1
+    assert calls["paths"] == 0
+
+    # GREEN gate -> proceeds into the production path (sentinel proves it)
+    monkeypatch.setattr(
+        seal_mod, "run_tranche", lambda tranche: (tmp_path / "r.json", 0)
+    )
+    assert seal_mod.main(["--edition", "2026-preseason"]) == 1
+    assert calls["paths"] == 1

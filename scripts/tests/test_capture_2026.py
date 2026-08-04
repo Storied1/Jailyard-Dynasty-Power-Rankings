@@ -807,6 +807,34 @@ def test_cli_exits_nonzero_on_unmet_required_component(tmp_path, monkeypatch):
     assert main(["--season", "2026", "--tranche", "A"]) == 1
 
 
+def test_producer_runtime_error_still_writes_receipt(tmp_path, monkeypatch):
+    """I16b — a non-ValueError producer failure (nflreadpy/polars/OS error)
+    becomes an honest per-component error and the receipt is STILL written,
+    never a bare traceback with no receipt."""
+    import scripts.capture_2026 as cap
+    from scripts.capture_2026 import run_tranche
+
+    def exploding_producer(source_id, **kwargs):
+        raise RuntimeError("unknown feature flag: 'sse3'")
+
+    monkeypatch.setattr(cap, "_run_producer", exploding_producer)
+    receipt_path, code = run_tranche(
+        "A",
+        policy_path=freeze_v1(tmp_path),
+        public_root=tmp_path / "public",
+        private_root=tmp_path / "private",
+        receipts_root=tmp_path / "receipts",
+        now=FIXED_NOW,
+        run_producers=True,
+    )
+    assert code == 1
+    assert receipt_path.exists()
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    statuses = {c["source_id"]: c for g in receipt["groups"] for c in g["components"]}
+    assert statuses["sleeper_league"]["status"] == "error"
+    assert "RuntimeError" in statuses["sleeper_league"]["error"]
+
+
 def test_gate_reachability_census_reports_zero_violations():
     """I58 — parse section 8's gate cells and section 10.B's census from the
     contract file; assert full coverage, ordering, and zero unreachable rows."""

@@ -219,7 +219,11 @@ def capture(
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.exists():  # re-check after mkdir: append-only, never overwrite
         raise CaptureError(f"append-only store: envelope already exists at {target}")
-    with open(target, "wb") as f:
+    try:
+        handle = open(target, "xb")
+    except FileExistsError as exc:
+        raise CaptureError(f"append-only artifact already exists: {target}") from exc
+    with handle as f:
         f.write(canonical_bytes(envelope))
     return target
 
@@ -736,7 +740,11 @@ def freeze_policy(
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.exists():
         raise CaptureError(f"policy {version} already frozen at {target}; immutable")
-    with open(target, "wb") as f:
+    try:
+        handle = open(target, "xb")
+    except FileExistsError as exc:
+        raise CaptureError(f"append-only artifact already exists: {target}") from exc
+    with handle as f:
         f.write(canonical_bytes(doc))
     return target
 
@@ -1141,7 +1149,11 @@ def write_accounting_receipt(receipt: dict, receipts_root=None) -> Path:
     if target.exists():
         raise CaptureError(f"append-only receipts: {target} already exists")
     target.parent.mkdir(parents=True, exist_ok=True)
-    with open(target, "wb") as f:
+    try:
+        handle = open(target, "xb")
+    except FileExistsError as exc:
+        raise CaptureError(f"append-only artifact already exists: {target}") from exc
+    with handle as f:
         f.write(canonical_bytes(receipt))
     return target
 
@@ -1211,8 +1223,10 @@ def run_tranche(
                     public_root=public,
                     now=now,
                 )
-            except ValueError as exc:  # CaptureError from either module instance
-                producer_errors[source_id] = str(exc)
+            except Exception as exc:  # noqa: BLE001 — receipt MUST still
+                # be written (I16b); nflreadpy/polars/OS errors become honest
+                # per-component error statuses instead of a crash w/o receipt
+                producer_errors[source_id] = f"{type(exc).__name__}: {exc}"
 
     receipt = build_accounting_receipt(
         policy,
