@@ -965,6 +965,78 @@ def test_producer_runtime_error_still_writes_receipt(tmp_path, monkeypatch):
     assert "RuntimeError" in statuses["sleeper_league"]["error"]
 
 
+def test_receipt_chronology_generated_at_after_admitted_captures(tmp_path, monkeypatch):
+    """F1 control — a green receipt's generated_at is at or after EVERY
+    admitted captured_at: the accounting clock resolves only after all
+    producer attempts complete."""
+    import scripts.capture_2026 as cap
+    from scripts.capture_2026 import run_tranche
+
+    def post_acquisition_producer(source_id, *, league_json_path, public_root, now):
+        assert now is None  # production passthrough preserved
+        stamp = datetime.now(timezone.utc)
+        return capture(
+            source_id,
+            {"data": source_id},
+            request={"endpoint_or_dataset": f"fixture:{source_id}", "params": {}},
+            season=2026,
+            league_id="1312884727480352768",
+            captured_at=stamp.isoformat().replace("+00:00", "Z"),
+            known_at_basis="post-acquisition stamp",
+            access_scope="public",
+            privacy="public",
+            public_root=public_root,
+            private_root=tmp_path / "private",
+            now=stamp,
+        )
+
+    monkeypatch.setattr(cap, "_run_producer", post_acquisition_producer)
+    receipt_path, code = run_tranche(
+        "A",
+        policy_path=freeze_v1(tmp_path),
+        public_root=tmp_path / "public",
+        private_root=tmp_path / "private",
+        receipts_root=tmp_path / "receipts",
+        now=None,  # PRODUCTION mode
+        run_producers=True,
+    )
+    assert code == 0
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["ok"] is True
+    generated = datetime.fromisoformat(receipt["generated_at"].replace("Z", "+00:00"))
+    admitted = [
+        c["captured_at"]
+        for g in receipt["groups"]
+        for c in g["components"]
+        if c["status"] == "captured"
+    ]
+    assert len(admitted) == 3
+    for value in admitted:
+        assert datetime.fromisoformat(value.replace("Z", "+00:00")) <= generated
+
+
+def test_future_relative_envelope_cannot_satisfy_tranche_gate(tmp_path):
+    """F1 control — an envelope captured after the accounting clock is a
+    chronology violation: never 'captured', fails the gate closed."""
+    capture(
+        "sleeper_league",
+        {"league_id": "1312884727480352768"},
+        **valid_kwargs(
+            tmp_path,
+            captured_at="2026-08-04T13:00:00Z",
+            now=datetime(2026, 8, 4, 13, 0, 0, tzinfo=timezone.utc),
+        ),
+    )
+    _capture_component(tmp_path, "sleeper_rosters")
+    _capture_component(tmp_path, "nfl_schedules")
+    receipt = accounting(tmp_path)  # accounting clock is FIXED_NOW (12:00)
+    status = {c["source_id"]: c for g in receipt["groups"] for c in g["components"]}
+    assert status["sleeper_league"]["status"] == "error"
+    assert "chronology" in status["sleeper_league"]["error"]
+    assert receipt["ok"] is False
+    assert "sleeper_league" in receipt["unmet_required"]
+
+
 def test_gate_reachability_census_reports_zero_violations():
     """I58 — parse section 8's gate cells and section 10.B's census from the
     contract file; assert full coverage, ordering, and zero unreachable rows."""

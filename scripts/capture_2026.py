@@ -1047,6 +1047,16 @@ def _component_report(row, roots, now, producer_errors) -> dict:
         captured_dt = datetime.fromisoformat(
             envelope["captured_at"].replace("Z", "+00:00")
         )
+        if captured_dt > now:
+            # a capture from the accounting clock's FUTURE can never be
+            # coverage: its negative age must not read as fresh; fail closed
+            report["status"] = "error"
+            report["error"] = (
+                f"captured_at {envelope['captured_at']} is later than the "
+                f"accounting clock {now.isoformat().replace('+00:00', 'Z')} — "
+                "chronology violation, not coverage"
+            )
+            return report
         fresh = (
             row["freshness"] is None
             or (now - captured_dt).total_seconds() <= row["freshness"]
@@ -1234,7 +1244,6 @@ def run_tranche(
     # injected fixture clock stays deterministic. The resolved instant below
     # is only the accounting/receipt clock.
     producer_clock = now
-    now = now if now is not None else datetime.now(timezone.utc)
     public = Path(public_root) if public_root is not None else PUBLIC_CAPTURE_ROOT
     private = Path(private_root) if private_root is not None else PRIVATE_CAPTURE_ROOT
 
@@ -1252,6 +1261,11 @@ def run_tranche(
                 # be written (I16b); nflreadpy/polars/OS errors become honest
                 # per-component error statuses instead of a crash w/o receipt
                 producer_errors[source_id] = f"{type(exc).__name__}: {exc}"
+
+    # The accounting clock resolves only AFTER every producer attempt has
+    # completed, so generated_at is never earlier than an admitted
+    # captured_at — a receipt must attest a chronologically coherent state.
+    now = now if now is not None else datetime.now(timezone.utc)
 
     receipt = build_accounting_receipt(
         policy,

@@ -97,6 +97,15 @@ DECISION_VERSION = "record_points_v1"
 SEAL_SUFFIX = ".sealed.json"
 EXPECTED_RUNS = {"record_points": 1, "minimal_legal": 3, "full_rich": 3}
 
+# the verifier an arm REQUIRES derives from the arm itself, never from
+# mutable receipt/seal content — forging runner_kind must not change which
+# discipline applies
+EXPECTED_RUNNER_KIND = {
+    "record_points": "deterministic",
+    "minimal_legal": "model",
+    "full_rich": "model",
+}
+
 SEAL_FIELDS = (
     "edition_id",
     "kind",
@@ -288,6 +297,8 @@ def open_run(
     cutoff-receipt and policy locators — a caller-supplied path could bind a
     newer locator to the bundle's older hash and mint a seal that can never
     verify."""
+    if arm_id not in EXPECTED_RUNNER_KIND:
+        raise CaptureError(f"unknown arm {arm_id!r}: no runner discipline defined")
     if bundle["bundle_sha256"] != compute_bundle_sha256(bundle):
         raise CaptureError("bundle hash does not recompute; refusing to open a run")
     predecessor_hash, null_reason = find_predecessor(
@@ -307,7 +318,7 @@ def open_run(
         "edition_id": edition_id,
         "arm_id": arm_id,
         "trial_id": trial_id,
-        "runner_kind": "deterministic",
+        "runner_kind": EXPECTED_RUNNER_KIND[arm_id],
         "bundle_sha256": bundle["bundle_sha256"],
         "decision_input_sha256": bundle["decision_input_sha256"],
         "source_manifest_sha256": bundle["source_manifest_sha256"],
@@ -387,6 +398,11 @@ def _crosscheck_run_artifacts(receipt, decision, claims, bundle, trial_key, erro
     ):
         if receipt.get(field) != bundle.get(field):
             errors.append(f"receipt.{field} disagrees with the bundle")
+    # locators must EQUAL the bundle's — content that merely hashes the same
+    # at a substituted path is a provenance break, not an equivalence
+    for field in ("cutoff_receipt_locator", "policy_locator"):
+        if receipt.get(field) != bundle.get(field):
+            errors.append(f"receipt.{field} is not the bundle's bound locator")
 
     rows = decision.get("ranking") if isinstance(decision, dict) else None
     claim_list = claims.get("claims") if isinstance(claims, dict) else None
@@ -429,14 +445,22 @@ def _crosscheck_run_artifacts(receipt, decision, claims, bundle, trial_key, erro
                 errors.append(f"claim for {row.get('owner_id')}: {name} mismatch")
 
 
-def _rederive_equality_check(receipt, decision, claims, bundle, errors):
-    """For the deterministic arm the sealed decision must equal
-    run_record_points(bundle) canonically, and the sealed claims must equal
-    build_claims(decision, bundle, run_id, trial) — a coordinated forgery of
-    decision+claims+receipt (all hashes mutually consistent) cannot survive
-    a re-derivation from the bound bundle. Enforced before sealing AND at
-    reload; model arms (Tranche B) get their own discipline."""
-    if receipt.get("runner_kind") != "deterministic":
+def _rederive_equality_check(receipt, decision, claims, bundle, arm_id, errors):
+    """The REQUIRED verifier derives from the ARM, never from mutable receipt
+    content: record_points demands runner_kind == "deterministic" and a full
+    canonical rederivation of decision and claims from the bound bundle — a
+    forged runner_kind cannot disable the check. Enforced before sealing AND
+    at reload; model arms (Tranche B) get their own discipline."""
+    expected_kind = EXPECTED_RUNNER_KIND.get(arm_id)
+    if expected_kind is None:
+        errors.append(f"unknown arm {arm_id!r}: no runner discipline defined")
+        return
+    if receipt.get("runner_kind") != expected_kind:
+        errors.append(
+            f"runner_kind {receipt.get('runner_kind')!r} does not match the "
+            f"arm-required {expected_kind!r} for {arm_id!r}"
+        )
+    if expected_kind != "deterministic":
         return
     expected_decision = run_record_points(bundle)
     if canonical_json_v1(decision) != canonical_json_v1(expected_decision):
@@ -450,6 +474,88 @@ def _rederive_equality_check(receipt, decision, claims, bundle, errors):
     )
     if canonical_json_v1(claims) != canonical_json_v1(expected_claims):
         errors.append("claims do not rederive from the decision and bundle")
+
+
+def _verify_cutoff_qualification(cutoff_receipt, root, errors):
+    """I42 — resolve the receipt's OWN qualification envelope, verify it, and
+    re-derive kickoff and both cutoffs from it. Runs pre-seal and at reload."""
+    if cutoff_receipt.get("derivation_version") != DERIVATION_VERSION:
+        errors.append(
+            f"cutoff derivation_version {cutoff_receipt.get('derivation_version')!r} "
+            f"is not the supported {DERIVATION_VERSION!r}"
+        )
+    try:
+        source_path = _resolve_locator(cutoff_receipt["kickoff_source_locator"], root)
+        ok_env, env_errors = verify_envelope(source_path)
+        if not ok_env:
+            errors.append(
+                "cutoff qualification source envelope failed verification: "
+                + "; ".join(env_errors)
+            )
+            return
+        source_env = load_json_bytes_strict(source_path.read_bytes())
+        if (
+            source_env["envelope_sha256"]
+            != cutoff_receipt["kickoff_source_envelope_sha256"]
+        ):
+            errors.append(
+                "cutoff qualification source envelope hash differs from the "
+                "receipt's bound value"
+            )
+            return
+        requalified = qualify_kickoff(source_path)
+        re_pre, re_view = derive_cutoffs(_parse_z(requalified["kickoff_utc"]))
+        if (
+            requalified["kickoff_utc"] != cutoff_receipt["kickoff_utc"]
+            or requalified["kickoff_game_id"] != cutoff_receipt["kickoff_game_id"]
+            or _iso_z(re_pre) != cutoff_receipt["preseason_cutoff_utc"]
+            or _iso_z(re_view) != cutoff_receipt["preview_cutoff_utc"]
+        ):
+            errors.append(
+                "cutoff re-derivation from the bound schedule envelope "
+                "disagrees with the qualification receipt"
+            )
+    except (OSError, CaptureError) as exc:
+        errors.append(f"cutoff qualification source unavailable: {exc}")
+
+
+def _rederive_bundle_payload(bundle, root, errors):
+    """I21 core — re-verify every manifest entry by kind, regenerate the
+    decision-input payload from the bound sources (blob + envelopes, never
+    the worktree), and rebuild the bundle identity. Returns
+    (regenerated_decision_input_sha256, rebuilt_bundle_sha256), or
+    (None, None) with errors appended."""
+    manifest = bundle.get("source_manifest", [])
+    _verify_manifest_entries(manifest, root, errors)
+    if errors:
+        return None, None
+    entries = {e["source_id"]: e for e in manifest}
+    standings_entry = entries.get("standings_2025")
+    rosters_entry = entries.get("sleeper_rosters")
+    if standings_entry is None or rosters_entry is None:
+        errors.append("manifest missing standings_2025 or sleeper_rosters")
+        return None, None
+    try:
+        standings_doc = load_json_bytes_strict(
+            _git_blob_bytes(root, standings_entry["git_blob_oid"])
+        )
+        rosters_env = load_json_bytes_strict(
+            _resolve_locator(rosters_entry["locator"], root).read_bytes()
+        )
+        franchises = build_baseline_standings(
+            standings_doc, rosters_env["payload"]["rosters"]
+        )
+    except (OSError, CaptureError) as exc:
+        errors.append(f"payload regeneration failed: {exc}")
+        return None, None
+    regenerated = _build_decision_input(
+        bundle["edition_id"], bundle["arm_id"], bundle["cutoff_utc"], franchises
+    )
+    regenerated_sha = sha256_hex(canonical_json_v1(regenerated))
+    rebuilt = dict(bundle)
+    rebuilt["decision_input_payload"] = regenerated
+    rebuilt["decision_input_sha256"] = regenerated_sha
+    return regenerated_sha, compute_bundle_sha256(rebuilt)
 
 
 def seal_trial(trial_dir, *, repo_root=None, now=None) -> Path:
@@ -488,7 +594,9 @@ def seal_trial(trial_dir, *, repo_root=None, now=None) -> Path:
     _crosscheck_run_artifacts(
         receipt, decision, claims, bundle, trial_key, binding_errors
     )
-    _rederive_equality_check(receipt, decision, claims, bundle, binding_errors)
+    _rederive_equality_check(
+        receipt, decision, claims, bundle, trial_key[1], binding_errors
+    )
     if binding_errors:
         raise CaptureError(
             "refusing to seal inconsistent run artifacts: " + "; ".join(binding_errors)
@@ -511,6 +619,31 @@ def seal_trial(trial_dir, *, repo_root=None, now=None) -> Path:
     if policy_doc["policy_sha256"] != receipt["matrix_sha256"]:
         raise CaptureError(
             "bound policy does not hash to the bundle's matrix value; refusing to seal"
+        )
+
+    # FULL pre-seal validation of every bound input: the qualification
+    # envelope behind the cutoff receipt, every source-manifest entry, and a
+    # complete regeneration of the decision input + bundle identity from the
+    # verified sources. A corruption anywhere refuses the seal instead of
+    # minting an immutable artifact that can only fail verification later.
+    preflight_errors: list[str] = []
+    _verify_cutoff_qualification(cutoff_receipt_doc, input_root, preflight_errors)
+    regenerated_sha, rebuilt_sha = _rederive_bundle_payload(
+        bundle, input_root, preflight_errors
+    )
+    if not preflight_errors:
+        if regenerated_sha != bundle["decision_input_sha256"]:
+            preflight_errors.append(
+                "decision input does not regenerate from the verified sources"
+            )
+        if rebuilt_sha != bundle["bundle_sha256"]:
+            preflight_errors.append(
+                "bundle identity does not regenerate from the verified sources"
+            )
+    if preflight_errors:
+        raise CaptureError(
+            "refusing to seal: bound inputs fail verification: "
+            + "; ".join(preflight_errors)
         )
 
     sealed = now if now is not None else datetime.now(timezone.utc)
@@ -752,9 +885,11 @@ def verify_seal_dir(trial_dir, *, repo_root=None) -> tuple[bool, list, list]:
         (seal["edition_id"], seal["arm_id"], seal["trial_id"]),
         errors,
     )
-    # …and the deterministic decision/claims must still REDERIVE from the
-    # bound bundle — even a fully re-hashed coordinated forgery fails here
-    _rederive_equality_check(receipt, decision, claims, bundle, errors)
+    # …and the ARM-derived discipline must still hold — even a fully
+    # re-hashed coordinated forgery (including a forged runner_kind) fails
+    _rederive_equality_check(receipt, decision, claims, bundle, seal["arm_id"], errors)
+    if seal["runner_kind"] != receipt.get("runner_kind"):
+        errors.append("seal/receipt runner_kind disagreement")
 
     started = _parse_z(receipt["started_at"])
     ended = _parse_z(seal["ended_at"])
@@ -784,51 +919,7 @@ def verify_seal_dir(trial_dir, *, repo_root=None) -> tuple[bool, list, list]:
             errors.append("bundle cutoff disagrees with the seal")
         if receipt.get("cutoff_receipt_sha256") != seal["cutoff_receipt_sha256"]:
             errors.append("run receipt cutoff binding disagrees with the seal")
-        if cutoff_receipt.get("derivation_version") != DERIVATION_VERSION:
-            errors.append(
-                f"cutoff derivation_version {cutoff_receipt.get('derivation_version')!r} "
-                f"is not the supported {DERIVATION_VERSION!r}"
-            )
-        # I42's "selected schedule game agrees": resolve the receipt's OWN
-        # qualification envelope, verify it, and re-derive the cutoffs from it
-        try:
-            source_path = _resolve_locator(
-                cutoff_receipt["kickoff_source_locator"], root
-            )
-            ok_env, env_errors = verify_envelope(source_path)
-            if not ok_env:
-                errors.append(
-                    "cutoff qualification source envelope failed verification: "
-                    + "; ".join(env_errors)
-                )
-            else:
-                source_env = load_json_bytes_strict(source_path.read_bytes())
-                if (
-                    source_env["envelope_sha256"]
-                    != cutoff_receipt["kickoff_source_envelope_sha256"]
-                ):
-                    errors.append(
-                        "cutoff qualification source envelope hash differs from "
-                        "the receipt's bound value"
-                    )
-                else:
-                    requalified = qualify_kickoff(source_path)
-                    re_pre, re_view = derive_cutoffs(
-                        _parse_z(requalified["kickoff_utc"])
-                    )
-                    if (
-                        requalified["kickoff_utc"] != cutoff_receipt["kickoff_utc"]
-                        or requalified["kickoff_game_id"]
-                        != cutoff_receipt["kickoff_game_id"]
-                        or _iso_z(re_pre) != cutoff_receipt["preseason_cutoff_utc"]
-                        or _iso_z(re_view) != cutoff_receipt["preview_cutoff_utc"]
-                    ):
-                        errors.append(
-                            "cutoff re-derivation from the bound schedule envelope "
-                            "disagrees with the qualification receipt"
-                        )
-        except (OSError, CaptureError) as exc:
-            errors.append(f"cutoff qualification source unavailable: {exc}")
+        _verify_cutoff_qualification(cutoff_receipt, root, errors)
     except CaptureError as exc:
         errors.append(f"cutoff receipt failed reload: {exc}")
 
@@ -883,38 +974,9 @@ def rederive_trial(trial_dir, *, repo_root=None) -> dict:
     bundle = load_json_bytes_strict(
         _resolve_locator(seal["bundle_locator"], root).read_bytes()
     )
-    manifest = bundle["source_manifest"]
-    _verify_manifest_entries(manifest, root, errors)
+    regenerated_sha, rebuilt_sha = _rederive_bundle_payload(bundle, root, errors)
     if errors:
         return {"ok": False, "errors": errors}
-
-    entries = {e["source_id"]: e for e in manifest}
-    standings_entry = entries.get("standings_2025")
-    rosters_entry = entries.get("sleeper_rosters")
-    if standings_entry is None or rosters_entry is None:
-        return {
-            "ok": False,
-            "errors": ["manifest missing standings_2025 or sleeper_rosters"],
-        }
-
-    standings_doc = load_json_bytes_strict(
-        _git_blob_bytes(root, standings_entry["git_blob_oid"])
-    )
-    rosters_env = load_json_bytes_strict(
-        _resolve_locator(rosters_entry["locator"], root).read_bytes()
-    )
-    franchises = build_baseline_standings(
-        standings_doc, rosters_env["payload"]["rosters"]
-    )
-    regenerated = _build_decision_input(
-        bundle["edition_id"], bundle["arm_id"], bundle["cutoff_utc"], franchises
-    )
-    regenerated_sha = sha256_hex(canonical_json_v1(regenerated))
-
-    rebuilt = dict(bundle)
-    rebuilt["decision_input_payload"] = regenerated
-    rebuilt["decision_input_sha256"] = regenerated_sha
-    rebuilt_sha = compute_bundle_sha256(rebuilt)
 
     result = {
         "ok": True,
@@ -930,6 +992,27 @@ def rederive_trial(trial_dir, *, repo_root=None) -> dict:
     if rebuilt_sha != seal["bundle_sha256"]:
         result["ok"] = False
         result["errors"].append("regenerated bundle hash differs from bound")
+
+    # the sealed decision and claims must themselves rederive under the
+    # ARM-derived discipline — rederivation can never report green for a
+    # forged record_points decision
+    try:
+        decision = load_json_bytes_strict(
+            _resolve_locator(seal["decision_locator"], root).read_bytes()
+        )
+        claims = load_json_bytes_strict(
+            _resolve_locator(seal["claims_locator"], root).read_bytes()
+        )
+        receipt = load_json_bytes_strict(
+            _resolve_locator(seal["receipt_locator"], root).read_bytes()
+        )
+        _rederive_equality_check(
+            receipt, decision, claims, bundle, seal["arm_id"], result["errors"]
+        )
+    except (OSError, CaptureError) as exc:
+        result["errors"].append(f"run bodies unreadable for rederivation: {exc}")
+    if result["errors"]:
+        result["ok"] = False
     return result
 
 

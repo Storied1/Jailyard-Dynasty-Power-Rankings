@@ -939,6 +939,11 @@ def test_fully_rehashed_coordinated_forgery_fails_reload(tmp_path):
     assert not ok
     assert any("rederive" in e for e in errors)
 
+    # rederivation can never report green for a forged record_points decision
+    result = rederive_trial(trial_dir, repo_root=world["repo_root"])
+    assert not result["ok"]
+    assert any("rederive" in e for e in result["errors"])
+
 
 def test_production_seal_success_requires_green_reload(tmp_path, monkeypatch):
     """F2 — the CLI reports success only after reload verification AND
@@ -966,3 +971,130 @@ def test_production_seal_success_requires_green_reload(tmp_path, monkeypatch):
         seal_mod, "rederive_trial", lambda d, **k: {"ok": True, "errors": []}
     )
     assert seal_mod.main(["--edition", "2026-preseason"]) == 0
+
+
+# ---------------------------------------------------------------------------
+# HOLD/REVISE controls — F2 full pre-seal validation, F3 runner-kind bypass
+# ---------------------------------------------------------------------------
+
+
+def _stopped_trial(tmp_path):
+    world = build_world(tmp_path)
+    trial_dir = run_trial(
+        "2026-preseason",
+        "record_points",
+        1,
+        now=SEAL_NOW,
+        stop_before_seal=True,
+        **world,
+    )
+    return world, trial_dir
+
+
+def test_corrupted_manifest_envelope_refused_at_seal(tmp_path):
+    """F2 — a corrupted bound source-manifest envelope refuses the seal
+    BEFORE the exclusive write; only-reload-catches is not acceptable."""
+    world, trial_dir = _stopped_trial(tmp_path)
+    env_path = next(iter((world["public_root"] / "sleeper_rosters").glob("*.json")))
+    doc = json.loads(env_path.read_text(encoding="utf-8"))
+    doc["payload"]["rosters"][0]["owner_id"] = "corrupted"
+    env_path.write_text(json.dumps(doc), encoding="utf-8")
+
+    with pytest.raises(CaptureError, match="bound inputs fail verification"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+    assert not (trial_dir / "seal.sealed.json").exists()
+
+
+def test_corrupted_qualification_envelope_refused_at_seal(tmp_path):
+    """F2 — the cutoff receipt's OWN qualification envelope is verified and
+    the cutoffs re-derived from it pre-seal."""
+    world, trial_dir = _stopped_trial(tmp_path)
+    cutoff = json.loads(Path(world["cutoff_receipt_path"]).read_text(encoding="utf-8"))
+    qual_path = Path(cutoff["kickoff_source_locator"])
+    doc = json.loads(qual_path.read_text(encoding="utf-8"))
+    doc["payload"]["games"][0]["gametime"] = "18:00"
+    qual_path.write_text(json.dumps(doc), encoding="utf-8")
+
+    with pytest.raises(CaptureError, match="qualification source"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+    assert not (trial_dir / "seal.sealed.json").exists()
+
+
+def test_substituted_policy_locator_refused_at_seal(tmp_path):
+    """F2 — receipt locators must EQUAL the bundle's bound locators; a
+    substituted path whose content hashes the same is a provenance break."""
+    import shutil
+
+    world, trial_dir = _stopped_trial(tmp_path)
+    substitute = tmp_path / "policy_copy.json"
+    shutil.copyfile(world["policy_path"], substitute)
+
+    receipt_path = trial_dir / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["policy_locator"] = str(substitute)
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(CaptureError, match="bound locator"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+    assert not (trial_dir / "seal.sealed.json").exists()
+
+
+def test_runner_kind_cannot_disable_preseal_rederivation(tmp_path):
+    """F3 — the required verifier derives from the ARM: forging
+    receipt.runner_kind cannot switch off the record_points rederivation."""
+    from scripts.capture_2026 import canonical_bytes, sha256_hex
+
+    world, trial_dir = _stopped_trial(tmp_path)
+    bundle = json.loads((trial_dir.parent / "bundle.json").read_text(encoding="utf-8"))
+    receipt = json.loads((trial_dir / "receipt.json").read_text(encoding="utf-8"))
+    forged_decision, forged_claims = _forge_decision_and_claims(
+        trial_dir, bundle, receipt
+    )
+    receipt["output_decision_sha256"] = sha256_hex(canonical_bytes(forged_decision))
+    receipt["runner_kind"] = "forged-nondeterministic"
+
+    (trial_dir / "decision.json").write_bytes(canonical_bytes(forged_decision))
+    (trial_dir / "claims.json").write_bytes(canonical_bytes(forged_claims))
+    (trial_dir / "receipt.json").write_bytes(canonical_bytes(receipt))
+
+    with pytest.raises(CaptureError, match="runner_kind|rederive"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+    assert not (trial_dir / "seal.sealed.json").exists()
+
+
+def test_fully_rehashed_runner_kind_bypass_fails_reload_and_rederive(tmp_path):
+    """F3 — a post-seal forgery rewriting decision, claims, receipt AND seal
+    with runner_kind forged everywhere and every hash consistent must fail
+    both reload verification and rederivation."""
+    from scripts.capture_2026 import canonical_bytes, sha256_hex
+
+    world, trial_dir = sealed_trial(tmp_path)
+    bundle = json.loads((trial_dir.parent / "bundle.json").read_text(encoding="utf-8"))
+    receipt = json.loads((trial_dir / "receipt.json").read_text(encoding="utf-8"))
+    forged_decision, forged_claims = _forge_decision_and_claims(
+        trial_dir, bundle, receipt
+    )
+    receipt["output_decision_sha256"] = sha256_hex(canonical_bytes(forged_decision))
+    receipt["runner_kind"] = "forged-nondeterministic"
+
+    seal_path = trial_dir / "seal.sealed.json"
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    seal["decision_sha256"] = receipt["output_decision_sha256"]
+    seal["claims_sha256"] = sha256_hex(canonical_bytes(forged_claims))
+    seal["receipt_sha256"] = sha256_hex(canonical_bytes(receipt))
+    seal["runner_kind"] = "forged-nondeterministic"
+    body = {k: v for k, v in seal.items() if k != "decision_hash"}
+    seal["decision_hash"] = sha256_hex(canonical_bytes(body))
+
+    (trial_dir / "decision.json").write_bytes(canonical_bytes(forged_decision))
+    (trial_dir / "claims.json").write_bytes(canonical_bytes(forged_claims))
+    (trial_dir / "receipt.json").write_bytes(canonical_bytes(receipt))
+    seal_path.write_bytes(canonical_bytes(seal))
+
+    ok, errors, _ = verify_seal_dir(trial_dir, repo_root=world["repo_root"])
+    assert not ok
+    assert any("runner_kind" in e for e in errors)
+
+    result = rederive_trial(trial_dir, repo_root=world["repo_root"])
+    assert not result["ok"]
+    assert any("runner_kind" in e or "rederive" in e for e in result["errors"])

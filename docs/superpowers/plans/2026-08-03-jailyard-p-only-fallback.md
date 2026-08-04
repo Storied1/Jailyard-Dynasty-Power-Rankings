@@ -679,7 +679,7 @@ export POLARS_SKIP_CPU_CHECK=1                 # required for the nflreadpy path
 
 $PY -m pytest scripts/tests/ -q                                    # >= 343 passed / 2 skipped + new
 $PY scripts/capture_2026.py --help                                 # exit 0 WITH output
-$PY scripts/capture_2026.py --freeze-policy <candidate.json> --version v1   # A1b: stamps frozen_at + policy_sha256, writes content/governance/source_policy_2026.v1.json exactly once; refuses re-freeze
+$PY scripts/capture_2026.py --freeze-policy <candidate.json> --version v1 --expected-candidate-sha256 <approved-sha256>   # A1b: verifies the APPROVED candidate hash, stamps frozen_at + policy_sha256, writes content/governance/source_policy_2026.v1.json exactly once; refuses re-freeze or an unapproved candidate
 $PY scripts/capture_2026.py --season 2026 --tranche A              # league id read + verified
 $PY scripts/cutoff_2026.py --season 2026 --write-receipt
 $PY scripts/bundle_2026.py --edition 2026-preseason --arm record_points \
