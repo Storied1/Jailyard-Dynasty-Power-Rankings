@@ -1,6 +1,10 @@
 # Jailyard — P-only 2026 Preservation and Sealing: Acceptance Contract
 
-**Status:** DRAFT — awaiting Blake's binary review. Not authorized for implementation.
+**Status:** APPROVED for Tranche-A implementation (A1–A6/E2E-A only) — Blake delegated the technical
+approval 2026-08-04; exercised after the I50a/I50b correction, a five-finding architect repair pass,
+and an architect PASS with a mechanically verified census (62/62 gate tokens, 0 violations). Tranche
+B, the production `v1` freeze, and production A7 sealing remain Blake-gated. Nothing here authorizes
+push, publication, or scheduler activation.
 
 **Design authority:** `docs/superpowers/specs/2026-08-01-jailyard-writer-foundation-design.md`
 APPROVED at `9805426`, §6. That section requires this path to exist and states it "may run only
@@ -120,23 +124,23 @@ not block the safeguard — it is reported honestly and blocks only B.
 
 ## 4. Files
 
-| Path                                                                                                                                                      | Responsibility                                                    | Git            |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | -------------- |
-| `.gitignore`                                                                                                                                              | ignore private roots — **authorized surface for A1 and A5**       | tracked        |
-| `scripts/capture_2026.py`                                                                                                                                 | envelope write/verify, producers, accounting                      | tracked        |
-| `scripts/cutoff_2026.py`                                                                                                                                  | kickoff qualification, cutoff receipt                             | tracked        |
-| `scripts/bundle_2026.py`                                                                                                                                  | payload projection, bundle compiler, source manifest              | tracked        |
-| `scripts/seal_2026.py`                                                                                                                                    | run receipts, claims, seals, reload verify, rederive              | tracked        |
-| `scripts/tests/test_capture_2026.py`, `test_cutoff_2026.py`, `test_bundle_2026.py`, `test_seal_2026.py`, `test_privacy_boundary.py`, `test_p_only_e2e.py` | §7                                                                | tracked        |
-| `content/governance/capture_table_2026.json`                                                                                                              | eight groups, twelve components                                   | tracked        |
-| `content/governance/source_policy_2026.v1.json`                                                                                                           | **frozen in A1b** — baseline policy, governs `record_points` (S3) | tracked        |
-| `content/governance/source_policy_2026.v2.json`                                                                                                           | **frozen in B2** — model-arm policy; never edits `v1` (S3)        | tracked        |
-| `content/governance/runner_config_2026.json`                                                                                                              | **frozen** shared model-arm binding (S7)                          | tracked        |
-| `content/governance/evaluation_config_2026.json`                                                                                                          | **frozen** scoring + aggregation (S10)                            | tracked        |
-| `data/captures/2026/public/`, `data/captures/2026/_receipts/`                                                                                             | public envelopes, accounting + cutoff receipts                    | tracked        |
-| `content/seals/2026/{edition_id}/{arm_id}/trial{n}/`                                                                                                      | seals, decisions, claims, run receipts                            | tracked        |
-| `private_captures/2026/`, `private_bundles/2026/`                                                                                                         | private envelopes and private bundles                             | **gitignored** |
-| `docs/superpowers/plans/capture-manual-ingest.md`                                                                                                         | chat ingestion procedure                                          | tracked        |
+| Path                                                                                                                                                      | Responsibility                                                       | Git            |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------- |
+| `.gitignore`                                                                                                                                              | ignore private roots — **authorized surface for A1 and A5**          | tracked        |
+| `scripts/capture_2026.py`                                                                                                                                 | envelope write/verify, producers, accounting, **policy freeze (S3)** | tracked        |
+| `scripts/cutoff_2026.py`                                                                                                                                  | kickoff qualification, cutoff receipt                                | tracked        |
+| `scripts/bundle_2026.py`                                                                                                                                  | payload projection, bundle compiler, source manifest                 | tracked        |
+| `scripts/seal_2026.py`                                                                                                                                    | run receipts, claims, seals, reload verify, rederive                 | tracked        |
+| `scripts/tests/test_capture_2026.py`, `test_cutoff_2026.py`, `test_bundle_2026.py`, `test_seal_2026.py`, `test_privacy_boundary.py`, `test_p_only_e2e.py` | §7                                                                   | tracked        |
+| `content/governance/capture_table_2026.json`                                                                                                              | eight groups, twelve components                                      | tracked        |
+| `content/governance/source_policy_2026.v1.json`                                                                                                           | **frozen in A1b** — baseline policy, governs `record_points` (S3)    | tracked        |
+| `content/governance/source_policy_2026.v2.json`                                                                                                           | **frozen in B2** — model-arm policy; never edits `v1` (S3)           | tracked        |
+| `content/governance/runner_config_2026.json`                                                                                                              | **frozen** shared model-arm binding (S7)                             | tracked        |
+| `content/governance/evaluation_config_2026.json`                                                                                                          | **frozen** scoring + aggregation (S10)                               | tracked        |
+| `data/captures/2026/public/`, `data/captures/2026/_receipts/`                                                                                             | public envelopes, accounting + cutoff receipts                       | tracked        |
+| `content/seals/2026/{edition_id}/{arm_id}/trial{n}/`                                                                                                      | seals, decisions, claims, run receipts                               | tracked        |
+| `private_captures/2026/`, `private_bundles/2026/`                                                                                                         | private envelopes and private bundles                                | **gitignored** |
+| `docs/superpowers/plans/capture-manual-ingest.md`                                                                                                         | chat ingestion procedure — **authored at B1**                        | tracked        |
 
 `CAPTURE_TABLE_PATH` **must be defined** as a module constant resolving to
 `content/governance/capture_table_2026.json`. The prior revision referenced it without defining it.
@@ -199,6 +203,7 @@ not only capture identities:
 | `edition_id`, `arm_id`, `cutoff_utc`              | scope                                                                                               |
 | `cutoff_receipt_locator`, `cutoff_receipt_sha256` | the cutoff this bundle was cut at                                                                   |
 | `source_manifest[]`                               | S6 — every selected source, capture and qualified alike                                             |
+| `source_manifest_sha256`                          | hash over the canonical manifest; bound downstream by S8, S9 and S11                                |
 | `decision_input_payload`                          | the **canonical rendered payload** handed to the runner                                             |
 | `decision_input_sha256`                           | hash of that payload                                                                                |
 | `projection`                                      | `{ordering_version, redaction_version, projection_version, code_sha256, config_sha256, parameters}` |
@@ -281,6 +286,12 @@ nothing binds `decision_hash` — the chain is acyclic.
 experiment_status ∈ {complete, unavailable}, reason, computed_at}`. `experiment_status` is
 **derived**: `complete` iff all **seven** verified prospective seals exist for that edition
 (`record_points` ×1, `minimal_legal` ×3, `full_rich` ×3). Never manually asserted.
+
+**S14 — Capture table** (`capture_table_2026.json`, resolved by `CAPTURE_TABLE_PATH`).
+`{season, groups[]}`; group: `{group, components[]}` — exactly R4's eight groups and twelve
+components, no additional fields. Grouping for S2 receipts comes from here; per-source policy
+(windows, freshness, requiredness, `empty_valid`) comes **only** from S3.
+`test_eight_groups_twelve_components_independent` pins it against R4.
 
 ## 6. Invariants
 
@@ -420,9 +431,10 @@ experiment_status ∈ {complete, unavailable}, reason, computed_at}`. `experimen
 
 **Tranche A independence**
 
-- **I50** A7's required-source set is **exactly** the four sources enumerated in §8; the status of
-  any other component — `due`, `not_due` or `error` — cannot block A7. Non-baseline producers may
-  run, fail, and be reported during A without affecting the safeguard.
+- **I50a** A7's required-source set is **exactly** the four sources enumerated in §8, read from the
+  frozen `v1` policy's `required_for` rows.
+- **I50b** The status of any component outside that set — `due`, `not_due` or `error` — cannot block
+  A7. Non-baseline producers may run, fail, and be reported during A without affecting the safeguard.
 - **I51** Baseline franchise continuity joins 2025 → 2026 by **`owner_id`**, not by `roster_id`
   (the two seasons are different Sleeper leagues, so `roster_id` is not durable across them). A 2026
   franchise whose owner has no 2025 record sorts **last** under R5's stated ordering — 0 wins, 0
@@ -450,8 +462,9 @@ allow_nan=False`, appends exactly one LF, and encodes UTF-8. Both are versioned;
 
 **Governance reachability (gate: A1b)**
 
-- **I57** `v1` conforms to the S3 schema and contains **exactly** the declared rows — the four A7
-  required sources plus every component Tranche A attempts.
+- **I57** `v1` conforms to the S3 schema and contains **exactly** the seventeen declared rows — all
+  twelve capture components plus `standings_2025`, `league_history_{2022,2023,2024}` and
+  `player_crosswalk` — with `arms`/`required_for` nonempty **only** on the four A7-required rows.
 - **I58** **No task's gate may require code or artifacts first delivered by a later task.** Enforced
   by the §8 gate-reachability census, which maps every gate invariant to the task delivering what it
   needs and must report zero violations.
@@ -523,8 +536,8 @@ Every test must be **observed failing** with its rule removed. A green suite alo
 | `test_bundle_receipt_seal_bind_policy_locator_and_hash`                                                                                                                                             | I48    |
 | `test_freezing_v2_leaves_v1_bytes_and_v1_bound_seals_unchanged`                                                                                                                                     | I49    |
 | `test_v1_alone_completes_accounting_bundle_seal_and_rederive`                                                                                                                                       | I52    |
-| `test_a7_required_set_is_exactly_the_four_named_sources`                                                                                                                                            | I50    |
-| `test_nonbaseline_component_due_or_error_cannot_block_a7`                                                                                                                                           | I50    |
+| `test_a7_required_set_is_exactly_the_four_named_sources`                                                                                                                                            | I50a   |
+| `test_nonbaseline_component_due_or_error_cannot_block_a7`                                                                                                                                           | I50b   |
 | `test_baseline_joins_2025_to_2026_by_owner_id`                                                                                                                                                      | I51    |
 | `test_strict_loader_rejects_nested_duplicate_keys` / `test_strict_loader_rejects_nan_inf_neginf`                                                                                                    | I53    |
 | `test_strict_loader_operates_on_raw_bytes_not_parsed_objects`                                                                                                                                       | I53    |
@@ -563,16 +576,16 @@ with its rule removed** → commit. Binary gates.
 
 ### Tranche A — prospective safeguard
 
-| Task    | Delivers                                                                                                                                                                                                                                                  | Gate (reachable at this task)                                                                                                           |
-| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **A1**  | `.gitignore` private roots, envelope schema, write/verify, `CAPTURE_TABLE_PATH`, capture table                                                                                                                                                            | I1–I5, I9, I37–I41 green **before any private write**                                                                                   |
-| **A1b** | **freeze baseline policy `v1`** — the four A7-required sources plus every component A or A-opt attempts, scoped `arms: [record_points]`                                                                                                                   | **I47** (write-once, re-freeze refused), **I57** (schema + exactly the declared rows), **I58** (gate-reachability census, 0 violations) |
-| **A2**  | **the three A7-required capture producers only** — `sleeper_rosters`, `sleeper_league`, `nfl_schedules`. The fourth required source, `standings_2025`, is a qualified artifact and needs no producer. **This is the sole producer predecessor of A3–A7.** | I7, I8, I50 green                                                                                                                       |
-| **A3**  | tranche-scoped accounting receipt + CLI                                                                                                                                                                                                                   | I10–I13, I16a, I16b green                                                                                                               |
-| **A4**  | cutoff qualification + receipt                                                                                                                                                                                                                            | I17, I18, I42, R1 green                                                                                                                 |
-| **A5**  | **S13 strict load + canonicalizer**, projection rules, bundle compiler, source manifest, R5 baseline input                                                                                                                                                | I19–I23, I43, I46, I51 green; **I53, I54, I55, I56** green                                                                              |
-| **A6**  | deterministic run receipt, claims, seal, reload verify, rederive                                                                                                                                                                                          | I24–I32, I44 green; **I21, I48, I52, I55, I59** green; **E2E-A** green                                                                  |
-| **A7**  | **operate**: seal preseason + preview baselines before their cutoffs                                                                                                                                                                                      | seals verify `prospective`                                                                                                              |
+| Task    | Delivers                                                                                                                                                                                                                                                                                                                                                                                                        | Gate (reachable at this task)                                                                                                           |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **A1**  | `.gitignore` private roots, envelope schema, write/verify, `CAPTURE_TABLE_PATH`, capture table                                                                                                                                                                                                                                                                                                                  | I1–I6, I37–I41 green **before any private write**                                                                                       |
+| **A1b** | **freeze baseline policy `v1`** — all seventeen S3 rows (twelve components + `standings_2025`, `league_history_{2022,2023,2024}`, `player_crosswalk`), scope `baseline`: `arms`/`required_for` nonempty **only** on the four A7-required rows; every row carries window/freshness/`empty_valid` so A3 can report all twelve honestly. Freeze fn lives in `capture_2026.py`; its tests in `test_capture_2026.py` | **I47** (write-once, re-freeze refused), **I57** (schema + exactly the declared rows), **I58** (gate-reachability census, 0 violations) |
+| **A2**  | **the three A7-required capture producers only** — `sleeper_rosters`, `sleeper_league`, `nfl_schedules`. The fourth required source, `standings_2025`, is a qualified artifact and needs no producer. **This is the sole producer predecessor of A3–A7.**                                                                                                                                                       | I9, I50a green                                                                                                                          |
+| **A3**  | tranche-scoped accounting receipt + CLI                                                                                                                                                                                                                                                                                                                                                                         | I10–I13, I15, I16a, I16b, I50b green                                                                                                    |
+| **A4**  | cutoff qualification + receipt                                                                                                                                                                                                                                                                                                                                                                                  | I17, I18, I42 (unit), R1 green                                                                                                          |
+| **A5**  | **S13 strict load + canonicalizer**, projection rules, bundle compiler, source manifest, R5 baseline input                                                                                                                                                                                                                                                                                                      | I19, I20, I22, I43, I46, I51 green; **I53, I54, I55 (unit), I56** green                                                                 |
+| **A6**  | deterministic run receipt, claims, seal, reload verify, rederive                                                                                                                                                                                                                                                                                                                                                | I24–I32, I44 green; **I21, I42 (end-to-end), I48, I52, I55, I59** green; **E2E-A** green                                                |
+| **A7**  | **operate**: seal preseason + preview baselines before their cutoffs                                                                                                                                                                                                                                                                                                                                            | seals verify `prospective`                                                                                                              |
 
 **I52 at A6 uses an isolated pre-cutoff fixture clock.** It proves the A3–A7 code path completes
 with only `v1` on disk; it does **not** require production A7 operation to have happened first.
@@ -602,10 +615,14 @@ cutoff with no qualifying capture loses that evidence permanently and is not a s
 **Receipts.** A-opt captures appear in the same accounting receipt as every other component, with
 their own status. They are reported at `--tranche A` and **gate** at `--tranche B`.
 
+**Lane gate.** I7 and I8 go green when the lane's producers land — written with the lane, exercised
+with fixtures — and **B1 re-verifies both**. They never gate A3–A7 (I59): the safeguard path neither
+imports nor requires the optional producer module they live in.
+
 ### A7 required-source set — exhaustive
 
 Derived from what the `record_points` decision payload actually consumes, not from group membership.
-**These four, and nothing else, can block A7** (I50):
+**These four, and nothing else, can block A7** (I50a, I50b):
 
 | Source                                              | Why fatal                                                                                                                                                                                                           | In the decision payload?      |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
@@ -628,11 +645,11 @@ and I11 evaluates the tranche in scope.
 
 | Task   | Delivers                                                                                                                                                       | Gate                                                                                                                                                                                         |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **B1** | remaining producers (`sleeper_projections`, `nfl_team_context`, `nfl_injuries`, `chat_export`) plus confirmation that **A-opt**'s five components are captured | I36 green — all twelve                                                                                                                                                                       |
+| **B1** | remaining producers (`sleeper_projections`, `nfl_team_context`, `nfl_injuries`, `chat_export`) plus confirmation that **A-opt**'s five components are captured | I7, I8, I36 green — all twelve                                                                                                                                                               |
 | **B2** | frozen **model-arm policy `v2`**, `runner_config_2026.json`, `evaluation_config_2026.json`                                                                     | Blake-approved, hashed, frozen before any B run; **I49 run against a NONEMPTY expected `v1`-seal set** — `v1`'s bytes and every existing `v1`-bound seal verify identically after the freeze |
 | **B3** | `minimal_legal` + `full_rich` bundles                                                                                                                          | I23 green                                                                                                                                                                                    |
 | **B4** | 3 paired trials per model arm                                                                                                                                  | I33, I34, I45 green                                                                                                                                                                          |
-| **B5** | derived experiment status + R3 fallback                                                                                                                        | I35 green; E2E-B green                                                                                                                                                                       |
+| **B5** | derived experiment status + R3 fallback                                                                                                                        | I14, I35 green; E2E-B green                                                                                                                                                                  |
 
 ### Gate reachability — a standing rule
 
@@ -640,10 +657,19 @@ and I11 evaluates the tranche in scope.
 above is satisfiable with what exists at or before its own task. The census below is part of §10 and
 must report zero violations before implementation kickoff.
 
-Two corrections this rule already forced: A1b previously demanded I48 (needs bundles, receipts and
+Three corrections this rule already forced: A1b previously demanded I48 (needs bundles, receipts and
 seals from A5/A6), I49 (needs `v2` from B2) and I52 (needs the whole A3–A7 path) — none of which can
 be green when A1b runs. And I52's own text named A1b as its gate, which is why the contradiction
-survived earlier reads.
+survived earlier reads. Third: I50 sat in A2's gate while its cannot-block-A7 half needs A3's
+accounting to be testable — split into I50a (required set, gated A2) and I50b (cannot-block, gated
+A3), each keeping its existing named test. Fourth (architect pass, 2026-08-04): the census mapped 14
+invariants while §8's cells name ~50, concealing five more placement defects — I9 sat at A1 needing
+A2's `sleeper_league` producer (moved to A2); I7/I8 sat at A2 while their subjects are lane
+producers (moved to the lane gate + B1); I23 sat at A5 with no `v1` rows to bind against (B3 alone);
+I42's everywhere-check sat wholly at A4 (split unit A4 / end-to-end A6, the I55 convention); and I21
+sat inside A5's range shorthand while §4 puts rederivation in `seal_2026.py` (A6). §10.B now
+enumerates the full gate surface, and `v1` widened to all seventeen S3 rows so A3's
+twelve-component reporting is derivable from the frozen matrix.
 
 ### Commands
 
@@ -653,6 +679,7 @@ export POLARS_SKIP_CPU_CHECK=1                 # required for the nflreadpy path
 
 $PY -m pytest scripts/tests/ -q                                    # >= 343 passed / 2 skipped + new
 $PY scripts/capture_2026.py --help                                 # exit 0 WITH output
+$PY scripts/capture_2026.py --freeze-policy <candidate.json> --version v1   # A1b: stamps frozen_at + policy_sha256, writes content/governance/source_policy_2026.v1.json exactly once; refuses re-freeze
 $PY scripts/capture_2026.py --season 2026 --tranche A              # league id read + verified
 $PY scripts/cutoff_2026.py --season 2026 --write-receipt
 $PY scripts/bundle_2026.py --edition 2026-preseason --arm record_points \
@@ -711,9 +738,9 @@ explicit approval of that exact action and are **not** authorized by approving t
    transformations, evaluation. B cannot start without them; **A is unaffected**, because A freezes
    its own `v1` at A1b.
    1b. **`v1`'s contents require Blake's approval at A1b** — it is immutable once frozen and every A
-   seal cites it permanently. Its scope is small (the four required sources plus the components A
-   attempts), but a mistake in it cannot be corrected in place, only superseded by a `v3` that A's
-   existing seals will not cite.
+   seal cites it permanently. Its seventeen rows cover every source, but only the four A7-required
+   rows carry nonempty `arms`/`required_for`; a mistake in it cannot be corrected in place, only
+   superseded by a `v3` that A's existing seals will not cite.
 2. **Sleeper projections endpoint shape** for 2026 is unverified against a live response (B1).
 3. **Preseason cutoff is 31 days out** (`2026-09-03T00:20:00Z`). Tranche A exists so this date is met
    by the safeguard regardless of B's progress.
@@ -755,19 +782,52 @@ Git evidence fails closed.
 
 ### B. Gate-reachability census
 
-| Invariant          | Gate                             | Needs                                                   | Delivered by  | Reachable |
-| ------------------ | -------------------------------- | ------------------------------------------------------- | ------------- | --------- |
-| I47, I57, I58      | A1b                              | `v1` file + freeze fn + the contract itself             | A1b           | ✅        |
-| I53, I54, I56      | A5                               | strict loader, canonicalizer, bundle compiler, manifest | A5            | ✅        |
-| I55                | A5 (unit), A6/E2E-A (end-to-end) | manifest + rederive path                                | A5, A6        | ✅        |
-| I21, I48, I52, I59 | A6 / E2E-A                       | bundle, receipt, seal, full A path                      | A5, A6        | ✅        |
-| I49                | B2                               | `v2` **and a nonempty `v1`-bound seal set**             | B2 (after A7) | ✅        |
-| I50                | A2                               | required producers + accounting                         | A2, A3        | ✅        |
+Task order for reachability: A1 < A1b < A2 < A3 < A4 < A5 < A6 < A7; the A-opt lane opens after A1
+and must land by B1; A7 ≤ B1 < B2 < B3 < B4 < B5. A row is reachable iff every Delivered-by task is
+at or before its Gate task. `test_gate_reachability_census_reports_zero_violations` parses §8's gate
+cells and this table **from the contract file** and asserts mechanically: every invariant token
+(`I\d+a?b?` or `R1`) in a §8 gate cell has exactly one row here, every row satisfies the ordering,
+and no row is marked unreachable.
 
-**Violations: 0.** Previously 3 — A1b demanded I48, I49 and I52, none satisfiable at A1b. I52 now
-runs at A6 against an isolated pre-cutoff **fixture clock**, so it proves the path without requiring
-production A7 to have run. I49 now runs at B2 against a **nonempty** expected `v1`-seal set, so it
-cannot pass vacuously against zero seals. Every new invariant I53–I59 has exactly one owning gate.
+| Invariant          | Gate                             | Needs                                                   | Delivered by       | Reachable |
+| ------------------ | -------------------------------- | ------------------------------------------------------- | ------------------ | --------- |
+| I1–I5              | A1                               | envelope write/verify + `fetch_sleeper.fetch_json`      | A1                 | ✅        |
+| I6                 | A1                               | private write path, fixture private component           | A1                 | ✅        |
+| I37–I41            | A1                               | `.gitignore`, git guards, containment checks            | A1                 | ✅        |
+| I47, I57, I58      | A1b                              | freeze fn (`capture_2026.py`) + `v1` + this contract    | A1b                | ✅        |
+| I9                 | A2                               | `sleeper_league` producer + `data/2026/league.json`     | A2                 | ✅        |
+| I50a               | A2                               | frozen `v1` required-source rows                        | A1b                | ✅        |
+| I10–I13            | A3                               | producers + accounting + all-seventeen-row `v1` windows | A1b, A2, A3        | ✅        |
+| I15                | A3                               | receipt writer (unit; E2E-A private-leak control at A6) | A3                 | ✅        |
+| I16a, I16b         | A3                               | tranche-scoped gate + CLI                               | A3                 | ✅        |
+| I50b               | A3                               | required producers + tranche-scoped accounting          | A2, A3             | ✅        |
+| I17, I18, R1       | A4                               | verified `nfl_schedules` envelope + qualification       | A2, A4             | ✅        |
+| I42                | A4 (unit), A6/E2E-A (everywhere) | receipt binding; then bundle + seal + reload            | A4; A5, A6         | ✅        |
+| I19, I20, I22      | A5                               | selection + bundle compiler                             | A5                 | ✅        |
+| I43, I46, I51      | A5                               | projection, R5 input, owner-id join                     | A1b, A5            | ✅        |
+| I53, I54, I56      | A5                               | strict loader, canonicalizer, bundle compiler, manifest | A5                 | ✅        |
+| I55                | A5 (unit), A6/E2E-A (end-to-end) | manifest + rederive path                                | A5, A6             | ✅        |
+| I24–I32, I44       | A6                               | receipt, claims, seal layer                             | A5, A6             | ✅        |
+| S3 freeze/drift    | A6                               | frozen policy + runs for drift to invalidate            | A1b, A5, A6        | ✅        |
+| I21, I48, I52, I59 | A6 / E2E-A                       | bundle, receipt, seal, full A path                      | A5, A6             | ✅        |
+| I7, I8             | B1 (lane landing is non-gating)  | optional-lane producers                                 | lane (post-A1), B1 | ✅        |
+| I36                | B1                               | all twelve producers                                    | lane, B1           | ✅        |
+| I49                | B2                               | `v2` **and a nonempty `v1`-bound seal set**             | B2 (after A7)      | ✅        |
+| I23                | B3                               | frozen `v2` rows + model-arm bundles                    | B2, B3             | ✅        |
+| I33, I34, I45      | B4                               | runner + evaluation configs, paired trials              | B2, B4             | ✅        |
+| I14                | B5                               | `v2` chat row + B sealing gate                          | B2, B5             | ✅        |
+| I35                | B5                               | seven-seal derivation                                   | B5                 | ✅        |
+
+**Violations: 0 across the full gate surface** — every invariant token in a §8 gate cell is mapped.
+History: the first pass found 3 (A1b demanding I48/I49/I52 — I52 now runs at A6 against an isolated
+pre-cutoff **fixture clock**, proving the path without production A7; I49 at B2 against a
+**nonempty** expected `v1`-seal set, so it cannot pass vacuously). The I50 correction found a 4th —
+I50 at A2 while its cannot-block-A7 half needs A3's accounting; split into I50a/I50b, the two
+existing named tests mapping one-to-one. The 2026-08-04 architect pass found the census itself
+under-enumerated — 14 rows against ~50 gate tokens — concealing five more placement defects, fixed
+in §8: I9 → A2, I7/I8 → lane + B1, I23 → B3 alone, I42 split A4/A6, I21 out of A5's range.
+Under-enumeration is how each survived: a census that lists only the invariants already under
+suspicion measures scope, not correctness.
 
 ### C. Optional-lane orphan census
 
