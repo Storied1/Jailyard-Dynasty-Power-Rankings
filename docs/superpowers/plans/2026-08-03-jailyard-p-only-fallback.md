@@ -125,7 +125,7 @@ not block the safeguard — it is reported honestly and blocks only B.
 | `.gitignore`                                                                                                                                              | ignore private roots — **authorized surface for A1 and A5**       | tracked        |
 | `scripts/capture_2026.py`                                                                                                                                 | envelope write/verify, producers, accounting                      | tracked        |
 | `scripts/cutoff_2026.py`                                                                                                                                  | kickoff qualification, cutoff receipt                             | tracked        |
-| `scripts/bundle_2026.py`                                                                                                                                  | payload projection, bundle compiler, capture manifest             | tracked        |
+| `scripts/bundle_2026.py`                                                                                                                                  | payload projection, bundle compiler, source manifest              | tracked        |
 | `scripts/seal_2026.py`                                                                                                                                    | run receipts, claims, seals, reload verify, rederive              | tracked        |
 | `scripts/tests/test_capture_2026.py`, `test_cutoff_2026.py`, `test_bundle_2026.py`, `test_seal_2026.py`, `test_privacy_boundary.py`, `test_p_only_e2e.py` | §7                                                                | tracked        |
 | `content/governance/capture_table_2026.json`                                                                                                              | eight groups, twelve components                                   | tracked        |
@@ -198,7 +198,7 @@ not only capture identities:
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `edition_id`, `arm_id`, `cutoff_utc`              | scope                                                                                               |
 | `cutoff_receipt_locator`, `cutoff_receipt_sha256` | the cutoff this bundle was cut at                                                                   |
-| `capture_manifest[]`                              | S6 — the selected envelopes                                                                         |
+| `source_manifest[]`                               | S6 — every selected source, capture and qualified alike                                             |
 | `decision_input_payload`                          | the **canonical rendered payload** handed to the runner                                             |
 | `decision_input_sha256`                           | hash of that payload                                                                                |
 | `projection`                                      | `{ordering_version, redaction_version, projection_version, code_sha256, config_sha256, parameters}` |
@@ -210,9 +210,39 @@ Projection rules are **deterministic**: a stated total ordering of entities and 
 redaction set, and a stated field projection — each versioned and hashed. Rederivation regenerates
 `decision_input_payload` and must reproduce `decision_input_sha256` **and** `bundle_sha256`.
 
-**S6 — Capture manifest.** Ordered list of
-`{source_id, locator, envelope_sha256, payload_sha256, captured_at}` — one entry per selected
-envelope. This is what rederivation reads from.
+**S6 — Source manifest.** Ordered list, one entry per selected source. Two kinds, one chain — an
+envelope-only manifest could not carry `standings_2025`, leaving one of A7's four required sources
+outside the verified chain entirely.
+
+| Field                                                                                                           | Kind               | Gating?                                  |
+| --------------------------------------------------------------------------------------------------------------- | ------------------ | ---------------------------------------- |
+| `kind ∈ {capture, qualified_artifact}`, `source_id`, `locator`                                                  | both               | **gate** — identity                      |
+| `content_sha256` (canonical, per S13), `canonicalizer_id`, `canonicalizer_version`, `canonicalizer_code_sha256` | both               | **gate** — authoritative source identity |
+| `envelope_sha256`, `payload_sha256`, `captured_at`                                                              | capture            | **gate**                                 |
+| `commit_sha`, `path`, `git_blob_oid`, `blob_bytes_sha256`                                                       | qualified_artifact | **gate** — the frozen historical bytes   |
+| `observed_worktree_bytes_sha256`, `byte_count`, `eol_profile`                                                   | qualified_artifact | **non-gating diagnostics only**          |
+
+**A qualified artifact is pinned to a commit, not to the working tree.** The commit/path/blob
+linkage and `blob_bytes_sha256` are verified; only the three worktree observations are diagnostic.
+This is what lets the file be legitimately edited later without invalidating an old seal.
+
+**S13 — Strict load and canonicalization.** Two versioned pure functions. Strictness operates on
+**raw bytes**, because an already-parsed object has lost the information the check needs:
+
+- **`load_json_strict(raw_json: bytes) -> object`** — rejects **duplicate keys at every nesting
+  level** and rejects `NaN`, `Infinity` and `-Infinity`, **before** parsing discards them. In Python
+  this means an `object_pairs_hook` that raises on a repeated key (it fires per object, so nesting is
+  covered) and a `parse_constant` that raises; the stdlib default silently keeps the last duplicate
+  and happily produces non-finite floats.
+- **`canonical_json_v1(validated_obj) -> bytes`** — serializes **in memory** with
+  `sort_keys=True, ensure_ascii=False, indent=2, allow_nan=False`, appends **exactly one** LF, and
+  encodes UTF-8 explicitly.
+
+**Object-only canonicalization cannot qualify a source artifact** — it would accept a file whose
+duplicate keys or non-finite values were already silently resolved. `content_sha256` is SHA-256 over
+`canonical_json_v1(load_json_strict(raw_bytes))`. It is **not** derived from
+`scripts/shared.py::save_json_canonical`'s on-disk output, and **this plan does not modify that
+helper**.
 
 **S7 — Runner config** (`runner_config_2026.json`, frozen). `provider, model, model_version,
 reasoning, tools_policy, browsing, budget, retries, sampling_policy, prompt_locator, prompt_sha256,
@@ -220,7 +250,7 @@ rule_locators, rule_sha256s, runner_config_sha256`. **One immutable `runner_conf
 every model receipt**, identical across `minimal_legal` and `full_rich`.
 
 **S8 — Decision-run receipt.** `decision_run_id, edition_id, arm_id, trial_id, runner_kind,
-bundle_sha256, decision_input_sha256, capture_manifest_sha256, cutoff_receipt_locator,
+bundle_sha256, decision_input_sha256, source_manifest_sha256, cutoff_receipt_locator,
 cutoff_receipt_sha256, policy_locator, matrix_sha256, predecessor_decision_hash,
 predecessor_null_reason,
 started_at, ended_at, output_decision_sha256`. `state_hash` is **null with a recorded reason** — no
@@ -230,7 +260,7 @@ adds `runner_config_sha256` (S7).
 **S9 — Claim.** Design §4 field set plus binding: `claim_id, target, claim_type ∈ {ordinal_rank,
 binary_probability, bounded_quantity}, horizon, assertion, confidence, bound, decisive_evidence,
 contrary_evidence, cutoff_utc, edition_id, arm_id, trial_id, decision_run_id, bundle_sha256,
-capture_manifest_sha256, resolution_rule {rule, source, resolve_on}, outcome, score,
+source_manifest_sha256, resolution_rule {rule, source, resolve_on}, outcome, score,
 resolution_failed`. `outcome`/`score` start null.
 
 **S10 — Evaluation config** (`evaluation_config_2026.json`, frozen). The **already-approved** design
@@ -241,7 +271,7 @@ non-deterministic runners; `evaluation_config_sha256`.
 
 **S11 — Seal.** `{edition_id, kind, season, arm_id, trial_id, cutoff_utc, cutoff_receipt_locator,
 cutoff_receipt_sha256, ended_at, sealed_at, label ∈ {prospective, retrospective}, bundle_sha256,
-bundle_locator, decision_input_sha256, capture_manifest_sha256, policy_locator, matrix_sha256,
+bundle_locator, decision_input_sha256, source_manifest_sha256, policy_locator, matrix_sha256,
 decision_sha256,
 decision_locator, claims_sha256, claims_locator, receipt_sha256, receipt_locator,
 predecessor_decision_hash, runner_kind, decision_hash}`. `decision_hash` covers every other field;
@@ -320,17 +350,19 @@ experiment_status ∈ {complete, unavailable}, reason, computed_at}`. `experimen
 
 **Bundle and payload**
 
-- **I19** The compiler selects, per source, the latest **verified** envelope with
-  `captured_at <= cutoff_utc`. A post-cutoff envelope is never selected.
+- **I19** Selection is per source and per kind. **Captures:** the latest **verified** envelope with
+  `captured_at <= cutoff_utc`; a post-cutoff envelope is never selected. **Qualified artifacts:** the
+  content at the bound `commit_sha`/`path`, frozen per I54.
 - **I20** `bundle_sha256` and `decision_input_sha256` are computed from content. There is **no
   caller-supplied factset or bundle hash**.
 - **I43** The bundle binds the **canonical decision-input payload** the runner received, plus the
   versioned ordering, redaction and projection rules with their code and config hashes and
   parameters.
-- **I21** Rederivation **regenerates** the decision-input payload from the sealed capture manifest by
-  re-reading and re-verifying each envelope and re-applying the recorded projection, then reproduces
-  `decision_input_sha256` and `bundle_sha256`. Re-hashing an already-frozen bundle is not a test and
-  is forbidden.
+- **I21** Rederivation **regenerates** the decision-input payload from the sealed source manifest,
+  re-verifying **every entry by kind** — captures via envelope and payload hashes, qualified
+  artifacts via I55 — then re-applies the recorded projection and reproduces `decision_input_sha256`
+  and `bundle_sha256`. It must cover **all four** A7 required sources, `data/2025/season_combined.json`
+  included. Re-hashing an already-frozen bundle is not a test and is forbidden.
 - **I22** A bundle containing any private component sets `contains_private: true` and is written
   under `private_bundles/`. Only its hashes may be committed.
 - **I23** Arm membership comes from the frozen matrix: `full_rich` fails if any source the matrix
@@ -354,10 +386,10 @@ experiment_status ∈ {complete, unavailable}, reason, computed_at}`. `experimen
 - **I30** Seals are immutable; seal files use a distinct suffix so decision, claims and receipt
   bodies are never deserialized as seals.
 - **I31** Load-time verification recomputes and cross-checks **every** hash: seal metadata, decision,
-  claims, receipt, bundle, decision-input payload, capture manifest, cutoff receipt, matrix, and
-  receipt↔decision agreement.
+  claims, receipt, bundle, decision-input payload, source manifest, **every qualified artifact's
+  bound commit/path/blob linkage**, cutoff receipt, matrix, and receipt↔decision agreement.
 - **I32** Every ranking position carries at least one claim with a `resolution_rule` fixed before the
-  outcome; every claim binds `bundle_sha256` and `capture_manifest_sha256`.
+  outcome; every claim binds `bundle_sha256` and `source_manifest_sha256`.
 - **I33** Both model arms bind an identical `runner_config_sha256` — provider, model, model_version,
   reasoning, budget, retries, sampling policy, prompt, rules, tools policy and browsing all equal. A
   mismatch fails the run.
@@ -382,8 +414,9 @@ experiment_status ∈ {complete, unavailable}, reason, computed_at}`. `experimen
 - **I49** Freezing `v2` leaves `v1`'s bytes unchanged **and** leaves the verification result of every
   `v1`-bound seal unchanged. A `v2` value never reaches a `v1`-bound seal.
 - **I52** `v1` alone is **sufficient** for baseline accounting, bundle construction, sealing and
-  rederivation: with only `v1` present and no `v2` on disk, A3 through A7 complete. This is A1b's
-  gate and the thing the prior lifecycle got backwards.
+  rederivation: with only `v1` present and no `v2` on disk, the A3–A7 code path completes. **Gated at
+  A6/E2E-A**, exercised with an isolated pre-cutoff **fixture clock** — it proves the path, and does
+  not require production A7 operation to have happened first.
 
 **Tranche A independence**
 
@@ -394,6 +427,40 @@ experiment_status ∈ {complete, unavailable}, reason, computed_at}`. `experimen
   (the two seasons are different Sleeper leagues, so `roster_id` is not durable across them). A 2026
   franchise whose owner has no 2025 record sorts **last** under R5's stated ordering — 0 wins, 0
   points-for, `roster_id` ascending — which is a consequence of R5, not an additional rule.
+
+**Qualified-artifact identity (gate: A5, end-to-end at A6/E2E-A)**
+
+- **I53** `load_json_strict` rejects duplicate keys **at every nesting level** and rejects `NaN`,
+  `Infinity`, `-Infinity`, operating on **raw bytes** before parsing discards them.
+  `canonical_json_v1` serializes in memory with `sort_keys=True, ensure_ascii=False, indent=2,
+allow_nan=False`, appends exactly one LF, and encodes UTF-8. Both are versioned; neither derives
+  from `save_json_canonical`'s on-disk output, which this plan leaves unmodified.
+- **I54** At freeze, a qualified artifact binds `commit_sha`, `path`, `git_blob_oid`,
+  `blob_bytes_sha256`, canonicalizer identity and canonical `content_sha256`. The **current worktree
+  must canonically equal that blob** or the freeze fails. Worktree bytes, byte count and EOL profile
+  are recorded as diagnostics only.
+- **I55** Rederivation reads and verifies the **bound commit/path/blob — never the current
+  worktree**: the blob must resolve at that commit/path, its bytes must hash to `blob_bytes_sha256`,
+  and `canonical_json_v1(load_json_strict(blob))` must hash to `content_sha256`. **Missing or
+  mismatched bound Git evidence fails closed.** A later legitimate worktree edit must not invalidate
+  an old seal; a worktree difference is reported as `same_content_different_materialization` and is
+  **diagnostic only**.
+- **I56** All four A7 required sources appear in the source manifest with verified identity; a
+  manifest missing any of them fails the bundle.
+
+**Governance reachability (gate: A1b)**
+
+- **I57** `v1` conforms to the S3 schema and contains **exactly** the declared rows — the four A7
+  required sources plus every component Tranche A attempts.
+- **I58** **No task's gate may require code or artifacts first delivered by a later task.** Enforced
+  by the §8 gate-reachability census, which maps every gate invariant to the task delivering what it
+  needs and must report zero violations.
+
+**Optional-lane isolation (gate: A6/E2E-A)**
+
+- **I59** The baseline path neither imports nor requires any optional producer module; accounting
+  derives optional-component status from the store and the frozen policy without invoking them. The
+  full A path runs with optional producer modules absent.
 
 ## 7. Named tests
 
@@ -459,12 +526,27 @@ Every test must be **observed failing** with its rule removed. A green suite alo
 | `test_a7_required_set_is_exactly_the_four_named_sources`                                                                                                                                            | I50    |
 | `test_nonbaseline_component_due_or_error_cannot_block_a7`                                                                                                                                           | I50    |
 | `test_baseline_joins_2025_to_2026_by_owner_id`                                                                                                                                                      | I51    |
+| `test_strict_loader_rejects_nested_duplicate_keys` / `test_strict_loader_rejects_nan_inf_neginf`                                                                                                    | I53    |
+| `test_strict_loader_operates_on_raw_bytes_not_parsed_objects`                                                                                                                                       | I53    |
+| `test_canonical_json_v1_params_and_single_trailing_lf`                                                                                                                                              | I53    |
+| `test_freeze_requires_worktree_canonically_equal_to_bound_blob`                                                                                                                                     | I54    |
+| `test_freeze_binds_commit_path_blob_oid_and_blob_bytes_sha256`                                                                                                                                      | I54    |
+| `test_rederive_reads_bound_blob_not_current_worktree`                                                                                                                                               | I55    |
+| `test_later_worktree_edit_does_not_invalidate_an_old_seal`                                                                                                                                          | I55    |
+| `test_missing_or_mismatched_bound_git_evidence_fails_closed`                                                                                                                                        | I55    |
+| `test_worktree_difference_reported_as_same_content_different_materialization`                                                                                                                       | I55    |
+| `test_source_manifest_carries_capture_and_qualified_entries`                                                                                                                                        | I56    |
+| `test_all_four_a7_sources_present_and_verified` / `test_manifest_missing_a_required_source_fails_bundle`                                                                                            | I56    |
+| `test_v1_matches_schema_and_contains_exactly_the_declared_rows`                                                                                                                                     | I57    |
+| `test_gate_reachability_census_reports_zero_violations`                                                                                                                                             | I58    |
+| `test_baseline_path_runs_with_optional_producer_modules_absent`                                                                                                                                     | I59    |
+| `test_accounting_reports_optional_status_without_invoking_producers`                                                                                                                                | I59    |
 | `test_unmatched_2026_franchise_sorts_last_deterministically`                                                                                                                                        | I51    |
 
 **End-to-end** — `test_p_only_e2e.py`, two tests:
 
 > **A:** envelopes (A's components only) → tranche-A accounting → cutoff qualification → baseline
-> bundle → deterministic run → claims → seal → reload verify → rederive from the capture manifest.
+> bundle → deterministic run → claims → seal → reload verify → rederive from the source manifest.
 >
 > **B:** full envelopes → tranche-B accounting → minimal + full bundles → 7 runs across 3 arms →
 > claims → 7 seals → reload verify → rederive → derived `experiment_status`.
@@ -481,16 +563,44 @@ with its rule removed** → commit. Binary gates.
 
 ### Tranche A — prospective safeguard
 
-| Task    | Delivers                                                                                                                                                                                                                                                                                                                                                                                             | Gate                                                         |
-| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **A1**  | `.gitignore` private roots, envelope schema, write/verify, `CAPTURE_TABLE_PATH`, capture table                                                                                                                                                                                                                                                                                                       | I1–I5, I9, I37–I41 green **before any private write**        |
-| **A1b** | **freeze baseline policy `v1`** — the four A7-required sources plus every component A attempts, scoped `arms: [record_points]`                                                                                                                                                                                                                                                                       | I47–I49, I52 green; `v1` sufficient with **no `v2` on disk** |
-| **A2**  | producers: the **three A7-required captures first** (`sleeper_rosters`, `sleeper_league`, `nfl_schedules`; the fourth required source, `standings_2025`, is a qualified artifact already on disk and needs no producer), then the other prospective captures (`sleeper_users`, `draft_meta`, `draft_picks`, `sleeper_transactions`, `sleeper_matchups`) — attempted and reported, **never blocking** | I7, I8, I50 green                                            |
-| **A3**  | tranche-scoped accounting receipt + CLI                                                                                                                                                                                                                                                                                                                                                              | I10–I13, I16a, I16b green                                    |
-| **A4**  | cutoff qualification + receipt                                                                                                                                                                                                                                                                                                                                                                       | I17, I18, I42, R1 green                                      |
-| **A5**  | projection rules, bundle compiler, capture manifest, R5 baseline input                                                                                                                                                                                                                                                                                                                               | I19–I23, I43, I46, I48, I51 green                            |
-| **A6**  | deterministic run receipt, claims, seal, reload verify, rederive                                                                                                                                                                                                                                                                                                                                     | I24–I32, I44 green; E2E-A green                              |
-| **A7**  | **operate**: seal preseason + preview baselines before their cutoffs                                                                                                                                                                                                                                                                                                                                 | seals verify `prospective`                                   |
+| Task    | Delivers                                                                                                                                                                                                                                                  | Gate (reachable at this task)                                                                                                           |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **A1**  | `.gitignore` private roots, envelope schema, write/verify, `CAPTURE_TABLE_PATH`, capture table                                                                                                                                                            | I1–I5, I9, I37–I41 green **before any private write**                                                                                   |
+| **A1b** | **freeze baseline policy `v1`** — the four A7-required sources plus every component A or A-opt attempts, scoped `arms: [record_points]`                                                                                                                   | **I47** (write-once, re-freeze refused), **I57** (schema + exactly the declared rows), **I58** (gate-reachability census, 0 violations) |
+| **A2**  | **the three A7-required capture producers only** — `sleeper_rosters`, `sleeper_league`, `nfl_schedules`. The fourth required source, `standings_2025`, is a qualified artifact and needs no producer. **This is the sole producer predecessor of A3–A7.** | I7, I8, I50 green                                                                                                                       |
+| **A3**  | tranche-scoped accounting receipt + CLI                                                                                                                                                                                                                   | I10–I13, I16a, I16b green                                                                                                               |
+| **A4**  | cutoff qualification + receipt                                                                                                                                                                                                                            | I17, I18, I42, R1 green                                                                                                                 |
+| **A5**  | **S13 strict load + canonicalizer**, projection rules, bundle compiler, source manifest, R5 baseline input                                                                                                                                                | I19–I23, I43, I46, I51 green; **I53, I54, I55, I56** green                                                                              |
+| **A6**  | deterministic run receipt, claims, seal, reload verify, rederive                                                                                                                                                                                          | I24–I32, I44 green; **I21, I48, I52, I55, I59** green; **E2E-A** green                                                                  |
+| **A7**  | **operate**: seal preseason + preview baselines before their cutoffs                                                                                                                                                                                      | seals verify `prospective`                                                                                                              |
+
+**I52 at A6 uses an isolated pre-cutoff fixture clock.** It proves the A3–A7 code path completes
+with only `v1` on disk; it does **not** require production A7 operation to have happened first.
+Nothing in A6's gate waits on A7.
+
+### A-opt — parallel preservation lane (starts after A1; never gates A3–A7)
+
+The 2026 evidence for these components is perishable, so the lane is real work with real deadlines —
+it simply is not on the safeguard's critical path. Every component below has an owner, a command, a
+cadence, a window, a capture deadline, a `v1` policy row, a receipt, and a downstream B gate.
+
+| Component              | Command                                                   | Cadence | Availability window           | Capture deadline | `v1` row                    | Consumed by                     |
+| ---------------------- | --------------------------------------------------------- | ------- | ----------------------------- | ---------------- | --------------------------- | ------------------------------- |
+| `sleeper_users`        | `capture_2026.py --season 2026 --component sleeper_users` | daily   | open now                      | preseason cutoff | present, `required_for: []` | B3 `minimal_legal`, `full_rich` |
+| `draft_meta`           | `… --component draft_meta`                                | daily   | opens at draft scheduling     | preseason cutoff | present, `required_for: []` | B3 both model arms              |
+| `draft_picks`          | `… --component draft_picks`                               | daily   | opens at draft start          | preseason cutoff | present, `required_for: []` | B3 both model arms              |
+| `sleeper_transactions` | `… --component sleeper_transactions`                      | daily   | open now                      | preview cutoff   | present, `required_for: []` | B3 `full_rich`                  |
+| `sleeper_matchups`     | `… --component sleeper_matchups`                          | daily   | opens at schedule publication | preview cutoff   | present, `required_for: []` | B3 `full_rich`                  |
+
+**Ownership:** the sole writer named at implementation kickoff owns the lane; it is not delegated
+away from the A path's owner without an explicit hand-off.
+
+**Deferral rule.** A-opt work may follow A7 **only when** a qualifying pre-cutoff capture already
+exists for that component, **or** the next applicable cutoff is still open. Deferring past a closed
+cutoff with no qualifying capture loses that evidence permanently and is not a scheduling choice.
+
+**Receipts.** A-opt captures appear in the same accounting receipt as every other component, with
+their own status. They are reported at `--tranche A` and **gate** at `--tranche B`.
 
 ### A7 required-source set — exhaustive
 
@@ -516,13 +626,24 @@ and I11 evaluates the tranche in scope.
 
 ### Tranche B — rich prospective contrast
 
-| Task   | Delivers                                                                                       | Gate                                                                                                      |
-| ------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **B1** | remaining producers (`sleeper_projections`, `nfl_team_context`, `nfl_injuries`, `chat_export`) | I36 green — all twelve                                                                                    |
-| **B2** | frozen **model-arm policy `v2`**, `runner_config_2026.json`, `evaluation_config_2026.json`     | Blake-approved, hashed, frozen before any B run; **I49 re-run: `v1` and every `v1`-bound seal unchanged** |
-| **B3** | `minimal_legal` + `full_rich` bundles                                                          | I23 green                                                                                                 |
-| **B4** | 3 paired trials per model arm                                                                  | I33, I34, I45 green                                                                                       |
-| **B5** | derived experiment status + R3 fallback                                                        | I35 green; E2E-B green                                                                                    |
+| Task   | Delivers                                                                                                                                                       | Gate                                                                                                                                                                                         |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **B1** | remaining producers (`sleeper_projections`, `nfl_team_context`, `nfl_injuries`, `chat_export`) plus confirmation that **A-opt**'s five components are captured | I36 green — all twelve                                                                                                                                                                       |
+| **B2** | frozen **model-arm policy `v2`**, `runner_config_2026.json`, `evaluation_config_2026.json`                                                                     | Blake-approved, hashed, frozen before any B run; **I49 run against a NONEMPTY expected `v1`-seal set** — `v1`'s bytes and every existing `v1`-bound seal verify identically after the freeze |
+| **B3** | `minimal_legal` + `full_rich` bundles                                                                                                                          | I23 green                                                                                                                                                                                    |
+| **B4** | 3 paired trials per model arm                                                                                                                                  | I33, I34, I45 green                                                                                                                                                                          |
+| **B5** | derived experiment status + R3 fallback                                                                                                                        | I35 green; E2E-B green                                                                                                                                                                       |
+
+### Gate reachability — a standing rule
+
+**No task's gate may require code or artifacts first delivered by a later task** (I58). Every gate
+above is satisfiable with what exists at or before its own task. The census below is part of §10 and
+must report zero violations before implementation kickoff.
+
+Two corrections this rule already forced: A1b previously demanded I48 (needs bundles, receipts and
+seals from A5/A6), I49 (needs `v2` from B2) and I52 (needs the whole A3–A7 path) — none of which can
+be green when A1b runs. And I52's own text named A1b as its gate, which is why the contradiction
+survived earlier reads.
 
 ### Commands
 
@@ -599,63 +720,71 @@ explicit approval of that exact action and are **not** authorized by approving t
 
 ## 10. Self-review
 
-Scoped to the two traces requested; no other section reopened.
+Three censuses. No other section reopened.
 
-### 1. Policy creation → accounting → baseline bundle → seal
+### A. Source-chain verification
 
-| Step                                        | Cites                                                                        | Exists by  |
-| ------------------------------------------- | ---------------------------------------------------------------------------- | ---------- |
-| **A1b** freeze `source_policy_2026.v1.json` | — writes it                                                                  | A1b        |
-| **A3** accounting, `--tranche A`            | `v1` rows: `required_for`, `availability_window`, `freshness`, `empty_valid` | A1b ✅     |
-| **A5** baseline bundle                      | `v1` for arm membership; binds `policy_locator` + `matrix_sha256` = `v1`     | A1b ✅     |
-| **A6/A7** run receipt + seal                | binds the same `v1` locator + hash                                           | A1b ✅     |
-| **A7** rederivation                         | re-reads `v1` at the bound locator, re-verifies its hash                     | A1b ✅     |
-| **B2** freeze `v2`                          | writes a **new file**; `v1` untouched                                        | after A ✅ |
+| Stage               | Carries                                                                                                           | Verified against                                                                            |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| S6 source manifest  | one entry per source; `kind`, `locator`, canonical `content_sha256`, canonicalizer identity                       | —                                                                                           |
+| … capture entries   | `envelope_sha256`, `payload_sha256`, `captured_at`                                                                | re-read envelope, both hashes (I5, I21)                                                     |
+| … qualified entries | `commit_sha`, `path`, `git_blob_oid`, `blob_bytes_sha256`                                                         | blob resolves at commit/path; bytes hash; `canonical_json_v1(load_json_strict(blob))` (I55) |
+| S5 bundle           | `source_manifest[]`, `source_manifest_sha256`, `decision_input_payload`, `decision_input_sha256`, `bundle_sha256` | I20, I43                                                                                    |
+| S8 run receipt      | `source_manifest_sha256`, `bundle_sha256`, `decision_input_sha256`                                                | I31                                                                                         |
+| S9 claim            | `bundle_sha256`, `source_manifest_sha256`                                                                         | I32                                                                                         |
+| S11 seal            | `source_manifest_sha256` + every hash above                                                                       | I31                                                                                         |
+| Reload / rederive   | regenerates the payload from the **manifest**, per kind                                                           | I21, I55 — all four A7 sources                                                              |
 
-The cycle is broken: nothing in A cites an artifact that B creates. I52 states the sufficiency
-claim directly — with **no `v2` on disk**, A3 through A7 complete — and A1b's gate is that test, so
-the independence is verified rather than asserted. I47 makes each version write-once and forbids a
-freeze from touching another version's file; I49 requires that freezing `v2` change neither `v1`'s
-bytes nor the verification result of any `v1`-bound seal, re-run as a B2 gate. I48 makes every
-bundle, receipt and seal name **which version** it was cut under, so a two-version world is never
-ambiguous.
+All four A7 required sources are inside the chain: `sleeper_rosters`, `sleeper_league`,
+`nfl_schedules` as `capture`; `standings_2025` as `qualified_artifact`. The envelope-only manifest
+could not represent the fourth at all — that was the break.
 
-Residual risk, stated: `v1` is immutable, so an error in it is not correctable in place — only
-supersedable by a version A's existing seals will not cite. That is the intended property, and it is
-why open item 1b asks for Blake's approval of `v1`'s contents at A1b rather than treating it as
-mechanical.
+**Strictness is at the byte boundary.** `load_json_strict` takes raw bytes and rejects nested
+duplicate keys and `NaN`/`Infinity`/`-Infinity` **before** parsing discards them; canonicalizing an
+already-parsed object would silently accept a file whose duplicates were resolved last-wins.
+Measured on `data/2025/season_combined.json`: strict parse passes, and canonical worktree equals
+canonical committed blob at `29203e49…`, so I54's freeze equality holds today.
 
-### 2. The exact A7 required-source set
+**Rederivation reads the frozen blob, not the worktree.** Bound commit/path/blob linkage and
+`blob_bytes_sha256` are gates; `observed_worktree_bytes_sha256`, `byte_count` and `eol_profile` are
+diagnostics. That distinction is load-bearing: the worktree copy is CRLF (`a50e041c…`, 392,064
+bytes) while the committed blob is LF (`9e5ac6b0…`, 377,620) — a 14,444-byte difference on identical
+content. Gating on the worktree would break every seal on a fresh clone; gating on the blob also
+means a **later legitimate edit to the file cannot invalidate an old seal**. Missing or mismatched
+Git evidence fails closed.
 
-Four, derived from what the `record_points` payload consumes:
+### B. Gate-reachability census
 
-| Source                   | Role                                                                     | In payload |
-| ------------------------ | ------------------------------------------------------------------------ | ---------- |
-| `standings_2025`         | recomputed wins/points-for, `roster_id → owner_id`, `playoff_week_start` | yes        |
-| `sleeper_rosters` (2026) | the franchise set to rank; carries the `owner_id` join key               | yes        |
-| `sleeper_league` (2026)  | league-identity verification (I9); the seal binds the league             | no         |
-| `nfl_schedules` (2026)   | cutoff qualification, which A7 depends on                                | no         |
+| Invariant          | Gate                             | Needs                                                   | Delivered by  | Reachable |
+| ------------------ | -------------------------------- | ------------------------------------------------------- | ------------- | --------- |
+| I47, I57, I58      | A1b                              | `v1` file + freeze fn + the contract itself             | A1b           | ✅        |
+| I53, I54, I56      | A5                               | strict loader, canonicalizer, bundle compiler, manifest | A5            | ✅        |
+| I55                | A5 (unit), A6/E2E-A (end-to-end) | manifest + rederive path                                | A5, A6        | ✅        |
+| I21, I48, I52, I59 | A6 / E2E-A                       | bundle, receipt, seal, full A path                      | A5, A6        | ✅        |
+| I49                | B2                               | `v2` **and a nonempty `v1`-bound seal set**             | B2 (after A7) | ✅        |
+| I50                | A2                               | required producers + accounting                         | A2, A3        | ✅        |
 
-Nine components cannot block A7: `sleeper_users`, `draft_meta`, `draft_picks`,
-`sleeper_transactions`, `sleeper_matchups`, `sleeper_projections`, `nfl_team_context`,
-`nfl_injuries`, `chat_export`. They are implemented and attempted during A — the evidence is
-perishable and B needs it — and reported honestly as `due`/`not_due`/`error`. I50 makes that a
-test, not a convention.
+**Violations: 0.** Previously 3 — A1b demanded I48, I49 and I52, none satisfiable at A1b. I52 now
+runs at A6 against an isolated pre-cutoff **fixture clock**, so it proves the path without requiring
+production A7 to have run. I49 now runs at B2 against a **nonempty** expected `v1`-seal set, so it
+cannot pass vacuously against zero seals. Every new invariant I53–I59 has exactly one owning gate.
 
-Two findings from tracing rather than assuming:
+### C. Optional-lane orphan census
 
-- **`sleeper_users` is not fatal**, though it shares a group with `sleeper_league`. The 2025→2026
-  join is by `owner_id`, which `sleeper_rosters` already carries; users adds display names, which
-  are presentation. Group membership is not a proxy for requiredness — hence per-component
-  `required_for` in S3.
-- **The join must be `owner_id`, not `roster_id`** (I51): 2025 and 2026 are different Sleeper
-  leagues (`1180228858937966592` vs `1312884727480352768`), so `roster_id` is not durable across
-  them. Verified: all twelve 2026 owners match 2025 in the current snapshot — evidence the join
-  works, not a guarantee, since the snapshot predates capture. An unmatched owner sorts last under
-  R5's stated ordering (0 wins, 0 points-for, `roster_id` ↑), a consequence of R5 rather than a new
-  rule.
+| Component              | Owner | Command | Cadence | Window | Deadline | `v1` row | Receipt | B gate |
+| ---------------------- | ----- | ------- | ------- | ------ | -------- | -------- | ------- | ------ |
+| `sleeper_users`        | ✅    | ✅      | ✅      | ✅     | ✅       | ✅       | ✅      | ✅ B3  |
+| `draft_meta`           | ✅    | ✅      | ✅      | ✅     | ✅       | ✅       | ✅      | ✅ B3  |
+| `draft_picks`          | ✅    | ✅      | ✅      | ✅     | ✅       | ✅       | ✅      | ✅ B3  |
+| `sleeper_transactions` | ✅    | ✅      | ✅      | ✅     | ✅       | ✅       | ✅      | ✅ B3  |
+| `sleeper_matchups`     | ✅    | ✅      | ✅      | ✅     | ✅       | ✅       | ✅      | ✅ B3  |
 
-I also tightened I46 while tracing: `final_record` is a **stored season-end aggregate**, and trusting
-one is the exact defect that produced this project's 46 leaks. Wins and points-for are recomputed
-from `weeks[playoff_week_start − 2].standings` and the stored value is used only as a cross-check
-that fails closed.
+**Orphans: 0.** A-opt starts after A1 and runs alongside the critical path; it is a predecessor to
+nothing in Tranche A. Deferral past A7 is permitted **only** with a qualifying pre-cutoff capture in
+hand or the next applicable cutoff still open — so "optional" bounds the _ordering_, never the
+_obligation_, and perishable evidence is not quietly lost to sequencing.
+
+**The critical path is now three producers.** A2 delivers `sleeper_rosters`, `sleeper_league` and
+`nfl_schedules`; `standings_2025` needs none. I59 proves the baseline neither imports nor requires
+optional producer modules, tested with those modules absent — so optional _implementation_, not just
+optional runtime status, is off the safeguard's path.
