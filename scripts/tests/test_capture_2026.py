@@ -570,6 +570,243 @@ def test_draft_reaches_picks_and_fails_on_metadata_only(tmp_path):
         )
 
 
+# ---------------------------------------------------------------------------
+# A3 — tranche-scoped accounting (I10-I13, I15, I16a, I16b, I50b)
+# ---------------------------------------------------------------------------
+
+
+def _capture_component(tmp_path, source_id, payload=None, captured_at=None, **kw):
+    return capture(
+        source_id,
+        payload if payload is not None else {"data": source_id},
+        **valid_kwargs(
+            tmp_path,
+            captured_at=captured_at or "2026-08-04T10:00:00Z",
+            request={"endpoint_or_dataset": f"fixture:{source_id}", "params": {}},
+            **kw,
+        ),
+    )
+
+
+def _capture_required_three(tmp_path):
+    for sid in ("sleeper_league", "sleeper_rosters", "nfl_schedules"):
+        _capture_component(tmp_path, sid)
+
+
+def accounting(tmp_path, policy_doc_path=None, now=FIXED_NOW, tranche="A", errors=None):
+    from scripts.capture_2026 import build_accounting_receipt
+
+    if policy_doc_path is None:
+        frozen = tmp_path / "governance" / "source_policy_2026.v1.json"
+        policy_doc_path = frozen if frozen.exists() else freeze_v1(tmp_path)
+    return build_accounting_receipt(
+        load_policy(policy_doc_path),
+        tranche=tranche,
+        public_root=tmp_path / "public",
+        private_root=tmp_path / "private",
+        now=now,
+        producer_errors=errors or {},
+    )
+
+
+def test_eight_groups_twelve_components_independent(tmp_path):
+    receipt = accounting(tmp_path)
+    groups = {g["group"]: g for g in receipt["groups"]}
+    assert set(groups) == {
+        "league_identity",
+        "rosters",
+        "draft",
+        "transactions",
+        "league_matchups",
+        "projections",
+        "nfl_context",
+        "chat",
+    }
+    components = [c for g in receipt["groups"] for c in g["components"]]
+    assert len(components) == 12
+    assert groups["league_identity"]["components"][0]["source_id"] == "sleeper_league"
+    for component in components:
+        assert component["status"] in ("captured", "due", "not_due", "error")
+        for field in (
+            "source_id",
+            "required_for",
+            "mechanism",
+            "cadence",
+            "availability_window",
+            "empty_valid",
+            "captured_at",
+            "payload_sha256",
+            "envelope_sha256",
+            "error",
+            "acquisition_trigger",
+        ):
+            assert field in component, f"{component['source_id']} missing {field}"
+
+
+def test_group_passes_only_when_required_components_pass(tmp_path):
+    # required component captured, optional sibling absent -> group incomplete
+    # but the tranche-A gate passes (I11 evaluates the tranche in scope)
+    _capture_required_three(tmp_path)
+    receipt = accounting(tmp_path)
+    groups = {g["group"]: g for g in receipt["groups"]}
+    assert groups["league_identity"]["status"] == "incomplete"  # users absent
+    assert receipt["ok"] is True and receipt["unmet_required"] == []
+
+    # required component missing -> its group blocks the tranche
+    receipt2 = accounting(tmp_path, now=FIXED_NOW, tranche="A")
+    (tmp_path / "public" / "sleeper_league").rename(tmp_path / "hidden")
+    receipt2 = accounting(tmp_path)
+    assert receipt2["ok"] is False
+    assert "sleeper_league" in receipt2["unmet_required"]
+
+
+def test_not_due_before_window_due_after(tmp_path):
+    candidate = build_candidate_policy_v1()
+    for row in candidate["rows"]:
+        if row["source_id"] == "sleeper_users":
+            row["availability_window"]["opens_at_rule"] = "utc:2026-09-01T00:00:00Z"
+        if row["source_id"] == "draft_meta":
+            row["availability_window"]["opens_at_rule"] = "utc:2026-08-01T00:00:00Z"
+    policy = freeze_policy(
+        write_candidate(tmp_path, candidate),
+        "v1",
+        governance_dir=tmp_path / "governance",
+        now=FIXED_NOW,
+    )
+    receipt = accounting(tmp_path, policy_doc_path=policy)
+    status = {
+        c["source_id"]: c["status"] for g in receipt["groups"] for c in g["components"]
+    }
+    assert status["sleeper_users"] == "not_due"  # window opens 2026-09-01
+    assert status["draft_meta"] == "due"  # open since 2026-08-01, absent
+
+
+def test_stale_component_returns_to_due(tmp_path):
+    # sleeper_rosters freshness is 48h; captured 2026-08-01 vs now 2026-08-04
+    _capture_component(tmp_path, "sleeper_rosters", captured_at="2026-08-01T00:00:00Z")
+    receipt = accounting(tmp_path)
+    status = {
+        c["source_id"]: c["status"] for g in receipt["groups"] for c in g["components"]
+    }
+    assert status["sleeper_rosters"] == "due"
+    assert "sleeper_rosters" in receipt["unmet_required"]
+
+    # a fresh capture flips it to captured
+    _capture_component(tmp_path, "sleeper_rosters", captured_at="2026-08-04T09:00:00Z")
+    receipt2 = accounting(tmp_path)
+    status2 = {
+        c["source_id"]: c["status"] for g in receipt2["groups"] for c in g["components"]
+    }
+    assert status2["sleeper_rosters"] == "captured"
+
+
+def test_component_clears_after_ingestion(tmp_path):
+    receipt = accounting(tmp_path)
+    status = {
+        c["source_id"]: c["status"] for g in receipt["groups"] for c in g["components"]
+    }
+    assert status["sleeper_league"] == "due"
+
+    _capture_component(tmp_path, "sleeper_league")
+    receipt2 = accounting(tmp_path)
+    status2 = {
+        c["source_id"]: c["status"] for g in receipt2["groups"] for c in g["components"]
+    }
+    assert status2["sleeper_league"] == "captured"  # no permanent unavailable
+
+
+def test_tranche_a_gate_ignores_unfinished_rich_components(tmp_path):
+    _capture_required_three(tmp_path)
+    receipt = accounting(tmp_path, errors={"sleeper_projections": "endpoint 500"})
+    assert receipt["ok"] is True
+    assert receipt["unmet_required"] == []
+
+    # the SAME store fails the tranche-B gate (rich components unmet)
+    receipt_b = accounting(
+        tmp_path, tranche="B", errors={"sleeper_projections": "endpoint 500"}
+    )
+    assert receipt_b["ok"] is False
+    assert "sleeper_projections" in receipt_b["unmet_required"]
+    assert "chat_export" in receipt_b["unmet_required"]
+
+
+def test_nonbaseline_component_due_or_error_cannot_block_a7(tmp_path):
+    _capture_required_three(tmp_path)
+    receipt = accounting(
+        tmp_path,
+        errors={"nfl_injuries": "nflreadpy timeout", "draft_picks": "api 502"},
+    )
+    status = {
+        c["source_id"]: c["status"] for g in receipt["groups"] for c in g["components"]
+    }
+    assert status["nfl_injuries"] == "error"
+    assert status["draft_picks"] == "error"
+    assert status["chat_export"] in ("due", "not_due")
+    assert receipt["ok"] is True  # none of them can block A7
+    assert receipt["unmet_required"] == []
+
+
+def test_receipt_carries_no_payload_or_chat(tmp_path):
+    secret = "TRADE VETO rant from the group chat 2026-08-01"
+    capture(
+        "chat_export",
+        {"messages_requested": ["2026-08"], "messages": [{"text": secret}]},
+        **valid_kwargs(
+            tmp_path,
+            access_scope="league_private",
+            privacy="private",
+            request={"endpoint_or_dataset": "manual:whatsapp_export", "params": {}},
+        ),
+    )
+    _capture_required_three(tmp_path)
+    receipt = accounting(tmp_path)
+    serialized = json.dumps(receipt)
+    assert secret not in serialized
+    assert "TRADE VETO" not in serialized
+    assert '"payload"' not in serialized
+    status = {c["source_id"]: c for g in receipt["groups"] for c in g["components"]}
+    assert status["chat_export"]["status"] == "captured"
+    assert status["chat_export"]["payload_sha256"]  # hashes yes, content no
+
+
+def test_cli_exits_nonzero_on_unmet_required_component(tmp_path, monkeypatch):
+    import scripts.capture_2026 as cap
+    from scripts.capture_2026 import main, run_tranche
+
+    # the real gate logic, against a fixture store missing everything
+    policy = freeze_v1(tmp_path)
+    receipt_path, code = run_tranche(
+        "A",
+        policy_path=policy,
+        public_root=tmp_path / "public",
+        private_root=tmp_path / "private",
+        receipts_root=tmp_path / "receipts",
+        now=FIXED_NOW,
+        run_producers=False,
+    )
+    assert code == 1
+    assert receipt_path.exists()  # the receipt is still written (I16b)
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["ok"] is False and receipt["unmet_required"]
+
+    # and once the required three exist, the same gate passes
+    _capture_required_three(tmp_path)
+    receipt_path2, code2 = run_tranche(
+        "A",
+        policy_path=policy,
+        public_root=tmp_path / "public",
+        private_root=tmp_path / "private",
+        receipts_root=tmp_path / "receipts",
+        now=FIXED_NOW.replace(hour=13),
+        run_producers=False,
+    )
+    assert code2 == 0
+
+    # main() wires run_tranche's exit code through unchanged
+    monkeypatch.setattr(cap, "run_tranche", lambda *a, **k: (tmp_path / "r.json", 1))
+    assert main(["--season", "2026", "--tranche", "A"]) == 1
+
+
 def test_gate_reachability_census_reports_zero_violations():
     """I58 — parse section 8's gate cells and section 10.B's census from the
     contract file; assert full coverage, ordering, and zero unreachable rows."""

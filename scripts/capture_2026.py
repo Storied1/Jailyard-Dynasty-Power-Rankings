@@ -927,6 +927,305 @@ def build_candidate_policy_v1() -> dict:
     return {"policy_version": "v1", "scope": "baseline", "rows": rows}
 
 
+# ---------------------------------------------------------------------------
+# A3 — tranche-scoped accounting (S2; I10-I13, I15, I16a, I16b, I50b)
+# ---------------------------------------------------------------------------
+
+PRODUCTION_V1_POLICY_PATH = GOVERNANCE_DIR / "source_policy_2026.v1.json"
+
+# chat is the one league-private component; its envelopes live under the
+# private root, so accounting searches there for it (hashes only — I15).
+PRIVATE_SOURCE_IDS = {"chat_export"}
+
+_MECHANISM_BY_PREFIX = (
+    ("nflreadpy:", "nflreadpy"),
+    ("manual:", "manual"),
+    ("/", "sleeper_api"),
+)
+
+
+def _mechanism_for(locator: str) -> str:
+    for prefix, mechanism in _MECHANISM_BY_PREFIX:
+        if locator.startswith(prefix):
+            return mechanism
+    return "unknown"
+
+
+def _cadence_for(freshness) -> str:
+    if freshness is None:
+        return "on_demand"
+    if freshness <= 86400:
+        return "daily"
+    if freshness <= 604800:
+        return "weekly"
+    return "periodic"
+
+
+def _window_open(rule: str, now: datetime) -> bool:
+    """Evaluate an opens_at_rule. Unknown rules fail closed (raise)."""
+    if rule == "immediate":
+        return True
+    if rule == "never":
+        return False
+    if rule.startswith("utc:"):
+        instant = rule[len("utc:") :]
+        if not admissible(instant, None):
+            raise CaptureError(f"window rule carries an inexact instant: {rule!r}")
+        return now >= datetime.fromisoformat(instant.replace("Z", "+00:00"))
+    if rule in ("preseason_cutoff", "preview_cutoff"):
+        # resolvable only once a cutoff receipt exists (A4); before that the
+        # conservative reading is "not yet open"
+        return False
+    raise CaptureError(f"unknown availability-window rule {rule!r}")
+
+
+def latest_verified_envelope(source_id: str, roots) -> dict | None:
+    """Newest verified envelope for a source across the given roots, or None.
+
+    Tampered envelopes are skipped (I5: a mismatch is not coverage) rather
+    than trusted or fatal — an older verified envelope may still qualify.
+    """
+    candidates = []
+    for root in roots:
+        source_dir = Path(root) / source_id
+        if source_dir.is_dir():
+            candidates.extend(source_dir.glob("*.json"))
+    for path in sorted(candidates, key=lambda p: p.name, reverse=True):
+        ok, _ = verify_envelope(path)
+        if ok:
+            return json.loads(path.read_text(encoding="utf-8"))
+    return None
+
+
+def _component_report(row, roots, now, producer_errors) -> dict:
+    source_id = row["source_id"]
+    report = {
+        "source_id": source_id,
+        "required_for": list(row["required_for"]),
+        "mechanism": _mechanism_for(row["locator_or_endpoint"]),
+        "cadence": _cadence_for(row["freshness"]),
+        "availability_window": dict(row["availability_window"]),
+        "empty_valid": row["empty_valid"],
+        "status": None,
+        "captured_at": None,
+        "payload_sha256": None,
+        "envelope_sha256": None,
+        "error": None,
+        "acquisition_trigger": (
+            f"python scripts/capture_2026.py --season 2026 --component {source_id}"
+        ),
+    }
+
+    envelope = latest_verified_envelope(source_id, roots)
+    if envelope is not None:
+        captured_dt = datetime.fromisoformat(
+            envelope["captured_at"].replace("Z", "+00:00")
+        )
+        fresh = (
+            row["freshness"] is None
+            or (now - captured_dt).total_seconds() <= row["freshness"]
+        )
+        if fresh:
+            report["status"] = "captured"
+            report["captured_at"] = envelope["captured_at"]
+            report["payload_sha256"] = envelope["payload_sha256"]
+            report["envelope_sha256"] = envelope["envelope_sha256"]
+            # a producer error this run is still reported alongside coverage
+            if source_id in producer_errors:
+                report["error"] = str(producer_errors[source_id])
+            return report
+
+    if source_id in producer_errors:
+        report["status"] = "error"
+        report["error"] = str(producer_errors[source_id])
+        return report
+
+    report["status"] = (
+        "due"
+        if _window_open(row["availability_window"]["opens_at_rule"], now)
+        else "not_due"
+    )
+    return report
+
+
+def required_components_for_tranche(policy: dict, tranche: str) -> set:
+    """Capture components whose absence blocks the tranche's gate.
+
+    Tranche A: components with required_for containing record_points (the
+    qualified standings_2025 has no producer and is verified at bundle time).
+    Tranche B: all twelve components (I36's all-twelve surface).
+    """
+    capture_rows = [r for r in policy["rows"] if r["kind"] == "capture"]
+    if tranche == "A":
+        return {
+            r["source_id"] for r in capture_rows if "record_points" in r["required_for"]
+        }
+    if tranche == "B":
+        return {r["source_id"] for r in capture_rows}
+    raise CaptureError(f"unknown tranche {tranche!r}")
+
+
+def build_accounting_receipt(
+    policy: dict,
+    *,
+    tranche: str,
+    public_root,
+    private_root,
+    now: datetime,
+    producer_errors=None,
+    capture_table_path=None,
+) -> dict:
+    """S2 receipt: eight groups, twelve independent components (I10).
+
+    Derives every status from the store and the frozen policy WITHOUT
+    invoking any producer (I59's accounting half). Carries hashes and
+    metadata only — no payload, never raw chat (I15).
+    """
+    producer_errors = producer_errors or {}
+    required = required_components_for_tranche(policy, tranche)
+    rows_by_id = {r["source_id"]: r for r in policy["rows"] if r["kind"] == "capture"}
+    table_path = (
+        capture_table_path if capture_table_path is not None else CAPTURE_TABLE_PATH
+    )
+    table = load_capture_table(table_path)
+
+    groups = []
+    unmet = []
+    for group_def in table["groups"]:
+        components = []
+        for source_id in group_def["components"]:
+            row = rows_by_id.get(source_id)
+            if row is None:
+                raise CaptureError(f"component {source_id!r} has no policy row")
+            roots = [public_root]
+            if source_id in PRIVATE_SOURCE_IDS:
+                roots.append(private_root)
+            report = _component_report(row, roots, now, producer_errors)
+            components.append(report)
+            if source_id in required and report["status"] != "captured":
+                unmet.append(source_id)
+        statuses = {c["status"] for c in components}
+        if "error" in statuses:
+            group_status = "error"
+        elif statuses == {"captured"}:
+            group_status = "captured"
+        else:
+            group_status = "incomplete"
+        groups.append(
+            {
+                "group": group_def["group"],
+                "required_for": sorted(
+                    {arm for c in components for arm in c["required_for"]}
+                ),
+                "status": group_status,
+                "components": components,
+            }
+        )
+
+    return {
+        "season": 2026,
+        "generated_at": now.isoformat().replace("+00:00", "Z"),
+        "tranche": tranche,
+        "groups": groups,
+        "unmet_required": sorted(unmet),
+        "ok": not unmet,
+    }
+
+
+def write_accounting_receipt(receipt: dict, receipts_root=None) -> Path:
+    root = Path(receipts_root) if receipts_root is not None else RECEIPTS_ROOT
+    compact = _utc_compact(
+        datetime.fromisoformat(receipt["generated_at"].replace("Z", "+00:00"))
+    )
+    target = root / f"accounting_{receipt['tranche']}_{compact}.json"
+    if target.exists():
+        raise CaptureError(f"append-only receipts: {target} already exists")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with open(target, "wb") as f:
+        f.write(canonical_bytes(receipt))
+    return target
+
+
+CORE_PRODUCERS = {
+    "sleeper_league": produce_sleeper_league,
+    "sleeper_rosters": produce_sleeper_rosters,
+    "nfl_schedules": produce_nfl_schedules,
+}
+
+
+def _run_producer(source_id, *, league_json_path, public_root, now):
+    """Run one component producer; optional components lazy-import their
+    module (I59: the baseline path runs with capture_optional_2026 absent)."""
+    if source_id in CORE_PRODUCERS:
+        producer = CORE_PRODUCERS[source_id]
+        if source_id == "nfl_schedules":
+            return producer(
+                league_json_path=league_json_path, public_root=public_root, now=now
+            )
+        return producer(
+            league_json_path=league_json_path, public_root=public_root, now=now
+        )
+    try:
+        import capture_optional_2026 as optional
+    except ImportError as exc:
+        raise CaptureError(
+            f"optional producer module absent; cannot capture {source_id}: {exc}"
+        ) from exc
+    producer = optional.OPTIONAL_PRODUCERS.get(source_id)
+    if producer is None:
+        raise CaptureError(f"no producer for component {source_id!r}")
+    return producer(league_json_path=league_json_path, public_root=public_root, now=now)
+
+
+def run_tranche(
+    tranche: str,
+    *,
+    policy_path=None,
+    public_root=None,
+    private_root=None,
+    receipts_root=None,
+    league_json_path=None,
+    now=None,
+    run_producers=True,
+) -> tuple[Path, int]:
+    """The --tranche gate: attempt required producers, account, write, exit.
+
+    The receipt is written even when the gate fails; the CLI exit code is
+    nonzero when any component required for the tranche is not captured
+    (I16b). Production callers pass no overrides.
+    """
+    policy = load_policy(
+        policy_path if policy_path is not None else PRODUCTION_V1_POLICY_PATH
+    )
+    now = now if now is not None else datetime.now(timezone.utc)
+    public = Path(public_root) if public_root is not None else PUBLIC_CAPTURE_ROOT
+    private = Path(private_root) if private_root is not None else PRIVATE_CAPTURE_ROOT
+
+    producer_errors = {}
+    if run_producers:
+        for source_id in sorted(required_components_for_tranche(policy, tranche)):
+            try:
+                _run_producer(
+                    source_id,
+                    league_json_path=league_json_path,
+                    public_root=public,
+                    now=now,
+                )
+            except ValueError as exc:  # CaptureError from either module instance
+                producer_errors[source_id] = str(exc)
+
+    receipt = build_accounting_receipt(
+        policy,
+        tranche=tranche,
+        public_root=public,
+        private_root=private,
+        now=now,
+        producer_errors=producer_errors,
+    )
+    receipt_path = write_accounting_receipt(receipt, receipts_root)
+    return receipt_path, (0 if receipt["ok"] else 1)
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="capture_2026.py",
@@ -945,7 +1244,50 @@ def main(argv=None) -> int:
         metavar="vN",
         help="policy version to freeze, e.g. v1 (required with --freeze-policy)",
     )
+    parser.add_argument("--season", type=int, help="season (2026 only)")
+    parser.add_argument(
+        "--tranche",
+        choices=("A", "B"),
+        help="run the tranche gate: required producers + accounting receipt",
+    )
+    parser.add_argument(
+        "--component",
+        metavar="SOURCE_ID",
+        help="run one component producer (lane usage)",
+    )
     args = parser.parse_args(argv)
+
+    if args.season is not None and args.season != 2026:
+        print(
+            f"this module is 2026-scoped; got --season {args.season}", file=sys.stderr
+        )
+        return 2
+
+    if args.tranche:
+        if args.season != 2026:
+            print("--tranche requires --season 2026", file=sys.stderr)
+            return 2
+        try:
+            receipt_path, code = run_tranche(args.tranche)
+        except CaptureError as exc:
+            print(f"tranche gate failed closed: {exc}", file=sys.stderr)
+            return 1
+        print(f"accounting receipt: {rel_to_root(receipt_path)} (exit {code})")
+        return code
+
+    if args.component:
+        if args.season != 2026:
+            print("--component requires --season 2026", file=sys.stderr)
+            return 2
+        try:
+            path = _run_producer(
+                args.component, league_json_path=None, public_root=None, now=None
+            )
+        except ValueError as exc:  # CaptureError from either module instance
+            print(f"component capture failed: {exc}", file=sys.stderr)
+            return 1
+        print(f"captured: {rel_to_root(path)}")
+        return 0
 
     if args.freeze_policy:
         if not args.version:
