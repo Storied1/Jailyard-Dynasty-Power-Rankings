@@ -159,26 +159,32 @@ def make_fixture_policy(tmp_path, repo: Path) -> Path:
     )
 
 
+CUTOFF_GAMES = [
+    {
+        "game_id": "2026_01_AAA_BBB",
+        "season": 2026,
+        "game_type": "REG",
+        "week": 1,
+        "gameday": "2026-09-09",
+        "weekday": "n/a",
+        "gametime": "20:20",
+        "away_team": "AAA",
+        "home_team": "BBB",
+    }
+]
+
+# capture instant for the fixture store: fresh against the seal-layer clock
+# (2026-08-25T12:00Z) under the candidate policy's freshness windows
+STORE_CAPTURED_AT = "2026-08-25T09:00:00Z"
+
+
 def make_cutoff_receipt(tmp_path) -> Path:
     from scripts.cutoff_2026 import build_cutoff_receipt, write_cutoff_receipt
 
-    games = [
-        {
-            "game_id": "2026_01_AAA_BBB",
-            "season": 2026,
-            "game_type": "REG",
-            "week": 1,
-            "gameday": "2026-09-09",
-            "weekday": "n/a",
-            "gametime": "20:20",
-            "away_team": "AAA",
-            "home_team": "BBB",
-        }
-    ]
     envelope = store_envelope(
         tmp_path,
         "nfl_schedules",
-        {"dataset": "schedules", "season": 2026, "games": games},
+        {"dataset": "schedules", "season": 2026, "games": CUTOFF_GAMES},
         "2026-08-04T10:00:00Z",
     )
     receipt = build_cutoff_receipt(envelope, now=FIXED_NOW)
@@ -186,18 +192,24 @@ def make_cutoff_receipt(tmp_path) -> Path:
 
 
 def full_store(tmp_path):
-    """All three required capture envelopes, comfortably pre-cutoff."""
+    """All three required capture envelopes, fresh against the seal clock."""
     store_envelope(
         tmp_path,
         "sleeper_league",
         {"league_id": "1312884727480352768"},
-        "2026-08-20T10:00:00Z",
+        STORE_CAPTURED_AT,
     )
     store_envelope(
         tmp_path,
         "sleeper_rosters",
         {"rosters": ROSTERS_2026, "count": 4},
-        "2026-08-20T10:00:00Z",
+        STORE_CAPTURED_AT,
+    )
+    store_envelope(
+        tmp_path,
+        "nfl_schedules",
+        {"dataset": "schedules", "season": 2026, "games": CUTOFF_GAMES},
+        STORE_CAPTURED_AT,
     )
 
 
@@ -433,7 +445,7 @@ def test_compiler_excludes_post_cutoff_envelopes(tmp_path):
     rosters_entry = next(
         e for e in bundle["source_manifest"] if e["source_id"] == "sleeper_rosters"
     )
-    assert rosters_entry["captured_at"] == "2026-08-20T10:00:00Z"  # pre-cutoff one
+    assert rosters_entry["captured_at"] == STORE_CAPTURED_AT  # pre-cutoff one
 
 
 def test_no_caller_supplied_bundle_or_factset_hash(tmp_path):
