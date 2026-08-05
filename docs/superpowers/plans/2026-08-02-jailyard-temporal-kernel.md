@@ -24,6 +24,18 @@ seal/body glob collision is removed by suffix contract (K1.5), receipts are clos
 persisted and persisted before they are sealed (K3.5), the contrast controls follow one coherent
 degraded-verdict rule (K3.3/K3.4/K3.7), and every review artifact the K3.8 packet cites is written
 to a committed path (K3.7). See Self-Review, "Round-three integration."
+**Round four (2026-08-05, Sol/ChatGPT independent review):** ten consolidated blockers, every one
+reproduced against this text or the real repo before repair, resolved in one bounded correction —
+private-custody roots for facts and compiled states, canonical fractional instants, live Sleeper
+matchup-row pairing, versioned timing-policy artifacts, all-envelope chronological iteration with
+full-type enumeration and a durable normalization report, `fact_type` bound into `fact_id`,
+package-form exception imports, the non-circular step-level K1/K2 sequence with a retained cutoff
+artifact, information-bearing `nfl_game` bodies, §6 backtest safeguards (masking, opaque-form
+sealing, explicit retrospective labels), `runner_kwargs`/`--dry-run`/complete-chain trial census,
+a producer-freezing manifest with an executable degraded→STOP path, durable claim
+resolution with a grading state and a comparable-scores gate, seal-as-commit-marker crash safety
+with a kernel verifier, fail-closed evidence commits, and content-bound blind review. See
+Self-Review, "Round-four integration."
 Still DRAFT; no revision constitutes approval.
 
 **Design authority:** `docs/superpowers/specs/2026-08-01-jailyard-writer-foundation-design.md`,
@@ -79,6 +91,23 @@ same interface). No new services.
 - **Exit-code convention for gate CLIs:** `0` ok, `1` degraded (verdict), `2` reserved for argparse
   usage errors, `3` stop-no-decision (verdict), `4` failed gate / crash (never a verdict). A gate
   that cannot tell a crash from a verdict is not a gate.
+- **Private custody roots (design §1: custody and admissibility are separate axes).** Facts with
+  `privacy: "private"` (chat) live ONLY in `private_facts/` (gitignored, index-guarded exactly like
+  `private_captures/`); compiled artifacts that embed private fact content (any
+  `access_scope: "league_private"` state or bundle) live ONLY in `private_editions/` (gitignored,
+  index-guarded). Tracked roots — `data/facts/`, `content/editions/`, `content/decisions/`,
+  `data/claims/` — carry public-custody content and DERIVED artifacts that quote no private text
+  (hashes, counts, rankings over roster ids). The staging guard grep extends to
+  `^(private_captures|private_bundles|private_facts|private_editions)/`, `.gitignore` gains both
+  new roots (a task step, K1.6 Step 3c), and the sentinel test (K1.6/K3.4) proves a synthetic
+  private secret reaches the full_rich bundle, is absent from no_chat, and is absent from every
+  tracked or staged artifact — with a planted private index entry failing the guard.
+- **Canonical instants.** All fact timestamps are canonicalized to exactly six fractional digits
+  (`YYYY-MM-DDTHH:MM:SS.ffffffZ`) by `fact_schema.canonical_instant()` at construction — Phase-P
+  envelopes carry fractional-microsecond `captured_at` values that a whole-second-only rule
+  rejects, and mixed-width strings are not lexicographically safe. In canonical form, string
+  comparison IS chronological comparison; whole-second inputs are admitted and padded with
+  `.000000`.
 
 ---
 
@@ -1005,9 +1034,24 @@ from shared import load_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FACT_TYPES_PATH = ROOT / "content" / "governance" / "fact_types.json"
-INSTANT = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+# Canonical form: ALWAYS six fractional digits, so lexicographic order is
+# chronological order. Phase-P envelopes carry microsecond captured_at values;
+# a whole-second-only rule rejects every one of them, and comparing mixed-width
+# strings ("...:23.482196Z" vs "...:24Z") is representation-dependent.
+INSTANT = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$")
+_INPUT_INSTANT = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$")
 ACCESS_SCOPES = {"public", "league_private"}
 PRIVACY = {"public", "private"}
+
+
+def canonical_instant(s):
+    """Admit exact whole-second or fractional UTC instants; emit the canonical
+    six-digit form. Anything else (naive, date-only, month-only, non-string)
+    returns None and validate() refuses the fact."""
+    if not isinstance(s, str) or not _INPUT_INSTANT.match(s):
+        return None
+    head, _, frac = s[:-1].partition(".")
+    return f"{head}.{frac.ljust(6, '0')}Z"
 
 
 @dataclass(frozen=True)
@@ -1033,6 +1077,12 @@ class Fact:
     payload_bytes: bytes | None = None
 
     def __post_init__(self):
+        # Canonicalize the three clocks at the boundary: after this, every
+        # stored instant is the six-digit form and string order is time order.
+        for name in ("effective_at", "known_at", "captured_at"):
+            c = canonical_instant(getattr(self, name))
+            if c is not None:
+                object.__setattr__(self, name, c)
         if self.payload_bytes is None:
             return
         if not isinstance(self.payload_bytes, bytes):
@@ -1227,13 +1277,17 @@ def test_value_revert_mints_three_distinct_ids_not_a_cycle(tmp_path):
 
 def test_same_record_id_under_two_types_never_cross_supersedes(tmp_path):
     """Prefix disjointness is a convention in nine f-strings; the mechanism is
-    (fact_type, source_record_id) resolution."""
+    (fact_type, source_record_id) resolution AND fact_type inside fact_id.
+    IDENTICAL content, instants, and normalizer version -- a differing payload
+    would mask an id collision, and the collision refusal would reject this
+    perfectly legitimate second observation."""
     s = FactStore(tmp_path / "f.jsonl")
     a, act_a = s.observe(payload={"v": 1}, **OBS)
-    b, act_b = s.observe(payload={"v": 2},
+    b, act_b = s.observe(payload={"v": 1},
                          **dict(OBS, fact_type="matchup_result",
                                 known_at_basis="game_conclusion"))
     assert act_a == "created" and act_b == "created"
+    assert a.fact_id != b.fact_id, "fact_type must be bound into identity"
     assert b.supersedes is None and len(s.load()) == 2
 ```
 
@@ -1252,8 +1306,17 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fact_schema import (Fact, FACT_FIELDS, PayloadIntegrityError,  # noqa: E402
-                         canonical_bytes, fact_hash, validate)
+# Package form FIRST (the capture_optional_2026.py pattern, mandated by Global
+# Constraints): under pytest this module is scripts.fact_store while a bare
+# import would load a SECOND fact_schema whose PayloadIntegrityError is a
+# different class -- the on-disk tamper test would then not catch the exception
+# its own store raises.
+try:
+    from scripts.fact_schema import (Fact, FACT_FIELDS, PayloadIntegrityError,  # noqa: E402
+                                     canonical_bytes, fact_hash, validate)
+except ImportError:  # pragma: no cover -- direct-run fallback
+    from fact_schema import (Fact, FACT_FIELDS, PayloadIntegrityError,  # noqa: E402
+                             canonical_bytes, fact_hash, validate)
 
 SCHEMA_VERSION = 1
 
@@ -1313,7 +1376,12 @@ class FactStore:
             # a stable known_at (roster drop/re-add before the anchor moves) would
             # otherwise mint the original fact_id again, creating a supersession
             # CYCLE that empties state_at's retirement set for the whole record.
-            fact_id=fact_hash({"srid": meta["source_record_id"], "content": digest,
+            # `type` is in identity too: resolution is (fact_type, srid)-keyed,
+            # so identity must be as well -- with identical content/time/version
+            # under two types, an id that omits fact_type collides and the
+            # duplicate refusal below would REJECT a legitimate observation.
+            fact_id=fact_hash({"type": meta["fact_type"],
+                               "srid": meta["source_record_id"], "content": digest,
                                "known_at": meta["known_at"],
                                "norm": meta["normalizer_version"],
                                "supersedes": supersedes}
@@ -1463,7 +1531,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fact_schema import load_fact_types  # noqa: E402
+try:  # package form first -- one module identity under pytest and direct run
+    from scripts.fact_schema import canonical_instant, load_fact_types  # noqa: E402
+except ImportError:  # pragma: no cover -- direct-run fallback
+    from fact_schema import canonical_instant, load_fact_types  # noqa: E402
 
 SCOPE_LATTICE = {
     "public": {"public"},
@@ -1508,6 +1579,14 @@ def state_at(season, cutoff, access_scope, as_recorded_at=None, facts=None):
         raise ValueError(
             f"access_scope must be one of {sorted(SCOPE_LATTICE)}; "
             "an omitted or unrecognized scope is an error, never a default")
+    # BOTH sides of every temporal comparison are canonical: fact instants are
+    # canonicalized at construction, and the cutoff/vantage here -- otherwise a
+    # fact .000001s past a whole-second cutoff would still string-compare below
+    # the short form and be admitted.
+    cutoff = canonical_instant(cutoff)
+    as_recorded_at = canonical_instant(as_recorded_at) if as_recorded_at else None
+    if cutoff is None:
+        raise ValueError("cutoff must be an exact UTC instant")
     visible = SCOPE_LATTICE[access_scope]
     pool = list(facts if facts is not None else _load_default_facts(season))
 
@@ -1526,18 +1605,31 @@ def state_at(season, cutoff, access_scope, as_recorded_at=None, facts=None):
 
 
 FACTS_ROOT = Path(__file__).resolve().parents[1] / "data" / "facts"
+PRIVATE_FACTS_ROOT = Path(__file__).resolve().parents[1] / "private_facts"
 
 
 def _load_default_facts(season):
-    """Exactly one file, named for the season. Never a glob over the root --
-    that is how a poisoned sibling store enters a state it does not belong to.
-    FACTS_ROOT is read at call time so tests can relocate it."""
-    from fact_store import FactStore
+    """Exactly one PUBLIC file plus one PRIVATE file, each named for the season.
+    Never a glob over either root -- that is how a poisoned sibling store enters
+    a state it does not belong to. FACTS_ROOT / PRIVATE_FACTS_ROOT are read at
+    call time so tests can relocate them. The private store is LOCAL REHYDRATION
+    (gitignored): required for a league_private compile on this machine; its
+    absence is recorded on the state (`private_root_absent=True`) so a public
+    clone fails closed on league_private editions instead of silently compiling
+    a chat-free state that claims the full scope."""
+    try:
+        from scripts.fact_store import FactStore
+    except ImportError:  # pragma: no cover
+        from fact_store import FactStore
     path = FACTS_ROOT / f"{season}.jsonl"
     if not path.exists():
         raise FileNotFoundError(
             f"no fact store for season {season} at {path}; normalize before compiling")
-    return FactStore(path).load()
+    facts = FactStore(path).load()
+    private_path = PRIVATE_FACTS_ROOT / f"{season}.jsonl"
+    if private_path.exists():
+        facts += FactStore(private_path).load()
+    return facts
 ```
 
 - [ ] **Step 4: Run to verify it passes** → 9 passed
@@ -1796,7 +1888,14 @@ git commit -m "feat(temporal): h2h and all seven records recomputed from admitte
   run receipt: `run_receipt_path` + `run_receipt_hash`; takes `predecessor_decision_hash`),
   `load_decision(sealed, root) -> (ranking, claims)`, `write_json_once(path, doc)`,
   `decision_history_at(season, cutoff, arm_id, trial_id, root) -> list[SealedDecision]`,
-  `verify_predecessor(sealed, arm_id, trial_id)`, `CrossArmContamination`
+  `verify_predecessor(sealed, arm_id, trial_id)`, `CrossArmContamination`,
+  `verify_tree(root) -> (checked, failures)` — the KERNEL verifier: for every `*.seal.json` under
+  `root`, recompute `decision_hash` over the body-with-hash-excluded, resolve all three locators,
+  re-hash ranking/claims bodies against `ranking_hash`/`claims_hash`, re-hash the receipt against
+  `run_receipt_hash` and require it CLOSED, require `label == "retrospective_backtest"` for
+  season 2025, and require every non-null `predecessor_decision_hash` to resolve to an existing
+  same-arm same-trial seal's `decision_hash` (lineage audited from committed files alone). Exposed
+  via a `--verify-tree ROOT` CLI mode ending `raise SystemExit(main())`; K3.8 Step 1 gates on it.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1940,9 +2039,11 @@ class SealedDecision:
     # The receipt's CONTENT is bound, not just its name: without this the receipt
     # file can be rewritten in place and every verification still passes.
     run_receipt_hash: str
-    # This kernel store deliberately has no prospective/retrospective `label`
-    # field: every 2025 backtest decision is retrospective by construction, and
-    # the prospective 2026 lane is Phase-P's sealed store, not this one.
+    # Design §6: "every artifact labeled retrospective replay / backtest" is an
+    # EXPLICIT label, not an implication. Every 2025 kernel seal carries
+    # label="retrospective_backtest"; seal() hard-codes it for season 2025 and
+    # refuses any other value there (the prospective lane is Phase-P's store).
+    label: str
 
 
 def seal(root, edition_id, season, cutoff_utc, arm_id, trial_id, state_hash,
@@ -1959,6 +2060,14 @@ def seal(root, edition_id, season, cutoff_utc, arm_id, trial_id, state_hash,
     racing writer's file, and a crashed prior attempt's bodies must be refused,
     never silently overwritten."""
     from scripts.bundle_2026 import portable_locator  # Phase-P's law, reused not reimplemented
+    # The receipt is OPENED and verified, not trusted: its bytes must match
+    # run_receipt_hash, and it must be CLOSED (ended_at + output_decision_hash
+    # non-null) -- a seal must never bind a receipt it has not read.
+    receipt_doc = json.loads(Path(run_receipt_path).read_text(encoding="utf-8"))
+    if fact_hash(receipt_doc) != run_receipt_hash:
+        raise ValueError(f"receipt at {run_receipt_path} does not match run_receipt_hash")
+    if not receipt_doc.get("ended_at") or not receipt_doc.get("output_decision_hash"):
+        raise ValueError("seal refuses an OPEN run receipt")
     rh, ch = fact_hash(ranking), fact_hash(claims)
     d = Path(root) / f"{season}" / arm_id / f"trial{trial_id}"
     p = d / f"{edition_id}.seal.json"
@@ -1972,6 +2081,7 @@ def seal(root, edition_id, season, cutoff_utc, arm_id, trial_id, state_hash,
             "arm_id": arm_id, "trial_id": trial_id, "state_hash": state_hash,
             "run_id": run_id, "ranking_hash": rh, "claims_hash": ch,
             "predecessor_decision_hash": predecessor_decision_hash,
+            "label": "retrospective_backtest",   # design §6; hard-coded for the 2025 lane
             "ranking_path": portable_locator(rp, Path(root)),
             "claims_path": portable_locator(cp, Path(root)),
             "run_receipt_path": portable_locator(Path(run_receipt_path), Path(root)),
@@ -2047,12 +2157,24 @@ git commit -m "feat(decisions): arm-scoped decision history, cross-arm contamina
 
 ### Task K1.6: Normalizers for the nine bridge fact types
 
-**PREREQUISITE: Task K2.2 executes BEFORE this task, despite document order.**
+**PREREQUISITE: K2.2 Steps 1-4 execute BEFORE this task, despite document order.**
 `normalize_facts.py` imports `scripts.kickoff_source` (`UnavailableEvidence` at the top of
 `normalize_all`, `to_utc`/`resolve_zone` in `_nfl_game`), so until `kickoff_source.py` exists,
 **every** call to `normalize_all` — K1.6 Step 4, K1.7 Steps 2-3, K2.1 Step 5b — dies with
-`ModuleNotFoundError`. Execution order within K1/K2 is therefore: K1.1-K1.5 → **K2.2** → K1.6 →
-K1.7 → K2.1 → K2.3. The Ordering paragraph in the Self-Review records the same edge.
+`ModuleNotFoundError`. The step-level execution order for K1/K2 (a whole-task reorder is
+CIRCULAR: K2.2's compile step needs K2.1's compiler, whose preview descriptor needs K2.2's
+derived cutoff):
+
+1. K1.1-K1.5 (schema, store, state, reducers, decision history)
+2. **K2.2 Steps 1-4** — create `kickoff_source.py` + `venue_timezones.json`, derive the preview
+   cutoff, and RETAIN it in `content/governance/preview_cutoff_2025.v1.json`
+3. **K1.6** (this task) — normalize; materialize `data/facts/2025.jsonl` + the private store
+4. K1.7 (discriminating tests)
+5. K2.1 — compiler + all three descriptors (preview cutoff READ from the retained artifact),
+   then **Step 5c compiles all three editions**
+6. K2.3 (census; consumes the compiled states)
+
+The Ordering paragraph in the Self-Review records the same sequence.
 
 **Files:** Create `scripts/normalize_facts.py`, `scripts/tests/test_normalize_facts.py`
 
@@ -2156,8 +2278,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fact_store import FactStore  # noqa: E402
-from shared import load_json  # noqa: E402
+try:  # package form first (Global Constraints import law)
+    from scripts.fact_store import FactStore  # noqa: E402
+except ImportError:  # pragma: no cover
+    from fact_store import FactStore  # noqa: E402
+from shared import load_json, save_json_canonical  # noqa: E402
 
 NORMALIZER_VERSION = "norm-v1"
 
@@ -2369,9 +2494,22 @@ def _nfl_game(raw, season):
             "entity_ref": {"type": "game", "id": str(raw["game_id"])},
             "effective_at": inst, "known_at": inst, "known_at_basis": "game_conclusion",
             "access_scope": "public", "privacy": "public"}
+    # The body carries the INFORMATION, not just identity: the design's rationale
+    # for this required family is "distinguishes rich from minimal", and a
+    # schedule shell (ids + kickoff) satisfies a row-count contrast while
+    # carrying nothing a ranking could use. Legacy files hold all of these
+    # fields; a record carrying NONE of the context fields is refused as
+    # unqualified context rather than counted as present.
+    context = {k: raw.get(k) for k in
+               ("home_score", "away_score", "result", "key_injuries", "rest_days",
+                "div_game", "spread_line", "roof", "temp", "wind", "team_stats")}
+    if not any(v is not None for v in context.values()):
+        raise UnqualifiedSource(
+            f"game {raw.get('game_id')}: no information-bearing context fields; "
+            "a schedule shell is not evidence")
     body = {"season": season, "game_id": raw["game_id"],
             "home_team": raw.get("home_team"), "away_team": raw.get("away_team"),
-            "kickoff_utc": inst}
+            "kickoff_utc": inst, **context}
     return meta, body
 
 
@@ -2400,11 +2538,28 @@ PRIOR_SEASONS = (2022, 2023, 2024)   # historical_matchup scope; never the compi
 # ENVELOPE; the record body comes from `payload`.
 ENVELOPE_SOURCES = {   # fact_type -> (component_id, payload walk to records)
     "franchise_identity": ("sleeper_rosters", "payload.rosters[] joined to sleeper_users payload.users[] on owner_id"),
-    "matchup_result":     ("sleeper_matchups", "payload.matchups.{week}[]"),
+    # VERIFIED live shape: matchup rows are PER-ROSTER ({roster_id, matchup_id,
+    # points, ...}) -- there is no team1/team2 in a Sleeper matchup response.
+    # The iterator GROUPS rows by (week, matchup_id) into exactly-two pairs and
+    # synthesizes team1/team2 as {roster_id, points} (team1 = lower roster_id,
+    # deterministic); a (week, matchup_id) group with != 2 rows is refused
+    # (UnqualifiedSource), never guessed.
+    "matchup_result":     ("sleeper_matchups", "payload.matchups.{week}[] grouped by (week, matchup_id) into team1/team2 pairs"),
     "transaction":        ("sleeper_transactions", "payload.transactions.{week}[]"),
     "draft_pick":         ("draft_picks", "payload.picks[] + top-level payload.draft_id; draft_instant = envelope captured_at, basis capture_instant"),
     "nfl_game":           ("nfl_schedules", "payload games list"),
+    # ALL NINE types are enumerated in BOTH lanes -- a type absent from this map
+    # would silently vanish from the census, letting a five-type surface
+    # false-green as full coverage. The four without a 2026 envelope component
+    # are explicit sentinels, carried into the `unavailable` bucket as data:
+    "chat_message":       (None, "manual export not ingested for 2026 (design: private-class, manual)"),
+    "historical_matchup": (None, "n/a for 2026 BY DESIGN (design §3 row: 2026 source n/a)"),
+    "schedule_pairing":   (None, "qualified 2026 mapping deliberately deferred to K3 (open dependency 5)"),
+    "roster_membership":  (None, "no qualified 2026 anchor policy approved (open dependency 3)"),
 }
+# Coverage gate: both lanes must enumerate the full bridge. A test asserts
+#   set(ENVELOPE_SOURCES) == set(LEGACY_SOURCES) == set(NORMALIZERS)
+# and a planted extra/missing type fails it.
 
 # LANE 2 -- 2025 BACKTEST: legacy repository files, each walk verified against
 # the actual structure (NOT the shapes an earlier revision imagined):
@@ -2424,8 +2579,17 @@ LEGACY_SOURCES = {     # fact_type -> (path template, verified record walk)
 }
 
 
-def normalize_all(source_root, out_path, season):
-    """Every bridge type, one FactStore, deterministic order, no wall clock.
+def normalize_all(source_root, out_path, season, private_out_path=None):
+    """Every bridge type, TWO custody-split FactStores, deterministic order, no wall clock.
+
+    CUSTODY SPLIT (Global Constraints, private custody roots): facts whose meta
+    carries privacy="private" are written ONLY to `private_out_path` (default
+    `private_facts/{season}.jsonl` — gitignored, index-guarded); everything else
+    goes to `out_path` (tracked `data/facts/{season}.jsonl`). Routing is on the
+    fact's own privacy field, and a private fact reaching the public store is a
+    raised error, not a warning — the sentinel test plants a synthetic secret
+    chat message and asserts it appears in the private store, in the full_rich
+    bundle, and in NO tracked or staged artifact.
 
     Returns {"counts": {fact_type: n}, "unqualified": {fact_type: n},
              "undatable": {fact_type: n},
@@ -2446,6 +2610,8 @@ def normalize_all(source_root, out_path, season):
     from scripts.kickoff_source import UnavailableEvidence
     sources = ENVELOPE_SOURCES if season >= 2026 else LEGACY_SOURCES
     store = FactStore(out_path)
+    private_store = FactStore(private_out_path
+                              or Path("private_facts") / f"{season}.jsonl")
     counts, unqualified, undatable, unavailable = {}, {}, {}, {}
     for fact_type in sorted(sources):
         spec = sources[fact_type]
@@ -2464,14 +2630,18 @@ def normalize_all(source_root, out_path, season):
                 except UnavailableEvidence:
                     undatable[fact_type] = undatable.get(fact_type, 0) + 1
                     continue
-                store.observe(payload=body, source_ref=source_ref,
-                              captured_at=env_meta["captured_at"],  # ENVELOPE/policy, never the record, never now()
-                              normalizer_version=NORMALIZER_VERSION, **meta)
+                target = private_store if meta["privacy"] == "private" else store
+                target.observe(payload=body, source_ref=source_ref,
+                               captured_at=env_meta["captured_at"],  # ENVELOPE/policy, never the record, never now()
+                               normalizer_version=NORMALIZER_VERSION, **meta)
                 counts[fact_type] = counts.get(fact_type, 0) + 1
         except MissingSource as exc:
             unavailable[fact_type] = str(exc)
             continue
     store.write()
+    private_store.write()
+    if any(f.privacy == "private" for f in store.load()):
+        raise ValueError("custody violation: private fact in the public store")
     for t in sorted(set(unqualified) - set(counts)):
         unavailable[t] = f"all {unqualified[t]} records refused ({t} yielded zero facts)"
     return {"counts": counts, "unqualified": unqualified, "undatable": undatable,
@@ -2484,22 +2654,36 @@ silently deferred into that missing function. Its contract:
 
 - Signature: `_iter_source(source_root, fact_type, spec, season) -> Iterator[tuple[str, dict, dict]]`
   yielding `(source_ref, env_meta, record)`.
-- **Envelope lane:** resolves `data/captures/2026/public/<component>/*.json` under `source_root`,
-  takes the **latest** envelope per component (filename-ordered ISO timestamps), sets
-  `env_meta = {"captured_at": envelope["captured_at"], ...access_scope, privacy, known_at_basis}`,
+- **Envelope lane:** resolves `data/captures/2026/public/<component>/*.json` under `source_root`
+  and iterates **ALL envelopes chronologically** (filename-ordered ISO timestamps) — never
+  latest-only, which would discard first-held availability and intermediate corrections that the
+  store's coalesce/supersede machinery exists to preserve (a re-observed identical record
+  coalesces, keeping the FIRST capture's fact; a changed record supersedes). Per envelope it sets
+  `env_meta = {"captured_at": envelope["captured_at"], ...access_scope, privacy, known_at_basis}`
   and walks `payload` per the ENVELOPE_SOURCES walk. `source_ref` is
-  `f"capture:2026/public/{component}/{filename}"`.
+  `f"capture:2026/public/{component}/{filename}"`. Discriminating test: an A→A→B→A envelope
+  sequence for one record yields a three-fact chain (created, coalesced, superseded, superseded)
+  whose first fact carries the FIRST envelope's `captured_at`.
 - **Legacy lane:** substitutes `{season}` (and fans `{prior}` out over `PRIOR_SEASONS` — the
   placeholder an earlier revision left unbound), performs the verified walk, and sets
-  `env_meta["captured_at"]` from `LEGACY_CAPTURE_INSTANTS` — a committed constant map, one exact
-  UTC instant per legacy file, derived once from each file's last pre-2026-08 git commit and
-  recorded under policy id `legacy-capture-v1`. A file with no map entry raises — never a default,
-  never `now()`. `source_ref` is `f"legacy:{relative_path}"`.
+  `env_meta["captured_at"]` from `LEGACY_CAPTURE_INSTANTS`, loaded from the **committed artifact**
+  `content/governance/legacy_capture_instants.v1.json` (policy id `legacy-capture-v1`): one exact
+  UTC instant per tracked legacy file, generated ONCE by a stated command
+  (`git log -1 --format=%aI -- <file>` over each LEGACY_SOURCES path, converted to canonical UTC)
+  and committed with the generation command recorded in the artifact's `provenance` field. The
+  gitignored chat corpus is untracked, so its instant cannot come from git: policy
+  `chat-capture-v1` takes it from `content/chat/provenance.json` — the receipt-bound manifest that
+  already records when the repo verified those bytes. A file with no map entry raises — never a
+  default, never `now()`. `source_ref` is `f"legacy:{relative_path}"`.
 - **Instant enrichment:** for matchup walks it threads `week` and the per-(season, week)
-  `concluded_at` from the committed week-boundary table under policy `legacy-week-conclusion-v1`
-  (recorded in `known_at_basis` via `conclusion_policy`); for draft walks it threads top-level
-  `draft_id` and `draft_instant`/`draft_instant_basis`. Records never invent instants; the iterator
-  attaches them from named, versioned policies or the normalizer refuses.
+  `concluded_at` from the **committed artifact**
+  `content/governance/week_conclusions_2022_2025.v1.json` (policy id `legacy-week-conclusion-v1`):
+  one instant per (season, week), generated once from the schedules parquet as the week's final
+  kickoff advanced to the repo's established Tuesday `06:59:59Z` boundary, with source hashes and
+  the generation command in its `provenance` field. For draft walks it threads top-level
+  `draft_id` and `draft_instant`/`draft_instant_basis`. Records never invent instants; the
+  iterator attaches them from these named, versioned artifacts or the normalizer refuses. Both
+  artifacts are written by K1.6 Step 3c and staged in Step 5's commit.
 - A missing **file** in the legacy lane yields the type into `unavailable` via `MissingSource`,
   which `_iter_source` raises at file-open time — **before its first yield**, so the loop's wrap
   can never discard already-observed records — never `FileNotFoundError` mid-run; a missing
@@ -2527,6 +2711,11 @@ def main():
     a = ap.parse_args()
     out = Path(a.out) if a.out else Path("data") / "facts" / f"{a.season}.jsonl"
     report = normalize_all(source_root=a.source_root, out_path=out, season=a.season)
+    # The report is a DURABLE, TRACKED artifact, not stdout: K3.3's contrast
+    # reads availability from it (a printed report cannot bind a verdict).
+    # It contains only counts and refusal reasons -- no private text.
+    report_path = out.with_suffix(".report.json")
+    save_json_canonical(report_path, report)
     print(json.dumps(report, indent=2, sort_keys=True))
     # Zero facts overall is a failed run, not a quiet success.
     return 0 if report["counts"] else 1
@@ -2536,16 +2725,41 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
+- [ ] **Step 3c: Write the custody and timing-policy artifacts**
+
+```bash
+# .gitignore gains the private kernel roots (mirroring private_captures/):
+printf 'private_facts/\nprivate_editions/\n' >> .gitignore
+# Generate the two versioned timing artifacts (commands recorded in each
+# artifact's `provenance` field; values reviewed before commit):
+$PY scripts/normalize_facts.py --emit-legacy-instants \
+    > content/governance/legacy_capture_instants.v1.json
+$PY scripts/normalize_facts.py --emit-week-conclusions \
+    > content/governance/week_conclusions_2022_2025.v1.json
+```
+
+(`--emit-legacy-instants` walks LEGACY_SOURCES' tracked paths via
+`git log -1 --format=%aI -- <file>`; `--emit-week-conclusions` derives per-(season, week)
+conclusion instants from the schedules parquet advanced to the established Tuesday `06:59:59Z`
+boundary. Both flags live in this module's `main()`. The chat corpus instant comes from
+`content/chat/provenance.json` under policy `chat-capture-v1` at iteration time, not from these
+artifacts.)
+
 All nine normalizers follow the `(meta, body)` convention and are shown in full above — none
 returns a bare dict (a `meta, body = <dict>` unpack raises `ValueError`, which is exactly what the
 gate review caught when four of the nine were left on the old shape).
 
-- [ ] **Step 4: Run to verify it passes** → 9 passed
+- [ ] **Step 4: Run to verify it passes** → 11 passed (the 9 prior + the coverage gate + the
+      custody sentinel)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/normalize_facts.py scripts/tests/test_normalize_facts.py
+git add scripts/normalize_facts.py scripts/tests/test_normalize_facts.py .gitignore \
+        content/governance/legacy_capture_instants.v1.json \
+        content/governance/week_conclusions_2022_2025.v1.json
+git diff --cached --name-only | grep -qE '^(private_captures|private_bundles|private_facts|private_editions)/' \
+  && { echo "STOP: private path staged"; exit 1; } || true
 git commit -m "feat(facts): normalizers for the nine bridge types, unqualified sources refused"
 ```
 
@@ -2862,8 +3076,10 @@ git commit -m "test(kernel): seven rules, seven controls, four noninterference p
 **Interfaces:**
 
 - Produces: `EditionDescriptor` (edition_id, season, kind, cutoff_utc, access_scope,
-  as_recorded_at, predecessors), `compile_state(descriptor) -> Path` writing
-  `<edition>/compiled/{descriptor,state,state_manifest,source_hashes}.json`
+  as_recorded_at, predecessors), `compile_state(descriptor) -> Path` writing tracked
+  `<edition>/compiled/{descriptor,state_manifest,source_hashes}.json` plus the private
+  `private_editions/<edition>/state.json`; `EDITIONS_ROOT`, `PRIVATE_EDITIONS_ROOT` (both module
+  globals read at call time)
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2875,43 +3091,82 @@ from scripts.fact_schema import fact_hash
 PRE = EditionDescriptor("2025-preseason", 2025, "preseason", "2025-09-03T23:59:59Z",
                         "league_private", None, ())
 
-def test_writes_all_compile_artifacts(tmp_path, monkeypatch):
-    monkeypatch.setattr("scripts.compile_state.EDITIONS_ROOT", tmp_path)
-    out = compile_state(PRE)
-    for f in ("descriptor.json", "state.json", "state_manifest.json", "source_hashes.json"):
-        assert (out / f).exists(), f
+@pytest.fixture
+def compile_roots(tmp_path, monkeypatch):
+    """Isolated compiler fixture: relocated tracked/private roots AND an
+    isolated fact store, so no compiler test reads the real repository."""
+    from scripts.fact_store import FactStore
+    import scripts.temporal_state as ts
+    froot = tmp_path / "facts"; froot.mkdir()
+    s = FactStore(froot / "2025.jsonl")
+    s.observe(payload={"v": 1}, **FIXTURE_OBS)          # module-level minimal obs
+    s.write()
+    monkeypatch.setattr(ts, "FACTS_ROOT", froot)
+    monkeypatch.setattr(ts, "PRIVATE_FACTS_ROOT", tmp_path / "pf")
+    monkeypatch.setattr("scripts.compile_state.EDITIONS_ROOT", tmp_path / "ed")
+    monkeypatch.setattr("scripts.compile_state.PRIVATE_EDITIONS_ROOT", tmp_path / "priv")
+    return tmp_path
 
-def test_manifest_hash_matches_the_persisted_state(tmp_path, monkeypatch):
-    monkeypatch.setattr("scripts.compile_state.EDITIONS_ROOT", tmp_path)
+def test_writes_all_compile_artifacts_with_custody_split(compile_roots):
     out = compile_state(PRE)
-    state = json.loads((out / "state.json").read_text(encoding="utf-8"))
+    for f in ("descriptor.json", "state_manifest.json", "source_hashes.json"):
+        assert (out / f).exists(), f
+    assert not (out / "state.json").exists(), \
+        "a league_private state must never land in the tracked compiled tree"
+    assert (compile_roots / "priv" / PRE.edition_id / "state.json").exists()
+
+def test_manifest_hash_matches_the_persisted_private_state(compile_roots):
+    out = compile_state(PRE)
+    state = json.loads((compile_roots / "priv" / PRE.edition_id / "state.json")
+                       .read_text(encoding="utf-8"))
     mf = json.loads((out / "state_manifest.json").read_text(encoding="utf-8"))
     assert mf["state_payload_sha256"] == fact_hash(state)
 
-def test_source_identities_live_outside_the_state(tmp_path, monkeypatch):
+def test_compiler_output_equals_direct_state_at(compile_roots):
+    """state_at is the SOLE authority: the persisted state must equal a direct
+    state_at() computation fact-for-fact. A stub compiler emitting a plausible
+    but independent slice fails here -- this is the planted-bypass control."""
+    from scripts.temporal_state import state_at
+    compile_state(PRE)
+    state = json.loads((compile_roots / "priv" / PRE.edition_id / "state.json")
+                       .read_text(encoding="utf-8"))
+    direct = state_at(PRE.season, PRE.cutoff_utc, PRE.access_scope)
+    assert [f["fact_id"] for f in state["admitted"]] == \
+           [f.fact_id for f in direct.admitted]
+
+def test_source_identities_live_outside_the_state(compile_roots):
     """The df7c1ea defect: identities inside the compared artifact make the
     truncation comparison impossible to pass."""
-    monkeypatch.setattr("scripts.compile_state.EDITIONS_ROOT", tmp_path)
     out = compile_state(PRE)
-    state = json.loads((out / "state.json").read_text(encoding="utf-8"))
+    state = json.loads((compile_roots / "priv" / PRE.edition_id / "state.json")
+                       .read_text(encoding="utf-8"))
     assert "source_identities" not in state and "source_hashes" not in state
     assert json.loads((out / "source_hashes.json").read_text(encoding="utf-8"))
 
-def test_rebuild_preserves_sibling_artifacts(tmp_path, monkeypatch):
-    monkeypatch.setattr("scripts.compile_state.EDITIONS_ROOT", tmp_path)
+def test_rebuild_preserves_sibling_artifacts(compile_roots):
     compile_state(PRE)
-    authored = tmp_path / PRE.edition_id / "ranking_record.json"
+    authored = compile_roots / "ed" / PRE.edition_id / "ranking_record.json"
     authored.write_text('{"entries": []}', encoding="utf-8")
-    compile_state(PRE)
-    assert authored.exists(), "the compiler owns only compiled/"
-
-def test_clean_rebuild_is_byte_identical(tmp_path, monkeypatch):
     import shutil
-    monkeypatch.setattr("scripts.compile_state.EDITIONS_ROOT", tmp_path)
-    a = (compile_state(PRE) / "state.json").read_bytes()
-    shutil.rmtree(tmp_path / PRE.edition_id / "compiled")
-    assert (compile_state(PRE) / "state.json").read_bytes() == a
+    shutil.rmtree(compile_roots / "priv" / PRE.edition_id)
+    shutil.rmtree(compile_roots / "ed" / PRE.edition_id / "compiled")
+    compile_state(PRE)
+    assert authored.exists(), "the compiler owns only compiled/ and the private state"
+
+def test_clean_rebuild_is_byte_identical(compile_roots):
+    import shutil
+    priv_state = compile_roots / "priv" / PRE.edition_id / "state.json"
+    compile_state(PRE)
+    a = priv_state.read_bytes()
+    shutil.rmtree(compile_roots / "ed" / PRE.edition_id / "compiled")
+    shutil.rmtree(compile_roots / "priv" / PRE.edition_id)
+    compile_state(PRE)
+    assert priv_state.read_bytes() == a
 ```
+
+(`FIXTURE_OBS` is a module-level minimal observation dict in this test file, mirroring K1.2's
+`OBS`. Compiled artifacts are exclusive-per-compile: a rebuild deletes its own prior output
+first — the fixture does — or `compile_state` refuses.)
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
 
@@ -2919,6 +3174,18 @@ def test_clean_rebuild_is_byte_identical(tmp_path, monkeypatch):
       rename, with `source_hashes.json` carrying every consumed input (fact file, normalizer
       code, fact-type registry, predecessor seals) as **structured** paths and hashes, never
       `str(dict)`.
+
+      **Custody split for compiled states (Global Constraints, private roots):** all three D1
+      descriptors request `access_scope: "league_private"`, so their compiled `state.json` embeds
+      private chat text and is written to `private_editions/<edition>/state.json` (gitignored,
+      index-guarded, local rehydration). The TRACKED `<edition>/compiled/` tree holds only
+      `descriptor.json`, `state_manifest.json` (which binds the private state by
+      `state_payload_sha256`), and `source_hashes.json` — hashes and counts, no private text. A
+      compile on a clone without the private root fails closed (`private_root_absent`) rather
+      than emitting a chat-free state claiming league scope. The K2.1 tests assert
+      `state.json` is ABSENT from the tracked compiled directory and present under the (test-
+      relocated) private root, and the K1.6 sentinel test extends here: the planted secret must
+      not appear in any file under `content/editions/`.
 
       **`EDITIONS_ROOT` must be read from the module global at call time**, never captured in a
       default argument or bound at import. The tests above relocate the whole compile tree by
@@ -2940,12 +3207,13 @@ def test_clean_rebuild_is_byte_identical(tmp_path, monkeypatch):
 }
 ```
 
-Preview: `kind: "preview"`, `cutoff_utc` = strictly before the qualified first kickoff (derived,
-not hard-coded — see K2.2), `predecessors: ["2025-preseason"]`.
+Preview: `kind: "preview"`, `cutoff_utc` = READ from
+`content/governance/preview_cutoff_2025.v1.json` (K2.2 Step 4's retained derivation — never a
+human transcription), `predecessors: ["2025-preseason"]`.
 Recap: `kind: "recap"`, `cutoff_utc: "2025-09-09T06:59:59Z"`,
 `predecessors: ["2025-preseason", "2025-wk01-preview"]`.
 
-- [ ] **Step 5: Run** → 5 passed
+- [ ] **Step 5: Run** → 6 passed
 
 - [ ] **Step 5b: Add the CLI** — K3.7 invokes this script
 
@@ -2974,6 +3242,16 @@ $PY scripts/compile_state.py --descriptor content/editions/2025-preseason/descri
 ```
 
 Both exit 0; the second prints the compiled directory.
+
+- [ ] **Step 5c: Compile all three editions** — K2.3's census and K3.5's chains consume all
+      three; this is the earliest point at which compiler, descriptors, retained preview cutoff,
+      and fact store all exist:
+
+```bash
+for e in 2025-preseason 2025-wk01-preview 2025-wk01-recap; do
+  $PY scripts/compile_state.py --descriptor "content/editions/$e/descriptor.json" || exit 1
+done
+```
 
 - [ ] **Step 6: Commit**
 
@@ -3046,21 +3324,16 @@ print("kickoff:", r["instant_utc"], "\ncutoff :", strictly_before(r["instant_utc
 PY
 ```
 
-Write the printed cutoff into the preview descriptor. `compile_state` re-derives it and refuses
-to compile a preview whose descriptor cutoff is not strictly-before the qualified kickoff.
-
-- [ ] **Step 4b: Compile all three states** — K2.3's census tests and K3.5's chain tests consume
-      all three compiled editions, and until this step only `2025-preseason` exists (K2.1 Step 5b
-      compiled it alone, before the preview cutoff was derivable):
-
-```bash
-for e in 2025-preseason 2025-wk01-preview 2025-wk01-recap; do
-  $PY scripts/compile_state.py --descriptor "content/editions/$e/descriptor.json" || exit 1
-done
-```
-
-(The preseason edition recompiles idempotently — byte-identical per K2.1's clean-rebuild test.)
-K2.3 and K3.5 depend on this step.
+**Retain the derivation, don't transcribe it:** the command above also writes
+`content/governance/preview_cutoff_2025.v1.json` —
+`{"kickoff_utc": ..., "cutoff_utc": strictly_before(kickoff), "source_hashes": {...},
+"provenance": <the derivation command>}` — committed in this task's Step 6. K2.1's preview
+descriptor (created LATER, per the step-level sequence in K1.6's prerequisite) reads
+`cutoff_utc` from this artifact rather than from a human transcription, and `compile_state`
+re-derives and refuses to compile a preview whose descriptor cutoff is not strictly-before the
+qualified kickoff. (Compilation of the three editions happens at **K2.1 Step 5c**, after the
+compiler and descriptors exist — an earlier revision put a compile step here, before its own
+compiler.)
 
 **The qualification is a compile-time gate, not a test.** `test_result_carries_every_source_hash`
 skips when the gitignored schedules parquet is absent — deliberately: the CI suite runs on fresh
@@ -3076,7 +3349,8 @@ preview compiles — no consumer treats them as authority.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add scripts/kickoff_source.py content/governance/venue_timezones.json scripts/tests/test_kickoff_source.py
+git add scripts/kickoff_source.py content/governance/venue_timezones.json \
+        content/governance/preview_cutoff_2025.v1.json scripts/tests/test_kickoff_source.py
 git commit -m "feat(cutoff): timezone-correct kickoff qualification, neutral sites fail closed"
 ```
 
@@ -3626,29 +3900,56 @@ def test_freeze_stamps_an_instant_and_a_hash(frozen):
     {
       "family": "roster_membership",
       "required": true,
-      "rationale": "directly informs strength judgments"
+      "rationale": "directly informs strength judgments",
+      "source_ids": [],
+      "source_note": "declared unsourced (open dependency 3); frozen as such",
+      "normalizer_version": "norm-v1"
     },
     {
       "family": "historical_matchup",
       "required": true,
-      "rationale": "the no-history arm ablates exactly this"
+      "rationale": "the no-history arm ablates exactly this",
+      "source_ids": ["legacy:data/{prior}/season_combined.json"],
+      "normalizer_version": "norm-v1"
     },
     {
       "family": "chat_message",
       "required": true,
-      "rationale": "the no-chat arm ablates exactly this"
+      "rationale": "the no-chat arm ablates exactly this",
+      "source_ids": ["legacy:chat/parsed_messages.json"],
+      "normalizer_version": "norm-v1"
     },
     {
       "family": "nfl_game",
       "required": true,
-      "rationale": "distinguishes rich from minimal"
+      "rationale": "distinguishes rich from minimal",
+      "source_ids": [
+        "legacy:data/{season}/nfl_games/*.json + schedules parquet"
+      ],
+      "normalizer_version": "norm-v1"
     },
     {
       "family": "media_item",
       "required": false,
-      "rationale": "deferred to S1b, non-evidentiary decoration; absence must not degrade the data-layer experiment"
+      "rationale": "deferred to S1b, non-evidentiary decoration; absence must not degrade the data-layer experiment",
+      "source_ids": [],
+      "normalizer_version": null
     }
   ]
+}
+```
+
+**The freeze covers producers, not just names.** `source_ids` and `normalizer_version` are IN the
+manifest and inside the frozen hash — the prose promised this while the written manifest carried
+neither, making "no source may be added after freezing" undetectable. `assess_contrast` recomputes
+each family's actual producers from the persisted normalization report
+(`data/facts/{season}.report.json` + the LEGACY/ENVELOPE_SOURCES walks) and raises `ManifestDrift`
+(CLI exit 4) on any difference — planted added-source and version-bump tests must land and
+produce exit 4.
+
+```json
+{
+  "note": "manifest schema above; freeze_manifest stamps frozen_at + manifest_sha256 over the whole document including source_ids and normalizer_version"
 }
 ```
 
@@ -4023,7 +4324,15 @@ calls a live provider — every K3.5 test passes a deterministic stub for the mo
 stub is also what `--dry-run` executes);
 `write_blind_packet(out, label_map_path) -> int` (declared HERE — the round-two text called it
 from the CLI and K3.7 with no creating task: NameError after all 36 paid trials);
-`refuse_if_sealed(root, season, arm_id, trial_id, edition_id)`
+`refuse_if_sealed(root, season, arm_id, trial_id, edition_id)`;
+`runner_kwargs(arm_id, bundle) -> dict` (model arms: `runner_config(arm_id)`'s model block +
+computed prompt/rule hashes; `record_points`: computed `code_hash`/`config_hash`/`input_hashes`,
+no provider fields); `dry_run_all(root) -> int` (full five-arm loop on stub runners into a
+scratch root); `mask_bundle(bundle, salt)` / `rebind_names(artifact, salt)` (deterministic
+identity masking, §6 safeguards); `complete_chains(arm_id, root) -> list[int]` (trial ids whose
+all-edition chains sealed, read from run receipts); `clean_incomplete_cell(root, season, arm_id,
+trial_id, edition_id)` (removes a seal-less cell's orphan bodies/receipt — the only sanctioned
+deletion in the decisions tree; raises on a sealed cell)
 
 **`root` is an explicit parameter, not a monkeypatched module global.** `decision_history_at`
 binds `root=SEALS_ROOT` as a **default argument**, evaluated once at import — so
@@ -4142,7 +4451,13 @@ descriptor + compiled state
                                                                    #   config_hash/input_hashes (no provider block)
   -> RUNNERS[arm](bundle, predecessor)                             # deterministic | model
   -> ranking (one entry per franchise) + claims (>=1 per position)
-  -> resolve_claims(prior_claims, state)                           # recap grades what is due
+  -> save_claims(new_claims, root)                                 # EXPLICIT: nothing else persists them
+  -> resolve_claims(load_claims(root, arm, trial), grading_state)  # recap grades what is due
+  -> save_claims(resolution_events, root)                          # immutable RESOLUTION records,
+                                                                   #   keyed by claim_id -- load_claims
+                                                                   #   collapses to a stable current
+                                                                   #   view (latest resolution wins),
+                                                                   #   so re-runs never double-count
   -> inertia_comparator(...) -> load_decision(prior, root) -> score  # unchanged prior, re-scored
   -> run = close_run(run, output_decision_hash=fact_hash({"ranking": ranking,
                                                           "claims": claims}),
@@ -4153,13 +4468,22 @@ descriptor + compiled state
           predecessor_decision_hash=<verified predecessor's decision_hash or None>)
 ```
 
-**Close, persist, then seal — Phase-P's order, and the round-two defect inverted.** The earlier
-sequence persisted the OPEN receipt, sealed, and then closed an in-memory record nobody ever wrote
-to disk: the receipt surviving on disk had no `ended_at` and no `output_decision_hash`, so it
-attested that a run STARTED while K3.8 read it as proof a run COMPLETED — and a crash between
-persist and seal left a lying receipt with no seal to contradict it. Binding
-`output_decision_hash` to the ranking/claims content (not `seal.decision_hash`) is what removes
-the circular coupling that forced the receipt to be written before the seal in the first place.
+**Close, persist, then seal — with the SEAL as the transaction commit marker.** The earlier
+sequence persisted the OPEN receipt, sealed, and then closed an in-memory record nobody ever
+wrote to disk. Binding `output_decision_hash` to the ranking/claims content (not
+`seal.decision_hash`) removes the circular coupling that forced that order. What makes the cell
+crash-safe is the commit-marker rule: **a cell without its `.seal.json` does not exist.** Bodies
+and the closed receipt land first (exclusive-create); `seal()` — which verifies the receipt's
+bytes and closedness before writing — lands last and IS the commit point.
+`decision_history_at` already reads only `*.seal.json`; `load_runs` counts only receipts whose
+cell carries a seal and reports sealless orphans separately (an orphan is crash debris, never
+evidence). A crashed cell is resumed by `clean_incomplete_cell(root, ...)` — removing orphan
+bodies/receipt for a cell with NO seal, the only sanctioned deletion in the decisions tree and
+mechanically impossible for a sealed cell — followed by a re-run under a NEW trial id.
+**Crash-injection tests at every write boundary** (after body 1, after body 2, after the
+receipt, before the seal) assert: the cell is invisible to `decision_history_at` and
+`load_runs`, the orphans are enumerated, cleanup + re-run under trial N+1 succeeds, and a sealed
+cell can never be cleaned.
 
 `RUNNERS` maps `arm_id` to a callable of `(bundle, predecessor) -> (ranking, claims)`.
 `record_points` is the deterministic one: it orders by `state.standings(season=...)` —
@@ -4170,14 +4494,36 @@ and preview — and emits one `ordinal_rank` claim per position.
 in the plan): model arms call the Anthropic API via the `anthropic` client — uncomment `anthropic`
 in `requirements.txt` in this task's commit — constructed from `ANTHROPIC_API_KEY`, with model,
 version, reasoning, sampling and budget taken verbatim from `runner_config.json` (the receipt
-records what actually ran, never fiction). The full loop is 4 model arms x 3 trials x 3 editions =
+records what actually ran, never fiction).
+
+**The design's §6 backtest safeguards are operational steps here, not prose.** (a) **Opaque
+identities:** before any bundle reaches a model, `mask_bundle(bundle, salt)` deterministically
+replaces franchise/owner/display names with opaque tokens (`team_01`…, keyed by roster_id + a
+per-experiment salt recorded in the run receipt); NFL entities stay real (they are the public
+context being tested). A planted real owner name in a provider request is a failing test.
+(b) **Decision lock before names return:** the arm's decision is sealed IN OPAQUE FORM — the
+sealed ranking/claims reference tokens and roster_ids; `rebind_names` is applied only to
+presentation copies AFTER `seal()` returns, never to sealed bytes. (c) **Retrospective labels:**
+every kernel seal carries `label="retrospective_backtest"` (K1.5) and every run receipt records
+`"labeling": "retrospective_backtest"` — the explicit marking design §6 requires, not an
+implication. The full loop is 4 model arms x 3 trials x 3 editions =
 36 calls; at the configured 100k budget the ceiling is ~3.6M tokens — a spend decision Blake makes
 by authorizing K3.7, not a surprise. **Failure/resume rule:** `retries: 0`, and a failed cell is
 re-run under a NEW trial id (never by re-sealing the old one — seals are immutable); K3.6's
 completeness gate counts the replacement trial, and the abandoned partial trial is recorded in the
-run receipts as evidence, not silently vacated. Before any paid call, a `--dry-run` mode executes
-the full Step 3 loop against a stub runner and must produce all 39 sealed cells, proving the loop
-and the completeness gate agree.
+run receipts as evidence, not silently vacated. Before any paid call, the CLI's `--dry-run
+--out-root <scratch>` mode (implemented by `dry_run_all(root) -> int`, declared in this task's
+Interfaces) executes the full Step 3 loop against stub runners into the scratch root and must
+produce all 39 sealed cells, proving the loop and the completeness gate agree with zero spend.
+
+**Replacement trials and the completeness census.** "Trials 1-3" is a hardcode the replacement
+rule contradicts: after trial 2 fails mid-chain, the valid experiment is complete chains 1, 3, 4
+with 2 abandoned. The census is therefore over COMPLETE CHAINS, not trial numbers:
+`complete_chains(arm_id, root)` reads the run receipts and returns trial ids whose all-three-
+edition chains sealed; K3.6's expected grid requires `len(complete_chains(arm)) >=` the arm's
+minimum (3 model / 1 deterministic) and scores exactly those trials; abandoned partials are
+reported in the packet, never counted and never hidden. Fixture test: chains {1, 3, 4} complete +
+{2} abandoned passes; a missing edition cell inside trial 4 fails.
 
 **Every ranking position must yield at least one scoreable claim.** `run_arm_chain` raises if
 `len(claims) < len(ranking["entries"])`, because the design requires that every published position
@@ -4200,7 +4546,17 @@ def main():
     ap.add_argument("--blind-packet", action="store_true",
                     help="write anonymized sealed rankings for blind review")
     ap.add_argument("--out", help="output directory; required with --blind-packet")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="execute the FULL chain against stub runners into --out-root; "
+                         "no provider call, no real-store write")
+    ap.add_argument("--out-root", help="scratch root; required with --dry-run")
     a = ap.parse_args()
+    if a.dry_run:
+        if not a.out_root:
+            ap.error("--dry-run requires --out-root")
+        n = dry_run_all(Path(a.out_root))     # all five arms, stub runners
+        print(f"dry run sealed {n} cells under {a.out_root}")
+        return 0 if n == 39 else 1            # the loop and the completeness gate must agree
     if a.blind_packet:
         if not a.out:
             ap.error("--blind-packet requires --out")
@@ -4249,8 +4605,9 @@ git commit -m "feat(eval): chronological per-arm chains with closed decision lin
 
 **Interfaces:** `score_claim(claim) -> float | None`, `aggregate(claims) -> dict`,
 `combine_trials(trials, runner_kind) -> dict`, `AGGREGATION_ORDER`,
-`MIN_TRIALS_NONDETERMINISTIC`, `CLAIMS_DEFAULT_ROOT` (module global, `None` = the ledger's
-default root; `main()` reads it at call time so tests can redirect the ledger)
+`MIN_TRIALS_NONDETERMINISTIC`, `CLAIMS_DEFAULT_ROOT` and `DECISIONS_DEFAULT_ROOT` (module
+globals, `None` = the respective real roots; `main()` reads both at call time so tests can
+redirect the ledger and the receipts tree)
 
 - Consumes: `Claim`, `make_claim`, `load_claims` (K3.1); `ARMS` (K3.4) for each arm's
   `runner_kind`. `eval_scoring` imports `ARMS` rather than restating which arms are
@@ -4346,7 +4703,8 @@ def test_report_refuses_a_missing_cell(claim_factory, tmp_path, monkeypatch, cap
                  for t in range(1, (1 if ARMS[a]["runner_kind"] == "deterministic" else 3) + 1)]
     save_claims(full_grid[:-1], root=tmp_path)          # exactly one cell missing
     # CLAIMS_DEFAULT_ROOT is a module global eval_scoring's main() READS AT CALL
-    # TIME (`load_claims(root=CLAIMS_DEFAULT_ROOT)`, declared in Step 3) -- the
+    # TIME (`load_claims(root=CLAIMS_DEFAULT_ROOT)`, declared in this task's
+    # Interfaces block) -- the
     # patch below is live, not the inert-default-argument class this plan
     # documents for SEALS_ROOT and EDITIONS_ROOT.
     monkeypatch.setattr("scripts.eval_scoring.CLAIMS_DEFAULT_ROOT", tmp_path)
@@ -4354,6 +4712,16 @@ def test_report_refuses_a_missing_cell(claim_factory, tmp_path, monkeypatch, cap
     assert scoring_main() == 1
     assert "incomplete experiment" in capsys.readouterr().err
 ```
+
+**The grading state and the comparable-scores gate.** Claims resolving past the recap cutoff
+(e.g. `final_regular_season_rank` on 2026-01-06) are graded against a **grading state** —
+`state_at(2025, resolve_on, "league_private")` computed at scoring time from the full fact store —
+which is structurally unavailable to every decision runner (runners receive only the three
+edition states, all of whose cutoffs precede every resolution date; the grading state is never
+compiled into `content/editions/` and never enters a bundle). And a lift comparison requires
+**comparable scored claims on both sides**: `--report` refuses (exit 1) when any compared arm has
+zero resolved-and-scored claims — a 39-cell all-unresolved grid is a null measurement, not a
+verdict. Fixture test: an all-unresolved grid must fail the gate, never emit `by_arm` output.
 
 **Score direction and the STOP comparison form are precommitted here; the lift THRESHOLD is not.**
 All three scoring rules are distances — **lower is always better** — and `combine_trials` reports
@@ -4392,12 +4760,22 @@ def main():
               file=sys.stderr)
         return 1
     # A report that silently omits an arm, edition, or trial reads as a complete
-    # measurement of a smaller experiment. Refuse instead.
-    expected = {(arm, ed, t)
-                for arm in ARMS
-                for ed in EDITION_IDS
-                for t in range(1, (1 if ARMS[arm]["runner_kind"] == "deterministic"
-                                   else MIN_TRIALS_NONDETERMINISTIC) + 1)}
+    # measurement of a smaller experiment. Refuse instead. The census is over
+    # COMPLETE CHAINS from the run receipts (replacement trials mean the valid
+    # ids need not be 1..N -- chains {1,3,4} with 2 abandoned is a valid grid).
+    from scripts.eval_arms import complete_chains
+    expected = set()
+    for arm in ARMS:
+        need = 1 if ARMS[arm]["runner_kind"] == "deterministic" else MIN_TRIALS_NONDETERMINISTIC
+        # DECISIONS_DEFAULT_ROOT: module global beside CLAIMS_DEFAULT_ROOT (run
+        # receipts live in the decisions tree, not the claims ledger); None
+        # means the real root; read at call time for the same live-patch reason.
+        chains = complete_chains(arm, DECISIONS_DEFAULT_ROOT)
+        if len(chains) < need:
+            print(f"FAIL {arm}: {len(chains)} complete chains, {need} required",
+                  file=sys.stderr)
+            return 1
+        expected |= {(arm, ed, t) for ed in EDITION_IDS for t in chains[:need]}
     present = {(c.arm_id, c.edition_id, c.trial_id) for c in claims}
     if not a.arm and (missing := sorted(expected - present)):
         print(f"FAIL incomplete experiment, {len(missing)} cells missing: {missing[:5]}",
@@ -4496,14 +4874,31 @@ $PY scripts/eval_contrast.py --preflight > "$f.tmp"; rc=$?
 echo "{\"gate\": \"contrast_preflight\", \"exit_code\": $rc}" \
   > content/editions/_evaluation/contrast_exit.json
 commit_evidence() {
-  git add content/editions/_evaluation/ && git commit -m "eval(k3): gate evidence at ${1}" || true
+  # Fail CLOSED: a commit failure masked by || true would let a lost verdict
+  # masquerade as a durable one. The newly frozen manifest is staged too --
+  # a degraded exit after Step 1 otherwise leaves the freeze uncommitted.
+  git add content/editions/_evaluation/ content/governance/evidence_families.json     && git commit -m "eval(k3): gate evidence at ${1}"     || { echo "FAILED GATE: evidence commit failed at ${1}"; exit 4; }
 }
 case $rc in
   0) echo "contrast preflight ok -> arms may run" ;;
-  1) echo "DEGRADED before any arm ran. One approved remediation cycle is permitted."
-     echo "Running five arms x three trials against evidence already known to be"
-     echo "insufficient buys nothing and spends the trial budget."
-     commit_evidence "preflight-degraded"; exit 1 ;;
+  1) echo "DEGRADED before any arm ran. Recording the verdict WITHOUT model spend:"
+     # The preflight is advisory (increment=False) -- on its own it would leave
+     # cycles_used at zero forever and never produce the contrast.json K3.8's
+     # no-decision packet requires. The assess below is deterministic (family
+     # counts come from compiled states; no model arm runs): it PERSISTS the
+     # cycle against the frozen manifest hash and writes the verdict artifact.
+     # First degraded run exits 1 here; a second unrepaired run exits 3 -- the
+     # two-invocation 1 -> 3 sequence is the executable bound.
+     f2=content/editions/_evaluation/contrast.json
+     $PY scripts/eval_contrast.py --assess --full-arm full_rich --minimal-arm minimal_legal \
+         > "$f2.tmp"; rc2=$?
+     [ -s "$f2.tmp" ] && mv "$f2.tmp" "$f2" || rm -f "$f2.tmp"
+     echo "{\"gate\": \"contrast_assess_preflight_stage\", \"exit_code\": $rc2}" \
+       > content/editions/_evaluation/contrast_exit.json
+     commit_evidence "preflight-degraded-recorded"
+     [ "$rc2" -eq 3 ] && { echo "STOP - NO DECISION. Go to K3.8."; exit 3; }
+     echo "One approved remediation cycle is permitted (K3.3's scope). Do not run arms."
+     exit 1 ;;
   3) echo "STOP - NO DECISION. Go to K3.8."; commit_evidence "preflight-stop"; exit 3 ;;
   *) echo "FAILED GATE (exit $rc; 2 = usage error, 4 = crash): never a verdict."
      commit_evidence "preflight-failed-gate"; exit "$rc" ;;
@@ -4537,7 +4932,10 @@ design's minimum for a non-deterministic runner.
 # Step 2b's fence does not exist in this one -- an undefined commit_evidence
 # would leave the STOP paths' evidence uncommitted while still exiting "correctly".
 commit_evidence() {
-  git add content/editions/_evaluation/ && git commit -m "eval(k3): gate evidence at ${1}" || true
+  # Fail CLOSED: a commit failure masked by || true would let a lost verdict
+  # masquerade as a durable one. The newly frozen manifest is staged too --
+  # a degraded exit after Step 1 otherwise leaves the freeze uncommitted.
+  git add content/editions/_evaluation/ content/governance/evidence_families.json     && git commit -m "eval(k3): gate evidence at ${1}"     || { echo "FAILED GATE: evidence commit failed at ${1}"; exit 4; }
 }
 f=content/editions/_evaluation/contrast.json
 $PY scripts/eval_contrast.py --assess --full-arm full_rich --minimal-arm minimal_legal \
@@ -4603,20 +5001,31 @@ reported and the disagreement is the finding.
 
 ```bash
 $PY - <<'PY' || exit 1
-import json, sys
+import hashlib, json, sys
 from pathlib import Path
 p = Path("content/editions/_evaluation/blind_review.json")
 if not p.is_file() or p.stat().st_size == 0:
     sys.exit("STOP: blind review not recorded")
 doc = json.loads(p.read_text(encoding="utf-8"))
-packet = sorted(q.name for q in Path("content/editions/_evaluation/blind_packet").iterdir())
-missing = [t for t in packet if t not in {f"{k}" for k in doc["rankings"]}
-           and t.rsplit(".", 1)[0] not in doc["rankings"]]
-if missing or not doc.get("reviewed_at"):
-    sys.exit(f"STOP: blind review incomplete; unranked tokens: {missing[:5]}")
-print(f"blind review covers {len(doc['rankings'])} tokens")
+pk = Path("content/editions/_evaluation/blind_packet")
+# RECOMPUTE packet_sha256 -- a declared-but-unchecked hash verifies nothing.
+# It binds filename AND content, so body mutation after review fails here.
+listing = [(q.name, hashlib.sha256(q.read_bytes()).hexdigest())
+           for q in sorted(pk.iterdir())]
+actual = hashlib.sha256(json.dumps(listing, sort_keys=True).encode()).hexdigest()
+if doc.get("packet_sha256") != actual:
+    sys.exit("STOP: packet content changed since review (or hash never recorded)")
+tokens = {q.name.rsplit(".", 1)[0] for q in pk.iterdir()}
+ranked = set(doc["rankings"])
+if tokens != ranked or not doc.get("reviewed_at"):
+    sys.exit(f"STOP: token sets differ; unranked={sorted(tokens - ranked)[:5]} "
+             f"extra={sorted(ranked - tokens)[:5]}")
+print(f"blind review covers {len(ranked)} tokens; packet hash verified")
 PY
 ```
+
+(Discriminating tests: body mutation after review → fail; a missing token → fail; an extra
+ranked token → fail.)
 
 - [ ] **Step 7: Commit — every artifact, not just the scores**
 
@@ -4650,10 +5059,19 @@ $PY -m pytest scripts/tests/ -q || exit 1
 $PY scripts/migration_census.py --all || exit 1
 $PY scripts/generate_chat_provenance.py --verify || exit 1
 $PY scripts/seal_2026.py --verify-all || exit 1     # Phase-P store intact: read, never written
-for f in content/editions/_evaluation/contrast_preflight.json \
-         content/editions/_evaluation/contrast.json \
-         content/editions/_evaluation/scores.json \
-         content/editions/_evaluation/entrypoint_proof.json; do
+$PY scripts/decision_history.py --verify-tree content/decisions || exit 1
+  # ^ the KERNEL verifier (K1.5): every seal's decision_hash, locators, body
+  #   hashes, CLOSED receipt hash, retrospective label, and predecessor lineage
+  #   re-verified from committed files -- kernel seals are held to the same
+  #   standard Phase-P's are, not trusted as written.
+# Branch-specific artifact requirements -- a no-decision STOP produces no
+# scores/blind review, and demanding them there would make the honest verdict
+# unreportable:
+BRANCH=$($PY -c "import json; print(json.load(open('content/editions/_evaluation/contrast_exit.json'))['exit_code'])")
+required="contrast_preflight.json contrast.json contrast_exit.json entrypoint_proof.json"
+[ "$BRANCH" = "0" ] && required="$required scores.json blind_review.json blind_label_map.json"
+for name in $required; do
+  f="content/editions/_evaluation/$name"
   $PY -c "import json,sys; json.load(open('$f', encoding='utf-8'))" \
     || { echo "STOP: $f absent, empty, or unparseable"; exit 1; }
 done
@@ -4686,6 +5104,15 @@ joins the packet's Phase-P item.
 
 **The packet is invalid if the contrast was not actually measured.** A `contrast.json` that is
 absent, empty, or produced by a process that exited without assessing does not satisfy this step.
+
+**Packet contents are branch-specific.** On the ok path (contrast exit 0) the packet carries all
+eight items above. On the degraded/no-decision paths (exit 1 after the permitted cycle, or exit
+3), the VALID packet is: the entry-point proof, the state-leak census, the contrast verdict +
+exit code + frozen manifest hash, the normalization availability report, any seals produced
+before the halt (verified by the kernel verifier), and the Phase-P item — with scores and blind
+review explicitly recorded as NOT PRODUCED because no complete arm grid exists. A no-decision
+packet that demanded `scores.json` would make the honest outcome unreportable; one that silently
+omitted the explanation would hide it.
 
 - [ ] **Step 3: Answer in writing**
 
@@ -4891,6 +5318,45 @@ sweep line, `runner_config.json`/prompt creation (K3.2 Step 3b), claims-ledger p
 declared layout, the K3.6 completeness-gate test, and the K2.2 qualification gate reconciled with
 CI's parquet-less fresh clones.
 
+**Round-four integration (2026-08-05, Sol/ChatGPT independent review — ten blockers, all
+reproduced then resolved).** (1) Private custody: `privacy="private"` facts and every
+`league_private` compiled state now live in gitignored, index-guarded `private_facts/` /
+`private_editions/` roots with local rehydration, an extended staging guard, and a synthetic-
+secret sentinel test spanning normalize → bundle → every tracked artifact. (2) Source-byte
+reality: canonical six-fractional-digit instants (envelope `captured_at` values are microsecond-
+grained and the whole-second rule rejected all of them — proven by executing the regex against a
+real envelope), live Sleeper matchup rows grouped by `(week, matchup_id)` into pairs (rows carry
+`roster_id`, not `team1`/`team2` — verified), and both timing policies materialized as committed
+versioned artifacts with stated generation commands (the chat corpus instant from the receipt-
+bound provenance manifest, since an untracked file has no git date). (3) Replay fidelity:
+`_iter_source` iterates ALL envelopes chronologically; both source maps enumerate all nine types
+with explicit sentinels and a planted-deviation coverage gate; the four-bucket report is a
+persisted, tracked artifact that K3.3 reads. (4) Identity: `fact_type` joins `fact_id` (Sol
+reproduced the cross-type collision with identical content — which the duplicate refusal would
+have turned into rejecting a legitimate observation); `fact_store` uses package-form-first
+imports so its exception identity matches under pytest. (5) Ordering: the task-level reorder was
+itself circular; replaced by the step-level sequence with the preview cutoff RETAINED as a
+committed artifact, compile-all moved to K2.1 Step 5c, isolated compiler fixtures, and a
+state_at-equality authority test. (6) Measurement validity: `nfl_game` bodies carry the
+information (injuries, rest, spread, EPA team stats — a schedule shell is refused as unqualified
+context), and the §6 safeguards are operational: deterministic identity masking into model
+inputs, decisions sealed in opaque form before name rebind, explicit `retrospective_backtest`
+labels on seals and receipts. (7) Runner contract: `runner_kwargs` declared, `--dry-run
+--out-root` implemented, and the trial census is over complete chains from run receipts, so
+replacement trials reconcile with completeness. (8) Contrast: the manifest freezes per-family
+`source_ids` + `normalizer_version` (the prose promised it; the JSON didn't carry it), drift
+plants must produce exit 4, and the degraded path is executable — a degraded preflight triggers a
+deterministic assess that persists the cycle and writes `contrast.json`, so two unrepaired runs
+yield 1 then 3 with zero model spend, and K3.8's packet requirements are branch-specific.
+(9) Claims: explicit `save_claims` in the driver flow, immutable resolution events collapsed to a
+stable current view, a grading state structurally unavailable to decision runners, and a
+comparable-scores gate an all-unresolved grid cannot pass. (10) Durability: the seal is the
+transaction commit marker (orphans invisible, cleanable, re-run under a new trial id;
+crash-injection tests at every write boundary), `seal()` opens and verifies the receipt it binds,
+a kernel verifier (`--verify-tree`) audits every seal/body/receipt/lineage from committed files
+in the K3.8 sweep, evidence commits fail closed at exit 4, and blind review binds recomputed
+filename+content packet hashes with exact token-set equality.
+
 **Type consistency.** `Fact`/`FACT_FIELDS` (K1.1) are consumed by `FactStore` (K1.2), `state_at`
 (K1.3), and the normalizers (K1.6); the payload attachment rides alongside, outside the contract
 and outside identity, and is persisted and hash-verified by the store.
@@ -4902,12 +5368,12 @@ five. `load_claims` (K3.1) is the single ledger reader for K3.5 and K3.6.
 **Ordering.** The 2026 capture lane still precedes this work because the evidence is perishable and
 nothing is currently running — but it is now delivered by the P-only contract, not by this plan, and
 the two proceed independently. Within this plan:
-K1.6 depends on K1.1-K1.2 **and on K2.2** (`normalize_all` imports `scripts.kickoff_source`
-inside its body, so EVERY `normalize_all` call — not just `nfl_game` records — fails with
-`ModuleNotFoundError` until K2.2 lands; execution order is K1.1-K1.5 → K2.2 → K1.6 → K1.7 →
-K2.1 → K2.3, per K1.6's prerequisite note); K2.1 depends on K1.3-K1.4 and on
-K1.6's CLI having materialized `data/facts/{season}.jsonl`; K2.2 must precede the preview
-descriptor's cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **and
+The K1/K2 order is STEP-level, not task-level (task-level reorderings are circular — K2.2's
+compile needs K2.1's compiler; K2.1's preview descriptor needs K2.2's cutoff):
+K1.1-K1.5 → K2.2 Steps 1-4 (helpers + derived cutoff RETAINED in
+`preview_cutoff_2025.v1.json`) → K1.6 (normalize + materialize both fact stores) → K1.7 →
+K2.1 incl. Step 5c (compiler, descriptors reading the retained cutoff, compile all three) →
+K2.3. Within K3: K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **and
 K2.1** (it consumes `EditionDescriptor`); K3.6 depends on K3.4 for `runner_kind`.
 
 **Open execution dependencies — fail closed, Blake's call.**
