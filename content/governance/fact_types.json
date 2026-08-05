@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "types": {
+    "franchise_identity": {
+      "reducer": "latest",
+      "default_access_scope": "public",
+      "known_at_basis": "capture_instant"
+    },
+    "schedule_pairing": {
+      "reducer": "latest",
+      "default_access_scope": "public",
+      "known_at_basis": "qualified_schedule_source_or_policy"
+    },
+    "matchup_result": {
+      "reducer": "append",
+      "default_access_scope": "public",
+      "known_at_basis": "game_conclusion"
+    },
+    "roster_membership": {
+      "reducer": "latest",
+      "default_access_scope": "public",
+      "known_at_basis": "anchor_or_transaction_completion"
+    },
+    "transaction": {
+      "reducer": "append",
+      "default_access_scope": "public",
+      "known_at_basis": "effective_completion_instant"
+    },
+    "draft_pick": {
+      "reducer": "append",
+      "default_access_scope": "public",
+      "known_at_basis": "pick_timestamp_else_capture"
+    },
+    "chat_message": {
+      "reducer": "append",
+      "default_access_scope": "league_private",
+      "known_at_basis": "message_timestamp"
+    },
+    "historical_matchup": {
+      "reducer": "append",
+      "default_access_scope": "public",
+      "known_at_basis": "game_conclusion"
+    },
+    "nfl_game": {
+      "reducer": "latest",
+      "default_access_scope": "public",
+      "known_at_basis": "game_conclusion"
+    }
+  }
+}
