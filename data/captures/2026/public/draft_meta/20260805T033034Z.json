@@ -1,0 +1,82 @@
+{
+  "access_scope": "public",
+  "captured_at": "2026-08-05T03:30:34.712720Z",
+  "envelope_sha256": "7a41a54b4993595dac752c2bcfcace92087b6ffb0d73f288b61429e964343ecc",
+  "known_at_basis": "live read of /league/1312884727480352768/drafts at captured_at",
+  "league_id": "1312884727480352768",
+  "locator": "data/captures/2026/public/draft_meta/20260805T033034Z.json",
+  "payload": {
+    "count": 1,
+    "drafts": [
+      {
+        "created": 1767378620553,
+        "creators": ["510013812276232192"],
+        "draft_id": "1312884727488737280",
+        "draft_order": {
+          "415249306090479616": 11,
+          "510013812276232192": 8,
+          "510215233736572928": 10,
+          "510254202180411392": 7,
+          "575194626101170176": 6,
+          "575406354368348160": 1,
+          "575878107617718272": 5,
+          "792312710317572096": 3,
+          "792563831732838400": 9,
+          "793977545186979840": 2,
+          "861064424906158080": 12,
+          "865653448849391616": 4
+        },
+        "last_message_id": "1385052168662315008",
+        "last_message_time": 1784584679335,
+        "last_picked": 1784584678292,
+        "league_id": "1312884727480352768",
+        "metadata": {
+          "description": "",
+          "name": "The Jailyard",
+          "scoring_type": "idp_1qb",
+          "show_team_names": "0"
+        },
+        "season": "2026",
+        "season_type": "regular",
+        "settings": {
+          "alpha_sort": 0,
+          "autopause_enabled": 0,
+          "autopause_end_time": 1020,
+          "autopause_start_time": 300,
+          "autostart": 0,
+          "cpu_autopick": 1,
+          "enforce_position_limits": 1,
+          "nomination_timer": 60,
+          "pick_timer": 43200,
+          "player_type": 1,
+          "reversal_round": 0,
+          "rounds": 6,
+          "slots_bn": 13,
+          "slots_db": 1,
+          "slots_def": 1,
+          "slots_dl": 1,
+          "slots_flex": 1,
+          "slots_k": 1,
+          "slots_lb": 1,
+          "slots_qb": 1,
+          "slots_rb": 2,
+          "slots_te": 1,
+          "slots_wr": 3,
+          "teams": 12
+        },
+        "sport": "nfl",
+        "start_time": 1783700048140,
+        "status": "complete",
+        "type": "linear"
+      }
+    ]
+  },
+  "payload_sha256": "cfb0583ff2d54713b21f4170dd060a9a3cc275c3020ae091f4a621d5e8cf20f7",
+  "privacy": "public",
+  "request": {
+    "endpoint_or_dataset": "/league/1312884727480352768/drafts",
+    "params": {}
+  },
+  "season": 2026,
+  "source_id": "draft_meta"
+}
