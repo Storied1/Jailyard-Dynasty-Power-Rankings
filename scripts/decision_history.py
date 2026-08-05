@@ -18,6 +18,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:  # package form first -- one module identity under pytest and direct run
     from scripts.fact_schema import fact_hash  # noqa: E402
 except ImportError:  # pragma: no cover - direct-run fallback

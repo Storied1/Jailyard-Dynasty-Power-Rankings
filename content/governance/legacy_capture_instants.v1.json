@@ -1,0 +1,38 @@
+{
+  "entries": {
+    "chat/parsed_messages.json": {
+      "instant": "2026-07-12T07:33:03.000000Z",
+      "policy_id": "chat-capture-v1"
+    },
+    "data/2022/season_combined.json": {
+      "instant": "2026-04-04T17:38:17.000000Z",
+      "policy_id": "legacy-capture-v1"
+    },
+    "data/2023/season_combined.json": {
+      "instant": "2026-04-04T17:38:17.000000Z",
+      "policy_id": "legacy-capture-v1"
+    },
+    "data/2024/season_combined.json": {
+      "instant": "2026-04-04T17:38:17.000000Z",
+      "policy_id": "legacy-capture-v1"
+    },
+    "data/2025/draft_picks.json": {
+      "instant": "2026-06-06T15:10:58.000000Z",
+      "policy_id": "legacy-capture-v1"
+    },
+    "data/2025/nfl_games": {
+      "instant": "2026-07-10T03:59:25.000000Z",
+      "policy_id": "legacy-capture-v1"
+    },
+    "data/2025/season_combined.json": {
+      "instant": "2026-04-04T17:38:17.000000Z",
+      "policy_id": "legacy-capture-v1"
+    },
+    "data/2025/transactions.json": {
+      "instant": "2026-04-04T17:38:17.000000Z",
+      "policy_id": "legacy-capture-v1"
+    }
+  },
+  "policy_id": "legacy-capture-v1",
+  "provenance": "git log -1 --format=%aI -- <path> per tracked legacy path; chat entry from content/chat/provenance.json's commit instant (chat-capture-v1)"
+}

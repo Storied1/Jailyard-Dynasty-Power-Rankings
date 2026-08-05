@@ -1,0 +1,21 @@
+{
+  "counts": {
+    "draft_pick": 72,
+    "franchise_identity": 48,
+    "transaction": 126
+  },
+  "normalizer_version": "norm-v1",
+  "unavailable": {
+    "chat_message": "manual export not ingested for 2026 (design: private-class, manual)",
+    "historical_matchup": "n/a for 2026 BY DESIGN (design section 3 row)",
+    "matchup_result": "all 108 records refused (matchup_result yielded zero facts)",
+    "nfl_game": "all 1360 records refused (nfl_game yielded zero facts)",
+    "roster_membership": "no qualified 2026 anchor policy approved",
+    "schedule_pairing": "qualified 2026 mapping deliberately deferred to K3"
+  },
+  "undatable": {},
+  "unqualified": {
+    "matchup_result": 108,
+    "nfl_game": 1360
+  }
+}

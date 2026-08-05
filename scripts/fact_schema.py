@@ -16,6 +16,7 @@ from dataclasses import dataclass, fields
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from shared import load_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]

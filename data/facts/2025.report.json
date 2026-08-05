@@ -1,0 +1,19 @@
+{
+  "counts": {
+    "chat_message": 22884,
+    "draft_pick": 72,
+    "franchise_identity": 12,
+    "historical_matchup": 294,
+    "matchup_result": 98,
+    "nfl_game": 285,
+    "transaction": 717
+  },
+  "normalizer_version": "norm-v1",
+  "unavailable": {
+    "nfl_game_pregame": "no qualified schedule-publication instant (sched_publication_2025.v1.json absent); pregame context is not invented or backdated",
+    "roster_membership": "no qualified pre-kickoff roster anchor (open dependency 3)",
+    "schedule_pairing": "no qualified pre-kickoff schedule source (design section 1)"
+  },
+  "undatable": {},
+  "unqualified": {}
+}

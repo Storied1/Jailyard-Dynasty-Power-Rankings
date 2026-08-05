@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:  # package form first -- one module identity under pytest and direct run
     from scripts.fact_schema import (
         canonical_instant,  # noqa: E402, F401

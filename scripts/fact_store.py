@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 # Package form FIRST (the capture_optional_2026.py pattern): under pytest this
 # module is scripts.fact_store while a bare import would load a SECOND
 # fact_schema whose PayloadIntegrityError is a different class -- the on-disk
@@ -44,6 +45,8 @@ class FactStore:
     def __init__(self, path):
         self.path = Path(path)
         self._facts = []
+        self._ids = set()
+        self._by_key = {}  # (fact_type, source_record_id) -> [facts]
         if self.path.exists():
             for line in self.path.read_text(encoding="utf-8").splitlines():
                 if line.strip():
@@ -52,7 +55,7 @@ class FactStore:
                     # Fact.__post_init__ re-verifies content_sha256 against these
                     # bytes, so on-disk tampering raises PayloadIntegrityError here
                     # rather than silently entering a state.
-                    self._facts.append(
+                    self._append(
                         Fact(
                             **rec,
                             payload_bytes=(
@@ -64,15 +67,18 @@ class FactStore:
     def load(self):
         return list(self._facts)
 
+    def _append(self, fact):
+        self._facts.append(fact)
+        self._ids.add(fact.fact_id)
+        self._by_key.setdefault((fact.fact_type, fact.source_record_id), []).append(
+            fact
+        )
+
     def _latest_for(self, fact_type, source_record_id):
         # Keyed on (fact_type, source_record_id): resolution must never let two
         # types sharing a record id supersede each other. Prefix disjointness in
         # the normalizers is a convention; this is the mechanism.
-        candidates = [
-            f
-            for f in self._facts
-            if f.fact_type == fact_type and f.source_record_id == source_record_id
-        ]
+        candidates = self._by_key.get((fact_type, source_record_id), [])
         superseded = {f.supersedes for f in candidates if f.supersedes}
         live = [f for f in candidates if f.fact_id not in superseded]
         return max(live, key=lambda f: (f.known_at, f.fact_id)) if live else None
@@ -95,12 +101,16 @@ class FactStore:
         # normalizer change is a change in meaning even when the bytes are
         # identical; comparing content_sha256 alone would discard a norm-v2
         # reading of the same capture as a duplicate of its norm-v1 predecessor.
+        # Design section 1: "Identical repeats coalesce ... updates nothing" is
+        # UNCONDITIONAL on time -- capture-instant-based types (franchise
+        # identity) get a new known_at every envelope, and putting the clocks in
+        # this tuple would turn four identical daily captures into a
+        # supersession chain of identical payloads instead of one fact whose
+        # first-held instant stands.
         meaning = (
             "normalizer_version",
             "access_scope",
             "known_at_basis",
-            "effective_at",
-            "known_at",
             "fact_type",
             "privacy",
         )
@@ -140,13 +150,13 @@ class FactStore:
             ),  # canonicalized once, then immutable
             **{k: v for k, v in meta.items() if k in FACT_FIELDS},
         )
-        if any(f.fact_id == fact.fact_id for f in self._facts):
+        if fact.fact_id in self._ids:
             # Never a warning: a duplicate id forks the supersession graph.
             raise ValueError(f"fact_id collision: {fact.fact_id}")
         problems = validate(fact)
         if problems:
             raise ValueError(f"invalid fact: {problems}")
-        self._facts.append(fact)
+        self._append(fact)
         return fact, ("superseded" if prior is not None else "created")
 
     def write(self):
