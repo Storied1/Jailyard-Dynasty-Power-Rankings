@@ -311,6 +311,11 @@ def test_schedule_shell_is_refused_as_postgame_context():
         )
 
 
+@pytest.mark.skipif(
+    not (REPO / "data" / "external" / "schedules_2025.parquet").exists(),
+    reason="gitignored schedules parquets absent (clean checkout); the emit "
+    "functions are covered portably via the synthetic kickoff fixture",
+)
 def test_emit_clis_produce_source_bound_artifacts():
     """The exact CLI paths for both timing-policy emitters; provenance and
     source hashes present; week-conclusion hashes match the parquet bytes."""
@@ -346,9 +351,91 @@ def test_report_is_persisted_and_carries_no_private_text():
     doc = json.loads(report_path.read_text(encoding="utf-8"))
     assert set(doc) == {
         "counts",
+        "actions",
         "unqualified",
         "undatable",
         "unavailable",
         "normalizer_version",
     }
     assert doc["counts"]["chat_message"] == 22884  # counts only -- never text
+
+
+def test_franchise_join_never_backdates_later_user_names(tmp_path):
+    """Live ordering regression: rosters captured 01:43:39.205154Z, users
+    captured 03:30:23.482196Z. The roster observation must be ROSTER-ONLY
+    (user fields unavailable); at a 02:00 cutoff no joined display name may be
+    admitted. A joined observation appears only from a rosters capture at or
+    after the users capture, dated no earlier than both, with provenance
+    binding both envelopes."""
+    root = tmp_path / "captures"
+    _write_env = _write_fixture_envelope
+    d = root / "data" / "captures" / "2026" / "public"
+    for component, stamp, captured, payload in (
+        (
+            "sleeper_rosters",
+            "20260805T014339Z",
+            "2026-08-05T01:43:39.205154Z",
+            {"rosters": [{"roster_id": 1, "owner_id": "u1"}]},
+        ),
+        (
+            "sleeper_users",
+            "20260805T033023Z",
+            "2026-08-05T03:30:23.482196Z",
+            {"users": [{"user_id": "u1", "display_name": "Blake"}]},
+        ),
+        (
+            "sleeper_rosters",
+            "20260805T033237Z",
+            "2026-08-05T03:32:37.977891Z",
+            {"rosters": [{"roster_id": 1, "owner_id": "u1"}]},
+        ),
+    ):
+        env = {
+            "source_id": component,
+            "season": 2026,
+            "captured_at": captured,
+            "access_scope": "public",
+            "privacy": "public",
+            "payload": payload,
+        }
+        (d / component).mkdir(parents=True, exist_ok=True)
+        (d / component / f"{stamp}.json").write_text(json.dumps(env), encoding="utf-8")
+    facts = _normalize_component(root, {"franchise_identity"}, tmp_path / "f.jsonl")
+    chain = sorted(facts, key=lambda f: f.known_at)
+    assert chain[0].payload["display_name"] is None
+    assert chain[0].payload.get("display_name_unavailable") is True
+    assert "sleeper_users" not in chain[0].source_ref, "roster-only: one envelope"
+    joined = chain[-1]
+    assert joined.payload["display_name"] == "Blake"
+    # Provenance binds BOTH envelopes in the source_ref metadata field.
+    assert "sleeper_rosters/20260805T033237Z.json" in joined.source_ref
+    assert "sleeper_users/20260805T033023Z.json" in joined.source_ref
+    assert joined.known_at >= "2026-08-05T03:30:23.482196Z", "dated >= both inputs"
+    from scripts.temporal_state import state_at
+
+    early = state_at(2026, "2026-08-05T02:00:00Z", "public", facts=facts)
+    names = [f.payload["display_name"] for f in early.admitted]
+    assert names == [None], "no joined name may be admitted at a 02:00 cutoff"
+
+
+def test_counts_equal_materialized_facts_and_actions_reconcile(tmp_path):
+    """Truthful accounting: counts must equal store contents by type; coalesced
+    repeats must not inflate it; actions reconcile exactly."""
+    r = normalize_all(
+        source_root=REPO,
+        out_path=tmp_path / "f.jsonl",
+        season=2026,
+        private_out_path=tmp_path / "p.jsonl",
+    )
+    facts = FactStore(tmp_path / "f.jsonl").load()
+    by_type = {}
+    for f in facts:
+        by_type[f.fact_type] = by_type.get(f.fact_type, 0) + 1
+    assert r["counts"] == by_type, "counts must equal materialized facts by type"
+    for t_ in set(r["counts"]) | set(r["actions"]["coalesced"]):
+        observed = sum(r["actions"][a].get(t_, 0) for a in r["actions"])
+        materialized = r["actions"]["created"].get(t_, 0) + r["actions"][
+            "superseded"
+        ].get(t_, 0)
+        assert r["counts"].get(t_, 0) == materialized
+        assert observed >= materialized

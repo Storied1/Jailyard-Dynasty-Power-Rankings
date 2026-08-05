@@ -70,11 +70,15 @@ def _sha256_file(path):
     return "sha256:" + hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def first_kickoff_instant(season):
-    """The qualified first REG-season kickoff, with hashes of every source used."""
+def first_kickoff_instant(season, parquet=None):
+    """The qualified first REG-season kickoff, with hashes of every source used.
+    `parquet` overrides the default cache path (synthetic fixtures in tests --
+    no green test may depend on this checkout's gitignored caches)."""
     import polars as pl
 
-    parquet = ROOT / SCHEDULES_TEMPLATE.format(season=season)
+    parquet = (
+        Path(parquet) if parquet else ROOT / SCHEDULES_TEMPLATE.format(season=season)
+    )
     if not parquet.exists():
         raise UnavailableEvidence(
             f"schedules parquet absent at {parquet}; run scripts/fetch_nflreadpy.py first"

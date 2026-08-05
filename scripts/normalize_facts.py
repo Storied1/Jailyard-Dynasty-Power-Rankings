@@ -155,6 +155,10 @@ def _franchise_identity(raw, season):
         "display_name": raw.get("display_name") or raw.get("username"),
         "team_name": raw.get("team_name"),
     }
+    if raw.get("display_name_unavailable"):
+        # Roster-only identity: no users capture existed no later than this
+        # roster capture. Recorded as unavailable, never backfilled from later.
+        body["display_name_unavailable"] = True
     return meta, body
 
 
@@ -553,31 +557,55 @@ def _env_meta(env):
 def _iter_envelopes(root, fact_type, spec):
     component, _ = spec
     files = _envelope_files(root, component)
+    users_docs, users_refs = [], {}
     if fact_type == "franchise_identity":
-        users_files = _envelope_files(root, "sleeper_users")
-        users_docs = [json.loads(p.read_text(encoding="utf-8")) for p in users_files]
+        try:
+            users_files = _envelope_files(root, "sleeper_users")
+        except MissingSource:
+            users_files = []  # roster-only identity: user fields unavailable
+        for up in users_files:
+            doc = json.loads(up.read_text(encoding="utf-8"))
+            users_docs.append(doc)
+            users_refs[doc["captured_at"]] = (
+                f"capture:2026/public/sleeper_users/{up.name}"
+            )
     for p in files:
         env = json.loads(p.read_text(encoding="utf-8"))
         ref = f"capture:2026/public/{component}/{p.name}"
         meta = _env_meta(env)
         payload = env["payload"]
         if fact_type == "franchise_identity":
-            # Join each rosters envelope to the latest users envelope captured
-            # no later than it (else the earliest available) -- deterministic.
+            # TEMPORAL RULE: a joined value may never be dated earlier than
+            # EITHER input. Only users envelopes captured no later than this
+            # rosters envelope are joinable; when none exists yet, the identity
+            # is emitted ROSTER-ONLY with user fields explicitly unavailable --
+            # never a later capture's names backdated onto an earlier clock.
             eligible = [u for u in users_docs if u["captured_at"] <= env["captured_at"]]
-            users_doc = eligible[-1] if eligible else users_docs[0]
-            names = {
-                u["user_id"]: u.get("display_name")
-                for u in users_doc["payload"]["users"]
-            }
+            users_doc = eligible[-1] if eligible else None
+            names = (
+                {
+                    u["user_id"]: u.get("display_name")
+                    for u in users_doc["payload"]["users"]
+                }
+                if users_doc
+                else {}
+            )
+            # Provenance binds BOTH envelopes for a joined observation -- in
+            # the source_ref METADATA field, never the hashed body: provenance
+            # in the body would make every identical repeat a distinct fact and
+            # defeat the design's unconditional coalescing.
+            joined_ref = (
+                f"{ref}+{users_refs[users_doc['captured_at']]}" if users_doc else ref
+            )
             for r in payload["rosters"]:
                 rec = {
                     "roster_id": r["roster_id"],
                     "owner_id": r.get("owner_id"),
-                    "display_name": names.get(r.get("owner_id")),
+                    "display_name": names.get(r.get("owner_id")) if users_doc else None,
+                    "display_name_unavailable": users_doc is None,
                     "capture_instant": env["captured_at"],
                 }
-                yield ref, meta, rec
+                yield joined_ref, meta, rec
         elif fact_type == "matchup_result":
             for week_str in sorted(payload["matchups"], key=int):
                 paired, _refused = _pair_matchup_rows(
@@ -780,6 +808,7 @@ def normalize_all(source_root, out_path, season, private_out_path=None):
         else Path("private_facts") / f"{season}.jsonl"
     )
     counts, unqualified, undatable, unavailable = {}, {}, {}, {}
+    actions = {"created": {}, "coalesced": {}, "superseded": {}}
     for fact_type in sorted(sources):
         spec = sources[fact_type]
         if spec[0] is None:
@@ -800,14 +829,18 @@ def normalize_all(source_root, out_path, season, private_out_path=None):
                     undatable[fact_type] = undatable.get(fact_type, 0) + 1
                     continue
                 target = private_store if meta["privacy"] == "private" else store
-                target.observe(
+                _fact, action = target.observe(
                     payload=body,
                     source_ref=source_ref,
                     captured_at=env_meta["captured_at"],  # ENVELOPE/policy, never now()
                     normalizer_version=NORMALIZER_VERSION,
                     **meta,
                 )
-                counts[fact_type] = counts.get(fact_type, 0) + 1
+                actions[action][fact_type] = actions[action].get(fact_type, 0) + 1
+                if action != "coalesced":
+                    # counts = MATERIALIZED facts. A coalesced repeat writes
+                    # nothing; counting it would report an inflated store.
+                    counts[fact_type] = counts.get(fact_type, 0) + 1
         except MissingSource as exc:
             unavailable[fact_type] = str(exc)
             continue
@@ -824,8 +857,20 @@ def normalize_all(source_root, out_path, season, private_out_path=None):
         unavailable[t] = (
             f"all {unqualified[t]} records refused ({t} yielded zero facts)"
         )
+    # Reconciliation is enforced, not asserted in prose: counts must equal the
+    # materialized store contents per type, and created+coalesced+superseded
+    # must equal the observations that reached a store.
+    materialized = {}
+    for f in store.load() + private_store.load():
+        materialized[f.fact_type] = materialized.get(f.fact_type, 0) + 1
+    for t_, n in counts.items():
+        if materialized.get(t_, 0) < n:
+            raise ValueError(
+                f"accounting drift: counts[{t_}]={n} exceeds materialized {materialized.get(t_, 0)}"
+            )
     return {
         "counts": counts,
+        "actions": actions,
         "unqualified": unqualified,
         "undatable": undatable,
         "unavailable": unavailable,

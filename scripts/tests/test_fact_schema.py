@@ -123,6 +123,14 @@ def test_instants_canonicalize_to_six_fractional_digits():
     assert canonical_instant(None) is None
 
 
+def test_impossible_calendar_values_are_rejected_despite_valid_shape():
+    """Shape alone is not validity: 2025-13-45T99:99:99Z matches the regex and
+    must still be refused."""
+    for bad in ("2025-13-45T99:99:99Z", "2025-02-30T12:00:00Z", "2025-00-01T00:00:00Z"):
+        assert canonical_instant(bad) is None
+        assert validate(mk(known_at=bad))
+
+
 def test_unregistered_fact_type_is_invalid():
     assert validate(mk(fact_type="speculative_type"))
 

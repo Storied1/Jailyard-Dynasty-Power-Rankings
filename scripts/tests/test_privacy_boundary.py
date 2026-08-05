@@ -141,6 +141,33 @@ def test_symlink_or_reparse_point_escape_rejected(tmp_path):
 # ---------------------------------------------------------------------------
 
 
+def test_index_staging_guard_covers_all_four_private_roots(tmp_path):
+    """Force-staged plants in a temporary repository, one per private root --
+    including the kernel's private_facts/ and private_editions/. Each must fail
+    with the exact offending path; the clean index passes."""
+    repo = tmp_path / "repo4"
+    repo.mkdir()
+    assert git("init", "-q", cwd=repo).returncode == 0
+    ok, offending = staging_guard(repo_root=repo)
+    assert ok and offending == []
+    for root in (
+        "private_captures",
+        "private_bundles",
+        "private_facts",
+        "private_editions",
+    ):
+        plant = repo / root / "2025" / "x.jsonl"
+        plant.parent.mkdir(parents=True)
+        plant.write_text("{}", encoding="utf-8")
+        rel = f"{root}/2025/x.jsonl"
+        assert git("add", "-f", rel, cwd=repo).returncode == 0, "the plant must land"
+        ok, offending = staging_guard(repo_root=repo)
+        assert not ok and offending == [rel], (root, offending)
+        assert git("reset", "-q", cwd=repo).returncode == 0
+    ok, offending = staging_guard(repo_root=repo)
+    assert ok and offending == []
+
+
 def test_index_staging_guard_fails_on_staged_private_path(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()

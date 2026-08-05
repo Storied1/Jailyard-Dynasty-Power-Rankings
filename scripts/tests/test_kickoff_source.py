@@ -60,6 +60,28 @@ def test_strictly_before_is_strictly_before():
     assert strictly_before("2025-09-05T00:20:00Z") == "2025-09-05T00:19:59Z"
 
 
+def test_first_kickoff_from_a_synthetic_fixture(tmp_path):
+    """Checkout-portable: a synthetic schedules parquet, no gitignored cache."""
+    import polars as pl
+
+    fixture = tmp_path / "sched.parquet"
+    pl.DataFrame(
+        {
+            "game_id": ["2025_01_B_A", "2025_01_C_D", "2025_02_E_F"],
+            "game_type": ["REG", "REG", "REG"],
+            "week": [1, 1, 2],
+            "gameday": ["2025-09-07", "2025-09-04", "2025-09-14"],
+            "gametime": ["13:00", "20:20", "13:00"],
+            "home_team": ["PHI", "PHI", "PHI"],
+            "stadium_id": ["PHI00", "PHI00", "PHI00"],
+        }
+    ).write_parquet(fixture)
+    out = first_kickoff_instant(2025, parquet=fixture)
+    assert out["instant_utc"] == "2025-09-05T00:20:00Z"
+    assert out["game_id"] == "2025_01_C_D"
+    assert all(v.startswith("sha256:") for v in out["source_hashes"].values())
+
+
 def test_derive_preview_cutoff_cli_is_exclusive_create_and_source_bound(tmp_path):
     """The exact CLI path: writes the artifact with source hashes matching
     independently computed input hashes; a repeat invocation cannot truncate or

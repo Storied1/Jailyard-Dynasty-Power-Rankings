@@ -14,10 +14,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:  # package form first -- one module identity under pytest and direct run
-    from scripts.fact_schema import (
-        canonical_instant,  # noqa: E402, F401
-        load_fact_types,
-    )
+    from scripts.fact_schema import canonical_instant  # noqa: E402, F401
+    from scripts.fact_schema import load_fact_types
 except ImportError:  # pragma: no cover - direct-run fallback
     from fact_schema import canonical_instant, load_fact_types  # noqa: E402, F401
 
@@ -234,9 +232,19 @@ def state_at(season, cutoff, access_scope, as_recorded_at=None, facts=None):
     # fact .000001s past a whole-second cutoff would still string-compare below
     # the short form and be admitted.
     cutoff = canonical_instant(cutoff)
-    as_recorded_at = canonical_instant(as_recorded_at) if as_recorded_at else None
     if cutoff is None:
         raise ValueError("cutoff must be an exact UTC instant")
+    if as_recorded_at is not None:
+        # Fail CLOSED: an explicitly supplied vantage that cannot be parsed
+        # (malformed, impossible, or empty) must never silently become None --
+        # None means LATEST reconstruction, which ADMITS late captures, the
+        # exact facts an as-recorded replay exists to exclude.
+        as_recorded_at = canonical_instant(as_recorded_at)
+        if as_recorded_at is None:
+            raise ValueError(
+                "as_recorded_at was supplied but is not an exact UTC instant; "
+                "refusing to degrade an as-recorded replay to a latest reconstruction"
+            )
     private_root_absent = False
     if facts is not None:
         pool = list(facts)

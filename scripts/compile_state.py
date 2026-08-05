@@ -211,13 +211,30 @@ def load_compiled_state(edition_id, editions_root=None, private_root=None):
 
 
 def verify_compiled(descriptor):
-    """No-write verification: recompute the state and compare against the
-    persisted manifest + private bytes. Returns [] or a list of problems."""
+    """No-write verification of the COMPLETE compiled contract: persisted
+    descriptor, full manifest fields and counts, state locator, source_hashes
+    against LIVE inputs, the state payload itself, and (for previews) the
+    retained cutoff derivation plus its source hashes. Returns [] or problems."""
+    eid = descriptor.edition_id
     problems = []
+    compiled = Path(EDITIONS_ROOT) / eid / "compiled"
+
+    # 1. Persisted descriptor equals the given one, field for field.
     try:
-        doc = load_compiled_state(descriptor.edition_id)
+        persisted = load_json(compiled / "descriptor.json", required=True)
+    except Exception as exc:  # noqa: BLE001 - every failure is a finding
+        return [f"{eid}: descriptor: {exc}"]
+    given = {**descriptor.__dict__, "predecessors": list(descriptor.predecessors)}
+    if persisted != given:
+        problems.append(
+            f"{eid}: persisted descriptor differs from the given descriptor"
+        )
+
+    # 2. State resolves (hash-verified) and recomputes identically via state_at.
+    try:
+        doc = load_compiled_state(eid)
     except (FileNotFoundError, ValueError) as exc:
-        return [str(exc)]
+        return problems + [str(exc)]
     state = state_at(
         descriptor.season,
         descriptor.cutoff_utc,
@@ -226,20 +243,61 @@ def verify_compiled(descriptor):
     )
     recomputed = _serialize_state(state)
     if fact_hash(recomputed) != fact_hash(doc):
+        problems.append(f"{eid}: recomputed state differs from persisted state")
+
+    # 3. Manifest: complete fields, correct locator, counts matching recompute.
+    manifest = load_json(compiled / "state_manifest.json", required=True)
+    required_fields = {
+        "edition_id",
+        "state_payload_sha256",
+        "state_path",
+        "admitted_count",
+        "admitted_by_type",
+    }
+    if not required_fields <= set(manifest):
         problems.append(
-            f"{descriptor.edition_id}: recomputed state differs from persisted state"
+            f"{eid}: manifest missing {sorted(required_fields - set(manifest))}"
         )
-    manifest = load_json(
-        Path(EDITIONS_ROOT)
-        / descriptor.edition_id
-        / "compiled"
-        / "state_manifest.json",
-        required=True,
-    )
-    if manifest["state_payload_sha256"] != fact_hash(recomputed):
-        problems.append(
-            f"{descriptor.edition_id}: manifest hash differs from recomputation"
-        )
+    else:
+        if manifest["edition_id"] != eid:
+            problems.append(f"{eid}: manifest edition_id {manifest['edition_id']!r}")
+        if manifest["state_path"] != f"private_editions/{eid}/state.json":
+            problems.append(f"{eid}: manifest state locator {manifest['state_path']!r}")
+        if manifest["state_payload_sha256"] != fact_hash(recomputed):
+            problems.append(f"{eid}: manifest hash differs from recomputation")
+        if manifest["admitted_count"] != len(state.admitted):
+            problems.append(
+                f"{eid}: manifest admitted_count {manifest['admitted_count']} != "
+                f"recomputed {len(state.admitted)}"
+            )
+        if manifest["admitted_by_type"] != _counts_by_type(state.admitted):
+            problems.append(
+                f"{eid}: manifest admitted_by_type differs from recomputation"
+            )
+
+    # 4. source_hashes.json against LIVE inputs.
+    persisted_hashes = load_json(compiled / "source_hashes.json", required=True)
+    if persisted_hashes != _source_hashes(descriptor):
+        problems.append(f"{eid}: source_hashes differ from live inputs")
+
+    # 5. Previews: the retained cutoff derivation and ITS source hashes, live.
+    if descriptor.kind == "preview":
+        try:
+            _check_preview_cutoff(descriptor)
+        except (FileNotFoundError, ValueError) as exc:
+            problems.append(str(exc))
+        else:
+            artifact = load_json(PREVIEW_CUTOFF_PATH, required=True)
+            for rel, recorded in artifact.get("source_hashes", {}).items():
+                live_path = ROOT / rel
+                if not live_path.exists():
+                    # The gitignored parquet may be absent on a clean checkout;
+                    # the ARTIFACT is the retained authority in that case.
+                    continue
+                if _sha256_file(live_path) != recorded:
+                    problems.append(
+                        f"{eid}: preview-cutoff source {rel} drifted from the retained hash"
+                    )
     return problems
 
 

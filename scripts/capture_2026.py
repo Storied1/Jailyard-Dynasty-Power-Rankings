@@ -280,7 +280,16 @@ def staging_guard(repo_root=REPO_ROOT) -> tuple[bool, list[str]]:
     offending = [
         line
         for line in result.stdout.splitlines()
-        if line.startswith(("private_captures/", "private_bundles/"))
+        if line.startswith(
+            (
+                "private_captures/",
+                "private_bundles/",
+                # Kernel private roots (K1/K2): facts with privacy="private"
+                # and compiled league_private states. Same law, same guard.
+                "private_facts/",
+                "private_editions/",
+            )
+        )
     ]
     return (not offending), offending
 

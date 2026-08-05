@@ -245,3 +245,82 @@ def test_cli_verify_mode_executes(compile_roots, tmp_path):
         text=True,
     )
     assert r.returncode == 0 and "--verify" in r.stdout
+
+
+@pytest.mark.parametrize(
+    "artifact,transform",
+    [
+        (
+            "descriptor.json",
+            lambda s: s.replace('"kind": "preseason"', '"kind": "recap"'),
+        ),
+        (
+            "state_manifest.json",
+            lambda s: s.replace('"admitted_count": ', '"admitted_count": 9'),
+        ),
+        (
+            "state_manifest.json",
+            lambda s: s.replace(
+                '"state_payload_sha256": "sha256:', '"state_payload_sha256": "sha256:0'
+            ),
+        ),
+        (
+            "source_hashes.json",
+            lambda s: s.replace('"sha256": "sha256:', '"sha256": "sha256:0', 1),
+        ),
+    ],
+)
+def test_verify_catches_each_authoritative_artifact_mutation(
+    compile_roots, artifact, transform
+):
+    """Parameterized mutations of each authoritative compiled artifact must
+    fail verification while the pristine edition passes without writes."""
+    out = compile_state(PRE)
+    assert verify_compiled(PRE) == []
+    path = out / artifact
+    original = path.read_text(encoding="utf-8")
+    mutated = transform(original)
+    assert mutated != original, "the plant must land"
+    path.write_text(mutated, encoding="utf-8")
+    assert verify_compiled(PRE), f"mutation of {artifact} must fail verification"
+    path.write_text(original, encoding="utf-8")
+    assert verify_compiled(PRE) == []
+
+
+def test_verify_catches_private_state_mutation(compile_roots):
+    compile_state(PRE)
+    sp = compile_roots / "priv" / PRE.edition_id / "state.json"
+    original = sp.read_text(encoding="utf-8")
+    sp.write_text(original.replace('"v":1', '"v":9'), encoding="utf-8")
+    assert verify_compiled(PRE), "a mutated private state must fail verification"
+    sp.write_text(original, encoding="utf-8")
+    assert verify_compiled(PRE) == []
+
+
+@pytest.mark.skipif(
+    not (REPO / "private_editions" / "2025-preseason" / "state.json").exists(),
+    reason="production private states absent (clean checkout); resolution "
+    "fail-closed is proven separately",
+)
+def test_real_cli_verify_exits_zero_on_all_three_editions():
+    """The actual CLI and exit code -- not --help -- against the three pristine
+    repository editions, without writes."""
+    for e in ("2025-preseason", "2025-wk01-preview", "2025-wk01-recap"):
+        compiled = REPO / "content" / "editions" / e / "compiled"
+        before = {q.name: q.read_bytes() for q in compiled.iterdir()}
+        r = subprocess.run(
+            [
+                PY,
+                "scripts/compile_state.py",
+                "--verify",
+                "--descriptor",
+                f"content/editions/{e}/descriptor.json",
+            ],
+            cwd=REPO,
+            capture_output=True,
+            text=True,
+        )
+        assert r.returncode == 0, (e, r.stdout, r.stderr)
+        assert "verified (no write)" in r.stdout
+        after = {q.name: q.read_bytes() for q in compiled.iterdir()}
+        assert before == after

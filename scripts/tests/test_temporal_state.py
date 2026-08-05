@@ -147,6 +147,19 @@ def test_as_recorded_at_excludes_late_captures():
     assert {f.fact_id for f in vantage.admitted} == {"early"}
 
 
+def test_explicit_invalid_vantage_fails_closed():
+    """An explicitly supplied as_recorded_at that cannot parse must RAISE --
+    silently becoming None would degrade an as-recorded replay to a LATEST
+    reconstruction, admitting the very late captures it exists to exclude."""
+    for bad in ("not-a-date", "", "2025-13-45T99:99:99Z", "2025-09-05"):
+        with pytest.raises(ValueError, match="as_recorded_at|cutoff"):
+            state_at(
+                2025, "2025-12-01T00:00:00Z", "public", as_recorded_at=bad, facts=[]
+            )
+    with pytest.raises(ValueError):
+        state_at(2025, "2025-13-45T99:99:99Z", "public", facts=[])
+
+
 def test_state_contains_no_decisions():
     s = state_at(2025, "2025-09-02T00:00:00Z", "public", facts=[F()])
     assert not hasattr(s, "decisions") and not hasattr(s, "rankings")

@@ -13,6 +13,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass, fields
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -33,11 +34,16 @@ PRIVACY = {"public", "private"}
 
 def canonical_instant(s):
     """Admit exact whole-second or fractional UTC instants; emit the canonical
-    six-digit form. Anything else (naive, date-only, month-only, non-string)
-    returns None and validate() refuses the fact."""
+    six-digit form. Anything else -- naive, date-only, month-only, non-string,
+    or a string-shaped IMPOSSIBLE value like 2025-13-45T99:99:99Z -- returns
+    None and the caller refuses. Shape alone is not validity."""
     if not isinstance(s, str) or not _INPUT_INSTANT.match(s):
         return None
     head, _, frac = s[:-1].partition(".")
+    try:
+        datetime.strptime(head, "%Y-%m-%dT%H:%M:%S")
+    except ValueError:
+        return None
     return f"{head}.{frac.ljust(6, '0')}Z"
 
 

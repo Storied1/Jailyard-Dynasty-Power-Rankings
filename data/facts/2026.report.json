@@ -1,7 +1,20 @@
 {
+  "actions": {
+    "coalesced": {
+      "franchise_identity": 24
+    },
+    "created": {
+      "draft_pick": 72,
+      "franchise_identity": 12,
+      "transaction": 126
+    },
+    "superseded": {
+      "franchise_identity": 12
+    }
+  },
   "counts": {
     "draft_pick": 72,
-    "franchise_identity": 48,
+    "franchise_identity": 24,
     "transaction": 126
   },
   "normalizer_version": "norm-v1",

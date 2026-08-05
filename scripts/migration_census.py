@@ -15,19 +15,29 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:  # package form first -- one module identity under pytest and direct run
-    from scripts.compile_state import load_compiled_state  # noqa: E402
+    from scripts.compile_state import (  # noqa: E402
+        EditionDescriptor,
+        load_compiled_state,
+        verify_compiled,
+    )
     from scripts.fact_schema import canonical_instant  # noqa: E402
 except ImportError:  # pragma: no cover - direct-run fallback
-    from compile_state import load_compiled_state  # noqa: E402
+    from compile_state import (  # noqa: E402
+        EditionDescriptor,
+        load_compiled_state,
+        verify_compiled,
+    )
     from fact_schema import canonical_instant  # noqa: E402
 from shared import load_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Every top-level section of a legacy week packet, mapped to the fact type that
-# carries it under the kernel, or to a non-fact disposition:
+# Every leaf path of a legacy week packet, mapped by dotted-path prefix to the
+# fact type that carries it under the kernel, or to a non-fact disposition:
 #   presentation -- prose/display selection, not evidence
 #   derived      -- recomputed from admitted facts (reducers), never stored
+# A leaf is covered when its top section AND its depth-2 key are both mapped;
+# a planted unknown leaf at either depth fails the census.
 FIELD_MAP = {
     "meta": "presentation",
     "matchups": "matchup_result",
@@ -41,15 +51,223 @@ FIELD_MAP = {
 }
 
 
-def unmapped_legacy_fields(season):
-    """Top-level packet sections with no fact-type or disposition mapping."""
+# The COMPLETE leaf-path surface of the legacy week packets, hand-audited and
+# explicit -- coverage is judged against exact normalized paths, never a depth
+# approximation. Lists normalize to "[]"; the one bounded wildcard segment is
+# team_profiles_summary's second segment (dynamic team-name keys), and the
+# value schema BENEATH that wildcard is still fully enumerated. A leaf absent
+# from this set -- at any depth -- is unmapped and fails the census.
+ALLOWED_LEAVES = frozenset(
+    {
+        "awards.biggest_blowout",
+        "awards.biggest_blowout.margin",
+        "awards.biggest_blowout.score",
+        "awards.biggest_blowout.teams",
+        "awards.biggest_blowout.winner",
+        "awards.closest_game",
+        "awards.closest_game.margin",
+        "awards.closest_game.score",
+        "awards.closest_game.teams",
+        "awards.high_scorer",
+        "awards.high_scorer.owner",
+        "awards.high_scorer.points",
+        "awards.high_scorer.team_name",
+        "awards.low_scorer",
+        "awards.low_scorer.owner",
+        "awards.low_scorer.points",
+        "awards.low_scorer.team_name",
+        "awards.top_performer",
+        "awards.top_performer.fantasy_team",
+        "awards.top_performer.game_context.game_id",
+        "awards.top_performer.game_context.one_liner",
+        "awards.top_performer.game_context.opponent",
+        "awards.top_performer.game_context.src.game_id",
+        "awards.top_performer.game_context.src.one_liner",
+        "awards.top_performer.game_context.src.opponent",
+        "awards.top_performer.game_context.src.stat_line",
+        "awards.top_performer.game_context.stat_line",
+        "awards.top_performer.name",
+        "awards.top_performer.nfl_team",
+        "awards.top_performer.player_id",
+        "awards.top_performer.points",
+        "awards.top_performer.position",
+        "historical_context.biggest_blowout.loser",
+        "historical_context.biggest_blowout.margin",
+        "historical_context.biggest_blowout.score",
+        "historical_context.biggest_blowout.season",
+        "historical_context.biggest_blowout.week",
+        "historical_context.biggest_blowout.winner",
+        "historical_context.highest_combined.points",
+        "historical_context.highest_combined.score",
+        "historical_context.highest_combined.season",
+        "historical_context.highest_combined.teams",
+        "historical_context.highest_combined.week",
+        "historical_context.highest_score.opponent",
+        "historical_context.highest_score.owner_id",
+        "historical_context.highest_score.points",
+        "historical_context.highest_score.season",
+        "historical_context.highest_score.team",
+        "historical_context.highest_score.week",
+        "historical_context.longest_losing_streak.count",
+        "historical_context.longest_losing_streak.owner_id",
+        "historical_context.longest_losing_streak.team",
+        "historical_context.longest_win_streak.count",
+        "historical_context.longest_win_streak.owner_id",
+        "historical_context.longest_win_streak.team",
+        "historical_context.lowest_combined.points",
+        "historical_context.lowest_combined.score",
+        "historical_context.lowest_combined.season",
+        "historical_context.lowest_combined.teams",
+        "historical_context.lowest_combined.week",
+        "historical_context.lowest_winning_score.opponent",
+        "historical_context.lowest_winning_score.owner_id",
+        "historical_context.lowest_winning_score.points",
+        "historical_context.lowest_winning_score.season",
+        "historical_context.lowest_winning_score.team",
+        "historical_context.lowest_winning_score.week",
+        "matchups[].h2h.last_meeting.score",
+        "matchups[].h2h.last_meeting.season",
+        "matchups[].h2h.last_meeting.week",
+        "matchups[].h2h.team1_wins",
+        "matchups[].h2h.team2_wins",
+        "matchups[].h2h.total_games",
+        "matchups[].margin",
+        "matchups[].matchup_id",
+        "matchups[].momentum.edge",
+        "matchups[].momentum.favorite_team_name",
+        "matchups[].momentum.label",
+        "matchups[].team1.owner",
+        "matchups[].team1.points",
+        "matchups[].team1.projected",
+        "matchups[].team1.roster_id",
+        "matchups[].team1.team_name",
+        "matchups[].team1.top_scorers[].game_context.game_id",
+        "matchups[].team1.top_scorers[].game_context.one_liner",
+        "matchups[].team1.top_scorers[].game_context.opponent",
+        "matchups[].team1.top_scorers[].game_context.src.game_id",
+        "matchups[].team1.top_scorers[].game_context.src.one_liner",
+        "matchups[].team1.top_scorers[].game_context.src.opponent",
+        "matchups[].team1.top_scorers[].game_context.src.stat_line",
+        "matchups[].team1.top_scorers[].game_context.stat_line",
+        "matchups[].team1.top_scorers[].name",
+        "matchups[].team1.top_scorers[].player_id",
+        "matchups[].team1.top_scorers[].points",
+        "matchups[].team1.top_scorers[].position",
+        "matchups[].team1.top_scorers[].team",
+        "matchups[].team2.owner",
+        "matchups[].team2.points",
+        "matchups[].team2.projected",
+        "matchups[].team2.roster_id",
+        "matchups[].team2.team_name",
+        "matchups[].team2.top_scorers[].game_context.game_id",
+        "matchups[].team2.top_scorers[].game_context.one_liner",
+        "matchups[].team2.top_scorers[].game_context.opponent",
+        "matchups[].team2.top_scorers[].game_context.src.game_id",
+        "matchups[].team2.top_scorers[].game_context.src.one_liner",
+        "matchups[].team2.top_scorers[].game_context.src.opponent",
+        "matchups[].team2.top_scorers[].game_context.src.stat_line",
+        "matchups[].team2.top_scorers[].game_context.stat_line",
+        "matchups[].team2.top_scorers[].name",
+        "matchups[].team2.top_scorers[].player_id",
+        "matchups[].team2.top_scorers[].points",
+        "matchups[].team2.top_scorers[].position",
+        "matchups[].team2.top_scorers[].team",
+        "matchups[].upset",
+        "matchups[].winner",
+        "meta.generated_for",
+        "meta.is_playoff",
+        "meta.season",
+        "meta.week",
+        "next_matchups[].team1",
+        "next_matchups[].team1_rank",
+        "next_matchups[].team2",
+        "next_matchups[].team2_rank",
+        "previous_weeks_summary[].high_score",
+        "previous_weeks_summary[].high_scorer",
+        "previous_weeks_summary[].leader",
+        "previous_weeks_summary[].leader_record",
+        "previous_weeks_summary[].week",
+        "season_context.best_record.record",
+        "season_context.best_record.team_name",
+        "season_context.is_playoff",
+        "season_context.league_avg_ppg",
+        "season_context.points_leader.pf",
+        "season_context.points_leader.team_name",
+        "season_context.this_week_avg",
+        "season_context.total_weeks",
+        "season_context.weeks_played",
+        "season_context.worst_record.record",
+        "season_context.worst_record.team_name",
+        "standings[].all_time_record",
+        "standings[].current_elo",
+        "standings[].elo_change",
+        "standings[].losses",
+        "standings[].margin_this_week",
+        "standings[].momentum.label",
+        "standings[].momentum.score",
+        "standings[].movement",
+        "standings[].owner",
+        "standings[].pa",
+        "standings[].peak_elo",
+        "standings[].pf",
+        "standings[].power_score",
+        "standings[].prev_rank",
+        "standings[].rank",
+        "standings[].record",
+        "standings[].roster_id",
+        "standings[].streak",
+        "standings[].team_name",
+        "standings[].week_points",
+        "standings[].wins",
+        "team_profiles_summary.*.essay_snippet",
+        "team_profiles_summary.*.needs[]",
+        "team_profiles_summary.*.preseason_rank",
+        "team_profiles_summary.*.ranks.draft",
+        "team_profiles_summary.*.ranks.qb",
+        "team_profiles_summary.*.ranks.rb",
+        "team_profiles_summary.*.ranks.starter",
+        "team_profiles_summary.*.ranks.te",
+        "team_profiles_summary.*.ranks.wr",
+        "team_profiles_summary.*.roast",
+        "team_profiles_summary.*.tier",
+        "team_profiles_summary.*.weeklyPoints_projected",
+    }
+)
+
+# Sections whose IMMEDIATE child keys are dynamic identities (bounded wildcard).
+DYNAMIC_KEY_SECTIONS = {"team_profiles_summary"}
+
+
+def unmapped_legacy_fields(season, weeks_dir=None):
+    """RECURSIVE leaf coverage: every actual leaf path must fall under a mapped
+    (top section, depth-2 key) pair. --season is honored: only 2025 packets
+    exist; any other season is REJECTED, never reported as a vacuous OK."""
+    if season != 2025:
+        raise ValueError(
+            f"no legacy week packets exist for season {season}; refusing a vacuous census"
+        )
     unmapped = set()
-    weeks_dir = ROOT / "content" / "weeks"
+    weeks_dir = Path(weeks_dir) if weeks_dir is not None else ROOT / "content" / "weeks"
+
+    def walk(node, norm_path, fname, wild_next):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                seg = "*" if wild_next else k
+                walk(v, f"{norm_path}.{seg}", fname, False)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v, f"{norm_path}[]", fname, False)
+        else:
+            if norm_path not in ALLOWED_LEAVES:
+                unmapped.add(f"{fname}:{norm_path}")
+
     for p in sorted(weeks_dir.glob("week*_data.json")):
         doc = load_json(p, required=True)
-        for key in doc:
+        for key, v in doc.items():
             if key not in FIELD_MAP:
                 unmapped.add(f"{p.name}:{key}")
+                continue
+            walk(v, key, p.name, key in DYNAMIC_KEY_SECTIONS)
     return sorted(unmapped)
 
 
@@ -74,12 +292,34 @@ def _iter_instants(obj):
 def _compiled_leak_census(edition_id):
     """Zero post-cutoff instants, mechanically: every temporal string anywhere
     in the compiled state must be <= the descriptor cutoff."""
-    doc = load_compiled_state(edition_id)
-    descriptor = load_json(
+    # The census trusts NOTHING unverified: the full compiled contract --
+    # descriptor, manifest fields and counts, state locator, state payload,
+    # source hashes against live inputs, preview-cutoff provenance -- must
+    # verify before any metadata is consumed. A mutated authoritative artifact
+    # fails here even when state/manifest metadata remain self-consistent.
+    raw = load_json(
         ROOT / "content" / "editions" / edition_id / "compiled" / "descriptor.json",
         required=True,
     )
+    descriptor_obj = EditionDescriptor(
+        **{**raw, "predecessors": tuple(raw.get("predecessors", ()))}
+    )
+    problems = verify_compiled(descriptor_obj)
+    if problems:
+        raise ValueError(
+            f"{edition_id}: compiled contract failed verification: {problems}"
+        )
+    doc = load_compiled_state(edition_id)
+    descriptor = raw
     cutoff = canonical_instant(descriptor["cutoff_utc"])
+    # VERIFIED metadata only: the hash-verified state's own cutoff must agree
+    # with the descriptor the census is about to trust.
+    if doc["cutoff"] != cutoff or doc["season"] != descriptor["season"]:
+        raise ValueError(
+            f"{edition_id}: descriptor metadata disagrees with the verified state "
+            f"({descriptor['cutoff_utc']}/{descriptor['season']} vs "
+            f"{doc['cutoff']}/{doc['season']})"
+        )
     detail = sorted({i for i in _iter_instants(doc["admitted"]) if i > cutoff})
     return {"future_entries": len(detail), "detail": detail, "is_decision_input": True}
 
@@ -172,7 +412,11 @@ def main():
     a = ap.parse_args()
     failed = 0
     if a.all:
-        unmapped = unmapped_legacy_fields(a.season)
+        try:
+            unmapped = unmapped_legacy_fields(a.season)
+        except ValueError as exc:
+            print(f"FAIL {exc}")
+            return 1
         if unmapped:
             failed += 1
             print(f"FAIL {len(unmapped)} unmapped legacy fields: {unmapped[:8]}")
