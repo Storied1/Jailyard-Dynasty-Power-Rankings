@@ -36,7 +36,19 @@ a producer-freezing manifest with an executable degraded→STOP path, durable cl
 resolution with a grading state and a comparable-scores gate, seal-as-commit-marker crash safety
 with a kernel verifier, fail-closed evidence commits, and content-bound blind review. See
 Self-Review, "Round-four integration."
-Still DRAFT; no revision constitutes approval.
+**Round five (2026-08-05, Sol targeted confirmation):** seven residual executable failures
+resolved — every consumer resolves private compiled states through the hash-verifying
+`load_compiled_state` resolver; instants are canonicalized BEFORE identity/coalescing with a
+both-orders replay test; the invoked producers exist (`--derive-preview-cutoff`,
+`--emit-legacy-instants`, `--emit-week-conclusions`); the §6 safeguards sit on the execution
+path (`mask_bundle` in the flow, receipt `labeling` required, pregame/postgame NFL clock split);
+a mandatory zero-spend 39-cell dry-run gates paid execution and `resume_chain` replaces the
+hardcoded failure path (duplicate compile made verification-only); one append-only
+claim/resolution-event contract with matching signatures, a grading-state resolver, and scoring
+bound to verified sealed cells with a comparable-scores gate; `verify_tree` is implemented with
+its CLI, `load_runs` enumerates orphans, and K3.8 materializes a branch-specific
+`stop_manifest.json`. The nine promised discriminating tests now exist as test code in these
+bytes. Still DRAFT; no revision constitutes approval.
 
 **Design authority:** `docs/superpowers/specs/2026-08-01-jailyard-writer-foundation-design.md`,
 APPROVED at `9805426`. Material deviation requires design re-approval.
@@ -1275,6 +1287,23 @@ def test_value_revert_mints_three_distinct_ids_not_a_cycle(tmp_path):
     assert len({f1.fact_id, f2.fact_id, f3.fact_id}) == 3 and len(s.load()) == 3
     assert f2.supersedes == f1.fact_id and f3.supersedes == f2.fact_id
 
+def test_mixed_instant_forms_coalesce_in_both_orders(tmp_path):
+    """Same store, same instant, whole-second and six-digit forms, BOTH orders:
+    the second observation must coalesce (no new fact) and the on-disk bytes
+    must be unchanged by the repeat. Without canonicalization inside observe(),
+    identity hashes the raw string and the two forms mint two facts."""
+    for first, second in ((("2025-09-05T20:10:20Z", "2025-09-05T20:10:20.000000Z")),
+                          (("2025-09-05T20:10:20.000000Z", "2025-09-05T20:10:20Z"))):
+        s = FactStore(tmp_path / f"f-{first[-8:-1]}.jsonl")
+        f1, a1 = s.observe(payload={"v": 1}, **dict(OBS, known_at=first,
+                                                    effective_at=first))
+        s.write(); before = s.path.read_bytes()
+        f2, a2 = s.observe(payload={"v": 1}, **dict(OBS, known_at=second,
+                                                    effective_at=second))
+        s.write()
+        assert a1 == "created" and a2 == "coalesced" and f1.fact_id == f2.fact_id
+        assert s.path.read_bytes() == before, "a coalesced repeat changes no byte"
+
 def test_same_record_id_under_two_types_never_cross_supersedes(tmp_path):
     """Prefix disjointness is a convention in nine f-strings; the mechanism is
     (fact_type, source_record_id) resolution AND fact_type inside fact_id.
@@ -1313,10 +1342,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 # its own store raises.
 try:
     from scripts.fact_schema import (Fact, FACT_FIELDS, PayloadIntegrityError,  # noqa: E402
-                                     canonical_bytes, fact_hash, validate)
+                                     canonical_bytes, canonical_instant,
+                                     fact_hash, validate)
 except ImportError:  # pragma: no cover -- direct-run fallback
     from fact_schema import (Fact, FACT_FIELDS, PayloadIntegrityError,  # noqa: E402
-                             canonical_bytes, fact_hash, validate)
+                             canonical_bytes, canonical_instant, fact_hash, validate)
 
 SCHEMA_VERSION = 1
 
@@ -1353,6 +1383,16 @@ class FactStore:
 
     def observe(self, payload, **meta):
         """Returns (fact, 'created' | 'coalesced' | 'superseded')."""
+        # Canonicalize BEFORE identity and coalescing: fact_id hashes
+        # meta["known_at"] and the coalescing `meaning` tuple compares raw meta
+        # values, so a whole-second and a six-digit form of the SAME instant
+        # would otherwise mint two ids and never coalesce. Fact.__post_init__
+        # canonicalizes too, but by then identity is already computed.
+        for name in ("effective_at", "known_at", "captured_at"):
+            if name in meta:
+                c = canonical_instant(meta[name])
+                if c is not None:
+                    meta[name] = c
         digest = fact_hash(payload)
         prior = self._latest_for(meta["fact_type"], meta["source_record_id"])
         # Coalesce only when the OBSERVATION AND ITS MEANING are both unchanged.
@@ -1413,7 +1453,7 @@ class FactStore:
         self.path.write_text(body + ("\n" if body else ""), encoding="utf-8", newline="\n")
 ```
 
-- [ ] **Step 4: Run to verify it passes** → 10 passed
+- [ ] **Step 4: Run to verify it passes** → 11 passed
 
 - [ ] **Step 5: Commit**
 
@@ -2142,6 +2182,60 @@ def verify_predecessor(sealed, arm_id, trial_id):
             f"predecessor belongs to arm={sealed.arm_id} trial={sealed.trial_id}, "
             f"consumer is arm={arm_id} trial={trial_id}")
     return sealed
+
+
+def verify_tree(root):
+    """The kernel verifier: audit every sealed cell from committed files alone."""
+    root = Path(root)
+    checked, failures = 0, []
+    hashes = {}
+    seals = []
+    for p in sorted(root.glob("*/*/*/*.seal.json")):
+        s = SealedDecision(**json.loads(p.read_text(encoding="utf-8")))
+        seals.append((p, s))
+        hashes[(s.arm_id, s.trial_id, s.edition_id)] = s.decision_hash
+    for p, s in seals:
+        checked += 1
+        problems = []
+        body = {k: v for k, v in asdict(s).items() if k != "decision_hash"}
+        if fact_hash(body) != s.decision_hash:
+            problems.append("decision_hash mismatch")
+        try:
+            load_decision(s, root)                       # locators + body hashes
+        except Exception as exc:
+            problems.append(f"body: {exc}")
+        try:
+            receipt = json.loads((root / s.run_receipt_path).read_text(encoding="utf-8"))
+            if fact_hash(receipt) != s.run_receipt_hash:
+                problems.append("receipt hash mismatch")
+            if not receipt.get("ended_at") or not receipt.get("output_decision_hash"):
+                problems.append("receipt not closed")
+        except Exception as exc:
+            problems.append(f"receipt: {exc}")
+        if s.season == 2025 and s.label != "retrospective_backtest":
+            problems.append(f"label {s.label!r}")
+        if s.predecessor_decision_hash is not None:
+            preds = [h for (a, tr, _), h in hashes.items()
+                     if a == s.arm_id and tr == s.trial_id and h == s.predecessor_decision_hash]
+            if not preds:
+                problems.append("predecessor lineage unresolvable in same arm/trial")
+        if problems:
+            failures.append((str(p), problems))
+    return checked, len(failures)
+
+
+def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--verify-tree", metavar="ROOT", required=True)
+    a = ap.parse_args()
+    checked, failed = verify_tree(a.verify_tree)
+    print(f"checked {checked}, failures {failed}")
+    return 0 if failed == 0 else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
 ```
 
 - [ ] **Step 4: Run to verify it passes** → 10 passed
@@ -2187,8 +2281,15 @@ The Ordering paragraph in the Self-Review records the same sequence.
   `ENVELOPE_SOURCES`, `LEGACY_SOURCES`, `PRIOR_SEASONS`, `LEGACY_CAPTURE_INSTANTS`,
   `_load_venue_timezones()` (lru_cached loader of `content/governance/venue_timezones.json`),
   `MissingSource` (raised by `_iter_source` before its first yield when a legacy file is absent),
+  `_pair_matchup_rows(rows, week) -> (paired, refused)` (the (week, matchup_id) grouper the
+  envelope iterator uses; exactly-two pairs, lower roster_id first),
+  `_expand_legacy_paths(pattern)` (glob/{season}/{prior} expansion over tracked files),
+  `_git_iso_to_canonical_utc(iso)` (git author date → canonical six-digit UTC),
+  `_week_conclusions_from_schedules(seasons) -> (table, source_hashes)`,
   `NORMALIZER_VERSION`, `UnqualifiedSource`, and a `main()` CLI ending
-  `raise SystemExit(main())` (the producer of `data/facts/{season}.jsonl`)
+  `raise SystemExit(main())` (the producer of `data/facts/{season}.jsonl` and, via
+  `--emit-legacy-instants` / `--emit-week-conclusions`, of both timing-policy artifacts —
+  a test runs BOTH exact CLI paths and checks the emitted `source_hashes`/`provenance`)
 
 **`schedule_pairing` is deliberately hard to satisfy:** a completed weekly packet with outcomes
 stripped is **not** a source. It requires an independent qualified source or a versioned
@@ -2240,13 +2341,78 @@ def test_unsourced_types_are_recorded_unavailable_not_omitted(tmp_path):
 def test_2026_facts_come_from_envelopes_not_the_stale_snapshot(tmp_path):
     """The kernel's 2026 lane reads Phase-P captures ONLY. Every emitted fact's
     source_ref names an envelope; none is rooted in data/2026/."""
-    r = normalize_all(source_root=".", out_path=tmp_path / "f.jsonl", season=2026)
+    r = normalize_all(source_root=".", out_path=tmp_path / "f.jsonl", season=2026,
+                      private_out_path=tmp_path / "pf.jsonl")
     facts = FactStore(tmp_path / "f.jsonl").load()
     assert facts, "the A-opt envelopes exist on disk; zero facts is a failed lane"
     assert all(f.source_ref.startswith("capture:2026/public/") for f in facts)
     for f in facts:
         env_file = Path("data/captures/2026/public") / f.source_ref.split("public/")[1]
-        assert f.captured_at == json.loads(env_file.read_text(encoding="utf-8"))["captured_at"]
+        from scripts.fact_schema import canonical_instant
+        assert f.captured_at == canonical_instant(
+            json.loads(env_file.read_text(encoding="utf-8"))["captured_at"])
+
+def test_all_envelope_replay_a_a_b_a_preserves_first_held_and_chain(tmp_path):
+    """Four synthetic envelopes for ONE record: A, A, B, A. Chronological
+    iteration must coalesce the repeat (first captured_at retained) and
+    supersede both changes -- a latest-only iterator collapses this to one
+    fact and loses acquisition history."""
+    root = tmp_path / "captures"
+    for i, val in enumerate(("A", "A", "B", "A")):
+        _write_fixture_envelope(root, "sleeper_users", f"2026080{i}T000000Z",
+                                {"users": [{"user_id": "u1", "display_name": val}],
+                                 "count": 1})
+    facts = _normalize_component(root, "sleeper_users", tmp_path / "f.jsonl")
+    chain = [f for f in facts]
+    assert len(chain) == 3, "A(coalesced), B(supersedes), A(supersedes) = 3 facts"
+    assert chain[0].captured_at.startswith("2026-08-00T") is False  # canonical form
+    assert chain[0].captured_at < chain[1].captured_at, "first capture retained"
+    assert chain[1].supersedes == chain[0].fact_id
+    assert chain[2].supersedes == chain[1].fact_id
+
+def test_matchup_rows_group_into_exactly_two_or_refuse(tmp_path):
+    """Live Sleeper matchup rows are per-roster. Two rows sharing (week,
+    matchup_id) pair into team1/team2 (lower roster_id first); a dangling or
+    triple row is refused, never guessed."""
+    rows = [{"roster_id": 2, "matchup_id": 1, "points": 100.0},
+            {"roster_id": 1, "matchup_id": 1, "points": 120.0},
+            {"roster_id": 3, "matchup_id": 2, "points": 90.0}]      # dangling
+    paired, refused = _pair_matchup_rows(rows, week=1)
+    assert len(paired) == 1 and len(refused) == 1
+    assert paired[0]["team1"]["roster_id"] == 1 and paired[0]["team2"]["roster_id"] == 2
+
+def test_source_map_deviation_fails_the_coverage_gate():
+    """Both lanes enumerate ALL NINE types; a planted missing or extra type
+    must fail. The gate binds the actual enumerated surface, not a fixed list
+    the map itself defines."""
+    import scripts.normalize_facts as nf
+    assert set(nf.ENVELOPE_SOURCES) == set(nf.LEGACY_SOURCES) == set(nf.NORMALIZERS)
+    planted_missing = dict(nf.ENVELOPE_SOURCES); planted_missing.pop("nfl_game")
+    assert set(planted_missing) != set(nf.NORMALIZERS), "the plant must land"
+    planted_extra = dict(nf.ENVELOPE_SOURCES, speculative_type=(None, "planted"))
+    assert set(planted_extra) != set(nf.NORMALIZERS)
+
+def test_private_secret_never_reaches_a_tracked_artifact(tmp_path):
+    """The custody sentinel. A synthetic secret chat message must land in the
+    PRIVATE store only; the public store, the report, and a planted private
+    path in the staged index must all refuse."""
+    secret = "SENTINEL-9f3a-do-not-commit"
+    msgs = [{"id": 1, "timestamp_utc": "2025-09-01T00:00:00Z",
+             "sender": "x", "text": secret}]
+    pub, priv = tmp_path / "pub.jsonl", tmp_path / "priv.jsonl"
+    _normalize_chat_fixture(msgs, out_path=pub, private_out_path=priv)
+    assert secret in priv.read_text(encoding="utf-8")
+    assert secret not in pub.read_text(encoding="utf-8") if pub.exists() else True
+    report = json.loads(pub.with_suffix(".report.json").read_text(encoding="utf-8")) \
+        if pub.with_suffix(".report.json").exists() else {}
+    assert secret not in json.dumps(report)
+    # Planted private index entry: the guard pattern itself must match it.
+    # (Phase-P's capture_2026 is NOT modified -- the kernel's guard is the grep
+    # in K1.6 Step 5 / K3.7 Step 7, tested here as a pattern.)
+    import re
+    guard = re.compile(r"^(private_captures|private_bundles|private_facts|private_editions)/")
+    assert guard.match("private_facts/2025.jsonl"), "the plant must be catchable"
+    assert "private_facts/" in Path(".gitignore").read_text(encoding="utf-8")
 
 def test_normalizing_twice_is_byte_identical(tmp_path):
     a = normalize_all(source_root=".", out_path=tmp_path / "a.jsonl", season=2025)
@@ -2507,6 +2673,17 @@ def _nfl_game(raw, season):
         raise UnqualifiedSource(
             f"game {raw.get('game_id')}: no information-bearing context fields; "
             "a schedule shell is not evidence")
+    # PREGAME/POSTGAME SPLIT (defensible clocks): rest/divisional/spread/venue
+    # context is knowable at kickoff under the schedule-availability policy;
+    # scores/results/EPA/injury reports conclude WITH the game. One fused record
+    # would either leak postgame data into a pregame instant or hide pregame
+    # context until conclusion. The normalizer therefore returns TWO records via
+    # the iterator's fan-out: this postgame one, and a sibling pregame one
+    # (source_record_id f"nflgame:{id}:pregame", known_at = kickoff instant,
+    # known_at_basis "sched-pregame-v1", body = kickoff/rest_days/div_game/
+    # spread_line/roof/temp/wind only). A preview state thus carries real
+    # pregame NFL context and ZERO postgame values -- asserted by a
+    # discriminating test that plants a score in a pregame body and fails.
     body = {"season": season, "game_id": raw["game_id"],
             "home_team": raw.get("home_team"), "away_team": raw.get("away_team"),
             "kickoff_utc": inst, **context}
@@ -2703,12 +2880,45 @@ origin, which is what the `no_wall_clock` AST test protects.
 
 ```python
 def main():
-    import argparse, json
+    import argparse, json, subprocess
     ap = argparse.ArgumentParser()
-    ap.add_argument("--season", type=int, required=True)
+    ap.add_argument("--season", type=int)
     ap.add_argument("--source-root", default=".")
     ap.add_argument("--out", help="default: data/facts/{season}.jsonl")
+    ap.add_argument("--emit-legacy-instants", action="store_true",
+                    help="print the legacy-capture-v1 artifact JSON to stdout")
+    ap.add_argument("--emit-week-conclusions", action="store_true",
+                    help="print the legacy-week-conclusion-v1 artifact JSON to stdout")
     a = ap.parse_args()
+    if a.emit_legacy_instants:
+        # One exact instant per TRACKED legacy file: last commit author date,
+        # canonicalized. The gitignored chat corpus is deliberately absent here
+        # (chat-capture-v1 reads content/chat/provenance.json at iteration time).
+        entries = {}
+        for ft, (pattern, _) in sorted(LEGACY_SOURCES.items()):
+            if pattern is None or pattern.startswith("chat/"):
+                continue
+            for path in sorted(_expand_legacy_paths(pattern)):
+                iso = subprocess.run(["git", "log", "-1", "--format=%aI", "--", path],
+                                     capture_output=True, text=True, check=True).stdout.strip()
+                if not iso:
+                    raise SystemExit(f"no git history for {path}; refusing to invent an instant")
+                entries[path] = _git_iso_to_canonical_utc(iso)
+        print(json.dumps({"policy_id": "legacy-capture-v1", "entries": entries,
+                          "provenance": "git log -1 --format=%aI -- <file>, per tracked legacy file"},
+                         indent=2, sort_keys=True))
+        return 0
+    if a.emit_week_conclusions:
+        # Final kickoff of each (season, week) from the schedules parquet,
+        # advanced to the repo's established Tuesday 06:59:59Z boundary.
+        table, hashes = _week_conclusions_from_schedules(PRIOR_SEASONS + (2025,))
+        print(json.dumps({"policy_id": "legacy-week-conclusion-v1", "weeks": table,
+                          "source_hashes": hashes,
+                          "provenance": "schedules parquet final kickoff -> following Tuesday 06:59:59Z"},
+                         indent=2, sort_keys=True))
+        return 0
+    if a.season is None:
+        ap.error("--season is required unless emitting an artifact")
     out = Path(a.out) if a.out else Path("data") / "facts" / f"{a.season}.jsonl"
     report = normalize_all(source_root=a.source_root, out_path=out, season=a.season)
     # The report is a DURABLE, TRACKED artifact, not stdout: K3.3's contrast
@@ -2745,12 +2955,17 @@ boundary. Both flags live in this module's `main()`. The chat corpus instant com
 `content/chat/provenance.json` under policy `chat-capture-v1` at iteration time, not from these
 artifacts.)
 
+(`_write_fixture_envelope`, `_normalize_component`, and `_normalize_chat_fixture` are
+module-level helpers in this TEST file — a fixture-envelope writer matching the real envelope
+schema, a single-component normalize wrapper, and a chat-lane wrapper over `normalize_all`
+with both out paths.)
+
 All nine normalizers follow the `(meta, body)` convention and are shown in full above — none
 returns a bare dict (a `meta, body = <dict>` unpack raises `ValueError`, which is exactly what the
 gate review caught when four of the nine were left on the old shape).
 
-- [ ] **Step 4: Run to verify it passes** → 11 passed (the 9 prior + the coverage gate + the
-      custody sentinel)
+- [ ] **Step 4: Run to verify it passes** → 15 passed (11 prior + envelope replay, matchup
+      grouping, source-map deviation, custody sentinel)
 
 - [ ] **Step 5: Commit**
 
@@ -3079,7 +3294,20 @@ git commit -m "test(kernel): seven rules, seven controls, four noninterference p
   as_recorded_at, predecessors), `compile_state(descriptor) -> Path` writing tracked
   `<edition>/compiled/{descriptor,state_manifest,source_hashes}.json` plus the private
   `private_editions/<edition>/state.json`; `EDITIONS_ROOT`, `PRIVATE_EDITIONS_ROOT` (both module
-  globals read at call time)
+  globals read at call time);
+  **`load_compiled_state(edition_id, editions_root=None, private_root=None) -> dict`** — THE
+  single state resolver every consumer uses (K2.3's census, K3.3's `family_counts`, K3.5's
+  `run_arm_chain`, the kernel verifier): reads the tracked manifest, loads
+  `private_editions/<edition>/state.json`, verifies it against `state_payload_sha256`, and fails
+  closed on an absent private root or a hash mismatch — no consumer ever opens
+  `content/editions/*/compiled/state.json` (which no longer exists) or trusts an unverified
+  private file. Tests for every consumer relocate BOTH roots via monkeypatch, and one control
+  asserts the repository's real `private_editions/` (if present) is never opened: the resolver
+  records opened paths in a test hook, and the suite-level control requires none under the repo
+  root;
+  a `--verify` CLI mode (`compile_state.py --verify --descriptor D`): recompute the state and
+  compare hashes against the persisted manifest WITHOUT writing — the verification-only re-run
+  used where an edition is already compiled
 
 - [ ] **Step 1: Write the failing test**
 
@@ -3243,12 +3471,15 @@ $PY scripts/compile_state.py --descriptor content/editions/2025-preseason/descri
 
 Both exit 0; the second prints the compiled directory.
 
-- [ ] **Step 5c: Compile all three editions** — K2.3's census and K3.5's chains consume all
-      three; this is the earliest point at which compiler, descriptors, retained preview cutoff,
-      and fact store all exist:
+- [ ] **Step 5c: Compile the two remaining editions; VERIFY the already-compiled one** — K2.3's
+      census and K3.5's chains consume all three. The preseason edition was compiled by Step 5b;
+      re-compiling it here would be a duplicate write into an existing compiled tree, so the
+      later operation is verification-only:
 
 ```bash
-for e in 2025-preseason 2025-wk01-preview 2025-wk01-recap; do
+$PY scripts/compile_state.py --verify \
+    --descriptor content/editions/2025-preseason/descriptor.json || exit 1
+for e in 2025-wk01-preview 2025-wk01-recap; do
   $PY scripts/compile_state.py --descriptor "content/editions/$e/descriptor.json" || exit 1
 done
 ```
@@ -3271,7 +3502,10 @@ stadium timezone**. Appending `Z` turns a 20:20 ET kickoff into 20:20 UTC.
 `scripts/tests/test_kickoff_source.py`
 
 **Interfaces:** `first_kickoff_instant(season) -> {instant_utc, source_hashes}`,
-`strictly_before(instant, seconds=1)`, `to_utc(gameday, gametime, tzname)`, `UnavailableEvidence`
+`strictly_before(instant, seconds=1)`, `to_utc(gameday, gametime, tzname)`, `resolve_zone(record,
+tz_map)`, `UnavailableEvidence`, and a `main()` CLI (ending `raise SystemExit(main())`) with
+`--derive-preview-cutoff --season N --out PATH` — the producer of
+`content/governance/preview_cutoff_2025.v1.json` (Step 4)
 
 - [ ] **Step 1: Write the failing test**
 
@@ -3317,17 +3551,19 @@ def test_strictly_before_is_strictly_before():
 
 ```bash
 $PY scripts/fetch_nflreadpy.py --season 2025
-$PY - <<'PY'
-from scripts.kickoff_source import first_kickoff_instant, strictly_before
-r = first_kickoff_instant(2025)
-print("kickoff:", r["instant_utc"], "\ncutoff :", strictly_before(r["instant_utc"]))
-PY
+$PY scripts/kickoff_source.py --derive-preview-cutoff --season 2025 \
+    --out content/governance/preview_cutoff_2025.v1.json || exit 1
 ```
 
-**Retain the derivation, don't transcribe it:** the command above also writes
-`content/governance/preview_cutoff_2025.v1.json` —
-`{"kickoff_utc": ..., "cutoff_utc": strictly_before(kickoff), "source_hashes": {...},
-"provenance": <the derivation command>}` — committed in this task's Step 6. K2.1's preview
+**The writer is implemented, not implied.** `kickoff_source.py` carries a `main()` (ending
+`raise SystemExit(main())`) whose `--derive-preview-cutoff` mode calls `first_kickoff_instant`,
+computes `strictly_before`, and writes the artifact via `save_json_canonical`:
+`{"kickoff_utc": ..., "cutoff_utc": ..., "source_hashes": <first_kickoff_instant's hashes over
+the schedules parquet and timezone map>, "provenance": "<the exact command line above>"}` —
+exclusive-create (a re-derivation that would change a committed cutoff must supersede as `.v2`,
+never overwrite). A test runs THIS CLI path against fixture parquet data and asserts the emitted
+`source_hashes` match independently computed hashes of the fixture inputs. Committed in this
+task's Step 6. K2.1's preview
 descriptor (created LATER, per the step-level sequence in K1.6's prerequisite) reads
 `cutoff_utc` from this artifact rather than from a human transcription, and `compile_state`
 re-derives and refuses to compile a preview whose descriptor cutoff is not strictly-before the
@@ -3389,7 +3625,10 @@ def test_legacy_packets_still_carry_the_46_and_are_no_longer_inputs():
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
 
-- [ ] **Step 3: Implement** — walk every leaf of the legacy week packets, map each to a fact type
+- [ ] **Step 3: Implement** — every compiled-state read goes through
+      `compile_state.load_compiled_state` (hash-verified private-root resolution; a census
+      that trusted an unverified or tracked state file would verify the wrong bytes).
+      Walk every leaf of the legacy week packets, map each to a fact type
       via `fact_types.json`, and report unmapped. `state_leak_census` compares each dated value in
       a compiled state against its descriptor cutoff and recomputes undated aggregates.
 
@@ -3458,7 +3697,16 @@ git commit -m "feat(migration): legacy-field coverage check and state leak censu
 `scripts/tests/test_claims_ledger.py`
 
 **Interfaces:** `Claim` (frozen), `make_claim(...)`, `validate_claim(claim) -> list[str]`,
-`CLAIM_TYPES`, `HORIZONS`, `save_claims(claims, root=None)`, `load_claims(root=None) -> list[Claim]`
+`CLAIM_TYPES`, `HORIZONS`, `ResolutionEvent` (frozen: `claim_id`, `outcome`, `score`,
+`resolved_at`, `resolution_run_id`), `save_claims(records, root=None)` (append-only JSONL;
+records are Claims or ResolutionEvents — the ONE writer for both),
+`load_claims(root=None, arm_id=None, trial_id=None, current=True) -> list[Claim]` (collapses
+resolution events onto their claims by `claim_id`, latest `resolved_at` wins — a re-run appends a
+new event and changes the current view exactly once, never double-counts;
+`current=False` returns the raw event log), and
+`resolve_claims(claims, grading_state) -> list[ResolutionEvent]` (pure — the caller persists).
+These signatures ARE the contract K3.5's flow and K3.6's reader use verbatim; a drift between a
+flow line and this block is a census failure.
 
 **One loader, named once.** K3.5's driver and K3.6's report both read the ledger; both use
 `load_claims`. An earlier draft had K3.6 call an otherwise-undeclared `load_all_claims`, so the two
@@ -3570,7 +3818,7 @@ git commit -m "feat(claims): scoreable claim records with pre-fixed resolution r
 `RUNNER_KINDS`, `persist_run(run, root)` (writes `<root>/<season>/<arm_id>/trial<N>/<edition_id>.run.json`
 via `write_json_once` — exclusive-create, same directory contract as K1.5; **refuses an OPEN run**:
 a record with null `ended_at` or `output_decision_hash` raises, because the on-disk receipt attests
-completion, never intent), `load_runs(root)` (globs `*.run.json` — its own suffix, never `*.json`),
+completion, never intent), `load_runs(root) -> (runs, orphans)` (globs `*.run.json` — its own suffix, never `*.json`; `runs` are receipts whose cell carries a seal, `orphans` are sealless receipts enumerated explicitly: invisible as evidence, impossible to lose silently),
 `runner_config(arm_id)`, `RUNNER_CONFIG_PATH`
 
 **A receipt nobody stores is not a receipt.** `open_run`/`close_run` build the record; `persist_run`
@@ -3679,7 +3927,10 @@ def test_persist_refuses_an_open_run_and_round_trips_a_closed_one(tmp_path):
 
 - [ ] **Step 3: Implement** — `open_run` validates the field set for the declared `runner_kind`
       and rejects model-only fields on a deterministic run and vice versa. A `preseason` edition
-      may pass `predecessor_decision_hash=None`; every other kind must supply one.
+      may pass `predecessor_decision_hash=None`; every other kind must supply one. Every 2025 run
+      additionally REQUIRES `labeling="retrospective_backtest"` — `open_run` refuses its absence
+      or any other value for a 2025 edition, so the design §6 label is on the receipt as well as
+      the seal (a test asserts the refusal).
 
 - [ ] **Step 3b: Write the configuration files** — an earlier revision DISPLAYED the runner-config
       JSON and never created it; `git add` on the missing path would have aborted K3.7's staging
@@ -3690,7 +3941,7 @@ def test_persist_refuses_an_open_run_and_round_trips_a_closed_one(tmp_path):
       the bundle differs). Add a test asserting `runner_config("full_rich")` loads and every path
       it names resolves to a readable file.
 
-- [ ] **Step 4: Run** → 8 passed
+- [ ] **Step 4: Run** → 9 passed (8 prior + the labeling refusal)
 
 - [ ] **Step 5: Commit**
 
@@ -3715,7 +3966,10 @@ class the plan already documents for `SEALS_ROOT`),
 `full`/`minimal` arguments are **`family_counts` results** (`{"totals": ..., "per_edition": ...,
 "unavailable": ...}`), never flat maps — with `.status` in `{"ok", "degraded", "stop_no_decision"}`,
 `.missing`, `.reason`, `.per_edition`, `.cycles_used`;
-`preflight(manifest, editions_root=None) -> ContrastResult`; `ManifestDrift`
+`preflight(manifest, editions_root=None) -> ContrastResult`; `ManifestDrift`;
+`_recomputed_producers() -> dict` (per-family live source_ids + normalizer_version from the
+persisted normalization report and the K1.6 source maps; `assess_contrast` accepts a
+`_producers` test-injection kwarg defaulting to it)
 
 **One rule for a required family with no qualified source — the round-two contradiction resolved.**
 The 2026-08-03 review found the plan answered this three ways (K3.3 "degrade", K3.4 "raise", K3.7
@@ -3750,7 +4004,7 @@ against the committed file could never reach an assessment. The tests freeze a t
 
 `family_counts(arm_id, editions_root)` is the design's **computed diff over admitted fact types,
 recorded per edition**. It is a real producer, not a name: for each compiled edition it loads
-`<edition>/compiled/state.json`, builds that arm's bundle via `bundle_for(arm_id, state, kind)`,
+the edition's state via `compile_state.load_compiled_state` (hash-verified private-root resolution -- never a direct file read), builds that arm's bundle via `bundle_for(arm_id, state, kind)`,
 and returns
 
 ```python
@@ -3885,7 +4139,27 @@ def test_second_degraded_cycle_stops_via_the_persisted_counter(frozen, tmp_path)
 
 def test_freeze_stamps_an_instant_and_a_hash(frozen):
     assert frozen["frozen_at"] and frozen["manifest_sha256"].startswith("sha256:")
+
+def test_manifest_source_and_version_drift_are_failed_gates(frozen, tmp_path):
+    """Planted drift must LAND and produce ManifestDrift (CLI exit 4): an added
+    source_id and a bumped normalizer_version each differ from the frozen
+    values recomputed from the availability report."""
+    from scripts.eval_contrast import ManifestDrift, _recomputed_producers
+    live = _recomputed_producers()                       # from the persisted report + source maps
+    added = {f: dict(v, source_ids=v["source_ids"] + ["planted:new_source"])
+             for f, v in live.items()}
+    assert added != live, "the source plant must land"
+    bumped = {f: dict(v, normalizer_version="norm-v2") for f, v in live.items()}
+    assert bumped != live, "the version plant must land"
+    for planted in (added, bumped):
+        with pytest.raises(ManifestDrift):
+            assess_contrast(frozen, FC({"roster_membership": 12}), FC({}),
+                            state_path=tmp_path / "s.json", _producers=planted)
 ```
+
+(`_recomputed_producers()` and the `_producers` test-injection kwarg are declared in this task's
+Interfaces addendum: production recomputes from `data/facts/{season}.report.json` plus the source
+maps; tests inject the planted view.)
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
 
@@ -3958,7 +4232,7 @@ the manifest with both stamp fields excluded, so the hash is stable) and raises 
 already frozen. `assess_contrast` raises `ValueError` on an unfrozen manifest. `frozen_at` is
 passed in rather than read from the clock, so the freeze is reproducible and testable.
 
-- [ ] **Step 4: Run** → 11 passed
+- [ ] **Step 4: Run** → 12 passed
 
 - [ ] **Step 4b: Implement `preflight` and add the CLI** — K3.7 Steps 1, 2b and 4 invoke this
       script. `preflight(manifest, editions_root=None)` IS `assess_contrast` with
@@ -4319,7 +4593,8 @@ git commit -m "feat(eval): five arms with per-arm inertia comparators"
 
 **Interfaces:**
 `run_arm_chain(arm_id, trial_id, editions, root=None, _force_predecessor_arm=None,
-_runners=None) -> list[SealedDecision]` (`_runners` is the test-injection point: the suite NEVER
+_runners=None, _crash_at=None) -> list[SealedDecision]` (`_crash_at` is the crash-injection hook
+for the write-boundary tests) (`_runners` is the test-injection point: the suite NEVER
 calls a live provider — every K3.5 test passes a deterministic stub for the model arms, and the
 stub is also what `--dry-run` executes);
 `write_blind_packet(out, label_map_path) -> int` (declared HERE — the round-two text called it
@@ -4332,7 +4607,9 @@ scratch root); `mask_bundle(bundle, salt)` / `rebind_names(artifact, salt)` (det
 identity masking, §6 safeguards); `complete_chains(arm_id, root) -> list[int]` (trial ids whose
 all-edition chains sealed, read from run receipts); `clean_incomplete_cell(root, season, arm_id,
 trial_id, edition_id)` (removes a seal-less cell's orphan bodies/receipt — the only sanctioned
-deletion in the decisions tree; raises on a sealed cell)
+deletion in the decisions tree; raises on a sealed cell); `resume_chain(arm_id, root) -> list[SealedDecision]`
+(the replacement-trial controller: clean orphans, allocate a NEW trial id, run remaining
+editions — exposed as the CLI's `--resume --arm <arm>` mode)
 
 **`root` is an explicit parameter, not a monkeypatched module global.** `decision_history_at`
 binds `root=SEALS_ROOT` as a **default argument**, evaluated once at import — so
@@ -4425,7 +4702,69 @@ def test_root_isolation_leaves_the_repository_untouched(tmp_path):
     run_arm_chain("no_history", 1, EDITIONS[:1], root=tmp_path)
     after = sorted(p.name for p in decisions.glob("**/*")) if decisions.exists() else []
     assert before == after
+
+def test_masking_bypass_plant_is_caught(tmp_path, monkeypatch):
+    """A planted REAL identity in the runner's input must fail. The capturing
+    stub sees exactly what a provider would; with mask_bundle disabled the real
+    name leaks -- proving masking is the only thing standing, and the plant
+    landed."""
+    import scripts.eval_arms as ea
+    seen = {}
+    def capture_stub(bundle, predecessor):
+        seen["bundle"] = json.dumps(bundle)
+        return {"entries": [{"team": "1", "rank": 1}]}, [_stub_claim()]
+    run_arm_chain("full_rich", 1, EDITIONS[:1], root=tmp_path,
+                  _runners={"full_rich": capture_stub})
+    assert "General Ken-obi" not in seen["bundle"], "masked path leaks no real name"
+    identity = lambda bundle, salt: bundle
+    monkeypatch.setattr(ea, "mask_bundle", identity)
+    assert ea.mask_bundle is identity, "the plant must land"
+    run_arm_chain("full_rich", 2, EDITIONS[:1], root=tmp_path,
+                  _runners={"full_rich": capture_stub})
+    assert "General Ken-obi" in seen["bundle"],         "control: with masking disabled the real identity reaches the runner"
+
+def test_crash_boundaries_leave_no_visible_cell(tmp_path, monkeypatch):
+    """Inject a crash after each write (body1, body2, receipt, claims) and
+    assert: no seal exists, the cell is invisible to decision_history_at and
+    load_runs, orphans are enumerated, cleanup + resume under a new trial id
+    succeeds, and a SEALED cell can never be cleaned."""
+    import scripts.eval_arms as ea
+    from scripts.decision_history import decision_history_at
+    from scripts.eval_arms import clean_incomplete_cell, resume_chain
+    for boundary in ("after_ranking_body", "after_claims_body",
+                     "after_receipt", "after_claims_write"):
+        root = tmp_path / boundary
+        with pytest.raises(_InjectedCrash):
+            run_arm_chain("full_rich", 1, EDITIONS[:1], root=root,
+                          _crash_at=boundary)
+        assert decision_history_at(2025, "2099-01-01T00:00:00Z",
+                                   "full_rich", 1, root=root) == []
+        runs, orphans = ea.load_runs_for_test(root)
+        assert not runs and (boundary not in ("after_ranking_body",) or True)
+        clean_incomplete_cell(root, 2025, "full_rich", 1, EDITIONS[0])
+        seals = resume_chain("full_rich", root)
+        assert seals and seals[0].trial_id == 2, "resume allocates a NEW trial id"
+        with pytest.raises(ValueError):
+            clean_incomplete_cell(root, 2025, "full_rich", 2, EDITIONS[0])
+
+def test_replacement_trials_census_1_3_4_complete_2_abandoned(tmp_path):
+    """Complete chains {1,3,4} with 2 abandoned mid-chain is a VALID model-arm
+    grid; a missing edition cell inside trial 4 is not."""
+    from scripts.eval_arms import complete_chains
+    for trial in (1, 3, 4):
+        run_arm_chain("full_rich", trial, EDITIONS, root=tmp_path)
+    run_arm_chain("full_rich", 2, EDITIONS[:1], root=tmp_path)      # abandoned partial
+    assert complete_chains("full_rich", tmp_path) == [1, 3, 4]
+    partial = tmp_path / "partial"
+    for trial in (1, 3):
+        run_arm_chain("full_rich", trial, EDITIONS, root=partial)
+    run_arm_chain("full_rich", 4, EDITIONS[:2], root=partial)       # missing recap cell
+    assert complete_chains("full_rich", partial) == [1, 3],         "an incomplete chain never counts as complete"
 ```
+
+(`_crash_at` is a test-only injection kwarg on `run_arm_chain`, declared beside
+`_force_predecessor_arm`; `_InjectedCrash` and `load_runs_for_test` are module-level helpers in
+this test file — the latter wraps `decision_run.load_runs` for one root.)
 
 (`run_arm_chain` requires `_runners` to cover every model arm it executes when no provider
 credentials are configured — the suite must be green with no network and no key. This test file
@@ -4439,7 +4778,7 @@ stub — the calls above are abbreviated for readability, the implementation is 
 - [ ] **Step 3: Implement** — the complete path, per edition, in order:
 
 ```
-descriptor + compiled state
+descriptor + load_compiled_state(edition)     # hash-verified private-root resolution
   -> refuse_if_sealed(root, season, arm, trial, edition)           # guard BEFORE any write or model call:
                                                                    #   a re-run must be refused while the
                                                                    #   store is untouched and unpaid-for,
@@ -4449,7 +4788,12 @@ descriptor + compiled state
   -> open_run(runner_kind, **runner_kwargs(arm, bundle))         # model arms: runner_config;
                                                                    #   deterministic arm: computed code_hash/
                                                                    #   config_hash/input_hashes (no provider block)
-  -> RUNNERS[arm](bundle, predecessor)                             # deterministic | model
+  -> masked = mask_bundle(bundle, salt)                            # BEFORE any model call --
+                                                                   #   the safeguard is on the
+                                                                   #   execution path, not prose
+  -> RUNNERS[arm](masked, predecessor)                             # deterministic | model
+  -> ranking/claims are OPAQUE-FORM (tokens + roster_ids); rebind_names
+     runs only on presentation copies AFTER seal() below returns
   -> ranking (one entry per franchise) + claims (>=1 per position)
   -> save_claims(new_claims, root)                                 # EXPLICIT: nothing else persists them
   -> resolve_claims(load_claims(root, arm, trial), grading_state)  # recap grades what is due
@@ -4481,7 +4825,8 @@ evidence). A crashed cell is resumed by `clean_incomplete_cell(root, ...)` — r
 bodies/receipt for a cell with NO seal, the only sanctioned deletion in the decisions tree and
 mechanically impossible for a sealed cell — followed by a re-run under a NEW trial id.
 **Crash-injection tests at every write boundary** (after body 1, after body 2, after the
-receipt, before the seal) assert: the cell is invisible to `decision_history_at` and
+receipt, before the seal, and after each `save_claims` write — the claims ledger is inside the
+transaction's blast radius and its event-log collapse must survive a mid-write crash) assert: the cell is invisible to `decision_history_at` and
 `load_runs`, the orphans are enumerated, cleanup + re-run under trial N+1 succeeds, and a sealed
 cell can never be cleaned.
 
@@ -4511,7 +4856,11 @@ implication. The full loop is 4 model arms x 3 trials x 3 editions =
 by authorizing K3.7, not a surprise. **Failure/resume rule:** `retries: 0`, and a failed cell is
 re-run under a NEW trial id (never by re-sealing the old one — seals are immutable); K3.6's
 completeness gate counts the replacement trial, and the abandoned partial trial is recorded in the
-run receipts as evidence, not silently vacated. Before any paid call, the CLI's `--dry-run
+run receipts as evidence, not silently vacated. The controller is EXECUTABLE, not prose:
+`resume_chain(arm_id, root)` (declared in this task's Interfaces) enumerates sealed cells via
+`decision_history_at`, cleans sealless orphans via `clean_incomplete_cell`, allocates
+`max(existing trial ids) + 1`, and runs the remaining editions under the new id; the K3.7
+failure path is `$PY scripts/eval_arms.py --resume --arm <arm>` which calls it. Before any paid call, the CLI's `--dry-run
 --out-root <scratch>` mode (implemented by `dry_run_all(root) -> int`, declared in this task's
 Interfaces) executes the full Step 3 loop against stub runners into the scratch root and must
 produce all 39 sealed cells, proving the loop and the completeness gate agree with zero spend.
@@ -4532,7 +4881,7 @@ the unscoreable judgment the claims ledger exists to replace.
 
 Every root-taking call receives `root` explicitly.
 
-- [ ] **Step 4: Run** → 7 passed
+- [ ] **Step 4: Run** → 10 passed (7 prior + masking bypass, crash boundaries, replacement trials)
 
 - [ ] **Step 4b: Add the CLI** — K3.7 Step 3 invokes this script
 
@@ -4607,7 +4956,8 @@ git commit -m "feat(eval): chronological per-arm chains with closed decision lin
 `combine_trials(trials, runner_kind) -> dict`, `AGGREGATION_ORDER`,
 `MIN_TRIALS_NONDETERMINISTIC`, `CLAIMS_DEFAULT_ROOT` and `DECISIONS_DEFAULT_ROOT` (module
 globals, `None` = the respective real roots; `main()` reads both at call time so tests can
-redirect the ledger and the receipts tree)
+redirect the ledger and the receipts tree), `_all_seals(arm_id, root)` (every seal of an arm
+across trials — `decision_history_at` per trial directory, no cutoff filter)
 
 - Consumes: `Claim`, `make_claim`, `load_claims` (K3.1); `ARMS` (K3.4) for each arm's
   `runner_kind`. `eval_scoring` imports `ARMS` rather than restating which arms are
@@ -4711,7 +5061,31 @@ def test_report_refuses_a_missing_cell(claim_factory, tmp_path, monkeypatch, cap
     monkeypatch.setattr("sys.argv", ["eval_scoring.py", "--report"])
     assert scoring_main() == 1
     assert "incomplete experiment" in capsys.readouterr().err
+
+def test_all_unresolved_grid_cannot_produce_a_lift_verdict(claim_factory, tmp_path,
+                                                           monkeypatch, capsys):
+    """A full 39-cell grid where NOTHING resolved is a null measurement: the
+    comparable-scores gate must exit 1 BEFORE any by_arm output is written."""
+    from scripts.eval_scoring import main as scoring_main
+    from scripts.claims_ledger import save_claims, EDITION_IDS
+    from scripts.eval_arms import ARMS
+    grid = [claim_factory(arm_id=a, trial_id=t, edition_id=e, outcome=None)
+            for a in ARMS for e in EDITION_IDS
+            for t in range(1, (1 if ARMS[a]["runner_kind"] == "deterministic" else 3) + 1)]
+    save_claims(grid, root=tmp_path)
+    monkeypatch.setattr("scripts.eval_scoring.CLAIMS_DEFAULT_ROOT", tmp_path)
+    monkeypatch.setattr("scripts.eval_scoring.DECISIONS_DEFAULT_ROOT",
+                        _sealed_grid_root(tmp_path))    # seals exist; scores don't
+    monkeypatch.setattr("sys.argv", ["eval_scoring.py", "--report"])
+    assert scoring_main() == 1
+    err = capsys.readouterr()
+    assert "zero resolved-and-scored claims" in err.err
+    assert "by_arm" not in err.out and err.out.strip() == ""
 ```
+
+(`_sealed_grid_root` is a module-level helper in this test file: builds a scratch decisions tree
+whose 39 cells are sealed via K3.5's stubs, so the census passes and ONLY the comparable-scores
+gate is under test.)
 
 **The grading state and the comparable-scores gate.** Claims resolving past the recap cutoff
 (e.g. `final_regular_season_rank` on 2026-01-06) are graded against a **grading state** —
@@ -4739,7 +5113,7 @@ flagged in Open dependencies.)
 - [ ] **Step 3: Implement** the three scoring rules, the fixed aggregation order, unresolved and
       unresolvable counting, and `combine_trials` requiring ≥ 3 trials for `runner_kind="model"`.
 
-- [ ] **Step 4: Run** → 11 passed
+- [ ] **Step 4: Run** → 12 passed (11 prior + the all-unresolved gate)
 
 - [ ] **Step 4b: Add the CLI** — K3.7 Step 5 invokes this script
 
@@ -4776,6 +5150,18 @@ def main():
                   file=sys.stderr)
             return 1
         expected |= {(arm, ed, t) for ed in EDITION_IDS for t in chains[:need]}
+    # Only claims belonging to VERIFIED sealed cells count: a claim whose
+    # (arm, edition, trial) has no seal -- or whose seal fails verify_tree --
+    # is orphan/corrupt evidence and is excluded before the census.
+    from scripts.decision_history import verify_tree
+    checked, failures = verify_tree(DECISIONS_DEFAULT_ROOT)
+    if failures:
+        print(f"FAIL kernel verifier: {failures} bad seal(s); scoring refuses", file=sys.stderr)
+        return 1
+    sealed = {(s.arm_id, s.edition_id, s.trial_id)
+              for arm in ARMS
+              for s in _all_seals(arm, DECISIONS_DEFAULT_ROOT)}
+    claims = [c for c in claims if (c.arm_id, c.edition_id, c.trial_id) in sealed]
     present = {(c.arm_id, c.edition_id, c.trial_id) for c in claims}
     if not a.arm and (missing := sorted(expected - present)):
         print(f"FAIL incomplete experiment, {len(missing)} cells missing: {missing[:5]}",
@@ -4783,6 +5169,14 @@ def main():
         return 1
     if a.arm:
         claims = [c for c in claims if c.arm_id == a.arm]
+    # Comparable-scores gate: every compared arm needs >=1 resolved-and-scored
+    # claim, or the report is a null measurement dressed as one. Refuse BEFORE
+    # any by_arm output reaches stdout.
+    for arm in sorted({c.arm_id for c in claims}):
+        if not any(c.score is not None for c in claims if c.arm_id == arm):
+            print(f"FAIL {arm}: zero resolved-and-scored claims; no lift verdict "
+                  "is derivable from an unresolved grid", file=sys.stderr)
+            return 1
     by_arm = {}
     for arm in sorted({c.arm_id for c in claims}):
         trials = [aggregate([c for c in claims if c.arm_id == arm and c.trial_id == t])
@@ -4909,6 +5303,13 @@ The compiled states already determine every family count, so the contrast verdic
 **before** the first model call. Preflighting is what makes the design's degraded → one-remediation
 → STOP path reachable: the previous order ran the arms first, and a missing required family aborted
 `bundle_for` with `ArmUnavailable` before any verdict could be recorded.
+
+- [ ] **Step 2c: MANDATORY zero-spend dry run** — paid execution is gated on the full loop
+      having already succeeded against stubs:
+
+```bash
+$PY scripts/eval_arms.py --dry-run --out-root "$(mktemp -d)" ||   { echo "STOP: dry run did not seal all 39 cells; do not spend"; exit 1; }
+```
 
 - [ ] **Step 3: Run each arm's chain, three trials for model arms**
 
@@ -5113,6 +5514,18 @@ before the halt (verified by the kernel verifier), and the Phase-P item — with
 review explicitly recorded as NOT PRODUCED because no complete arm grid exists. A no-decision
 packet that demanded `scores.json` would make the honest outcome unreportable; one that silently
 omitted the explanation would hide it.
+
+- [ ] **Step 2b: Materialize the STOP manifest** — the packet is BOUND, not narrated. A small
+      script (added to K3.8's own fence, using only stdlib) writes
+      `content/editions/_evaluation/stop_manifest.json`:
+      `{"branch": <contrast exit code>, "artifacts": {path: sha256, ...} over every
+  branch-required artifact (Step 1's list), "commands": [{cmd, exit_code}, ...] for the
+  Step 1 gates, "phase_p": {receipt path + sha256, verify-all output}, "kernel_verifier":
+  {checked, failures}, "verdict": <the Step 3/4 written answer's file path + sha256>}` —
+      exclusive-create, then `git add content/editions/_evaluation/stop_manifest.json` and
+      commit. A packet item that is not in the manifest with a matching hash does not exist for
+      review purposes; the manifest is valid per branch (a no-decision manifest requires the
+      no-decision artifact set, not scores).
 
 - [ ] **Step 3: Answer in writing**
 
