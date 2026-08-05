@@ -1,0 +1,18 @@
+{
+  "fact_store": {
+    "path": "data/facts/2025.jsonl",
+    "sha256": "sha256:3badddc9216e31462497c2954b6b7d37fb9d36773ad31c26a73d23c650371398"
+  },
+  "fact_type_registry": {
+    "path": "content/governance/fact_types.json",
+    "sha256": "sha256:ed4643a82096dbdbf725ad4d93999f7a94ece5609b48fa2aefcd3d8b3db5f67d"
+  },
+  "normalizer_code": {
+    "path": "scripts/normalize_facts.py",
+    "sha256": "sha256:b72e020b474351fe50374b54e05af728e56f72440265fa05ad912d38bd0d4cee"
+  },
+  "private_fact_store": {
+    "path": "private_facts/2025.jsonl",
+    "sha256": "sha256:305ec31cddad13670133184b79ad23a0aa346a081796e8b220a93551d48a62fe"
+  }
+}
