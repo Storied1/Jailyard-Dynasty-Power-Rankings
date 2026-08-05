@@ -1,0 +1,269 @@
+{
+  "generated_at": "2026-08-05T01:44:15.766382Z",
+  "groups": [
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_league",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "weekly",
+          "captured_at": "2026-08-05T01:44:15.702740Z",
+          "empty_valid": false,
+          "envelope_sha256": "754777643387eec132d98a430ac6d7b8a18a12c1936cb7627ffeec348b5edcaf",
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": "914b21351cc9ff1a439b8e97aac0d28e2ff9f025a53c3a28f453a635da38625c",
+          "required_for": ["record_points"],
+          "source_id": "sleeper_league",
+          "status": "captured"
+        },
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_users",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "sleeper_users",
+          "status": "due"
+        }
+      ],
+      "group": "league_identity",
+      "required_for": ["record_points"],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_rosters",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "weekly",
+          "captured_at": "2026-08-05T01:44:15.763374Z",
+          "empty_valid": false,
+          "envelope_sha256": "ae9015397336f199d68e4825e27d995f005388ec95521febca016b96ae25b6ce",
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": "2be1cc30cf8426df9bd6dacceaffe8613850256950b1ed87beacea932b77dfa4",
+          "required_for": ["record_points"],
+          "source_id": "sleeper_rosters",
+          "status": "captured"
+        }
+      ],
+      "group": "rosters",
+      "required_for": ["record_points"],
+      "status": "captured"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component draft_meta",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "draft_meta",
+          "status": "due"
+        },
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component draft_picks",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "draft_picks",
+          "status": "due"
+        }
+      ],
+      "group": "draft",
+      "required_for": [],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_transactions",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "sleeper_transactions",
+          "status": "due"
+        }
+      ],
+      "group": "transactions",
+      "required_for": [],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_matchups",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "sleeper_matchups",
+          "status": "due"
+        }
+      ],
+      "group": "league_matchups",
+      "required_for": [],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_projections",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "sleeper_projections",
+          "status": "due"
+        }
+      ],
+      "group": "projections",
+      "required_for": [],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component nfl_schedules",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "weekly",
+          "captured_at": "2026-08-05T01:44:15.595921Z",
+          "empty_valid": false,
+          "envelope_sha256": "0821c433a3320c91796748172252d30c8ba83a3f2bbddc80d12e245de2cc10b6",
+          "error": null,
+          "mechanism": "nflreadpy",
+          "payload_sha256": "80c891d14a2568c8465b549a633e1ac6d2515b39ccf4014ea95ddbf9046781d0",
+          "required_for": ["record_points"],
+          "source_id": "nfl_schedules",
+          "status": "captured"
+        },
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component nfl_team_context",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "weekly",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "nflreadpy",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "nfl_team_context",
+          "status": "due"
+        },
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component nfl_injuries",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "nflreadpy",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "nfl_injuries",
+          "status": "due"
+        }
+      ],
+      "group": "nfl_context",
+      "required_for": ["record_points"],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component chat_export",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "on_demand",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "manual",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "chat_export",
+          "status": "due"
+        }
+      ],
+      "group": "chat",
+      "required_for": [],
+      "status": "incomplete"
+    }
+  ],
+  "ok": true,
+  "season": 2026,
+  "tranche": "A",
+  "unmet_required": []
+}

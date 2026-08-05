@@ -1,0 +1,27 @@
+{
+  "arm_id": "record_points",
+  "bundle_sha256": "9c13a49728667e11f9e986b5d3b3ddc778ed6ceb1f10c6e4aa9e1692bec177bc",
+  "code_sha256": "323d8f9f4fa4758b73ba36cce38e2d328ff943bc20009f86c3ae635b112af1c2",
+  "config_sha256": "927204e37bdaad987bb11c9a9042f65ca5db4fe07700faf4b528c4478d48bf77",
+  "cutoff_receipt_locator": "data/captures/2026/_receipts/cutoff_20260805T014354Z.json",
+  "cutoff_receipt_sha256": "ab9d255e8244439d676427d1ce390524ef4a2e2903cf35f92cf19653d4fedff4",
+  "decision_input_sha256": "8d6bd0f9afc9cc1f70657a3292e8606fec998477530ef30f7a0a277ee438f436",
+  "decision_run_id": "2026-preseason_record_points_t1_20260805T014413Z",
+  "edition_id": "2026-preseason",
+  "ended_at": "2026-08-05T01:44:13.578483Z",
+  "input_hashes": {
+    "decision_input_sha256": "8d6bd0f9afc9cc1f70657a3292e8606fec998477530ef30f7a0a277ee438f436",
+    "source_manifest_sha256": "de21acfd1ec96d3571913dfe0b464806b633b1df46344aeda609e9e516becac9"
+  },
+  "matrix_sha256": "fed22ac2b5a46df3268bb4d4a8c3d95aa744876cb13fcdd4ecb65b5147877b69",
+  "output_decision_sha256": "f938aa6d9ff1623d7d2007d9d4ad69f26101bf162101678c9d5e1ffe85100161",
+  "policy_locator": "content/governance/source_policy_2026.v1.json",
+  "predecessor_decision_hash": null,
+  "predecessor_null_reason": "no earlier qualified seal for (record_points, trial 1) before 2026-09-03T00:20:00Z",
+  "runner_kind": "deterministic",
+  "source_manifest_sha256": "de21acfd1ec96d3571913dfe0b464806b633b1df46344aeda609e9e516becac9",
+  "started_at": "2026-08-05T01:44:13.578483Z",
+  "state_hash": null,
+  "state_hash_null_reason": "no state_at exists pre-kernel",
+  "trial_id": 1
+}

@@ -1,0 +1,182 @@
+{
+  "arm_id": "record_points",
+  "bundle_sha256": "9c13a49728667e11f9e986b5d3b3ddc778ed6ceb1f10c6e4aa9e1692bec177bc",
+  "contains_private": false,
+  "cutoff_receipt_locator": "data/captures/2026/_receipts/cutoff_20260805T014354Z.json",
+  "cutoff_receipt_sha256": "ab9d255e8244439d676427d1ce390524ef4a2e2903cf35f92cf19653d4fedff4",
+  "cutoff_utc": "2026-09-03T00:20:00Z",
+  "decision_input_payload": {
+    "arm_id": "record_points",
+    "cutoff_utc": "2026-09-03T00:20:00Z",
+    "edition_id": "2026-preseason",
+    "franchises": [
+      {
+        "matched": true,
+        "owner_id": "415249306090479616",
+        "points_for_2025": 2097.4,
+        "rank": 1,
+        "roster_id": 6,
+        "wins_2025": 11
+      },
+      {
+        "matched": true,
+        "owner_id": "861064424906158080",
+        "points_for_2025": 2030.1400000000003,
+        "rank": 2,
+        "roster_id": 10,
+        "wins_2025": 11
+      },
+      {
+        "matched": true,
+        "owner_id": "510215233736572928",
+        "points_for_2025": 2124.7000000000003,
+        "rank": 3,
+        "roster_id": 5,
+        "wins_2025": 10
+      },
+      {
+        "matched": true,
+        "owner_id": "792563831732838400",
+        "points_for_2025": 2145.94,
+        "rank": 4,
+        "roster_id": 8,
+        "wins_2025": 9
+      },
+      {
+        "matched": true,
+        "owner_id": "510013812276232192",
+        "points_for_2025": 2068.08,
+        "rank": 5,
+        "roster_id": 1,
+        "wins_2025": 9
+      },
+      {
+        "matched": true,
+        "owner_id": "510254202180411392",
+        "points_for_2025": 1932.9599999999996,
+        "rank": 6,
+        "roster_id": 11,
+        "wins_2025": 9
+      },
+      {
+        "matched": true,
+        "owner_id": "575878107617718272",
+        "points_for_2025": 1843.06,
+        "rank": 7,
+        "roster_id": 4,
+        "wins_2025": 7
+      },
+      {
+        "matched": true,
+        "owner_id": "575194626101170176",
+        "points_for_2025": 1884.7,
+        "rank": 8,
+        "roster_id": 2,
+        "wins_2025": 4
+      },
+      {
+        "matched": true,
+        "owner_id": "865653448849391616",
+        "points_for_2025": 1789.46,
+        "rank": 9,
+        "roster_id": 12,
+        "wins_2025": 4
+      },
+      {
+        "matched": true,
+        "owner_id": "792312710317572096",
+        "points_for_2025": 1757.5599999999997,
+        "rank": 10,
+        "roster_id": 7,
+        "wins_2025": 4
+      },
+      {
+        "matched": true,
+        "owner_id": "575406354368348160",
+        "points_for_2025": 1736.74,
+        "rank": 11,
+        "roster_id": 3,
+        "wins_2025": 4
+      },
+      {
+        "matched": true,
+        "owner_id": "793977545186979840",
+        "points_for_2025": 1699.1599999999999,
+        "rank": 12,
+        "roster_id": 9,
+        "wins_2025": 2
+      }
+    ],
+    "ranking_basis": "2025 final regular-season standings (R5)"
+  },
+  "decision_input_sha256": "8d6bd0f9afc9cc1f70657a3292e8606fec998477530ef30f7a0a277ee438f436",
+  "edition_id": "2026-preseason",
+  "matrix_sha256": "fed22ac2b5a46df3268bb4d4a8c3d95aa744876cb13fcdd4ecb65b5147877b69",
+  "policy_locator": "content/governance/source_policy_2026.v1.json",
+  "projection": {
+    "code_sha256": "6f2c9314e4942fbf5659aae43552c527f75ba681083220a893fe5b702739a5f0",
+    "config_sha256": "4a21260f58de3a458cfeccb65369f1f32530d3d89a4618589bd9f57d93d8cf84",
+    "ordering_version": "baseline_ordering_v1",
+    "parameters": {
+      "join_key": "owner_id",
+      "season": 2026
+    },
+    "projection_version": "baseline_projection_v1",
+    "redaction_version": "baseline_redaction_v1"
+  },
+  "source_manifest": [
+    {
+      "canonicalizer_code_sha256": "e760d7ce7af79329ce3a32cbd642cf3bbdb01388a6aec94e46da08f3910a2174",
+      "canonicalizer_id": "canonical_json",
+      "canonicalizer_version": "v1",
+      "captured_at": "2026-08-05T01:43:38.778614Z",
+      "content_sha256": "80c891d14a2568c8465b549a633e1ac6d2515b39ccf4014ea95ddbf9046781d0",
+      "envelope_sha256": "fe03e4bee016bf4f1291760ebcc1d5b05efb61bbbc5b6daafcdf599efd397343",
+      "kind": "capture",
+      "locator": "data/captures/2026/public/nfl_schedules/20260805T014338Z.json",
+      "payload_sha256": "80c891d14a2568c8465b549a633e1ac6d2515b39ccf4014ea95ddbf9046781d0",
+      "source_id": "nfl_schedules"
+    },
+    {
+      "canonicalizer_code_sha256": "e760d7ce7af79329ce3a32cbd642cf3bbdb01388a6aec94e46da08f3910a2174",
+      "canonicalizer_id": "canonical_json",
+      "canonicalizer_version": "v1",
+      "captured_at": "2026-08-05T01:43:39.057637Z",
+      "content_sha256": "914b21351cc9ff1a439b8e97aac0d28e2ff9f025a53c3a28f453a635da38625c",
+      "envelope_sha256": "8368edb01bcd36b7abce1bce7b6a5b4386e532be9d12dc85db8a1248f3eea41d",
+      "kind": "capture",
+      "locator": "data/captures/2026/public/sleeper_league/20260805T014339Z.json",
+      "payload_sha256": "914b21351cc9ff1a439b8e97aac0d28e2ff9f025a53c3a28f453a635da38625c",
+      "source_id": "sleeper_league"
+    },
+    {
+      "canonicalizer_code_sha256": "e760d7ce7af79329ce3a32cbd642cf3bbdb01388a6aec94e46da08f3910a2174",
+      "canonicalizer_id": "canonical_json",
+      "canonicalizer_version": "v1",
+      "captured_at": "2026-08-05T01:43:39.205154Z",
+      "content_sha256": "2be1cc30cf8426df9bd6dacceaffe8613850256950b1ed87beacea932b77dfa4",
+      "envelope_sha256": "a3ef09e710dc00e26676392fca7269cdbd1eb667775efa14e8f1af0d13d2483a",
+      "kind": "capture",
+      "locator": "data/captures/2026/public/sleeper_rosters/20260805T014339Z.json",
+      "payload_sha256": "2be1cc30cf8426df9bd6dacceaffe8613850256950b1ed87beacea932b77dfa4",
+      "source_id": "sleeper_rosters"
+    },
+    {
+      "blob_bytes_sha256": "9e5ac6b0e771917a28f24dba2a79c821ed709c0474d67993f19a7ebdeb38ed03",
+      "byte_count": 392064,
+      "canonicalizer_code_sha256": "e760d7ce7af79329ce3a32cbd642cf3bbdb01388a6aec94e46da08f3910a2174",
+      "canonicalizer_id": "canonical_json",
+      "canonicalizer_version": "v1",
+      "commit_sha": "f5df41acd6f934c9d3d13d622c21c6c36550fd0b",
+      "content_sha256": "29203e49163b3d3bdd81b3df1021b86a8947612901a09b32b44050a0c159ff46",
+      "eol_profile": "crlf",
+      "git_blob_oid": "499070a4c430746bc405ee854467f2287b62f2f7",
+      "kind": "qualified_artifact",
+      "locator": "data/2025/season_combined.json",
+      "observed_worktree_bytes_sha256": "a50e041cdac3cfeb5a9f623ca42dce9119d493c8d6d6825467abef3b155af8f6",
+      "path": "data/2025/season_combined.json",
+      "source_id": "standings_2025"
+    }
+  ],
+  "source_manifest_sha256": "de21acfd1ec96d3571913dfe0b464806b633b1df46344aeda609e9e516becac9"
+}

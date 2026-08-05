@@ -1,0 +1,269 @@
+{
+  "generated_at": "2026-08-05T01:42:02.052823Z",
+  "groups": [
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_league",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "weekly",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": "ModuleNotFoundError: No module named 'fetch_sleeper'",
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": ["record_points"],
+          "source_id": "sleeper_league",
+          "status": "error"
+        },
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_users",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "sleeper_users",
+          "status": "due"
+        }
+      ],
+      "group": "league_identity",
+      "required_for": ["record_points"],
+      "status": "error"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_rosters",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "weekly",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": "ModuleNotFoundError: No module named 'fetch_sleeper'",
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": ["record_points"],
+          "source_id": "sleeper_rosters",
+          "status": "error"
+        }
+      ],
+      "group": "rosters",
+      "required_for": ["record_points"],
+      "status": "error"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component draft_meta",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "draft_meta",
+          "status": "due"
+        },
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component draft_picks",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "draft_picks",
+          "status": "due"
+        }
+      ],
+      "group": "draft",
+      "required_for": [],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_transactions",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "sleeper_transactions",
+          "status": "due"
+        }
+      ],
+      "group": "transactions",
+      "required_for": [],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_matchups",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "sleeper_matchups",
+          "status": "due"
+        }
+      ],
+      "group": "league_matchups",
+      "required_for": [],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component sleeper_projections",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "sleeper_api",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "sleeper_projections",
+          "status": "due"
+        }
+      ],
+      "group": "projections",
+      "required_for": [],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component nfl_schedules",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "weekly",
+          "captured_at": "2026-08-05T01:42:02.024011Z",
+          "empty_valid": false,
+          "envelope_sha256": "20efdb663cd45e38adcf958ef30abc38210d0d095812d9a5b17990a830caa03a",
+          "error": null,
+          "mechanism": "nflreadpy",
+          "payload_sha256": "80c891d14a2568c8465b549a633e1ac6d2515b39ccf4014ea95ddbf9046781d0",
+          "required_for": ["record_points"],
+          "source_id": "nfl_schedules",
+          "status": "captured"
+        },
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component nfl_team_context",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "weekly",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "nflreadpy",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "nfl_team_context",
+          "status": "due"
+        },
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component nfl_injuries",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "daily",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "nflreadpy",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "nfl_injuries",
+          "status": "due"
+        }
+      ],
+      "group": "nfl_context",
+      "required_for": ["record_points"],
+      "status": "incomplete"
+    },
+    {
+      "components": [
+        {
+          "acquisition_trigger": "python scripts/capture_2026.py --season 2026 --component chat_export",
+          "availability_window": {
+            "closes_at_rule": "never",
+            "opens_at_rule": "immediate"
+          },
+          "cadence": "on_demand",
+          "captured_at": null,
+          "empty_valid": false,
+          "envelope_sha256": null,
+          "error": null,
+          "mechanism": "manual",
+          "payload_sha256": null,
+          "required_for": [],
+          "source_id": "chat_export",
+          "status": "due"
+        }
+      ],
+      "group": "chat",
+      "required_for": [],
+      "status": "incomplete"
+    }
+  ],
+  "ok": false,
+  "season": 2026,
+  "tranche": "A",
+  "unmet_required": ["sleeper_league", "sleeper_rosters"]
+}
