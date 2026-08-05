@@ -1,0 +1,301 @@
+{
+  "frozen_at": "2026-08-05T01:41:13.097362Z",
+  "policy_sha256": "fed22ac2b5a46df3268bb4d4a8c3d95aa744876cb13fcdd4ecb65b5147877b69",
+  "policy_version": "v1",
+  "rows": [
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 604800,
+      "kind": "capture",
+      "known_at_basis": "Sleeper API object read live at captured_at",
+      "locator_or_endpoint": "/league/1312884727480352768",
+      "policy_version": "v1",
+      "required_for": ["record_points"],
+      "scope": "baseline",
+      "source_id": "sleeper_league"
+    },
+    {
+      "arms": ["record_points"],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 172800,
+      "kind": "capture",
+      "known_at_basis": "Sleeper API object read live at captured_at",
+      "locator_or_endpoint": "/league/1312884727480352768/rosters",
+      "policy_version": "v1",
+      "required_for": ["record_points"],
+      "scope": "baseline",
+      "source_id": "sleeper_rosters"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 604800,
+      "kind": "capture",
+      "known_at_basis": "nflverse schedules dataset read at captured_at",
+      "locator_or_endpoint": "nflreadpy:schedules?season=2026",
+      "policy_version": "v1",
+      "required_for": ["record_points"],
+      "scope": "baseline",
+      "source_id": "nfl_schedules"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 86400,
+      "kind": "capture",
+      "known_at_basis": "Sleeper API object read live at captured_at",
+      "locator_or_endpoint": "/league/1312884727480352768/users",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "sleeper_users"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 86400,
+      "kind": "capture",
+      "known_at_basis": "Sleeper draft metadata read live at captured_at (2026 rookie draft completed 2026-07-10)",
+      "locator_or_endpoint": "/league/1312884727480352768/drafts",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "draft_meta"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 86400,
+      "kind": "capture",
+      "known_at_basis": "Sleeper draft picks read live at captured_at; draft_id resolved from /league/{league_id}/drafts (2026 draft complete, 72 picks)",
+      "locator_or_endpoint": "/draft/{draft_id}/picks",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "draft_picks"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 86400,
+      "kind": "capture",
+      "known_at_basis": "Sleeper API object read live at captured_at",
+      "locator_or_endpoint": "/league/1312884727480352768/transactions/{week}",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "sleeper_transactions"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 86400,
+      "kind": "capture",
+      "known_at_basis": "Sleeper API object read live at captured_at",
+      "locator_or_endpoint": "/league/1312884727480352768/matchups/{week}",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "sleeper_matchups"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 86400,
+      "kind": "capture",
+      "known_at_basis": "Sleeper projections endpoint read at captured_at (shape unverified until B1 — contract section 9 item 2)",
+      "locator_or_endpoint": "/projections/nfl/2026/{week}?season_type=regular",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "sleeper_projections"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 604800,
+      "kind": "capture",
+      "known_at_basis": "nflverse team stats dataset read at captured_at",
+      "locator_or_endpoint": "nflreadpy:team_stats?season=2026",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "nfl_team_context"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": 86400,
+      "kind": "capture",
+      "known_at_basis": "nflverse injuries dataset read at captured_at",
+      "locator_or_endpoint": "nflreadpy:injuries?season=2026",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "nfl_injuries"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "chat_refresh": {
+        "initial": "full export ingested before the first B bundle",
+        "subsequent": "re-export before the preview bundle when new messages exist"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": null,
+      "kind": "capture",
+      "known_at_basis": "league-private WhatsApp export ingested manually; message timestamps carry their own known_at",
+      "locator_or_endpoint": "manual:whatsapp_export",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "chat_export"
+    },
+    {
+      "arms": ["record_points"],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": null,
+      "kind": "qualified_artifact",
+      "known_at_basis": "2025 season complete; committed artifact pinned to its git blob at bundle time (I54/I55)",
+      "locator_or_endpoint": "data/2025/season_combined.json",
+      "policy_version": "v1",
+      "required_for": ["record_points"],
+      "scope": "baseline",
+      "source_id": "standings_2025"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": null,
+      "kind": "qualified_artifact",
+      "known_at_basis": "2022 season complete; committed artifact, blob-pinned",
+      "locator_or_endpoint": "data/2022/season_combined.json",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "league_history_2022"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": null,
+      "kind": "qualified_artifact",
+      "known_at_basis": "2023 season complete; committed artifact, blob-pinned",
+      "locator_or_endpoint": "data/2023/season_combined.json",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "league_history_2023"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": null,
+      "kind": "qualified_artifact",
+      "known_at_basis": "2024 season complete; committed artifact, blob-pinned",
+      "locator_or_endpoint": "data/2024/season_combined.json",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "league_history_2024"
+    },
+    {
+      "arms": [],
+      "availability_window": {
+        "closes_at_rule": "never",
+        "opens_at_rule": "immediate"
+      },
+      "editions": ["2026-preseason", "2026-wk01-preview"],
+      "empty_valid": false,
+      "freshness": null,
+      "kind": "qualified_artifact",
+      "known_at_basis": "cross-season player-id index (committed, blob-pinned); shared identically by both model arms per S3 — binding happens at B",
+      "locator_or_endpoint": "data/2025/player_arcs/_index.json",
+      "policy_version": "v1",
+      "required_for": [],
+      "scope": "baseline",
+      "source_id": "player_crosswalk"
+    }
+  ],
+  "scope": "baseline"
+}
