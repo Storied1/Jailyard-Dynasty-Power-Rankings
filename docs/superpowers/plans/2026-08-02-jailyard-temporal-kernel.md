@@ -112,7 +112,10 @@ same interface). No new services.
 **This entire section is superseded by
 `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`.** Tasks P1-P3 below are retained
 only as the record of what Blake's eight-accounting-groups ruling replaced. Executing them would
-create a second, divergent `capture_2026.py` against a different table.
+create a second, divergent `capture_2026.py` against a different table — and would WRITE into the
+operating Phase-P append-only store, violating this plan's own store-separation constraint. Their
+step checkboxes are therefore struck (`~~[SUPERSEDED — DO NOT EXECUTE]~~`): an agentic executor
+walks checkboxes, and prose warnings do not stop a checklist.
 
 Verified 2026-08-02: no capture script, no capture table, no capture directories, no capture
 workflow. `data/2026` is the 2026-04-04 snapshot. The only scheduled job is
@@ -130,7 +133,7 @@ under the P-only contract rather than here.
 - Produces: `capture(source, payload, known_at_rule, privacy, captured_at) -> Path`,
   `PUBLIC_ROOT`, `PRIVATE_ROOT`, `receipt(paths) -> dict`
 
-- [ ] **Step 1: Write the failing test**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 1: Write the failing test**
 
 ```python
 import json
@@ -181,11 +184,11 @@ def test_receipt_never_carries_private_payloads(tmp_path, monkeypatch):
     assert "secret" not in json.dumps(r) and r["entries"][0]["privacy"] == "private"
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 2: Run to verify it fails**
 
 Run: `$PY -m pytest scripts/tests/test_capture_2026.py -v` → `ModuleNotFoundError`
 
-- [ ] **Step 3: Implement**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 3: Implement**
 
 ```python
 """Append-only capture store. Public and private roots are physically separate."""
@@ -255,9 +258,9 @@ def receipt(paths):
 
 Append `private_captures/` to `.gitignore`.
 
-- [ ] **Step 4: Run to verify it passes** → 6 passed
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 4: Run to verify it passes** → 6 passed
 
-- [ ] **Step 5: Commit**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 5: Commit**
 
 ```bash
 git add scripts/capture_2026.py scripts/tests/test_capture_2026.py .gitignore
@@ -284,7 +287,7 @@ zero transactions. Lane P needs its own leg range.
 > `capture_2026.py` against a different table. Retained only as the record of what the ruling
 > replaced.
 
-- [ ] **Step 1: Write the failing test**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 1: Write the failing test**
 
 ```python
 import pytest
@@ -364,9 +367,9 @@ def test_all_legs_read_and_genuinely_empty_is_a_valid_capture(monkeypatch):
 The last two are the pair that matters: an unreadable leg and a genuinely quiet league must not
 produce the same artifact. Only one of them is a capture.
 
-- [ ] **Step 2: Run to verify it fails** → `ImportError: cannot import name 'TRANSACTION_LEGS'`
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 2: Run to verify it fails** → `ImportError: cannot import name 'TRANSACTION_LEGS'`
 
-- [ ] **Step 3: Write `content/governance/capture_table.json`**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 3: Write `content/governance/capture_table.json`**
 
 ```json
 {
@@ -436,7 +439,7 @@ produce the same artifact. Only one of them is a capture.
 }
 ```
 
-- [ ] **Step 4: Implement the fetchers**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 4: Implement the fetchers**
 
 ```python
 TRANSACTION_LEGS = list(range(1, 19))      # never derived from len(all_matchups)
@@ -517,9 +520,9 @@ Write `capture-manual-ingest.md` with one section per manual row (`#projections`
 `#chat`) giving the source, the exact `capture(...)` invocation, the `known_at` justification, and
 for chat that it is private-class and lands in `PRIVATE_ROOT`.
 
-- [ ] **Step 5: Run** → 10 passed
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 5: Run** → 10 passed
 
-- [ ] **Step 6: Commit**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 6: Commit**
 
 ```bash
 git add scripts/capture_2026.py content/governance/capture_table.json docs/superpowers/plans/capture-manual-ingest.md scripts/tests/test_capture_2026.py
@@ -540,7 +543,7 @@ per-row `status` in `{"captured", "unavailable", "error"}`, and `ROW_STATUSES`
 named human trigger" — a planned gap. `error` means "this row had a producer and it failed" — an
 unplanned gap. Collapsing them lets an outage read as a documented manual step.
 
-- [ ] **Step 1: Write the failing test**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 1: Write the failing test**
 
 ```python
 import json
@@ -601,9 +604,9 @@ def test_no_private_payload_in_the_receipt():
         accounting_receipt("2026-08-02T00:00:00Z", None, dry_run=True))
 ```
 
-- [ ] **Step 2: Run to verify it fails** → `ImportError`
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 2: Run to verify it fails** → `ImportError`
 
-- [ ] **Step 3: Implement**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 3: Implement**
 
 ```python
 ROW_STATUSES = {"captured", "unavailable", "error"}
@@ -701,7 +704,7 @@ A dry run exits 0 because it asserts nothing about coverage; a real run exits **
 required row is not `captured`. The scheduled task and the workflow both key on that code, so a
 silent capture failure surfaces the next morning instead of at normalization time in October.
 
-- [ ] **Step 3b: Run to verify it passes** → 7 passed
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 3b: Run to verify it passes** → 7 passed
 
 ```bash
 $PY -m pytest scripts/tests/test_capture_accounting.py -q || exit 1
@@ -711,13 +714,13 @@ The next step writes real capture files into the repository. Do not reach it on 
 P3 previously went straight from implementation to a live baseline capture without ever running
 its own tests green.
 
-- [ ] **Step 4: Take the baseline capture — do this before starting K1**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 4: Take the baseline capture — do this before starting K1**
 
 ```bash
 $PY scripts/capture_2026.py --league-id <2026_LEAGUE_ID> --now-utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 ```
 
-- [ ] **Step 5: Stage the public root only**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 5: Stage the public root only**
 
 ```bash
 git add data/captures/2026/public/
@@ -734,7 +737,7 @@ git commit -m "data(capture): baseline 2026 public capture with accounting recei
 The second check is the one that catches a silent no-op: an empty stage means the capture produced
 nothing, and committing it would record coverage that does not exist.
 
-- [ ] **Step 6: Daily local capture until the workflow is activated**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 6: Daily local capture until the workflow is activated**
 
 A phase-boundary checkpoint is not a cadence. Register it so it survives an unattended day:
 
@@ -760,15 +763,15 @@ schtasks //Run //TN "JailyardCapture2026"
 schtasks //Query //TN "JailyardCapture2026" //V //FO LIST | grep -i "last result\|last run"
 ```
 
-- [ ] **Step 7: Author the workflow — inactive until pushed**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 7: Author the workflow — inactive until pushed**
 
 `.github/workflows/capture-preseason-2026.yml`, `cron: '0 6 * 7,8,9 *'` (daily through September;
 the pre-kickoff window does not end 31 August). The job must **commit its captures back** — a
 runner discards its filesystem on exit.
 
-- [ ] **Step 8: STOP — activation requires Blake's explicit approval of that exact push.**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 8: STOP — activation requires Blake's explicit approval of that exact push.**
 
-- [ ] **Step 9: Commit**
+- ~~[SUPERSEDED — DO NOT EXECUTE]~~ **Step 9: Commit**
 
 ```bash
 git add scripts/capture_2026.py .github/workflows/capture-preseason-2026.yml scripts/tests/test_capture_accounting.py
@@ -1210,17 +1213,17 @@ def test_on_disk_payload_tampering_is_refused(tmp_path):
 def test_value_revert_mints_three_distinct_ids_not_a_cycle(tmp_path):
     """A -> B -> A at a stable known_at (roster drop/re-add before the anchor
     moves). Without `supersedes` in the identity hash the third observation
-    re-mints the first fact_id, the supersession graph becomes a cycle, and
-    state_at retires all three facts -- a membership that silently vanishes."""
-    from scripts.temporal_state import state_at
+    re-mints the first fact_id and the supersession graph becomes a cycle.
+    (The state-resolution half of this scenario lives in K1.7's
+    test_2b_value_revert_resolves_through_state_at -- temporal_state.py does
+    not exist yet at this task.)"""
     s = FactStore(tmp_path / "f.jsonl")
     r = dict(OBS, source_record_id="roster:2025:1:6949", fact_type="transaction")
     f1, _ = s.observe(payload={"on": True}, **r)
     f2, _ = s.observe(payload={"on": False}, **r)
     f3, _ = s.observe(payload={"on": True}, **r)
     assert len({f1.fact_id, f2.fact_id, f3.fact_id}) == 3 and len(s.load()) == 3
-    got = state_at(2025, "2025-09-02T00:00:00Z", "public", facts=s.load())
-    assert got.value("transaction", "roster:2025:1:6949").payload == {"on": True}
+    assert f2.supersedes == f1.fact_id and f3.supersedes == f2.fact_id
 
 def test_same_record_id_under_two_types_never_cross_supersedes(tmp_path):
     """Prefix disjointness is a convention in nine f-strings; the mechanism is
@@ -2044,6 +2047,13 @@ git commit -m "feat(decisions): arm-scoped decision history, cross-arm contamina
 
 ### Task K1.6: Normalizers for the nine bridge fact types
 
+**PREREQUISITE: Task K2.2 executes BEFORE this task, despite document order.**
+`normalize_facts.py` imports `scripts.kickoff_source` (`UnavailableEvidence` at the top of
+`normalize_all`, `to_utc`/`resolve_zone` in `_nfl_game`), so until `kickoff_source.py` exists,
+**every** call to `normalize_all` — K1.6 Step 4, K1.7 Steps 2-3, K2.1 Step 5b — dies with
+`ModuleNotFoundError`. Execution order within K1/K2 is therefore: K1.1-K1.5 → **K2.2** → K1.6 →
+K1.7 → K2.1 → K2.3. The Ordering paragraph in the Self-Review records the same edge.
+
 **Files:** Create `scripts/normalize_facts.py`, `scripts/tests/test_normalize_facts.py`
 
 **Interfaces:**
@@ -2053,6 +2063,8 @@ git commit -m "feat(decisions): arm-scoped decision history, cross-arm contamina
   `normalize_all(source_root, out_path, season) -> dict` (four-bucket report: counts / unqualified /
   undatable / unavailable), `_iter_source(source_root, fact_type, spec, season)`,
   `ENVELOPE_SOURCES`, `LEGACY_SOURCES`, `PRIOR_SEASONS`, `LEGACY_CAPTURE_INSTANTS`,
+  `_load_venue_timezones()` (lru_cached loader of `content/governance/venue_timezones.json`),
+  `MissingSource` (raised by `_iter_source` before its first yield when a legacy file is absent),
   `NORMALIZER_VERSION`, `UnqualifiedSource`, and a `main()` CLI ending
   `raise SystemExit(main())` (the producer of `data/facts/{season}.jsonl`)
 
@@ -2165,12 +2177,15 @@ def _schedule_pairing(raw, season):
             "pregame availability; supply a qualified schedule source or a versioned policy")
     if not raw.get("policy_id") and not raw.get("known_at"):
         raise UnqualifiedSource("schedule_pairing requires known_at or a versioned policy_id")
-    return {"fact_type": "schedule_pairing",
+    meta = {"fact_type": "schedule_pairing",
             "source_record_id": f"sched:{season}:{raw['week']}:{raw['home']}:{raw['away']}",
             "entity_ref": {"type": "matchup", "id": f"{raw['home']}|{raw['away']}"},
             "effective_at": raw["known_at"], "known_at": raw["known_at"],
             "known_at_basis": raw.get("policy_id", "qualified_schedule_source"),
             "access_scope": "public", "privacy": "public"}
+    body = {"season": season, "week": raw["week"],
+            "home": raw["home"], "away": raw["away"]}
+    return meta, body
 
 
 def _transaction(raw, season):
@@ -2180,20 +2195,27 @@ def _transaction(raw, season):
             f"transaction {raw.get('transaction_id')} has no status_updated; "
             "`created` is not an acceptable fallback for an effective instant")
     inst = _instant(ms)
-    return {"fact_type": "transaction",
+    meta = {"fact_type": "transaction",
             "source_record_id": f"txn:{raw['transaction_id']}",
             "entity_ref": {"type": "transaction", "id": str(raw["transaction_id"])},
             "effective_at": inst, "known_at": inst,
             "known_at_basis": "effective_completion_instant",
             "access_scope": "public", "privacy": "public"}
+    body = {"season": season, "transaction_id": str(raw["transaction_id"]),
+            "type": raw.get("type"), "adds": raw.get("adds"),
+            "drops": raw.get("drops"), "roster_ids": raw.get("roster_ids")}
+    return meta, body
 
 
 def _chat_message(raw, season):
     ts = raw["timestamp_utc"]
-    return {"fact_type": "chat_message", "source_record_id": f"msg:{raw['id']}",
+    meta = {"fact_type": "chat_message", "source_record_id": f"msg:{raw['id']}",
             "entity_ref": {"type": "message", "id": str(raw["id"])},
             "effective_at": ts, "known_at": ts, "known_at_basis": "message_timestamp",
             "access_scope": "league_private", "privacy": "private"}
+    body = {"id": raw["id"], "timestamp_utc": ts,
+            "sender": raw.get("sender"), "text": raw.get("text")}
+    return meta, body
 
 
 def _franchise_identity(raw, season):
@@ -2211,7 +2233,10 @@ def _franchise_identity(raw, season):
             "effective_at": inst, "known_at": inst, "known_at_basis": "capture_instant",
             "access_scope": "public", "privacy": "public"}
     body = {"season": season, "roster_id": str(raw["roster_id"]),
-            "owner_id": raw.get("owner_id"), "display_name": raw.get("display_name")}
+            "owner_id": raw.get("owner_id"),
+            # 2026: sleeper_users display_name; 2025 legacy: roster_map carries
+            # username/team_name, never display_name -- read both.
+            "display_name": raw.get("display_name") or raw.get("username")}
     return meta, body
 
 
@@ -2253,12 +2278,15 @@ def _roster_membership(raw, season):
         raise UnqualifiedSource(
             "roster_membership requires a qualified pre-kickoff anchor instant; "
             "a season-end roster snapshot cannot date a preseason membership")
-    return {"fact_type": "roster_membership",
+    meta = {"fact_type": "roster_membership",
             "source_record_id": f"roster:{season}:{raw['roster_id']}:{raw['player_id']}",
             "entity_ref": {"type": "franchise", "id": str(raw["roster_id"])},
             "effective_at": anchor, "known_at": anchor,
             "known_at_basis": "anchor_or_transaction_completion",
             "access_scope": "public", "privacy": "public"}
+    body = {"season": season, "roster_id": str(raw["roster_id"]),
+            "player_id": str(raw["player_id"]), "on_roster": bool(raw.get("on_roster", True))}
+    return meta, body
 
 
 def _draft_pick(raw, season):
@@ -2314,17 +2342,26 @@ def _nfl_game(raw, season):
     """Kickoff needs venue timezone -- reuse kickoff_source.to_utc (K2.2), never
     append Z to a local time-of-day. NOTE the ordering consequence: K2.2 must be
     executed BEFORE this normalizer can run (recorded in the Ordering paragraph);
-    until then nfl_game is registered-but-unsourced. `tz` is NOT read from the
-    record -- verified absent from both legacy nfl_games files and the 2026
-    schedules envelope -- it is resolved via content/governance/venue_timezones
-    (K2.2's resolve_zone, keyed by stadium then home team), failing closed.
-    An undatable game raises UnavailableEvidence, which normalize_all catches
-    into its own `undatable` counter -- distinct from `unqualified` -- so a
-    partial nfl_game yield is visible, never a silent abort mid-run.
+    K1.6 cannot execute at all before K2.2 -- see this task's prerequisite note.
+    `gameday`/`gametime` are ITERATOR-THREADED: the 2026 schedules envelope
+    carries them natively; legacy 2025 game files carry only a local `kickoff`
+    time-of-day with NO calendar date, so the iterator joins the schedules
+    parquet by game_id (the design's "nfl_games/ + schedules" row). `tz` is NOT
+    read from the record -- verified absent from both lanes -- it is resolved
+    via content/governance/venue_timezones.json through `_load_venue_timezones()`
+    (a cached loader declared in this module's Interfaces; K2.2's resolve_zone
+    consumes the same map), keyed by stadium then home team, failing closed.
+    An undatable game (no schedules row, absent parquet, unresolvable zone)
+    raises UnavailableEvidence, which normalize_all catches into its own
+    `undatable` counter -- distinct from `unqualified` -- so a partial nfl_game
+    yield is visible, never a silent abort mid-run.
     """
     from scripts.kickoff_source import to_utc, resolve_zone, UnavailableEvidence  # noqa: F401
     inst = raw.get("concluded_at")
     if not inst:
+        if not raw.get("gameday") or not raw.get("gametime"):
+            raise UnavailableEvidence(
+                f"game {raw.get('game_id')}: no calendar date (missing schedules join)")
         tzname = resolve_zone(raw, _load_venue_timezones())
         inst = to_utc(raw["gameday"], raw["gametime"], tzname)
     meta = {"fact_type": "nfl_game",
@@ -2378,7 +2415,7 @@ LEGACY_SOURCES = {     # fact_type -> (path template, verified record walk)
     "draft_pick":         ("data/{season}/draft_picks.json", "top-level dict {draft_id, start_date, picks[]}; draft_instant from start_date under policy draft-window-v1"),
     "chat_message":       ("chat/parsed_messages.json", "messages[] -- NOTE: chat/ (repo root), gitignored; content/chat/parsed_messages.json DOES NOT EXIST. Local-only source; absence yields the type `unavailable`, never a crash"),
     "historical_matchup": ("data/{prior}/season_combined.json", "fan-out over PRIOR_SEASONS; same walk as matchup_result"),
-    "nfl_game":           ("data/{season}/nfl_games/*.json", "ONE GAME PER FILE (no 'games' container); the file IS the record"),
+    "nfl_game":           ("data/{season}/nfl_games/*.json + data/external/schedules_{season}.parquet", "ONE GAME PER FILE (no 'games' container); the file IS the record. VERIFIED: legacy game files carry kickoff (LOCAL time-of-day), stadium/stadium_id, season, week -- and NO calendar date; the design's source row is 'nfl_games/ + schedules' and the date lives in the schedules half. The iterator joins each game to its schedules row by game_id and threads gameday/gametime onto the record; a game with no schedules row, or an absent parquet (gitignored -- fetch via scripts/fetch_nflreadpy.py), raises UnavailableEvidence into the `undatable` bucket, never a KeyError"),
     # schedule_pairing and roster_membership: DECLARED, UNSOURCED sentinels --
     # see the `unavailable` contract below. Present in this map as (None, reason)
     # so the refusal is data, not an omission.
@@ -2415,19 +2452,25 @@ def normalize_all(source_root, out_path, season):
         if spec[0] is None:
             unavailable[fact_type] = spec[1]
             continue
-        for source_ref, env_meta, raw in _iter_source(source_root, fact_type, spec, season):
-            try:
-                meta, body = NORMALIZERS[fact_type](raw, season)
-            except UnqualifiedSource:
-                unqualified[fact_type] = unqualified.get(fact_type, 0) + 1
-                continue
-            except UnavailableEvidence:
-                undatable[fact_type] = undatable.get(fact_type, 0) + 1
-                continue
-            store.observe(payload=body, source_ref=source_ref,
-                          captured_at=env_meta["captured_at"],  # ENVELOPE/policy, never the record, never now()
-                          normalizer_version=NORMALIZER_VERSION, **meta)
-            counts[fact_type] = counts.get(fact_type, 0) + 1
+        try:
+            # MissingSource raises from _iter_source BEFORE its first yield (at
+            # file open), so this wrap can never discard already-observed records.
+            for source_ref, env_meta, raw in _iter_source(source_root, fact_type, spec, season):
+                try:
+                    meta, body = NORMALIZERS[fact_type](raw, season)
+                except UnqualifiedSource:
+                    unqualified[fact_type] = unqualified.get(fact_type, 0) + 1
+                    continue
+                except UnavailableEvidence:
+                    undatable[fact_type] = undatable.get(fact_type, 0) + 1
+                    continue
+                store.observe(payload=body, source_ref=source_ref,
+                              captured_at=env_meta["captured_at"],  # ENVELOPE/policy, never the record, never now()
+                              normalizer_version=NORMALIZER_VERSION, **meta)
+                counts[fact_type] = counts.get(fact_type, 0) + 1
+        except MissingSource as exc:
+            unavailable[fact_type] = str(exc)
+            continue
     store.write()
     for t in sorted(set(unqualified) - set(counts)):
         unavailable[t] = f"all {unqualified[t]} records refused ({t} yielded zero facts)"
@@ -2457,10 +2500,12 @@ silently deferred into that missing function. Its contract:
   (recorded in `known_at_basis` via `conclusion_policy`); for draft walks it threads top-level
   `draft_id` and `draft_instant`/`draft_instant_basis`. Records never invent instants; the iterator
   attaches them from named, versioned policies or the normalizer refuses.
-- A missing **file** in the legacy lane yields the type into `unavailable` (via a sentinel
-  exception the loop catches), never `FileNotFoundError` mid-run; a missing **field** in a record
-  is the normalizer's `UnqualifiedSource` to raise. `shared.load_json` is always called with
-  `required=True` here — the silent-`None` default is exactly the wrong behavior for a producer.
+- A missing **file** in the legacy lane yields the type into `unavailable` via `MissingSource`,
+  which `_iter_source` raises at file-open time — **before its first yield**, so the loop's wrap
+  can never discard already-observed records — never `FileNotFoundError` mid-run; a missing
+  **field** in a record is the normalizer's `UnqualifiedSource` to raise. `shared.load_json` is
+  always called with `required=True` here — the silent-`None` default is exactly the wrong
+  behavior for a producer.
 
 **`captured_at` never comes from the record.** Verified: NO legacy source record (users,
 season_combined matchups, transactions, draft picks, nfl_games, parsed messages) carries a
@@ -2491,12 +2536,9 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-Every normalizer follows the `(meta, body)` convention — `_matchup_result`, `_draft_pick`,
-`_nfl_game`, and `_historical_matchup` are shown in full above; `_franchise_identity`,
-`_schedule_pairing`, `_transaction`, `_chat_message`, and `_roster_membership` return the same
-shape, with bodies: franchise `{roster_id, owner_id, display_name}`; schedule
-`{season, week, home, away}`; transaction `{season, transaction_id, type, adds, drops, roster_ids}`;
-chat `{id, timestamp_utc, sender, text}`; roster `{season, roster_id, player_id, on_roster}`.
+All nine normalizers follow the `(meta, body)` convention and are shown in full above — none
+returns a bare dict (a `meta, body = <dict>` unpack raises `ValueError`, which is exactly what the
+gate review caught when four of the nine were left on the old shape).
 
 - [ ] **Step 4: Run to verify it passes** → 9 passed
 
@@ -2575,6 +2617,19 @@ def test_2_mutation_in_place_update_would_lose_the_earlier_state(tmp_path, monke
     early = state_at(2025, "2025-09-03T00:00:00Z", "public", facts=s.load())
     assert early.value("transaction", "txn:1").payload == {"v": 2}, \
         "control: mutation rewrites history at an earlier cutoff"
+
+def test_2b_value_revert_resolves_through_state_at(tmp_path):
+    """The state half of K1.2's revert test (deferred here because
+    temporal_state.py does not exist at K1.2): all three facts of an A -> B -> A
+    chain admit, the chain retires cleanly, and value() resolves to the final
+    reading -- never None, which is what the pre-fix cycle produced."""
+    s = FactStore(tmp_path / "f.jsonl")
+    r = dict(OBS, source_record_id="roster:2025:1:6949")
+    s.observe(payload={"on": True}, **r)
+    s.observe(payload={"on": False}, **r)
+    s.observe(payload={"on": True}, **r)
+    got = state_at(2025, "2025-09-02T00:00:00Z", "public", facts=s.load())
+    assert got.value("transaction", "roster:2025:1:6949").payload == {"on": True}
 
 # 3 -------------------------------------------------------------------------
 def test_3_late_capture_excluded_from_as_recorded_replay():
@@ -2766,7 +2821,7 @@ def test_deterministic_replay_of_facts_and_state(tmp_path):
     assert [f.fact_id for f in sa.admitted] == [f.fact_id for f in sb.admitted]
 ```
 
-- [ ] **Step 2: Run** → 19 passed. **If any mutation control passes without its rule disabled, the
+- [ ] **Step 2: Run** → 20 passed. **If any mutation control passes without its rule disabled, the
       rule is not doing work — fix the rule, never the test.** Every control must (a) plant its
       mutation in a symbol the production entry point actually reads, (b) **assert the plant
       landed** before reading the consequence, and (c) read the consequence through production
@@ -2994,6 +3049,19 @@ PY
 Write the printed cutoff into the preview descriptor. `compile_state` re-derives it and refuses
 to compile a preview whose descriptor cutoff is not strictly-before the qualified kickoff.
 
+- [ ] **Step 4b: Compile all three states** — K2.3's census tests and K3.5's chain tests consume
+      all three compiled editions, and until this step only `2025-preseason` exists (K2.1 Step 5b
+      compiled it alone, before the preview cutoff was derivable):
+
+```bash
+for e in 2025-preseason 2025-wk01-preview 2025-wk01-recap; do
+  $PY scripts/compile_state.py --descriptor "content/editions/$e/descriptor.json" || exit 1
+done
+```
+
+(The preseason edition recompiles idempotently — byte-identical per K2.1's clean-rebuild test.)
+K2.3 and K3.5 depend on this step.
+
 **The qualification is a compile-time gate, not a test.** `test_result_carries_every_source_hash`
 skips when the gitignored schedules parquet is absent — deliberately: the CI suite runs on fresh
 clones with no parquet, and a hard-fail there turns every push red for a machine-state reason. The
@@ -3003,7 +3071,7 @@ compile until the parquet exists and the descriptor cutoff equals
 K1.7/K3.4 fixtures are TEST DATA, checked against the derivation by this gate the moment the real
 preview compiles — no consumer treats them as authority.
 
-- [ ] **Step 5: Run** → 5 passed
+- [ ] **Step 5: Run** → 5 passed (4 passed / 1 skipped on a clone without the gitignored schedules parquet — the skip is deliberate, see the gate note above)
 
 - [ ] **Step 6: Commit**
 
@@ -3021,7 +3089,7 @@ field find a fact type" — rather than the primary temporal guarantee.
 
 **Files:** Create `scripts/migration_census.py`, `scripts/tests/test_migration_census.py`
 
-**Interfaces:** `unmapped_legacy_fields(season) -> list[str]`, `state_leak_census(edition) -> dict`
+**Interfaces:** `unmapped_legacy_fields(season) -> list[str]`, `state_leak_census(edition, legacy=False) -> dict`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -3190,7 +3258,10 @@ def test_ledger_round_trips_through_persistence(tmp_path):
     cs = [make_claim(**base()), make_claim(**base(target="Boat"))]
     save_claims(cs, root=tmp_path)
     got = load_claims(root=tmp_path)
-    assert [c.target for c in got] == sorted(c.target for c in cs)
+    # Set equality: the on-disk sort key is (arm_id, edition_id, trial_id,
+    # claim_id), and both claims share the first three -- target order is not
+    # part of the contract.
+    assert {c.target for c in got} == {"General Ken-obi", "Boat"}
     assert not list(tmp_path.rglob("*.seal.json")), "the ledger never enters the decisions tree"
 ```
 
@@ -3206,7 +3277,7 @@ def test_ledger_round_trips_through_persistence(tmp_path):
       `(arm_id, edition_id, trial_id, claim_id)`; `load_claims(root=None)` reads them back as
       `Claim` records; `root=None` means `CLAIMS_ROOT`.
 
-- [ ] **Step 4: Run** → 8 passed
+- [ ] **Step 4: Run** → 7 passed
 
 - [ ] **Step 5: Commit**
 
@@ -3419,7 +3490,7 @@ than asserted once in aggregate.
 
 **The manifest binds producers, not just family names.** `frozen_at`/`manifest_sha256` over a list
 of names cannot detect the thing the design forbids — adding a _source_ after seeing output. Each
-family therefore also freezes `source_ids` (the `SOURCES` keys and file globs from K1.6) and
+family therefore also freezes `source_ids` (the `ENVELOPE_SOURCES`/`LEGACY_SOURCES` keys and file walks from K1.6) and
 `normalizer_version`. `assess_contrast` recomputes those from the live fact store and raises
 `ManifestDrift` if they differ from the frozen values, which is what makes "no source may be added
 after this point" enforceable rather than declarative.
@@ -3586,7 +3657,7 @@ the manifest with both stamp fields excluded, so the hash is stable) and raises 
 already frozen. `assess_contrast` raises `ValueError` on an unfrozen manifest. `frozen_at` is
 passed in rather than read from the clock, so the freeze is reproducible and testable.
 
-- [ ] **Step 4: Run** → 12 passed
+- [ ] **Step 4: Run** → 11 passed
 
 - [ ] **Step 4b: Implement `preflight` and add the CLI** — K3.7 Steps 1, 2b and 4 invoke this
       script. `preflight(manifest, editions_root=None)` IS `assess_contrast` with
@@ -4066,7 +4137,9 @@ descriptor + compiled state
                                                                    #   not after ledger/receipt writes
   -> bundle_for(arm, state, descriptor.kind)                       # ArmUnavailable fails closed
   -> decision_history_at(...) + verify_predecessor(...)            # same arm, same trial
-  -> open_run(runner_kind, **runner_config(arm))                   # configured, not implied
+  -> open_run(runner_kind, **runner_kwargs(arm, bundle))         # model arms: runner_config;
+                                                                   #   deterministic arm: computed code_hash/
+                                                                   #   config_hash/input_hashes (no provider block)
   -> RUNNERS[arm](bundle, predecessor)                             # deterministic | model
   -> ranking (one entry per franchise) + claims (>=1 per position)
   -> resolve_claims(prior_claims, state)                           # recap grades what is due
@@ -4176,7 +4249,8 @@ git commit -m "feat(eval): chronological per-arm chains with closed decision lin
 
 **Interfaces:** `score_claim(claim) -> float | None`, `aggregate(claims) -> dict`,
 `combine_trials(trials, runner_kind) -> dict`, `AGGREGATION_ORDER`,
-`MIN_TRIALS_NONDETERMINISTIC`
+`MIN_TRIALS_NONDETERMINISTIC`, `CLAIMS_DEFAULT_ROOT` (module global, `None` = the ledger's
+default root; `main()` reads it at call time so tests can redirect the ledger)
 
 - Consumes: `Claim`, `make_claim`, `load_claims` (K3.1); `ARMS` (K3.4) for each arm's
   `runner_kind`. `eval_scoring` imports `ARMS` rather than restating which arms are
@@ -4271,6 +4345,10 @@ def test_report_refuses_a_missing_cell(claim_factory, tmp_path, monkeypatch, cap
                  for a in ARMS for e in EDITION_IDS
                  for t in range(1, (1 if ARMS[a]["runner_kind"] == "deterministic" else 3) + 1)]
     save_claims(full_grid[:-1], root=tmp_path)          # exactly one cell missing
+    # CLAIMS_DEFAULT_ROOT is a module global eval_scoring's main() READS AT CALL
+    # TIME (`load_claims(root=CLAIMS_DEFAULT_ROOT)`, declared in Step 3) -- the
+    # patch below is live, not the inert-default-argument class this plan
+    # documents for SEALS_ROOT and EDITIONS_ROOT.
     monkeypatch.setattr("scripts.eval_scoring.CLAIMS_DEFAULT_ROOT", tmp_path)
     monkeypatch.setattr("sys.argv", ["eval_scoring.py", "--report"])
     assert scoring_main() == 1
@@ -4304,7 +4382,9 @@ def main():
     ap.add_argument("--report", action="store_true", required=True)
     ap.add_argument("--arm")
     a = ap.parse_args()
-    claims = load_claims()
+    # CLAIMS_DEFAULT_ROOT: module global, None means the ledger's own default
+    # root; read here at call time so tests can monkeypatch it.
+    claims = load_claims(root=CLAIMS_DEFAULT_ROOT)
     if not claims:
         # stderr: K3.7 Step 5 redirects stdout into scores.json, and a diagnostic
         # written there would become the artifact.
@@ -4453,6 +4533,12 @@ design's minimum for a non-deterministic runner.
 - [ ] **Step 4: Assess contrast integrity on the actual bundles — and branch**
 
 ```bash
+# Re-defined here: each fenced step runs as its own shell, so a function from
+# Step 2b's fence does not exist in this one -- an undefined commit_evidence
+# would leave the STOP paths' evidence uncommitted while still exiting "correctly".
+commit_evidence() {
+  git add content/editions/_evaluation/ && git commit -m "eval(k3): gate evidence at ${1}" || true
+}
 f=content/editions/_evaluation/contrast.json
 $PY scripts/eval_contrast.py --assess --full-arm full_rich --minimal-arm minimal_legal \
     > "$f.tmp"; rc=$?
@@ -4816,9 +4902,10 @@ five. `load_claims` (K3.1) is the single ledger reader for K3.5 and K3.6.
 **Ordering.** The 2026 capture lane still precedes this work because the evidence is perishable and
 nothing is currently running — but it is now delivered by the P-only contract, not by this plan, and
 the two proceed independently. Within this plan:
-K1.6 depends on K1.1-K1.2 **and on K2.2 for its `nfl_game` normalizer** (`kickoff_source.to_utc` /
-`resolve_zone` — an edge the round-two ordering paragraph omitted while the code imported it;
-until K2.2 lands, `nfl_game` is registered-but-unsourced); K2.1 depends on K1.3-K1.4 and on
+K1.6 depends on K1.1-K1.2 **and on K2.2** (`normalize_all` imports `scripts.kickoff_source`
+inside its body, so EVERY `normalize_all` call — not just `nfl_game` records — fails with
+`ModuleNotFoundError` until K2.2 lands; execution order is K1.1-K1.5 → K2.2 → K1.6 → K1.7 →
+K2.1 → K2.3, per K1.6's prerequisite note); K2.1 depends on K1.3-K1.4 and on
 K1.6's CLI having materialized `data/facts/{season}.jsonl`; K2.2 must precede the preview
 descriptor's cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **and
 K2.1** (it consumes `EditionDescriptor`); K3.6 depends on K3.4 for `runner_kind`.
