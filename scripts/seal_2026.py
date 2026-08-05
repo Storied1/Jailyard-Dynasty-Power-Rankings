@@ -529,6 +529,16 @@ def _rederive_bundle_payload(bundle, root, errors):
     _verify_manifest_entries(manifest, root, errors)
     if errors:
         return None, None
+    # the bundle's RECORDED source_manifest_sha256 must recompute from the
+    # verified entries themselves — a coordinated mutation of that field
+    # plus its dependent bindings must fail here, before any seal exists
+    recomputed_manifest_sha = sha256_hex(canonical_json_v1(gating_manifest(manifest)))
+    if recomputed_manifest_sha != bundle.get("source_manifest_sha256"):
+        errors.append(
+            "bundle's recorded source_manifest_sha256 does not recompute from "
+            "the verified manifest entries"
+        )
+        return None, None
     entries = {e["source_id"]: e for e in manifest}
     standings_entry = entries.get("standings_2025")
     rosters_entry = entries.get("sleeper_rosters")
@@ -885,9 +895,12 @@ def verify_seal_dir(trial_dir, *, repo_root=None) -> tuple[bool, list, list]:
         (seal["edition_id"], seal["arm_id"], seal["trial_id"]),
         errors,
     )
-    # …and the ARM-derived discipline must still hold — even a fully
-    # re-hashed coordinated forgery (including a forged runner_kind) fails
-    _rederive_equality_check(receipt, decision, claims, bundle, seal["arm_id"], errors)
+    # …and the ARM-derived discipline must still hold — selected from the
+    # TRIAL DIRECTORY, so a rehashed seal claiming another arm cannot pick
+    # a weaker discipline; even a fully re-hashed coordinated forgery fails
+    _rederive_equality_check(
+        receipt, decision, claims, bundle, trial_dir.parent.name, errors
+    )
     if seal["runner_kind"] != receipt.get("runner_kind"):
         errors.append("seal/receipt runner_kind disagreement")
 
@@ -993,9 +1006,33 @@ def rederive_trial(trial_dir, *, repo_root=None) -> dict:
         result["ok"] = False
         result["errors"].append("regenerated bundle hash differs from bound")
 
+    # identity comes from the TRIAL DIRECTORY, never from mutable seal
+    # content: a rehashed seal claiming another arm cannot select a weaker
+    # runner discipline
+    dir_edition = trial_dir.parent.parent.name
+    dir_arm = trial_dir.parent.name
+    try:
+        dir_trial = int(trial_dir.name.removeprefix("trial"))
+    except ValueError:
+        result["errors"].append(f"malformed trial directory name {trial_dir.name!r}")
+        result["ok"] = False
+        return result
+    for name, expected, actual in (
+        ("edition_id", dir_edition, seal["edition_id"]),
+        ("arm_id", dir_arm, seal["arm_id"]),
+        ("trial_id", dir_trial, seal["trial_id"]),
+    ):
+        if actual != expected:
+            result["errors"].append(
+                f"seal {name}={actual!r} disagrees with the trial directory "
+                f"({expected!r})"
+            )
+    if bundle.get("edition_id") != dir_edition or bundle.get("arm_id") != dir_arm:
+        result["errors"].append("bundle identity disagrees with the trial directory")
+
     # the sealed decision and claims must themselves rederive under the
-    # ARM-derived discipline — rederivation can never report green for a
-    # forged record_points decision
+    # DIRECTORY-derived arm discipline — rederivation can never report green
+    # for a forged record_points decision
     try:
         decision = load_json_bytes_strict(
             _resolve_locator(seal["decision_locator"], root).read_bytes()
@@ -1006,8 +1043,18 @@ def rederive_trial(trial_dir, *, repo_root=None) -> dict:
         receipt = load_json_bytes_strict(
             _resolve_locator(seal["receipt_locator"], root).read_bytes()
         )
+        for name, expected in (
+            ("edition_id", dir_edition),
+            ("arm_id", dir_arm),
+            ("trial_id", dir_trial),
+        ):
+            if receipt.get(name) != expected:
+                result["errors"].append(
+                    f"receipt {name}={receipt.get(name)!r} disagrees with the "
+                    f"trial directory ({expected!r})"
+                )
         _rederive_equality_check(
-            receipt, decision, claims, bundle, seal["arm_id"], result["errors"]
+            receipt, decision, claims, bundle, dir_arm, result["errors"]
         )
     except (OSError, CaptureError) as exc:
         result["errors"].append(f"run bodies unreadable for rederivation: {exc}")

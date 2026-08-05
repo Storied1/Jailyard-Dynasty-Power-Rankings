@@ -1098,3 +1098,89 @@ def test_fully_rehashed_runner_kind_bypass_fails_reload_and_rederive(tmp_path):
     result = rederive_trial(trial_dir, repo_root=world["repo_root"])
     assert not result["ok"]
     assert any("runner_kind" in e or "rederive" in e for e in result["errors"])
+
+
+# ---------------------------------------------------------------------------
+# HOLD/REVISE (2) controls — manifest-hash identity, directory-derived arm
+# ---------------------------------------------------------------------------
+
+
+def test_mutated_manifest_hash_with_consistent_bindings_refused_at_seal(tmp_path):
+    """The bundle's recorded source_manifest_sha256 must recompute from the
+    verified manifest entries BEFORE the exclusive seal write — a coordinated
+    mutation of that field plus every dependent binding (bundle_sha256,
+    receipt fields, claims) must refuse with no seal file."""
+    from scripts.bundle_2026 import compute_bundle_sha256
+    from scripts.capture_2026 import canonical_bytes
+    from scripts.seal_2026 import build_claims
+
+    world, trial_dir = _stopped_trial(tmp_path)
+    bundle_path = trial_dir.parent / "bundle.json"
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    receipt = json.loads((trial_dir / "receipt.json").read_text(encoding="utf-8"))
+    decision = json.loads((trial_dir / "decision.json").read_text(encoding="utf-8"))
+
+    bundle["source_manifest_sha256"] = "f" * 64
+    bundle["bundle_sha256"] = compute_bundle_sha256(bundle)
+    forged_claims = build_claims(
+        decision, bundle, receipt["decision_run_id"], receipt["trial_id"]
+    )
+    receipt["source_manifest_sha256"] = bundle["source_manifest_sha256"]
+    receipt["bundle_sha256"] = bundle["bundle_sha256"]
+    receipt["input_hashes"] = {
+        "decision_input_sha256": bundle["decision_input_sha256"],
+        "source_manifest_sha256": bundle["source_manifest_sha256"],
+    }
+
+    bundle_path.write_bytes(canonical_bytes(bundle))
+    (trial_dir / "claims.json").write_bytes(canonical_bytes(forged_claims))
+    (trial_dir / "receipt.json").write_bytes(canonical_bytes(receipt))
+
+    with pytest.raises(CaptureError, match="source_manifest_sha256"):
+        seal_trial(trial_dir, repo_root=world["repo_root"], now=SEAL_NOW)
+    assert not (trial_dir / "seal.sealed.json").exists()
+
+
+def test_rederive_refuses_arm_identity_forgery(tmp_path):
+    """A fully rehashed record_points trial whose seal AND receipt claim
+    minimal_legal/model cannot skip deterministic rederivation: identity
+    derives from the trial directory, and BOTH verify_seal_dir and
+    rederive_trial must return false."""
+    from scripts.capture_2026 import canonical_bytes, sha256_hex
+    from scripts.seal_2026 import build_claims
+
+    world, trial_dir = sealed_trial(tmp_path)
+    bundle = json.loads((trial_dir.parent / "bundle.json").read_text(encoding="utf-8"))
+    receipt = json.loads((trial_dir / "receipt.json").read_text(encoding="utf-8"))
+    forged_decision, _ = _forge_decision_and_claims(trial_dir, bundle, receipt)
+    forged_decision["arm_id"] = "minimal_legal"
+    receipt["arm_id"] = "minimal_legal"
+    receipt["runner_kind"] = "model"
+    receipt["output_decision_sha256"] = sha256_hex(canonical_bytes(forged_decision))
+    forged_claims = build_claims(
+        forged_decision, bundle, receipt["decision_run_id"], receipt["trial_id"]
+    )
+
+    seal_path = trial_dir / "seal.sealed.json"
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    seal["arm_id"] = "minimal_legal"
+    seal["runner_kind"] = "model"
+    seal["decision_sha256"] = receipt["output_decision_sha256"]
+    seal["claims_sha256"] = sha256_hex(canonical_bytes(forged_claims))
+    seal["receipt_sha256"] = sha256_hex(canonical_bytes(receipt))
+    body = {k: v for k, v in seal.items() if k != "decision_hash"}
+    seal["decision_hash"] = sha256_hex(canonical_bytes(body))
+
+    (trial_dir / "decision.json").write_bytes(canonical_bytes(forged_decision))
+    (trial_dir / "claims.json").write_bytes(canonical_bytes(forged_claims))
+    (trial_dir / "receipt.json").write_bytes(canonical_bytes(receipt))
+    seal_path.write_bytes(canonical_bytes(seal))
+
+    ok, errors, _ = verify_seal_dir(trial_dir, repo_root=world["repo_root"])
+    assert not ok
+
+    result = rederive_trial(trial_dir, repo_root=world["repo_root"])
+    assert not result["ok"]
+    assert any(
+        "arm" in e or "rederive" in e or "runner_kind" in e for e in result["errors"]
+    )
