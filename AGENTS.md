@@ -36,6 +36,14 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `data/league_history.json` — cross-season analytics (Elo, H2H, records)
 - Sleeper API (`https://api.sleeper.app/v1`) as live fallback
 
+## P-only 2026 Prospective Pipeline (OPERATING)
+
+Contract `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`; modules `scripts/{capture,capture_optional,cutoff,bundle,seal}_2026.py`. Gate/operate: `capture_2026.py --season 2026 --tranche A` → `cutoff_2026.py --write-receipt` → `bundle_2026.py --edition <ed> --arm record_points --policy content/governance/source_policy_2026.v1.json` → `seal_2026.py --edition <ed> --arm record_points --trial 1`; check with `seal_2026.py --verify-all` / `--rederive-all` (all need `POLARS_SKIP_CPU_CHECK=1`).
+
+- `data/captures/2026/` and `content/seals/2026/` are APPEND-ONLY — never edit, delete, or re-seal; `source_policy_2026.v1.json` is frozen — supersede, never modify; freeze requires `--expected-candidate-sha256`.
+- `private_captures/` + `private_bundles/` are gitignored — never `git add -f`; run the staging guard before committing captures/bundles.
+- Prettier reformatting committed pipeline JSON is safe (verification recomputes canonical content); value edits break seals by design.
+
 ## Critical Rules
 
 - **NEVER touch `dontuse`, `dontuse2`, `dontusedraft3`** — archived legacy files

@@ -46,6 +46,28 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `content/preseason-2025/{preseason_chat_context,preseason_content}.json` + `content/review-log.jsonl` — M1 t2 preseason pipeline (2026-07-08): sanitized preseason chat context, `/write-preseason` output, shared JSONL editorial log (one line per `/edit-week`+`/edit-preseason` pass)
 - Sleeper API (`https://api.sleeper.app/v1`) as live fallback
 
+## P-only 2026 Prospective Pipeline (Tranche A — OPERATING since 2026-08-05)
+
+Contract: `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md` (APPROVED, implemented, both editions sealed prospective). Modules: `scripts/{capture,capture_optional,cutoff,bundle,seal}_2026.py`.
+
+```bash
+export POLARS_SKIP_CPU_CHECK=1   # required for the nflreadpy path
+python scripts/capture_2026.py --season 2026 --tranche A        # gate: 3 required producers + accounting receipt (exit!=0 = red)
+python scripts/capture_2026.py --season 2026 --component <id>   # A-opt lane capture (perishable evidence)
+python scripts/cutoff_2026.py --season 2026 --write-receipt
+python scripts/bundle_2026.py --edition <ed> --arm record_points --policy content/governance/source_policy_2026.v1.json
+python scripts/seal_2026.py --edition <ed> --arm record_points --trial 1   # self-enforces gate, reload + rederive before success
+python scripts/seal_2026.py --verify-all     # and --rederive-all
+```
+
+- **Append-only store** — `data/captures/2026/`, `content/seals/2026/` artifacts are never edited, deleted, or re-sealed; seals use the `.sealed.json` suffix; exclusive-create enforces it.
+- **`source_policy_2026.v1.json` is FROZEN (I47)** — never edit; supersede only via a new version; freezing requires `--expected-candidate-sha256` (the Blake-approval binding).
+- **Prospective label** = ended AND sealed ≤ cutoff, read only from the hash-verified cutoff receipt; no reclassification mechanism exists and none may be added.
+- **Verification recomputes canonical content** — prettier reformatting committed JSON does NOT break hashes; any value edit does.
+- **Locators are repo-relative POSIX** in repository-owned artifacts (machine-absolute refuses); the seals tree is TRACKED; `private_captures/` + `private_bundles/` are gitignored — never `git add -f`.
+- **Staging guard before committing captures/bundles:** `git diff --cached --name-only | grep -qE '^(private_captures|private_bundles)/'` must match nothing.
+- **New scripts bootstrap BOTH paths** — `scripts/` AND the repo root (`fetch_sleeper.py` lives at root; pytest's CWD masks a missing root insert until the CLI runs).
+
 ## Critical Rules
 
 - **NEVER touch `dontuse`, `dontuse2`, `dontusedraft3`** — archived legacy files
