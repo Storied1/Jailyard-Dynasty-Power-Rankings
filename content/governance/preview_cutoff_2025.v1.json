@@ -1,0 +1,10 @@
+{
+  "cutoff_utc": "2025-09-05T00:19:59Z",
+  "kickoff_game_id": "2025_01_DAL_PHI",
+  "kickoff_utc": "2025-09-05T00:20:00Z",
+  "provenance": "python scripts/kickoff_source.py --derive-preview-cutoff --season 2025 --out content/governance/preview_cutoff_2025.v1.json",
+  "source_hashes": {
+    "content/governance/venue_timezones.json": "sha256:05c4ccbc1bf74e9d5c98cb25c6a6e435bc654bbfa65bd17b68cba29b87041155",
+    "data/external/schedules_2025.parquet": "sha256:56818014e9d3d8f42bbfa5e8f787f1c6c412a4fe3f38b55b3d40a8ee3ce10a91"
+  }
+}
