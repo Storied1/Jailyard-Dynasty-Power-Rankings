@@ -1184,3 +1184,22 @@ def test_rederive_refuses_arm_identity_forgery(tmp_path):
     assert any(
         "arm" in e or "rederive" in e or "runner_kind" in e for e in result["errors"]
     )
+
+
+def test_trial_directory_alias_rejected(tmp_path):
+    """trial01 aliases trial1 through int() parsing — verification AND
+    rederivation must BOTH reject the non-canonical directory spelling
+    (canonical grammar: trial<positive-int>, no leading zero)."""
+    import shutil
+
+    world, trial_dir = sealed_trial(tmp_path)
+    alias = trial_dir.parent / "trial01"
+    shutil.copytree(trial_dir, alias)
+
+    ok, errors, _ = verify_seal_dir(alias, repo_root=world["repo_root"])
+    assert not ok
+    assert any("trial" in e for e in errors)
+
+    result = rederive_trial(alias, repo_root=world["repo_root"])
+    assert not result["ok"]
+    assert any("malformed trial directory" in e for e in result["errors"])

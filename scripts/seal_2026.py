@@ -20,6 +20,7 @@ import argparse
 import hashlib
 import inspect
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1011,12 +1012,18 @@ def rederive_trial(trial_dir, *, repo_root=None) -> dict:
     # runner discipline
     dir_edition = trial_dir.parent.parent.name
     dir_arm = trial_dir.parent.name
-    try:
-        dir_trial = int(trial_dir.name.removeprefix("trial"))
-    except ValueError:
-        result["errors"].append(f"malformed trial directory name {trial_dir.name!r}")
+    # canonical grammar only: trial<positive-int>, no leading zero, sign,
+    # zero, or missing prefix — int("01") would alias trial01 to trial 1 and
+    # make verification and rederivation disagree about artifact identity
+    trial_match = re.fullmatch(r"trial([1-9][0-9]*)", trial_dir.name)
+    if trial_match is None:
+        result["errors"].append(
+            f"malformed trial directory name {trial_dir.name!r} — canonical "
+            "grammar is trial<positive-int> with no leading zero"
+        )
         result["ok"] = False
         return result
+    dir_trial = int(trial_match.group(1))
     for name, expected, actual in (
         ("edition_id", dir_edition, seal["edition_id"]),
         ("arm_id", dir_arm, seal["arm_id"]),
