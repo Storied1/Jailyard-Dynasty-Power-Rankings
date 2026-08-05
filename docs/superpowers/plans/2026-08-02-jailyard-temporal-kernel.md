@@ -14,11 +14,17 @@ change was required. **Lane P moved out of this plan** — Tasks P1-P3 are SUPER
 `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`, which delivers the capture and
 sealing lane with executed, mutation-tested code. This document is now **K1-K3 only**.
 
-**Outstanding against this plan:** the 2026-08-03 adversarial review returned NO-SHIP with one
-critical and seven high findings against K1-K3 — a disconnected `SOURCES`/`normalize_all` producer
-graph, fact-identity and coalescing defects, an all-seasons `standings()`, a seal/body glob
-collision, receipt ordering, contrast-control contradictions, and non-durable review artifacts.
-**None are corrected here.** Still DRAFT; no revision constitutes approval.
+**Round three (2026-08-05):** the 2026-08-03 adversarial review's NO-SHIP findings — one critical
+and seven high against K1-K3 — were independently **re-derived from this text** by a three-reviewer
+pass (source/fact graph, decision/artifact graph, evaluation/execution graph) and are **resolved in
+this revision**: the `SOURCES`/`normalize_all` producer graph now reads real envelopes and legacy
+shapes (K1.6), fact identity binds `supersedes` and refuses duplicate ids (K1.2), coalescing and
+supersession are type-keyed and revert-safe (K1.2), `standings()` is season-qualified (K1.4), the
+seal/body glob collision is removed by suffix contract (K1.5), receipts are closed before they are
+persisted and persisted before they are sealed (K3.5), the contrast controls follow one coherent
+degraded-verdict rule (K3.3/K3.4/K3.7), and every review artifact the K3.8 packet cites is written
+to a committed path (K3.7). See Self-Review, "Round-three integration."
+Still DRAFT; no revision constitutes approval.
 
 **Design authority:** `docs/superpowers/specs/2026-08-01-jailyard-writer-foundation-design.md`,
 APPROVED at `9805426`. Material deviation requires design re-approval.
@@ -60,6 +66,19 @@ same interface). No new services.
   writer.
 - This plan performs no pushes, deletes nothing, and touches no protected untracked paths
   (`.claude/worktrees/`, `New folder/`).
+- **Store separation is an invariant, not an accident.** The kernel decision store is
+  `content/decisions/`; the kernel fact store is `data/facts/`. Phase-P's sealed store is
+  `content/seals/2026/`, its captures are `data/captures/2026/` + `private_captures/`, and its
+  policy is `content/governance/source_policy_2026.v1.json`. This plan READS the Phase-P stores and
+  never writes, edits, re-seals, or re-roots them, and never modifies the frozen policy.
+- **Exception classes cross module boundaries as `scripts.X` imports, never bare.** A bare
+  `from decision_history import ...` under pytest creates a second module instance whose exception
+  classes fail `pytest.raises`/`isinstance` by identity — the documented `capture_optional_2026.py`
+  pattern (package form first) is the required import shape for any module that raises or catches
+  a kernel exception across files.
+- **Exit-code convention for gate CLIs:** `0` ok, `1` degraded (verdict), `2` reserved for argparse
+  usage errors, `3` stop-no-decision (verdict), `4` failed gate / crash (never a verdict). A gate
+  that cannot tell a crash from a verdict is not a gate.
 
 ---
 
@@ -78,8 +97,12 @@ same interface). No new services.
 | `scripts/eval_contrast.py`                  | Frozen evidence-family manifest, contrast integrity                 |
 | `scripts/eval_arms.py`                      | The five arms, inertia comparator, chronological driver             |
 | `scripts/eval_scoring.py`                   | Per-claim-type scoring, fixed aggregation                           |
+| `scripts/compile_state.py`                  | Edition descriptors, D1 state compilation (K2.1)                    |
+| `scripts/kickoff_source.py`                 | Timezone-correct kickoff qualification (K2.2)                       |
 | `content/governance/fact_types.json`        | Fact-type registry: reducer, access scope, `known_at` basis         |
 | `content/governance/evidence_families.json` | Frozen manifest for the K3 contrast                                 |
+| `content/governance/venue_timezones.json`   | Stadium/team timezone map for kickoff qualification (K2.2)          |
+| `content/governance/runner_config.json`     | Model-arm provider/prompt configuration (K3.2 Step 3b)              |
 | ~~`content/governance/capture_table.json`~~ | **SUPERSEDED** — the P-only contract owns `capture_table_2026.json` |
 
 ---
@@ -887,6 +910,12 @@ def test_naive_or_date_only_timestamps_rejected():
 def test_unregistered_fact_type_is_invalid():
     assert validate(mk(fact_type="speculative_type"))
 
+def test_entity_ref_missing_a_required_key_is_invalid_even_with_extras():
+    """A proper-subset test passes {"type","season"}; the superset test must not."""
+    assert validate(mk(entity_ref={"type": "player", "season": 2025}))
+    assert validate(mk(entity_ref={"id": "1", "week": 1}))
+    assert not validate(mk(entity_ref={"type": "player", "id": "1", "week": 1}))
+
 def test_fact_is_immutable():
     with pytest.raises(Exception):
         mk().known_at = "2026-01-01T00:00:00Z"
@@ -960,6 +989,7 @@ def test_fact_types_registry_covers_the_nine_bridge_types():
 
 ```python
 """The canonical temporal fact. Fifteen fields, three clocks, never conflated."""
+import functools
 import hashlib
 import json
 import re
@@ -1026,7 +1056,11 @@ assert len(FACT_FIELDS) == 15
 assert set(FACT_FIELDS) == {f.name for f in fields(Fact)} - {"payload_bytes"}
 
 
+@functools.lru_cache(maxsize=1)
 def load_fact_types():
+    # validate() runs once per observed fact; without the cache a multi-season
+    # normalize performs one file open + parse per fact (~tens of thousands).
+    # Tests that mutate the registry call load_fact_types.cache_clear().
     return load_json(FACT_TYPES_PATH, required=True)["types"]
 
 
@@ -1066,12 +1100,14 @@ def validate(fact) -> list:
     if not problems and fact.captured_at < fact.known_at:
         # We cannot have held it before it was knowable.
         problems.append("captured_at precedes known_at")
-    if not isinstance(fact.entity_ref, dict) or set(fact.entity_ref) < {"type", "id"}:
+    # Superset test, not proper-subset: {"type","season"} must fail on the missing id,
+    # and an extra contextual key must not disable the required-key check.
+    if not isinstance(fact.entity_ref, dict) or not {"type", "id"} <= set(fact.entity_ref):
         problems.append("entity_ref: requires {type, id}")
     return problems
 ```
 
-- [ ] **Step 5: Run to verify it passes** → 11 passed
+- [ ] **Step 5: Run to verify it passes** → 12 passed
 
 - [ ] **Step 6: Commit**
 
@@ -1170,6 +1206,32 @@ def test_on_disk_payload_tampering_is_refused(tmp_path):
     p.write_text(poisoned, encoding="utf-8", newline="\n")
     with pytest.raises(PayloadIntegrityError):
         FactStore(p).load()
+
+def test_value_revert_mints_three_distinct_ids_not_a_cycle(tmp_path):
+    """A -> B -> A at a stable known_at (roster drop/re-add before the anchor
+    moves). Without `supersedes` in the identity hash the third observation
+    re-mints the first fact_id, the supersession graph becomes a cycle, and
+    state_at retires all three facts -- a membership that silently vanishes."""
+    from scripts.temporal_state import state_at
+    s = FactStore(tmp_path / "f.jsonl")
+    r = dict(OBS, source_record_id="roster:2025:1:6949", fact_type="transaction")
+    f1, _ = s.observe(payload={"on": True}, **r)
+    f2, _ = s.observe(payload={"on": False}, **r)
+    f3, _ = s.observe(payload={"on": True}, **r)
+    assert len({f1.fact_id, f2.fact_id, f3.fact_id}) == 3 and len(s.load()) == 3
+    got = state_at(2025, "2025-09-02T00:00:00Z", "public", facts=s.load())
+    assert got.value("transaction", "roster:2025:1:6949").payload == {"on": True}
+
+def test_same_record_id_under_two_types_never_cross_supersedes(tmp_path):
+    """Prefix disjointness is a convention in nine f-strings; the mechanism is
+    (fact_type, source_record_id) resolution."""
+    s = FactStore(tmp_path / "f.jsonl")
+    a, act_a = s.observe(payload={"v": 1}, **OBS)
+    b, act_b = s.observe(payload={"v": 2},
+                         **dict(OBS, fact_type="matchup_result",
+                                known_at_basis="game_conclusion"))
+    assert act_a == "created" and act_b == "created"
+    assert b.supersedes is None and len(s.load()) == 2
 ```
 
 The store persists one JSON object per line carrying the fifteen contract fields **plus** a
@@ -1187,7 +1249,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fact_schema import Fact, FACT_FIELDS, fact_hash, validate  # noqa: E402
+from fact_schema import (Fact, FACT_FIELDS, PayloadIntegrityError,  # noqa: E402
+                         canonical_bytes, fact_hash, validate)
 
 SCHEMA_VERSION = 1
 
@@ -1211,8 +1274,13 @@ class FactStore:
     def load(self):
         return list(self._facts)
 
-    def _latest_for(self, source_record_id):
-        candidates = [f for f in self._facts if f.source_record_id == source_record_id]
+    def _latest_for(self, fact_type, source_record_id):
+        # Keyed on (fact_type, source_record_id): resolution must never let two
+        # types sharing a record id supersede each other. Prefix disjointness in
+        # the normalizers is a convention; this is the mechanism.
+        candidates = [f for f in self._facts
+                      if f.fact_type == fact_type
+                      and f.source_record_id == source_record_id]
         superseded = {f.supersedes for f in candidates if f.supersedes}
         live = [f for f in candidates if f.fact_id not in superseded]
         return max(live, key=lambda f: (f.known_at, f.fact_id)) if live else None
@@ -1220,7 +1288,7 @@ class FactStore:
     def observe(self, payload, **meta):
         """Returns (fact, 'created' | 'coalesced' | 'superseded')."""
         digest = fact_hash(payload)
-        prior = self._latest_for(meta["source_record_id"])
+        prior = self._latest_for(meta["fact_type"], meta["source_record_id"])
         # Coalesce only when the OBSERVATION AND ITS MEANING are both unchanged.
         # The design binds normalizer_version into every fact precisely because a
         # normalizer change is a change in meaning even when the bytes are identical;
@@ -1233,18 +1301,27 @@ class FactStore:
                      and all(getattr(prior, k) == meta.get(k) for k in meaning))
         if unchanged:
             return prior, "coalesced"          # identical repeat: nothing changes
+        supersedes = prior.fact_id if prior is not None else None
         fact = Fact(
             # normalizer_version is part of identity: a norm-v2 reading of the same
             # bytes at the same instant is a DIFFERENT fact, and without it the
             # supersessor would hash to its predecessor's id and supersede itself.
+            # `supersedes` is ALSO part of identity: an A -> B -> A value revert at
+            # a stable known_at (roster drop/re-add before the anchor moves) would
+            # otherwise mint the original fact_id again, creating a supersession
+            # CYCLE that empties state_at's retirement set for the whole record.
             fact_id=fact_hash({"srid": meta["source_record_id"], "content": digest,
                                "known_at": meta["known_at"],
-                               "norm": meta["normalizer_version"]}
+                               "norm": meta["normalizer_version"],
+                               "supersedes": supersedes}
                               ).replace("sha256:", "fact:"),
             content_sha256=digest, schema_version=SCHEMA_VERSION,
-            supersedes=(prior.fact_id if prior is not None else None),
+            supersedes=supersedes,
             payload_bytes=canonical_bytes(payload),   # canonicalized once, then immutable
             **{k: v for k, v in meta.items() if k in FACT_FIELDS})
+        if any(f.fact_id == fact.fact_id for f in self._facts):
+            # Never a warning: a duplicate id forks the supersession graph.
+            raise ValueError(f"fact_id collision: {fact.fact_id}")
         problems = validate(fact)
         if problems:
             raise ValueError(f"invalid fact: {problems}")
@@ -1265,7 +1342,7 @@ class FactStore:
         self.path.write_text(body + ("\n" if body else ""), encoding="utf-8", newline="\n")
 ```
 
-- [ ] **Step 4: Run to verify it passes** → 8 passed
+- [ ] **Step 4: Run to verify it passes** → 10 passed
 
 - [ ] **Step 5: Commit**
 
@@ -1284,14 +1361,14 @@ git commit -m "feat(facts): idempotent coalescing, supersession, byte-stable wri
 
 - Consumes: `Fact`, `FactStore`
 - Produces: `state_at(season, cutoff, access_scope, as_recorded_at=None, facts=None) -> LeagueState`,
-  `SCOPE_LATTICE`, `LeagueState.admitted` / `.by_type(fact_type)` / `.value(source_record_id)`
+  `SCOPE_LATTICE`, `LeagueState.admitted` / `.by_type(fact_type)` / `.value(fact_type, source_record_id)`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 import pytest
 from scripts.temporal_state import state_at, SCOPE_LATTICE
-from scripts.fact_schema import Fact
+from scripts.fact_schema import Fact, canonical_bytes, fact_hash
 
 def F(**over):
     base = dict(fact_id="f", source_record_id="r", entity_ref={"type": "t", "id": "1"},
@@ -1301,6 +1378,15 @@ def F(**over):
                 content_sha256="sha256:" + "a" * 64, privacy="public",
                 normalizer_version="v1", schema_version=1, supersedes=None)
     base.update(over)
+    # Mirror K1.1's mk(): `payload=` is the ergonomic call form; the dataclass
+    # field is payload_bytes, and content_sha256 must match the body or
+    # __post_init__ raises PayloadIntegrityError. K1.4's M() and K3's fixtures
+    # all construct through this path.
+    if "payload" in base:
+        body = base.pop("payload")
+        base["payload_bytes"] = canonical_bytes(body)
+        if "content_sha256" not in over:
+            base["content_sha256"] = fact_hash(body)
     return Fact(**base)
 
 def test_lattice_is_exactly_two_rows():
@@ -1335,8 +1421,8 @@ def test_supersession_respects_known_at():
     b = F(fact_id="b", source_record_id="txn", known_at="2025-09-05T00:00:00Z", supersedes="a")
     early = state_at(2025, "2025-09-03T00:00:00Z", "public", facts=[a, b])
     late = state_at(2025, "2025-09-07T00:00:00Z", "public", facts=[a, b])
-    assert early.value("txn").fact_id == "a"
-    assert late.value("txn").fact_id == "b"
+    assert early.value("transaction", "txn").fact_id == "a"
+    assert late.value("transaction", "txn").fact_id == "b"
 
 def test_three_step_correction_chain_resolves_at_each_cutoff():
     a = F(fact_id="a", source_record_id="r", known_at="2025-09-01T00:00:00Z")
@@ -1346,7 +1432,8 @@ def test_three_step_correction_chain_resolves_at_each_cutoff():
     for cutoff, expected in (("2025-09-02T00:00:00Z", "a"),
                              ("2025-09-06T00:00:00Z", "b"),
                              ("2025-09-10T00:00:00Z", "c")):
-        assert state_at(2025, cutoff, "public", facts=facts).value("r").fact_id == expected
+        assert state_at(2025, cutoff, "public",
+                        facts=facts).value("transaction", "r").fact_id == expected
 
 def test_as_recorded_at_excludes_late_captures():
     facts = [F(fact_id="early", source_record_id="x", captured_at="2026-01-01T00:00:00Z"),
@@ -1400,13 +1487,16 @@ class LeagueState:
         return sorted((f for f in self.admitted if f.fact_type == fact_type),
                       key=lambda f: (f.effective_at, f.source_record_id, f.fact_id))
 
-    def value(self, source_record_id):
+    def value(self, fact_type, source_record_id):
         """Supersession resolution: the latest KNOWN reading of one record.
 
         Ordered by known_at, not effective_at -- a later correction supersedes an
         earlier one because we learned it later, whatever instant it describes.
+        Keyed on (fact_type, source_record_id), mirroring FactStore._latest_for:
+        two types sharing a record id must never resolve into each other.
         """
-        live = [f for f in self.admitted if f.source_record_id == source_record_id]
+        live = [f for f in self.admitted
+                if f.fact_type == fact_type and f.source_record_id == source_record_id]
         return max(live, key=lambda f: (f.known_at, f.fact_id)) if live else None
 
 
@@ -1523,6 +1613,37 @@ def test_standings_are_recomputed_from_admitted_results():
     assert row["A"]["points_for"] == 210.0, "the week-9 blowout must be invisible"
     assert [r["team"] for r in s] == ["A", "B"] or [r["team"] for r in s] == ["B", "A"]
 
+def test_standings_are_season_qualified_while_h2h_is_all_time():
+    """The recorded category-4 defect. Mixed-season facts: the 2022 meeting counts
+    in h2h (all-time) and MUST NOT count in 2025 standings."""
+    facts = [M(1, 2022, 9, "2022-11-01T00:00:00Z", "A", "B", 140.3, 100.0),
+             M(2, 2025, 1, "2025-09-10T06:59:59Z", "A", "B", 120.0, 100.0)]
+    s = state_at(2025, "2025-09-20T00:00:00Z", "public", facts=facts)
+    assert s.h2h("A", "B")["total_games"] == 2
+    row = {r["team"]: r for r in s.standings()}
+    assert row["A"]["wins"] == 1 and row["A"]["losses"] == 0
+    assert row["A"]["points_for"] == 120.0, "the 2022 game must not fold into 2025"
+
+def test_standings_mutation_control_without_the_season_predicate():
+    """Control: drop the predicate and the 2022 game folds in. Proves the test
+    above fails when the rule is removed rather than passing vacuously."""
+    facts = [M(1, 2022, 9, "2022-11-01T00:00:00Z", "A", "B", 140.3, 100.0),
+             M(2, 2025, 1, "2025-09-10T06:59:59Z", "A", "B", 120.0, 100.0)]
+    s = state_at(2025, "2025-09-20T00:00:00Z", "public", facts=facts)
+    unfiltered = {}
+    for g in s.by_type("matchup_result") + s.by_type("historical_matchup"):
+        p = g.payload                       # rule removed: no season predicate
+        unfiltered[p["home"]] = unfiltered.get(p["home"], 0) + 1
+    assert unfiltered["A"] == 2, "control: without the predicate both seasons fold"
+
+def test_tied_game_is_a_tie_in_both_aggregates():
+    facts = [M(1, 2025, 1, "2025-09-10T06:59:59Z", "A", "B", 100.0, 100.0)]
+    s = state_at(2025, "2025-09-20T00:00:00Z", "public", facts=facts)
+    h = s.h2h("A", "B")
+    assert h["ties"] == 1 and h["a_wins"] == 0 and h["b_wins"] == 0
+    row = {r["team"]: r for r in s.standings()}
+    assert row["A"]["ties"] == 1 and row["A"]["wins"] == 0
+
 def test_reducers_fold_on_effective_at_not_known_at():
     """A correction learned late about an early game folds at its EFFECTIVE instant.
     Ordering by known_at would put the September game after the December one."""
@@ -1540,10 +1661,13 @@ def test_reducers_fold_on_effective_at_not_known_at():
     assert [f.fact_id for f in s.by_type("matchup_result")] == ["m1", "m2", "mc"]
 ```
 
-`F` (K1.3) needs no change: `Fact.payload` defaults to `None`, so `F(payload=...)` already reaches
-the dataclass through `base.update(over)`. Production facts carry the same attachment — written
-and reloaded by `FactStore` (K1.2) — so a reducer sees the identical shape in tests and in
-production.
+`F` (K1.3) carries the same payload handling as K1.1's `mk()` — pop `payload`, canonicalize into
+`payload_bytes`, derive `content_sha256` unless deliberately pinned. An earlier revision claimed
+"`F` needs no change"; executed, `F(payload=...)` raised
+`TypeError: Fact.__init__() got an unexpected keyword argument 'payload'`, and even under the right
+kwarg the hardcoded `content_sha256` would trip `PayloadIntegrityError`. Production facts carry the
+same attachment — written and reloaded by `FactStore` (K1.2) — so a reducer sees the identical
+shape in tests and in production.
 
 - [ ] **Step 2: Run to verify it fails** → `AttributeError: 'LeagueState' object has no attribute 'h2h'`
 
@@ -1559,9 +1683,10 @@ production.
         # a second temporal rule.
         games.sort(key=lambda f: (f.effective_at, f.fact_id))
         a_wins = sum(1 for g in games if _winner(g.payload) == a)
+        ties = sum(1 for g in games if _winner(g.payload) is None)
         last = games[-1].payload if games else None
-        return {"a_wins": a_wins, "b_wins": len(games) - a_wins,
-                "total_games": len(games), "last_meeting": last}
+        return {"a_wins": a_wins, "b_wins": len(games) - a_wins - ties,
+                "ties": ties, "total_games": len(games), "last_meeting": last}
 
     def records(self):
         """All seven league records, recomputed. Dated and undated alike."""
@@ -1604,12 +1729,24 @@ production.
                 rec[key] = None
         return rec
 
-    def standings(self):
-        """Win/loss/points-for from admitted results only. The design's third
-        recomputed aggregate -- previously listed as an interface and never built."""
+    def standings(self, season=None):
+        """Win/loss/points-for from admitted results only, SEASON-QUALIFIED.
+
+        The pool is deliberately not season-filtered (pre-2025 facts belong in a
+        2025 state so the no-history arm can ablate them), which makes this reducer
+        the only correct place for the season predicate. Without it, 2022-2024
+        historical_matchup facts inflate a 2025 week-3 table to ~120 games played
+        -- silently, since the output still looks plausible. h2h() and records()
+        are deliberately all-time (League Bible framing); standings() never is.
+        `season=None` means this state's own season; K3's record_points arm passes
+        the PRIOR season explicitly at preseason/preview.
+        """
+        season = self.season if season is None else season
         table = {}
         for g in self.by_type("matchup_result") + self.by_type("historical_matchup"):
             p = g.payload
+            if p["season"] != season:
+                continue
             for team, pts, opp in ((p["home"], p["home_pts"], p["away_pts"]),
                                    (p["away"], p["away_pts"], p["home_pts"])):
                 t = table.setdefault(team, {"team": team, "wins": 0, "losses": 0,
@@ -1625,10 +1762,17 @@ production.
 
 
 def _winner(p):
+    """None on a tie -- fantasy ties are rare but real (Sleeper roster settings
+    carry a `ties` field), and h2h must agree with standings' tie column."""
+    if p["home_pts"] == p["away_pts"]:
+        return None
     return p["home"] if p["home_pts"] > p["away_pts"] else p["away"]
 ```
 
-- [ ] **Step 4: Run to verify it passes** → 6 passed
+`h2h()` reports `{"a_wins", "b_wins", "ties", "total_games", "last_meeting"}` with
+`b_wins = total - a_wins - ties`, so a tied meeting is never silently credited to the away team.
+
+- [ ] **Step 4: Run to verify it passes** → 9 passed
 
 - [ ] **Step 5: Commit**
 
@@ -1645,8 +1789,9 @@ git commit -m "feat(temporal): h2h and all seven records recomputed from admitte
 
 **Interfaces:**
 
-- Produces: `SealedDecision` (frozen), `seal(...) -> SealedDecision`,
-  `load_decision(sealed) -> (ranking, claims)`,
+- Produces: `SealedDecision` (frozen), `seal(...) -> SealedDecision` (requires a persisted CLOSED
+  run receipt: `run_receipt_path` + `run_receipt_hash`; takes `predecessor_decision_hash`),
+  `load_decision(sealed, root) -> (ranking, claims)`, `write_json_once(path, doc)`,
   `decision_history_at(season, cutoff, arm_id, trial_id, root) -> list[SealedDecision]`,
   `verify_predecessor(sealed, arm_id, trial_id)`, `CrossArmContamination`
 
@@ -1654,13 +1799,24 @@ git commit -m "feat(temporal): h2h and all seven records recomputed from admitte
 
 ```python
 import pytest
-from scripts.decision_history import (seal, decision_history_at, verify_predecessor,
-                                      CrossArmContamination)
+from pathlib import Path
+from scripts.decision_history import (seal, decision_history_at, load_decision,
+                                      verify_predecessor, CrossArmContamination)
+from scripts.fact_schema import fact_hash
 
 def mkseal(tmp, arm, trial, cutoff, eid):
+    # A real (closed) receipt must exist BEFORE sealing -- the seal binds its
+    # path AND its content hash (K3.5 owns the ordering in production).
+    d = Path(tmp) / "2025" / arm / f"trial{trial}"
+    d.mkdir(parents=True, exist_ok=True)
+    receipt = {"run_id": "run-1", "ended_at": "2026-08-05T00:00:00Z",
+               "output_decision_hash": "sha256:" + "0" * 64}
+    rr = d / f"{eid}.run.json"
+    rr.write_text(__import__("json").dumps(receipt), encoding="utf-8")
     return seal(root=tmp, edition_id=eid, season=2025, cutoff_utc=cutoff,
                 arm_id=arm, trial_id=trial, state_hash="sha256:" + "a" * 64,
-                ranking={"entries": []}, claims=[], run_id="run-1")
+                ranking={"entries": []}, claims=[], run_id="run-1",
+                run_receipt_path=rr, run_receipt_hash=fact_hash(receipt))
 
 def test_history_is_scoped_to_arm_and_trial(tmp_path):
     mkseal(tmp_path, "full_rich", 1, "2025-09-03T23:59:59Z", "pre")
@@ -1692,6 +1848,41 @@ def test_seal_is_immutable_and_hashed(tmp_path):
     assert s.decision_hash.startswith("sha256:")
     with pytest.raises(Exception):
         s.arm_id = "no_chat"
+
+def test_directory_holds_exactly_the_declared_file_species(tmp_path):
+    """The naming contract IS the collision guard: a future writer adding a
+    fifth species is caught here, not by a consumer's TypeError."""
+    mkseal(tmp_path, "full_rich", 1, "2025-09-03T23:59:59Z", "pre")
+    d = tmp_path / "2025" / "full_rich" / "trial1"
+    assert sorted(p.name for p in d.iterdir()) == [
+        "pre.claims.json", "pre.ranking.json", "pre.run.json", "pre.seal.json"]
+
+def test_history_ignores_planted_body_files(tmp_path):
+    """A stray {ed}.ranking.json must never parse as a seal."""
+    mkseal(tmp_path, "full_rich", 1, "2025-09-03T23:59:59Z", "pre")
+    d = tmp_path / "2025" / "full_rich" / "trial1"
+    (d / "stray.ranking.json").write_text('{"entries": []}', encoding="utf-8")
+    got = decision_history_at(2025, "2025-09-05T00:00:00Z", "full_rich", 1, root=tmp_path)
+    assert len(got) == 1 and got[0].edition_id == "pre"
+
+def test_locators_are_relative_posix_and_hash_is_location_independent(tmp_path):
+    """Machine-absolute locators are a host leak into a tracked file and make
+    decision_hash differ per machine (the Phase-P portable-locator law)."""
+    s = mkseal(tmp_path / "rootA", "full_rich", 1, "2025-09-03T23:59:59Z", "pre")
+    t = mkseal(tmp_path / "rootB", "full_rich", 1, "2025-09-03T23:59:59Z", "pre")
+    for loc in (s.ranking_path, s.claims_path, s.run_receipt_path):
+        assert "\\" not in loc and not Path(loc).is_absolute()
+    assert s.decision_hash == t.decision_hash, "same logical seal, same hash, any parent dir"
+    assert load_decision(s, tmp_path / "rootA")[0] == {"entries": []}
+
+def test_seal_refuses_to_overwrite_a_crashed_attempts_body(tmp_path):
+    """Exclusive-create on the BODIES too: a pre-existing ranking body is
+    refused, never truncated."""
+    d = tmp_path / "2025" / "full_rich" / "trial1"
+    d.mkdir(parents=True)
+    (d / "pre.ranking.json").write_text('{"stale": true}', encoding="utf-8")
+    with pytest.raises(FileExistsError):
+        mkseal(tmp_path, "full_rich", 1, "2025-09-03T23:59:59Z", "pre")
 ```
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
@@ -1729,46 +1920,86 @@ class SealedDecision:
     ranking_hash: str
     claims_hash: str
     decision_hash: str
+    # Lineage is RECORDED, not just enforced at runtime: verify_predecessor checks
+    # it, and this field makes the chain auditable from committed files alone.
+    # None only at preseason, where no qualified same-arm predecessor exists.
+    predecessor_decision_hash: str | None
     # Content LOCATORS, not just hashes. A hash proves the body has not changed;
     # it cannot hand the body back. The inertia comparator must score an arm's
     # preview against its own unchanged prior RANKING, and blind review must show
     # Blake actual prose -- neither can be done from a digest alone.
+    # Locators are REPO-RELATIVE POSIX (the Phase-P law): a machine-absolute path
+    # is a host/user leak into a tracked file, is unreadable on any other clone,
+    # and makes decision_hash differ per machine for the same logical decision.
     ranking_path: str
     claims_path: str
     run_receipt_path: str
+    # The receipt's CONTENT is bound, not just its name: without this the receipt
+    # file can be rewritten in place and every verification still passes.
+    run_receipt_hash: str
+    # This kernel store deliberately has no prospective/retrospective `label`
+    # field: every 2025 backtest decision is retrospective by construction, and
+    # the prospective 2026 lane is Phase-P's sealed store, not this one.
 
 
 def seal(root, edition_id, season, cutoff_utc, arm_id, trial_id, state_hash,
-         ranking, claims, run_id, run_receipt_path=None):
+         ranking, claims, run_id, run_receipt_path, run_receipt_hash,
+         predecessor_decision_hash=None):
+    """Directory file-naming contract (the ONLY four species; every reader globs
+    its own suffix, never `*.json`):
+      {edition_id}.seal.json     -- the SealedDecision (this function)
+      {edition_id}.ranking.json  -- sealed ranking body (this function)
+      {edition_id}.claims.json   -- sealed claims body (this function)
+      {edition_id}.run.json      -- CLOSED decision-run receipt (K3.2 persist_run)
+    All four are exclusive-create: reuse Phase-P's `_write_json_once` semantics
+    (scripts/seal_2026.py:148-158) -- a check-then-write pair can truncate a
+    racing writer's file, and a crashed prior attempt's bodies must be refused,
+    never silently overwritten."""
+    from scripts.bundle_2026 import portable_locator  # Phase-P's law, reused not reimplemented
     rh, ch = fact_hash(ranking), fact_hash(claims)
     d = Path(root) / f"{season}" / arm_id / f"trial{trial_id}"
-    p = d / f"{edition_id}.json"
-    if p.exists():
-        raise FileExistsError(f"seal already exists and is immutable: {p}")
+    p = d / f"{edition_id}.seal.json"
     d.mkdir(parents=True, exist_ok=True)
-    # Persist the bodies FIRST, then seal over their locations. A seal that names a
-    # file which does not exist is worse than no locator at all.
+    # Persist the bodies FIRST (exclusive-create), then seal over their locations.
+    # A seal that names a file which does not exist is worse than no locator.
     rp, cp = d / f"{edition_id}.ranking.json", d / f"{edition_id}.claims.json"
-    save_json_canonical(rp, ranking)
-    save_json_canonical(cp, claims)
+    write_json_once(rp, ranking)
+    write_json_once(cp, claims)
     body = {"edition_id": edition_id, "season": season, "cutoff_utc": cutoff_utc,
             "arm_id": arm_id, "trial_id": trial_id, "state_hash": state_hash,
             "run_id": run_id, "ranking_hash": rh, "claims_hash": ch,
-            "ranking_path": str(rp), "claims_path": str(cp),
-            "run_receipt_path": str(run_receipt_path or "")}
+            "predecessor_decision_hash": predecessor_decision_hash,
+            "ranking_path": portable_locator(rp, Path(root)),
+            "claims_path": portable_locator(cp, Path(root)),
+            "run_receipt_path": portable_locator(Path(run_receipt_path), Path(root)),
+            "run_receipt_hash": run_receipt_hash}
     s = SealedDecision(**body, decision_hash=fact_hash(body))
-    save_json_canonical(p, asdict(s))
+    write_json_once(p, asdict(s))     # exclusive-create IS the immutability guard
     return s
 
 
-def load_decision(sealed):
+def write_json_once(path, doc):
+    """Exclusive-create canonical writer -- same semantics as Phase-P's
+    `_write_json_once` (scripts/seal_2026.py:148): open(path, "xb") so append-only
+    holds even under concurrent writers, and a crashed prior attempt's file is
+    refused rather than truncated."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "xb") as handle:      # FileExistsError IS the immutability guard
+        handle.write(json.dumps(doc, sort_keys=True, separators=(",", ":"),
+                                ensure_ascii=False).encode("utf-8"))
+    return path
+
+
+def load_decision(sealed, root):
     """Return the sealed ranking and claims, verifying both against their hashes.
 
+    Locators are root-relative POSIX (never machine-absolute -- the Phase-P law),
+    so the caller supplies the root they were sealed under.
     This is what the inertia comparator consumes: `unchanged prior decision` means
     THIS body, re-scored at the new horizon, not a hash compared to itself.
     """
-    ranking = json.loads(Path(sealed.ranking_path).read_text(encoding="utf-8"))
-    claims = json.loads(Path(sealed.claims_path).read_text(encoding="utf-8"))
+    ranking = json.loads((Path(root) / sealed.ranking_path).read_text(encoding="utf-8"))
+    claims = json.loads((Path(root) / sealed.claims_path).read_text(encoding="utf-8"))
     if fact_hash(ranking) != sealed.ranking_hash:
         raise ValueError(f"{sealed.edition_id}: sealed ranking body does not match its hash")
     if fact_hash(claims) != sealed.claims_hash:
@@ -1781,7 +2012,11 @@ def decision_history_at(season, cutoff, arm_id, trial_id, root=SEALS_ROOT):
     if not d.exists():
         return []
     out = []
-    for p in sorted(d.glob("*.json")):
+    # Suffix-exact: the directory holds four file species (see seal()'s contract)
+    # and a bare *.json glob would parse ranking/claims bodies as SealedDecision
+    # records -- TypeError on the first populated directory, which is every
+    # non-preseason call. Every reader globs its OWN suffix.
+    for p in sorted(d.glob("*.seal.json")):
         s = SealedDecision(**json.loads(p.read_text(encoding="utf-8")))
         if s.cutoff_utc < cutoff:          # strictly earlier
             out.append(s)
@@ -1796,7 +2031,7 @@ def verify_predecessor(sealed, arm_id, trial_id):
     return sealed
 ```
 
-- [ ] **Step 4: Run to verify it passes** → 6 passed
+- [ ] **Step 4: Run to verify it passes** → 10 passed
 
 - [ ] **Step 5: Commit**
 
@@ -1813,8 +2048,13 @@ git commit -m "feat(decisions): arm-scoped decision history, cross-arm contamina
 
 **Interfaces:**
 
-- Produces: `NORMALIZERS` (dict by fact type), `normalize_all(source_root, out_path, season) -> dict`,
-  `NORMALIZER_VERSION`, `UnqualifiedSource`
+- Produces: `NORMALIZERS` (dict by fact type; each returns `(meta_kwargs, body)` — the body is the
+  shaped observation the reducers consume, never the raw record),
+  `normalize_all(source_root, out_path, season) -> dict` (four-bucket report: counts / unqualified /
+  undatable / unavailable), `_iter_source(source_root, fact_type, spec, season)`,
+  `ENVELOPE_SOURCES`, `LEGACY_SOURCES`, `PRIOR_SEASONS`, `LEGACY_CAPTURE_INSTANTS`,
+  `NORMALIZER_VERSION`, `UnqualifiedSource`, and a `main()` CLI ending
+  `raise SystemExit(main())` (the producer of `data/facts/{season}.jsonl`)
 
 **`schedule_pairing` is deliberately hard to satisfy:** a completed weekly packet with outcomes
 stripped is **not** a source. It requires an independent qualified source or a versioned
@@ -1823,7 +2063,10 @@ availability policy, else the fact is unavailable.
 - [ ] **Step 1: Write the failing test**
 
 ```python
+import json
 import pytest
+from pathlib import Path
+from scripts.fact_store import FactStore
 from scripts.normalize_facts import NORMALIZERS, normalize_all, UnqualifiedSource
 
 def test_all_nine_bridge_types_have_a_normalizer():
@@ -1836,21 +2079,40 @@ def test_schedule_from_a_completed_packet_is_unqualified():
         NORMALIZERS["schedule_pairing"]({"source": "weekly_packet_outcomes_stripped"}, season=2025)
 
 def test_schedule_with_a_versioned_policy_is_admitted():
-    fact = NORMALIZERS["schedule_pairing"](
+    meta, body = NORMALIZERS["schedule_pairing"](
         {"source": "sleeper_schedule", "policy_id": "sched-avail-v1",
          "home": "A", "away": "B", "season": 2025, "week": 1,
          "known_at": "2025-08-01T00:00:00Z"}, season=2025)
-    assert fact["known_at_basis"] == "sched-avail-v1"
+    assert meta["known_at_basis"] == "sched-avail-v1"
 
 def test_transaction_without_status_updated_is_unqualified():
     with pytest.raises(UnqualifiedSource):
         NORMALIZERS["transaction"]({"transaction_id": "1", "created": 1725000000000}, season=2025)
 
 def test_chat_message_defaults_to_league_private():
-    f = NORMALIZERS["chat_message"](
+    meta, body = NORMALIZERS["chat_message"](
         {"id": 1, "timestamp_utc": "2025-09-01T00:00:00Z", "sender": "x", "text": "hi"},
         season=2025)
-    assert f["access_scope"] == "league_private" and f["privacy"] == "private"
+    assert meta["access_scope"] == "league_private" and meta["privacy"] == "private"
+
+def test_unsourced_types_are_recorded_unavailable_not_omitted(tmp_path):
+    """The fail-closed contract IS the report: schedule_pairing and
+    roster_membership must arrive in `unavailable` as recorded refusals -- a
+    missing key is indistinguishable from a benignly empty type, which is what
+    let the contrast read clean-but-empty instead of degraded."""
+    r = normalize_all(source_root=".", out_path=tmp_path / "f.jsonl", season=2025)
+    assert {"schedule_pairing", "roster_membership"} <= set(r["unavailable"])
+
+def test_2026_facts_come_from_envelopes_not_the_stale_snapshot(tmp_path):
+    """The kernel's 2026 lane reads Phase-P captures ONLY. Every emitted fact's
+    source_ref names an envelope; none is rooted in data/2026/."""
+    r = normalize_all(source_root=".", out_path=tmp_path / "f.jsonl", season=2026)
+    facts = FactStore(tmp_path / "f.jsonl").load()
+    assert facts, "the A-opt envelopes exist on disk; zero facts is a failed lane"
+    assert all(f.source_ref.startswith("capture:2026/public/") for f in facts)
+    for f in facts:
+        env_file = Path("data/captures/2026/public") / f.source_ref.split("public/")[1]
+        assert f.captured_at == json.loads(env_file.read_text(encoding="utf-8"))["captured_at"]
 
 def test_normalizing_twice_is_byte_identical(tmp_path):
     a = normalize_all(source_root=".", out_path=tmp_path / "a.jsonl", season=2025)
@@ -1935,27 +2197,52 @@ def _chat_message(raw, season):
 
 
 def _franchise_identity(raw, season):
-    """Sleeper users/league. known_at = the capture instant that first held it."""
-    inst = raw["captured_at"]
-    return {"fact_type": "franchise_identity",
+    """known_at = the capture instant that first held it. `capture_instant` is
+    threaded onto the record by the ITERATOR (envelope captured_at for 2026,
+    the legacy-capture-v1 map for 2025) -- no normalizer reads captured_at off a
+    raw source record, because no source record carries one. The record itself
+    is the rosters/roster_map row joined to its user (2026: sleeper_rosters x
+    sleeper_users on owner_id; 2025: season_combined roster_map -- users.json
+    has no roster_id and is a display-name sidecar only)."""
+    inst = raw["capture_instant"]
+    meta = {"fact_type": "franchise_identity",
             "source_record_id": f"franchise:{season}:{raw['roster_id']}",
             "entity_ref": {"type": "franchise", "id": str(raw["roster_id"])},
             "effective_at": inst, "known_at": inst, "known_at_basis": "capture_instant",
             "access_scope": "public", "privacy": "public"}
+    body = {"season": season, "roster_id": str(raw["roster_id"]),
+            "owner_id": raw.get("owner_id"), "display_name": raw.get("display_name")}
+    return meta, body
 
 
 def _matchup_result(raw, season):
-    """known_at = game conclusion. A scheduled-but-unplayed matchup is NOT a result."""
+    """known_at = game conclusion. A scheduled-but-unplayed matchup is NOT a result.
+
+    The worked example of the (meta, body) convention every normalizer follows:
+    the BODY is the shaped observation the reducers consume (h2h/records/standings
+    dereference exactly these six keys), never the raw source record. Teams are
+    roster_id strings -- the durable franchise identity; season_combined's team1/
+    team2 sub-objects carry {roster_id, points} and no name.
+    `concluded_at` is supplied by the ITERATOR (see `_iter_source`): legacy
+    season_combined matchups carry no instant, so it is enriched from the
+    versioned policy named in known_at_basis; a week with no qualified conclusion
+    instant raises here rather than guessing.
+    """
     if not raw.get("concluded_at"):
         raise UnqualifiedSource(
             f"matchup {raw.get('matchup_id')} has no conclusion instant; a pairing is "
             "a schedule_pairing fact, never a matchup_result")
     inst = raw["concluded_at"]
-    return {"fact_type": "matchup_result",
+    meta = {"fact_type": "matchup_result",
             "source_record_id": f"match:{season}:{raw['week']}:{raw['matchup_id']}",
             "entity_ref": {"type": "matchup", "id": str(raw["matchup_id"])},
-            "effective_at": inst, "known_at": inst, "known_at_basis": "game_conclusion",
+            "effective_at": inst, "known_at": inst,
+            "known_at_basis": raw.get("conclusion_policy", "game_conclusion"),
             "access_scope": "public", "privacy": "public"}
+    body = {"season": season, "week": raw["week"],
+            "home": str(raw["team1"]["roster_id"]), "away": str(raw["team2"]["roster_id"]),
+            "home_pts": raw["team1"]["points"], "away_pts": raw["team2"]["points"]}
+    return meta, body
 
 
 def _roster_membership(raw, season):
@@ -1975,39 +2262,80 @@ def _roster_membership(raw, season):
 
 
 def _draft_pick(raw, season):
-    inst = _instant(raw["pick_ts"]) if raw.get("pick_ts") else raw.get("captured_at")
+    """Verified against BOTH available sources: neither the legacy pick records
+    (draft_slot, pick_no, picked_by, player_id, round, ...) nor the Phase-P
+    envelope picks carry a per-pick timestamp. The datable instant is therefore
+    per-DRAFT, supplied by the iterator: for 2026, the envelope's captured_at
+    (basis `capture_instant`); for 2025 legacy, the draft window derived from the
+    file's top-level `start_date`/draft metadata under policy `draft-window-v1`.
+    `draft_id` also sits at the file/envelope top level, not on the pick -- the
+    iterator threads both onto each record. A pick with neither instant is
+    refused, and `player_id` is required: entity_ref must never hold "None".
+    """
+    inst = _instant(raw["pick_ts"]) if raw.get("pick_ts") else raw.get("draft_instant")
     if not inst:
         raise UnqualifiedSource(f"draft pick {raw.get('pick_no')} has no datable instant")
-    return {"fact_type": "draft_pick",
+    if not raw.get("player_id"):
+        raise UnqualifiedSource(f"draft pick {raw.get('pick_no')} has no player_id")
+    meta = {"fact_type": "draft_pick",
             "source_record_id": f"pick:{raw['draft_id']}:{raw['pick_no']}",
-            "entity_ref": {"type": "player", "id": str(raw.get("player_id"))},
+            "entity_ref": {"type": "player", "id": str(raw["player_id"])},
             "effective_at": inst, "known_at": inst,
-            "known_at_basis": "pick_timestamp_else_capture",
+            "known_at_basis": raw.get("draft_instant_basis", "pick_timestamp_else_capture"),
             "access_scope": "public", "privacy": "public"}
+    body = {"season": season, "draft_id": raw["draft_id"], "pick_no": raw["pick_no"],
+            "round": raw["round"], "roster_id": str(raw["roster_id"]),
+            "player_id": str(raw["player_id"])}
+    return meta, body
 
 
 def _historical_matchup(raw, season):
-    """2022-2024 from season_combined.json. known_at = each game's conclusion."""
+    """2022-2024 from each prior season's season_combined.json. known_at = each
+    game's conclusion (iterator-enriched, same policy machinery as
+    _matchup_result). Body shape is IDENTICAL to _matchup_result's -- the
+    reducers concatenate the two types and must see one schema. `season` in the
+    body is the PRIOR season the game belongs to, never the compiled season."""
     if not raw.get("concluded_at"):
         raise UnqualifiedSource(f"historical matchup {raw.get('matchup_id')} is undated")
     inst = raw["concluded_at"]
-    return {"fact_type": "historical_matchup",
+    meta = {"fact_type": "historical_matchup",
             "source_record_id": f"hist:{raw['season']}:{raw['week']}:{raw['matchup_id']}",
             "entity_ref": {"type": "matchup", "id": str(raw["matchup_id"])},
-            "effective_at": inst, "known_at": inst, "known_at_basis": "game_conclusion",
+            "effective_at": inst, "known_at": inst,
+            "known_at_basis": raw.get("conclusion_policy", "game_conclusion"),
             "access_scope": "public", "privacy": "public"}
+    body = {"season": raw["season"], "week": raw["week"],
+            "home": str(raw["team1"]["roster_id"]), "away": str(raw["team2"]["roster_id"]),
+            "home_pts": raw["team1"]["points"], "away_pts": raw["team2"]["points"]}
+    return meta, body
 
 
 def _nfl_game(raw, season):
     """Kickoff needs venue timezone -- reuse kickoff_source.to_utc (K2.2), never
-    append Z to a local time-of-day."""
-    from kickoff_source import to_utc
-    inst = raw.get("concluded_at") or to_utc(raw["gameday"], raw["gametime"], raw.get("tz"))
-    return {"fact_type": "nfl_game",
+    append Z to a local time-of-day. NOTE the ordering consequence: K2.2 must be
+    executed BEFORE this normalizer can run (recorded in the Ordering paragraph);
+    until then nfl_game is registered-but-unsourced. `tz` is NOT read from the
+    record -- verified absent from both legacy nfl_games files and the 2026
+    schedules envelope -- it is resolved via content/governance/venue_timezones
+    (K2.2's resolve_zone, keyed by stadium then home team), failing closed.
+    An undatable game raises UnavailableEvidence, which normalize_all catches
+    into its own `undatable` counter -- distinct from `unqualified` -- so a
+    partial nfl_game yield is visible, never a silent abort mid-run.
+    """
+    from scripts.kickoff_source import to_utc, resolve_zone, UnavailableEvidence  # noqa: F401
+    inst = raw.get("concluded_at")
+    if not inst:
+        tzname = resolve_zone(raw, _load_venue_timezones())
+        inst = to_utc(raw["gameday"], raw["gametime"], tzname)
+    meta = {"fact_type": "nfl_game",
             "source_record_id": f"nflgame:{raw['game_id']}",
             "entity_ref": {"type": "game", "id": str(raw["game_id"])},
             "effective_at": inst, "known_at": inst, "known_at_basis": "game_conclusion",
             "access_scope": "public", "privacy": "public"}
+    body = {"season": season, "game_id": raw["game_id"],
+            "home_team": raw.get("home_team"), "away_team": raw.get("away_team"),
+            "kickoff_utc": inst}
+    return meta, body
 
 
 NORMALIZERS = {
@@ -2022,16 +2350,40 @@ NORMALIZERS = {
     "nfl_game": _nfl_game,
 }
 
-SOURCES = {                     # fact_type -> (loader, iterator) for normalize_all
-    "franchise_identity": ("data/{season}/users.json", "rosters"),
-    "matchup_result":     ("data/{season}/season_combined.json", "matchups"),
-    "transaction":        ("data/{season}/transactions.json", "transactions"),
-    "draft_pick":         ("data/{season}/draft_picks.json", "picks"),
-    "chat_message":       ("content/chat/parsed_messages.json", "messages"),
-    "historical_matchup": ("data/{prior}/season_combined.json", "matchups"),
-    "nfl_game":           ("data/{season}/nfl_games/*.json", "games"),
-    # schedule_pairing and roster_membership have NO qualified source today.
-    # They stay absent rather than being invented -- see Open dependencies.
+PRIOR_SEASONS = (2022, 2023, 2024)   # historical_matchup scope; never the compiled season
+
+# Two source lanes, verified against the real files/envelopes on disk.
+#
+# LANE 1 -- 2026: PHASE-P ENVELOPES ONLY (data/captures/2026/public/<component>/*.json).
+# The design's architecture line is "immutable captures -> typed temporal facts";
+# legacy data/2026/*.json is the stale 2026-04-04 snapshot and is NEVER a 2026
+# source. Envelope keys (verified): source_id, season, league_id, captured_at,
+# known_at_basis, access_scope, privacy, request, payload, payload_sha256,
+# envelope_sha256, locator. captured_at / access_scope / privacy come from the
+# ENVELOPE; the record body comes from `payload`.
+ENVELOPE_SOURCES = {   # fact_type -> (component_id, payload walk to records)
+    "franchise_identity": ("sleeper_rosters", "payload.rosters[] joined to sleeper_users payload.users[] on owner_id"),
+    "matchup_result":     ("sleeper_matchups", "payload.matchups.{week}[]"),
+    "transaction":        ("sleeper_transactions", "payload.transactions.{week}[]"),
+    "draft_pick":         ("draft_picks", "payload.picks[] + top-level payload.draft_id; draft_instant = envelope captured_at, basis capture_instant"),
+    "nfl_game":           ("nfl_schedules", "payload games list"),
+}
+
+# LANE 2 -- 2025 BACKTEST: legacy repository files, each walk verified against
+# the actual structure (NOT the shapes an earlier revision imagined):
+LEGACY_SOURCES = {     # fact_type -> (path template, verified record walk)
+    "franchise_identity": ("data/{season}/season_combined.json", "roster_map entries (roster_id -> identity); users.json is a LIST without roster_id and is a display-name sidecar only"),
+    "matchup_result":     ("data/{season}/season_combined.json", "weeks[] -> matchups[] (weeks is a LIST of 18; matchup records carry matchup_id/team1/team2/winner)"),
+    "transaction":        ("data/{season}/transactions.json", "dict keyed by week STRING '1'..'17' -> list of transactions"),
+    "draft_pick":         ("data/{season}/draft_picks.json", "top-level dict {draft_id, start_date, picks[]}; draft_instant from start_date under policy draft-window-v1"),
+    "chat_message":       ("chat/parsed_messages.json", "messages[] -- NOTE: chat/ (repo root), gitignored; content/chat/parsed_messages.json DOES NOT EXIST. Local-only source; absence yields the type `unavailable`, never a crash"),
+    "historical_matchup": ("data/{prior}/season_combined.json", "fan-out over PRIOR_SEASONS; same walk as matchup_result"),
+    "nfl_game":           ("data/{season}/nfl_games/*.json", "ONE GAME PER FILE (no 'games' container); the file IS the record"),
+    # schedule_pairing and roster_membership: DECLARED, UNSOURCED sentinels --
+    # see the `unavailable` contract below. Present in this map as (None, reason)
+    # so the refusal is data, not an omission.
+    "schedule_pairing":   (None, "no qualified pre-kickoff schedule source (design $1)"),
+    "roster_membership":  (None, "no qualified pre-kickoff roster anchor (open dependency 3)"),
 }
 
 
@@ -2039,39 +2391,114 @@ def normalize_all(source_root, out_path, season):
     """Every bridge type, one FactStore, deterministic order, no wall clock.
 
     Returns {"counts": {fact_type: n}, "unqualified": {fact_type: n},
+             "undatable": {fact_type: n},
+             "unavailable": {fact_type: reason},
              "normalizer_version": NORMALIZER_VERSION}.
+
+    The FOUR buckets are the honesty contract. `counts` = facts written.
+    `unqualified` = records a normalizer refused (UnqualifiedSource).
+    `undatable` = records whose instant could not be established (K2.2's
+    UnavailableEvidence) -- counted, never a mid-run abort. `unavailable` =
+    declared types with NO source this run (the (None, reason) sentinels, plus
+    chat_message when the gitignored corpus is absent) -- carried as DATA so
+    K3.3's contrast reads a recorded refusal, not a missing key it cannot
+    distinguish from a benignly empty type. A type appearing in `counts` with 0
+    AND in `unqualified` with its full record count is reported `unavailable`,
+    not silently empty (the draft_pick 100%-refusal trap).
     """
+    from scripts.kickoff_source import UnavailableEvidence
+    sources = ENVELOPE_SOURCES if season >= 2026 else LEGACY_SOURCES
     store = FactStore(out_path)
-    counts, unqualified = {}, {}
-    for fact_type in sorted(SOURCES):
-        pattern, key = SOURCES[fact_type]
-        for source_ref, raw in _iter_source(source_root, pattern, key, season):
+    counts, unqualified, undatable, unavailable = {}, {}, {}, {}
+    for fact_type in sorted(sources):
+        spec = sources[fact_type]
+        if spec[0] is None:
+            unavailable[fact_type] = spec[1]
+            continue
+        for source_ref, env_meta, raw in _iter_source(source_root, fact_type, spec, season):
             try:
-                meta = NORMALIZERS[fact_type](raw, season)
+                meta, body = NORMALIZERS[fact_type](raw, season)
             except UnqualifiedSource:
                 unqualified[fact_type] = unqualified.get(fact_type, 0) + 1
                 continue
-            store.observe(payload=raw, source_ref=source_ref,
-                          captured_at=raw["captured_at"],   # from the record, never now()
+            except UnavailableEvidence:
+                undatable[fact_type] = undatable.get(fact_type, 0) + 1
+                continue
+            store.observe(payload=body, source_ref=source_ref,
+                          captured_at=env_meta["captured_at"],  # ENVELOPE/policy, never the record, never now()
                           normalizer_version=NORMALIZER_VERSION, **meta)
             counts[fact_type] = counts.get(fact_type, 0) + 1
     store.write()
-    return {"counts": counts, "unqualified": unqualified,
-            "normalizer_version": NORMALIZER_VERSION}
+    for t in sorted(set(unqualified) - set(counts)):
+        unavailable[t] = f"all {unqualified[t]} records refused ({t} yielded zero facts)"
+    return {"counts": counts, "unqualified": unqualified, "undatable": undatable,
+            "unavailable": unavailable, "normalizer_version": NORMALIZER_VERSION}
 ```
 
-**`captured_at` is read from the source record in every branch.** `_iter_source` requires it and
-raises if a source cannot supply one — that, not a convention, is what makes replay deterministic
-and what the `no_wall_clock` AST test enforces.
+**The `_iter_source` contract — a real producer, specified in full.** An earlier revision invoked
+`_iter_source` in one line and defined it nowhere; every structural mismatch above was being
+silently deferred into that missing function. Its contract:
 
-**Two types ship with no source and that is deliberate.** `schedule_pairing` has no qualified
-pre-kickoff source, and `roster_membership` has no qualified anchor producer. Both normalizers
-exist and both raise `UnqualifiedSource`; `normalize_all` counts the refusals in `unqualified`
-rather than skipping silently. This is the fail-closed outcome the design requires — and because
-`roster_membership` is a **required** contrast family, it is also what makes the K3 contrast
-degraded rather than falsely clean. See Open dependencies.
+- Signature: `_iter_source(source_root, fact_type, spec, season) -> Iterator[tuple[str, dict, dict]]`
+  yielding `(source_ref, env_meta, record)`.
+- **Envelope lane:** resolves `data/captures/2026/public/<component>/*.json` under `source_root`,
+  takes the **latest** envelope per component (filename-ordered ISO timestamps), sets
+  `env_meta = {"captured_at": envelope["captured_at"], ...access_scope, privacy, known_at_basis}`,
+  and walks `payload` per the ENVELOPE_SOURCES walk. `source_ref` is
+  `f"capture:2026/public/{component}/{filename}"`.
+- **Legacy lane:** substitutes `{season}` (and fans `{prior}` out over `PRIOR_SEASONS` — the
+  placeholder an earlier revision left unbound), performs the verified walk, and sets
+  `env_meta["captured_at"]` from `LEGACY_CAPTURE_INSTANTS` — a committed constant map, one exact
+  UTC instant per legacy file, derived once from each file's last pre-2026-08 git commit and
+  recorded under policy id `legacy-capture-v1`. A file with no map entry raises — never a default,
+  never `now()`. `source_ref` is `f"legacy:{relative_path}"`.
+- **Instant enrichment:** for matchup walks it threads `week` and the per-(season, week)
+  `concluded_at` from the committed week-boundary table under policy `legacy-week-conclusion-v1`
+  (recorded in `known_at_basis` via `conclusion_policy`); for draft walks it threads top-level
+  `draft_id` and `draft_instant`/`draft_instant_basis`. Records never invent instants; the iterator
+  attaches them from named, versioned policies or the normalizer refuses.
+- A missing **file** in the legacy lane yields the type into `unavailable` (via a sentinel
+  exception the loop catches), never `FileNotFoundError` mid-run; a missing **field** in a record
+  is the normalizer's `UnqualifiedSource` to raise. `shared.load_json` is always called with
+  `required=True` here — the silent-`None` default is exactly the wrong behavior for a producer.
 
-- [ ] **Step 4: Run to verify it passes** → 7 passed
+**`captured_at` never comes from the record.** Verified: NO legacy source record (users,
+season_combined matchups, transactions, draft picks, nfl_games, parsed messages) carries a
+`captured_at` field — the earlier `raw["captured_at"]` read was written as if every record were an
+envelope, and would have raised `KeyError` on the first record of the first type. The envelope's
+top-level `captured_at` (2026) or the `legacy-capture-v1` policy map (2025) is the only admissible
+origin, which is what the `no_wall_clock` AST test protects.
+
+- [ ] **Step 3b: Add the CLI** — nothing else materializes `data/facts/{season}.jsonl`, which
+      `state_at`'s default path and K2.1's compiler both require
+
+```python
+def main():
+    import argparse, json
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--season", type=int, required=True)
+    ap.add_argument("--source-root", default=".")
+    ap.add_argument("--out", help="default: data/facts/{season}.jsonl")
+    a = ap.parse_args()
+    out = Path(a.out) if a.out else Path("data") / "facts" / f"{a.season}.jsonl"
+    report = normalize_all(source_root=a.source_root, out_path=out, season=a.season)
+    print(json.dumps(report, indent=2, sort_keys=True))
+    # Zero facts overall is a failed run, not a quiet success.
+    return 0 if report["counts"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+Every normalizer follows the `(meta, body)` convention — `_matchup_result`, `_draft_pick`,
+`_nfl_game`, and `_historical_matchup` are shown in full above; `_franchise_identity`,
+`_schedule_pairing`, `_transaction`, `_chat_message`, and `_roster_membership` return the same
+shape, with bodies: franchise `{roster_id, owner_id, display_name}`; schedule
+`{season, week, home, away}`; transaction `{season, transaction_id, type, adds, drops, roster_ids}`;
+chat `{id, timestamp_utc, sender, text}`; roster `{season, roster_id, player_id, on_roster}`.
+
+- [ ] **Step 4: Run to verify it passes** → 9 passed
 
 - [ ] **Step 5: Commit**
 
@@ -2114,12 +2541,18 @@ def test_1_duplicate_capture_yields_one_fact(tmp_path):
     s.observe(payload={"v": 1}, **dict(OBS, captured_at="2026-08-03T00:00:00Z"))
     assert len(s.load()) == 1
 
-def test_1_mutation_without_coalescing_would_duplicate(tmp_path, monkeypatch):
+def test_1_mutation_without_coalescing_hits_the_id_refusal(tmp_path, monkeypatch):
+    """Control with defense-in-depth: disable coalescing and the second identical
+    observation now mints the SAME fact_id (same srid/content/known_at/norm,
+    supersedes=None) -- and the duplicate-id refusal fires instead of silently
+    duplicating. The plant is asserted to land before the consequence is read."""
+    disabled = lambda self, ft, srid: None
+    monkeypatch.setattr(FactStore, "_latest_for", disabled)
     s = FactStore(tmp_path / "f.jsonl")
-    monkeypatch.setattr(FactStore, "_latest_for", lambda self, srid: None)  # disable the rule
+    assert FactStore._latest_for is disabled, "the plant must land"
     s.observe(payload={"v": 1}, **OBS)
-    s.observe(payload={"v": 1}, **dict(OBS, captured_at="2026-08-03T00:00:00Z"))
-    assert len(s.load()) == 2, "control: without coalescing the store duplicates"
+    with pytest.raises(ValueError, match="fact_id collision"):
+        s.observe(payload={"v": 1}, **dict(OBS, captured_at="2026-08-03T00:00:00Z"))
 
 # 2 -------------------------------------------------------------------------
 def test_2_revised_duplicate_supersedes_without_mutating(tmp_path):
@@ -2140,7 +2573,7 @@ def test_2_mutation_in_place_update_would_lose_the_earlier_state(tmp_path, monke
                             (self._facts[0], "mutated"))[1])
     s.observe(payload={"v": 2}, **dict(OBS, known_at="2025-09-06T00:00:00Z"))
     early = state_at(2025, "2025-09-03T00:00:00Z", "public", facts=s.load())
-    assert early.value("txn:1").payload == {"v": 2}, \
+    assert early.value("transaction", "txn:1").payload == {"v": 2}, \
         "control: mutation rewrites history at an earlier cutoff"
 
 # 3 -------------------------------------------------------------------------
@@ -2193,21 +2626,30 @@ def test_5_schedule_provenance_failure_is_unavailable():
     with pytest.raises(UnqualifiedSource):
         NORMALIZERS["schedule_pairing"]({"source": "weekly_packet"}, season=2025)
 
-def test_5_mutation_accepting_a_stripped_packet_admits_an_unqualified_pairing():
-    """Control: allow the packet source and concealment reads as availability."""
+def test_5_mutation_accepting_a_stripped_packet_admits_an_unqualified_pairing(monkeypatch):
+    """Control: remove the packet-source guard IN THE PRODUCTION REGISTRY and
+    concealment reads as availability. The plant is placed where consumers
+    actually look (the NORMALIZERS dict), asserted to land, and the consequence
+    is read through the registry lookup -- not from a lambda the test wrote."""
     import scripts.normalize_facts as nf
     raw = {"source": "weekly_packet", "home": "A", "away": "B", "week": 1,
            "known_at": "2025-08-01T00:00:00Z"}
-    original = nf._schedule_pairing
-    try:
-        nf._schedule_pairing = lambda r, season: {          # rule removed
-            "fact_type": "schedule_pairing", "known_at_basis": "packet",
-            "source_record_id": "sched:x", "entity_ref": {"type": "matchup", "id": "x"},
-            "effective_at": r["known_at"], "known_at": r["known_at"],
-            "access_scope": "public", "privacy": "public"}
-        assert nf._schedule_pairing(raw, 2025)["known_at_basis"] == "packet"
-    finally:
-        nf._schedule_pairing = original
+    original = nf.NORMALIZERS["schedule_pairing"]
+    permissive = lambda r, season: (
+        {"fact_type": "schedule_pairing", "known_at_basis": "packet",
+         "source_record_id": "sched:x", "entity_ref": {"type": "matchup", "id": "x"},
+         "effective_at": r["known_at"], "known_at": r["known_at"],
+         "access_scope": "public", "privacy": "public"},
+        {"season": 2025, "week": 1, "home": "A", "away": "B"})
+    monkeypatch.setitem(nf.NORMALIZERS, "schedule_pairing", permissive)
+    assert nf.NORMALIZERS["schedule_pairing"] is not original, "the plant must land"
+    meta, body = nf.NORMALIZERS["schedule_pairing"](raw, 2025)
+    assert meta["known_at_basis"] == "packet", \
+        "control: with the guard removed, a stripped packet is admitted"
+    # And the unmutated registry refuses the same record:
+    monkeypatch.setitem(nf.NORMALIZERS, "schedule_pairing", original)
+    with pytest.raises(UnqualifiedSource):
+        nf.NORMALIZERS["schedule_pairing"](raw, 2025)
 
 # 6 -------------------------------------------------------------------------
 def test_6_three_step_correction_chain():
@@ -2216,42 +2658,40 @@ def test_6_three_step_correction_chain():
     c = F(fact_id="c", source_record_id="r", known_at="2025-09-09T00:00:00Z", supersedes="b")
     for cutoff, want in (("2025-09-02T00:00:00Z", "a"), ("2025-09-06T00:00:00Z", "b"),
                          ("2025-09-10T00:00:00Z", "c")):
-        assert state_at(2025, cutoff, "public", facts=[a, b, c]).value("r").fact_id == want
+        assert state_at(2025, cutoff, "public",
+                        facts=[a, b, c]).value("transaction", "r").fact_id == want
 
-def test_6_mutation_retiring_by_inadmissible_supersessor_blanks_the_early_state():
-    """Control: retire a predecessor using a supersessor that is itself not yet
-    admitted, and the earliest cutoff loses its value entirely."""
+def test_6_inadmissible_supersessor_does_not_retire_its_predecessor():
+    """The discriminating form, THROUGH production: at the early cutoff the
+    supersessor b is not yet admitted, so a must survive. Under the removed rule
+    (retiring against the WHOLE pool instead of admitted facts) this returns
+    None and the assertion fails -- the test cannot pass vacuously. An earlier
+    revision asserted an inline comprehension it wrote itself, which passed
+    identically whether state_at was correct, broken, or deleted."""
     a = F(fact_id="a", source_record_id="r", known_at="2025-09-01T00:00:00Z")
     b = F(fact_id="b", source_record_id="r", known_at="2025-09-05T00:00:00Z", supersedes="a")
-    pool = [a, b]
-    retired = {f.supersedes for f in pool if f.supersedes}        # rule removed:
-    survivors = [f for f in pool                                  # retire from the WHOLE pool
-                 if f.fact_id not in retired and f.known_at <= "2025-09-02T00:00:00Z"]
-    assert survivors == [], "control: retiring against unadmitted facts empties the state"
+    early = state_at(2025, "2025-09-02T00:00:00Z", "public", facts=[a, b])
+    got = early.value("transaction", "r")
+    assert got is not None and got.fact_id == "a", \
+        "retirement must consult ADMITTED facts only"
 
 # 7 -------------------------------------------------------------------------
 def test_7_cross_arm_predecessor_poisoning(tmp_path):
-    other = seal(root=tmp_path, edition_id="pre", season=2025,
-                 cutoff_utc="2025-09-03T23:59:59Z", arm_id="no_chat", trial_id=1,
-                 state_hash="sha256:" + "a" * 64, ranking={"entries": []}, claims=[],
-                 run_id="r1")
+    from scripts.tests.test_decision_history import mkseal
+    other = mkseal(tmp_path, "no_chat", 1, "2025-09-03T23:59:59Z", "pre")
     with pytest.raises(CrossArmContamination):
         verify_predecessor(other, arm_id="full_rich", trial_id=1)
 
-def test_7_mutation_without_the_arm_check_the_poison_is_accepted(tmp_path):
-    """Control: drop the arm/trial comparison and every arm inherits the best
-    arm's continuity, which is exactly what makes the comparison meaningless."""
-    import scripts.decision_history as dh
-    other = seal(root=tmp_path, edition_id="pre", season=2025,
-                 cutoff_utc="2025-09-03T23:59:59Z", arm_id="no_chat", trial_id=1,
-                 state_hash="sha256:" + "a" * 64, ranking={"entries": []}, claims=[],
-                 run_id="r1")
-    original = dh.verify_predecessor
-    try:
-        dh.verify_predecessor = lambda sealed, arm_id, trial_id: sealed
-        assert dh.verify_predecessor(other, "full_rich", 1).arm_id == "no_chat"
-    finally:
-        dh.verify_predecessor = original
+def test_7_mutation_note_the_real_control_lives_in_k35():
+    """Rule 7's mutation control cannot be honest at this layer: patching
+    dh.verify_predecessor is inert for any consumer that imported the symbol by
+    name, so a lambda-patch control asserts only the lambda. The genuine control
+    -- disable the check where run_arm_chain reads it, assert the plant landed,
+    and observe a poisoned chain complete -- is
+    test_mutation_disabled_predecessor_check_accepts_poison in
+    scripts/tests/test_chronological.py (K3.5), which exercises the production
+    driver end to end. This placeholder documents the deferral so the K1.7
+    'seven controls' census counts an honest 6 + 1-deferred, not a vacuous 7."""
 
 # preserved noninterference proofs (design §3: "reuse the existing hard-won
 # tests through this path") --------------------------------------------------
@@ -2300,13 +2740,19 @@ def test_preview_state_is_outcome_free_by_composition():
     assert not hasattr(s, "allow_outcome_derivation")
 
 def test_leaky_comparator_control_would_admit_the_outcome():
-    """The deliberately leaky control: admit on effective_at instead of known_at
-    and the preview state gains the very result it must not have."""
+    """The leaky-comparator pair: production state_at (known_at admission) must
+    EXCLUDE a result whose effective_at precedes the cutoff but whose known_at
+    does not -- while the modeled defect (effective_at admission) admits it.
+    The production assertion is what makes this discriminating: if state_at ever
+    switched clocks, the first assert fails. The inline comprehension alone --
+    an earlier revision's whole control -- could never fail."""
     result = F(fact_id="r", source_record_id="m", fact_type="matchup_result",
                effective_at="2025-09-04T00:00:00Z", known_at="2025-09-09T06:59:59Z")
+    s = state_at(2025, "2025-09-05T00:19:59Z", "public", facts=[result])
+    assert s.admitted == [], "production: known_at admission excludes the result"
     leaked = [f for f in [result] if f.effective_at <= "2025-09-05T00:19:59Z"]
     assert [f.fact_id for f in leaked] == ["r"], \
-        "control: admitting on effective_at leaks results into a preview"
+        "modeled defect: admitting on effective_at leaks results into a preview"
 
 # deterministic replay ------------------------------------------------------
 def test_deterministic_replay_of_facts_and_state(tmp_path):
@@ -2321,13 +2767,18 @@ def test_deterministic_replay_of_facts_and_state(tmp_path):
 ```
 
 - [ ] **Step 2: Run** → 19 passed. **If any mutation control passes without its rule disabled, the
-      rule is not doing work — fix the rule, never the test.**
+      rule is not doing work — fix the rule, never the test.** Every control must (a) plant its
+      mutation in a symbol the production entry point actually reads, (b) **assert the plant
+      landed** before reading the consequence, and (c) read the consequence through production
+      code — a control that asserts a literal or lambda the test itself wrote is a probe that
+      cannot fail, and four of the round-two controls were exactly that (rules 5, 6, 7 and the
+      leaky comparator; all four rewritten in this revision, rule 7's genuine control deferred to
+      K3.5 where its consumer exists).
 
-Seven rules, seven controls, four preserved noninterference proofs, one replay test. A previous
-revision shipped a control for rule 1 only while the Self-Review claimed all seven had one:
-deterministic replay of the same source is not a substitute for physical truncation or for
-poisoned-input isolation, because a deterministic pipeline reproduces a leak just as faithfully as
-it reproduces a correct answer.
+Seven rules; six controls here plus rule 7's in K3.5; four preserved noninterference proofs; one
+replay test. Deterministic replay of the same source is not a substitute for physical truncation or
+for poisoned-input isolation, because a deterministic pipeline reproduces a leak just as faithfully
+as it reproduces a correct answer.
 
 - [ ] **Step 3: Run the full suite**
 
@@ -2459,8 +2910,15 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-Verify: `$PY scripts/compile_state.py --descriptor content/editions/2025-preseason/descriptor.json`
-exits 0 and prints the compiled directory.
+Verify — the fact store must exist first (`normalize_facts` is its only producer; without this
+line the compiler dies on `FileNotFoundError: no fact store for season 2025`):
+
+```bash
+$PY scripts/normalize_facts.py --season 2025 || exit 1
+$PY scripts/compile_state.py --descriptor content/editions/2025-preseason/descriptor.json
+```
+
+Both exit 0; the second prints the compiled directory.
 
 - [ ] **Step 6: Commit**
 
@@ -2536,6 +2994,15 @@ PY
 Write the printed cutoff into the preview descriptor. `compile_state` re-derives it and refuses
 to compile a preview whose descriptor cutoff is not strictly-before the qualified kickoff.
 
+**The qualification is a compile-time gate, not a test.** `test_result_carries_every_source_hash`
+skips when the gitignored schedules parquet is absent — deliberately: the CI suite runs on fresh
+clones with no parquet, and a hard-fail there turns every push red for a machine-state reason. The
+gate that cannot be skipped is `compile_state`'s refusal above: the preview edition simply cannot
+compile until the parquet exists and the descriptor cutoff equals
+`strictly_before(first_kickoff_instant(season))`. The hardcoded `2025-09-05T00:19:59Z` literals in
+K1.7/K3.4 fixtures are TEST DATA, checked against the derivation by this gate the moment the real
+preview compiles — no consumer treats them as authority.
+
 - [ ] **Step 5: Run** → 5 passed
 
 - [ ] **Step 6: Commit**
@@ -2591,9 +3058,13 @@ def test_legacy_packets_still_carry_the_46_and_are_no_longer_inputs():
 ```python
 def main():
     import argparse, json
+    from pathlib import Path
     ap = argparse.ArgumentParser()
-    ap.add_argument("--all", action="store_true")
-    ap.add_argument("--edition")
+    # Required mutually-exclusive group (eval_contrast's pattern): a bare
+    # invocation must error at exit 2, never call state_leak_census(None).
+    mode = ap.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--all", action="store_true")
+    mode.add_argument("--edition")
     ap.add_argument("--season", type=int, default=2025)
     a = ap.parse_args()
     failed = 0
@@ -2674,11 +3145,13 @@ import pytest
 from scripts.claims_ledger import make_claim, validate_claim, CLAIM_TYPES, HORIZONS
 
 def base(**over):
+    # edition_id is REQUIRED: K3.6's completeness gate keys cells on
+    # (arm_id, edition_id, trial_id); a claim without it collapses the grid.
     b = dict(target="General Ken-obi", claim_type="ordinal_rank", horizon="rest_of_season",
              assertion=2, confidence=0.6, decisive_evidence=["/records/highest_score"],
              contrary_evidence="thin schedule so far", cutoff_utc="2025-09-09T06:59:59Z",
              state_hash="sha256:" + "a" * 64, arm_id="full_rich", trial_id=1,
-             decision_run_id="run-1",
+             decision_run_id="run-1", edition_id="2025-wk01-recap",
              resolution_rule={"rule": "final_regular_season_rank", "source": "standings",
                               "resolve_on": "2026-01-06T00:00:00Z"})
     b.update(over); return b
@@ -2704,18 +3177,36 @@ def test_bounded_quantity_requires_a_bound():
 def test_probability_must_be_within_zero_and_one():
     assert validate_claim(make_claim(**base(claim_type="binary_probability", assertion=1.4)))
 
-def test_claim_binds_its_arm_trial_and_run():
+def test_claim_binds_its_arm_trial_edition_and_run():
     c = make_claim(**base())
     assert c.arm_id == "full_rich" and c.trial_id == 1 and c.decision_run_id == "run-1"
+    assert c.edition_id == "2025-wk01-recap"
+
+def test_ledger_round_trips_through_persistence(tmp_path):
+    """save_claims/load_claims are implemented HERE, not just named: K3.5's
+    driver and K3.6's report both depend on them, and an earlier revision
+    declared them in Interfaces with no creating step."""
+    from scripts.claims_ledger import save_claims, load_claims
+    cs = [make_claim(**base()), make_claim(**base(target="Boat"))]
+    save_claims(cs, root=tmp_path)
+    got = load_claims(root=tmp_path)
+    assert [c.target for c in got] == sorted(c.target for c in cs)
+    assert not list(tmp_path.rglob("*.seal.json")), "the ledger never enters the decisions tree"
 ```
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
 
-- [ ] **Step 3: Implement** the dataclass, the JSON Schema, and `validate_claim` enforcing type,
-      horizon, bounds, and a complete `resolution_rule` (rule, source, resolve_on) fixed at claim
-      time.
+- [ ] **Step 3: Implement** the dataclass (including `edition_id`), the JSON Schema,
+      `validate_claim` enforcing type, horizon, bounds, and a complete `resolution_rule`
+      (rule, source, resolve_on) fixed at claim time — **and the persistence pair**, on the fact
+      store's declared-layout model:
+      `CLAIMS_ROOT = ROOT / "data" / "claims"`, one `{season}.jsonl` per season, deliberately
+      OUTSIDE `content/decisions/` so the ledger can never become a fifth file species in the seal
+      directory. `save_claims(claims, root=None)` appends canonically-serialized records sorted by
+      `(arm_id, edition_id, trial_id, claim_id)`; `load_claims(root=None)` reads them back as
+      `Claim` records; `root=None` means `CLAIMS_ROOT`.
 
-- [ ] **Step 4: Run** → 6 passed
+- [ ] **Step 4: Run** → 8 passed
 
 - [ ] **Step 5: Commit**
 
@@ -2731,8 +3222,11 @@ git commit -m "feat(claims): scoreable claim records with pre-fixed resolution r
 **Files:** Create `scripts/decision_run.py`, `scripts/tests/test_decision_run.py`
 
 **Interfaces:** `DecisionRun`, `open_run(...)`, `close_run(run, output_decision_hash, ended_at)`,
-`RUNNER_KINDS`, `persist_run(run, root)`, `load_runs(root)`, `runner_config(arm_id)`,
-`RUNNER_CONFIG_PATH`
+`RUNNER_KINDS`, `persist_run(run, root)` (writes `<root>/<season>/<arm_id>/trial<N>/<edition_id>.run.json`
+via `write_json_once` — exclusive-create, same directory contract as K1.5; **refuses an OPEN run**:
+a record with null `ended_at` or `output_decision_hash` raises, because the on-disk receipt attests
+completion, never intent), `load_runs(root)` (globs `*.run.json` — its own suffix, never `*.json`),
+`runner_config(arm_id)`, `RUNNER_CONFIG_PATH`
 
 **A receipt nobody stores is not a receipt.** `open_run`/`close_run` build the record; `persist_run`
 writes it to `<root>/<season>/<arm_id>/trial<N>/<edition_id>.run.json`, and K3.8's packet reads
@@ -2818,6 +3312,22 @@ def test_predecessor_hash_is_mandatory_outside_preseason():
         open_run(runner_kind="deterministic", code_hash="sha256:" + "d" * 64,
                  config_hash="sha256:" + "e" * 64, input_hashes={},
                  **dict(COMMON, predecessor_decision_hash=None))
+
+def test_persist_refuses_an_open_run_and_round_trips_a_closed_one(tmp_path):
+    """The receipt on disk must attest a COMPLETED run. Persisting the open
+    record was the round-two ordering defect: load_runs could never confirm any
+    run finished, and a crash left a receipt for a run that produced nothing."""
+    from scripts.decision_run import persist_run, load_runs
+    r = open_run(runner_kind="deterministic", code_hash="sha256:" + "d" * 64,
+                 config_hash="sha256:" + "e" * 64, input_hashes={}, **COMMON)
+    with pytest.raises(ValueError):
+        persist_run(r, tmp_path)                      # open: refused
+    done = close_run(r, output_decision_hash="sha256:" + "9" * 64,
+                     ended_at="2026-08-02T00:05:00Z")
+    persist_run(done, tmp_path)
+    loaded = load_runs(tmp_path)
+    assert len(loaded) == 1
+    assert loaded[0].ended_at and loaded[0].output_decision_hash
 ```
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
@@ -2826,12 +3336,22 @@ def test_predecessor_hash_is_mandatory_outside_preseason():
       and rejects model-only fields on a deterministic run and vice versa. A `preseason` edition
       may pass `predecessor_decision_hash=None`; every other kind must supply one.
 
-- [ ] **Step 4: Run** → 6 passed
+- [ ] **Step 3b: Write the configuration files** — an earlier revision DISPLAYED the runner-config
+      JSON and never created it; `git add` on the missing path would have aborted K3.7's staging
+      with a misleading guard message, and every model run would have died hashing a nonexistent
+      prompt. Write `content/governance/runner_config.json` with exactly the JSON above, and write
+      `content/governance/prompts/ranking_prompt.md` (the ranking instruction the four model arms
+      share — **identical across arms**, so arm differences measure evidence, never prompt; only
+      the bundle differs). Add a test asserting `runner_config("full_rich")` loads and every path
+      it names resolves to a readable file.
+
+- [ ] **Step 4: Run** → 8 passed
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/decision_run.py scripts/tests/test_decision_run.py
+git add scripts/decision_run.py scripts/tests/test_decision_run.py \
+        content/governance/runner_config.json content/governance/prompts/ranking_prompt.md
 git commit -m "feat(runs): decision-run receipts for deterministic and model runners"
 ```
 
@@ -2843,10 +3363,40 @@ git commit -m "feat(runs): decision-run receipts for deterministic and model run
 `scripts/tests/test_eval_contrast.py`
 
 **Interfaces:** `load_manifest(path=MANIFEST_PATH)`, `freeze_manifest(path=MANIFEST_PATH, frozen_at)`,
-`family_counts(arm_id, editions_root=EDITIONS_ROOT) -> dict`,
-`assess_contrast(manifest, full, minimal, state_path=CONTRAST_STATE_PATH) -> ContrastResult` with
-`.status` in `{"ok", "degraded", "stop_no_decision"}`, `.missing`, `.reason`, `.per_edition`,
-`.cycles_used`; `preflight(manifest, editions_root) -> ContrastResult`; `ManifestDrift`
+`family_counts(arm_id, editions_root=None) -> dict` (`None` = the module-global `EDITIONS_ROOT`
+imported from `scripts.compile_state`, read at CALL time — never a bound default, the inert-patch
+class the plan already documents for `SEALS_ROOT`),
+`assess_contrast(manifest, full, minimal, state_path=CONTRAST_STATE_PATH) -> ContrastResult` — the
+`full`/`minimal` arguments are **`family_counts` results** (`{"totals": ..., "per_edition": ...,
+"unavailable": ...}`), never flat maps — with `.status` in `{"ok", "degraded", "stop_no_decision"}`,
+`.missing`, `.reason`, `.per_edition`, `.cycles_used`;
+`preflight(manifest, editions_root=None) -> ContrastResult`; `ManifestDrift`
+
+**One rule for a required family with no qualified source — the round-two contradiction resolved.**
+The 2026-08-03 review found the plan answered this three ways (K3.3 "degrade", K3.4 "raise", K3.7
+"both, on the same exit code"), and Blake's open dependency 3 (roster anchor) guarantees the case
+occurs on the first real run. The single rule, owned here:
+
+- `bundle_for` (K3.4) raises `ArmUnavailable` **only in the arm-execution lane** — K3.5's driver,
+  where running an arm that cannot measure would spend model trials on nothing. K3.7 preflights
+  the contrast first, so in a correctly-ordered run it never fires there.
+- **The contrast lane never propagates an exception as a verdict.** `family_counts` catches
+  `ArmUnavailable` per (arm, edition), records the family at count 0 with the arm marked in its
+  `unavailable` map, and continues. It also folds in `normalize_all`'s `unavailable` bucket
+  (recorded refusals for `schedule_pairing`/`roster_membership`) so a declared-unsourced family
+  reads as **degraded**, never as clean-but-empty.
+- `assess_contrast` returns `degraded` for a missing/zero/unavailable required family (first
+  cycle) and `stop_no_decision` on the second; `ManifestDrift` and every unexpected exception exit
+  the CLI at **4** (failed gate), never 1 — exit 1 is emitted ONLY by a `ContrastResult` whose
+  status is `degraded`. A gate that reads a crash as a verdict is not a gate.
+
+**What remediation may do.** The one approved cycle may re-capture or re-normalize **under an
+already-frozen `source_id` and `normalizer_version`** — nothing else. Adding a source or bumping a
+normalizer version is a manifest change: it requires a NEW manifest version, discards every
+completed arm, and restarts the comparison (the design's own invalidation rule). `ManifestDrift`
+is therefore a failed gate, never a remediable verdict — without this boundary the only documented
+"remediation" for a missing family was the exact action the freeze forbids, an infinite loop with
+the cycle counter never advancing.
 
 **Every function takes an explicit path.** The manifest ships **unfrozen** (`frozen_at: null`), and
 `assess_contrast` refuses an unfrozen manifest — so a test calling a no-argument `load_manifest()`
@@ -2900,9 +3450,20 @@ def frozen(tmp_path):
     freeze_manifest(path=p, frozen_at="2026-08-02T00:00:00Z")
     return load_manifest(path=p)
 
-def test_shipped_manifest_is_unfrozen():
+def FC(totals, unavailable=None):
+    """family_counts result shape -- what assess_contrast ACTUALLY receives in
+    production. Round-two tests passed flat maps and a positional cycle count;
+    implemented to those tests, the production path found none of the required
+    families and reported DEGRADED on every run regardless of the evidence."""
+    return {"totals": totals, "per_edition": {"2025-wk01-recap": dict(totals)},
+            "unavailable": dict(unavailable or {})}
+
+def test_manifest_freeze_state_is_coherent():
+    """True BEFORE and AFTER K3.7 Step 1 freezes the committed file -- asserting
+    `frozen_at is None` outright made the plan's own success break the K3.8
+    suite gate permanently."""
     m = load_manifest()
-    assert m["frozen_at"] is None and m["manifest_sha256"] is None
+    assert (m["frozen_at"] is None) == (m["manifest_sha256"] is None)
 
 def test_manifest_requires_exactly_the_four_families():
     m = load_manifest()
@@ -2913,9 +3474,15 @@ def test_media_is_explicitly_excluded():
     media = next(f for f in m["families"] if f["family"] == "media_item")
     assert media["required"] is False and "S1b" in media["rationale"]
 
-def test_assessing_an_unfrozen_manifest_is_refused():
+def test_assessing_an_unfrozen_manifest_is_refused(tmp_path):
+    p = tmp_path / "m.json"
+    shutil.copyfile(MANIFEST_PATH, p)
+    unfrozen = load_manifest(path=p)
+    if unfrozen["frozen_at"] is not None:
+        pytest.skip("committed manifest already frozen by K3.7 Step 1")
     with pytest.raises(ValueError):
-        assess_contrast(load_manifest(), {"roster_membership": 12}, {}, 0)
+        assess_contrast(unfrozen, FC({"roster_membership": 12}), FC({}),
+                        state_path=tmp_path / "state.json")
 
 def test_freezing_twice_is_refused(tmp_path):
     p = tmp_path / "m.json"
@@ -2924,27 +3491,52 @@ def test_freezing_twice_is_refused(tmp_path):
     with pytest.raises(ValueError):
         freeze_manifest(path=p, frozen_at="2026-08-03T00:00:00Z")
 
-def test_missing_required_family_is_degraded(frozen):
-    full = {"roster_membership": 12, "historical_matchup": 0, "chat_message": 900, "nfl_game": 16}
-    r = assess_contrast(frozen, full, {"roster_membership": 12}, 0)
+def test_missing_required_family_is_degraded(frozen, tmp_path):
+    full = FC({"roster_membership": 12, "historical_matchup": 0,
+               "chat_message": 900, "nfl_game": 16})
+    r = assess_contrast(frozen, full, FC({"roster_membership": 12}),
+                        state_path=tmp_path / "state.json")
     assert r.status == "degraded" and "historical_matchup" in r.missing
 
-def test_absent_media_does_not_degrade(frozen):
-    full = {"roster_membership": 12, "historical_matchup": 400, "chat_message": 900,
-            "nfl_game": 16, "media_item": 0}
-    r = assess_contrast(frozen, full, {"roster_membership": 12}, 0)
+def test_declared_unavailable_family_is_degraded_not_clean(frozen, tmp_path):
+    """normalize_all's recorded refusal must reach the verdict as degradation --
+    the clean-but-empty trap."""
+    full = FC({"roster_membership": 0, "historical_matchup": 400,
+               "chat_message": 900, "nfl_game": 16},
+              unavailable={"roster_membership": "no qualified anchor"})
+    r = assess_contrast(frozen, full, FC({}), state_path=tmp_path / "state.json")
+    assert r.status == "degraded" and "roster_membership" in r.missing
+
+def test_absent_media_does_not_degrade(frozen, tmp_path):
+    full = FC({"roster_membership": 12, "historical_matchup": 400, "chat_message": 900,
+               "nfl_game": 16, "media_item": 0})
+    r = assess_contrast(frozen, full, FC({"roster_membership": 12}),
+                        state_path=tmp_path / "state.json")
     assert r.status == "ok"
 
-def test_identical_bundles_are_degraded_even_when_complete(frozen):
-    full = {"roster_membership": 12, "historical_matchup": 400, "chat_message": 900, "nfl_game": 16}
-    r = assess_contrast(frozen, full, dict(full), 0)
+def test_identical_bundles_are_degraded_even_when_complete(frozen, tmp_path):
+    full = FC({"roster_membership": 12, "historical_matchup": 400,
+               "chat_message": 900, "nfl_game": 16})
+    r = assess_contrast(frozen, full, FC(dict(full["totals"])),
+                        state_path=tmp_path / "state.json")
     assert r.status == "degraded" and "no measurable difference" in r.reason
 
-def test_second_degraded_cycle_stops(frozen):
-    full = {"roster_membership": 12, "historical_matchup": 0, "chat_message": 900, "nfl_game": 16}
-    r = assess_contrast(frozen, full, {"roster_membership": 12}, 1)
-    assert r.status == "stop_no_decision"
-    assert "S1a does not begin" in r.reason
+def test_second_degraded_cycle_stops_via_the_persisted_counter(frozen, tmp_path):
+    """TWO CALLS against one state file. The counter is read from and written to
+    disk, keyed by manifest_sha256 -- if assess_contrast took it from a parameter
+    or env var this test fails, which is the point: every re-run would otherwise
+    be cycle one and 'one remediation cycle' would be unbounded in practice."""
+    import json as j
+    sp = tmp_path / "contrast_state.json"
+    full = FC({"roster_membership": 12, "historical_matchup": 0,
+               "chat_message": 900, "nfl_game": 16})
+    first = assess_contrast(frozen, full, FC({"roster_membership": 12}), state_path=sp)
+    assert first.status == "degraded" and first.cycles_used == 1
+    on_disk = j.loads(sp.read_text(encoding="utf-8"))
+    assert on_disk == {"manifest_sha256": frozen["manifest_sha256"], "cycles_used": 1}
+    second = assess_contrast(frozen, full, FC({"roster_membership": 12}), state_path=sp)
+    assert second.status == "stop_no_decision"
+    assert "S1a does not begin" in second.reason
 
 def test_freeze_stamps_an_instant_and_a_hash(frozen):
     assert frozen["frozen_at"] and frozen["manifest_sha256"].startswith("sha256:")
@@ -2994,13 +3586,20 @@ the manifest with both stamp fields excluded, so the hash is stable) and raises 
 already frozen. `assess_contrast` raises `ValueError` on an unfrozen manifest. `frozen_at` is
 passed in rather than read from the clock, so the freeze is reproducible and testable.
 
-- [ ] **Step 4: Run** → 10 passed
+- [ ] **Step 4: Run** → 12 passed
 
-- [ ] **Step 4b: Add the CLI** — K3.7 Steps 1 and 4 invoke this script
+- [ ] **Step 4b: Implement `preflight` and add the CLI** — K3.7 Steps 1, 2b and 4 invoke this
+      script. `preflight(manifest, editions_root=None)` IS `assess_contrast` with
+      `increment=False`: same required-family and difference checks over the same
+      `family_counts`, but a degraded preflight is **advisory** and never consumes the one
+      remediation cycle (otherwise a degraded preflight would spend the only cycle before Step 4
+      ever ran). It requires a frozen manifest exactly as `--assess` does. Two tests: a degraded
+      preflight leaves `cycles_used` unchanged on disk; preflight and assess agree on identical
+      inputs.
 
 ```python
 def main():
-    import argparse, json
+    import argparse, json, sys
     ap = argparse.ArgumentParser()
     mode = ap.add_mutually_exclusive_group(required=True)
     mode.add_argument("--assess", action="store_true")
@@ -3018,9 +3617,17 @@ def main():
         return 0
     # cycles_used is read from and written to the persisted contrast state, keyed by
     # manifest_sha256 -- never supplied by the caller, or every re-run is cycle one.
-    r = (preflight(load_manifest(), EDITIONS_ROOT) if a.preflight
-         else assess_contrast(load_manifest(), family_counts(a.full_arm),
-                              family_counts(a.minimal_arm)))
+    try:
+        r = (preflight(load_manifest()) if a.preflight
+             else assess_contrast(load_manifest(), family_counts(a.full_arm),
+                                  family_counts(a.minimal_arm)))
+    except Exception as exc:      # ManifestDrift, IO, anything unforeseen
+        # A crash is a FAILED GATE, never a verdict. Unhandled, CPython exits 1 --
+        # which K3.7's case block would read as DEGRADED, conflating three
+        # different events on one code.
+        print(json.dumps({"status": "failed_gate", "error": f"{type(exc).__name__}: {exc}"}),
+              file=sys.stderr)
+        return 4
     print(json.dumps({"status": r.status, "missing": r.missing, "reason": r.reason,
                       "cycles_used": r.cycles_used, "per_edition": r.per_edition},
                      indent=2, sort_keys=True))
@@ -3037,9 +3644,9 @@ if __name__ == "__main__":
 `if __name__ == "__main__": raise SystemExit(main())` this module defines `main()` and never calls
 it: `$PY scripts/eval_contrast.py --assess` would import the module, print nothing, and **exit 0**.
 A gate branching on that exit code reads `ok` — so contrast integrity would go **unmeasured** while
-appearing to pass, and the K3.8 review packet would be invalid. This is the one CLI of the six that
-lacked the guard; a `def main():` census counts 6/6 clean while the guard census is 5/6, which is
-why the check must be on **execution**, not presence.
+appearing to pass, and the K3.8 review packet would be invalid. This was the one CLI among this
+plan's own that lacked the guard; a `def main():` census counts every module clean while the guard
+census does not, which is why the check must be on **execution**, not presence.
 
 Mode selection is a required mutually-exclusive group, so a bare invocation errors (exit 2) instead
 of silently assessing. Verify before relying on it:
@@ -3050,8 +3657,9 @@ $PY scripts/eval_contrast.py;            echo "bare exit=$?"          # 2, usage
 ```
 
 Exit codes from `--assess` are distinct: **0** ok, **1** degraded (one remediation cycle
-permitted), **3** stop-no-decision. **2 is reserved for argparse usage errors** and is never a
-verdict. K3.7 Step 4 branches on all four outcomes, including the unexpected one.
+permitted), **3** stop-no-decision, **4** failed gate/crash (ManifestDrift or any unhandled
+exception — never a verdict). **2 is reserved for argparse usage errors** and is never a verdict.
+K3.7 Steps 2b and 4 branch on all five outcomes, including the unexpected one.
 
 - [ ] **Step 5: Commit**
 
@@ -3067,7 +3675,11 @@ git commit -m "feat(eval): frozen evidence manifest, bounded degradation, media 
 **Files:** Create `scripts/eval_arms.py`, `scripts/tests/test_eval_arms.py`,
 `scripts/tests/conftest_eval.py`; modify `scripts/tests/conftest.py`
 
-**Interfaces:** `ARMS` (five), `bundle_for(arm_id, state)`,
+**Interfaces:** `ARMS` (five),
+`bundle_for(arm_id, state, edition_kind) -> {"families": [...], "facts": {...},
+"ranking_basis": str | None, "standings": list}` — one arity, one return shape, everywhere
+(`ranking_basis`/`standings` populated for `record_points`, `None`/`[]` otherwise; the round-two
+text stated the signature three ways and omitted the two keys its own tests read),
 `inertia_comparator(arm_id, trial_id, edition, root) -> SealedDecision | None`, `ArmUnavailable`
 
 **The comparator does not derive its own cutoff.** It receives the `EditionDescriptor` and uses
@@ -3129,12 +3741,10 @@ def preseason_state():
 @pytest.fixture
 def seeded_seals(tmp_path):
     """A full_rich preseason seal only — no_chat deliberately has none, so
-    test_comparator_absent_without_a_qualified_predecessor is a real negative."""
-    from scripts.decision_history import seal
-    seal(root=tmp_path, edition_id="2025-preseason", season=2025,
-         cutoff_utc="2025-09-03T23:59:59Z", arm_id="full_rich", trial_id=1,
-         state_hash="sha256:" + "a" * 64, ranking={"entries": []}, claims=[],
-         run_id="run-seed")
+    test_comparator_absent_without_a_qualified_predecessor is a real negative.
+    Sealed via K1.5's test helper so the closed-receipt precondition holds."""
+    from scripts.tests.test_decision_history import mkseal
+    mkseal(tmp_path, "full_rich", 1, "2025-09-03T23:59:59Z", "2025-preseason")
     return tmp_path
 ```
 
@@ -3172,11 +3782,20 @@ def test_no_chat_bundle_omits_chat(fake_state):
     assert "chat_message" not in b["families"] and "historical_matchup" in b["families"]
 
 def test_no_history_ablates_every_pre_2025_type(fake_state):
-    from scripts.eval_arms import PRE_2025_TYPES
+    """The expected set is bound INDEPENDENTLY of ARMS -- comparing the ablation
+    list against the constant that defines it is a tautology that cannot fail.
+    In the nine-type bridge, historical_matchup is the ONLY type whose facts
+    predate 2025 (verified against fact_types.json); if a second pre-2025 type
+    is ever registered, THIS literal must grow with it and the tautological
+    form would have silently passed."""
+    independently_derived = {"historical_matchup"}
     b = bundle_for("no_history", fake_state, "recap")
-    assert not (PRE_2025_TYPES & set(b["families"])), \
-        "the design says 'full minus pre-2025 facts', not 'minus historical_matchup'"
+    assert not (independently_derived & set(b["families"])), \
+        "the design says 'full minus pre-2025 facts'"
     assert "chat_message" in b["families"]
+    from scripts.eval_arms import PRE_2025_TYPES
+    assert PRE_2025_TYPES == independently_derived, \
+        "ARMS' constant must match the independently-bound surface"
 
 def test_minimal_bundle_is_a_strict_subset_of_full(fake_state):
     assert set(bundle_for("minimal_legal", fake_state, "recap")["families"]) < \
@@ -3232,8 +3851,10 @@ STRUCTURALLY_ABSENT = {
     "recap":     set(),
 }
 
-# Pre-2025 fact types. The no-history arm ablates ALL of them, not just one:
-# the design says "Full minus pre-2025 facts."
+# Pre-2025 fact types. The no-history arm ablates ALL of them ("Full minus
+# pre-2025 facts"). In the current nine-type bridge, historical_matchup is the
+# only such type -- the set form exists so a future pre-2025 type joins the
+# ablation by membership, not by a second edit site.
 PRE_2025_TYPES = {"historical_matchup"}
 
 ARMS = {
@@ -3275,21 +3896,25 @@ def inertia_comparator(arm_id, trial_id, edition, root):
     `edition` is the EditionDescriptor. Season and cutoff come from it — this consumer
     derives no temporal rule of its own.
     """
-    from decision_history import decision_history_at
+    # scripts.-form import (Global Constraints): a bare `from decision_history
+    # import` under pytest creates a second module whose CrossArmContamination
+    # is a different class -- the poison test would error instead of pass.
+    from scripts.decision_history import decision_history_at
     if edition.kind == "preseason":
         return None                      # nothing to carry forward; invent nothing
     prior = decision_history_at(edition.season, edition.cutoff_utc, arm_id, trial_id, root=root)
     return prior[-1] if prior else None
 ```
 
-`bundle_for(arm_id, state)` returns `{"families": [...], "facts": {...}}`. For `record_points`,
-`minimal_legal` and `full_rich` the family list is the arm's declared `families`; for the two
-ablation arms it is `full_rich`'s families minus the arm's `ablates` entries — so an ablation is
-defined by subtraction from the full bundle and cannot drift from it.
+For `record_points`, `minimal_legal` and `full_rich` the family list is the arm's declared
+`families` (per `families_by_kind` where present); for the two ablation arms it is `full_rich`'s
+families minus the arm's `ablates` entries — so an ablation is defined by subtraction from the
+full bundle and cannot drift from it.
 
-`bundle_for(arm_id, state, edition_kind)` takes the edition kind and calls `required_families`.
-`ArmUnavailable` is raised in two cases, both meaning the arm cannot measure what it exists to
-measure:
+`bundle_for` takes the edition kind and calls `required_families`. `ArmUnavailable` is raised in
+two cases, both meaning the arm cannot measure what it exists to measure — and **only in the
+arm-execution lane** (K3.5); the contrast lane's `family_counts` catches it per (arm, edition) and
+records the arm unavailable, per K3.3's single rule:
 
 - a **required** family (per `required_families`) for which the state admits **zero** facts;
 - a family the arm **ablates** for which the state admits **zero** facts — removing nothing is not
@@ -3321,7 +3946,13 @@ git commit -m "feat(eval): five arms with per-arm inertia comparators"
 **Files:** Modify `scripts/eval_arms.py`; create `scripts/tests/test_chronological.py`
 
 **Interfaces:**
-`run_arm_chain(arm_id, trial_id, editions, root=None, _force_predecessor_arm=None) -> list[SealedDecision]`
+`run_arm_chain(arm_id, trial_id, editions, root=None, _force_predecessor_arm=None,
+_runners=None) -> list[SealedDecision]` (`_runners` is the test-injection point: the suite NEVER
+calls a live provider — every K3.5 test passes a deterministic stub for the model arms, and the
+stub is also what `--dry-run` executes);
+`write_blind_packet(out, label_map_path) -> int` (declared HERE — the round-two text called it
+from the CLI and K3.7 with no creating task: NameError after all 36 paid trials);
+`refuse_if_sealed(root, season, arm_id, trial_id, edition_id)`
 
 **`root` is an explicit parameter, not a monkeypatched module global.** `decision_history_at`
 binds `root=SEALS_ROOT` as a **default argument**, evaluated once at import — so
@@ -3366,21 +3997,62 @@ def test_recap_grades_this_arms_prior_claims(tmp_path):
     graded = [c for c in load_claims(root=tmp_path) if c.outcome is not None]
     assert graded and all(c.arm_id == "full_rich" for c in graded)
 
-def test_a_seal_cannot_be_overwritten(tmp_path):
-    run_arm_chain("full_rich", 1, EDITIONS[:1], root=tmp_path)
-    with pytest.raises(FileExistsError):
-        run_arm_chain("full_rich", 1, EDITIONS[:1], root=tmp_path)
+def test_a_rerun_is_refused_before_any_write_or_spend(tmp_path):
+    """The guard fires FIRST: the refused re-run leaves the ledger, receipts and
+    seal directory byte-identical, and never invokes a runner. Round two placed
+    the mutating writes ahead of the guard, so the normal response to a partial
+    failure -- re-run -- double-appended claims and overwrote receipts before
+    being refused (and for model arms, paid for a call it then threw away)."""
+    from scripts.claims_ledger import load_claims
+    calls = []
+    def counting_stub(bundle, predecessor):
+        calls.append(1)
+        return {"entries": [{"team": "1", "rank": 1}]}, [_stub_claim()]
+    run_arm_chain("full_rich", 1, EDITIONS[:1], root=tmp_path,
+                  _runners={"full_rich": counting_stub})
+    n_calls, n_claims = len(calls), len(load_claims(root=tmp_path))
+    files = sorted(p.name for p in tmp_path.rglob("*") if p.is_file())
+    with pytest.raises(FileExistsError, match=r"\.seal\.json"):
+        run_arm_chain("full_rich", 1, EDITIONS[:1], root=tmp_path,
+                      _runners={"full_rich": counting_stub})
+    assert len(calls) == n_calls, "the refused re-run must not invoke the runner"
+    assert len(load_claims(root=tmp_path)) == n_claims, "no claim double-append"
+    assert sorted(p.name for p in tmp_path.rglob("*") if p.is_file()) == files
+
+def test_mutation_disabled_predecessor_check_accepts_poison(tmp_path, monkeypatch):
+    """Rule 7's REAL mutation control (deferred from K1.7, where every consumer
+    imports verify_predecessor by name and a module-attr patch is inert). The
+    plant lands on the symbol run_arm_chain actually reads; with the check
+    disabled, a cross-arm predecessor is accepted and the poisoned chain
+    completes -- proving the check is the only thing standing."""
+    import scripts.eval_arms as ea
+    run_arm_chain("no_chat", 1, EDITIONS[:1], root=tmp_path)
+    passthrough = lambda sealed, arm_id, trial_id: sealed
+    monkeypatch.setattr(ea, "verify_predecessor", passthrough)
+    assert ea.verify_predecessor is passthrough, "the plant must land"
+    seals = run_arm_chain("full_rich", 1, EDITIONS[:2], root=tmp_path,
+                          _force_predecessor_arm="no_chat")
+    assert seals, "control: without the check the poisoned chain completes"
 
 def test_root_isolation_leaves_the_repository_untouched(tmp_path):
-    """Control: the tests above must not be writing into content/decisions/."""
+    """Control: the tests above must not be writing into content/decisions/.
+    Anchored to the REPO ROOT, not the CWD -- a CWD-dependent [] == [] pass is
+    vacuous whenever pytest runs from anywhere else."""
     from pathlib import Path
-    before = sorted(p.name for p in Path("content/decisions").glob("**/*")) \
-        if Path("content/decisions").exists() else []
+    repo = Path(__file__).resolve().parents[2]
+    decisions = repo / "content" / "decisions"
+    before = sorted(p.name for p in decisions.glob("**/*")) if decisions.exists() else []
     run_arm_chain("no_history", 1, EDITIONS[:1], root=tmp_path)
-    after = sorted(p.name for p in Path("content/decisions").glob("**/*")) \
-        if Path("content/decisions").exists() else []
+    after = sorted(p.name for p in decisions.glob("**/*")) if decisions.exists() else []
     assert before == after
 ```
+
+(`run_arm_chain` requires `_runners` to cover every model arm it executes when no provider
+credentials are configured — the suite must be green with no network and no key. This test file
+defines a module-level `STUB_RUNNERS` dict of deterministic stubs for all five arms plus the
+`_stub_claim()` helper (one valid resolvable claim via `claims_ledger.make_claim`), and **every**
+`run_arm_chain` call in this file passes `_runners=STUB_RUNNERS` unless the test shows its own
+stub — the calls above are abbreviated for readability, the implementation is not.)
 
 - [ ] **Step 2: Run to verify it fails** → `ImportError: cannot import name 'run_arm_chain'`
 
@@ -3388,21 +4060,51 @@ def test_root_isolation_leaves_the_repository_untouched(tmp_path):
 
 ```
 descriptor + compiled state
+  -> refuse_if_sealed(root, season, arm, trial, edition)           # guard BEFORE any write or model call:
+                                                                   #   a re-run must be refused while the
+                                                                   #   store is untouched and unpaid-for,
+                                                                   #   not after ledger/receipt writes
   -> bundle_for(arm, state, descriptor.kind)                       # ArmUnavailable fails closed
   -> decision_history_at(...) + verify_predecessor(...)            # same arm, same trial
   -> open_run(runner_kind, **runner_config(arm))                   # configured, not implied
   -> RUNNERS[arm](bundle, predecessor)                             # deterministic | model
   -> ranking (one entry per franchise) + claims (>=1 per position)
   -> resolve_claims(prior_claims, state)                           # recap grades what is due
-  -> inertia_comparator(...) -> load_decision(prior) -> score      # unchanged prior, re-scored
-  -> persist_run(...) ; seal(..., run_receipt_path=...)
-  -> close_run(run, output_decision_hash=seal.decision_hash, ended_at=...)
+  -> inertia_comparator(...) -> load_decision(prior, root) -> score  # unchanged prior, re-scored
+  -> run = close_run(run, output_decision_hash=fact_hash({"ranking": ranking,
+                                                          "claims": claims}),
+                     ended_at=<runner-completion instant>)
+  -> receipt_path = persist_run(run, root)                         # the CLOSED receipt, exclusive-create
+  -> seal(..., run_receipt_path=receipt_path,
+          run_receipt_hash=fact_hash(asdict(run)),
+          predecessor_decision_hash=<verified predecessor's decision_hash or None>)
 ```
 
+**Close, persist, then seal — Phase-P's order, and the round-two defect inverted.** The earlier
+sequence persisted the OPEN receipt, sealed, and then closed an in-memory record nobody ever wrote
+to disk: the receipt surviving on disk had no `ended_at` and no `output_decision_hash`, so it
+attested that a run STARTED while K3.8 read it as proof a run COMPLETED — and a crash between
+persist and seal left a lying receipt with no seal to contradict it. Binding
+`output_decision_hash` to the ranking/claims content (not `seal.decision_hash`) is what removes
+the circular coupling that forced the receipt to be written before the seal in the first place.
+
 `RUNNERS` maps `arm_id` to a callable of `(bundle, predecessor) -> (ranking, claims)`.
-`record_points` is the deterministic one: it orders by `state.standings()` — current-season at
-recap, prior-season at preseason and preview — and emits one `ordinal_rank` claim per position.
-Model arms call the configured provider with the bundle and the arm's prompt.
+`record_points` is the deterministic one: it orders by `state.standings(season=...)` —
+current-season at recap, PRIOR-season (2024 for the 2025 backtest, passed explicitly) at preseason
+and preview — and emits one `ordinal_rank` claim per position.
+
+**The model runner is specified, not implied** (it is the most expensive and least reversible step
+in the plan): model arms call the Anthropic API via the `anthropic` client — uncomment `anthropic`
+in `requirements.txt` in this task's commit — constructed from `ANTHROPIC_API_KEY`, with model,
+version, reasoning, sampling and budget taken verbatim from `runner_config.json` (the receipt
+records what actually ran, never fiction). The full loop is 4 model arms x 3 trials x 3 editions =
+36 calls; at the configured 100k budget the ceiling is ~3.6M tokens — a spend decision Blake makes
+by authorizing K3.7, not a surprise. **Failure/resume rule:** `retries: 0`, and a failed cell is
+re-run under a NEW trial id (never by re-sealing the old one — seals are immutable); K3.6's
+completeness gate counts the replacement trial, and the abandoned partial trial is recorded in the
+run receipts as evidence, not silently vacated. Before any paid call, a `--dry-run` mode executes
+the full Step 3 loop against a stub runner and must produce all 39 sealed cells, proving the loop
+and the completeness gate agree.
 
 **Every ranking position must yield at least one scoreable claim.** `run_arm_chain` raises if
 `len(claims) < len(ranking["entries"])`, because the design requires that every published position
@@ -3411,7 +4113,7 @@ the unscoreable judgment the claims ledger exists to replace.
 
 Every root-taking call receives `root` explicitly.
 
-- [ ] **Step 4: Run** → 6 passed
+- [ ] **Step 4: Run** → 7 passed
 
 - [ ] **Step 4b: Add the CLI** — K3.7 Step 3 invokes this script
 
@@ -3429,11 +4131,15 @@ def main():
     if a.blind_packet:
         if not a.out:
             ap.error("--blind-packet requires --out")
-        n = write_blind_packet(a.out)
-        print(f"wrote {n} anonymized decisions; label_map.json is NOT in {a.out}")
+        n = write_blind_packet(a.out, label_map_path=BLIND_LABEL_MAP_PATH)
+        print(f"wrote {n} anonymized decisions; the label map is NOT in {a.out}")
         return 0 if n else 1
-    if not (a.arm and a.trial and a.editions):
+    # `is None`, not truthiness: `--trial 0` must be rejected as out of range
+    # (trials start at 1), never silently read as absent.
+    if a.arm is None or a.trial is None or a.editions is None:
         ap.error("--arm, --trial and --editions are required unless --blind-packet")
+    if a.trial < 1:
+        ap.error("--trial must be >= 1")
     editions = [e.strip() for e in a.editions.split(",") if e.strip()]
     seals = run_arm_chain(a.arm, a.trial, editions)
     for s in seals:
@@ -3446,8 +4152,13 @@ if __name__ == "__main__":
 ```
 
 `--arm` is constrained to the five registered arms, so a typo cannot silently create a sixth.
-`write_blind_packet(out)` returns the number of anonymized decisions written and the CLI exits 1 on
-zero — an empty packet must not read as a completed blind review.
+`write_blind_packet(out, label_map_path)` returns the number of anonymized decisions written and
+the CLI exits 1 on zero — an empty packet must not read as a completed blind review.
+`BLIND_LABEL_MAP_PATH = ROOT / "content" / "editions" / "_evaluation" / "blind_label_map.json"` —
+a NAMED, COMMITTED destination (durability wins: without a surviving map, the recorded review is
+opaque tokens forever), deliberately outside the `--out` packet directory, which is the only tree
+Blake opens. Two tests: no file under the packet directory contains any of the five arm ids (name
+or body), and the label map holds exactly one entry per packet file.
 
 - [ ] **Step 5: Commit**
 
@@ -3479,14 +4190,18 @@ def claim_factory():
     """Minimal scoreable claims. Every field the scorer reads, nothing it doesn't."""
     from scripts.claims_ledger import make_claim
     def make(claim_type="ordinal_rank", assertion=1, outcome=None, bound=None,
-             resolution_failed=False, arm_id="full_rich", trial_id=1):
+             resolution_failed=False, arm_id="full_rich", trial_id=1,
+             edition_id="2025-wk01-recap"):
+        # edition_id is load-bearing: the K3.6 completeness gate keys cells on
+        # (arm_id, edition_id, trial_id) -- a factory omitting it collapses the
+        # grid to 5 cells against 39 expected and --report refuses forever.
         return make_claim(
             target="T", claim_type=claim_type, horizon="rest_of_season",
             assertion=assertion, confidence=0.6, decisive_evidence=[],
             contrary_evidence="", cutoff_utc="2025-09-09T06:59:59Z",
             state_hash="sha256:" + "a" * 64, arm_id=arm_id, trial_id=trial_id,
-            decision_run_id="run-1", bound=bound, outcome=outcome,
-            resolution_failed=resolution_failed,
+            decision_run_id="run-1", edition_id=edition_id, bound=bound,
+            outcome=outcome, resolution_failed=resolution_failed,
             resolution_rule={"rule": "final_regular_season_rank", "source": "standings",
                              "resolve_on": "2026-01-06T00:00:00Z"})
     return make
@@ -3543,20 +4258,48 @@ def test_single_trial_model_arm_is_rejected(claim_factory):
     from scripts.eval_scoring import combine_trials
     with pytest.raises(ValueError):
         combine_trials([aggregate([claim_factory(assertion=2, outcome=3)])], runner_kind="model")
+
+def test_report_refuses_a_missing_cell(claim_factory, tmp_path, monkeypatch, capsys):
+    """The completeness gate is TESTED, not asserted: a claim set missing exactly
+    one (arm, edition, trial) cell makes main() return 1. This is the guard
+    against reporting a smaller experiment as a complete one, and it depends on
+    edition_id being populated -- which is why both claim helpers carry it."""
+    from scripts.eval_scoring import main as scoring_main
+    from scripts.claims_ledger import save_claims, EDITION_IDS
+    from scripts.eval_arms import ARMS
+    full_grid = [claim_factory(arm_id=a, trial_id=t, edition_id=e, assertion=2, outcome=3)
+                 for a in ARMS for e in EDITION_IDS
+                 for t in range(1, (1 if ARMS[a]["runner_kind"] == "deterministic" else 3) + 1)]
+    save_claims(full_grid[:-1], root=tmp_path)          # exactly one cell missing
+    monkeypatch.setattr("scripts.eval_scoring.CLAIMS_DEFAULT_ROOT", tmp_path)
+    monkeypatch.setattr("sys.argv", ["eval_scoring.py", "--report"])
+    assert scoring_main() == 1
+    assert "incomplete experiment" in capsys.readouterr().err
 ```
+
+**Score direction and the STOP comparison form are precommitted here; the lift THRESHOLD is not.**
+All three scoring rules are distances — **lower is always better** — and `combine_trials` reports
+median-with-range per arm. The K3.8 comparison form is fixed now, before any arm runs:
+`full_rich` vs `minimal_legal`, and each ablation vs `full_rich`, on median claim score per arm
+with inter-trial ranges shown. What this plan deliberately does NOT precommit is a numeric lift
+threshold: the design's STOP gate reads "Judge data-layer lift — **Blake's call**", and writing a
+mechanical criterion here would move a judgment the design reserves to Blake into plan authority.
+The packet presents the fixed comparisons; the judgment stays human. (If Blake prefers a
+pre-registered numeric criterion, that is a design-level decision to record before K3.7 runs —
+flagged in Open dependencies.)
 
 - [ ] **Step 2: Run to verify it fails** → `ModuleNotFoundError`
 
 - [ ] **Step 3: Implement** the three scoring rules, the fixed aggregation order, unresolved and
       unresolvable counting, and `combine_trials` requiring ≥ 3 trials for `runner_kind="model"`.
 
-- [ ] **Step 4: Run** → 10 passed
+- [ ] **Step 4: Run** → 11 passed
 
 - [ ] **Step 4b: Add the CLI** — K3.7 Step 5 invokes this script
 
 ```python
 def main():
-    import argparse, json
+    import argparse, json, sys
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", action="store_true", required=True)
     ap.add_argument("--arm")
@@ -3602,7 +4345,7 @@ cannot be reported as a measurement.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/eval_scoring.py scripts/tests/test_eval_scoring.py
+git add scripts/eval_scoring.py scripts/tests/test_eval_scoring.py scripts/tests/conftest_eval.py
 git commit -m "feat(eval): precommitted scoring rules and fixed aggregation order"
 ```
 
@@ -3610,17 +4353,29 @@ git commit -m "feat(eval): precommitted scoring rules and fixed aggregation orde
 
 ### Task K3.7: Run the arms and record blind review
 
-- [ ] **Step 0: Prove every gate CLI actually executes**
+- [ ] **Step 0: Prove every gate CLI actually executes — and persist the proof**
 
-A `main()` that is never called exits 0, and a gate branching on that reads success. Confirm all
-six entry points before any of them is trusted:
+A `main()` that is never called exits 0, and a gate branching on that reads success. The census
+covers the SIX CLIs this plan creates (`capture_2026` belongs to the P-only plan and is verified by
+its own gates plus K3.8's `seal_2026.py --verify-all`; counting it here proved the other plan's
+work). And the proof is WRITTEN, not echoed: K3.8's packet requires it, and stdout is not an
+artifact — terminal scrollback would be the only record of the very check that exists because a
+silent no-op once read as success.
 
 ```bash
-for s in capture_2026 compile_state migration_census eval_contrast eval_arms eval_scoring; do
+mkdir -p content/editions/_evaluation
+proof=content/editions/_evaluation/entrypoint_proof.json
+echo '{"checked": [' > "$proof.tmp"
+first=1
+for s in normalize_facts compile_state migration_census eval_contrast eval_arms eval_scoring; do
   out=$($PY "scripts/$s.py" --help 2>&1); rc=$?
-  [ $rc -eq 0 ] && [ -n "$out" ] || { echo "FAIL $s: rc=$rc, output=${#out} bytes"; exit 1; }
+  [ $rc -eq 0 ] && [ -n "$out" ] || { echo "FAIL $s: rc=$rc, output=${#out} bytes"; rm -f "$proof.tmp"; exit 1; }
+  [ $first -eq 1 ] || echo ',' >> "$proof.tmp"; first=0
+  printf '{"script": "%s", "rc": %d, "help_bytes": %d}' "$s" "$rc" "${#out}" >> "$proof.tmp"
 done
-echo "all six entry points execute"
+echo ']}' >> "$proof.tmp"
+mv "$proof.tmp" "$proof"
+echo "all six entry points execute; proof at $proof"
 ```
 
 - [ ] **Step 1: Freeze the manifest before anything runs**
@@ -3647,17 +4402,31 @@ and the arms would run anyway on states it just rejected.
 
 - [ ] **Step 2b: Preflight contrast integrity BEFORE any model arm runs**
 
+Artifacts are written tmp-then-mv (a `>` redirect truncates the target BEFORE the command runs, so
+a failed run would leave a zero-byte file that later reads as present), the exit code is recorded
+as an artifact (line "the exit code IS the gate" is only true if the code survives the shell), and
+**every terminating branch commits its evidence first** — round two's STOP paths exited before the
+only `git commit` in K3, leaving the verdict evidence uncommitted in the working tree.
+
 ```bash
 mkdir -p content/editions/_evaluation
-$PY scripts/eval_contrast.py --preflight > content/editions/_evaluation/contrast_preflight.json
-rc=$?
+f=content/editions/_evaluation/contrast_preflight.json
+$PY scripts/eval_contrast.py --preflight > "$f.tmp"; rc=$?
+[ -s "$f.tmp" ] && mv "$f.tmp" "$f" || rm -f "$f.tmp"
+echo "{\"gate\": \"contrast_preflight\", \"exit_code\": $rc}" \
+  > content/editions/_evaluation/contrast_exit.json
+commit_evidence() {
+  git add content/editions/_evaluation/ && git commit -m "eval(k3): gate evidence at ${1}" || true
+}
 case $rc in
   0) echo "contrast preflight ok -> arms may run" ;;
   1) echo "DEGRADED before any arm ran. One approved remediation cycle is permitted."
      echo "Running five arms x three trials against evidence already known to be"
-     echo "insufficient buys nothing and spends the trial budget."; exit 1 ;;
-  3) echo "STOP - NO DECISION. Go to K3.8."; exit 3 ;;
-  *) echo "failed gate: exit $rc"; exit "$rc" ;;
+     echo "insufficient buys nothing and spends the trial budget."
+     commit_evidence "preflight-degraded"; exit 1 ;;
+  3) echo "STOP - NO DECISION. Go to K3.8."; commit_evidence "preflight-stop"; exit 3 ;;
+  *) echo "FAILED GATE (exit $rc; 2 = usage error, 4 = crash): never a verdict."
+     commit_evidence "preflight-failed-gate"; exit "$rc" ;;
 esac
 ```
 
@@ -3684,34 +4453,41 @@ design's minimum for a non-deterministic runner.
 - [ ] **Step 4: Assess contrast integrity on the actual bundles — and branch**
 
 ```bash
+f=content/editions/_evaluation/contrast.json
 $PY scripts/eval_contrast.py --assess --full-arm full_rich --minimal-arm minimal_legal \
-    > content/editions/_evaluation/contrast.json
-rc=$?
+    > "$f.tmp"; rc=$?
+[ -s "$f.tmp" ] && mv "$f.tmp" "$f" || rm -f "$f.tmp"
+echo "{\"gate\": \"contrast_assess\", \"exit_code\": $rc}" \
+  > content/editions/_evaluation/contrast_exit.json
 case $rc in
   0) echo "contrast ok -> continue to Step 5" ;;
-  1) echo "contrast DEGRADED -> STOP. One approved remediation cycle is permitted."
+  1) echo "contrast DEGRADED -> STOP. One approved remediation cycle is permitted"
+     echo "(re-capture/re-normalize under an already-frozen source_id ONLY -- K3.3)."
      echo "The cycle count is persisted in contrast_state.json against the frozen"
      echo "manifest hash; a second degraded verdict returns 3, not 1."
      echo "Do not proceed to Step 5."
-     exit 1 ;;
+     commit_evidence "assess-degraded"; exit 1 ;;
   3) echo "STOP - NO DECISION, NO EXPANSION. Go to K3.8 and record the verdict."
      echo "S1a does not begin. Prospective capture and sealing continue."
-     exit 3 ;;
-  *) echo "unexpected exit $rc from eval_contrast (2 = usage error); treat as a failed gate"
-     exit "$rc" ;;
+     commit_evidence "assess-stop"; exit 3 ;;
+  *) echo "FAILED GATE: exit $rc (2 = usage error, 4 = ManifestDrift/crash) -- never a verdict."
+     commit_evidence "assess-failed-gate"; exit "$rc" ;;
 esac
 ```
 
-The exit code **is** the gate. `0` continues, `1` halts for the single approved remediation cycle,
-`3` routes to K3.8 with NO DECISION, and anything else — including argparse's `2` — is a failed
-gate rather than a verdict. The remediation counter is passed in explicitly so a second degraded
-result cannot be re-read as a first.
+The exit code **is** the gate — and it is recorded in `contrast_exit.json`, so it is evidence
+rather than shell state. `0` continues, `1` halts for the single approved remediation cycle, `3`
+routes to K3.8 with NO DECISION, and anything else — argparse's `2`, the crash code `4` — is a
+failed gate rather than a verdict. The remediation counter is **persisted** in
+`contrast_state.json` against the frozen manifest hash (K3.3), never passed by a caller, so a
+second degraded result cannot be re-read as a first.
 
 - [ ] **Step 5: Score and aggregate**
 
 ```bash
-mkdir -p content/editions/_evaluation
-$PY scripts/eval_scoring.py --report > content/editions/_evaluation/scores.json || exit 1
+f=content/editions/_evaluation/scores.json
+$PY scripts/eval_scoring.py --report > "$f.tmp" || { rm -f "$f.tmp"; exit 1; }
+mv "$f.tmp" "$f"
 ```
 
 - [ ] **Step 6: Randomized blind review**
@@ -3722,21 +4498,50 @@ $PY scripts/eval_arms.py --blind-packet \
 ```
 
 `--blind-packet` reads each seal, calls `load_decision` to recover the **actual ranking body**, and
-writes one anonymized file per (arm, trial, edition) named by opaque token — plus
-`label_map.json`, which is written to a **separate** directory and is not part of the packet Blake
-opens. Without the content locators added in K1.5 there is no body to present: a `ranking_hash`
-cannot be read, so "present unlabeled arm outputs" had nothing to present.
+writes one anonymized file per (arm, trial, edition) named by opaque token — plus the label map at
+`content/editions/_evaluation/blind_label_map.json` (the NAMED path from K3.5's CLI — committed
+for durability, outside the `blind_packet/` directory, which is the only tree Blake opens; a map
+written to an unnamed "separate directory" would never be committed and the recorded review would
+be opaque tokens forever). Without the content locators added in K1.5 there is no body to present:
+a `ranking_hash` cannot be read, so "present unlabeled arm outputs" had nothing to present.
 
 Blake ranks the tokens on prose and judgment quality; the result is recorded at
-`content/editions/_evaluation/blind_review.json` against those tokens, and only then is the label
+`content/editions/_evaluation/blind_review.json` — schema:
+`{"reviewed_at": <exact UTC instant>, "packet_sha256": <hash over the packet directory listing>,
+"rankings": {"<token>": <rank int>, ...}}`, one entry per packet file — and only then is the label
 map applied. **Blind review never overwrites computed scores** — where the two disagree, both are
 reported and the disagreement is the finding.
+
+- [ ] **Step 6b: Validate the review artifact** — an unwritten or empty review must fail here,
+      not surface as a missing packet item at K3.8:
+
+```bash
+$PY - <<'PY' || exit 1
+import json, sys
+from pathlib import Path
+p = Path("content/editions/_evaluation/blind_review.json")
+if not p.is_file() or p.stat().st_size == 0:
+    sys.exit("STOP: blind review not recorded")
+doc = json.loads(p.read_text(encoding="utf-8"))
+packet = sorted(q.name for q in Path("content/editions/_evaluation/blind_packet").iterdir())
+missing = [t for t in packet if t not in {f"{k}" for k in doc["rankings"]}
+           and t.rsplit(".", 1)[0] not in doc["rankings"]]
+if missing or not doc.get("reviewed_at"):
+    sys.exit(f"STOP: blind review incomplete; unranked tokens: {missing[:5]}")
+print(f"blind review covers {len(doc['rankings'])} tokens")
+PY
+```
 
 - [ ] **Step 7: Commit — every artifact, not just the scores**
 
 ```bash
+test -s content/editions/_evaluation/blind_review.json \
+  || { echo "STOP: blind review not recorded"; exit 1; }
+test -s content/editions/_evaluation/entrypoint_proof.json \
+  || { echo "STOP: entry-point proof missing"; exit 1; }
 git add content/editions/ content/governance/evidence_families.json \
-        content/governance/runner_config.json content/decisions/
+        content/governance/runner_config.json content/governance/prompts/ \
+        content/decisions/ data/claims/
 git status --short | grep -qE 'content/decisions/.*\.(ranking|claims)\.json' \
   || { echo "STOP: sealed decision bodies missing; the packet is unreviewable"; exit 1; }
 git commit -m "eval(k3): five arms, three trials each for model runners, scored and blind-reviewed"
@@ -3758,22 +4563,40 @@ the verdict resting on a number with nothing behind it.
 $PY -m pytest scripts/tests/ -q || exit 1
 $PY scripts/migration_census.py --all || exit 1
 $PY scripts/generate_chat_provenance.py --verify || exit 1
+$PY scripts/seal_2026.py --verify-all || exit 1     # Phase-P store intact: read, never written
+for f in content/editions/_evaluation/contrast_preflight.json \
+         content/editions/_evaluation/contrast.json \
+         content/editions/_evaluation/scores.json \
+         content/editions/_evaluation/entrypoint_proof.json; do
+  $PY -c "import json,sys; json.load(open('$f', encoding='utf-8'))" \
+    || { echo "STOP: $f absent, empty, or unparseable"; exit 1; }
+done
 ```
 
-Each is a gate. An ungated sweep reports its own failure and then hands Blake a packet built on it.
+Each is a gate. An ungated sweep reports its own failure and then hands Blake a packet built on
+it. The artifact loop enforces what round two stated only as prose ("a contrast.json that is
+absent, empty, or produced by a process that exited without assessing does not satisfy this
+step") — a zero-byte redirect survivor now fails here, mechanically. The `seal_2026.py
+--verify-all` line proves the kernel run left Phase-P's sealed store untouched, and its output
+joins the packet's Phase-P item.
 
 - [ ] **Step 2: Assemble the review packet**
 
-- **entry-point proof:** the K3.7 Step 0 output showing all six CLIs execute — without it, a green
-  contrast verdict may be a `main()` that never ran;
+- **entry-point proof:** `content/editions/_evaluation/entrypoint_proof.json` (K3.7 Step 0's
+  persisted record — six scripts, all rc 0) — without it, a green contrast verdict may be a
+  `main()` that never ran;
 - state leak census: 0 future entries across all three states; legacy packets unchanged at 46 and
   no longer decision inputs;
 - the seven K1 discriminating tests with their mutation controls;
 - deterministic replay: facts and state byte-identical across two normalizations;
 - per-arm scores with medians and ranges, unresolved and unresolvable counts;
-- contrast-integrity verdict, its **exit code**, and the frozen manifest hash;
-- blind review versus computed scores, including any disagreement;
-- the 2026 capture accounting receipt and current seal status.
+- contrast-integrity verdict (`contrast.json`), its **exit code** (`contrast_exit.json`), and the
+  frozen manifest hash;
+- blind review versus computed scores, including any disagreement (`blind_review.json` +
+  `blind_label_map.json` + `scores.json`);
+- the 2026 capture accounting receipt (latest `data/captures/2026/_receipts/accounting_A_*.json`)
+  and the Step 1 `seal_2026.py --verify-all` output — the Phase-P item is produced by a command,
+  not assembled from memory.
 
 **The packet is invalid if the contrast was not actually measured.** A `contrast.json` that is
 absent, empty, or produced by a process that exited without assessing does not satisfy this step.
@@ -3925,11 +4748,62 @@ not a producer.
 
 **Placeholder scan — honest version.** No TBD/TODO. Scope is K1-K3; the P tasks are superseded and
 excluded from this scan. Fully specified with code: K1.1-K1.5, K1.7, K3.3. Specified as a named
-contract plus a worked example, with the remaining cases following the same shape: K1.6's `SOURCES`
-iteration, K2.1's compiler internals, K2.3's leaf walk, K3.5's `RUNNERS` bodies. Earlier revisions
-claimed "every code step carries runnable code" — that was not true then and is not claimed now.
-**None of the code in this plan has been executed**, which is the condition the eight outstanding
-findings below were produced under and the reason they are not corrected in this pass.
+contract with its full signature, semantics, and error behavior stated (no longer a bare name):
+K1.6's `_iter_source`, K2.1's compiler internals, K2.3's leaf walk, K3.5's `RUNNERS` bodies (model
+runner client, key source, resume rule, and dry-run mode now stated). Earlier revisions claimed
+"every code step carries runnable code" — that was not true then and is not claimed now.
+**None of the code in this plan has been executed by its own tasks.** Round three's reviewers did,
+however, execute transcriptions of several code blocks against the real repo (the K1.5 glob, the
+K1.3 `F` fixture, the fact-id revert, the entity_ref validation), which is how four of the round's
+defects were proven rather than argued.
+
+**Round-three integration (2026-08-05).** The eight 2026-08-03 NO-SHIP findings were re-derived
+from this text by three independent read-only reviewers (source/fact, decision/artifact,
+evaluation/execution graphs) without access to the original review's detail, then resolved:
+
+1. **SOURCES/`normalize_all` producer graph** — re-derived as worse than "disconnected": no edge
+   closed (`_iter_source` undefined; every mapped path/key wrong against the verified on-disk
+   shapes; `captured_at` on no source record; reducer payload keys produced by no normalizer;
+   `{prior}` unbound; `data/facts/` written by nothing; draft_pick 100%-refused; the two declared
+   unsourced types silently omitted). Resolved in K1.6: two verified source lanes (Phase-P
+   envelopes for 2026, corrected legacy walks for the 2025 backtest), the full `_iter_source`
+   contract, the `(meta, body)` normalizer convention with per-type body schemas, the four-bucket
+   honesty report, and a CLI that materializes the store.
+2. **Fact identity** — re-derived by execution: an A→B→A value revert at stable `known_at` minted
+   a duplicate `fact_id` and a supersession cycle that emptied `state_at`'s retirement set.
+   Resolved in K1.2: `supersedes` is bound into identity, duplicate ids are refused, and the
+   revert test + entity_ref superset validation land in K1.1/K1.2.
+3. **Coalescing/supersession** — same cycle plus type-blind resolution; resolved by keying
+   `_latest_for` and `LeagueState.value` on `(fact_type, source_record_id)`.
+4. **All-seasons `standings()`** — re-derived (no season predicate anywhere in the reducer while
+   the pool is deliberately unfiltered); resolved with the season-qualified `standings(season=None)`
+   plus a mixed-season discriminating test and its mutation control.
+5. **Seal/body glob collision** — re-derived by execution (`TypeError: SealedDecision() argument
+after ** must be a mapping`); resolved by the four-species suffix contract, `*.seal.json`
+   globbing, exclusive-create writes, and portable root-relative locators (which also fixed the
+   machine-absolute-path leak and host-dependent `decision_hash`).
+6. **Receipt ordering** — re-derived (open receipt persisted, closed record discarded; ledger and
+   receipt writes ahead of the append-only guard; STOP paths exiting before the only commit).
+   Resolved: close→persist→seal order with `run_receipt_hash` bound into the seal,
+   `refuse_if_sealed` before any write or model call, `persist_run` refusing open runs, and
+   commit-evidence on every terminating branch.
+7. **Contrast-control contradictions** — re-derived as one unanswered question (required family
+   with no qualified source: K3.3 said degrade, K3.4 said raise, K3.7 read both on one exit code)
+   plus the cycle-counter specified three incompatible ways, the `family_counts` shape mismatch,
+   and the freeze breaking two tests the K3.8 sweep gates on. Resolved by the single rule in K3.3
+   (exceptions never verdicts; exit 4 reserved; counter persisted; remediation scope defined;
+   preflight implemented, advisory), the unified `bundle_for`, and freeze-state-coherent tests.
+8. **Non-durable review artifacts** — re-derived (entry-point proof in a shell variable; label map
+   with no destination; `blind_review.json` with no producer or gate). Resolved: persisted
+   entry-point proof, named committed label-map path, review schema + Step 6b validation gate,
+   tmp-then-mv artifact writes, and the K3.8 Step 1 parseability loop.
+
+Also landed in round three: the K1.7 mutation-control rewrite (four vacuous controls replaced with
+plant-asserted, production-exercising forms; rule 7's control moved to K3.5 where its consumer
+exists), the `scripts.`-form import law, the Phase-P store-separation invariant and `--verify-all`
+sweep line, `runner_config.json`/prompt creation (K3.2 Step 3b), claims-ledger persistence with a
+declared layout, the K3.6 completeness-gate test, and the K2.2 qualification gate reconciled with
+CI's parquet-less fresh clones.
 
 **Type consistency.** `Fact`/`FACT_FIELDS` (K1.1) are consumed by `FactStore` (K1.2), `state_at`
 (K1.3), and the normalizers (K1.6); the payload attachment rides alongside, outside the contract
@@ -3942,9 +4816,12 @@ five. `load_claims` (K3.1) is the single ledger reader for K3.5 and K3.6.
 **Ordering.** The 2026 capture lane still precedes this work because the evidence is perishable and
 nothing is currently running — but it is now delivered by the P-only contract, not by this plan, and
 the two proceed independently. Within this plan:
-K1.6 depends on K1.1-K1.2; K2.1 depends on K1.3-K1.4; K2.2 must precede the preview descriptor's
-cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **and K2.1**
-(it consumes `EditionDescriptor`); K3.6 depends on K3.4 for `runner_kind`.
+K1.6 depends on K1.1-K1.2 **and on K2.2 for its `nfl_game` normalizer** (`kickoff_source.to_utc` /
+`resolve_zone` — an edge the round-two ordering paragraph omitted while the code imported it;
+until K2.2 lands, `nfl_game` is registered-but-unsourced); K2.1 depends on K1.3-K1.4 and on
+K1.6's CLI having materialized `data/facts/{season}.jsonl`; K2.2 must precede the preview
+descriptor's cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **and
+K2.1** (it consumes `EditionDescriptor`); K3.6 depends on K3.4 for `runner_kind`.
 
 **Open execution dependencies — fail closed, Blake's call.**
 
@@ -3960,7 +4837,14 @@ cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **
    without them.
 3. **Roster anchor.** Unchanged from the prior plan: no producer for a qualified pre-kickoff
    roster snapshot. `roster_membership` is a **required** contrast family, so its absence makes
-   the contrast **degraded** — one remediation cycle, then STOP with no decision.
+   the contrast **degraded** — one remediation cycle, then STOP with no decision. Round three made
+   this path mechanically reachable: the refusal is recorded in `normalize_all`'s `unavailable`
+   bucket, `family_counts` carries it to `assess_contrast`, and the verdict is `degraded` — never
+   an uncaught `ArmUnavailable` exiting 1 and masquerading as that verdict.
+   3b. **Lift threshold — deliberately not precommitted (K3.6).** The design's STOP gate is "Judge
+   data-layer lift — Blake's call"; this plan fixes the comparison FORM and score direction but
+   records no numeric criterion. If Blake wants a pre-registered threshold, that is a design-level
+   decision to take before K3.7 Step 3 runs.
 4. **Legacy packets keep their 46 leaks.** They stop being decision inputs, and K2.3 asserts this
    explicitly rather than silently. Whether to repair them for site rendering is out of scope here.
 5. **Capture-row coverage — RESOLVED 2026-08-03**, eight accounting groups; Lane P moved to the
@@ -3968,5 +4852,7 @@ cutoff; K3.3's freeze precedes K3.7's runs; K3.4's comparator depends on K1.5 **
    most plausible qualified 2026 source for `schedule_pairing`, so **2026 may be clean where 2025
    is degraded** (see (2) and (3)). That is a legitimate asymmetry, but it should be chosen
    deliberately at K3 rather than discovered during contrast assessment.
-6. **K1-K3 adversarial findings are open.** One critical, seven high, from the 2026-08-03 review.
-   They are recorded and uncorrected; this plan is not executable until they are addressed.
+6. **K1-K3 adversarial findings — RESOLVED in round three (2026-08-05).** The one critical and
+   seven high from the 2026-08-03 review were independently re-derived by a three-reviewer pass
+   and corrected in this revision; the disposition ledger is in "Round-three integration" above.
+   Still DRAFT: resolution of the findings is not approval, and nothing here authorizes K1.
