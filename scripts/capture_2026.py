@@ -23,6 +23,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+# repo root too: fetch_sleeper.py lives there, and direct CLI execution
+# (`python scripts/capture_2026.py`) does not put the CWD on sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from shared import REPO_ROOT, admissible, rel_to_root  # noqa: E402
 
