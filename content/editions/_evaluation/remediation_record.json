@@ -1,0 +1,9 @@
+{
+  "cycle": 1,
+  "manifest_sha256": "sha256:98f0ee71f963894c14427b98f5db1a5bfef1a394d567b0926561f6b0f40d90a1",
+  "scope": "K3.3: append-only re-capture or re-normalization under ALREADY-FROZEN source_ids and normalizer_version only; adding a source or bumping a version is a manifest change (ManifestDrift, failed gate)",
+  "finding": "No in-scope remediation action exists. The degraded verdict's root cause is roster_membership (and schedule_pairing in the full bundle): both are frozen with empty source_ids -- 'declared unsourced (open dependency 3); frozen as such'. Re-capture and re-normalization operate on frozen source_ids; an empty set yields nothing to re-run. The three sourced required families (historical_matchup 294, chat_message 22884, nfl_game 285 facts in data/facts/2025.report.json) are present and were never the deficiency; every model-arm bundle aborts on the unsourced families, which zeroes all family counts in the contrast lane.",
+  "action_taken": "none -- documented no-op; the sole permitted action class cannot supply an unsourced family",
+  "what_would_repair_it": "a qualified pre-kickoff roster anchor policy (Blake's open dependency 3), admitted as a NEW manifest version -- which by design discards every completed arm and restarts the comparison; a decision reserved to Blake, not remediation",
+  "next": "second assess_contrast invocation executes the bounded 1 -> 3 path: STOP -- NO DECISION, NO EXPANSION"
+}
