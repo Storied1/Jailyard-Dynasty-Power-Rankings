@@ -1,0 +1,156 @@
+{
+  "artifacts": {
+    "content/editions/_evaluation/contrast.json": "sha256:8a3df690a77749450145cfaac60f8bac4640ced716bb71b16cffbd2a3335f07d",
+    "content/editions/_evaluation/contrast_exit.json": "sha256:bb23ad485632669decf95324bfdbb13594d263a8cd4b660ef21122fe23418604",
+    "content/editions/_evaluation/contrast_preflight.json": "sha256:89e4a5b06fcef3af2543665a17a5a4bfaa1a4df8396c293103eeba2707d92e1c",
+    "content/editions/_evaluation/contrast_state.json": "sha256:3760d411b11d543f8664d789de42c0e9cf1df8ff350014bc777403008dae224b",
+    "content/editions/_evaluation/entrypoint_proof.json": "sha256:2a9170be34cb62777cd9a3b8807e09b2ff9ecdda980b5814fdd969fecfc166ee",
+    "content/editions/_evaluation/remediation_record.json": "sha256:fd1ee0e964e12a334ea3350c472eddf25b56b995811c80a8c4e11402cfd11b91",
+    "content/editions/_evaluation/verdict.md": "sha256:5e73e869f37980c7a31ff0b5b1757419a818ae7ecb81818b4b3595aa3eed0d73",
+    "content/governance/evidence_families.json": "sha256:c77b29c805d9d7b8bcffcb498ab716b487974f615dba1d144d3f96f05d5b8935",
+    "content/governance/prompts/ranking_prompt.md": "sha256:a3292fc9730fef3561f2bbec536b3f83b8974fcf9b88c0af35756060e9790398",
+    "content/governance/runner_config.json": "sha256:bc9c8d8d16697324b081cb013506828ae44760313c47a3e0849a1d330bf440c5",
+    "data/facts/2025.report.json": "sha256:43429ab149bb4476328f87b729ac0da9b636cbabe54aa4d2bc7fca53ad561dcd",
+    "data/facts/2026.report.json": "sha256:91104ae80c760d9c2021146bc33e5d8204fae9d3e842b8d44c8e960e94d068a0"
+  },
+  "branch": 3,
+  "commands": [
+    {
+      "cmd": "pytest scripts/tests/ (full suite)",
+      "exit_code": 0,
+      "result": "664 passed, 2 skipped"
+    },
+    {
+      "cmd": "migration_census.py --all",
+      "exit_code": 0,
+      "result": "46 legacy entries, decision input False, OK"
+    },
+    {
+      "cmd": "generate_chat_provenance.py --verify",
+      "exit_code": 0,
+      "result": "provenance.json matches recomputed (full)"
+    },
+    {
+      "cmd": "seal_2026.py --verify-all",
+      "exit_code": 0,
+      "result": "checked 2, failures 0"
+    },
+    {
+      "cmd": "seal_2026.py --rederive-all",
+      "exit_code": 0,
+      "result": "checked 2, failures 0"
+    },
+    {
+      "cmd": "decision_history.py --verify-tree content/decisions",
+      "exit_code": 0,
+      "result": "checked 0, failures 0"
+    },
+    {
+      "cmd": "compile_state.py --verify x3 (K3.7 Step 2)",
+      "exit_code": 0,
+      "result": "3 editions verified, no write"
+    },
+    {
+      "cmd": "eval_contrast.py --preflight",
+      "exit_code": 1,
+      "result": "degraded"
+    },
+    {
+      "cmd": "eval_contrast.py --assess (cycle 1)",
+      "exit_code": 1,
+      "result": "degraded, cycles_used=1 persisted"
+    },
+    {
+      "cmd": "eval_contrast.py --assess (post-remediation)",
+      "exit_code": 3,
+      "result": "stop_no_decision"
+    }
+  ],
+  "commit_census": {
+    "base": "e9cfb5acd691cb2d5b095869f32f09bb24d986a2",
+    "changed_files": [
+      "content/editions/_evaluation/contrast.json",
+      "content/editions/_evaluation/contrast_exit.json",
+      "content/editions/_evaluation/contrast_preflight.json",
+      "content/editions/_evaluation/contrast_state.json",
+      "content/editions/_evaluation/entrypoint_proof.json",
+      "content/editions/_evaluation/remediation_record.json",
+      "content/governance/evidence_families.json",
+      "content/governance/prompts/ranking_prompt.md",
+      "content/governance/runner_config.json",
+      "scripts/claims_ledger.py",
+      "scripts/decision_run.py",
+      "scripts/eval_arms.py",
+      "scripts/eval_contrast.py",
+      "scripts/eval_scoring.py",
+      "scripts/schemas/claim.schema.json",
+      "scripts/tests/conftest.py",
+      "scripts/tests/conftest_eval.py",
+      "scripts/tests/test_chronological.py",
+      "scripts/tests/test_claims_ledger.py",
+      "scripts/tests/test_decision_run.py",
+      "scripts/tests/test_eval_arms.py",
+      "scripts/tests/test_eval_contrast.py",
+      "scripts/tests/test_eval_scoring.py"
+    ],
+    "commits": [
+      "b18f2ceecd19a639b64f8ebcd76561767b0db22d fix(eval): freeze-state-agnostic contrast tests -- the plan's own freeze must not break the suite",
+      "28c94270679a36ac853624a560a7cf0bc83a491f eval(k3): gate evidence at assess-stop -- NO DECISION, NO EXPANSION",
+      "1d9c6c4515a1ddd164b1565adef433652c859de0 eval(k3): gate evidence at preflight-degraded-recorded",
+      "48638aeab372b7649202c2f6b60cc529ec556703 feat(eval): precommitted scoring rules and fixed aggregation order",
+      "2d3cccc238729c9411e6f33869abea6daa4dd1d9 feat(eval): chronological per-arm chains with closed decision lineage",
+      "2053692b1d72992d756ec8cc46489d59587b06f4 feat(eval): five arms with per-arm inertia comparators",
+      "6c6650ec7d0ac398251e7ed99fdbd893f2e082a0 feat(eval): frozen evidence manifest, bounded degradation, media excluded",
+      "f9a78680c7fb7a927d19ca2cc68e4bd1c33ec926 feat(runs): decision-run receipts for deterministic and model runners",
+      "8f760395e2734f9556f8570b5c3b53619664a2c1 feat(claims): scoreable claim records with pre-fixed resolution rules"
+    ]
+  },
+  "frozen_manifest_sha256": "sha256:98f0ee71f963894c14427b98f5db1a5bfef1a394d567b0926561f6b0f40d90a1",
+  "kernel_verifier": {
+    "checked": 0,
+    "failures": 0,
+    "note": "0 kernel seals exist: no arm ran on this branch"
+  },
+  "mutation_controls": "verify_predecessor poison plant, mask_bundle bypass plant, crash-injection at four write boundaries, planted manifest source/version drift, planted private index entry -- each proven to fail without its rule (suite 664 passed)",
+  "not_produced": {
+    "arm_chains": "0 of 36 model invocations spent -- 'do not run model arms merely to obtain a result'",
+    "blind_label_map.json": "no blind packet written",
+    "blind_review.json": "no sealed decisions to review",
+    "dry_run": "on the arms-may-run path only; branch exited at preflight. Machinery proven by test_dry_run_seals_all_39_cells (39/39 on stub runners)",
+    "scores.json": "no complete arm grid exists (branch 3)"
+  },
+  "outcome": "NO DECISION -- CONTRAST DEGRADED",
+  "phase_p": {
+    "accounting_receipt_path": "data/captures/2026/_receipts/accounting_A_20260805T033237Z.json",
+    "accounting_receipt_sha256": "sha256:558d54a981f460518c77c6aaa839cfcf0602757ffa3014cf1071a0d5c84e62aa",
+    "rederive_all": "checked 2, failures 0 (exit 0)",
+    "verify_all": "checked 2, failures 0 (exit 0)"
+  },
+  "state_leak_census": "46 legacy packets, future entries marked non-decision-input; 0 future entries across all three compiled states (migration_census --all OK)",
+  "transport_provenance": {
+    "auth_class": "claude.ai Max subscription OAuth (ANTHROPIC_API_KEY unset; never inspected)",
+    "claude_code_version": "2.1.223",
+    "smoke_canary": {
+      "note": "auth-class proof only; no experimental invocation occurred",
+      "output_tokens": 5,
+      "provider": "firstParty",
+      "requested_model": "claude-opus-5",
+      "result": "PONG",
+      "returned_model": "claude-opus-5"
+    }
+  },
+  "trial_census": {
+    "abandoned_trials": {},
+    "claims": 0,
+    "complete_chains": {},
+    "model_invocations_authorized": 36,
+    "model_invocations_spent": 0,
+    "receipts": 0,
+    "resolution_events": 0,
+    "seals": 0
+  },
+  "verdict": {
+    "path": "content/editions/_evaluation/verdict.md",
+    "sha256": "sha256:5e73e869f37980c7a31ff0b5b1757419a818ae7ecb81818b4b3595aa3eed0d73"
+  }
+}
