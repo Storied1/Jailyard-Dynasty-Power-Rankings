@@ -94,6 +94,146 @@ def preseason_state():
     return state_at(2025, "2025-09-03T23:59:59Z", "league_private", facts=hist + others)
 
 
+def synthetic_chain_states():
+    """Three per-edition LeagueStates with EVERY family sourced -- what the K3.5
+    driver tests inject. The real 2025 store has zero roster_membership and
+    schedule_pairing facts (open dependency 3), so bundle_for on the real
+    compiled states raises ArmUnavailable for every model arm; the driver's
+    mechanics are proven on synthetic states, and the real-store degradation is
+    the CONTRAST lane's finding, not a test failure."""
+    from scripts.tests.test_reducers import M
+
+    identities = [
+        ("1", "GauchoTrain", "General Ken-obi", "510013812276232192"),
+        ("2", "bchodos", "Kittler on the Roof", "510013812276232193"),
+        ("3", "kharlow", "Burden of Etienne-y Woody", "510013812276232194"),
+    ]
+    facts = []
+    for rid, display, team, owner in identities:
+        facts.append(
+            F(
+                fact_id=f"fi{rid}",
+                source_record_id=f"franchise:2025:{rid}",
+                fact_type="franchise_identity",
+                entity_ref={"type": "franchise", "id": rid},
+                payload={
+                    "roster_id": rid,
+                    "season": 2025,
+                    "display_name": display,
+                    "team_name": team,
+                    "owner_id": owner,
+                },
+            )
+        )
+        facts.append(
+            F(
+                fact_id=f"dp{rid}",
+                source_record_id=f"draft:2025:{rid}",
+                fact_type="draft_pick",
+                entity_ref={"type": "franchise", "id": rid},
+                payload={
+                    "roster_id": rid,
+                    "round": 1,
+                    "pick_no": int(rid),
+                    "season": 2025,
+                },
+            )
+        )
+        facts.append(
+            F(
+                fact_id=f"rm{rid}",
+                source_record_id=f"roster:2025:{rid}",
+                fact_type="roster_membership",
+                entity_ref={"type": "franchise", "id": rid},
+                payload={"roster_id": rid, "players": [f"p{rid}a", f"p{rid}b"]},
+            )
+        )
+    facts.append(
+        F(
+            fact_id="chat1",
+            source_record_id="chat:1",
+            fact_type="chat_message",
+            access_scope="league_private",
+            privacy="private",
+            payload={
+                "text": "General Ken-obi is toast this year",
+                "sender": "GauchoTrain",
+            },
+        )
+    )
+    facts.append(
+        F(
+            fact_id="nfl1",
+            source_record_id="nfl:2025_01_ARI_NO",
+            fact_type="nfl_game",
+            entity_ref={"type": "nfl_game", "id": "2025_01_ARI_NO"},
+            payload={
+                "game_id": "2025_01_ARI_NO",
+                "home_team": "NO",
+                "away_team": "ARI",
+            },
+        )
+    )
+    facts.append(
+        F(
+            fact_id="sp1",
+            source_record_id="pair:2025:1",
+            fact_type="schedule_pairing",
+            entity_ref={"type": "matchup", "id": "1"},
+            payload={"season": 2025, "week": 1, "home": "1", "away": "2"},
+        )
+    )
+    hist = [
+        M(1, 2024, 1, "2024-09-08T23:00:00Z", "1", "2", 120.0, 100.0),
+        M(2, 2024, 2, "2024-09-15T23:00:00Z", "1", "3", 90.0, 130.0),
+        M(3, 2024, 3, "2024-09-22T23:00:00Z", "2", "3", 140.0, 110.0),
+    ]
+    facts += [
+        F(
+            **{
+                **{
+                    k: getattr(h, k)
+                    for k in (
+                        "source_record_id",
+                        "entity_ref",
+                        "source_ref",
+                        "effective_at",
+                        "known_at",
+                        "access_scope",
+                        "known_at_basis",
+                        "captured_at",
+                        "privacy",
+                        "normalizer_version",
+                    )
+                },
+                "fact_id": h.fact_id,
+                "fact_type": "historical_matchup",
+                "payload": h.payload,
+            }
+        )
+        for h in hist
+    ]
+    # Week-1 2025 results: known AFTER the preview cutoff, admitted only at recap.
+    facts += [
+        M(1, 2025, 1, "2025-09-08T23:00:00Z", "1", "2", 131.4, 101.2),
+        M(2, 2025, 1, "2025-09-08T23:10:00Z", "3", "1", 99.0, 120.0),
+    ]
+    cutoffs = {
+        "2025-preseason": "2025-09-03T23:59:59Z",
+        "2025-wk01-preview": "2025-09-05T00:19:59Z",
+        "2025-wk01-recap": "2025-09-09T06:59:59Z",
+    }
+    return {
+        eid: state_at(2025, cutoff, "league_private", facts=facts)
+        for eid, cutoff in cutoffs.items()
+    }
+
+
+@pytest.fixture
+def chain_states():
+    return synthetic_chain_states()
+
+
 @pytest.fixture
 def claim_factory():
     """Minimal scoreable claims. Every field the scorer reads, nothing it doesn't."""

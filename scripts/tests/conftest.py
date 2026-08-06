@@ -47,6 +47,7 @@ def content_purity_gate():
 
 # K3 eval fixtures (K3.4 Step 0): defined in conftest_eval.py, re-exported here
 # so every test module sees them. The purity gate above stays intact.
+from scripts.tests.conftest_eval import chain_states  # noqa: E402, F401
 from scripts.tests.conftest_eval import claim_factory  # noqa: E402, F401
 from scripts.tests.conftest_eval import fake_state  # noqa: E402, F401
 from scripts.tests.conftest_eval import fake_state_without_history  # noqa: E402, F401
