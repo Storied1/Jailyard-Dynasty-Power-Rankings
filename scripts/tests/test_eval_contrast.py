@@ -1,7 +1,6 @@
 """K3.3 — frozen evidence manifest, bounded degradation, producer-drift gates."""
 
 import json as j
-import shutil
 
 import pytest
 
@@ -15,11 +14,23 @@ from scripts.eval_contrast import (
 REQUIRED = {"roster_membership", "historical_matchup", "chat_message", "nfl_game"}
 
 
+def _unfrozen_copy(tmp_path, name="evidence_families.json"):
+    """A copy with the stamps cleared. Freeze-state-agnostic: K3.7 Step 1
+    freezes the COMMITTED manifest exactly once, and these tests must keep
+    proving the same rules before AND after that -- a fixture that freezes the
+    committed copy directly breaks permanently the moment the plan succeeds."""
+    doc = j.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    doc["frozen_at"] = None
+    doc["manifest_sha256"] = None
+    p = tmp_path / name
+    p.write_text(j.dumps(doc, indent=2, sort_keys=True), encoding="utf-8")
+    return p
+
+
 @pytest.fixture
 def frozen(tmp_path):
-    """A frozen copy. The committed manifest stays unfrozen until K3.7 Step 1."""
-    p = tmp_path / "evidence_families.json"
-    shutil.copyfile(MANIFEST_PATH, p)
+    """A frozen copy, from an explicitly unfrozen base."""
+    p = _unfrozen_copy(tmp_path)
     freeze_manifest(path=p, frozen_at="2026-08-02T00:00:00Z")
     return load_manifest(path=p)
 
@@ -56,11 +67,8 @@ def test_media_is_explicitly_excluded():
 
 
 def test_assessing_an_unfrozen_manifest_is_refused(tmp_path):
-    p = tmp_path / "m.json"
-    shutil.copyfile(MANIFEST_PATH, p)
-    unfrozen = load_manifest(path=p)
-    if unfrozen["frozen_at"] is not None:
-        pytest.skip("committed manifest already frozen by K3.7 Step 1")
+    unfrozen = load_manifest(path=_unfrozen_copy(tmp_path, "m.json"))
+    assert unfrozen["frozen_at"] is None
     with pytest.raises(ValueError):
         assess_contrast(
             unfrozen,
@@ -71,8 +79,7 @@ def test_assessing_an_unfrozen_manifest_is_refused(tmp_path):
 
 
 def test_freezing_twice_is_refused(tmp_path):
-    p = tmp_path / "m.json"
-    shutil.copyfile(MANIFEST_PATH, p)
+    p = _unfrozen_copy(tmp_path, "m.json")
     freeze_manifest(path=p, frozen_at="2026-08-02T00:00:00Z")
     with pytest.raises(ValueError):
         freeze_manifest(path=p, frozen_at="2026-08-03T00:00:00Z")
