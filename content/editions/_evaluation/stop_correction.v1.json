@@ -1,0 +1,149 @@
+{
+  "1_machine_outcome_remains_authentic": {
+    "statement": "The existing branch-3 machine outcome stands. eval_contrast --preflight returned 1 (degraded), --assess returned 1 (cycle 1, persisted against the frozen manifest hash), and --assess returned 3 (stop_no_decision) after the bounded remediation cycle. Those exit codes, their artifacts, and the STOP they produced are authentic and are NOT withdrawn.",
+    "unaffected": "K3 remains STOP -- NO DECISION, NO EXPANSION. Zero of 36 authorized model invocations were spent. No seal, receipt, claim, score, or blind review exists."
+  },
+  "2_actual_admitted_counts_per_edition": {
+    "editions": {
+      "2025-preseason": {
+        "admitted_by_type": {
+          "chat_message": 19383,
+          "draft_pick": 72,
+          "historical_matchup": 294,
+          "transaction": 182
+        },
+        "admitted_count": 19931
+      },
+      "2025-wk01-preview": {
+        "admitted_by_type": {
+          "chat_message": 19398,
+          "draft_pick": 72,
+          "historical_matchup": 294,
+          "transaction": 183
+        },
+        "admitted_count": 19947
+      },
+      "2025-wk01-recap": {
+        "admitted_by_type": {
+          "chat_message": 19561,
+          "draft_pick": 72,
+          "historical_matchup": 294,
+          "matchup_result": 6,
+          "nfl_game": 16,
+          "transaction": 195
+        },
+        "admitted_count": 20144
+      }
+    },
+    "fact_store_totals_2025": {
+      "chat_message": 22884,
+      "draft_pick": 72,
+      "franchise_identity": 12,
+      "historical_matchup": 294,
+      "matchup_result": 98,
+      "nfl_game": 285,
+      "transaction": 717
+    },
+    "note": "admitted counts are per-cutoff and far smaller than store totals; a family present in the store is not thereby admitted at an edition cutoff",
+    "source": "content/editions/<edition>/compiled/state_manifest.json (hash-bound above)"
+  },
+  "3_first_abort_family_is_franchise_identity_not_roster_membership": {
+    "also_zero_at_every_edition": ["roster_membership", "schedule_pairing"],
+    "correction": "The STOP packet's verdict.md and remediation_record.json name roster_membership (open dependency 3) as the root cause. That diagnosis is WRONG as the first-order cause: the arms never reach roster_membership because franchise_identity -- a sourced family -- is checked first and is zero. Qualifying a roster anchor alone would NOT make any model arm runnable.",
+    "franchise_identity_status": {
+      "cause": "all 12 franchise_identity facts carry known_at=2026-04-04 under known_at_basis 'legacy-capture-v1', which postdates every 2025 edition cutoff (preseason 2025-09-03T23:59:59Z, preview 2025-09-05T00:19:59Z, recap 2025-09-09T06:59:59Z). The family is unadmitted for a TEMPORAL reason, not an unsourced one.",
+      "facts_admitted_at_every_2025_edition": 0,
+      "facts_in_store": 12,
+      "source_id": "legacy:data/{season}/season_combined.json",
+      "sourced": true
+    },
+    "nfl_game": {
+      "note": "absent from preseason and preview by its game_conclusion known_at basis; present at recap",
+      "preseason": 0,
+      "preview": 0,
+      "recap": 16
+    },
+    "reproduced_by": "bundle_for(arm, rehydrate_state(load_compiled_state(edition)), descriptor.kind) executed against all three real compiled states, all five arms",
+    "result": "minimal_legal, full_rich, no_chat and no_history each abort at EVERY edition with: 'required family franchise_identity has zero admitted facts at this <kind> edition'. record_points succeeds at all three editions."
+  },
+  "4_family_counts_erases_valid_counts_after_the_first_abort": {
+    "consequence": "totals collapse to an empty map for every model arm, and assess_contrast reports ALL FOUR required families missing.",
+    "mechanism": "scripts/eval_contrast.py family_counts sets counts = {} in its ArmUnavailable handler, discarding the entire edition's counts; bundle_for raises on the FIRST zero-count required family, so families that WERE genuinely admitted at that edition (chat_message 19383/19398/19561, historical_matchup 294, draft_pick 72) are never counted.",
+    "not_repaired_here": "fixing family_counts is a code change outside this append-only correction's scope; it is recorded as a defect the next authorized mission must repair before any contrast verdict is diagnostic.",
+    "therefore": "the persisted missing list ['chat_message','historical_matchup','nfl_game','roster_membership'] in contrast_preflight.json and contrast.json is an ARTIFACT OF THE ERASURE, not a truthful per-family availability census. It is unreliable as a diagnosis and must not be cited as one."
+  },
+  "5_schedule_pairing_contradiction": {
+    "contradiction": "The design simultaneously says an edition proceeds without schedule_pairing and that an inadmissible schedule source degrades the comparison; the implementation resolves it by hard-requiring the family, which is the strictest reading and blocks every full_rich bundle. The semantics are unresolved, not settled.",
+    "design_text": "docs/superpowers/specs/2026-08-01-jailyard-writer-foundation-design.md line 206: 'Absent both, the schedule fact is unavailable and the edition proceeds without it.'",
+    "design_text_elsewhere": "same design, line 444: 'If a required family is unavailable -- no qualified roster anchor, no qualified historical source, no admissible schedule source -- the comparison is degraded.'",
+    "implementation": "scripts/eval_arms.py ARMS['full_rich']['families'] includes schedule_pairing, so required_families() requires it and bundle_for raises ArmUnavailable when it is zero -- the edition does NOT proceed without it.",
+    "resolution_authority": "design-level; reserved to Blake. Not resolved by this correction."
+  },
+  "6_production_model_transport_is_not_wired": {
+    "did_it_affect_the_stop": false,
+    "fact": "scripts/eval_arms.py run_arm_chain raises RuntimeError('no model transport wired') for any model arm when no _runners mapping is supplied. No subscription-backed production runner was implemented, and none was canary-qualified against the Part-7 checklist.",
+    "why_not": "the branch terminated at contrast preflight, before K3.7 Step 3; and independently, every model arm aborts in bundle_for BEFORE the runner lookup is reached. No arm was ever eligible to run, so the missing transport changed no exit code and cost no spend.",
+    "withdrawn": "verdict.md line 32's claim that 'The machinery itself is fully built and proven' is WITHDRAWN. What is built and test-proven is the kernel/ledger/contrast/scoring/driver machinery under injected stub runners (664 tests, incl. the 39-cell stub dry run). The paid execution path is NOT built."
+  },
+  "7_closure_decision_replacing_the_roster_anchor_framing": {
+    "correct_closure": [
+      "K3 remains NO DECISION and goes DORMANT. It is not retried under the current mission.",
+      "S1a and S1b do not begin.",
+      "The definitive 2025 archive -- which was never contingent on measured lift -- proceeds through the simpler mechanism.",
+      "Prospective Phase-P capture and sealing continue unchanged (store verified intact: 2 seals, 0 failures, verify and rederive)."
+    ],
+    "withdrawn": "verdict.md's 'single decision now required: whether to qualify a roster anchor'. That framing rests on the incorrect causal diagnosis corrected in item 3 and would not, alone, make K3 runnable."
+  },
+  "8_conditions_for_any_future_k3_proposal": {
+    "authority": "proposal only. No condition, singly or together, authorizes S1a, S1b, or any expansion.",
+    "conditions": [
+      "truthful production family counts -- family_counts no longer erases an edition's valid counts after the first ArmUnavailable, so the reported missing set is the actual availability census",
+      "qualified temporal sources -- franchise_identity (and any other required family) carries a known_at admissible at the edition cutoffs, not a later legacy-capture instant",
+      "schedule semantics resolved -- the design's proceeds-without-it vs degraded-comparison contradiction settled by Blake before a manifest is frozen",
+      "a NEW frozen manifest -- the current freeze (bound above) is spent; a source or semantics change invalidates it by design",
+      "a proven execution transport -- a production model runner, canary-qualified for model identity, effort, sampling, schema-constrained output, isolation, and receipt capture"
+    ],
+    "statement": "K3 may be PROPOSED again only under a newly authorized mission, and only when ALL of the following hold:"
+  },
+  "9_original_stop_manifest_census_is_pre_final": {
+    "actual_final_k3_range": {
+      "base": "e9cfb5acd691cb2d5b095869f32f09bb24d986a2",
+      "changed_files": 25,
+      "commits": 10,
+      "head_at_stop_packet": "696734e7ba1d9ba895fed5e95db21c71b0c4cda7"
+    },
+    "cause": "the census was computed inside the same script invocation that created stop_manifest.json, so it could not include its own commit (the 10th) or its own two files (stop_manifest.json, verdict.md).",
+    "effect": "no artifact hash in stop_manifest.json is affected; only its self-referential commit/file counts are short. The manifest is not edited -- this label is the correction.",
+    "embedded_in_stop_manifest": {
+      "changed_files": 23,
+      "commits": 9
+    },
+    "label": "PRE-FINAL"
+  },
+  "bound_identities": {
+    "content/editions/2025-preseason/compiled/state_manifest.json": "sha256:f68acbcdb4d7d7d3389df5e78fea02ac40a325ba6a65c27aabdacb075a293174",
+    "content/editions/2025-wk01-preview/compiled/state_manifest.json": "sha256:5e1d030f018c194461bd2041442c487197db5190de9180a479eb287b4ef8308b",
+    "content/editions/2025-wk01-recap/compiled/state_manifest.json": "sha256:14f4f12427a503f84e2778bfcf0f25ecc8d252d14c9501c798c9b35a57c1f1ac",
+    "content/editions/_evaluation/stop_manifest.json": "sha256:23fa738c2857962ac7d5bd56b81aee26f8d57c86d96e83b619a1838c2df9496d",
+    "content/editions/_evaluation/verdict.md": "sha256:5e73e869f37980c7a31ff0b5b1757419a818ae7ecb81818b4b3595aa3eed0d73",
+    "content/governance/evidence_families.json": "sha256:c77b29c805d9d7b8bcffcb498ab716b487974f615dba1d144d3f96f05d5b8935",
+    "data/facts/2025.report.json": "sha256:43429ab149bb4476328f87b729ac0da9b636cbabe54aa4d2bc7fca53ad561dcd",
+    "docs/superpowers/plans/2026-08-02-jailyard-temporal-kernel.md": "sha256:8301b80f6dcfffd9fa59f254978ee4168a782d425b0dd8145192737f7da55e96",
+    "note": "every hash recomputed from live bytes at write time; the approved plan blob and SHA-256 are unchanged from the K3 authorization",
+    "plan_git_blob": "3e05ab776fb9f830a7e568becc9d578729f73686"
+  },
+  "correction_id": "stop_correction.v1",
+  "corrects": "content/editions/_evaluation/stop_manifest.json",
+  "nature": "append-only closure correction; supersedes NO artifact, edits NO artifact, deletes NO artifact, reruns NO arm, invokes NO model, qualifies NO source, revises NO plan or design",
+  "scope_discipline": {
+    "arms_run": 0,
+    "created_files": ["content/editions/_evaluation/stop_correction.v1.json"],
+    "deleted_files": [],
+    "edited_files": [],
+    "manifests_frozen": 0,
+    "model_invocations": 0,
+    "plan_or_design_revisions": 0,
+    "seals_written": 0,
+    "sources_qualified": 0
+  }
+}
