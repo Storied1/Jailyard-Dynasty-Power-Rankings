@@ -1,0 +1,23 @@
+{
+  "cycles_used": 0,
+  "missing": [
+    "chat_message",
+    "historical_matchup",
+    "nfl_game",
+    "roster_membership"
+  ],
+  "per_edition": {
+    "full": {
+      "2025-preseason": {},
+      "2025-wk01-preview": {},
+      "2025-wk01-recap": {}
+    },
+    "minimal": {
+      "2025-preseason": {},
+      "2025-wk01-preview": {},
+      "2025-wk01-recap": {}
+    }
+  },
+  "reason": "required family without qualified evidence: ['chat_message', 'historical_matchup', 'nfl_game', 'roster_membership']",
+  "status": "degraded"
+}
