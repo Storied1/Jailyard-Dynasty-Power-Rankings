@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "frozen_at": null,
+  "manifest_sha256": null,
+  "families": [
+    {
+      "family": "roster_membership",
+      "required": true,
+      "rationale": "directly informs strength judgments",
+      "source_ids": [],
+      "source_note": "declared unsourced (open dependency 3); frozen as such",
+      "normalizer_version": "norm-v1"
+    },
+    {
+      "family": "historical_matchup",
+      "required": true,
+      "rationale": "the no-history arm ablates exactly this",
+      "source_ids": ["legacy:data/{prior}/season_combined.json"],
+      "normalizer_version": "norm-v1"
+    },
+    {
+      "family": "chat_message",
+      "required": true,
+      "rationale": "the no-chat arm ablates exactly this",
+      "source_ids": ["legacy:chat/parsed_messages.json"],
+      "normalizer_version": "norm-v1"
+    },
+    {
+      "family": "nfl_game",
+      "required": true,
+      "rationale": "distinguishes rich from minimal",
+      "source_ids": ["legacy:data/{season}/nfl_games/*.json"],
+      "normalizer_version": "norm-v1"
+    },
+    {
+      "family": "media_item",
+      "required": false,
+      "rationale": "deferred to S1b, non-evidentiary decoration; absence must not degrade the data-layer experiment",
+      "source_ids": [],
+      "normalizer_version": null
+    }
+  ]
+}
