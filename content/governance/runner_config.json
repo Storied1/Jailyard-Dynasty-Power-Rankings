@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "model_arms": {
+    "provider": "anthropic",
+    "model": "claude-opus-5",
+    "model_version": "2026-05",
+    "reasoning": "high",
+    "tools_policy": "none",
+    "browsing": "disabled",
+    "budget": 100000,
+    "retries": 0,
+    "sampling_policy": "temperature=1.0",
+    "prompt_path": "content/governance/prompts/ranking_prompt.md",
+    "rule_paths": { "voice": "content/voice-bible.md" }
+  }
+}
