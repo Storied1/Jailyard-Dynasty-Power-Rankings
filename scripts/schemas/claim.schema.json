@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Claim ledger record (K3.1)",
+  "description": "One line of data/claims/{season}.jsonl: a Claim or a ResolutionEvent, discriminated by `kind`. Claims fix their resolution rule at claim time; events are immutable and collapse latest-resolved_at-wins.",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "kind",
+        "claim_id",
+        "target",
+        "claim_type",
+        "horizon",
+        "assertion",
+        "confidence",
+        "decisive_evidence",
+        "contrary_evidence",
+        "cutoff_utc",
+        "state_hash",
+        "arm_id",
+        "trial_id",
+        "decision_run_id",
+        "edition_id",
+        "resolution_rule"
+      ],
+      "properties": {
+        "kind": { "const": "claim" },
+        "claim_id": { "type": "string", "pattern": "^claim-[0-9a-f]{16}$" },
+        "target": { "type": "string", "minLength": 1 },
+        "claim_type": {
+          "enum": ["ordinal_rank", "binary_probability", "bounded_quantity"]
+        },
+        "horizon": {
+          "enum": ["next_week", "rest_of_season", "championship", "dynasty"]
+        },
+        "assertion": {},
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "decisive_evidence": { "type": "array", "items": { "type": "string" } },
+        "contrary_evidence": { "type": "string" },
+        "cutoff_utc": { "type": "string" },
+        "state_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "arm_id": { "type": "string" },
+        "trial_id": { "type": "integer", "minimum": 1 },
+        "decision_run_id": { "type": "string" },
+        "edition_id": { "type": "string" },
+        "resolution_rule": {
+          "type": "object",
+          "required": ["rule", "source", "resolve_on"],
+          "properties": {
+            "rule": { "type": "string" },
+            "source": { "type": "string" },
+            "resolve_on": { "type": "string" }
+          }
+        },
+        "bound": { "type": ["number", "null"] },
+        "outcome": {},
+        "score": { "type": ["number", "null"] },
+        "resolution_failed": { "type": "boolean" }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "kind",
+        "claim_id",
+        "outcome",
+        "score",
+        "resolved_at",
+        "resolution_run_id"
+      ],
+      "properties": {
+        "kind": { "const": "resolution_event" },
+        "claim_id": { "type": "string" },
+        "outcome": {},
+        "score": { "type": ["number", "null"] },
+        "resolved_at": { "type": "string" },
+        "resolution_run_id": { "type": "string" },
+        "resolution_failed": { "type": "boolean" }
+      }
+    }
+  ]
+}
