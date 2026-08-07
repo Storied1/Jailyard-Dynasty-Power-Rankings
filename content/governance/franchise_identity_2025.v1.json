@@ -1,0 +1,111 @@
+{
+  "display": {
+    "attestation": {
+      "commit": "d464f8cf8e0e64418ed9025342e1058e88c8ad7a",
+      "instant": "2025-08-02T20:30:09.000000Z",
+      "locator": "git:d464f8cf8e0e64418ed9025342e1058e88c8ad7a:jailyard_2025_power_rankings_updated.html",
+      "path": "jailyard_2025_power_rankings_updated.html"
+    },
+    "attested": {
+      "1": {
+        "attested_team_name": "The Boonist Monks",
+        "attested_username": "GauchoTrain",
+        "team_name": "The Boonist Monks",
+        "username": "GauchoTrain"
+      },
+      "10": {
+        "attested_team_name": "General Ken‑obi",
+        "attested_username": "bLaker24",
+        "team_name": "General Ken-obi",
+        "username": "bLaker24"
+      },
+      "11": {
+        "attested_team_name": "Sleeping Giants",
+        "attested_username": "zbcowan",
+        "team_name": "Sleeping Giants",
+        "username": "zbcowan"
+      },
+      "12": {
+        "attested_team_name": "Ghastly Grayskull Gang",
+        "attested_username": "GrayskullXX",
+        "team_name": "Ghastly Grayskull Gang",
+        "username": "GrayskullXX"
+      },
+      "2": {
+        "attested_team_name": "Kittler on the Roof",
+        "attested_username": "bchodos",
+        "team_name": "Kittler on the Roof",
+        "username": "bchodos"
+      },
+      "3": {
+        "attested_team_name": "Burden of Etienne‑y Woody",
+        "attested_username": "kharlo w",
+        "team_name": "Burden of Etienne-y Woody",
+        "username": "kharlow"
+      },
+      "4": {
+        "attested_team_name": "Noble FFT",
+        "attested_username": "kevobucks",
+        "team_name": "Noble FFT",
+        "username": "kevobucks"
+      },
+      "5": {
+        "attested_team_name": "The Legion of Bouz",
+        "attested_username": "KidBouzie",
+        "team_name": "The Legion of Bouz",
+        "username": "KidBouzie"
+      },
+      "6": {
+        "attested_team_name": "Rasheeing the Scene",
+        "attested_username": "ToreroGaucho",
+        "team_name": "Rasheeing the Scene",
+        "username": "ToreroGaucho"
+      },
+      "7": {
+        "attested_team_name": "Chudders Football Team",
+        "attested_username": "Chudders",
+        "team_name": "Chudders Football Team",
+        "username": "Chudders"
+      },
+      "8": {
+        "attested_team_name": "MHJTIME",
+        "attested_username": "rango_",
+        "team_name": "MHJTIME",
+        "username": "rango_"
+      },
+      "9": {
+        "attested_team_name": "Father Time",
+        "attested_username": "Redrumsregrub",
+        "team_name": "Father Time ",
+        "username": "Redrumsregrub"
+      }
+    },
+    "known_at_basis": "franchise-display-attestation-v1",
+    "match_rule": "a display fact is emitted only where the AUTHORITATIVE Sleeper team_name equals the attested team_name after NFKC + folded hyphens/no-break spaces + collapsed whitespace + casefold, joined on a whitespace-insensitive username key (the documented 'kharlo w'/'kharlow' drift). No match = names stay unavailable.",
+    "provenance": "earliest tracked commit whose inline league table binds every captured Sleeper username to a team name; instant = git author date in UTC, the legacy-capture-v1 method. A commit instant is an OBSERVED UPPER BOUND on knowability, so it cannot date a fact earlier than it was true.",
+    "unattested": []
+  },
+  "kind": "Versioned known_at inference policy (design Open Items: 'known_at inference policies for legacy 2025 sources carrying no publication instant'). Dates facts; never supplies their values.",
+  "policy_id": "franchise-identity-2025-v1",
+  "season": 2025,
+  "spine": {
+    "bindings": {
+      "1": "510013812276232192",
+      "10": "861064424906158080",
+      "11": "510254202180411392",
+      "12": "865653448849391616",
+      "2": "575194626101170176",
+      "3": "575406354368348160",
+      "4": "575878107617718272",
+      "5": "510215233736572928",
+      "6": "415249306090479616",
+      "7": "792312710317572096",
+      "8": "792563831732838400",
+      "9": "793977545186979840"
+    },
+    "derivation": "every pick carries roster_id AND picked_by; the binding is one-to-one over all 12 rosters and is cross-checked against the captured roster_map before being dated. Instant = end of the draft start_date UTC, the draft-window-v1 convention.",
+    "instant": "2025-07-10T23:59:59.000000Z",
+    "known_at_basis": "franchise-spine-draft-v1",
+    "source": "data/2025/draft_picks.json"
+  }
+}

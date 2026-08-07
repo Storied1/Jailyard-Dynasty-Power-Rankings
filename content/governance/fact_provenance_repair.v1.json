@@ -1,0 +1,175 @@
+{
+  "admitted_by_edition_after": {
+    "2025-preseason": {
+      "draft_pick": 72,
+      "franchise_identity": 12,
+      "historical_matchup": 294,
+      "transaction": 182
+    },
+    "2025-wk01-preview": {
+      "draft_pick": 72,
+      "franchise_identity": 12,
+      "historical_matchup": 294,
+      "transaction": 183
+    },
+    "2025-wk01-recap": {
+      "draft_pick": 72,
+      "franchise_identity": 12,
+      "historical_matchup": 294,
+      "matchup_result": 6,
+      "nfl_game": 16,
+      "roster_membership": 375,
+      "transaction": 195
+    }
+  },
+  "answers": "fact_provenance_census.v1",
+  "kind": "READ-ONLY REPORT. Answers fact_provenance_census.v1 family by family. Does NOT supersede it -- v1 stands as the pre-repair record.",
+  "leak_proof_failures": [],
+  "leak_proofs": [
+    {
+      "detail": "2091 admitted, 0 past their cutoff",
+      "id": "P1",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "0 facts still dated by a download instant",
+      "id": "P2",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "36 admitted team names, 0 not present in the 2025-08-02 blob",
+      "id": "P3",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "375 week-1 players; 0 rosters differ from the snapshot",
+      "id": "P4",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "5 untouched public families compared against census v1; 0 moved",
+      "id": "P5",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "zero franchise facts before the draft anchor; zero names before the attestation",
+      "id": "P6",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "a franchise fact dated 2025-12-01 was refused by the week-1 recap state",
+      "id": "P7",
+      "verdict": "PASS"
+    }
+  ],
+  "per_family": {
+    "chat_message": {
+      "census_v1_defect": null,
+      "census_v1_honest": true,
+      "disposition": "UNCHANGED -- already honest",
+      "facts_now": 22884,
+      "known_at_bases_now": {
+        "message_timestamp": 22884
+      },
+      "what_it_deliberately_does_not_fix": "Nothing. It was never mis-dated.",
+      "what_the_repair_does": "known_at is each message's own timestamp. The largest honestly-dated evidence body in the store, and untouched by this repair."
+    },
+    "draft_pick": {
+      "census_v1_defect": "COARSE, not false: all 72 picks collapse to one instant (1 distinct known_at). Pick 72 is treated as knowable at the same moment as pick 1.",
+      "census_v1_honest": true,
+      "disposition": "NOT REPAIRABLE FROM DISK -- coarse, and honestly so",
+      "facts_now": 72,
+      "known_at_bases_now": {
+        "draft-window-v1": 72
+      },
+      "what_it_deliberately_does_not_fix": "Per-pick instants are not in the captured file -- no pick carries a timestamp. Refining this needs a re-capture of Sleeper's draft endpoint with pick metadata, which is new evidence, not a re-derivation. Pick 72 is still treated as knowable at the moment pick 1 was.",
+      "what_the_repair_does": "Unchanged. All 72 picks share the draft-window-v1 instant."
+    },
+    "franchise_identity": {
+      "census_v1_defect": "the download date stands in for the date the fact was true. All 12 facts share one instant that postdates the 2025 season entirely, so ZERO are admitted at any 2025 edition cutoff. This is the family every model arm checks first.",
+      "census_v1_honest": false,
+      "disposition": "REPAIRED",
+      "facts_now": 24,
+      "known_at_bases_now": {
+        "franchise-display-attestation-v1": 12,
+        "franchise-spine-draft-v1": 12
+      },
+      "what_it_deliberately_does_not_fix": "It cannot recover a team name that CHANGED during 2025. If a franchise renamed after 2025-08-02, this dates the post-rename name at the pre-rename instant. Nothing on disk can detect that -- Sleeper serves no name-change history and the repo holds no later 2025 attestation -- so the bound is stated rather than hidden. It also leaves the 2026 lane untouched, where capture instant and knowledge instant genuinely coincide because the capture is prospective.",
+      "what_the_repair_does": "Split into the two assertions it always conflated. The roster/owner SPINE is dated 2025-07-10 from data/2025/draft_picks.json, where every pick carries roster_id AND picked_by; the binding is one-to-one over all 12 rosters and is cross-checked against the capture before being dated. The DISPLAY layer (username, team_name) is dated 2025-08-02T20:30:09Z, the author instant of commit d464f8c, the earliest tracked commit whose blob attests every captured username -- an OBSERVED upper bound on when the names were knowable, established by the same git method legacy_capture_instants.v1 already uses. The two are emitted as a supersession chain, so a cutoff between them yields spine-only with names declared unavailable. Values always come from the authoritative Sleeper capture; the attestation supplies a date and nothing else, and a name that does not match it exactly stays unavailable."
+    },
+    "historical_matchup": {
+      "census_v1_defect": "same conservative-late policy coarsening as matchup_result",
+      "census_v1_honest": true,
+      "disposition": "UNCHANGED -- already honest",
+      "facts_now": 294,
+      "known_at_bases_now": {
+        "legacy-week-conclusion-v1": 294
+      },
+      "what_it_deliberately_does_not_fix": "The same deliberate coarsening as matchup_result.",
+      "what_the_repair_does": "The same conservative-late policy applied to 2022-2024."
+    },
+    "matchup_result": {
+      "census_v1_defect": "POLICY-DERIVED, not observed: it is a conservative LATE bound (the Tuesday after the week's final game), not the actual moment each result became known. Erring late is fail-closed -- it can only withhold a fact from a state, never leak one in early.",
+      "census_v1_honest": true,
+      "disposition": "UNCHANGED -- already honest",
+      "facts_now": 98,
+      "known_at_bases_now": {
+        "legacy-week-conclusion-v1": 98
+      },
+      "what_it_deliberately_does_not_fix": "Finer per-game instants are derivable from the schedules parquet and were deliberately not adopted. Refining this can only admit facts EARLIER, which is the one direction that can leak, and nothing needs it.",
+      "what_the_repair_does": "Conservative LATE bound: the Tuesday after the week's final game. Erring late is fail-closed -- it can withhold a fact from a state, never leak one in early."
+    },
+    "nfl_game": {
+      "census_v1_defect": "POSTGAME ONLY. Pregame context (injuries, spreads, weather as knowable BEFORE kickoff) is recorded unavailable in data/facts/2025.report.json: 'no qualified schedule-publication instant (sched_publication_2025.v1.json absent); pregame context is not invented or backdated'. The honest postgame instant is why nfl_game is absent from preseason and preview and present (16) only at recap.",
+      "census_v1_honest": true,
+      "disposition": "UNCHANGED -- the refusal is correct",
+      "facts_now": 285,
+      "known_at_bases_now": {
+        "legacy-week-conclusion-v1": 285
+      },
+      "what_it_deliberately_does_not_fix": "Pregame context -- injuries, spreads, weather as knowable BEFORE kickoff -- stays unavailable. Dating it needs an approved schedule-publication policy that does not exist. Correct behaviour, not a gap in the data.",
+      "what_the_repair_does": "Postgame context only, dated at each week's conclusion. This is why nfl_game is absent from the preseason and preview states and present only at the recap."
+    },
+    "roster_membership": {
+      "census_v1_defect": "DECLARED UNSOURCED, recorded as a refusal in data/facts/2025.report.json: 'no qualified pre-kickoff roster anchor (open dependency 3)'. Zero facts in the store; zero admitted everywhere.",
+      "census_v1_honest": null,
+      "disposition": "REPAIRED, PARTIALLY -- post-kickoff only",
+      "facts_now": 1041,
+      "known_at_bases_now": {
+        "legacy-week-conclusion-v1": 1041
+      },
+      "what_it_deliberately_does_not_fix": "It gives NO pre-kickoff anchor, so the preseason and preview states still admit zero roster facts. That refusal stands and is asserted by test. Separately: the census proposed draft_picks.json as an opening-roster anchor, and that does not hold. This is a DYNASTY league (data/2025/league.json settings.type=2, draft_rounds=6), so 72 picks over 12 teams is a rookie draft, not a roster.",
+      "what_the_repair_does": "Was declared unsourced with zero facts. Now sourced from the captured weekly snapshots under data/2025/fantasy_rosters/, each dated at its week's conclusion under the same legacy-week-conclusion-v1 policy the result families use. Departures are emitted explicitly rather than implied, because the reducer is `latest` and an implied departure would leave rosters that only ever grow. A snapshot that is derived, uncaptured, or carries no usable instant is refused outright."
+    },
+    "schedule_pairing": {
+      "census_v1_defect": "DECLARED UNSOURCED: 'no qualified pre-kickoff schedule source (design section 1)'. Design section 1: stripping outcomes from a completed weekly packet does not prove the pairing was knowable before kickoff.",
+      "census_v1_honest": null,
+      "disposition": "NOT REPAIRED -- needs a decision, not data",
+      "facts_now": 0,
+      "known_at_bases_now": {},
+      "what_it_deliberately_does_not_fix": "Design section 1: stripping outcomes from a completed weekly packet proves concealment, not pregame availability. Admitting it needs either an independently qualified schedule source, which is not captured for 2025, or an approved versioned availability policy. That is a governance call for Blake; inventing one is exactly the defect this repair removes.",
+      "what_the_repair_does": "Still unavailable, still zero facts."
+    },
+    "transaction": {
+      "census_v1_defect": null,
+      "census_v1_honest": true,
+      "disposition": "UNCHANGED -- already honest",
+      "facts_now": 717,
+      "known_at_bases_now": {
+        "effective_completion_instant": 717
+      },
+      "what_it_deliberately_does_not_fix": "Nothing. It was never mis-dated.",
+      "what_the_repair_does": "known_at is each transaction's own completion instant, with 514 distinct times of day across 717 facts."
+    }
+  },
+  "report_id": "fact_provenance_repair.v1",
+  "season": 2025,
+  "surface_summary": {
+    "families_dishonestly_dated_after": 0,
+    "families_dishonestly_dated_before": 1,
+    "families_populated_after": 8,
+    "families_populated_before": 7,
+    "families_registered": 9,
+    "families_still_unavailable": ["nfl_game_pregame", "schedule_pairing"]
+  }
+}

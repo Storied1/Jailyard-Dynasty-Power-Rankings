@@ -14,14 +14,28 @@ from scripts.eval_contrast import (
 REQUIRED = {"roster_membership", "historical_matchup", "chat_message", "nfl_game"}
 
 
-def _unfrozen_copy(tmp_path, name="evidence_families.json"):
+def _unfrozen_copy(tmp_path, name="evidence_families.json", sync_producers=True):
     """A copy with the stamps cleared. Freeze-state-agnostic: K3.7 Step 1
     freezes the COMMITTED manifest exactly once, and these tests must keep
     proving the same rules before AND after that -- a fixture that freezes the
-    committed copy directly breaks permanently the moment the plan succeeds."""
+    committed copy directly breaks permanently the moment the plan succeeds.
+
+    `sync_producers` rewrites each family's producer view from the LIVE source
+    map. The rules under test here are about degradation and cycle bounds, not
+    about what the committed v1 manifest happened to declare in August 2026; a
+    fixture pinned to that snapshot fails on any legitimate producer change and
+    reports it as a bug in the rule. The drift itself is asserted separately, by
+    test_committed_manifest_drifts_on_roster_membership.
+    """
     doc = j.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     doc["frozen_at"] = None
     doc["manifest_sha256"] = None
+    if sync_producers:
+        from scripts.eval_contrast import _recomputed_producers
+
+        live = _recomputed_producers()
+        for fam in doc["families"]:
+            fam.update(live[fam["family"]])
     p = tmp_path / name
     p.write_text(j.dumps(doc, indent=2, sort_keys=True), encoding="utf-8")
     return p
@@ -199,18 +213,54 @@ def test_manifest_source_and_version_drift_are_failed_gates(frozen, tmp_path):
             )
 
 
-def test_recomputed_producers_match_the_committed_manifest():
-    """The freeze binds the LIVE producer surface: if this drifts, production
-    --assess exits 4 on its first run and the experiment cannot start."""
+def test_committed_manifest_drifts_on_roster_membership():
+    """The freeze binds the LIVE producer surface, and it no longer matches.
+
+    This test used to assert live == frozen. That stopped being true when the
+    2025 provenance repair SOURCED `roster_membership`, which the manifest had
+    frozen as "declared unsourced (open dependency 3); frozen as such".
+
+    The drift is real, intentional and deliberately NOT repaired:
+
+      * The design's contrast-integrity rule is that changing the manifest
+        invalidates every completed arm and restarts the comparison. K3 spent
+        0 of 36 authorized model invocations, so nothing is invalidated.
+      * K3 was ruled DORMANT on 2026-08-06. Re-freezing the manifest is a K3
+        action and is not authorized. The frozen file is a record of a
+        precommitment, not a live gate.
+
+    So the assertion is inverted and pinned: exactly ONE family drifts, it is
+    `roster_membership`, and production --assess therefore refuses to start.
+    Whoever revives K3 must re-freeze against the repaired store first, and this
+    test is where they will find out.
+    """
     from scripts.eval_contrast import _recomputed_producers
 
     live = _recomputed_producers()
-    m = load_manifest()
-    for fam in m["families"]:
-        assert fam["source_ids"] == live[fam["family"]]["source_ids"], fam["family"]
-        assert (
-            fam["normalizer_version"] == live[fam["family"]]["normalizer_version"]
-        ), fam["family"]
+    drifted = {
+        fam["family"]
+        for fam in load_manifest()["families"]
+        if fam["source_ids"] != live[fam["family"]]["source_ids"]
+        or fam["normalizer_version"] != live[fam["family"]]["normalizer_version"]
+    }
+    assert drifted == {"roster_membership"}
+
+
+def test_assess_refuses_the_committed_manifest_until_it_is_re_frozen(tmp_path):
+    """The consequence, exercised rather than described: with the committed
+    producer view, assess_contrast raises rather than quietly comparing against
+    a manifest that no longer describes the store."""
+    from scripts.eval_contrast import ManifestDrift
+
+    stale = _unfrozen_copy(tmp_path, sync_producers=False)
+    freeze_manifest(path=stale, frozen_at="2026-08-02T00:00:00Z")
+    with pytest.raises(ManifestDrift, match="roster_membership"):
+        assess_contrast(
+            load_manifest(path=stale),
+            FC({f: 1 for f in REQUIRED}),
+            FC({"franchise_identity": 1}),
+            state_path=tmp_path / "s.json",
+        )
 
 
 def test_degraded_preflight_leaves_the_cycle_counter_unchanged(frozen, tmp_path):

@@ -14,6 +14,7 @@ PREREQUISITE: K2.2's kickoff_source.py exists (imported by normalize_all).
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -91,7 +92,11 @@ ENVELOPE_SOURCES = {
 }
 
 LEGACY_SOURCES = {
-    "franchise_identity": ("data/{season}/season_combined.json", "roster_map entries"),
+    "franchise_identity": (
+        "data/{season}/season_combined.json",
+        "roster_map entries, dated by franchise-identity-2025-v1 (spine from "
+        "draft_picks.json, display from the earliest attesting commit)",
+    ),
     "matchup_result": ("data/{season}/season_combined.json", "weeks[] -> matchups[]"),
     "transaction": (
         "data/{season}/transactions.json",
@@ -115,8 +120,9 @@ LEGACY_SOURCES = {
         "no qualified pre-kickoff schedule source (design section 1)",
     ),
     "roster_membership": (
-        None,
-        "no qualified pre-kickoff roster anchor (open dependency 3)",
+        "data/{season}/fantasy_rosters/week*.json",
+        "captured weekly snapshots, dated at each week's conclusion; NO "
+        "pre-kickoff anchor exists, so preseason and preview admit zero",
     ),
 }
 
@@ -131,10 +137,20 @@ def _instant(ms):
 
 
 def _franchise_identity(raw, season):
-    """known_at = the capture instant that first held it. `capture_instant` is
-    threaded onto the record by the ITERATOR (envelope captured_at for 2026, the
-    legacy-capture-v1 map for 2025) -- no normalizer reads captured_at off a raw
-    source record, because no source record carries one."""
+    """known_at is threaded onto the record by the ITERATOR as `capture_instant`
+    -- no normalizer reads captured_at off a raw source record, because no source
+    record carries one.
+
+    2026: the envelope `captured_at`, where capture instant and knowledge instant
+    genuinely coincide because the capture is prospective.
+
+    2025: NOT the download instant. That was the census's one dishonestly-dated
+    family (`legacy-capture-v1`, 2026-04-04, postdating the whole season). The
+    legacy lane now emits the family as a supersession chain under
+    franchise-identity-2025-v1: the roster<->owner spine at the observed draft
+    instant, superseded by the full identity at the earliest instant this
+    repository can PROVE the names were knowable. Fields that no source can date
+    are declared unavailable rather than carried silently as null."""
     inst = raw["capture_instant"]
     meta = {
         "fact_type": "franchise_identity",
@@ -159,6 +175,11 @@ def _franchise_identity(raw, season):
         # Roster-only identity: no users capture existed no later than this
         # roster capture. Recorded as unavailable, never backfilled from later.
         body["display_name_unavailable"] = True
+    if raw.get("team_name_unavailable"):
+        # Set ONLY by the 2025 spine record, so the 2026 lane's payload bytes --
+        # and therefore its fact ids and the tracked 2026 store -- are untouched
+        # by this repair. A null here means "no source dates it", declared.
+        body["team_name_unavailable"] = True
     return meta, body
 
 
@@ -236,7 +257,10 @@ def _roster_membership(raw, season):
         "entity_ref": {"type": "franchise", "id": str(raw["roster_id"])},
         "effective_at": anchor,
         "known_at": anchor,
-        "known_at_basis": "anchor_or_transaction_completion",
+        # The VERSIONED POLICY that dated it, when the iterator names one --
+        # matching _matchup_result. The registry's generic basis string is only
+        # a fallback; a fact should say which policy established its clock.
+        "known_at_basis": raw.get("anchor_basis") or "anchor_or_transaction_completion",
         "access_scope": "public",
         "privacy": "public",
     }
@@ -634,20 +658,185 @@ def _iter_envelopes(root, fact_type, spec):
             raise MissingSource(f"no envelope walk for {fact_type}")
 
 
+def _iter_legacy_franchise_identity(root, rel, season):
+    """The repaired 2025 identity lane: one spine record then one display record
+    per roster, SHARING a source_record_id so FactStore.observe() mints the
+    second as a supersession of the first.
+
+    Order matters and is deliberate. The spine is yielded first so the store's
+    supersession graph runs draft -> attestation, which is what makes a cutoff
+    BETWEEN the two anchors resolve to spine-only: state_at retires a fact only
+    when its superseder is itself admitted.
+
+    Two clocks, never merged. `capture_instant` (-> known_at/effective_at) is
+    when the assertion became knowable; `captured_at` is when this repository
+    first held the bytes it is asserted from, which stays the legacy download
+    instant for each contributing file. Collapsing them is the original defect.
+    """
+    try:
+        from scripts.franchise_provenance import DISPLAY_BASIS, SPINE_BASIS, load_policy
+    except ImportError:  # pragma: no cover - direct-run fallback
+        from franchise_provenance import DISPLAY_BASIS, SPINE_BASIS, load_policy
+
+    doc = _require_json(root / rel)
+    combined_at, _ = _capture_instant_for(rel)
+    draft_rel = f"data/{season}/draft_picks.json"
+    draft_at, _ = _capture_instant_for(draft_rel)
+    policy = load_policy()
+    if policy["season"] != season:
+        raise MissingSource(
+            f"franchise-identity policy is for season {policy['season']}, not {season}"
+        )
+    spine, display = policy["spine"], policy["display"]
+    attestation = display.get("attestation")
+
+    # roster_map supplies the roster SET only. Every value the facts carry comes
+    # from the policy artifact, which is where the exact-match qualification
+    # against this same capture already happened.
+    for rid in sorted(doc["roster_map"], key=int):
+        owner = spine["bindings"].get(rid)
+        if owner is None:
+            # No qualified anchor for this roster: emitting it at the download
+            # instant is precisely the defect being repaired. Refused, not dated.
+            raise UnqualifiedSource(f"no spine binding for roster {rid}")
+        yield (
+            f"legacy:{spine['source']}",
+            {"captured_at": draft_at, "access_scope": "public", "privacy": "public"},
+            {
+                "roster_id": rid,
+                "owner_id": owner,
+                "display_name": None,
+                "team_name": None,
+                "display_name_unavailable": True,
+                "team_name_unavailable": True,
+                "capture_instant": spine["instant"],
+                "capture_instant_basis": SPINE_BASIS,
+            },
+        )
+        attested = display["attested"].get(rid)
+        if not attested:
+            continue  # names stay unavailable forever; no second fact is minted
+        yield (
+            # Joined provenance rides the source_ref METADATA field, never the
+            # hashed body -- the 2026 lane's rule, for the same reason.
+            f"legacy:{rel}+{attestation['locator']}",
+            {"captured_at": combined_at, "access_scope": "public", "privacy": "public"},
+            {
+                "roster_id": rid,
+                "owner_id": owner,
+                "username": attested["username"],
+                "team_name": attested["team_name"],
+                "capture_instant": attestation["instant"],
+                "capture_instant_basis": DISPLAY_BASIS,
+            },
+        )
+
+
+def _iter_legacy_roster_membership(root, season):
+    """Per-week membership from the captured weekly roster snapshots.
+
+    Honest bound, and a deliberately partial repair. These snapshots are Sleeper
+    matchup re-fetches for COMPLETED weeks, so they date a week's membership at
+    that week's conclusion under the same legacy-week-conclusion-v1 policy the
+    result families use -- conservative-late, which can only withhold a fact from
+    a state, never leak one in early. It gives no PRE-kickoff anchor, so
+    preseason and preview states still admit zero roster facts. That refusal is
+    correct and is left standing.
+
+    A `derived` snapshot (the transaction-reversal fallback, stamped advisory)
+    is refused outright: an approximate roster is not an observation.
+
+    Departures are emitted, not implied. The reducer is `latest` keyed on
+    (roster, player), so without an explicit on_roster=False a dropped player
+    would remain on the roster forever -- rosters that only ever grow, silently.
+    """
+    d = root / f"data/{season}/fantasy_rosters"
+    if not d.exists():
+        raise MissingSource(f"source directory absent: {d}")
+    files = sorted(
+        d.glob("week*.json"), key=lambda p: int(re.search(r"\d+", p.name)[0])
+    )
+    if not files:
+        raise MissingSource(f"no weekly roster snapshots under {d}")
+    rel_dir = f"data/{season}/fantasy_rosters"
+    prior = {}
+    for path in files:
+        doc = load_json(path, required=True)
+        week = doc["week"]
+        rel = f"{rel_dir}/{path.name}"
+        # This root is GITIGNORED, so there is no git instant for it. The
+        # producer records its own captured_at; a missing, malformed or
+        # non-captured snapshot is refused rather than dated by fallback.
+        captured_at = _self_reported_instant(doc.get("captured_at"))
+        usable = (
+            captured_at is not None
+            and doc.get("captured") is True
+            and not doc.get("derived")
+        )
+        meta = {
+            "captured_at": captured_at,
+            "access_scope": "public",
+            "privacy": "public",
+        }
+        concluded_at, anchor_policy = _conclusion_for(season, week)
+        if not usable:
+            concluded_at = None  # -> the normalizer refuses every record of this week
+        held = {}
+        for roster in doc["rosters"]:
+            rid = str(roster["roster_id"])
+            held[rid] = {str(p) for p in (roster.get("players") or [])}
+        for rid in sorted(held, key=int):
+            for pid in sorted(held[rid]):
+                yield (
+                    f"legacy:{rel}",
+                    meta,
+                    {
+                        "roster_id": rid,
+                        "player_id": pid,
+                        "on_roster": True,
+                        "anchor_basis": anchor_policy,
+                        # None when the week has no conclusion instant or the
+                        # snapshot is unusable -- the NORMALIZER refuses it, so
+                        # one bad week cannot abort the whole lane.
+                        "anchor_known_at": concluded_at,
+                    },
+                )
+            for pid in sorted(prior.get(rid, set()) - held[rid]):
+                yield (
+                    f"legacy:{rel}",
+                    meta,
+                    {
+                        "roster_id": rid,
+                        "player_id": pid,
+                        "on_roster": False,
+                        "anchor_basis": anchor_policy,
+                        "anchor_known_at": concluded_at,
+                    },
+                )
+        prior = held
+
+
+def _self_reported_instant(value):
+    """Canonicalize a producer-recorded ISO instant, or None. Fail closed:
+    non-string, naive, or unparseable yields None and the caller refuses."""
+    if not isinstance(value, str):
+        return None
+    try:
+        dt = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        return None  # a naive instant names no moment
+    dt = dt.astimezone(timezone.utc)
+    return canonical_instant(dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:26] + "Z")
+
+
 def _iter_legacy(root, fact_type, spec, season):
     pattern, _ = spec
     rel = pattern.replace("{season}", str(season))
 
     if fact_type == "franchise_identity":
-        rel_path = rel
-        doc = _require_json(root / rel_path)
-        instant, policy = _capture_instant_for(rel_path)
-        meta = {"captured_at": instant, "access_scope": "public", "privacy": "public"}
-        for rid in sorted(doc["roster_map"], key=int):
-            rec = dict(doc["roster_map"][rid])
-            rec["capture_instant"] = instant
-            rec["capture_instant_basis"] = policy
-            yield f"legacy:{rel_path}", meta, rec
+        yield from _iter_legacy_franchise_identity(root, rel, season)
 
     elif fact_type == "matchup_result":
         doc = _require_json(root / rel)
@@ -661,6 +850,9 @@ def _iter_legacy(root, fact_type, spec, season):
                     m, week=week, concluded_at=concluded_at, conclusion_policy=policy
                 )
                 yield f"legacy:{rel}", meta, rec
+
+    elif fact_type == "roster_membership":
+        yield from _iter_legacy_roster_membership(root, season)
 
     elif fact_type == "historical_matchup":
         for prior in PRIOR_SEASONS:
@@ -891,6 +1083,9 @@ def _expand_legacy_paths():
         "data/2025/draft_picks.json",
         "data/2025/nfl_games",
     ]
+    # data/*/fantasy_rosters/ is deliberately absent: it is GITIGNORED, so it has
+    # no git instant to read. Those snapshots carry their own producer-recorded
+    # captured_at, which _iter_legacy_roster_membership reads and fails closed on.
     paths += [f"data/{prior}/season_combined.json" for prior in PRIOR_SEASONS]
     return paths
 
