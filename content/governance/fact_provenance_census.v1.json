@@ -1,0 +1,266 @@
+{
+  "admitted_by_edition": {
+    "2025-preseason": {
+      "chat_message": 19383,
+      "draft_pick": 72,
+      "historical_matchup": 294,
+      "transaction": 182
+    },
+    "2025-wk01-preview": {
+      "chat_message": 19398,
+      "draft_pick": 72,
+      "historical_matchup": 294,
+      "transaction": 183
+    },
+    "2025-wk01-recap": {
+      "chat_message": 19561,
+      "draft_pick": 72,
+      "historical_matchup": 294,
+      "matchup_result": 6,
+      "nfl_game": 16,
+      "transaction": 195
+    }
+  },
+  "census_id": "fact_provenance_census.v1",
+  "declared_unavailable_in_report": {
+    "nfl_game_pregame": "no qualified schedule-publication instant (sched_publication_2025.v1.json absent); pregame context is not invented or backdated",
+    "roster_membership": "no qualified pre-kickoff roster anchor (open dependency 3)",
+    "schedule_pairing": "no qualified pre-kickoff schedule source (design section 1)"
+  },
+  "explicitly_not_in_scope": [
+    "no repair proposed or applied",
+    "no policy artifact written or amended",
+    "no fact re-normalized",
+    "no source qualified",
+    "no forward plan recorded"
+  ],
+  "generated_against": {
+    "content/governance/fact_types.json": "sha256:ed4643a82096dbdbf725ad4d93999f7a94ece5609b48fa2aefcd3d8b3db5f67d",
+    "content/governance/legacy_capture_instants.v1.json": "sha256:a7f70b6fe34894879c66edca261f92a33a7decd4f2ee66cacd314d904766fc50",
+    "content/governance/week_conclusions_2022_2025.v1.json": "sha256:b35a8481bc1a42d382c92109e9845208d7b37129f32707d720260e584938771c",
+    "data/facts/2025.jsonl": "sha256:3badddc9216e31462497c2954b6b7d37fb9d36773ad31c26a73d23c650371398",
+    "data/facts/2025.report.json": "sha256:43429ab149bb4476328f87b729ac0da9b636cbabe54aa4d2bc7fca53ad561dcd",
+    "head": "c74900346b7d1c8b836e29e351d8af6396c92986",
+    "private_facts/2025.jsonl": "sha256:305ec31cddad13670133184b79ad23a0aa346a081796e8b220a93551d48a62fe"
+  },
+  "kind": "READ-ONLY REPORT. Not a policy input, not a manifest, not a gate. Repairs nothing.",
+  "method": {
+    "counts_erasure_workaround": "This census does NOT call eval_contrast.family_counts. That function sets counts = {} when bundle_for raises ArmUnavailable, discarding an edition's genuinely admitted counts after the FIRST zero family (stop_correction.v1 item 4). Per-family counts here come from the fact-store JSONL directly; per-edition admitted counts come from each edition's compiled state_manifest.json, which state_at produces and family_counts never touches. The bug is worked around, not fixed.",
+    "read_only": true,
+    "sources_read": [
+      "data/facts/2025.jsonl",
+      "private_facts/2025.jsonl",
+      "data/facts/2025.report.json",
+      "content/editions/<edition>/compiled/state_manifest.json",
+      "content/governance/{legacy_capture_instants,week_conclusions_2022_2025}.v1.json",
+      "data/2025/draft_picks.json",
+      "data/franchises/*.json"
+    ]
+  },
+  "per_family_provenance": {
+    "chat_message": {
+      "defect": null,
+      "honest": true,
+      "known_at_is": "the message's own timestamp (message_timestamp), private custody",
+      "legitimate_historical_source_exists": "N/A -- already honestly dated",
+      "note": "22884 facts spanning 2023-09-07 to 2026-07-07; 19383/19398/19561 admitted at preseason/preview/recap respectively. The largest honestly-dated evidence body in the store."
+    },
+    "draft_pick": {
+      "admitted_at_all_three_editions": true,
+      "defect": "COARSE, not false: all 72 picks collapse to one instant (1 distinct known_at). Pick 72 is treated as knowable at the same moment as pick 1.",
+      "honest": true,
+      "known_at_is": "the draft window start (2025-07-10), from data/2025/draft_picks.json start_date, under policy draft-window-v1",
+      "legitimate_historical_source_exists": "PARTIAL -- per-pick instants are not in the captured file (pick keys: draft_slot, is_keeper, metadata, pick_no, picked_by, player_id, roster_id, round -- no timestamp). Sleeper's draft-picks endpoint would have to be re-captured with pick metadata to refine this."
+    },
+    "franchise_identity": {
+      "datable_today": "franchise EXISTENCE and the roster_id <-> owner_id binding: data/2025/draft_picks.json binds both (picks carry roster_id AND picked_by) at start_date 2025-07-10, an observed pre-season instant already trusted by the draft-window-v1 policy for draft_pick.",
+      "defect": "the download date stands in for the date the fact was true. All 12 facts share one instant that postdates the 2025 season entirely, so ZERO are admitted at any 2025 edition cutoff. This is the family every model arm checks first.",
+      "honest": false,
+      "known_at_is": "the instant the legacy FILE was downloaded (2026-04-04T17:38:17Z for data/2025/season_combined.json, per content/governance/legacy_capture_instants.v1.json)",
+      "legitimate_historical_source_exists": "PARTIAL -- split the family's two assertions",
+      "not_datable_today": "DISPLAY NAMES as of any 2025 instant. data/franchises/*.json carries current_team_name only (CLAUDE.md records this as a known deferred limitation: franchise_map stores CURRENT names). Sleeper serves no league name-change history. A team_name true in September 2025 is not recoverable from anything on disk; it can only be bounded, not observed.",
+      "scope_note": "affects the 2025 legacy lane only. The 2026 lane takes known_at from Phase-P envelope captured_at, where capture instant and knowledge instant genuinely coincide because the capture is prospective."
+    },
+    "historical_matchup": {
+      "admitted_at_all_three_editions": true,
+      "defect": "same conservative-late policy coarsening as matchup_result",
+      "honest": true,
+      "known_at_is": "same legacy-week-conclusion-v1 policy, applied to 2022-2024",
+      "legitimate_historical_source_exists": "YES, finer -- same parquet source"
+    },
+    "matchup_result": {
+      "defect": "POLICY-DERIVED, not observed: it is a conservative LATE bound (the Tuesday after the week's final game), not the actual moment each result became known. Erring late is fail-closed -- it can only withhold a fact from a state, never leak one in early.",
+      "honest": true,
+      "known_at_is": "the week's conclusion instant under policy legacy-week-conclusion-v1 ('schedules parquet final REG gameday per (season, week) -> following Tuesday 06:59:59Z')",
+      "legitimate_historical_source_exists": "YES, finer -- per-game end instants are derivable from the schedules parquet already hashed into content/governance/week_conclusions_2022_2025.v1.json; the current policy deliberately coarsens to the week."
+    },
+    "nfl_game": {
+      "defect": "POSTGAME ONLY. Pregame context (injuries, spreads, weather as knowable BEFORE kickoff) is recorded unavailable in data/facts/2025.report.json: 'no qualified schedule-publication instant (sched_publication_2025.v1.json absent); pregame context is not invented or backdated'. The honest postgame instant is why nfl_game is absent from preseason and preview and present (16) only at recap.",
+      "honest": true,
+      "known_at_is": "same legacy-week-conclusion-v1 policy (postgame)",
+      "legitimate_historical_source_exists": "PARTIAL -- the injuries/schedules parquets exist under data/external/, but no APPROVED versioned publication-instant policy exists to date them pre-kickoff. The refusal is correct behaviour, not a gap in the data."
+    },
+    "roster_membership": {
+      "defect": "DECLARED UNSOURCED, recorded as a refusal in data/facts/2025.report.json: 'no qualified pre-kickoff roster anchor (open dependency 3)'. Zero facts in the store; zero admitted everywhere.",
+      "honest": null,
+      "known_at_is": "N/A -- no facts emitted",
+      "legitimate_historical_source_exists": "PARTIAL -- data/2025/fantasy_rosters/week{1..17}.json holds real per-week roster snapshots with real starters, but they are POST-kickoff weekly states. Dating a PRE-kickoff week-1 roster honestly needs an anchor no captured source provides. data/2025/draft_picks.json establishes opening rosters at 2025-07-10, before any 2025 transaction."
+    },
+    "schedule_pairing": {
+      "defect": "DECLARED UNSOURCED: 'no qualified pre-kickoff schedule source (design section 1)'. Design section 1: stripping outcomes from a completed weekly packet does not prove the pairing was knowable before kickoff.",
+      "honest": null,
+      "known_at_is": "N/A -- no facts emitted",
+      "legitimate_historical_source_exists": "NO from league sources as captured -- Sleeper's matchup endpoint is read per completed week. A versioned availability policy (the design's second permitted route) would be a governance decision, not a data capture.",
+      "semantics_unresolved": "see stop_correction.v1 item 5: the design says an edition proceeds without this family AND that an inadmissible schedule source degrades the comparison; scripts/eval_arms.py hard-requires it in full_rich."
+    },
+    "transaction": {
+      "defect": null,
+      "evidence": "514 distinct times-of-day across 717 facts -- observed per-second Sleeper instants, not a synthesized or date-only value",
+      "honest": true,
+      "known_at_is": "the transaction's own completion instant (effective_completion_instant)",
+      "legitimate_historical_source_exists": "N/A -- already honestly dated"
+    }
+  },
+  "season": 2025,
+  "store_census": {
+    "private": {
+      "chat_message": {
+        "access_scopes": {
+          "league_private": 22884
+        },
+        "distinct_known_at_values": 22717,
+        "effective_at_range": [
+          "2023-09-07T22:54:06.000000Z",
+          "2026-07-07T18:17:44.000000Z"
+        ],
+        "facts": 22884,
+        "known_at_bases": {
+          "message_timestamp": 22884
+        },
+        "known_at_range": [
+          "2023-09-07T22:54:06.000000Z",
+          "2026-07-07T18:17:44.000000Z"
+        ]
+      }
+    },
+    "public": {
+      "draft_pick": {
+        "access_scopes": {
+          "public": 72
+        },
+        "distinct_known_at_values": 1,
+        "effective_at_range": [
+          "2025-07-10T23:59:59.000000Z",
+          "2025-07-10T23:59:59.000000Z"
+        ],
+        "facts": 72,
+        "known_at_bases": {
+          "draft-window-v1": 72
+        },
+        "known_at_range": [
+          "2025-07-10T23:59:59.000000Z",
+          "2025-07-10T23:59:59.000000Z"
+        ]
+      },
+      "franchise_identity": {
+        "access_scopes": {
+          "public": 12
+        },
+        "distinct_known_at_values": 1,
+        "effective_at_range": [
+          "2026-04-04T17:38:17.000000Z",
+          "2026-04-04T17:38:17.000000Z"
+        ],
+        "facts": 12,
+        "known_at_bases": {
+          "legacy-capture-v1": 12
+        },
+        "known_at_range": [
+          "2026-04-04T17:38:17.000000Z",
+          "2026-04-04T17:38:17.000000Z"
+        ]
+      },
+      "historical_matchup": {
+        "access_scopes": {
+          "public": 294
+        },
+        "distinct_known_at_values": 51,
+        "effective_at_range": [
+          "2022-09-13T06:59:59.000000Z",
+          "2024-12-31T06:59:59.000000Z"
+        ],
+        "facts": 294,
+        "known_at_bases": {
+          "legacy-week-conclusion-v1": 294
+        },
+        "known_at_range": [
+          "2022-09-13T06:59:59.000000Z",
+          "2024-12-31T06:59:59.000000Z"
+        ]
+      },
+      "matchup_result": {
+        "access_scopes": {
+          "public": 98
+        },
+        "distinct_known_at_values": 17,
+        "effective_at_range": [
+          "2025-09-09T06:59:59.000000Z",
+          "2025-12-30T06:59:59.000000Z"
+        ],
+        "facts": 98,
+        "known_at_bases": {
+          "legacy-week-conclusion-v1": 98
+        },
+        "known_at_range": [
+          "2025-09-09T06:59:59.000000Z",
+          "2025-12-30T06:59:59.000000Z"
+        ]
+      },
+      "nfl_game": {
+        "access_scopes": {
+          "public": 285
+        },
+        "distinct_known_at_values": 22,
+        "effective_at_range": [
+          "2025-09-09T06:59:59.000000Z",
+          "2026-02-10T06:59:59.000000Z"
+        ],
+        "facts": 285,
+        "known_at_bases": {
+          "legacy-week-conclusion-v1": 285
+        },
+        "known_at_range": [
+          "2025-09-09T06:59:59.000000Z",
+          "2026-02-10T06:59:59.000000Z"
+        ]
+      },
+      "transaction": {
+        "access_scopes": {
+          "public": 717
+        },
+        "distinct_known_at_values": 517,
+        "effective_at_range": [
+          "2025-01-01T17:37:27.000000Z",
+          "2025-12-31T07:38:50.000000Z"
+        ],
+        "facts": 717,
+        "known_at_bases": {
+          "effective_completion_instant": 717
+        },
+        "known_at_range": [
+          "2025-01-01T17:37:27.000000Z",
+          "2025-12-31T07:38:50.000000Z"
+        ]
+      }
+    }
+  },
+  "surface_summary": {
+    "blast_radius": "franchise_identity is the identity spine: it is what binds roster_id to owner and team name. Unadmitted, any consumer of state_at at a 2025 cutoff sees a league with results, chat and history but NO franchises -- which is why all four model arms abort on it first and why a writer built on this store would be blind to its own league.",
+    "families_declared_unsourced": 2,
+    "families_dishonestly_dated": 1,
+    "families_honestly_dated": 6,
+    "families_populated": 7,
+    "families_registered": 9,
+    "the_one_defect": "franchise_identity is the SOLE family in either store carrying policy legacy-capture-v1 -- the download date. Every other populated family derives known_at from an observed instant (transaction, chat_message), a real dated anchor (draft_pick), or a conservative late policy over real gamedays (matchup_result, historical_matchup, nfl_game)."
+  }
+}
