@@ -8,7 +8,7 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 
 - HTML5 / CSS3 / Vanilla JS (no frameworks, no npm, no build)
 - Canvas 2D API for charts (scatter, stacked bar, trend, Elo)
-- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 27 scripts)
+- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py`)
 - GitHub Actions for automated weekly data fetches
 - Hosted as static files (GitHub Pages or direct)
 
@@ -46,9 +46,11 @@ Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependen
 - `content/preseason-2025/{preseason_chat_context,preseason_content}.json` + `content/review-log.jsonl` — M1 t2 preseason pipeline (2026-07-08): sanitized preseason chat context, `/write-preseason` output, shared JSONL editorial log (one line per `/edit-week`+`/edit-preseason` pass)
 - Sleeper API (`https://api.sleeper.app/v1`) as live fallback
 
-## P-only 2026 Prospective Pipeline (Tranche A — OPERATING since 2026-08-05)
+> **Project state is NOT recorded in this file.** HEAD, commit/suite counts, phase status, what landed, and remaining content live in ONE place: the roadmap memory `project_jailyard_roadmap.md` (under `~/.claude/projects/c--Users-blake-projects-Jailyard-Dynasty-Power-Rankings/memory/`). This file carries rules and mechanics only. Ruled 2026-08-06 after five files drifted apart independently.
 
-Contract: `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md` (APPROVED, implemented, both editions sealed prospective). Modules: `scripts/{capture,capture_optional,cutoff,bundle,seal}_2026.py`.
+## P-only 2026 Prospective Pipeline
+
+Contract: `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`. Modules: `scripts/{capture,capture_optional,cutoff,bundle,seal}_2026.py`.
 
 ```bash
 export POLARS_SKIP_CPU_CHECK=1   # required for the nflreadpy path
@@ -220,7 +222,7 @@ Use `python` not `python3` on this machine. Python is at:
 - **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
 - **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
 - **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Run tests:** `python -m pytest scripts/tests/ -v` — 200 tests across momentum, extract_week_data (v1+v2 + as-of history), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, chat-context sanitizer (incl. preseason mode + null-sender guard + arc/prediction/callback field maps), chat determinism (map/reduce), shared helpers, media describe parsing, canonical save, verifier (incl. threads ledger), and team-profiles merge
+- **Run tests:** `python -m pytest scripts/tests/ -v` — covers momentum, extract_week_data (v1+v2 + as-of history), nflreadpy/nfl_games, expanded companion, roster snapshots, draft picks, player arcs, franchise wings, local draft prompts/context, chat-context sanitizer (incl. preseason mode + null-sender guard + arc/prediction/callback field maps), chat determinism (map/reduce), shared helpers, media describe parsing, canonical save, verifier (incl. threads ledger), team-profiles merge, the Phase-P capture/seal lane, and the temporal kernel + evaluation layer (facts, state_at, decision history, claims, runs, contrast, arms, scoring). Current pass/skip counts live in the roadmap memory, not here.
 - **Regenerate dynasty layer:** `python scripts/generate_player_arcs.py` then `python scripts/generate_franchise_wings.py` (local only — needs gitignored `players.json` + stats caches; `--fetch-stats` backfills 2022-24 caches once)
 - **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
 - **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
