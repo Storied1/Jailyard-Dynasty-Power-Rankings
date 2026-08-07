@@ -1113,3 +1113,133 @@ def test_gate_reachability_census_reports_zero_violations():
                     f"{token}: section 8 gates it at {task}, census says {gates}"
                 )
     assert violations == [], "census violations: " + "; ".join(violations)
+
+
+# --- B1: sleeper_projections producer ---------------------------------------
+# The frozen policy row sets empty_valid=false and flags the endpoint shape as
+# unverified. These tests pin the fail-closed rules; the shape was qualified
+# against a live 2026 response before the producer was written.
+
+
+def _proj_rec(week=1, season="2026", season_type="regular", pid="10881"):
+    return {
+        "player_id": pid,
+        "season": season,
+        "week": week,
+        "season_type": season_type,
+        "company": "rotowire",
+        "stats": {"pts_ppr": 12.3},
+    }
+
+
+def fake_projection_fetch(mapping):
+    """mapping: (season, week, season_type) -> payload (or None for unreadable)."""
+
+    def _fetch(season, week, season_type):
+        return mapping.get((season, week, season_type), None)
+
+    return _fetch
+
+
+def test_projections_capture_records_weeks_and_counts(tmp_path):
+    from scripts.capture_optional_2026 import produce_sleeper_projections
+
+    records = [_proj_rec(pid=str(n)) for n in range(1, 26)]
+    path = produce_sleeper_projections(
+        fetch=fake_projection_fetch({(2026, 1, "regular"): records}),
+        league_json_path=league_json(tmp_path),
+        public_root=tmp_path / "public",
+        now=FIXED_NOW,
+    )
+    ok, errors = verify_envelope(path)
+    assert ok, errors
+    env = json.loads(path.read_text(encoding="utf-8"))
+    assert env["payload"]["weeks_requested"] == [1]
+    assert env["payload"]["counts"] == {"1": 25}
+    assert len(env["payload"]["projections"]["1"]) == 25
+    assert env["request"]["params"]["season_type"] == "regular"
+    assert env["access_scope"] == "public" and env["privacy"] == "public"
+
+
+def test_projections_unreadable_week_is_not_an_empty_week(tmp_path):
+    from scripts.capture_optional_2026 import produce_sleeper_projections
+
+    with pytest.raises(CaptureError):
+        produce_sleeper_projections(
+            fetch=fake_projection_fetch({}),  # None -> unreadable
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public",
+            now=FIXED_NOW,
+        )
+    assert written_files(tmp_path / "public") == []
+
+
+def test_projections_empty_payload_is_refused(tmp_path):
+    """The frozen policy sets empty_valid=false for this source."""
+    from scripts.capture_optional_2026 import produce_sleeper_projections
+
+    with pytest.raises(CaptureError):
+        produce_sleeper_projections(
+            fetch=fake_projection_fetch({(2026, 1, "regular"): []}),
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public",
+            now=FIXED_NOW,
+        )
+    assert written_files(tmp_path / "public") == []
+
+
+def test_projections_non_list_response_is_refused(tmp_path):
+    from scripts.capture_optional_2026 import produce_sleeper_projections
+
+    with pytest.raises(CaptureError):
+        produce_sleeper_projections(
+            fetch=fake_projection_fetch({(2026, 1, "regular"): {"error": "nope"}}),
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public",
+            now=FIXED_NOW,
+        )
+    assert written_files(tmp_path / "public") == []
+
+
+def test_projections_response_must_match_the_request(tmp_path):
+    """The discriminating check: the payload self-reports season/week/
+    season_type, so a shifted or wrong-season response is caught at capture
+    instead of being trusted into a bundle. Each field is planted alone."""
+    from scripts.capture_optional_2026 import produce_sleeper_projections
+
+    plants = [
+        [_proj_rec(season="2025")],
+        [_proj_rec(week=2)],
+        [_proj_rec(season_type="post")],
+        [_proj_rec(), _proj_rec(season="2025")],  # one bad record among good
+    ]
+    for i, records in enumerate(plants):
+        with pytest.raises(CaptureError, match="does not match the request"):
+            produce_sleeper_projections(
+                fetch=fake_projection_fetch({(2026, 1, "regular"): records}),
+                league_json_path=league_json(tmp_path),
+                public_root=tmp_path / f"public{i}",
+                now=FIXED_NOW,
+            )
+        assert written_files(tmp_path / f"public{i}") == []
+
+
+def test_projections_is_registered_as_a_producer():
+    """capture_2026 --component sleeper_projections must dispatch; before B1 it
+    exited 1 with 'no producer for component'."""
+    from scripts.capture_optional_2026 import OPTIONAL_PRODUCERS
+
+    assert "sleeper_projections" in OPTIONAL_PRODUCERS
+
+
+def test_projections_rejects_an_unknown_season_type(tmp_path):
+    from scripts.capture_optional_2026 import produce_sleeper_projections
+
+    with pytest.raises(CaptureError):
+        produce_sleeper_projections(
+            league_json_path=league_json(tmp_path),
+            public_root=tmp_path / "public",
+            now=FIXED_NOW,
+            season_type="preseason",
+        )
+    assert written_files(tmp_path / "public") == []
