@@ -17,6 +17,17 @@ from scripts.ranking_record import (
 REPO = Path(__file__).resolve().parents[2]
 EDITION = "2025-wk01-recap"
 
+# The recap is a league_private edition: its compiled state lives in the gitignored
+# private_editions/ root and deliberately never enters the tracked tree, so it cannot
+# exist on a CI runner. Same module-level existence gate as test_compile_state.py:301
+# and test_migration_census.py:22. Skip, do not fail — absence here is by design, and
+# the tests below run in full locally where the private root is rehydrated.
+PRIVATE_STATE = REPO / "private_editions" / EDITION / "state.json"
+pytestmark = pytest.mark.skipif(
+    not PRIVATE_STATE.exists(),
+    reason="gitignored private edition state absent (present only locally)",
+)
+
 
 @pytest.fixture(scope="module")
 def record():

@@ -17,6 +17,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Full history, NOT the default shallow fetch-depth: 1.
+          # test_provenance_repair.py reads the 2025-08-02 attestation blob out of
+          # commit d464f8c to prove admitted team names come from a real 2025 blob
+          # rather than from the policy artifact. On a shallow clone that commit is
+          # absent and `git show` exits 128. Deepen rather than skip: skipping would
+          # leave the leak proofs green locally and vacuous on CI.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
