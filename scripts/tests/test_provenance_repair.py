@@ -452,8 +452,43 @@ def _verdicts(facts):
     return {pid: verdict for pid, verdict, _d in results}
 
 
+# P4 reads data/2025/fantasy_rosters/week1.json, under a gitignored root, so it is
+# present locally and absent on any fresh checkout. Assertions ABOUT P4's own verdict
+# are gated on it; the UNAVAILABLE control below deliberately is not.
+WEEK1_SNAPSHOT = REPO / "data" / "2025" / "fantasy_rosters" / "week1.json"
+_needs_snapshot = pytest.mark.skipif(
+    not WEEK1_SNAPSHOT.exists(),
+    reason="gitignored week-1 roster snapshot absent (present only locally)",
+)
+
+
+@_needs_snapshot
 def test_leak_proofs_pass_on_the_shipped_store(public_facts):
     assert set(_verdicts(list(public_facts)).values()) == {"PASS"}
+
+
+def test_a_proof_that_cannot_run_never_reports_pass(public_facts, monkeypatch):
+    """PLANTED: P4's input is made unreadable. It must report UNAVAILABLE and count
+    as a failure -- never PASS.
+
+    This is the self-passing-instrument class: before this, a missing snapshot made
+    P4 return PASS, so `no backward leak proven` printed in full confidence off a
+    proof that had inspected nothing. Same shape as eval_contrast.family_counts
+    zeroing its census and still answering. Runs everywhere, including where the
+    snapshot is genuinely absent, because that is the exact condition under test."""
+    import scripts.verify_provenance_repair as vpr
+
+    real = vpr.load_json
+    monkeypatch.setattr(
+        vpr,
+        "load_json",
+        lambda p, **kw: None if "fantasy_rosters" in str(p) else real(p, **kw),
+    )
+    results, failures = vpr.run_proofs(facts=list(public_facts))
+    verdicts = {pid: v for pid, v, _d in results}
+    assert verdicts["P4"] == "UNAVAILABLE"
+    assert any(f.startswith("P4:") for f in failures)
+    assert verdicts["P4"] != "PASS"
 
 
 def test_P3_fires_on_a_name_that_only_ever_existed_in_2026(public_facts):
@@ -472,6 +507,7 @@ def test_P3_fires_on_a_name_that_only_ever_existed_in_2026(public_facts):
     assert _verdicts(facts)["P3"] == "FAIL"
 
 
+@_needs_snapshot
 def test_P4_fires_when_a_later_week_leaks_backward(public_facts):
     """PLANTED: a player who joined AFTER week 1, dated at the week-1 conclusion.
     This is the backward-leak shape the recap is most exposed to."""

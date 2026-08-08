@@ -83,6 +83,18 @@ def run_proofs(facts=None):
         if not ok:
             failures.append(f"{pid}: {detail}")
 
+    def unavailable(pid, detail):
+        """A proof whose INPUT is missing did not pass -- it did not run.
+
+        Reporting PASS here is the self-passing-instrument defect: the same shape
+        as eval_contrast.family_counts zeroing its census after the first
+        ArmUnavailable and still answering confidently. UNAVAILABLE is counted as
+        a failure so `no backward leak proven` can never print off a proof that
+        inspected nothing.
+        """
+        results.append((pid, "UNAVAILABLE", detail))
+        failures.append(f"{pid}: {detail}")
+
     states = {
         eid: state_at(2025, _descriptor(eid)["cutoff_utc"], "public", facts=facts)
         for eid in EDITIONS
@@ -142,7 +154,11 @@ def run_proofs(facts=None):
     # --- P4 recap rosters equal week 1 exactly ------------------------------
     snap = load_json(ROOT / "data/2025/fantasy_rosters/week1.json", required=False)
     if snap is None:
-        check("P4", True, "week-1 snapshot absent locally (gitignored root) — skipped")
+        unavailable(
+            "P4",
+            "week-1 snapshot absent (data/*/fantasy_rosters/ is gitignored) — the "
+            "roster proof did NOT run; rehydrate the snapshot to prove it",
+        )
     else:
         expected = {
             str(r["roster_id"]): {str(p) for p in (r.get("players") or [])}
