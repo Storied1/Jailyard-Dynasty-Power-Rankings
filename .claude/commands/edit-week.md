@@ -94,7 +94,7 @@ Score: [patterns found] / 12
 ### 6. Structure & Word Counts
 
 - [ ] Essay: 400-700 words
-- [ ] Each ranking blurb: 100-200 words
+- [ ] Each ranking blurb: 60-220 words, length allocated by story importance (twelve near-identical-length blurbs is itself a flag)
 - [ ] Each confessional: 50-100 words
 - [ ] Mailbag answers: shorter than 3x the question length
 - [ ] Bits: 1-3 sentences each

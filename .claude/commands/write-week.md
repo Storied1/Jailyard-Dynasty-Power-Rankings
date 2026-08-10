@@ -122,7 +122,13 @@ Generate a complete `content/weeks/week${WEEK}_content.json` file with these sec
 - End with a quotable kicker line
 - Embed specific stats naturally in narrative sentences (Pattern 10)
 
-### 2. Power Rankings (12 blurbs, 100-200 words each)
+### 2. Power Rankings (12 blurbs, 60-220 words each — allocate length by importance)
+
+Where the writer lingers is itself an opinion: let the central stories breathe,
+dispatch thin cases quickly. Twelve near-identical-length blurbs all following
+the same setup → stats → kicker sequence is a defect, not discipline. The
+franchise is the subject; the week's result is the newest evidence for or
+against its ongoing story.
 
 ```json
 {

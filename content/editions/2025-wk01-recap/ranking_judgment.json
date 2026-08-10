@@ -70,6 +70,14 @@
   "positions": [
     {
       "baseline_rank": 1,
+      "claim": {
+        "assertion": 4,
+        "claim_id": "claim-0b26d44f89206f8c",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 0,
         "reason": null
@@ -390,6 +398,14 @@
     },
     {
       "baseline_rank": 4,
+      "claim": {
+        "assertion": 2,
+        "claim_id": "claim-90e66c48e852afdc",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 2,
         "reason": "Reigning champion won its opener; points-for gaps of 0.64 and 0.34 behind two teams that beat the league's two worst 2024 rosters are not evidence against a 13-3 title defense."
@@ -672,9 +688,17 @@
     },
     {
       "baseline_rank": 5,
+      "claim": {
+        "assertion": 1,
+        "claim_id": "claim-a7ed84532b690a59",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 2,
-        "reason": "Won by the second-biggest margin of the week with its QB room contributing almost nothing -- the only 2024 top-three finisher with an obvious unused gear."
+        "reason": "The week-1 win is LOW-information (opponent posted the second-lowest losing score) and is discounted exactly as the Monks' blowout is; the rank rests on the prior evidence bundle -- consecutive 2023-title and 10-4 (2024, #3 all-games) seasons and elite roster depth -- which one low-information week gives no reason to abandon."
       },
       "evidence": {
         "draft": {
@@ -873,7 +897,7 @@
       "points_for": 135.88,
       "rank": 3,
       "reasoning": {
-        "argument": "A +15.2 margin -- bigger than Kittler's or Rasheeing's -- while the quarterbacks were bad enough that Nate spent Monday night dunking on them. #3 all-games finish in 2024, 12-5 in 2023, and Saquon/CeeDee/Nico Collins made the floor look like this. The scary version hasn't even shown up yet.",
+        "argument": "Opponent quality cuts both ways, so the +15.2 margin over the week's second-weakest score buys almost nothing here -- same discount the Monks take. What holds the rank is everything that predates Sunday: a 2023 title, a #3 all-games 2024, the strongest multi-year game log among the non-champion winners, and a roster whose floor produced 135.88 while the quarterbacks were bad enough that Nate spent Monday night composing eulogies for them in the chat. Week 1 was one more data point in a three-season pattern, not the argument itself.",
         "chat_quotes": [
           {
             "fact_id": "fact:ccd110ab77f1990a362a2457ea4d9f193c1e3b50be2f7fcdd5906a2492002992",
@@ -998,6 +1022,14 @@
     },
     {
       "baseline_rank": 3,
+      "claim": {
+        "assertion": 5,
+        "claim_id": "claim-7c6ba634c46730b0",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": -1,
         "reason": "The week's #3 score leaned on a 38.76-point Josh Allen closer, the owner self-reported whiffing every start/sit call, and the Rashee Rice suspension bill hasn't come due yet."
@@ -1310,6 +1342,14 @@
     },
     {
       "baseline_rank": 7,
+      "claim": {
+        "assertion": 3,
+        "claim_id": "claim-f6b5561b07302165",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 2,
         "reason": "An 0-1 team outscored two of the six winners and lost only to the week's top score; last season's #2 finisher took a schedule-quality loss, not a form loss."
@@ -1628,6 +1668,14 @@
     },
     {
       "baseline_rank": 2,
+      "claim": {
+        "assertion": 6,
+        "claim_id": "claim-cb054638dbfe49dd",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": -4,
         "reason": "The +34.94 margin is the least informative big number of the week -- it came against a 109.42 from the roster that went 3-13 last season; a 7-9 2024 team doesn't jump to #2 for scheduling the worst opponent."
@@ -1918,6 +1966,14 @@
     },
     {
       "baseline_rank": 6,
+      "claim": {
+        "assertion": 7,
+        "claim_id": "claim-e2842cfa85b22ca6",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": -1,
         "reason": "Lowest winning score of the week (131.72) over the second-lowest-scoring loser; the 2022-23 pedigree belongs to an aging core that went 7-9 last year."
@@ -2252,6 +2308,14 @@
     },
     {
       "baseline_rank": 8,
+      "claim": {
+        "assertion": 8,
+        "claim_id": "claim-301d694b26a9dd8a",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 0,
         "reason": null
@@ -2617,6 +2681,14 @@
     },
     {
       "baseline_rank": 9,
+      "claim": {
+        "assertion": 9,
+        "claim_id": "claim-985eeb689d684ea2",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 0,
         "reason": null
@@ -2921,6 +2993,14 @@
     },
     {
       "baseline_rank": 10,
+      "claim": {
+        "assertion": 10,
+        "claim_id": "claim-d802ca4fe6d9adca",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 0,
         "reason": null
@@ -3203,6 +3283,14 @@
     },
     {
       "baseline_rank": 11,
+      "claim": {
+        "assertion": 11,
+        "claim_id": "claim-fb663aa313aa6db5",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 0,
         "reason": null
@@ -3481,6 +3569,14 @@
     },
     {
       "baseline_rank": 12,
+      "claim": {
+        "assertion": 12,
+        "claim_id": "claim-929719f316672967",
+        "claim_type": "ordinal_rank",
+        "horizon": "rest_of_season",
+        "ledger": "data/claims/2025.jsonl",
+        "resolve_on": "2025-12-09T07:59:59Z"
+      },
       "deviation": {
         "delta": 0,
         "reason": null

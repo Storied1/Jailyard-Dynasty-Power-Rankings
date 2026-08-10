@@ -195,7 +195,7 @@
   <div class="hero__layer layer-grid" data-speed="0.05"></div>
   <div class="hero__content">
     <h1 class="hero__title">The Jailyard Week 1 Column</h1>
-    <p class="hero__subtitle">Josh Allen dropped 38.76, the preseason rankings went up in flames, and the group chat hasn't recovered. The full Week 1 recap: essay, power rankings, confessionals, mailbag, and Week 2 picks.</p>
+    <p class="hero__subtitle">Derrick Henry silenced the obituary, the champs ran their errand, and the rebuild finally showed teeth. The full Week 1 recap: essay, power rankings, confessionals, mailbag, December calls on the record, and Week 2 picks.</p>
     <a href="#week1" class="hero__cta">Read the Column &#8595;</a>
   </div>
 </header>
@@ -260,177 +260,166 @@ window.addEventListener('scroll', ()=>{
 // WEEK 1 DATA
 // ═══════════════════════════════════════════════════════════
 
-const week1Essay = `Josh Allen dropped 38.76 points and somewhere in the group chat, @ToreroGaucho posted a single fire emoji \u2014 no caption, no context, just the quiet confidence of a man whose quarterback just turned a Week 1 matchup into a formality. The 2025 season is here, and the preseason power rankings lasted about as long as a Bryce Young starting job.
+const week1Essay = `One night in late August, Nate looked at Zach's roster — Derrick Henry, Kyren Williams, the whole Island of Misfit WR1s — and typed the most confident sentence of the offseason: "Good to know. Ill start you off 0-1." Here is what that sentence forgot: the team he was burying played for the title last December. Then Sunday happened, and Monday happened, and Henry happened — 18 carries, 169 yards and 2 touchdowns against the Bills — and the Sleeping Giants hung 151.48 on MHJTIME, the biggest number of the opening week, in its only game between two teams with real January plans.
 
-The numbers don\u2019t lie, but they do love irony. We spent all offseason building a meticulous ranking system \u2014 40% win percentage, 30% points for, 20% recent form, 10% strength of schedule \u2014 and the football gods responded by flipping the whole thing upside down like a snow globe. The preseason top three went a combined 1-2. The bottom two? Both won. Your carefully curated tiers? Already on fire.
+Six teams won this weekend. The better question is whose story actually moved. The champs didn't need theirs to. Kittler on the Roof has played in three straight finals, and the title defense opened like an errand: 143.72, Garrett Wilson and Puka Nacua combining for 225 receiving yards, nobody breaking a sweat, banner unthreatened. Ben spent the week enjoying Dallas's real-life chaos and let the roster do the talking — which is what three-straight-finals rosters get to do.
 
-Start with the Sleeping Giants, ranked eleventh coming in and currently sitting at number one after dropping 151.48 points on MHJTIME\u2019s head. We said your WRs peaked when Fortnite did. We said Derrick Henry and Josh Jacobs had too many career carries. Henry heard us, apparently, because he responded with a 28.7-point performance that suggested the only thing aging about him is his wine collection. Jalen Hurts added 24.28, and suddenly the Island of Misfit WR1s looks more like a private island with bottle service.
+The louder development came from two franchises finding out mid-game who they are this year. Chudders — three straight losing seasons, eleven draft picks in July, the league's designated bench-presser next to the trophy case — walked into the champion's building and lost by single digits while Justin Herbert carved the Chiefs for 318 and three and rookie Emeka Egbuka scored twice on debut. A rebuild doesn't announce itself with a trophy; it announces itself with a loss that scares better teams. That was one. And MHJTIME, ten-and-four a year ago and holding the best receiver room in the league, put up 142.62 — more than two of the six winners managed — and lost anyway, because the schedule pointed the Giants at Nate in the one week they were incandescent. He did everything right except pick his opponent.
 
-Then there\u2019s the Boonist Monks \u2014 preseason dead last, Week 1 power rank fourth \u2014 who beat Ghastly Grayskull Gang by a casual 34.94 points. That\u2019s not a margin of victory; that\u2019s a restraining order. Lamar Jackson went full video-game mode with 29.36, James Cook contributed 18.7, and @GauchoTrain \u2014 the league\u2019s self-appointed instigator of side bets and polls \u2014 is absolutely lighting up the group chat right now with receipts. Remember when we said your team could win it all or retire it all? Week 1 chose violence.
+The bottom of the league supplied the comedy. Kevin needed a rival's Sunday-morning courtesy heads-up that his starting QB slot was empty — a favor he will never hear the end of. Oscar watched Xavier Worthy's shoulder leave the season early, watched Brock Bowers limp to 103 yards, watched his bench outscore his plans, and typed the sentence of the week: "I'm unraveling week 1." It's the kind of message a group chat never deletes.
 
-Meanwhile, Noble FFT \u2014 your preseason number two, the team with the league\u2019s scariest backfield \u2014 lost to Rasheeing the Scene by 11.14 points despite Bijan Robinson\u2019s 21.4. Josh Allen\u2019s 38.76 simply doesn\u2019t care about your scouting report. And MHJTIME, our preseason three, put up 142.62 points and still lost. In most leagues, that total wins comfortably. In the Jailyard, that\u2019s a cruel lesson about the schedule gods.
-
-So what do we actually know after one week? That Derrick Henry isn\u2019t done. That Lamar Jackson is still a cheat code. That Josh Allen might be illegal. And that preseason rankings are suggestions, not prophecies.
-
-The group chat has been insufferable since Sunday. The rebuilders are talking trash. The contenders are recalculating. Somewhere, @Chudders is icing another trade offer and smirking.
-
-One week in and nothing makes sense. That\u2019s exactly how dynasty should feel.`;
+One week settles nothing — but it points. Henry pointed at one more contending year for a roster everyone eulogized. Herbert pointed at a window opening a season early. Lamar's three touchdowns pointed at a Monks team that now has to prove it against somebody healthy. The calls below are on the record for December, which is the only month that grades them. The season's opening argument is filed. Court is in session all fall.`;
 
 const week1Rankings = [
   {
-    rank: 1, prevRank: 11, teamName: 'Sleeping Giants', owner: 'zbcowan', record: '1-0',
-    blurb: 'We wrote your obituary in August. \u2018Your WRs peaked when Fortnite did,\u2019 we said. \u2018Aging stars on borrowed time,\u2019 we warned. You responded with 151.48 points \u2014 the highest total of Week 1 \u2014 led by Derrick Henry\u2019s 28.7-point sledgehammer and Jalen Hurts\u2019 24.28. Even Josh Jacobs chipped in 13.5 from the backfield committee that was supposedly falling apart. The victory over preseason-third MHJTIME wasn\u2019t just a win; it was a statement of intent from a roster the group chat had already eulogized. One week is a small sample. But if this is what borrowed time looks like, you\u2019ll take as many weeks as the football gods give you.'
+    rank: 1, prevRank: 11, teamName: "Sleeping Giants", owner: "zbcowan", record: "1-0",
+    blurb: "We drafted the obituary in August — preseason #11, \"your WRs peaked when Fortnite did,\" veterans on borrowed time — for a franchise that played for the title last December. That's the part everyone kept skipping. This roster won twelve games back in 2022, made the finals last season, and has spent three years being old the way Henry is old: theoretically. Week 1 was the theory failing in public. 151.48 — the biggest number anyone posted — in the only matchup between two teams with championship intentions, with Henry hammering the Bills for 169 yards and 2 touchdowns on 18 carries and saving a permit-requiring stiff-arm for Monday night, and Jalen Hurts sneaking in 2 rushing scores against Dallas. Best of all, the win landed on the exact guy who promised to start you 0-1 — by 8.86, with the whole chat watching. One honest note for December, though: this column thinks age eventually gets a vote and pencils you fourth at the wire. You spent August advertising league-winner RBs. The ad now has to run for thirteen more weeks."
   },
   {
-    rank: 2, prevRank: 5, teamName: 'Rasheeing the Scene', owner: 'ToreroGaucho', record: '1-0',
-    blurb: 'Josh Allen scored 38.76 points. Read that again. The man who was already the QB1 on most boards decided to remind everyone why your floor is higher than most teams\u2019 ceilings. Courtland Sutton added 16.1, De\u2019Von Achane contributed 16.0, and you cruised past Noble FFT by 11.14. We called your WR room a meme waiting to happen \u2014 turns out you don\u2019t need elite receivers when your quarterback IS the offense. The group chat consensus was to invest in a steady WR1 rather than another speedster. After Allen\u2019s 38.76, maybe the real investment was already on the roster all along.'
+    rank: 2, prevRank: 6, teamName: "Kittler on the Roof", owner: "bchodos", record: "1-0",
+    blurb: "Three straight trips to the final — runner-up in '22, runner-up in '23, champion at 11-3 in '24 — and the fourth campaign opened like an errand: 143.72 to 133.82, never really in doubt, nobody above 19 points and nobody needed above 19. Garrett Wilson went 7-for-95 with a touchdown against the Steelers, Puka caught 10 balls for 130 against the Texans, and the Jaguars defense quietly stacked 16 on the Panthers. This is the franchise the preseason column ranked sixth and called drywall-ceilinged, and the drywall keeps outliving everybody's marble. For December: second at the wire, hosting in the playoffs, one win from a fourth consecutive final — at which point the league should just rename the trophy. Somebody has to come take the belt. Nobody so much as reached for it in week one."
   },
   {
-    rank: 3, prevRank: 6, teamName: 'Kittler on the Roof', owner: 'bchodos', record: '1-0',
-    blurb: 'You opened the defense of your 2024 title exactly the way champions should \u2014 with a workmanlike 143.72-point victory over Chudders. Garrett Wilson (19.0), Puka Nacua (18.1), and a surprisingly strong Jacksonville defense (16.0) carried your squad while the rest of the roster provided that maddening consistency we\u2019ve come to expect. Runner-up in 2022, runner-up again in 2023, champion in 2024 \u2014 and now a quiet 1-0 start in 2025. Your floor is nice, we said. Your ceiling might be drywall. But drywall keeps winning games while other teams\u2019 marble ceilings crumble. Somewhere Tony Pollard had another three-yard carry and the chat still hasn\u2019t let it go.'
+    rank: 3, prevRank: 1, teamName: "General Ken-obi", owner: "bLaker24", record: "1-0",
+    blurb: "Honesty about the win first: Father Time put up the second-lowest losing score of the week, so beating them by 15.2 proves roughly what the Monks' 35-point party downstairs proves — very little. What holds this franchise third is everything that predates Sunday. A title in 2023. Ten-and-four last year. The deepest roster in the league, which produced 135.88 on a day the quarterbacks were bad enough that Nate spent Monday night composing eulogies for them in the chat — Drake Maye's 287-with-a-pick against the Raiders was the best line in the room, and Nick Bosa's 6-tackle, one-sack, fumble-recovery day carried the flag instead. That's the floor, and the floor won comfortably. The December call is about the ceiling: this column has you finishing first at the wire, quarterback room and all. If that's wrong, it won't be wrong quietly."
   },
   {
-    rank: 4, prevRank: 12, teamName: 'The Boonist Monks', owner: 'GauchoTrain', record: '1-0',
-    blurb: 'From dead last in the preseason to top four in Week 1 \u2014 and you didn\u2019t even need a close game to do it. Lamar Jackson\u2019s 29.36-point eruption anchored a 144.36-point week that buried Ghastly Grayskull by nearly 35 points. James Cook added 18.7, Jaxon Smith-Njigba contributed 13.9, and even the aging Travis Kelce managed 11.7 of quiet production. We said your team could win it all or retire it all. Week 1 picked the winning option. The group chat\u2019s most prolific instigator of side bets has fresh ammunition for at least seven days. Enjoy the receipts while they\u2019re warm, because at 27.2 years average age, every win feels like a bonus round.'
+    rank: 4, prevRank: 5, teamName: "Rasheeing the Scene", owner: "ToreroGaucho", record: "1-0",
+    blurb: "Two days before kickoff, this franchise flipped rookie Quinshon Judkins for Courtland Sutton — a win-now move from a team that made the playoffs at 9-5 last year and knows its window is open. Then the window did what it's built to do: Josh Allen preached a 38.76-point sermon — 394 passing yards, four total touchdowns against the Ravens — Sutton caught a touchdown on arrival, and the 144.06 covered for an owner who admitted he whiffed \"on each of my start / sit decisions.\" The suspension jokes (\"Rasheeing the 2025 Season\") are jokes with a due date, and one player supplied more than a quarter of the points. The posture is right and the weapon is real. December call: fifth — a good team with a great quarterback, waiting on the rest of its lineup card to match its trades."
   },
   {
-    rank: 5, prevRank: 1, teamName: 'General Ken-obi', owner: 'bLaker24', record: '1-0',
-    blurb: 'Relax \u2014 a 135.88-point win over Father Time is exactly what the preseason favorite is supposed to do, even if it doesn\u2019t generate headlines. Nick Bosa led the way with 19.0, Saquon Barkley added 16.4, and Drake Maye\u2019s 15.28 at quarterback was... fine. Not electric. Not disastrous. Just fine. The problem isn\u2019t the result; it\u2019s that your All-Pro team \u2014 the roster that could headline Coachella \u2014 finished sixth in total points this week. The group chat isn\u2019t teasing you about taxi squad debates this week; they\u2019re asking why CeeDee Lamb only put up 14.5. One week doesn\u2019t make a season, but the franchise everyone measures themselves against better start measuring up to its own billing.'
+    rank: 5, prevRank: 3, teamName: "MHJTIME", owner: "rango_", record: "0-1",
+    blurb: "Back in 2023 this franchise was in the toilet bowl. Last season it went 10-4 and made the playoffs. Week 1 belongs to that same climb, filed under the most productive loss in the league: 142.62 — more than two of the six winners scored — against the one opponent that beat it. Myles Garrett wrecked the Bengals for 2 sacks, Jayden Daniels stacked 233 passing yards and 68 on the ground against the Giants, and Chuba Hubbard — from the backfield Zach called \"trash\" in August — went for 89 total yards and a touchdown against the Jaguars. Even the alleged weakness showed up. Your own summer thesis: \"I just need avg rb play. Elite everywhere else.\" Week 1 delivered exactly that and charged you a loss for scheduling reasons. So here it is in writing for December: top three at the wire. The 0-1 is a costume. The grievance is legitimate. Go take it out on Father Time."
   },
   {
-    rank: 6, prevRank: 9, teamName: 'The Legion of Bouz', owner: 'KidBouzie', record: '1-0',
-    blurb: 'Patrick Mahomes dropped 26.02, Christian McCaffrey reminded everyone he\u2019s still very much alive with 19.2, and you quietly dispatched Burden of Etienne-y Woody by 11.4. It\u2019s not flashy. It won\u2019t dominate the group chat. But the 2022 inaugural champion grinding out a W with its two best players is exactly the kind of boring, effective football that keeps you dangerous. Remember trading for Mahomes in 2023? That deal keeps paying dividends even as the rest of your roster creaks toward the cliff. You need a tight end with a pulse \u2014 we\u2019ve said it, the chat has said it, your roster screams it \u2014 but for now, the Voltron receivers and your two stars are enough.'
+    rank: 6, prevRank: 12, teamName: "The Boonist Monks", owner: "GauchoTrain", record: "1-0",
+    blurb: "The all-in year — Lamar, Kelce's farewell tour, almost no picks left in the drawer — opened with the week's biggest margin, and the fine print matters: the +34.94 came against the one roster that showed up broken. Lamar was genuinely great (209 passing yards, 70 rushing, 3 total touchdowns against the Bills), and Jaxon Smith-Njigba's 124 receiving yards says the retool is real. None of it yet says whether a 7-7 team became a contender. Brent has already written the ending — Kelce brings the Monks their first ship, \"It's been decided\" — and this column's December call is sixth, the middle, again, unless the next statement win comes with a pulse attached. The clock, not the margin, is still the story."
   },
   {
-    rank: 7, prevRank: 3, teamName: 'MHJTIME', owner: 'rango_', record: '0-1',
-    blurb: 'Here\u2019s the cruel math of dynasty: you scored 142.62 points and lost. Most weeks, that total cruises to a W \u2014 but you drew the one opponent on the schedule who put up 151.48. Myles Garrett\u2019s 22.0 and Jayden Daniels\u2019 20.12 were both excellent, and Marvin Harrison Jr. added 15.6 \u2014 your historic WR trio showed up. The running back room, though, was exactly the concern we flagged: Chuba Hubbard managed 16.4 but the depth behind him remains patchwork. Toilet-bowl runner-up in 2023, semifinalist in 2024 \u2014 don\u2019t let 2025 become the year you had the talent but not the luck. This loss was a scheduling coin flip, not a referendum on your roster.'
+    rank: 7, prevRank: 9, teamName: "The Legion of Bouz", owner: "KidBouzie", record: "1-0",
+    blurb: "Your 2022 title gets a year further away every autumn — 11-3 in '23, 7-7 in '24 — and the opener fit the arc: the lowest winning score of the week (131.72), Mahomes conjuring 26.02 against the Chargers, McCaffrey grinding out 142 total yards on 31 touches without a touchdown. Respectable, mortgage-paying football. Seventh in December, says this column, and every win above that is the old guard stealing one. #THORTONTIME remains a better bit than a plan."
   },
   {
-    rank: 8, prevRank: 7, teamName: 'Chudders Football Team', owner: 'Chudders', record: '0-1',
-    blurb: 'Sure, you lost, but 133.82 points from a rebuilding roster is actually pretty encouraging. Justin Herbert threw for 27.92 fantasy points \u2014 the third-best QB performance of the week \u2014 and your rookie Emeka Egbuka exploded for 21.6. The young RB duo of Jeanty (11.0) and Croskey-Merritt (14.2) showed flashes too. You lost to the defending champion; there\u2019s no shame in that. Your war chest is still overflowing with draft picks and the chat is still joking about you icing trade offers. Keep icing them. The rebuild is on schedule, and if Egbuka is real, you might have found your WR1 of the future for free.'
+    rank: 8, prevRank: 7, teamName: "Chudders Football Team", owner: "Chudders", record: "0-1",
+    blurb: "Forget the loss for a second — this is a multi-year rebuild whose window finally looks open, and week 1 was the first hard evidence. Three straight losing seasons (4-10, 3-11, 4-10). Eleven picks in July's draft. The chat pricing \"Bill\" like a meme stock all August. And then the young roster walked into the champion's building and lost by only 9.9 while outscoring two of the week's winners — Justin Herbert sliced the Chiefs for 318 yards and 3 touchdowns, Emeka Egbuka scored twice on debut against the Falcons, and Jacory Croskey-Merritt ripped 82 yards and a touchdown on ten carries. You still couldn't get past Kittler, which is what champions are for — but for the first time since the trophy case got dusty, the weights look liftable. December call: eighth, and the happiest eighth-place team in the league. Keep the picks. The montage just cut to the fight."
   },
   {
-    rank: 9, prevRank: 2, teamName: 'Noble FFT', owner: 'kevobucks', record: '0-1',
-    blurb: 'From the league\u2019s scariest backfield to Week 1\u2019s ninth-ranked team \u2014 not exactly the start you drew up on the whiteboard. Bijan Robinson held up his end with 21.4, and Breece Hall added 15.5, but Josh Allen happened. The 38.76-point buzzsaw from Rasheeing the Scene made your 132.92 feel pedestrian. Jordan Love\u2019s 15.92 was fine, Ricky Pearsall added 13.8, but fine doesn\u2019t beat a quarterback who just put up the highest individual score of the week. We said an elite tight end and receiver depth would keep you out of contention until you fix them. After Week 1, add an answer for Josh Allen to that shopping list. Bijan and Breece are still gods. But gods need a supporting cast.'
+    rank: 9, prevRank: 2, teamName: "Noble FFT", owner: "kevobucks", record: "0-1",
+    blurb: "Somewhere between 2-12 in 2022, 2-12 in 2024, and Sunday morning's rival courtesy heads-up \"that you don't have a qb in the starting spot,\" this franchise's problem stopped being talent. Bijan went full Swiss-army against the Buccaneers — 100 receiving yards and a score out of the backfield — Breece Hall ran for 107 against the Steelers, and the 132.92 lost by 11 to a Josh Allen sermon, not to the empty lineup slot. The talent says top half. The operations say 2-12, twice. Ninth in December — with real upside the moment somebody sets two alarms."
   },
   {
-    rank: 10, prevRank: 10, teamName: 'Father Time', owner: 'Redrumsregrub', record: '0-1',
-    blurb: 'Some things stay consistent even when the rankings go haywire, and you sitting at tenth is one of them. A 120.68-point output against General Ken-obi was always going to be a tough sell, and your roster didn\u2019t do itself any favors. Brock Purdy led with 18.78, Kyle Hamilton contributed 13.5 from the DB slot, and Jaylen Warren managed 12.9. Brian Thomas Jr. \u2014 the 2024 rookie class headliner you\u2019re banking on \u2014 didn\u2019t crack your top five scorers this week. We said the chat would love your random 180-point weeks and ignore the rest. Week 1 was the rest.'
+    rank: 10, prevRank: 10, teamName: "Father Time", owner: "Redrumsregrub", record: "0-1",
+    blurb: "Quiet franchise, quiet loss, quiet 120.68 — Brock Purdy's 277 yards with two picks, Kyle Hamilton's honest safety work, wagyu receivers served medium-rare. This team went 9-5 back in 2022 and has been under .500 both years since, and the loudest take of the owner's entire summer was \"Tet all day.\" Tenth in December. The spoiler role is open year-round."
   },
   {
-    rank: 11, prevRank: 8, teamName: 'Burden of Etienne-y Woody', owner: 'kharlow', record: '0-1',
-    blurb: 'Justin Jefferson, the top-three overall asset who was supposed to carry you to respectability, put up 12.8 points. Your best scorer was Kyler Murray at 18.32, followed by the Denver Broncos defense at 18.0 and kicker Ka\u2019imi Fairbairn at 14.9. When your defense and your kicker both outscore your franchise wide receiver, the alarm bells should be deafening. The loss to Legion of Bouz by 11.4 isn\u2019t surprising; we flagged your quarterback roulette and running-back triage unit in the preseason. You scored 120.32, second-worst in the league. Those Jefferson trade rumors floating around the chat might be getting louder after this one.'
+    rank: 11, prevRank: 8, teamName: "Burden of Etienne-y Woody", owner: "kharlow", record: "0-1",
+    blurb: "The franchise literally named itself after its rookie class — seven July picks including Trevor Etienne, Woody Marks, and Luther Burden — then opened the season with a box score whose top three lines were a quarterback, a defense, and a kicker. Justin Jefferson deserves better company than a 120.32 loss to the week's lowest-scoring winner, and the commissioner spent the run-up workshopping your team name into a punchline. Stars-without-support was the preseason \"Fraud\" ruling; week 1 declined the appeal. Eleventh in December — and the rookies decide everything after that."
   },
   {
-    rank: 12, prevRank: 4, teamName: 'Ghastly Grayskull Gang', owner: 'GrayskullXX', record: '0-1',
-    blurb: 'This is what happens when your pick stash is bigger than your production. Week 1\u2019s low scorer at 109.42, a 34.94-point beatdown at the hands of the Boonist Monks, and a C.J. Stroud who managed just 9.72 points. Deebo Samuel\u2019s 19.1 and Brock Bowers\u2019 13.8 tried their best, but when your kicker Cam Little is your second-highest scorer at 16.8, you know the depth chart has problems. We wrote that the pundits in the chat love to remind you that picks don\u2019t score points. They\u2019re going to be especially loud this week. You cashed in capital to load up on explosive young runners \u2014 none of them exploded in Week 1. The blueprint is still sound, but blueprints don\u2019t win matchups.'
-  }
+    rank: 12, prevRank: 4, teamName: "Ghastly Grayskull Gang", owner: "GrayskullXX", record: "0-1",
+    blurb: "A year removed from 3-11, the retooling franchise with the famous pick stash needed exactly one afternoon to start unraveling: Worthy's shoulder gone almost immediately (\"Xavier worthy season over,\" the chat ruled within minutes), Brock Bowers gutting out 103 receiving yards while visibly hurting, the bench outscoring the plan, and the owner posting \"I'm unraveling week 1\" before Monday even arrived. The 109.42 was the week's lowest score, taken in its biggest beatdown, and Cam Little's perfect 4-for-4 leg landing among your top three scorers was the tell. Deebo led the wideouts with 77 yards, five weeks after \"Deebo about to be WR1.\" Twelfth in December — the picks don't suit up, and this year the plan might not either."
+  },
 ];
 
 const week1Confessionals = [
   {
-    teamName: 'Sleeping Giants',
-    text: 'I looked at the preseason rankings. Eleventh. I saw the essay: \u2018aging stars,\u2019 \u2018borrowed time,\u2019 \u2018Island of Misfit WR1s.\u2019 I read it out loud to Derrick Henry. I don\u2019t know if he can hear me through the phone, but he scored 28.7 so I\u2019m going to keep doing it every week.'
+    teamName: "MHJTIME",
+    text: "I scored 142.62. More than two teams that WON. I lose. The team I publicly promised to start 0-1 scored 151 in the one week the schedule pointed them at me. My backfield was supposed to be the problem — Chuba scored a touchdown! I did everything right and the universe filed it under L. Fine. FINE. Daniel Jones is available, by the way. Danny Dimes is QB2 in all of fantasy football. I have receipts for everything."
   },
   {
-    teamName: 'Ghastly Grayskull Gang',
-    text: 'The Boonist Monks beat me by 35 points. My kicker was my second-highest scorer. C.J. Stroud had 9.72 points. I have a mountain of draft picks and none of them played this week. I\u2019d like to formally request that the group chat skip roasting me for at least 48 hours. The producer says no.'
+    teamName: "The Boonist Monks",
+    text: "Biggest margin of the week and the column wants to talk about 'opponent quality' like some kind of lawyer. Lamar had three touchdowns. Kelce is going to stand on business in his last year and bring the Monks their first ship — it's been decided, because I decided it. Sixth? Fine. Write it down. Frame it. I'll be collecting apologies in December, cash or Venmo."
   },
   {
-    teamName: 'MHJTIME',
-    text: 'I scored 142 points. One hundred and forty-two. Do you know how many teams in this league would kill for 142? Eleven. Eleven teams would kill for 142. I played the one team that scored 151. Myles Garrett had 22. Jayden Daniels had 20. The WR trio showed up. And I still lost. Someone check if there\u2019s a Bad Luck clause in the bylaws.'
+    teamName: "Noble FFT",
+    text: "Yes, the QB slot was empty on Sunday morning. Yes, Patrick sent a 'courtesy heads up.' Yes, Nate called for my expulsion. You know what nobody's talking about? Bijan caught six balls for a hundred yards. Breece went for 107. I lost by 11 to a Josh Allen sermon, not to my lineup screen. The roster is fine. The roster is FINE. I just need to set an alarm. Two alarms."
   },
   {
-    teamName: 'The Boonist Monks',
-    text: 'Dead last in the preseason. DEAD. LAST. And now I\u2019m sitting here at number four after dropping 144 on Grayskull\u2019s head. Lamar went off, Cook went off, even Kelce chipped in. The group chat said my team could retire at any moment. Well, we didn\u2019t retire today.'
-  }
+    teamName: "Ghastly Grayskull Gang",
+    text: "Worthy's shoulder. Bowers limping. My bench going off while my starters filed workers' comp. I posted 'I'm unraveling week 1' as a joke, and then the scoreboard made it a documentary. Brent hung 144 on me and had the nerve to be gracious about it. It's week one. It's WEEK ONE. I have picks. I have time. I do not currently have a functioning wide receiver room. But I have picks, and I have time."
+  },
 ];
 
 const week1Mailbag = [
   {
-    q: 'Dear Commish: My preseason top-three team scored 142.62 and lost. Is it legal to protest a scheduling algorithm? Asking for @rango_.',
-    a: 'It\u2019s Week 1. You drew the one team that scored higher. If you\u2019re protesting scheduling after one loss, wait until Week 6 when the matchups get truly cruel. That\u2019s when the real panic starts.'
+    q: "Dear Commish: I won by 34.94 points — the biggest margin of the week — and you have me SIXTH, behind a team that LOST. Explain yourself. — GauchoTrain",
+    a: "Gladly. You beat the only roster in the league that was actively falling apart, your 7-7 from last season didn't retire over the summer, and the 0-1 team above you outscored two of this week's winners against the best team in the league. Rankings weigh who you beat, not just by how much. Beat a live opponent and the top four is right there — the horses are real. Kelce hive, remain calm."
   },
   {
-    q: 'From the group chat: @GrayskullXX, we were told picks don\u2019t score points. When do the picks start scoring points?',
-    a: 'Respectfully: when you draft them. Your two best dynasty assets \u2014 Brock Bowers and C.J. Stroud \u2014 combined for 23.5 points. That\u2019s a rounding error for Josh Allen.'
+    q: "@rango_ asks: I outscored two teams that won this week. A loss. Be honest with me — who do I sue?",
+    a: "The scheduling algorithm, and good luck: it has no assets and a great lawyer. You're the best 0-1 team this column has ever ranked fifth — and it just put a December top-three call on you in writing. Win the games where you're the better roster, which is most of them, and this becomes a funny story you tell at the draft."
   },
   {
-    q: '@zbcowan asks: Can I get the preseason rankings committee\u2019s home address? I just want to talk.',
-    a: 'The committee stands by ranking you eleventh. The committee also acknowledges that Derrick Henry scoring 28.7 in Week 1 was not in the model. The committee is currently updating the model.'
+    q: "From the group chat: \"just a courtesy heads up that you don't have a qb in the starting spot.\" Discuss.",
+    a: "The most polite act of psychological warfare in league history. Patrick gets a sportsmanship nod, Kevin gets a public-service reminder that rosters don't set themselves, and the rest of us get a banner quote for the ages. Set your lineups, people. It's week one, not week eleven."
   },
   {
-    q: 'Dear Commish: Is Josh Allen legal?',
-    a: 'Technically yes. Morally? Debatable. The man put up 38.76 in a format where 20 is a good week. There should be a luxury tax on quarterbacks.'
+    q: "Dear Commish: You ranked General Ken-obi #1 in the preseason, he won by 15, and now he's third. What more do you want from the man?",
+    a: "A win over somebody breathing, mostly — Father Time put up the week's second-lowest losing score, so Sunday told us little we didn't already know. The résumé is why he's third and not lower: a 2023 title, 10-4 last year, the deepest roster in the league. And the December call on record here is still Ken-obi first at the wire. Third is a September address, not a verdict."
   },
-  {
-    q: 'From the group chat: We set our preseason rankings using a formula \u2014 40% win pct, 30% points, 20% form, 10% SOS. After one week, should we just use 100% vibes?',
-    a: 'The formula is sound. The formula needs more than seven days of data. But between you and me, 100% vibes would have ranked the Boonist Monks higher than twelfth, so maybe the vibes know something.'
-  }
 ];
 
 const week1Bits = [
   {
-    title: 'Nobody Believes In Us Award',
-    text: 'The Sleeping Giants, who went from \u2018Island of Misfit WR1s\u2019 to Week 1\u2019s top scorer in the time it takes Derrick Henry to break a tackle. @zbcowan hasn\u2019t posted in the group chat yet. That\u2019s how you know he\u2019s savoring it.'
+    title: "Great Call of the Week",
+    text: "Zach, back in August: \"I've got league winner RBs.\" Derrick Henry, Monday night: 169 yards, 2 touchdowns, and a stiff-arm that should require a permit. Sometimes the ad copy is just true."
   },
   {
-    title: 'The Ewing Theory Alert',
-    text: 'The Boonist Monks dropped 144.36 despite Tyreek Hill being relatively quiet \u2014 didn\u2019t crack the top five scorers. Lamar Jackson at 29.36 and James Cook at 18.7 carried the load. When your supposed third-best player doesn\u2019t show up and you still win by 35, the theory is alive and well.'
+    title: "Overheard in the Chat",
+    text: "\"Kick him out of the league.  Tanking week 1\" — Nate, displaying his trademark restraint roughly ninety seconds after Patrick's courtesy heads-up about Kevin's empty QB slot."
   },
   {
-    title: 'Is MHJTIME the New 2019 Saints?',
-    text: 'Scored enough to beat most of the league and still lost to the one team on the schedule that went off. The dynasty equivalent of going 13-3 and losing in the first round. Heartbreaking, but fixable \u2014 as long as the schedule cooperates from here.'
+    title: "Preseason Prediction Tracker",
+    text: "Karim, September 2023: \"You soo high you think you got the second best team in the league rn.\" Two years on, Chudders opened with another loss — but held the champs to single digits and got 3 touchdowns from Herbert. Aging badly, but aging interestingly."
   },
   {
-    title: 'Things I Believe But Can\u2019t Prove',
-    text: 'Justin Herbert is going to be the steal of the 2025 season and Chudders\u2019 rebuild is six months ahead of schedule. Emeka Egbuka\u2019s 21.6-point debut was not a fluke. Book it.'
+    title: "Things I Believe But Can't Prove",
+    text: "The Judkins-for-Sutton swap gets cited in a heated group chat argument by Thanksgiving. Sutton caught a touchdown for his new team on day one; Nate admitted it \"Hurt to let go Sutton.\" Both sides convinced they won — that's how you know it was a real trade."
   },
   {
-    title: 'Overheard in the Chat',
-    text: '\u2018Henry is washed\u2019 \u2014 everyone, August 2025. \u2018Henry is BACK\u2019 \u2014 also everyone, September 2025. The duality of the Jailyard group chat, captured in two sentences and a four-week gap.'
-  }
+    title: "Luck Index",
+    text: "MHJTIME scored more than two of this week's six winners and lost. Ghastly scored less than everyone and lost by the most. One of these teams should feel unlucky. The other should feel seen."
+  },
 ];
 
 const week1Matches = [
   {
-    home: 'The Boonist Monks', away: 'Burden of Etienne-y Woody', spread: -8.5,
-    pick: 'The Boonist Monks',
-    blurb: 'Lamar Jackson just dropped 29.36 against a better opponent than this. Burden\u2019s 120.32 was second-worst in the league, and their best scorer was a quarterback they don\u2019t fully trust. The Monks are riding momentum and an aging core that apparently didn\u2019t get the age cliff memo. Monks cover comfortably.',
-    tag: 'Lock'
+    home: "The Boonist Monks", away: "Burden of Etienne-y Woody", spread: -6.5,
+    pick: "The Boonist Monks",
+    blurb: "The prove-it game arrives immediately. Burden's quarterback-defense-kicker offense visits a Monks team that just dropped 144, and if Lamar repeats even 80% of Week 1, this ends early. The 'beat somebody with a pulse' clause gets its first test — a pulse is present here, if faint."
   },
   {
-    home: 'Kittler on the Roof', away: 'Noble FFT', spread: -3.0,
-    pick: 'Noble FFT',
-    blurb: 'The defending champ showed consistency in Week 1 with 143.72, but Noble\u2019s roster is too talented to stay at ninth. Bijan Robinson (21.4) and Breece Hall (15.5) are matchup-proof, and without Josh Allen on the other side this week, 132 points starts looking a lot better. Noble bounces back in a tight one.',
-    tag: 'Upset Watch'
+    home: "Kittler on the Roof", away: "Noble FFT", spread: -7.0,
+    pick: "Kittler on the Roof",
+    blurb: "Kevin will absolutely set his lineup this week — public shame is the league's most reliable alarm clock — but a champ at operating temperature is a brutal draw for a team still running fire drills. Kittler just won comfortably without a single monster performance. That's the scary version.",
+    tag: "Lock"
   },
   {
-    home: 'The Legion of Bouz', away: 'Ghastly Grayskull Gang', spread: -6.0,
-    pick: 'The Legion of Bouz',
-    blurb: 'Mahomes (26.02) and McCaffrey (19.2) versus a team whose kicker was its second-highest scorer. This shouldn\u2019t be competitive. But Brock Bowers is a matchup nightmare and young rosters can explode any given week. Take the Bouz, but don\u2019t expect another 35-point blowout.'
+    home: "The Legion of Bouz", away: "Ghastly Grayskull Gang", spread: -8.0,
+    pick: "The Legion of Bouz",
+    blurb: "The lowest winning score of Week 1 hosts the lowest score, period. Mahomes and McCaffrey against a wounded Grayskull roster missing Worthy should be merciful and brief. If Bouz can't clear 140 against this, the aging-core alarm gets audibly louder."
   },
   {
-    home: 'Rasheeing the Scene', away: 'Chudders Football Team', spread: -5.5,
-    pick: 'Rasheeing the Scene',
-    blurb: 'Allen\u2019s 38.76 was an outlier, but even his floor is QB1. Chudders is rebuilding and Herbert\u2019s 27.92 won\u2019t carry every week. The spread feels right \u2014 Rasheeing wins but Chudders\u2019 young core keeps it respectable. Achane and Irving do enough alongside Allen.'
+    home: "Rasheeing the Scene", away: "Chudders Football Team", spread: -3.5,
+    pick: "Chudders Football Team",
+    blurb: "Yes, really. Herbert just carved the Chiefs for 318 and 3, Egbuka looks like an instant starter, and Rasheeing needed a 38.76-point Josh Allen miracle to paper over self-admitted lineup whiffs. If Allen is merely human for one Sunday, the rebuild collects its first scalp.",
+    tag: "Upset Watch"
   },
   {
-    home: 'MHJTIME', away: 'Father Time', spread: -5.0,
-    pick: 'MHJTIME',
-    blurb: 'Two 0-1 teams with very different ceilings. MHJTIME\u2019s 142.62 in a loss proves the firepower is there \u2014 Jayden Daniels, Myles Garrett, and the WR trio are real. Father Time\u2019s 120.68 doesn\u2019t inspire confidence. MHJTIME wins, but both teams\u2019 floors are unpredictable enough to make this one squirmy.',
-    tag: 'Stay Away'
+    home: "MHJTIME", away: "Father Time", spread: -9.5,
+    pick: "MHJTIME",
+    blurb: "An angry, elite roster that just dropped 142 in a loss now draws the league's quietest offense. Nate is insufferable after wins; after an unlucky loss he's a public hazard. Father Time should request a wellness check before kickoff."
   },
   {
-    home: 'General Ken-obi', away: 'Sleeping Giants', spread: -2.5,
-    pick: 'General Ken-obi',
-    blurb: 'The marquee matchup of Week 2: preseason number one versus the new number one. The Sleeping Giants just hung 151.48 on MHJTIME, but General Ken-obi\u2019s roster is deeper at every position. Barkley, Lamb, and the defensive studs should be enough \u2014 but if Henry goes off again, all bets are off. We\u2019ll take the General at home by a hair.'
-  }
+    home: "General Ken-obi", away: "Sleeping Giants", spread: -1.5,
+    pick: "Sleeping Giants",
+    blurb: "The marquee: preseason #1 hosting the team that just torched the preseason #3. Saquon against Henry, receipts against receipts. Blake's quarterbacks cannot possibly stay this quiet — but Zach's veterans just made the loudest statement of Week 1, and I ride hot hands in September. Give me the points and the right to regret it."
+  },
 ];
 
-const underdogLock = 'Noble FFT +3.0';
-const stayAway = 'MHJTIME vs Father Time';
-const teaser = 'Boonist Monks -3.0 / Rasheeing the Scene -1.0 \u2014 two favorites teased down to near-pickem spreads against rebuilding opponents';
+const underdogLock = "Chudders Football Team +3.5";
+const stayAway = "General Ken-obi vs Sleeping Giants — I picked it, and I already regret it";
+const teaser = "Kittler on the Roof -7.0 with MHJTIME -9.5: the two angriest good teams in the league, teased together";
 
 // ═══════════════════════════════════════════════════════════
 // RENDERING
