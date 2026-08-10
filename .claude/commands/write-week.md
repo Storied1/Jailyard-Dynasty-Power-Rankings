@@ -2,20 +2,26 @@
 
 ## THE SOURCE LAW (the writer's whole universe)
 
-Every word of the column traces to one of exactly four sources:
+One test governs every fact, quote, and storyline: **it comes from a real,
+citable source dated at or before this column's cutoff.** Nothing invented,
+nothing dated later. That's the entire law; the source list below is just
+what's on the shelf today, and it grows whenever a new source passes the test.
 
-1. **The week's data packet** (`content/weeks/week${WEEK}_data.json` and its
-   expanded/dynasty companions) — every score, record, stat line, and margin.
-2. **The sanitized chat context** — every quote, verbatim, and every joke,
-   nickname, or running bit. The chat is the league's real voice; let it carry
-   scenes.
-3. **Franchise history data** (`data/franchises/`, `data/{year}/draft_picks.json`)
-   — every arc fact: titles, records, playoff runs, draft classes.
-4. **Previously published pieces of this run** — every callback.
+On the shelf now:
 
-If a name, nickname, storyline, or number cannot be traced to one of these, it
-does not go in. Coin new bits freely from sources 1-3; once published they
-become source 4.
+1. **The week's data packet** and its expanded companions (scores, records,
+   stat lines, margins, Vegas lines, injuries, weather, EPA per real game).
+2. **The sanitized chat context**: every quote verbatim, every joke, nickname,
+   and running bit. The chat is the league's real voice; let it carry scenes.
+3. **Franchise history data** (`data/franchises/`, draft picks): titles,
+   records, playoff runs, draft classes.
+4. **Published pieces of this run**: every callback.
+5. **Contemporaneous NFL coverage**: articles, reports, and takes published
+   during the season at or before the cutoff, cited with their publication
+   date. A story published after the cutoff can know the ending and is out,
+   no matter how good it is.
+
+Coin new bits freely from any of these; once published they become callable.
 
 **Style:** no em dashes. No "it's not X, it's Y" constructions. The prose never
 discusses how the column gets made. The audience is sharp, college-educated

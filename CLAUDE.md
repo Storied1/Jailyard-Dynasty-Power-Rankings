@@ -69,7 +69,7 @@ python scripts/seal_2026.py --verify-all     # and --rederive-all
 
 ## Critical Rules
 
-- **THE SOURCE LAW** — every word of league-facing copy traces to exactly four sources: the week's clean data packet, the sanitized chat context (quotes verbatim), franchise history data, and previously published pieces of this run. Anything untraceable does not ship. New bits are coined from those sources; once published they become callable.
+- **THE SOURCE LAW** — one test: every fact, quote, and storyline comes from a real, citable source dated at or before the column's cutoff. On the shelf now: the week's data packet (incl. per-game lines/injuries/weather/EPA), the sanitized chat context (quotes verbatim), franchise history data, published pieces of this run, and contemporaneous NFL coverage cited with its publication date. The source set is open; anything untraceable or dated after the cutoff does not ship.
 - **No LLM tells in prose** — zero em dashes, no "it's not X, it's Y" constructions, prose never discusses how the column gets made. Audience: sharp, college-educated league members; real chat quotes carry scenes.
 - **Publication order is chronological: preseason column FIRST, then weeks in order** — a week's callbacks must land on a published predecessor.
 - **NEVER touch `dontuse`, `dontuse2`, `dontusedraft3`** — archived legacy files
