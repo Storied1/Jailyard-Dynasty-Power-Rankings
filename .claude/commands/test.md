@@ -6,7 +6,7 @@ Run validation checks on the codebase. No test framework exists — this command
 
 ### 1. HTML Validation
 
-For each .html file (excluding dontuse\*):
+For each .html file:
 
 - Verify `<!DOCTYPE html>` present
 - Verify `<meta charset="utf-8">` present
