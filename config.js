@@ -52,52 +52,14 @@ const LEAGUE_CONFIG = {
   pages: [
     { label: "League Bible", href: "history.html" },
     { label: "Season Hub", href: "season.html" },
-    { label: "Rankings", href: "preseason.html" },
     { label: "Power Rankings", href: "power-rankings.html" },
     { label: "Draft", href: "draft.html" },
     { label: "Trades", href: "trades.html" },
-    {
-      label: "2025 Preview",
-      href: "preseason-2025.html",
-      group: "columns",
-      subtitle: "Three champs in three years and a tanking referendum",
-    },
     {
       label: "Week 1",
       href: "week1.html",
       group: "columns",
       subtitle: "Opening week chaos sets the tone",
-    },
-    {
-      label: "Week 2",
-      href: "week2.html",
-      group: "columns",
-      subtitle: "Early risers and first-week frauds",
-    },
-    {
-      label: "Week 3",
-      href: "week3.html",
-      group: "columns",
-      subtitle: "The cream separates from the chaos",
-    },
-    {
-      label: "Week 4",
-      href: "week4.html",
-      group: "columns",
-      subtitle: "Legion stands alone at 4-0",
-    },
-    {
-      label: "Week 5",
-      href: "week5.html",
-      group: "columns",
-      subtitle: "Five-way tie at 4-1 after the Legion falls",
-    },
-    {
-      label: "Week 6",
-      href: "week6.html",
-      group: "columns",
-      subtitle:
-        "Kittler dethroned, trade bazaar erupts, Legion vs Ken-obi looms",
     },
   ],
 
