@@ -4,11 +4,10 @@ from scripts.generate_franchise_wings import (
     build_lineage_entry,
     build_trophy_case,
     championship_from_bracket,
-    match_profile,
-    normalize_username,
     playoff_participants,
     rekey_h2h,
 )
+from scripts.shared import normalize_username
 
 
 def test_championship_min_matchup_id_at_max_round():
@@ -58,21 +57,6 @@ def test_build_trophy_case():
 
 def test_normalize_username_collapses_whitespace_and_case():
     assert normalize_username("kharlo w") == normalize_username("Kharlow")
-
-
-def test_match_profile_by_normalized_username():
-    teams = [
-        {
-            "owner": "kharlo w",
-            "name": "Team K",
-            "rank": 4,
-            "tier": "Contender",
-            "roast": "r",
-            "keyPlayers": {"qb": ["X"]},
-        }
-    ]
-    assert match_profile(teams, "kharlow")["rank"] == 4
-    assert match_profile(teams, "nobody") is None
 
 
 def test_build_lineage_entry_precedence_draft_then_trade_then_add():

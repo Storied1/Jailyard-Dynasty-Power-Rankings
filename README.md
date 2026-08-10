@@ -2,7 +2,7 @@
 
 Twelve managers enter, one champion leaves. We sorted the chaos with numbers, instinct and a healthy dose of locker-room humour.
 
-A fully static website for **The Jailyard** — a 12-team dynasty fantasy football league. Preseason power rankings, weekly preview columns, a season hub with live Sleeper API data, an all-time league history bible, a rookie draft recap, and a trade tracker. Zero dependencies, no build step, no backend.
+A fully static website for **The Jailyard** — a 12-team dynasty fantasy football league. A season of long-form column editions with power rankings as the spine, a season hub with live Sleeper API data, an all-time league history bible, a rookie draft recap, and a trade tracker. Zero dependencies, no build step, no backend.
 
 ---
 
@@ -13,7 +13,7 @@ This site is designed to be forked and rebranded for any Sleeper dynasty league.
 ### Quick Start
 
 1. **Fork this repo** (or click "Use this template" on GitHub)
-2. **Edit `config.js`** — this is the only file you *need* to change:
+2. **Edit `config.js`** — this is the only file you _need_ to change:
    - `name` — your league name
    - `sleeperLeagueIds` — your Sleeper league IDs (one per season)
    - `currentSeason` — the current or most recent season year
@@ -36,15 +36,14 @@ If your league has carried over across seasons (dynasty), each season has a diff
 
 ### Customising Content
 
-| What | Where |
-|------|-------|
-| League name, colours, Sleeper IDs | `config.js` |
-| Preseason rankings, rosters, essays | `preseason.html` (inline JS data) |
-| Weekly preview columns | `week1.html` (duplicate for more weeks) |
-| Rookie draft board and grades | `draft.html` (inline JS data) |
-| Trade history and analysis | `trades.html` (inline JS data) |
-| Season results, standings, charts | Auto-generated from Sleeper API via `season.html` |
-| All-time records, Elo, H2H | Auto-generated from Sleeper API via `history.html` |
+| What                              | Where                                                             |
+| --------------------------------- | ----------------------------------------------------------------- |
+| League name, colours, Sleeper IDs | `config.js`                                                       |
+| Weekly column editions            | rendered per week by the editorial pipeline (`.claude/commands/`) |
+| Rookie draft board and grades     | `draft.html` (inline JS data)                                     |
+| Trade history and analysis        | `trades.html` (inline JS data)                                    |
+| Season results, standings, charts | Auto-generated from Sleeper API via `season.html`                 |
+| All-time records, Elo, H2H        | Auto-generated from Sleeper API via `history.html`                |
 
 Pages that say "Auto-generated" pull data from `data/` (cached JSON) or fall back to live Sleeper API calls. The others use inline JavaScript data objects that you edit directly.
 
@@ -88,15 +87,14 @@ open index.html
 
 ## Pages
 
-| Page | Description |
-|------|-------------|
-| `index.html` | Landing page with animated starfield, stats, and navigation cards |
-| `preseason.html` | Preseason power rankings with sortable table, team cards, and Canvas charts |
-| `season.html` | Season hub with weekly results, standings, and power rankings (Sleeper API) |
+| Page           | Description                                                                       |
+| -------------- | --------------------------------------------------------------------------------- |
+| `index.html`   | Landing page with animated starfield, stats, and navigation cards                 |
+| `season.html`  | Season hub with weekly results, standings, and power rankings (Sleeper API)       |
 | `history.html` | League Bible with all-time records, franchise profiles, H2H matrix, and Elo chart |
-| `draft.html` | Rookie draft recap with full draft board, grades, and storylines |
-| `trades.html` | Trade tracker with timeline, season filter, and activity chart |
-| `week1.html` | Week 1 preview column with essay, mailbag, and matchup predictions |
+| `draft.html`   | Rookie draft recap with full draft board, grades, and storylines                  |
+| `trades.html`  | Trade tracker with timeline, season filter, and activity chart                    |
+| `week{N}.html` | Weekly column editions, rendered as they publish                                  |
 
 ---
 

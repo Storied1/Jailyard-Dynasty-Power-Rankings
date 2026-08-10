@@ -1,4 +1,4 @@
-"""K2.3 — migration checks and the state leak census."""
+"""The state leak census: zero post-cutoff facts in every decision input."""
 
 import subprocess
 import sys
@@ -6,17 +6,17 @@ from pathlib import Path
 
 import pytest
 
-from scripts.migration_census import state_leak_census, unmapped_legacy_fields
+from scripts.migration_census import state_leak_census, unmapped_packet_fields
 
 PY = sys.executable
 REPO = Path(__file__).resolve().parents[2]
 
 
-def test_every_legacy_field_found_a_fact_type():
-    unmapped = unmapped_legacy_fields(2025)
+def test_every_packet_field_found_a_fact_type():
+    unmapped = unmapped_packet_fields(2025)
     assert (
         not unmapped
-    ), f"{len(unmapped)} legacy fields have no fact type: {unmapped[:8]}"
+    ), f"{len(unmapped)} packet fields have no fact type: {unmapped[:8]}"
 
 
 PRIVATE_PRESENT = (REPO / "private_editions" / "2025-preseason" / "state.json").exists()
@@ -53,9 +53,7 @@ def test_compiled_states_carry_zero_future_entries():
 
 def test_writer_packets_are_active_inputs_with_zero_future_entries():
     """The production contract: every active writer packet is cutoff-safe.
-    The packets once carried 46 confirmed leaks (32 h2h last_meeting + 13
-    highest_combined + 1 streak) — that condition lives in git history at
-    e6ebba3; the detectors below prove they still fire on a recurrence."""
+    The planted-leak tests below prove each detector fires."""
     r = state_leak_census("content/weeks", packets=True)
     assert r["future_entries"] == 0, r["detail"][:5]
     assert r["is_decision_input"] is True
@@ -135,7 +133,7 @@ def test_planted_unknown_nested_leaf_fails_the_recursive_census(tmp_path):
     must be reported -- top-level mapping alone would wave it through."""
     import json as j
 
-    from scripts.migration_census import unmapped_legacy_fields
+    from scripts.migration_census import unmapped_packet_fields
 
     src = REPO / "content" / "weeks" / "week1_data.json"
     doc = j.loads(src.read_text(encoding="utf-8"))
@@ -144,7 +142,7 @@ def test_planted_unknown_nested_leaf_fails_the_recursive_census(tmp_path):
     fixture_dir = tmp_path / "weeks"
     fixture_dir.mkdir()
     (fixture_dir / "week1_data.json").write_text(j.dumps(doc), encoding="utf-8")
-    unmapped = unmapped_legacy_fields(2025, weeks_dir=fixture_dir)
+    unmapped = unmapped_packet_fields(2025, weeks_dir=fixture_dir)
     assert any("speculative_nested_leaf" in u for u in unmapped), unmapped
     assert any("planted_top_section" in u for u in unmapped)
 
@@ -156,7 +154,7 @@ def test_deep_and_dict_section_plants_fail_with_exact_paths(tmp_path):
     normalized path."""
     import json as j
 
-    from scripts.migration_census import unmapped_legacy_fields
+    from scripts.migration_census import unmapped_packet_fields
 
     src = REPO / "content" / "weeks" / "week1_data.json"
     doc = j.loads(src.read_text(encoding="utf-8"))
@@ -167,7 +165,7 @@ def test_deep_and_dict_section_plants_fail_with_exact_paths(tmp_path):
     fixture_dir = tmp_path / "weeks"
     fixture_dir.mkdir()
     (fixture_dir / "week1_data.json").write_text(j.dumps(doc), encoding="utf-8")
-    unmapped = unmapped_legacy_fields(2025, weeks_dir=fixture_dir)
+    unmapped = unmapped_packet_fields(2025, weeks_dir=fixture_dir)
     assert (
         "week1_data.json:matchups[].h2h.last_meeting.planted_unknown_leaf" in unmapped
     )
@@ -190,21 +188,23 @@ def test_census_fails_when_an_authoritative_compiled_artifact_is_mutated():
         / "compiled"
         / "source_hashes.json"
     )
-    original = sh.read_text(encoding="utf-8")
-    mutated = original.replace('"sha256": "sha256:', '"sha256": "sha256:0', 1)
+    original = sh.read_bytes()
+    mutated = original.replace(b'"sha256": "sha256:', b'"sha256": "sha256:0', 1)
     assert mutated != original, "the plant must land"
-    sh.write_text(mutated, encoding="utf-8")
+    sh.write_bytes(mutated)
     try:
         with pytest.raises(ValueError, match="compiled contract failed verification"):
             state_leak_census("2025-preseason")
     finally:
-        sh.write_text(original, encoding="utf-8")
+        # byte-exact restore: verification must never mutate tracked bytes
+        sh.write_bytes(original)
+    assert sh.read_bytes() == original
     assert state_leak_census("2025-preseason")["future_entries"] == 0
 
 
 def test_unsupported_season_is_rejected_not_vacuously_ok():
     with pytest.raises(ValueError, match="1901"):
-        unmapped_legacy_fields(1901)
+        unmapped_packet_fields(1901)
     r = subprocess.run(
         [PY, "scripts/migration_census.py", "--all", "--season", "1901"],
         cwd=REPO,

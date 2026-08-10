@@ -1,83 +1,23 @@
-# The Jailyard Continuity/Canon Keeper
+# Canon Check (week ${WEEK})
 
-A standing pre-render adversarial gate. Complements `/edit-week`'s voice/quality
-gate — it doesn't replace it. Where `/edit-week` asks "is this good writing,"
-`canon-check` asks "is the underlying data even in the right shape, and does
-this week stay consistent with everything published before it." Run it after
-`/write-week ${WEEK}`, before `/pick-media ${WEEK}` / render — and it's safe to
-run even before `/write-week` has been called at all, since its first check
-only needs the sanitizer's source artifacts, not written content.
+Pre-render gate: is the underlying data in shape, and is the edition
+consistent with everything published before it?
 
-## Step 1: Artifact Check (always runs)
+## Step 1: artifacts (always)
 
 ```bash
-python scripts/canon_checks.py --week ${WEEK}
+python scripts/canon_checks.py --week ${WEEK}   # or --preseason
 ```
 
-This validates the _source artifacts_ the as-of-week sanitizer produces —
-`week${WEEK}_chat_context.json` has a `league_memory` block shaped
-`{culture, lexicon, running_jokes}`, and `week${WEEK}_data.json`'s standings
-entries have `current_elo`/`peak_elo`/`all_time_record` present and
-`championships`/`best_win_streak` absent (the in-season-omission rule). This
-is exactly the check that would have caught the weeks 7-18 league-culture gap
-before anyone ran `/write-week` against them.
+Validates the sanitized chat context shape and the packet's as-of-week
+standings fields. FAIL stops here; fix the generator, never the content.
 
-For the preseason artifact, run `python scripts/canon_checks.py --preseason`
-instead — validates `league_memory` plus the `meta.type == "preseason"`
-self-identification marker; no `--week`, no standings check (preseason has
-no week data yet).
-
-If this step reports FAIL, stop here — don't proceed to Step 2. The data isn't
-sanitized correctly; that has to be fixed at the source (`build_chat_context.py`
-/ `extract_week_data.py`), not papered over in the content review.
-
-## Step 2: Content/Continuity Check (only if content exists)
-
-Check whether `content/weeks/week${WEEK}_content.json` exists.
-
-**If it doesn't exist yet:** report "artifact checks only — content not yet
-written" and stop. This is the expected state for any week that hasn't gone
-through `/write-week` yet — not a gap, not an error.
-
-**If it exists**, run:
+## Step 2: content (if written)
 
 ```bash
 python scripts/verify_week_content.py --week ${WEEK} --pretty
 ```
 
-Then do a continuity pass: read `content/weeks/week${WEEK}_content.json`'s
-callbacks/references against the `meta.threads` ledger (and previous weeks'
-published content) and flag anything inconsistent with what earlier weeks
-actually said — a callback to a joke, storyline, or prediction that doesn't
-match what was actually published.
-
-(`verify_week_content.py`'s Tier 1 already mechanically checks `meta.threads`
-shape — valid status enum, no duplicate ids, as a hard error — and flags a
-thread that silently disappears between weeks as a Tier-1 warning. This
-manual pass covers what that automation can't: whether a callback's _text_
-is actually consistent with what earlier weeks said.)
-
-## Output
-
-```
-## Canon Check: Week ${WEEK}
-
-### Artifact Check: PASS / FAIL
-[List any issues, with file:line or field-path citations — no vague "looks off"]
-
-### Content/Continuity Check: PASS / FAIL / SKIPPED (content not yet written)
-[List any inconsistent callbacks, with the exact prior-week text being contradicted]
-
-### Verdict: PASS / FAIL
-```
-
-**No "PASS with notes."** Same standard as `/edit-week`: if anything is wrong,
-it's FAIL. Fix at the source, re-run, then re-check for PASS.
-
-## Usage
-
-```
-/canon-check 7
-```
-
-The argument is the week number to check.
+Then read the edition's callbacks and `meta.threads` against the published
+editions that precede it: every callback must match what was actually
+published. Verdict PASS or FAIL; anything wrong is FAIL.

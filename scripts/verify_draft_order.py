@@ -50,15 +50,17 @@ def extract_draft_picks(html_path: Path) -> list[dict]:
     )
 
     for m in pattern.finditer(array_text):
-        picks.append({
-            "round": int(m.group(1)),
-            "pick": int(m.group(2)),
-            "team": m.group(3),
-            "player": m.group(4),
-            "pos": m.group(5),
-            "college": m.group(6),
-            "note": m.group(7),
-        })
+        picks.append(
+            {
+                "round": int(m.group(1)),
+                "pick": int(m.group(2)),
+                "team": m.group(3),
+                "player": m.group(4),
+                "pos": m.group(5),
+                "college": m.group(6),
+                "note": m.group(7),
+            }
+        )
 
     if not picks:
         print("ERROR: No picks extracted from draftPicks array")
@@ -81,9 +83,7 @@ def verify_ordering(picks: list[dict]) -> bool:
 
         # Check we have the expected number of picks per round
         if pick_count != 12:
-            errors.append(
-                f"  Round {r}: found {pick_count} picks (expected 12)"
-            )
+            errors.append(f"  Round {r}: found {pick_count} picks (expected 12)")
 
         # Verify picks are sequential 1..N
         for i, p in enumerate(round_picks):
@@ -125,7 +125,9 @@ def main():
 
     rounds = sorted(set(p["round"] for p in picks))
     print(f"Rounds found: {rounds}")
-    print(f"Picks per round: {[len([p for p in picks if p['round'] == r]) for r in rounds]}")
+    print(
+        f"Picks per round: {[len([p for p in picks if p['round'] == r]) for r in rounds]}"
+    )
 
     if verify_ordering(picks):
         print("PASS: All picks correctly ordered within each round")

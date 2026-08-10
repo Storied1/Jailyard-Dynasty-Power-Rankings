@@ -543,7 +543,7 @@ def main():
         "--content",
         required=True,
         type=Path,
-        help="Path to content JSON (e.g. content/preseason-2026/preseason_content.json)",
+        help="Path to content JSON (e.g. content/preseason-2025/preseason_content.json)",
     )
 
     group = parser.add_mutually_exclusive_group(required=True)

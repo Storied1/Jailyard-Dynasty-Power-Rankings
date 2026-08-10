@@ -4,9 +4,11 @@
 > Status: CANDIDATE (not selected — comparison pending)
 
 ## 1. Name
+
 **The Playfield.** A playing field. A force field. A field of data. The name works in three registers: the literal (a football field), the spatial (an open canvas), and the revelatory (a field that plays back to you). No "The Jailyard" in the title — the brand lives inside, not on top.
 
 ## 2. Core Identity
+
 Twelve dots on a dark screen. That's the first impression. What looks like a loading state is actually the entire product — a gravitational map of your league where every interaction peels back another layer. The story isn't told. It's encountered. The Playfield replaces the scroll with space, the article with atmosphere, and the page with a single, evolving canvas that contains four years of your league's history in one view.
 
 This is not a dashboard. Dashboards are for admitting you have a spreadsheet problem. This is not a visualization demo. Demos are for conferences, not Tuesday nights. The Playfield is a spatial narrative engine — a place where data, writing, rivalry, and trash talk exist as matter you can touch, pull, and orbit around. Think of it as Google Earth for your fantasy league: one surface, infinite depth, and the conviction that zooming in always reveals something you didn't expect.
@@ -38,19 +40,24 @@ The canvas itself evolves. Not just the data — the visual language.
 ## 5. Five Signature Features
 
 ### 1. The Field
+
 The canvas itself. Twelve nodes in orbital positions determined by power ranking (center = #1, edge = #12), sized by point differential, colored by team identity. Nodes breathe — slow pulse for dominant teams, rapid pulse for volatile ones. This is the product. Everything else is what you discover inside it.
 
 ### 2. The Bloom
-Tap any node and it blooms: a radial expansion revealing the team's week — ranking blurb (the full Simmons-voice paragraph), score, top performers, movement arrow, and one ambient chat quote. The writing isn't lost; it's spatialized. Twelve blooms, twelve personal letters. The essay voice bible applies here identically. You're reading TO the owner, second person, conversational, roast-ready.
+
+Tap any node and it blooms: a radial expansion revealing the team's week — ranking blurb (the full editorial paragraph), score, top performers, movement arrow, and one ambient chat quote. The writing isn't lost; it's spatialized. Twelve blooms, twelve personal letters. The editorial standard applies here identically. You're reading TO the owner, second person, conversational, roast-ready.
 
 ### 3. The Threads
+
 Connection lines between every team pair. Thin by default. Hover or tap a thread and the rivalry card surfaces: all-time H2H record, Elo differential, trade history, and the single most relevant chat quote from their shared history. Threads thicken over the season as teams accumulate matchups. After four years, the thread between two rivals is visually unmistakable — a thick, hot line that practically vibrates.
 
 ### 4. The Rail
+
 A timeline scrubber at the bottom of the canvas. Drag it and the entire field animates: nodes migrate, connections redraw, the season replays like a time-lapse. Drag across season boundaries and the field restructures for a different year. Four years of history in one continuous gesture. The Rail turns the Playfield from a weekly snapshot into a living archive. Release the scrubber at any point and you're looking at that exact week's state — tap any node and read that week's blurb.
 
 ### 5. Field Notes
-The weekly essay — the 800-word Simmons-voice column — lives as a full-screen overlay triggered from the center of the field. A pulsing focal point at the canvas origin opens into "Field Notes: Week N." This is where long-form narrative lives. Unlike the Bloom blurbs (team-specific fragments), Field Notes is the panoramic view: the meta-narrative, the chaos summary, the connections between matchups that no single node can contain. The mailbag, comedy bits, and matchup picks live as sections within Field Notes. One tap in, one tap out. The writing quality is preserved; the delivery is spatial.
+
+The weekly essay — the long-form column — lives as a full-screen overlay triggered from the center of the field. A pulsing focal point at the canvas origin opens into "Field Notes: Week N." This is where long-form narrative lives. Unlike the Bloom blurbs (team-specific fragments), Field Notes is the panoramic view: the meta-narrative, the chaos summary, the connections between matchups that no single node can contain. The mailbag, comedy bits, and matchup picks live as sections within Field Notes. One tap in, one tap out. The writing quality is preserved; the delivery is spatial.
 
 ## 6. Design Language
 
@@ -94,15 +101,16 @@ Not a publication (that's The Clubhouse). Not a surveillance operation (that's T
 
 The Playfield is MORE licensable than a template site, not less. A traditional editorial site requires writing for every league — bespoke content, league-specific voice. The Playfield's core experience is data-driven: feed it Sleeper API data and it generates the orbital field, connection threads, Elo trails, and Shift animations automatically. The premium layer is the writing (Bloom blurbs, Field Notes), which the existing AI content pipeline produces from any league's data.
 
-**Licensing model:** config.json (team colors, league name, Sleeper ID) + data pipeline (fetch_sleeper.py already league-agnostic) = functional Playfield in under an hour. Content pipeline (write-week, edit-week, render) = premium tier. The canvas visualizations are the free hook; the Simmons-voice narrative engine is the paid moat.
+**Licensing model:** config.json (team colors, league name, Sleeper ID) + data pipeline (fetch_sleeper.py already league-agnostic) = functional Playfield in under an hour. Content pipeline (write-week, edit-week, render) = premium tier. The canvas visualizations are the free hook; the narrative engine is the paid moat.
 
-**Why this scales:** The hardest part of licensing a content site is the content. The hardest part of licensing a visualization is the data mapping. The Playfield's data mapping is already solved (Sleeper API), and the content pipeline already produces league-agnostic output from any league's JSON. A new league plugs in their Sleeper ID. The Playfield draws itself. The voice bible writes the columns. The owner never touches code.
+**Why this scales:** The hardest part of licensing a content site is the content. The hardest part of licensing a visualization is the data mapping. The Playfield's data mapping is already solved (Sleeper API), and the content pipeline already produces league-agnostic output from any league's JSON. A new league plugs in their Sleeper ID. The Playfield draws itself. The editorial system writes the columns. The owner never touches code.
 
 ## Source Material
+
 - 10 creative agent reports from Concept 01 + 7 from Concept 02 (cross-referenced)
 - Original Playfield pitch from Data Artist agent (Concept 02 session)
 - Research synthesis (`docs/v2-research-synthesis.md`)
 - Content pipeline architecture (CLAUDE.md)
 - Week 6 content JSON + Week 7 data JSON (representative data shapes)
-- Voice bible (`content/voice-bible.md`)
+- Editorial standard (`content/editorial-standard.md`)
 - 392 matchups, 21K chat messages, 4 seasons of Elo data

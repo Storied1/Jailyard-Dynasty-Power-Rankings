@@ -46,7 +46,6 @@ NAME_MAP_PATH = CONTENT_CHAT_DIR / "name-map.json"
 WEEKS_DIR = CONTENT_DIR / "weeks"  # week{N}_data.json (committed source)
 PRESEASON_DIR = CONTENT_DIR / "preseason-2025"
 TEAM_PROFILES_PATH = CONTENT_DIR / "team-profiles.json"
-VOICE_BIBLE_PATH = CONTENT_DIR / "voice-bible.md"
 
 # Derived dirs / files (OUTPUT_ROOT-owned; identical to the source dirs when
 # OUTPUT_ROOT == REPO_ROOT, i.e. in production).
@@ -386,7 +385,7 @@ JPEG_QUALITY = 85
 DESCRIPTION_BATCH_SIZE = 5
 GIPHY_CANDIDATES_PER_SLOT = 3
 
-# Token budgets (LLM generation) — used by local_draft.py, batch_drafts.py
+# Token budgets (local LLM generation defaults)
 SECTION_TOKEN_BUDGETS = {
     "essay": 4096,
     "rankings": 6144,

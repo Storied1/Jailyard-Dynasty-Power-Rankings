@@ -3,8 +3,8 @@
 data/franchises/{roster_id}.json x12 + _index.json. Rekeys owner_id-keyed
 league_history.json aggregates to roster_id (stable across all seasons --
 verified), adds bracket-derived trophy years, arc-derived roster lineage,
-and team-profiles voice callbacks. Inputs are committed files plus the
-generated player arcs; regenerable anywhere the repo is checked out.
+Inputs are committed files plus the generated player arcs; regenerable
+anywhere the repo is checked out.
 """
 
 import argparse
@@ -16,8 +16,8 @@ if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
 # fmt: off
-from shared import (CONTENT_DIR, DATA_DIR, load_json,  # noqa: E402
-                    normalize_username, save_json_canonical)
+from shared import (DATA_DIR, load_json,  # noqa: E402
+                    save_json_canonical)
 
 # fmt: on
 
@@ -26,7 +26,6 @@ CURRENT_SEASON = 2026
 OUT_DIR = DATA_DIR / "franchises"
 ARCS_DIR = DATA_DIR / "2025" / "player_arcs"
 SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "franchise.schema.json"
-PROFILE_SOURCE = "team-profiles.json (2025 preseason)"
 
 
 def championship_from_bracket(winners):
@@ -82,14 +81,6 @@ def build_trophy_case(rid, champs_by_season, playoffs_by_season):
         "runner_ups": runner_ups,
         "playoff_appearances": appearances,
     }
-
-
-def match_profile(teams, username):
-    target = normalize_username(username)
-    for t in teams:
-        if normalize_username(t.get("owner")) == target:
-            return t
-    return None
 
 
 def build_lineage_entry(arc, roster_id):
@@ -176,7 +167,6 @@ def main():
 
     schema = load_json(SCHEMA_PATH, required=True)
     lh = load_json(DATA_DIR / "league_history.json", required=True)
-    profiles = load_json(CONTENT_DIR / "team-profiles.json", required=True)
     rosters_2025 = load_json(DATA_DIR / "2025" / "rosters.json", required=True)
     owner_to_roster = {r["owner_id"]: r["roster_id"] for r in rosters_2025}
     roster_to_owner = {v: k for k, v in owner_to_roster.items()}
@@ -201,13 +191,9 @@ def main():
     )
     players_now = {r["roster_id"]: (r.get("players") or []) for r in rosters_now}
 
-    matched = 0
     for rid in sorted(roster_to_owner):
         oid = roster_to_owner[rid]
         stats = lh["franchise_stats"][oid]
-        profile = match_profile(profiles["teams"], stats["username"])
-        if profile:
-            matched += 1
 
         lineage = []
         for pid in sorted(players_now.get(rid, [])):
@@ -291,21 +277,10 @@ def main():
                 stats, lh["records"], lh["elo_history"].get(oid), oid
             ),
             "roster_lineage": lineage,
-            "voice_bible_callbacks": {
-                "preseason_rank": (profile or {}).get("rank"),
-                "tier": (profile or {}).get("tier"),
-                "roast": (profile or {}).get("roast"),
-                # position-keyed dict in team-profiles ({qb: [...], rb: ...})
-                "key_players": (profile or {}).get("keyPlayers") or {},
-                "source": PROFILE_SOURCE,
-            },
         }
 
         jsonschema.validate(franchise, schema)  # loud failure
         save_json_canonical(OUT_DIR / f"{rid}.json", franchise)
-
-    if matched != 12:
-        sys.exit(f"GATE: only {matched}/12 team-profiles matched by username")
 
     total_appearances = sum(len(playoffs_by_season[s]) for s in SEASONS)
     if total_appearances != 6 * len(SEASONS):

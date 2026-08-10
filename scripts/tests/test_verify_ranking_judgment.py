@@ -1,10 +1,10 @@
-"""The judgment gate's own acceptance test.
+"""The judgment gate's acceptance tests.
 
-The load-bearing half is the RED proof: the gate must FAIL on the committed
-arithmetic ranking_record.json (G1, G2, G4). An instrument that cannot fail on
-a known-bad sample is measuring nothing. The synthetic tests then pin each
-check's firing condition individually, and the private-state tests prove the
-full gate end to end where the frozen state exists.
+The load-bearing half is the RED proof: the gate must FAIL on the arithmetic
+ranking_record.json (G1, G2, G4). An instrument that cannot fail on a
+known-bad sample is measuring nothing. The synthetic fixtures pin each
+check's firing condition; the private-state tests prove the full gate end to
+end where the frozen state exists.
 """
 
 import json
@@ -14,6 +14,7 @@ import pytest
 
 from scripts.verify_ranking_judgment import (
     baseline_order,
+    check_g0_structure,
     check_g1_no_arithmetic,
     check_g2_deviation_with_cause,
     check_g3_contender_sanity,
@@ -23,9 +24,9 @@ from scripts.verify_ranking_judgment import (
 )
 
 REPO = Path(__file__).resolve().parents[2]
-EDITION_DIR = REPO / "content" / "editions" / "2025-wk01-recap"
-OLD_RECORD = EDITION_DIR / "ranking_record.json"
-NEW_RECORD = EDITION_DIR / "ranking_judgment.json"
+ARITHMETIC_RECORD = (
+    REPO / "content" / "editions" / "2025-wk01-recap" / "ranking_record.json"
+)
 PRIVATE_STATE = REPO / "private_editions" / "2025-wk01-recap" / "state.json"
 
 _needs_private = pytest.mark.skipif(
@@ -45,6 +46,7 @@ def _team(rank, rid, wins, pf, prior_rank, outcome="W", families=None, reason=No
     return {
         "rank": rank,
         "roster_id": rid,
+        "team_name": f"Team {rid}",
         "record": f"{wins}-{1 - wins}",
         "points_for": pf,
         "points_against": 100.0,
@@ -95,6 +97,51 @@ def _synthetic(order=None, families=("week_result", "chat_message"), reasons=Tru
     return {"edition_id": "synthetic", "positions": positions}
 
 
+def green_record():
+    """A full 12-team record that passes G0-G4: three reasoned, fact-bound
+    deviations from the arithmetic baseline; the prior-season champion (a
+    winner) ranked above every bottom-3 prior finisher."""
+    rids = [str(i) for i in range(1, 13)]
+    published = ["1", "2", "3", "4", "7", "5", "6", "8", "9", "10", "11", "12"]
+    base = {rid: i + 1 for i, rid in enumerate(rids)}
+    positions = []
+    for rank, rid in enumerate(published, start=1):
+        i = int(rid)
+        wins = 1 if i <= 6 else 0
+        deviates = rank != base[rid]
+        positions.append(
+            _team(
+                rank,
+                rid,
+                wins,
+                160.0 - i,
+                i,  # rid 1 is the returning champion and won
+                "W" if wins else "L",
+                families=("week_result", "prior_season", "chat_message"),
+                reason=("schedule-quality call" if deviates else None),
+            )
+        )
+        positions[-1]["baseline_rank"] = base[rid]
+    return {
+        "edition_id": "synthetic",
+        "positions": positions,
+        "baseline": [{"rank": base[r], "roster_id": r} for r in rids],
+    }
+
+
+def test_green_record_passes_g0_through_g4():
+    rec = green_record()
+    for check in (
+        check_g0_structure,
+        check_g1_no_arithmetic,
+        check_g2_deviation_with_cause,
+        check_g3_contender_sanity,
+        check_g4_evidence_breadth,
+    ):
+        ok, detail = check(rec)
+        assert ok, f"{check.__name__}: {detail}"
+
+
 def test_baseline_order_is_wins_then_points_then_roster_id():
     rec = _synthetic()
     assert baseline_order(rec["positions"]) == ["A", "B", "C", "D", "E", "F"]
@@ -111,7 +158,6 @@ def test_g1_passes_on_deviated_order():
 
 
 def test_g2_fails_below_three_deviations():
-    # one swap = two deviating positions: still a spreadsheet
     ok, detail = check_g2_deviation_with_cause(
         _synthetic(order=["A", "C", "B", "D", "E", "F"])
     )
@@ -145,7 +191,6 @@ def test_g2_passes_with_reasoned_fact_bound_deviations():
 
 
 def test_g3_fails_when_winning_champion_ranks_below_bottom3():
-    # A is prior-season #1 and won; E and F are bottom-3 priors (n-2 = 4)
     rec = _synthetic(order=["B", "E", "A", "C", "D", "F"])
     ok, detail = check_g3_contender_sanity(rec)
     assert not ok and "prior-season #1" in detail
@@ -192,114 +237,74 @@ def test_g4_passes_on_two_families_one_beyond_box_score():
     assert ok, detail
 
 
-# ------------------------------------------------- committed artifacts (RED) --
+# ------------------------------------------------------- G0 completeness --
+
+
+def test_g0_fails_when_a_position_is_removed():
+    rec = green_record()
+    del rec["positions"][4]
+    ok, detail = check_g0_structure(rec)
+    assert not ok and "11 positions" in detail
+
+
+def test_g0_fails_on_duplicate_roster():
+    rec = green_record()
+    rec["positions"][3]["roster_id"] = rec["positions"][2]["roster_id"]
+    ok, detail = check_g0_structure(rec)
+    assert not ok and "duplicate roster" in detail
+
+
+def test_g0_fails_on_duplicate_rank():
+    rec = green_record()
+    rec["positions"][5]["rank"] = rec["positions"][6]["rank"]
+    ok, detail = check_g0_structure(rec)
+    assert not ok and "not exactly 1-12" in detail
+
+
+def test_g0_fails_on_missing_rank():
+    rec = green_record()
+    del rec["positions"][0]["rank"]
+    ok, _ = check_g0_structure(rec)
+    assert not ok
+
+
+def test_g0_fails_on_unknown_roster_outside_baseline():
+    rec = green_record()
+    rec["positions"][7]["roster_id"] = "99"
+    ok, detail = check_g0_structure(rec)
+    assert not ok and "not in the record's baseline" in detail
+
+
+# ------------------------------------------------- committed artifact (RED) --
 
 
 def test_gate_goes_red_on_the_arithmetic_record():
-    """THE acceptance test: G1, G2 and G4 must all fire on the known-bad
-    committed artifact. If any passes, the instrument is broken."""
-    record = _load(OLD_RECORD)
+    """G1, G2 and G4 must all fire on the arithmetic record. If any passes,
+    the instrument is broken."""
+    record = _load(ARITHMETIC_RECORD)
     assert not check_g1_no_arithmetic(record)[0]
     assert not check_g2_deviation_with_cause(record)[0]
     assert not check_g4_evidence_breadth(record)[0]
-    # and the two that legitimately hold on the old artifact still hold
+    # the two that legitimately hold on the arithmetic record still hold
+    assert check_g0_structure(record)[0]
     assert check_g3_contender_sanity(record)[0]
-
-
-def test_judgment_record_passes_static_checks():
-    record = _load(NEW_RECORD)
-    for check in (
-        check_g1_no_arithmetic,
-        check_g2_deviation_with_cause,
-        check_g3_contender_sanity,
-        check_g4_evidence_breadth,
-    ):
-        ok, detail = check(record)
-        assert ok, f"{check.__name__}: {detail}"
-
-
-def test_judgment_record_orders_twelve_teams():
-    record = _load(NEW_RECORD)
-    assert sorted(p["rank"] for p in record["positions"]) == list(range(1, 13))
-    assert len({p["roster_id"] for p in record["positions"]}) == 12
 
 
 # ------------------------------------------------------- full gate (private) --
 
 
 @_needs_private
-def test_full_gate_green_on_judgment_record():
-    assert main(["--record", str(NEW_RECORD)]) == 0
-
-
-@_needs_private
 def test_full_gate_red_on_arithmetic_record():
-    assert main(["--record", str(OLD_RECORD)]) == 1
+    assert main(["--record", str(ARITHMETIC_RECORD)]) == 1
 
 
 @_needs_private
 def test_g5_fires_on_a_fabricated_citation():
-    record = _load(NEW_RECORD)
-    record["positions"][0]["reasoning"]["evidence"][0]["fact_ids"].append(
+    record = _load(ARITHMETIC_RECORD)
+    record["positions"][0]["evidence"]["roster"]["fact_ids"].append(
         "fact:0000000000000000000000000000000000000000000000000000000000000000"
     )
     passed, results = run_gate(record)
     assert not passed
-    g5 = dict((name, (ok, detail)) for name, ok, detail in results)["G5 resolution"]
+    g5 = {name: (ok, detail) for name, ok, detail in results}["G5 resolution"]
     assert not g5[0] and "do not resolve" in g5[1]
-
-
-# ------------------------------------------------------- G0 completeness --
-
-
-from scripts.verify_ranking_judgment import check_g0_structure  # noqa: E402
-
-
-def test_g0_fails_when_a_position_is_removed():
-    """Blake's probe, made permanent: an 11-team ranking must never be GREEN."""
-    record = _load(NEW_RECORD)
-    del record["positions"][4]
-    ok, detail = check_g0_structure(record)
-    assert not ok and "11 positions" in detail
-
-
-def test_g0_fails_on_duplicate_roster():
-    record = _load(NEW_RECORD)
-    record["positions"][3]["roster_id"] = record["positions"][2]["roster_id"]
-    ok, detail = check_g0_structure(record)
-    assert not ok and "duplicate roster" in detail
-
-
-def test_g0_fails_on_duplicate_rank():
-    record = _load(NEW_RECORD)
-    record["positions"][5]["rank"] = record["positions"][6]["rank"]
-    ok, detail = check_g0_structure(record)
-    assert not ok and "not exactly 1-12" in detail
-
-
-def test_g0_fails_on_missing_rank():
-    record = _load(NEW_RECORD)
-    del record["positions"][0]["rank"]
-    ok, detail = check_g0_structure(record)
-    assert not ok
-
-
-def test_g0_fails_on_unknown_roster_outside_baseline():
-    record = _load(NEW_RECORD)
-    record["positions"][7]["roster_id"] = "99"
-    ok, detail = check_g0_structure(record)
-    assert not ok and "not in the record's baseline" in detail
-
-
-def test_g0_passes_on_the_committed_judgment_record():
-    ok, detail = check_g0_structure(_load(NEW_RECORD))
-    assert ok, detail
-
-
-@_needs_private
-def test_full_gate_red_when_a_position_is_removed(tmp_path):
-    record = _load(NEW_RECORD)
-    del record["positions"][0]
-    mutated = tmp_path / "incomplete.json"
-    mutated.write_text(json.dumps(record), encoding="utf-8")
-    assert main(["--record", str(mutated)]) == 1

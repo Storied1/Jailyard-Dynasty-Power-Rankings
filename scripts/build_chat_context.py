@@ -1143,7 +1143,7 @@ def ai_rescore_candidates(candidates, week_data, api_key=None):
         prompt = (
             "You are scoring fantasy football group chat messages for a weekly column.\n"
             "Rate each on a 1-10 scale for: humor, relevancy to this week's matchups, "
-            "and how well it would read in a Bill Simmons-style column.\n"
+            "and how well it would read in an elite long-form sports column.\n"
             'Return ONLY a JSON array of objects: [{"idx": 0, "score": 8.5, "type": "trash_talk", '
             '"why": "brief reason"}]\n\n' + "\n\n".join(prompt_items)
         )

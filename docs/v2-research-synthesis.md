@@ -10,7 +10,7 @@
 
 **Dynasty is the right market.** Year-round engagement, deeper emotional investment, longer histories. Market: 400K-650K dynasty leagues, 1-3% conversion = 4,000-20,000 paying leagues, $200K-$700K ARR at $50/season.
 
-**The voice bible is genuine IP.** 12 codified DNA patterns with anti-patterns and exemplars. No competitor has attempted this. The moat is voice, not tech.
+**The editorial standard is genuine IP.** 12 codified DNA patterns with anti-patterns and exemplars. No competitor has attempted this. The moat is voice, not tech.
 
 **game_context is solved.** nfl_data_py/nflverse (MIT-licensed) + Sleeper's undocumented `stats/nfl/{season}/{week}` endpoint both provide real NFL stats. Player ID mapping via gsis_id is already solved.
 
@@ -38,35 +38,38 @@
 ## Ranked Opportunities
 
 ### Tier 1: Do First (high impact, high feasibility)
+
 1. Add `game_context` via Sleeper stats endpoint (~1 session)
 2. Editorial typography overhaul: serif headlines, drop caps, pull quotes (~1-2 sessions)
 3. Migrate to 11ty: extract duplicated CSS, set up data cascade (~2-3 sessions)
 4. "My Team" localStorage personalization (trivial implementation)
 
 ### Tier 2: Do Next (high impact, moderate feasibility)
+
 5. Progressive content format (4-5 season phases with distinct structures)
 6. Narrative arc navigation (arcs.json already exists)
 7. Weekly roster snapshots in pipeline
 8. Elo small multiples (replace spaghetti chart)
 
 ### Tier 3: Build Toward (requires decisions first)
+
 9. Licensing Phase 1 (GitHub template repo)
 10. Sleeper Mini exploration
 11. Discord webhook distribution
 
 ## Resolved Questions
 
-| Topic | Answer |
-|-------|--------|
-| NFL game context source | Sleeper undocumented stats + nflreadpy as backup. No paid API. |
-| What's beyond GIPHY? | Kill GIFs. Editorial typography, data viz, CSS animations. |
-| Tech stack | 11ty. Not Astro, not Next.js, not Tailwind. |
-| Sleeper features on the table? | Stats endpoint, traded_picks, previous_league_id. No write API. |
-| Premium site vs licensable? | Both, sequentially. Premium first, licensing is a natural byproduct. |
+| Topic                          | Answer                                                               |
+| ------------------------------ | -------------------------------------------------------------------- |
+| NFL game context source        | Sleeper undocumented stats + nflreadpy as backup. No paid API.       |
+| What's beyond GIPHY?           | Kill GIFs. Editorial typography, data viz, CSS animations.           |
+| Tech stack                     | 11ty. Not Astro, not Next.js, not Tailwind.                          |
+| Sleeper features on the table? | Stats endpoint, traded_picks, previous_league_id. No write API.      |
+| Premium site vs licensable?    | Both, sequentially. Premium first, licensing is a natural byproduct. |
 
 ## Open Questions (Need Brainstorming)
 
-1. Voice evolution — own identity or lean harder into Simmons?
+1. Voice evolution — own identity or lean harder into long-form sports columnists?
 2. Content quality at scale — cold start problem for new leagues
 3. Distribution strategy — Discord vs email vs Sleeper Mini
 4. Owner bias handling — should Ken-obi get roasted harder?
@@ -77,12 +80,14 @@
 ## Recommended Brainstorm Agenda
 
 ### Session 1: Design Identity + Editorial Voice (creative decisions)
+
 - Define "not AI slop" — review reference sites, pick a direction
 - Progressive content format — define season phases and structure shifts
 - Owner bias policy
-- Voice evolution — Simmons foundation + Jailyard's own identity
+- Voice evolution — long-form sports columnists foundation + Jailyard's own identity
 
 ### Session 2: Product Scope + Licensing Vision (strategic decisions)
+
 - "My Team" personalization scope
 - Distribution channel selection
 - Narrative arc navigation design
@@ -90,6 +95,7 @@
 - Cold start problem for new leagues
 
 ### Engineering Tasks (just build, no brainstorm needed)
+
 - game_context pipeline (Sleeper stats endpoint)
 - 11ty migration
 - Typography overhaul (after Session 1 design direction)

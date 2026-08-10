@@ -1,192 +1,66 @@
 # AGENTS.md — The Jailyard Dynasty Power Rankings
 
-## Quick Context
+Operating guide for coding agents. `CLAUDE.md` is the full reference; this
+file carries the invariants that must never be violated.
 
-Static fantasy football dynasty league site (12 teams, est. 2022). Zero dependencies — pure HTML/CSS/JS, inline everything. Data from Sleeper API (cached JSON + live fallback). Glassmorphic dark theme with light toggle.
+## What this is
 
-## Tech Stack
+Static site + editorial system for a 12-team Sleeper dynasty league. Pure
+HTML/CSS/JS, everything inline, zero dependencies. Python data pipeline.
+The written product: one long-form column edition per week of the season
+(preseason first), power rankings as the recurring spine, bar defined in
+`content/editorial-standard.md`.
 
-- HTML5 / CSS3 / Vanilla JS (no frameworks, no npm, no build)
-- Canvas 2D API for charts (scatter, stacked bar, trend, Elo)
-- Python 3 for data pipeline (`fetch_sleeper.py`, `scripts/*.py` — 27 scripts)
-- GitHub Actions for automated weekly data fetches
-- Hosted as static files (GitHub Pages or direct)
+## Invariants
 
-## Pages
+- **Zero dependencies, everything inline.** No npm, no CDN, no frameworks.
+  `config.js` is the only external file a page loads.
+- **Glassmorphic dark theme with light toggle.** All colors via `:root` CSS
+  variables (`--accent2`, not `--accent-2`). Canvas handles
+  `devicePixelRatio`. No infinite shimmer/pulse/glow animations.
+- **HTML is prettier-excluded** (`.prettierignore` = `*.html`). Never
+  reformat the compact hand-maintained pages.
+- **Editions cite only registered sources** (`content/writer-inputs.json`),
+  each dated at or before the edition's cutoff. Chat quotes verbatim;
+  numbers from the data packets; outside coverage cited with publication
+  date. Edition bodies use only knowledge available at that point in the
+  season (site chrome is present-day and exempt).
+- **No machine tells in prose**: zero em dashes, no "it's not X, it's Y"
+  constructions, prose never discusses how the column gets made.
+- **Quality gates are binary.** `verify_week_content.py`,
+  `verify_ranking_judgment.py`, `migration_census.py --all`, `/edit-week`,
+  `/canon-check`: an error means REVISE/FAIL. Fix first, approve second.
+- **Ranking orders are judgment, gated.** Published order matches a record
+  passing `python scripts/verify_ranking_judgment.py --record <path>`
+  (12 complete positions, non-arithmetic order, reasoned deviations,
+  contender sanity, evidence breadth, resolving citations).
+- **Temporal admission is exact-instant** via `shared.admissible`
+  (tz-aware ≤ cutoff; malformed/naive/date-only rejected).
+- **Append-only stores stay append-only**: `data/captures/2026/`,
+  `content/seals/2026/`, `content/review-log.jsonl`. The frozen
+  `source_policy_2026.v1.json` changes only by issuing a new version,
+  never by editing.
+- **Never `git add -f`** `private_captures/`, `private_bundles/`, or any
+  gitignored path. Staging guard:
+  `git diff --cached --name-only | grep -qE '^(private_captures|private_bundles)/'`
+  must match nothing.
+- **Chat provenance manifests are receipt-bound**: rewrite
+  `content/chat/provenance.json` only via
+  `generate_chat_provenance.py --write --receipt` after a green
+  `--rebuild-check`.
+- **Content fixes require HTML re-render**; a content JSON edit does not
+  update its page.
+- **After every push, watch CI keyed to HEAD's SHA** (see CLAUDE.md for the
+  exact command). A push is not done until its run is green.
 
-| File                  | Purpose                                                                      |
-| --------------------- | ---------------------------------------------------------------------------- |
-| `index.html`          | Landing — starfield canvas, stat counters, nav cards, Championship Vault     |
-| `preseason.html`      | Preseason rankings — data tables, charts, team cards, rosters                |
-| `preseason-2026.html` | 2026 Preview — next-season outlook                                           |
-| `season.html`         | Season hub — weekly results, power rankings, trend charts (Sleeper API)      |
-| `power-rankings.html` | Standalone power rankings page                                               |
-| `history.html`        | League Bible — all-time records, H2H matrix, Elo ratings, franchise profiles |
-| `draft.html`          | Draft recap — full draft board, grades, storylines                           |
-| `trades.html`         | Trade tracker — timeline, season filter, activity chart                      |
-| `week1-6.html`        | Weekly columns — essay, power rankings, mailbag, matchup picks               |
-| `config.js`           | Central league config — name, Sleeper IDs, colors, nav (edit to rebrand)     |
+## Pipeline per edition
 
-## Data
-
-- `league.teams[]` and `extras{}` in `preseason.html` (inline JS objects)
-- `config.js` — league branding, Sleeper IDs, nav links (loaded by all pages)
-- `data/` directory (generated by `fetch_sleeper.py`, consumed by season/history pages)
-- `data/{year}/season_combined.json` — main season data file
-- `data/league_history.json` — cross-season analytics (Elo, H2H, records)
-- Sleeper API (`https://api.sleeper.app/v1`) as live fallback
-
-## P-only 2026 Prospective Pipeline (OPERATING)
-
-Contract `docs/superpowers/plans/2026-08-03-jailyard-p-only-fallback.md`; modules `scripts/{capture,capture_optional,cutoff,bundle,seal}_2026.py`. Gate/operate: `capture_2026.py --season 2026 --tranche A` → `cutoff_2026.py --write-receipt` → `bundle_2026.py --edition <ed> --arm record_points --policy content/governance/source_policy_2026.v1.json` → `seal_2026.py --edition <ed> --arm record_points --trial 1`; check with `seal_2026.py --verify-all` / `--rederive-all` (all need `POLARS_SKIP_CPU_CHECK=1`).
-
-- `data/captures/2026/` and `content/seals/2026/` are APPEND-ONLY — never edit, delete, or re-seal; `source_policy_2026.v1.json` is frozen — supersede, never modify; freeze requires `--expected-candidate-sha256`.
-- `private_captures/` + `private_bundles/` are gitignored — never `git add -f`; run the staging guard before committing captures/bundles.
-- Prettier reformatting committed pipeline JSON is safe (verification recomputes canonical content); value edits break seals by design.
-
-## Critical Rules
-
-- **NEVER touch `dontuse`, `dontuse2`, `dontusedraft3`** — archived legacy files
-- **KEEP everything inline** — no external CSS/JS files unless explicitly requested
-- **ZERO dependencies** — no npm, no CDN imports, no frameworks
-- **Maintain glassmorphic dark theme** — `backdrop-filter`, CSS variables, gradients
-- **CSS variables for theming** — all colors via `var(--name)`, `:root` block per file
-- **Use `--accent2`** not `--accent-2` (standardized across files)
-- **Canvas charts must handle `devicePixelRatio`** for Retina displays
-- **Data changes must update all consumers** — if you change `league.teams` schema, grep for every reference
-
-## Known Patterns
-
-- Data loading: try cached JSON → catch → live Sleeper API → catch → error UI
-- IIFEs `(function(){ ... })()` for scope isolation (use in new code)
-- `idFromName()` helper converts team names to HTML-safe IDs
-- View Transitions API for page navigation polish
-- Speculation Rules for prerendering linked pages
-- Intersection Observer for scroll-triggered `.visible` class animations
-
-## Style Conventions
-
-- CSS: kebab-case classes, BEM-like for hero section, `clamp()` for responsive type
-- JS: camelCase, functional array methods (`forEach`, `map`, `sort`)
-- Commits: descriptive, informal
-- Variable naming: `:root` block defines `--bg`, `--fg`, `--muted`, `--accent`, `--accent2`, `--card`, `--border`, `--glass`, `--good`, `--bad`, `--warn`
-
-## AI Writing Staff (Content Pipeline)
-
-### Architecture
-
-Bill Simmons-style AI writers generate weekly columns from Sleeper data + WhatsApp chat context. Five-step pipeline:
-
-1. **`/write-week N`** — Writer agent: essay, 12 power ranking blurbs, confessionals, mailbag, bits, matchup picks (reads chat context)
-2. **`/edit-week N`** — Editor-in-Chief: quality gate (data accuracy, voice score, variety, continuity, tone)
-3. **`/pick-media N`** — Meme Savant: auto-picks GIFs for each media slot (needs GIPHY API key)
-4. **Resolve + render** — Tell Claude Code "resolve and render week N" → `media_cache.json` + `weekN.html`
-5. **Push** — "push it"
-
-### Content Files
-
-| Path                                    | Purpose                                                                                                                        |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `content/voice-bible.md`                | Master style guide — 12 Simmons DNA patterns, Jailyard lexicon, templates, anti-patterns                                       |
-| `content/team-profiles.json`            | All 12 teams: preseason rank, tier, roast, key players, full preseason essay text                                              |
-| `content/weeks/weekN_data.json`         | AI-ready data per week (matchups, standings, awards, context) — 18 files                                                       |
-| `content/weeks/weekN_content.json`      | Generated content per week (essay, rankings, mailbag, bits, picks)                                                             |
-| `content/weeks/weekN_chat_context.json` | WhatsApp chat quotes relevant to each week — 18 files                                                                          |
-| `content/chat/`                         | Chat analytics: `league-memory.json`, `arcs.json`, `predictions.json`, `relationships.json`, `consensus.json`, `personas/*.md` |
-| `content/chat/name-map.json`            | Identity chain: WhatsApp display name → real name, team, handle, roster_id                                                     |
-
-### Key Scripts
-
-| Script                                 | Purpose                                                               |
-| -------------------------------------- | --------------------------------------------------------------------- |
-| `fetch_sleeper.py`                     | Fetch season data from Sleeper API                                    |
-| `scripts/extract_week_data.py`         | Transforms `season_combined.json` → per-week AI-ready JSON            |
-| `scripts/verify_week_content.py`       | Content validator (Tier 1: structural, Tier 2: data, Tier 3: chat)    |
-| `scripts/parse_whatsapp.py`            | Phase 1: parse raw WhatsApp export → `chat/parsed_messages.json`      |
-| `scripts/map_chat_deterministic.py`    | Phase 2 MAP: heuristic extraction from monthly chat chunks            |
-| `scripts/reduce_chat_deterministic.py` | Phase 2 REDUCE: merge MAP outputs → analytics files                   |
-| `scripts/build_chat_context.py`        | Phase 3: per-week chat relevancy engine (`--no-ai` for deterministic) |
-
-### Chat Pipeline Invariants (do not violate)
-
-- **One admitter at every knowledge-cutoff boundary.** Every cutoff admission decision (messages, predictions + nested evidence, jokes, arcs, callbacks) goes through the uniform exact-instant admitter `shared.admissible` — admit iff an exact tz-aware instant `<=` the cutoff; missing/malformed/naive/date-only/month-only rejected. `shared.parse_ts` may do downstream arithmetic on an already-admitted exact instant (e.g. the lower recency-window bound, `build_chat_context.filter_messages_in_window`) but never decides cutoff admissibility. Month-granular comparison is banned.
-- **Provenance: `--verify` is the default gate; `--write` must be receipt-bound.** `python scripts/generate_chat_provenance.py` (no flags) verifies `content/chat/provenance.json` against disk. Never write the manifest except via `--write --receipt <path>` with a receipt emitted by a green `--rebuild-check` — a write is refused by design unless the ENTIRE six-role portable payload matches the receipt (`inputs_private`, `inputs_source`, `derived_intermediates`, `inputs_data`, `code`, `outputs_derived`, plus the private-derived `counts`); `normalized_source_root` is separate receipt-only authorization, never persisted. Do not work around a refusal.
-- **`arc_group_id` is NOT durable identity.** It is unique in-snapshot and stable only for an unchanged `(type, sorted participants)` crew — it changes when a crew gains a member. Never use it for cross-season/cross-snapshot thread continuity.
-- **Joke recency comes from `last_observed_at`,** never from the legacy month-grained `first_seen`/`last_seen` compatibility fields (see `.claude/commands/write-week.md`).
-
-### Workflow
-
-```bash
-# Data pipeline (already done for 2025, all 18 weeks)
-python fetch_sleeper.py --season 2025
-python scripts/extract_week_data.py --all --pretty
-
-# Chat pipeline (already done — 30 months analyzed, 18 weeks contextualized)
-python scripts/split_chat_months.py
-python scripts/map_chat_deterministic.py
-python scripts/reduce_chat_deterministic.py
-python scripts/build_chat_context.py --week N --season 2025 --no-ai
-
-# Weekly column generation
-/write-week N       # → weekN_content.json (reads chat context automatically)
-/edit-week N        # → APPROVE / REVISE / REJECT
-/pick-media N       # → media_picks.json (needs GIPHY API key in settings.local.json)
-# "resolve and render week N"  → media_cache.json + weekN.html
-# "push it"
-```
-
-### Voice Bible Key Rules
-
-- Write in **second person** ("you") for team blurbs — always TO the owner, never about them
-- **Group chat is a character** — reference it at least 3x per column
-- **Data as punctuation** — stats embedded in narrative, never standalone
-- **Every section ends with a kicker line** — memorable closer
-- **Never hallucinate stats** — every number must come from week data JSON
-- **Playful roasts only** — make owners laugh, never wince
-- See `content/voice-bible.md` for full 12-pattern guide
-
-### Current Status
-
-- 2025 data: ALL 18 weeks fetched and extracted
-- League history: 2022-2026, 392 matchups, Elo ratings computed
-- Chat integration: 21K messages analyzed, 18 weekly context files built
-- Weeks 1-6: content written, validated (PASS), rendered to HTML, pushed
-- Week 7+: data + chat context ready, content not yet written
-- Picks ledger: cumulative through Week 6 (Week 7+ pending)
-
-### Python Note (Windows)
-
-Use `python` not `python3` on this machine. Python is at:
-`C:\Users\blake\AppData\Local\Programs\Python\Python312\python`
-
-## Common Tasks
-
-- **Generate weekly column:** `/write-week N` → `/edit-week N` → `/pick-media N` → resolve+render → push
-- **Validate content:** `python scripts/verify_week_content.py --week N --pretty`
-- **Refresh data:** `python fetch_sleeper.py --all` then commit `data/`
-- **Extract week data:** `python scripts/extract_week_data.py --week N --pretty`
-- **Rebuild chat context:** `python scripts/build_chat_context.py --week N --season 2025 --no-ai`
-- **Update rankings:** Modify `league.teams[]` in `preseason.html`, adjust `rank` values
-- **Add chart:** Canvas 2D pattern from `preseason.html`, always handle `devicePixelRatio`
-- **Test changes:** Open in browser, check responsive, verify Canvas renders, test theme toggle
-
-## Local LLM Integration (Ollama)
-
-- **Ollama** running at `localhost:11434` with three models:
-  - `huihui_ai/qwen3.5-abliterated:35b` — 23GB MoE, creative writing / heavy reasoning
-  - `huihui_ai/qwen3.5-abliterated:9b` — 6.6GB, fast reviews and lightweight tasks
-  - `nomic-embed-text` — 274MB, embeddings (768-dim)
-- **MCP Server** (`scripts/ollama_mcp_server.py`) — exposes `ollama_generate`, `ollama_chat`, `ollama_embed` as Claude Code tools via `.mcp.json`
-- **Local Draft** (`scripts/local_draft.py`) — generate column drafts locally before Claude Code edits: `python scripts/local_draft.py --week N --section essay`
-- **Chat Embeddings** (`scripts/embed_chat.py`) — vectorize 21K WhatsApp messages for semantic search: `python scripts/embed_chat.py` then `--query "trade veto"`
-- **Post-Edit Hook** (`scripts/local_review_hook.py`) — Qwen 8B reviews diffs after every Write/Edit
-- **Qwen 3 thinking mode**: all Qwen 3 models use `<think>` tokens that consume `num_predict` budget — scripts double the token limit to compensate
+`/write-week N` → `/canon-check N` → `/edit-week N` → media commands if the
+edition uses media → `/render-week N` → browser-verify (zero console errors)
+→ commit. Preseason uses the `-preseason` variants and publishes first.
 
 ## Environment
 
-- Local dev: `python -m http.server 8000` or open HTML directly
-- Python: use `python` not `python3` (Windows)
-- Ollama: `localhost:11434` — must be running for MCP server and local scripts
-- GIPHY API key: stored in `.Claude Code/settings.local.json` (gitignored) — needed for `/pick-media`
-- GitHub Actions runs `fetch_sleeper.py` automatically on NFL Sundays
-- `chat/` directory and `content/chat/.map_cache/` are gitignored (privacy + intermediate data)
+Windows. Use `python`, not `python3`. `pip install -r requirements.txt` on
+fresh clones. Tests: `python -m pytest scripts/tests/`. Local server:
+`python -m http.server 8000`.

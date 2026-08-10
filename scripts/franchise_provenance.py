@@ -99,8 +99,7 @@ def username_key(text):
     """Join key for a Sleeper handle: fold(), then ALL whitespace removed.
 
     Whitespace-insensitive because of one documented corpus drift -- the 2025
-    artifact carries `kharlo w` where Sleeper carries `kharlow` (recorded in
-    CLAUDE.md and already patched in merge_team_profiles.py). The emitter proves
+    artifact carries `kharlo w` where Sleeper carries `kharlow`. The emitter proves
     the key is still injective on both sides before it is used, so the fold can
     never silently merge two owners.
     """

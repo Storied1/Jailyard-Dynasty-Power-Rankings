@@ -211,12 +211,9 @@ def test_run_tier1_returns_warnings_key():
 import json as _json  # noqa: E402
 from pathlib import Path as _Path  # noqa: E402
 
-import pytest  # noqa: E402
-
 from verify_week_content import check_rankings_order  # noqa: E402
 
 _REPO = _Path(__file__).resolve().parents[2]
-_JUDGMENT_SRC = "content/editions/2025-wk01-recap/ranking_judgment.json"
 _ARITHMETIC_SRC = "content/editions/2025-wk01-recap/ranking_record.json"
 
 
@@ -285,36 +282,56 @@ def test_red_ranking_source_fails_closed():
     assert errors and "RED" in errors[0]
 
 
-_PRIVATE = (_REPO / "private_editions" / "2025-wk01-recap" / "state.json").exists()
+def _with_green_gate(monkeypatch, record):
+    """Point a ranking_source at a real temp file and force the gate GREEN, so
+    the order-comparison stage is exercised in isolation."""
+    import verify_ranking_judgment as vrj
+
+    monkeypatch.setattr(vrj, "run_gate", lambda rec: (True, []))
+    tmp = _REPO / "content" / "weeks" / "_order_test_record.json"
+    tmp.write_text(_json.dumps(record), encoding="utf-8")
+    return "content/weeks/_order_test_record.json", tmp
 
 
-@pytest.mark.skipif(not _PRIVATE, reason="private edition state absent")
-def test_reversed_published_order_fails_against_green_judgment_record():
-    record = _json.loads((_REPO / _JUDGMENT_SRC).read_text(encoding="utf-8"))
-    names = [
-        p["team_name"] for p in sorted(record["positions"], key=lambda p: p["rank"])
-    ]
-    content = {
-        "meta": {"ranking_source": _JUDGMENT_SRC},
-        "rankings": [
-            {"rank": i + 1, "team_name": t} for i, t in enumerate(reversed(names))
-        ],
+def _mini_record():
+    names = ["Alpha", "Beta", "Gamma"]
+    return {
+        "positions": [
+            {"rank": i + 1, "roster_id": str(i + 1), "team_name": t}
+            for i, t in enumerate(names)
+        ]
     }
-    errors = []
-    check_rankings_order(content, {"standings": []}, errors)
-    assert errors and "gate-passed judgment record" in errors[0]
 
 
-@pytest.mark.skipif(not _PRIVATE, reason="private edition state absent")
-def test_matching_published_order_passes_against_green_judgment_record():
-    record = _json.loads((_REPO / _JUDGMENT_SRC).read_text(encoding="utf-8"))
-    names = [
-        p["team_name"] for p in sorted(record["positions"], key=lambda p: p["rank"])
-    ]
-    content = {
-        "meta": {"ranking_source": _JUDGMENT_SRC},
-        "rankings": [{"rank": i + 1, "team_name": t} for i, t in enumerate(names)],
-    }
-    errors = []
-    check_rankings_order(content, {"standings": []}, errors)
-    assert errors == []
+def test_reversed_published_order_fails_against_green_record(monkeypatch):
+    src, tmp = _with_green_gate(monkeypatch, _mini_record())
+    try:
+        content = {
+            "meta": {"ranking_source": src},
+            "rankings": [
+                {"rank": i + 1, "team_name": t}
+                for i, t in enumerate(["Gamma", "Beta", "Alpha"])
+            ],
+        }
+        errors = []
+        check_rankings_order(content, {"standings": []}, errors)
+        assert errors and "gate-passed judgment record" in errors[0]
+    finally:
+        tmp.unlink()
+
+
+def test_matching_published_order_passes_against_green_record(monkeypatch):
+    src, tmp = _with_green_gate(monkeypatch, _mini_record())
+    try:
+        content = {
+            "meta": {"ranking_source": src},
+            "rankings": [
+                {"rank": i + 1, "team_name": t}
+                for i, t in enumerate(["Alpha", "Beta", "Gamma"])
+            ],
+        }
+        errors = []
+        check_rankings_order(content, {"standings": []}, errors)
+        assert errors == []
+    finally:
+        tmp.unlink()

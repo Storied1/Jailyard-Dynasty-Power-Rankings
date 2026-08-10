@@ -266,10 +266,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="verify_ranking_judgment.py")
     ap.add_argument(
         "--record",
-        default=str(
-            ROOT / "content" / "editions" / "2025-wk01-recap" / "ranking_judgment.json"
-        ),
-        help="ranking record to gate (default: the wk01 judgment record)",
+        required=True,
+        help="path to the ranking record to gate",
     )
     a = ap.parse_args(argv)
     record = load_json(Path(a.record), required=True)

@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from shared import load_json  # noqa: E402
-from shared import DATA_DIR, REPO_ROOT, TEAM_PROFILES_PATH  # noqa: E402
+from shared import DATA_DIR, REPO_ROOT  # noqa: E402
 from shared import WEEKS_DIR as OUTPUT_DIR  # noqa: E402
 from shared import compute_momentum, load_nfl_stats_cache, normalize_team  # noqa: E402
 
@@ -61,11 +61,6 @@ def load_season_data(season=2025):
     """Load the combined season data file."""
     path = DATA_DIR / str(season) / "season_combined.json"
     return load_json(path, label=f"season_combined.json for {season}", required=True)
-
-
-def load_team_profiles():
-    """Load team profiles for preseason context."""
-    return load_json(TEAM_PROFILES_PATH)
 
 
 def load_history_data():
@@ -714,7 +709,6 @@ def extract_week(
     data,
     week_num,
     roster_lookup,
-    team_profiles=None,
     prev_weeks=None,
     history_data=None,
 ):
@@ -729,7 +723,6 @@ def extract_week(
     - previous_rankings: last week's power rankings (for movement arrows)
     - next_matchups: next week's scheduled matchups (if available)
     - season_context: running stats, streaks, trends
-    - team_profiles_summary: condensed preseason context per team
     """
     weeks = data["weeks"]
     week_idx = None
@@ -1010,20 +1003,6 @@ def extract_week(
                 }
             )
 
-    # --- Team Profiles Summary (for callbacks) ---
-    profiles_summary = {}
-    if team_profiles:
-        for team in team_profiles.get("teams", []):
-            profiles_summary[team["name"]] = {
-                "preseason_rank": team["rank"],
-                "tier": team["tier"],
-                "roast": team["roast"],
-                "needs": team["needs"],
-                "weeklyPoints_projected": team["weeklyPoints"],
-                "essay_snippet": team["preseasonEssay"][:500] + "...",
-                "ranks": team.get("ranks", {}),
-            }
-
     # --- Previous Weeks Summary (for callbacks) ---
     prev_summaries = []
     if prev_weeks:
@@ -1052,7 +1031,6 @@ def extract_week(
         "season_context": season_context,
         "next_matchups": next_matchups,
         "previous_weeks_summary": prev_summaries,
-        "team_profiles_summary": profiles_summary,
     }
 
     # Inject historical context (all-time records) if available — sliced
@@ -1147,7 +1125,6 @@ def main():
 
     data = load_season_data(season)
     roster_lookup = build_roster_lookup(data)
-    team_profiles = load_team_profiles()
     history_data = load_history_data()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1185,9 +1162,7 @@ def main():
                 prev_weeks.append(json.load(f))
     for week_num in sorted(weeks_to_extract):
         print(f"Extracting Week {week_num}...")
-        result = extract_week(
-            data, week_num, roster_lookup, team_profiles, prev_weeks, history_data
-        )
+        result = extract_week(data, week_num, roster_lookup, prev_weeks, history_data)
         if result is None:
             continue
 

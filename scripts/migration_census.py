@@ -1,22 +1,17 @@
-"""Migration checks and the state leak census. K2.3 of plan 562e90d.
+"""State leak census: every decision input carries ZERO post-cutoff facts.
 
-Two censused surfaces, one contract -- ZERO post-cutoff facts:
+Two censused surfaces, one contract:
 
 1. Compiled states carry zero post-cutoff instants by construction (known_at
    admission), proven mechanically here. Every compiled-state read goes
    through compile_state.load_compiled_state (hash-verified private-root
    resolution).
-2. The content/weeks writer packets are ACTIVE decision inputs -- /write-week
+2. The content/weeks writer packets are active decision inputs -- the writer
    reads them and verify_week_content validates against them -- so they are
-   held to the same zero. Every cutoff-sensitive field in them is derived
-   as-of the packet's week (extract_week_data's as_of_h2h / as_of_records
-   slices), and this census mechanically enforces zero across all of them:
-   a single post-cutoff value fails the --all run by exit code.
-
-History: the packets once carried 46 confirmed future entries (32 h2h
-last_meeting, 13 highest_combined, 1 losing-streak overstatement) while the
-compiled-state lane was built. That condition lives in git history at
-e6ebba3 and earlier; the detectors below still fire on any recurrence.
+   held to the same zero. Every cutoff-sensitive field is derived as-of the
+   packet's week (extract_week_data's as_of_h2h / as_of_records slices), and
+   this census enforces zero across all of them: a single post-cutoff value
+   fails the --all run by exit code.
 """
 
 import argparse
@@ -41,7 +36,7 @@ from shared import load_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Every leaf path of a legacy week packet, mapped by dotted-path prefix to the
+# Every leaf path of a writer week packet, mapped by dotted-path prefix to the
 # fact type that carries it under the kernel, or to a non-fact disposition:
 #   presentation -- prose/display selection, not evidence
 #   derived      -- recomputed from admitted facts (reducers), never stored
@@ -52,20 +47,17 @@ FIELD_MAP = {
     "matchups": "matchup_result",
     "standings": "derived",  # standings() recomputes from admitted facts
     "awards": "presentation",
-    "historical_context": "derived",  # records() recomputes; the 46 lived here
+    "historical_context": "derived",  # records() recomputes as-of
     "season_context": "presentation",
-    "team_profiles_summary": "presentation",
     "previous_weeks_summary": "presentation",
     "next_matchups": "schedule_pairing",
 }
 
 
-# The COMPLETE leaf-path surface of the legacy week packets, hand-audited and
+# The COMPLETE leaf-path surface of the writer week packets, hand-audited and
 # explicit -- coverage is judged against exact normalized paths, never a depth
-# approximation. Lists normalize to "[]"; the one bounded wildcard segment is
-# team_profiles_summary's second segment (dynamic team-name keys), and the
-# value schema BENEATH that wildcard is still fully enumerated. A leaf absent
-# from this set -- at any depth -- is unmapped and fails the census.
+# approximation. Lists normalize to "[]". A leaf absent from this set -- at
+# any depth -- is unmapped and fails the census.
 ALLOWED_LEAVES = frozenset(
     {
         "awards.biggest_blowout",
@@ -229,32 +221,20 @@ ALLOWED_LEAVES = frozenset(
         "standings[].team_name",
         "standings[].week_points",
         "standings[].wins",
-        "team_profiles_summary.*.essay_snippet",
-        "team_profiles_summary.*.needs[]",
-        "team_profiles_summary.*.preseason_rank",
-        "team_profiles_summary.*.ranks.draft",
-        "team_profiles_summary.*.ranks.qb",
-        "team_profiles_summary.*.ranks.rb",
-        "team_profiles_summary.*.ranks.starter",
-        "team_profiles_summary.*.ranks.te",
-        "team_profiles_summary.*.ranks.wr",
-        "team_profiles_summary.*.roast",
-        "team_profiles_summary.*.tier",
-        "team_profiles_summary.*.weeklyPoints_projected",
     }
 )
 
 # Sections whose IMMEDIATE child keys are dynamic identities (bounded wildcard).
-DYNAMIC_KEY_SECTIONS = {"team_profiles_summary"}
+DYNAMIC_KEY_SECTIONS = set()
 
 
-def unmapped_legacy_fields(season, weeks_dir=None):
-    """RECURSIVE leaf coverage: every actual leaf path must fall under a mapped
-    (top section, depth-2 key) pair. --season is honored: only 2025 packets
-    exist; any other season is REJECTED, never reported as a vacuous OK."""
+def unmapped_packet_fields(season, weeks_dir=None):
+    """RECURSIVE leaf coverage: every actual leaf path must appear in the
+    positive allowlist. --season is honored: only 2025 packets exist; any
+    other season is REJECTED, never reported as a vacuous OK."""
     if season != 2025:
         raise ValueError(
-            f"no legacy week packets exist for season {season}; refusing a vacuous census"
+            f"no writer week packets exist for season {season}; refusing a vacuous census"
         )
     unmapped = set()
     weeks_dir = Path(weeks_dir) if weeks_dir is not None else ROOT / "content" / "weeks"
@@ -335,11 +315,11 @@ def _compiled_leak_census(edition_id):
 
 
 def _writer_packet_census(weeks_dir=None):
-    """Post-cutoff facts in the ACTIVE writer packets. Detectors: (a) h2h
+    """Post-cutoff facts in the active writer packets. Detectors: (a) h2h
     last_meeting rows postdating their packet, (b) a highest_combined record
     postdating its packet, (c) longest_losing_streak values exceeding the
-    site-methodology as-of recomputation. The production endpoint is zero;
-    any hit fails the --all run."""
+    site-methodology as-of recomputation. The contract is zero; any hit
+    fails the --all run."""
     weeks_dir = Path(weeks_dir) if weeks_dir is not None else ROOT / "content" / "weeks"
     conclusions = load_json(
         ROOT / "content" / "governance" / "week_conclusions_2022_2025.v1.json",
@@ -432,13 +412,13 @@ def main():
     failed = 0
     if a.all:
         try:
-            unmapped = unmapped_legacy_fields(a.season, weeks_dir=a.weeks_dir)
+            unmapped = unmapped_packet_fields(a.season, weeks_dir=a.weeks_dir)
         except ValueError as exc:
             print(f"FAIL {exc}")
             return 1
         if unmapped:
             failed += 1
-            print(f"FAIL {len(unmapped)} unmapped legacy fields: {unmapped[:8]}")
+            print(f"FAIL {len(unmapped)} unmapped packet fields: {unmapped[:8]}")
         # Discover MANIFESTS -- the tracked state.json path is abolished.
         editions = sorted(
             p.parent.parent.name

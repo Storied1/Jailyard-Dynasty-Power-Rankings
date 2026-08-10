@@ -1,0 +1,59 @@
+{
+  "kind": "writer-input-registry/1",
+  "rule": "Every fact, quote, and storyline in a published edition traces to a source registered here, dated at or before the edition's cutoff.",
+  "source_classes": [
+    {
+      "id": "week_data",
+      "paths": [
+        "content/weeks/week{N}_data.json",
+        "content/weeks/week{N}_data_expanded.json",
+        "data/2025/nfl_games/{game_id}.json"
+      ],
+      "what": "Weekly data packet: matchups, standings, awards, per-game NFL context (scores, lines, injuries, weather, EPA), all fields derived as-of the edition's week."
+    },
+    {
+      "id": "chat_context",
+      "paths": [
+        "content/weeks/week{N}_chat_context.json",
+        "content/preseason-2025/preseason_chat_context.json"
+      ],
+      "what": "Sanitized league chat for the edition: verbatim quotes, storylines, and league memory admitted by exact timestamp at or before the cutoff."
+    },
+    {
+      "id": "franchise_history",
+      "paths": [
+        "data/franchises/{roster_id}.json",
+        "data/{year}/draft_picks.json",
+        "data/2025/player_arcs/{player_id}.json",
+        "data/2025/fantasy_rosters/week{N}.json",
+        "data/league_history.json"
+      ],
+      "what": "Franchise records, titles, playoff runs, rosters, draft classes, player arcs."
+    },
+    {
+      "id": "team_registry",
+      "paths": ["content/team-profiles.json"],
+      "what": "Team identity: roster_id, team name, owner."
+    },
+    {
+      "id": "accepted_decisions",
+      "paths": ["content/rankings/*.json"],
+      "what": "Structured editorial decisions accepted by the league (e.g. an accepted ranking order)."
+    },
+    {
+      "id": "published_editions",
+      "paths": [
+        "content/weeks/week{N}_content.json",
+        "content/preseason-2025/preseason_content.json"
+      ],
+      "what": "Editions already published by this system; the callback surface."
+    },
+    {
+      "id": "contemporaneous_coverage",
+      "paths": [
+        "(external; cite URL + publication date in the edition's source notes)"
+      ],
+      "what": "NFL articles, reports, and takes published at or before the edition's cutoff, cited with their publication date. Coverage dated after the cutoff is inadmissible."
+    }
+  ]
+}
