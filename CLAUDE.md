@@ -69,9 +69,9 @@ python scripts/seal_2026.py --verify-all     # and --rederive-all
 
 ## Critical Rules
 
-- **THE COPY LAW — legacy copy is dead.** All league-facing writing produced before 2026-08-10 (old weekly columns, old preseason articles/essays, team-profiles roasts/blurbs/essays, voice-bible lexicon nicknames and example lines) is retired and deleted where possible. NEVER use it as writer input, quote it, echo it, or call back to it. Writer inputs: clean weekly data packets, sanitized chat context, franchise history data, previously published REWRITTEN pieces only.
-- **No LLM tells in prose** — zero em dashes, no "it's not X, it's Y" constructions, no editorial mechanics narrated in the column. Audience: sharp, college-educated league members; real chat quotes carry scenes.
-- **Publication order is chronological: preseason column FIRST, then weeks in order** — a week's callbacks must land on a published rewritten predecessor.
+- **THE SOURCE LAW** — every word of league-facing copy traces to exactly four sources: the week's clean data packet, the sanitized chat context (quotes verbatim), franchise history data, and previously published pieces of this run. Anything untraceable does not ship. New bits are coined from those sources; once published they become callable.
+- **No LLM tells in prose** — zero em dashes, no "it's not X, it's Y" constructions, prose never discusses how the column gets made. Audience: sharp, college-educated league members; real chat quotes carry scenes.
+- **Publication order is chronological: preseason column FIRST, then weeks in order** — a week's callbacks must land on a published predecessor.
 - **NEVER touch `dontuse`, `dontuse2`, `dontusedraft3`** — archived legacy files
 - **KEEP everything inline** — no external CSS/JS files unless explicitly requested
 - **ZERO dependencies** — no npm, no CDN imports, no frameworks
@@ -187,12 +187,12 @@ python scripts/build_chat_context.py --week N --season 2025 --no-ai
 ### Voice Bible Key Rules
 
 - Write in **second person** ("you") for team blurbs — always TO the owner, never about them
-- **Group chat is a character** — reference it at least 3x per column
+- **Group chat is a character** — real quotes, verbatim, carry scenes
 - **Data as punctuation** — stats embedded in narrative, never standalone
 - **Every section ends with a kicker line** — memorable closer
-- **Never hallucinate stats** — every number must come from week data JSON
+- **Never hallucinate stats, quotes, or nicknames** — everything traces to the four writer sources
 - **Playful roasts only** — make owners laugh, never wince
-- See `content/voice-bible.md` for full 12-pattern guide
+- See `content/voice-bible.md` (rebuilt 2026-08-10) for the 12-pattern guide + anti-patterns
 
 ### Python Note (Windows)
 
