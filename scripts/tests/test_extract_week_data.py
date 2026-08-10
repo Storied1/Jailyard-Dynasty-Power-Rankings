@@ -362,3 +362,28 @@ def test_as_of_omits_unrecoverable_counters():
 
 def test_as_of_empty_when_owner_missing():
     assert compute_as_of_history("NOPE", 2025, 3, _history_fixture(), 3, 0) == {}
+
+
+# ---------------------------------------------------------------------------
+# as_of_records (historical_context as-of-week slice)
+# ---------------------------------------------------------------------------
+
+from extract_week_data import as_of_records  # noqa: E402
+
+
+def test_as_of_records_drops_future_and_unattributed():
+    records = {
+        "highest_score": {"points": 248.26, "season": 2024, "week": 11},
+        "highest_combined": {"points": 385.7, "season": 2025, "week": 14},
+        "this_week": {"points": 151.48, "season": 2025, "week": 1},
+        "longest_win_streak": {"count": 11, "team": "X"},  # no season/week
+    }
+    out = as_of_records(records, 2025, 1)
+    # prior-season and through-week records survive
+    assert set(out) == {"highest_score", "this_week"}
+    # the 2025 wk14 leak and the unattributable streak are gone — fail closed
+
+
+def test_as_of_records_passes_through_empty():
+    assert as_of_records(None, 2025, 1) is None
+    assert as_of_records({}, 2025, 1) == {}

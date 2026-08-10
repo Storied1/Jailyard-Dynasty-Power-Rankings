@@ -1,10 +1,10 @@
 """K2.3 — migration checks and the state leak census."""
 
 import subprocess
-
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 from scripts.migration_census import state_leak_census, unmapped_legacy_fields
 
@@ -51,18 +51,72 @@ def test_compiled_states_carry_zero_future_entries():
         assert r["is_decision_input"] is True
 
 
-def test_legacy_packets_still_carry_the_46_and_are_no_longer_inputs():
-    """Documents that the leaks were fixed BY CONSTRUCTION, not by patching
-    packets: 32 h2h last_meeting + 13 highest_combined + 1 streak = 46."""
-    r = state_leak_census("content/weeks", legacy=True)
-    assert r["future_entries"] == 46
-    assert r["is_decision_input"] is False
-    classes = {"h2h": 0, "highest_combined": 0, "longest_losing_streak": 0}
-    for d in r["detail"]:
-        for c in classes:
-            if c in d:
-                classes[c] += 1
-    assert classes == {"h2h": 32, "highest_combined": 13, "longest_losing_streak": 1}
+def test_writer_packets_are_active_inputs_with_zero_future_entries():
+    """The production contract: every active writer packet is cutoff-safe.
+    The packets once carried 46 confirmed leaks (32 h2h last_meeting + 13
+    highest_combined + 1 streak) — that condition lives in git history at
+    e6ebba3; the detectors below prove they still fire on a recurrence."""
+    r = state_leak_census("content/weeks", packets=True)
+    assert r["future_entries"] == 0, r["detail"][:5]
+    assert r["is_decision_input"] is True
+
+
+def _packet_fixture(tmp_path, mutate):
+    """Copy the real week1 packet, apply a plant, return the fixture dir."""
+    import json as j
+
+    src = REPO / "content" / "weeks" / "week1_data.json"
+    doc = j.loads(src.read_text(encoding="utf-8"))
+    mutate(doc)
+    fixture_dir = tmp_path / "weeks"
+    fixture_dir.mkdir()
+    (fixture_dir / "week1_data.json").write_text(j.dumps(doc), encoding="utf-8")
+    return fixture_dir
+
+
+def test_planted_future_h2h_meeting_fails_the_packet_census(tmp_path):
+    def plant(doc):
+        doc["matchups"][0]["h2h"]["last_meeting"] = {
+            "season": 2025,
+            "week": 12,
+            "score": "163.68-128.96",
+        }
+        assert doc["matchups"][0]["h2h"]["last_meeting"]["week"] == 12
+
+    fixture = _packet_fixture(tmp_path, plant)
+    r = state_leak_census("content/weeks", packets=True, weeks_dir=fixture)
+    assert r["future_entries"] == 1
+    assert "h2h last_meeting wk12" in r["detail"][0]
+
+
+def test_planted_future_highest_combined_fails_the_packet_census(tmp_path):
+    def plant(doc):
+        doc["historical_context"]["highest_combined"] = {
+            "points": 385.7,
+            "score": "191.1-194.6",
+            "season": 2025,
+            "teams": "Kittler on the Roof vs Rasheeing the Scene",
+            "week": 14,
+        }
+
+    fixture = _packet_fixture(tmp_path, plant)
+    r = state_leak_census("content/weeks", packets=True, weeks_dir=fixture)
+    assert r["future_entries"] == 1
+    assert "highest_combined wk14" in r["detail"][0]
+
+
+def test_planted_overstated_streak_fails_the_packet_census(tmp_path):
+    def plant(doc):
+        doc["historical_context"]["longest_losing_streak"] = {
+            "count": 99,
+            "owner_id": "x",
+            "team": "Noble FFT",
+        }
+
+    fixture = _packet_fixture(tmp_path, plant)
+    r = state_leak_census("content/weeks", packets=True, weeks_dir=fixture)
+    assert r["future_entries"] == 1
+    assert "longest_losing_streak 99" in r["detail"][0]
 
 
 def test_census_discovers_manifests_not_the_abolished_state_path():
@@ -172,8 +226,39 @@ def test_cli_gates_and_flag_discipline():
         text=True,
     )
     assert r.returncode == 0, r.stdout + r.stderr
-    assert "OK" in r.stdout and "46 future entries" in r.stdout
+    assert "OK" in r.stdout and "writer packets: 0 future entries" in r.stdout
     bare = subprocess.run(
         [PY, "scripts/migration_census.py"], cwd=REPO, capture_output=True, text=True
     )
     assert bare.returncode == 2, "a bare invocation is a usage error, never a census"
+
+
+def test_cli_fails_by_exit_code_on_a_planted_packet_leak(tmp_path):
+    """The production gate is the CLI: a planted post-cutoff value in the
+    packet directory must turn --all red by exit code, not by prose."""
+    import json as j
+
+    src = REPO / "content" / "weeks" / "week1_data.json"
+    doc = j.loads(src.read_text(encoding="utf-8"))
+    doc["matchups"][0]["h2h"]["last_meeting"] = {
+        "season": 2025,
+        "week": 17,
+        "score": "148.7-105.74",
+    }
+    fixture_dir = tmp_path / "weeks"
+    fixture_dir.mkdir()
+    (fixture_dir / "week1_data.json").write_text(j.dumps(doc), encoding="utf-8")
+    r = subprocess.run(
+        [
+            PY,
+            "scripts/migration_census.py",
+            "--all",
+            "--weeks-dir",
+            str(fixture_dir),
+        ],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "FAIL writer packets" in r.stdout and "wk17" in r.stdout

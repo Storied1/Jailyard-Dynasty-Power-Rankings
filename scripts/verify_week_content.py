@@ -131,15 +131,24 @@ def check_rankings_completeness(content: dict, data: dict, errors: list):
 
 
 def check_rankings_match_standings(content: dict, data: dict, errors: list):
-    """Each ranking entry matches corresponding standings entry."""
+    """Each ranking entry's facts match that TEAM's standings entry.
+
+    Keyed by team, not by rank slot: the published order may deviate from the
+    arithmetic standings sort when a judgment ranking record has passed
+    scripts/verify_ranking_judgment.py (which owns order correctness). The
+    per-team facts — record, owner, prev_rank — must still match the data
+    exactly; only the ordering is editorial.
+    """
     standings = data.get("standings", [])
-    standings_by_rank = {s["rank"]: s for s in standings}
 
     for r in content.get("rankings", []):
         rank = r["rank"]
-        s = standings_by_rank.get(rank)
+        s = find_team_in_standings(r.get("team_name", ""), standings)
         if not s:
-            errors.append(f"Rank {rank}: no matching standings entry")
+            errors.append(
+                f"Rank {rank}: team_name '{r.get('team_name')}' "
+                f"not found in standings"
+            )
             continue
 
         # Check fields (skip prev_rank if null — week 1)
@@ -154,22 +163,14 @@ def check_rankings_match_standings(content: dict, data: dict, errors: list):
                     f"{field} is '{content_val}' but data says '{data_val}'"
                 )
 
-        # Team name (normalized comparison)
-        if not teams_match(r.get("team_name", ""), s.get("team_name", "")):
-            errors.append(
-                f"Rank {rank}: team_name is '{r.get('team_name')}' "
-                f"but data says '{s.get('team_name')}'"
-            )
-
 
 def check_movement(content: dict, data: dict, errors: list):
-    """Movement string matches computed prev_rank - rank delta."""
+    """Movement string matches computed prev_rank - rank delta (team-keyed)."""
     standings = data.get("standings", [])
-    standings_by_rank = {s["rank"]: s for s in standings}
 
     for r in content.get("rankings", []):
         rank = r["rank"]
-        s = standings_by_rank.get(rank)
+        s = find_team_in_standings(r.get("team_name", ""), standings)
         if not s:
             continue
 
@@ -191,6 +192,83 @@ def check_movement(content: dict, data: dict, errors: list):
                 f"movement is '{r.get('movement')}' (delta={actual_delta}) "
                 f"but prev_rank={prev_rank} → rank={rank} "
                 f"= delta {expected_delta}"
+            )
+
+
+def check_rankings_order(content: dict, data: dict, errors: list):
+    """Published ranking ORDER correctness — owned by exactly one authority.
+
+    With meta.ranking_source declared: resolve the judgment record through a
+    root-contained path, run the judgment gate on it, and require the
+    published order to match the record's positions exactly. Missing,
+    escaping, malformed, or RED sources FAIL — a declared judgment that
+    cannot be verified never silently degrades to the standings sort.
+
+    Without meta.ranking_source: the published order must match the
+    standings sort rank-for-rank (the pre-judgment default).
+    """
+    rankings = sorted(content.get("rankings", []), key=lambda r: r.get("rank") or 0)
+    src = (content.get("meta") or {}).get("ranking_source")
+
+    if not src:
+        standings_by_rank = {s["rank"]: s for s in data.get("standings", [])}
+        for r in rankings:
+            s = standings_by_rank.get(r.get("rank"))
+            if s and not teams_match(r.get("team_name", ""), s.get("team_name", "")):
+                errors.append(
+                    f"Rank {r.get('rank')}: team_name is '{r.get('team_name')}' "
+                    f"but the standings order says '{s.get('team_name')}' "
+                    f"(no ranking_source declared)"
+                )
+        return
+
+    if not isinstance(src, str):
+        errors.append(f"meta.ranking_source is not a path string: {src!r}")
+        return
+    root = REPO_ROOT.resolve()
+    path = (root / src).resolve()
+    if root not in path.parents and path != root:
+        errors.append(f"meta.ranking_source escapes the repository root: {src}")
+        return
+    if not path.exists():
+        errors.append(f"meta.ranking_source does not exist: {src}")
+        return
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
+        errors.append(f"meta.ranking_source is unreadable/malformed: {src} ({e})")
+        return
+
+    try:
+        from verify_ranking_judgment import run_gate
+    except ImportError:  # pragma: no cover - package form under pytest
+        from scripts.verify_ranking_judgment import run_gate
+    try:
+        passed, results = run_gate(record)
+    except Exception as e:  # fail closed — an unrunnable gate is not a pass
+        errors.append(f"judgment gate could not run on {src}: {e}")
+        return
+    if not passed:
+        red = [name for name, ok, _ in results if not ok]
+        errors.append(f"meta.ranking_source record is RED ({', '.join(red)}): {src}")
+        return
+
+    expected = [
+        normalize_team(p.get("team_name") or "")
+        for p in sorted(record.get("positions", []), key=lambda p: p.get("rank") or 0)
+    ]
+    got = [normalize_team(r.get("team_name") or "") for r in rankings]
+    if expected != got:
+        for i, (e, g) in enumerate(zip(expected, got), start=1):
+            if e != g:
+                errors.append(
+                    f"Rank {i}: published '{g}' but the gate-passed judgment "
+                    f"record says '{e}'"
+                )
+        if len(expected) != len(got):
+            errors.append(
+                f"published rankings count {len(got)} != judgment record "
+                f"positions {len(expected)}"
             )
 
 
@@ -565,6 +643,7 @@ def run_tier1(content: dict, data: dict) -> dict:
     checks = [
         ("rankings_completeness", check_rankings_completeness),
         ("rankings_match_standings", check_rankings_match_standings),
+        ("rankings_order", check_rankings_order),
         ("movement_strings", check_movement),
         ("confessional_teams", check_confessional_teams),
         ("picks_matchups", check_picks_matchups),

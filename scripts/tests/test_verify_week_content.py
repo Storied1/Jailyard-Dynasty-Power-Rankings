@@ -199,4 +199,122 @@ def test_run_tier1_returns_warnings_key():
     result = run_tier1({}, {})
     assert "warnings" in result and isinstance(result["warnings"], list)
     assert "errors" in result and isinstance(result["errors"], list)
-    assert result["passed"] + result["failed"] == 11  # 10 existing + threads_continuity
+    assert (
+        result["passed"] + result["failed"] == 12
+    )  # 10 existing + threads_continuity + rankings_order
+
+
+# ---------------------------------------------------------------------------
+# check_rankings_order — published order owned by exactly one authority
+# ---------------------------------------------------------------------------
+
+import json as _json  # noqa: E402
+from pathlib import Path as _Path  # noqa: E402
+
+import pytest  # noqa: E402
+
+from verify_week_content import check_rankings_order  # noqa: E402
+
+_REPO = _Path(__file__).resolve().parents[2]
+_JUDGMENT_SRC = "content/editions/2025-wk01-recap/ranking_judgment.json"
+_ARITHMETIC_SRC = "content/editions/2025-wk01-recap/ranking_record.json"
+
+
+def _order_fixture(order, src=None):
+    content = {
+        "meta": ({"ranking_source": src} if src else {}),
+        "rankings": [{"rank": i + 1, "team_name": t} for i, t in enumerate(order)],
+    }
+    data = {
+        "standings": [
+            {"rank": i + 1, "team_name": t}
+            for i, t in enumerate(["Alpha", "Beta", "Gamma"])
+        ]
+    }
+    return content, data
+
+
+def test_no_ranking_source_enforces_standings_order():
+    content, data = _order_fixture(["Beta", "Alpha", "Gamma"])
+    errors = []
+    check_rankings_order(content, data, errors)
+    assert errors and "standings order" in errors[0]
+
+
+def test_no_ranking_source_passes_when_order_matches_standings():
+    content, data = _order_fixture(["Alpha", "Beta", "Gamma"])
+    errors = []
+    check_rankings_order(content, data, errors)
+    assert errors == []
+
+
+def test_missing_ranking_source_file_fails_closed():
+    content, data = _order_fixture(["Alpha"], src="content/nope/missing.json")
+    errors = []
+    check_rankings_order(content, data, errors)
+    assert errors and "does not exist" in errors[0]
+
+
+def test_escaping_ranking_source_fails_closed():
+    content, data = _order_fixture(["Alpha"], src="../outside.json")
+    errors = []
+    check_rankings_order(content, data, errors)
+    assert errors and "escapes the repository root" in errors[0]
+
+
+def test_malformed_ranking_source_fails_closed(tmp_path):
+    bad = _REPO / "content" / "weeks" / "_malformed_test_record.json"
+    bad.write_text("{not json", encoding="utf-8")
+    try:
+        content, data = _order_fixture(
+            ["Alpha"], src="content/weeks/_malformed_test_record.json"
+        )
+        errors = []
+        check_rankings_order(content, data, errors)
+        assert errors and "unreadable/malformed" in errors[0]
+    finally:
+        bad.unlink()
+
+
+def test_red_ranking_source_fails_closed():
+    """Pointing the column at the arithmetic record must fail: that record is
+    RED at the judgment gate by design."""
+    content, data = _order_fixture(["Alpha"], src=_ARITHMETIC_SRC)
+    errors = []
+    check_rankings_order(content, data, errors)
+    assert errors and "RED" in errors[0]
+
+
+_PRIVATE = (_REPO / "private_editions" / "2025-wk01-recap" / "state.json").exists()
+
+
+@pytest.mark.skipif(not _PRIVATE, reason="private edition state absent")
+def test_reversed_published_order_fails_against_green_judgment_record():
+    record = _json.loads((_REPO / _JUDGMENT_SRC).read_text(encoding="utf-8"))
+    names = [
+        p["team_name"] for p in sorted(record["positions"], key=lambda p: p["rank"])
+    ]
+    content = {
+        "meta": {"ranking_source": _JUDGMENT_SRC},
+        "rankings": [
+            {"rank": i + 1, "team_name": t} for i, t in enumerate(reversed(names))
+        ],
+    }
+    errors = []
+    check_rankings_order(content, {"standings": []}, errors)
+    assert errors and "gate-passed judgment record" in errors[0]
+
+
+@pytest.mark.skipif(not _PRIVATE, reason="private edition state absent")
+def test_matching_published_order_passes_against_green_judgment_record():
+    record = _json.loads((_REPO / _JUDGMENT_SRC).read_text(encoding="utf-8"))
+    names = [
+        p["team_name"] for p in sorted(record["positions"], key=lambda p: p["rank"])
+    ]
+    content = {
+        "meta": {"ranking_source": _JUDGMENT_SRC},
+        "rankings": [{"rank": i + 1, "team_name": t} for i, t in enumerate(names)],
+    }
+    errors = []
+    check_rankings_order(content, {"standings": []}, errors)
+    assert errors == []

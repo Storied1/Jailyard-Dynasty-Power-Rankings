@@ -1,11 +1,22 @@
 """Migration checks and the state leak census. K2.3 of plan 562e90d.
 
-The design demotes the source census to a migration check -- "did every legacy
-field find a fact type" -- and adds a mechanical leak census: compiled states
-must carry ZERO post-cutoff instants (by construction, proven here), while the
-legacy week packets still carry their 46 confirmed future entries and are no
-longer decision inputs. Every compiled-state read goes through
-compile_state.load_compiled_state (hash-verified private-root resolution).
+Two censused surfaces, one contract -- ZERO post-cutoff facts:
+
+1. Compiled states carry zero post-cutoff instants by construction (known_at
+   admission), proven mechanically here. Every compiled-state read goes
+   through compile_state.load_compiled_state (hash-verified private-root
+   resolution).
+2. The content/weeks writer packets are ACTIVE decision inputs -- /write-week
+   reads them and verify_week_content validates against them -- so they are
+   held to the same zero. Every cutoff-sensitive field in them is derived
+   as-of the packet's week (extract_week_data's as_of_h2h / as_of_records
+   slices), and this census mechanically enforces zero across all of them:
+   a single post-cutoff value fails the --all run by exit code.
+
+History: the packets once carried 46 confirmed future entries (32 h2h
+last_meeting, 13 highest_combined, 1 losing-streak overstatement) while the
+compiled-state lane was built. That condition lives in git history at
+e6ebba3 and earlier; the detectors below still fire on any recurrence.
 """
 
 import argparse
@@ -15,11 +26,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:  # package form first -- one module identity under pytest and direct run
-    from scripts.compile_state import (  # noqa: E402
-        EditionDescriptor,
-        load_compiled_state,
-        verify_compiled,
-    )
+    from scripts.compile_state import EditionDescriptor  # noqa: E402
+    from scripts.compile_state import load_compiled_state, verify_compiled
     from scripts.fact_schema import canonical_instant  # noqa: E402
 except ImportError:  # pragma: no cover - direct-run fallback
     from compile_state import (  # noqa: E402
@@ -28,6 +36,7 @@ except ImportError:  # pragma: no cover - direct-run fallback
         verify_compiled,
     )
     from fact_schema import canonical_instant  # noqa: E402
+
 from shared import load_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -125,6 +134,7 @@ ALLOWED_LEAVES = frozenset(
         "historical_context.lowest_winning_score.season",
         "historical_context.lowest_winning_score.team",
         "historical_context.lowest_winning_score.week",
+        "matchups[].h2h.last_meeting",  # null when no PRIOR meeting exists as-of
         "matchups[].h2h.last_meeting.score",
         "matchups[].h2h.last_meeting.season",
         "matchups[].h2h.last_meeting.week",
@@ -324,11 +334,13 @@ def _compiled_leak_census(edition_id):
     return {"future_entries": len(detail), "detail": detail, "is_decision_input": True}
 
 
-def _legacy_packet_census():
-    """The 46, re-derived: (a) h2h last_meeting rows postdating their packet,
-    (b) the week-14 highest_combined present in packets 1-13, (c) undated
-    longest_losing_streak values exceeding the kernel's as-of recomputation."""
-    weeks_dir = ROOT / "content" / "weeks"
+def _writer_packet_census(weeks_dir=None):
+    """Post-cutoff facts in the ACTIVE writer packets. Detectors: (a) h2h
+    last_meeting rows postdating their packet, (b) a highest_combined record
+    postdating its packet, (c) longest_losing_streak values exceeding the
+    site-methodology as-of recomputation. The production endpoint is zero;
+    any hit fails the --all run."""
+    weeks_dir = Path(weeks_dir) if weeks_dir is not None else ROOT / "content" / "weeks"
     conclusions = load_json(
         ROOT / "content" / "governance" / "week_conclusions_2022_2025.v1.json",
         required=True,
@@ -391,12 +403,14 @@ def _legacy_packet_census():
                 detail.append(
                     f"{p.name}: longest_losing_streak {committed} > as-of {correct}"
                 )
-    return {"future_entries": len(detail), "detail": detail, "is_decision_input": False}
+    return {"future_entries": len(detail), "detail": detail, "is_decision_input": True}
 
 
-def state_leak_census(target, legacy=False):
-    if legacy:
-        return _legacy_packet_census()
+def state_leak_census(target, packets=False, weeks_dir=None):
+    """packets=True censuses the active writer packets (weeks_dir overridable
+    for planted-leak tests); otherwise target names a compiled edition."""
+    if packets:
+        return _writer_packet_census(weeks_dir=weeks_dir)
     edition_id = str(target).rstrip("/").split("/")[-1]
     return _compiled_leak_census(edition_id)
 
@@ -409,11 +423,16 @@ def main():
     mode.add_argument("--all", action="store_true")
     mode.add_argument("--edition")
     ap.add_argument("--season", type=int, default=2025)
+    ap.add_argument(
+        "--weeks-dir",
+        dest="weeks_dir",
+        help="override the writer-packet directory (planted-leak testing only)",
+    )
     a = ap.parse_args()
     failed = 0
     if a.all:
         try:
-            unmapped = unmapped_legacy_fields(a.season)
+            unmapped = unmapped_legacy_fields(a.season, weeks_dir=a.weeks_dir)
         except ValueError as exc:
             print(f"FAIL {exc}")
             return 1
@@ -437,10 +456,20 @@ def main():
                 print(
                     f"FAIL {e}: {r['future_entries']} future entries {r['detail'][:3]}"
                 )
-        legacy = state_leak_census("content/weeks", legacy=True)
+        # Active writer packets are decision inputs: any post-cutoff fact in
+        # them is a FAILURE, not a footnote.
+        packets = state_leak_census(
+            "content/weeks", packets=True, weeks_dir=a.weeks_dir
+        )
+        if packets["future_entries"]:
+            failed += 1
+            print(
+                f"FAIL writer packets: {packets['future_entries']} future "
+                f"entries {packets['detail'][:5]}"
+            )
         print(
-            f"legacy packets: {legacy['future_entries']} future entries "
-            f"(decision input: {legacy['is_decision_input']})"
+            f"writer packets: {packets['future_entries']} future entries "
+            f"(decision input: {packets['is_decision_input']})"
         )
     else:
         r = state_leak_census(a.edition)

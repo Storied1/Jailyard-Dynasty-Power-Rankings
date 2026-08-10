@@ -30,7 +30,7 @@ Read these files in order:
 - [ ] Every matchup score in blurbs matches `week_data.json` exactly
 - [ ] Every team record (W-L) matches standings data
 - [ ] Every player performance stat is accurate to the data
-- [ ] Power rankings order matches the data's standings
+- [ ] Power rankings order matches the gate-passed judgment record for this week (`content/editions/*/ranking_judgment.json`, verified by `python scripts/verify_ranking_judgment.py`) when one exists; otherwise the data's standings. Per-team facts (record, owner, scores) must match the data either way.
 - [ ] Team names and owner handles are correct (cross-ref team-profiles.json)
 - [ ] No invented/hallucinated statistics or game results
 - [ ] Next week's matchup picks reference correct matchups from the data

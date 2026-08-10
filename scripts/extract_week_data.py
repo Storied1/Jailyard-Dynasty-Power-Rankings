@@ -471,6 +471,44 @@ def build_roster_lookup(data):
     return lookup
 
 
+def as_of_h2h(h2h_entry, season, week_num):
+    """H2H series sliced as-of (season, week_num) — never a future meeting.
+
+    league_history.json h2h entries are end-of-season aggregates whose games[]
+    rows each carry (season, week); copying the aggregate wins/losses and the
+    raw last game leaks future meetings into an in-season packet (32 of the
+    census's 46 lived here). Totals are recomputed from the rows admissible
+    through week_num (inclusive — the packet's own game already happened);
+    last_meeting is the most recent PRIOR meeting (strictly before week_num),
+    so it is never the current game and never a future one. total_games stays
+    wins + losses (ties drop, matching the committed site methodology).
+    """
+    games = sorted(h2h_entry.get("games", []), key=lambda g: (g["season"], g["week"]))
+    through = [
+        g
+        for g in games
+        if g["season"] < season or (g["season"] == season and g["week"] <= week_num)
+    ]
+    prior = [g for g in through if g["season"] < season or g["week"] < week_num]
+    wins = sum(1 for g in through if g["pts"] > g["opp_pts"])
+    losses = sum(1 for g in through if g["pts"] < g["opp_pts"])
+    last = prior[-1] if prior else None
+    return {
+        "team1_wins": wins,
+        "team2_wins": losses,
+        "total_games": wins + losses,
+        "last_meeting": (
+            {
+                "season": last["season"],
+                "week": last["week"],
+                "score": f"{last['pts']}-{last['opp_pts']}",
+            }
+            if last
+            else None
+        ),
+    }
+
+
 def build_matchup_entry(
     m,
     roster_lookup,
@@ -479,6 +517,8 @@ def build_matchup_entry(
     rid_to_owner,
     stats_cache=None,
     team_pair_to_game_id=None,
+    season=None,
+    week_num=None,
 ):
     """Build a single matchup dict from raw matchup data.
 
@@ -486,6 +526,10 @@ def build_matchup_entry(
     -> game_id crosswalk for the week. Built once per week in extract_week
     from the schedule (NOT from ff_playerids' static team field). When None,
     game_context.game_id will be null (graceful degradation per architect M3).
+
+    season/week_num gate the h2h slice: without both, h2h is OMITTED entirely
+    rather than emitted un-sliced — a packet with no h2h is degraded; a packet
+    with a future meeting in it is contaminated.
     """
     t1 = m["team1"]
     t2 = m["team2"]
@@ -552,29 +596,15 @@ def build_matchup_entry(
         "upset": _is_upset(winner_rid, t1["roster_id"], t2["roster_id"], prev_rankings),
     }
 
-    # Inject H2H history if available
-    if history_data:
+    # Inject H2H history if available — sliced as-of (season, week_num).
+    # Fail closed: without the slice coordinates the h2h block is omitted,
+    # never emitted from the end-of-season aggregate.
+    if history_data and season is not None and week_num is not None:
         oid1 = rid_to_owner.get(t1["roster_id"], "")
         oid2 = rid_to_owner.get(t2["roster_id"], "")
-        h2h = history_data.get("h2h", {})
-        h2h_key = f"{oid1}|{oid2}"
-        h2h_entry = h2h.get(h2h_key)
+        h2h_entry = history_data.get("h2h", {}).get(f"{oid1}|{oid2}")
         if h2h_entry:
-            last_game = h2h_entry["games"][-1] if h2h_entry["games"] else None
-            entry["h2h"] = {
-                "team1_wins": h2h_entry["wins"],
-                "team2_wins": h2h_entry["losses"],
-                "total_games": h2h_entry["wins"] + h2h_entry["losses"],
-                "last_meeting": (
-                    {
-                        "season": last_game["season"],
-                        "week": last_game["week"],
-                        "score": f"{last_game['pts']}-{last_game['opp_pts']}",
-                    }
-                    if last_game
-                    else None
-                ),
-            }
+            entry["h2h"] = as_of_h2h(h2h_entry, season, week_num)
 
     return entry
 
@@ -784,6 +814,8 @@ def extract_week(
                 rid_to_owner,
                 stats_cache,
                 team_pair_to_game_id,
+                season=int(data["season"]),
+                week_num=week_num,
             )
         )
 
@@ -1023,11 +1055,39 @@ def extract_week(
         "team_profiles_summary": profiles_summary,
     }
 
-    # Inject historical context (all-time records) if available
+    # Inject historical context (all-time records) if available — sliced
+    # as-of week N. league_history.json's records are end-of-season maxima,
+    # so injecting them verbatim leaks future games into an in-season
+    # artifact (a 2025 wk14 record inside week1_data.json).
     if history_data:
-        result["historical_context"] = history_data.get("records")
+        result["historical_context"] = as_of_records(
+            history_data.get("records"), int(data["season"]), week_num
+        )
 
     return result
+
+
+def as_of_records(records, season, week_num):
+    """All-time records admissible as of (season, week_num).
+
+    A record is kept only if it names the game it was set in (season/week)
+    and that game is on or before this artifact's week. Records with no
+    season/week attribution (streak spans) cannot prove they predate the
+    cutoff, so they are dropped — fail closed, like the rest of the
+    as-of-week sanitizer surface.
+    """
+    if not records:
+        return records
+    out = {}
+    for key, rec in records.items():
+        if not isinstance(rec, dict):
+            continue
+        rec_season, rec_week = rec.get("season"), rec.get("week")
+        if rec_season is None or rec_week is None:
+            continue
+        if rec_season < season or (rec_season == season and rec_week <= week_num):
+            out[key] = rec
+    return out
 
 
 def compute_streak(data, up_to_week, roster_id, roster_lookup):
