@@ -3,21 +3,26 @@
   "rule": "Every fact, quote, and storyline in a published edition traces to a source registered here, dated at or before the edition's cutoff.",
   "source_classes": [
     {
+      "id": "preseason_evidence",
+      "paths": [
+        "private_bundles/preseason-2025/preseason_evidence.json",
+        "content/preseason-2025/preseason_evidence.manifest.json"
+      ],
+      "what": "The complete league-data source for the preseason edition, projected from the compiled cutoff-bound edition state: team identities, draft, offseason transactions, historical results, complete cutoff rosters, exact chat quotes with fact_id references. The bundle itself is local private custody (gitignored); the tracked manifest carries edition, cutoff, canonical hash, counts, lineage, and the regeneration command. Writer preflight: python scripts/build_preseason_evidence.py --verify (rejects an absent or hash-mismatched bundle). The preseason writer opens the bundle and contemporaneous coverage, nothing else."
+    },
+    {
       "id": "week_data",
       "paths": [
         "content/weeks/week{N}_data.json",
         "content/weeks/week{N}_data_expanded.json",
         "data/2025/nfl_games/{game_id}.json"
       ],
-      "what": "Weekly data packet: matchups, standings, awards, per-game NFL context (scores, lines, injuries, weather, EPA), all fields derived as-of the edition's week."
+      "what": "Weekly data packet: matchups, standings, awards, per-game NFL context (scores, lines, injuries, weather, EPA), all fields derived as-of the edition's week. Weekly editions only; the preseason edition uses preseason_evidence instead."
     },
     {
       "id": "chat_context",
-      "paths": [
-        "content/weeks/week{N}_chat_context.json",
-        "content/preseason-2025/preseason_chat_context.json"
-      ],
-      "what": "Sanitized league chat for the edition: verbatim quotes, storylines, and league memory admitted by exact timestamp at or before the cutoff."
+      "paths": ["content/weeks/week{N}_chat_context.json"],
+      "what": "Sanitized league chat for the edition: verbatim quotes, storylines, and league memory admitted by exact timestamp at or before the cutoff. Weekly editions only; the preseason edition uses preseason_evidence instead."
     },
     {
       "id": "franchise_history",
@@ -28,7 +33,7 @@
         "data/2025/fantasy_rosters/week{N}.json",
         "data/league_history.json"
       ],
-      "what": "Franchise records, titles, playoff runs, rosters, draft classes, player arcs."
+      "what": "Franchise records, titles, playoff runs, rosters, draft classes, player arcs. Weekly editions only; the preseason edition uses preseason_evidence instead."
     },
     {
       "id": "team_registry",

@@ -176,30 +176,36 @@ def test_deep_and_dict_section_plants_fail_with_exact_paths(tmp_path):
     not PRIVATE_PRESENT,
     reason="production private states absent (clean checkout)",
 )
-def test_census_fails_when_an_authoritative_compiled_artifact_is_mutated():
+def test_census_fails_when_an_authoritative_compiled_artifact_is_mutated(
+    tmp_path, monkeypatch
+):
     """The leak census consumes the COMPLETE verified compilation contract: a
     corrupted source_hashes.json -- with state and manifest still internally
-    self-consistent -- must fail the census."""
-    sh = (
-        REPO
-        / "content"
-        / "editions"
-        / "2025-preseason"
-        / "compiled"
-        / "source_hashes.json"
-    )
+    self-consistent -- must fail the census. Runs entirely on a temporary COPY
+    of the compiled artifacts: the suite never writes a tracked file."""
+    import shutil
+
+    import scripts.compile_state as cs
+    import scripts.migration_census as mc
+
+    src = REPO / "content" / "editions" / "2025-preseason"
+    root = tmp_path / "repo"
+    editions = root / "content" / "editions"
+    editions.mkdir(parents=True)
+    shutil.copytree(src, editions / "2025-preseason")
+    monkeypatch.setattr(cs, "EDITIONS_ROOT", editions)
+    monkeypatch.setattr(mc, "ROOT", root)
+
+    # the patched roots must be live: the census passes on the clean copy
+    assert state_leak_census("2025-preseason")["future_entries"] == 0
+
+    sh = editions / "2025-preseason" / "compiled" / "source_hashes.json"
     original = sh.read_bytes()
     mutated = original.replace(b'"sha256": "sha256:', b'"sha256": "sha256:0', 1)
     assert mutated != original, "the plant must land"
     sh.write_bytes(mutated)
-    try:
-        with pytest.raises(ValueError, match="compiled contract failed verification"):
-            state_leak_census("2025-preseason")
-    finally:
-        # byte-exact restore: verification must never mutate tracked bytes
-        sh.write_bytes(original)
-    assert sh.read_bytes() == original
-    assert state_leak_census("2025-preseason")["future_entries"] == 0
+    with pytest.raises(ValueError, match="compiled contract failed verification"):
+        state_leak_census("2025-preseason")
 
 
 def test_unsupported_season_is_rejected_not_vacuously_ok():

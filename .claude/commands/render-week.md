@@ -9,8 +9,7 @@ Turn approved `content/weeks/week${WEEK}_content.json` into
    CSS variables (`--bg --fg --muted --accent --accent2 --card --border
 --glass --good --bad --warn`), sticky nav from `config.js`, scroll
    animations (IntersectionObserver + `.visible`), View Transitions meta,
-   back-to-top button, scroll progress bar. `power-rankings.html` and
-   `season.html` are live examples of the chrome.
+   back-to-top button, scroll progress bar. `season.html` is a live example of the chrome.
 2. Everything inline: all CSS in a `<style>` block, all JS inline (config.js
    is the only external file), all content baked into inline JS objects. No
    CDN, no frameworks, no client-side API calls.

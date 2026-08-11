@@ -198,28 +198,22 @@ def check_movement(content: dict, data: dict, errors: list):
 def check_rankings_order(content: dict, data: dict, errors: list):
     """Published ranking ORDER correctness — owned by exactly one authority.
 
-    With meta.ranking_source declared: resolve the judgment record through a
-    root-contained path, run the judgment gate on it, and require the
-    published order to match the record's positions exactly. Missing,
-    escaping, malformed, or RED sources FAIL — a declared judgment that
-    cannot be verified never silently degrades to the standings sort.
-
-    Without meta.ranking_source: the published order must match the
-    standings sort rank-for-rank (the pre-judgment default).
+    Every published ranking declares meta.ranking_source: a judgment record
+    that passes the ranking judgment gate. The check resolves it through a
+    root-contained path, runs the gate, and requires the published order to
+    match the record's positions exactly. Missing, escaping, malformed, or
+    RED sources FAIL. There is no fallback ordering: an undeclared source is
+    an error, never an arithmetic sort.
     """
     rankings = sorted(content.get("rankings", []), key=lambda r: r.get("rank") or 0)
     src = (content.get("meta") or {}).get("ranking_source")
 
     if not src:
-        standings_by_rank = {s["rank"]: s for s in data.get("standings", [])}
-        for r in rankings:
-            s = standings_by_rank.get(r.get("rank"))
-            if s and not teams_match(r.get("team_name", ""), s.get("team_name", "")):
-                errors.append(
-                    f"Rank {r.get('rank')}: team_name is '{r.get('team_name')}' "
-                    f"but the standings order says '{s.get('team_name')}' "
-                    f"(no ranking_source declared)"
-                )
+        if rankings:
+            errors.append(
+                "rankings are published without meta.ranking_source: every "
+                "published ranking declares a gate-passed judgment record"
+            )
         return
 
     if not isinstance(src, str):
@@ -636,6 +630,36 @@ def check_threads_continuity(content: dict, data: dict, errors: list, warnings: 
     prev, prev_label = _load_predecessor_threads(meta.get("week", 0))
     if prev is not None:
         _diff_thread_continuity(threads, prev, prev_label, warnings)
+
+
+def run_preseason_checks(content: dict) -> dict:
+    """The preseason ranking gate: the smallest executable check set for the
+    season-opening edition. Content-only (no week data exists yet):
+
+    - rankings are complete (12 entries, ranks 1-12);
+    - meta.ranking_source exists, resolves inside the repo, and its judgment
+      record passes the ranking gate;
+    - the published order matches the gate-passed record exactly.
+
+    Same fail-closed authority as the weekly path: both checks delegate to
+    the shared Tier-1 functions, which ignore week data entirely.
+    """
+    checks = [
+        ("rankings_completeness", check_rankings_completeness),
+        ("rankings_order", check_rankings_order),
+    ]
+    all_errors = []
+    passed = 0
+    failed = 0
+    for _name, fn in checks:
+        errs = []
+        fn(content, {}, errs)
+        if errs:
+            failed += 1
+            all_errors.extend(errs)
+        else:
+            passed += 1
+    return {"passed": passed, "failed": failed, "errors": all_errors, "warnings": []}
 
 
 def run_tier1(content: dict, data: dict) -> dict:
@@ -1621,14 +1645,62 @@ def format_json(week: int, tier1: dict, tier2: dict, tier3: dict | None = None) 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Verify weekly content JSON against week data"
+        description="Verify edition content JSON (weekly against week data; "
+        "--preseason runs the content-only preseason ranking gate)"
     )
-    parser.add_argument("--week", type=int, required=True, help="Week number")
+    parser.add_argument("--week", type=int, help="Week number")
+    parser.add_argument(
+        "--preseason",
+        action="store_true",
+        help="Validate content/preseason-2025/preseason_content.json",
+    )
     parser.add_argument("--pretty", action="store_true", help="Human-readable output")
     parser.add_argument(
         "--fix-suggestions", action="store_true", help="Show suggested fixes for errors"
     )
     args = parser.parse_args()
+
+    if args.preseason and args.week is not None:
+        print("ERROR: --week is not valid with --preseason")
+        sys.exit(2)
+    if not args.preseason and args.week is None:
+        print("ERROR: --week is required unless --preseason is set")
+        sys.exit(2)
+
+    if args.preseason:
+        content_path = PRESEASON_DIR / "preseason_content.json"
+        if not content_path.exists():
+            print(
+                f"ERROR: {content_path} not found -- no authored preseason "
+                f"content exists"
+            )
+            sys.exit(2)
+        content = load_json(content_path)
+        result = run_preseason_checks(content)
+        if args.pretty:
+            lines = ["PRESEASON CONTENT VALIDATION", "=" * 40, ""]
+            total = result["passed"] + result["failed"]
+            lines.append(f"RANKING GATE: {result['passed']}/{total} PASS")
+            for e in result["errors"]:
+                lines.append(f"  [FAIL] {e}")
+            lines.append("")
+            verdict = "PASS" if not result["errors"] else "FAIL"
+            n = len(result["errors"])
+            detail = "clean" if not n else f"{n} error" + ("s" if n != 1 else "")
+            lines.append(f"VERDICT: {verdict} ({detail})")
+            print("\n".join(lines))
+        else:
+            print(
+                json.dumps(
+                    {
+                        "edition": "preseason-2025",
+                        "verdict": "PASS" if not result["errors"] else "FAIL",
+                        "checks": result,
+                    },
+                    indent=2,
+                )
+            )
+        sys.exit(1 if result["errors"] else 0)
 
     content_path = WEEKS_DIR / f"week{args.week}_content.json"
     data_path = WEEKS_DIR / f"week{args.week}_data.json"

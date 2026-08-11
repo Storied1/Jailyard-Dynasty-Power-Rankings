@@ -1,0 +1,26 @@
+{
+  "bundle": {
+    "bytes": 961432,
+    "path": "private_bundles/preseason-2025/preseason_evidence.json",
+    "sha256": "05f77eb5a6ae191122e8c745c84b132e0a5358c75c091b7f2eeab864b1da946a"
+  },
+  "counts": {
+    "chat_quotes": 1955,
+    "draft_picks": 72,
+    "historical_games": 294,
+    "roster_players": 378,
+    "roster_teams": 12,
+    "teams": 12,
+    "transactions": 182
+  },
+  "cutoff_utc": "2025-09-03T23:59:59.000000Z",
+  "edition_id": "2025-preseason",
+  "kind": "preseason-evidence-manifest/1",
+  "lineage": {
+    "compiled_state": "content/editions/2025-preseason/compiled/",
+    "projection": "scripts/build_preseason_evidence.py",
+    "roster_snapshot": "data/2025/fantasy_rosters/week1.json",
+    "transaction_log": "data/2025/transactions.json"
+  },
+  "regenerate": "python scripts/build_preseason_evidence.py"
+}

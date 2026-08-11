@@ -231,17 +231,16 @@ def _order_fixture(order, src=None):
     return content, data
 
 
-def test_no_ranking_source_enforces_standings_order():
-    content, data = _order_fixture(["Beta", "Alpha", "Gamma"])
-    errors = []
-    check_rankings_order(content, data, errors)
-    assert errors and "standings order" in errors[0]
-
-
-def test_no_ranking_source_passes_when_order_matches_standings():
+def test_missing_ranking_source_is_an_error_never_a_fallback():
     content, data = _order_fixture(["Alpha", "Beta", "Gamma"])
     errors = []
     check_rankings_order(content, data, errors)
+    assert errors and "ranking_source" in errors[0]
+
+
+def test_no_rankings_section_needs_no_ranking_source():
+    errors = []
+    check_rankings_order({"meta": {}, "rankings": []}, {"standings": []}, errors)
     assert errors == []
 
 
@@ -335,3 +334,57 @@ def test_matching_published_order_passes_against_green_record(monkeypatch):
         assert errors == []
     finally:
         tmp.unlink()
+
+
+# ------------------------------------------------- preseason ranking gate --
+
+from verify_week_content import run_preseason_checks  # noqa: E402
+
+_TWELVE = [f"Team {c}" for c in "ABCDEFGHIJKL"]
+
+
+def test_preseason_missing_ranking_source_is_red():
+    """Detector-active fixture: authored preseason content WITH rankings but
+    WITHOUT meta.ranking_source must come back RED."""
+    content = {
+        "meta": {"season": 2025, "type": "preseason"},
+        "rankings": [{"rank": i + 1, "team_name": t} for i, t in enumerate(_TWELVE)],
+    }
+    assert len(content["rankings"]) == 12, "the plant must land: rankings exist"
+    assert "ranking_source" not in content["meta"]
+    result = run_preseason_checks(content)
+    assert result["failed"] >= 1
+    assert any("ranking_source" in e for e in result["errors"])
+
+
+def test_preseason_gate_passes_with_green_record_and_matching_order(monkeypatch):
+    src, tmp = _with_green_gate(
+        monkeypatch,
+        {
+            "positions": [
+                {"rank": i + 1, "roster_id": str(i + 1), "team_name": t}
+                for i, t in enumerate(_TWELVE)
+            ]
+        },
+    )
+    try:
+        content = {
+            "meta": {"season": 2025, "type": "preseason", "ranking_source": src},
+            "rankings": [
+                {"rank": i + 1, "team_name": t} for i, t in enumerate(_TWELVE)
+            ],
+        }
+        result = run_preseason_checks(content)
+        assert result["errors"] == []
+        assert result["failed"] == 0
+    finally:
+        tmp.unlink()
+
+
+def test_preseason_gate_rejects_incomplete_rankings():
+    content = {
+        "meta": {"season": 2025, "type": "preseason"},
+        "rankings": [{"rank": 1, "team_name": "Only One"}],
+    }
+    result = run_preseason_checks(content)
+    assert any("expected 12" in e for e in result["errors"])

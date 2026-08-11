@@ -27,9 +27,10 @@ For week ${WEEK}, load:
 
 ## Shape
 
-Required: `meta` ({week, season, type, and `ranking_source` when a judgment
-record exists}) and `rankings` (12 entries: rank, team_name, owner, record,
-blurb; ordered by the edition's judgment). Everything else is earned per the
+Required: `meta` ({week, season, type, `ranking_source`}) and `rankings`
+(12 entries: rank, team_name, owner, record, blurb; ordered by the edition's
+judgment). Publishing rankings without a gate-passed `meta.ranking_source`
+fails `verify_week_content`; there is no fallback ordering. Everything else is earned per the
 standard: sections exist because this week's material demands them, under
 whatever keys fit; the renderer renders what exists. Optional continuity:
 `meta.threads` (id, status opened|continued|paid_off|dropped, summary,
