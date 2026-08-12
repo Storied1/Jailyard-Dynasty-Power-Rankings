@@ -1,0 +1,1696 @@
+{
+  "access_scope": "league_private",
+  "baseline": [
+    {
+      "baseline_rank": 1,
+      "roster_id": "2"
+    },
+    {
+      "baseline_rank": 2,
+      "roster_id": "8"
+    },
+    {
+      "baseline_rank": 3,
+      "roster_id": "10"
+    },
+    {
+      "baseline_rank": 4,
+      "roster_id": "11"
+    },
+    {
+      "baseline_rank": 5,
+      "roster_id": "6"
+    },
+    {
+      "baseline_rank": 6,
+      "roster_id": "1"
+    },
+    {
+      "baseline_rank": 7,
+      "roster_id": "5"
+    },
+    {
+      "baseline_rank": 8,
+      "roster_id": "9"
+    },
+    {
+      "baseline_rank": 9,
+      "roster_id": "3"
+    },
+    {
+      "baseline_rank": 10,
+      "roster_id": "7"
+    },
+    {
+      "baseline_rank": 11,
+      "roster_id": "4"
+    },
+    {
+      "baseline_rank": 12,
+      "roster_id": "12"
+    }
+  ],
+  "citation_count": 222,
+  "cutoff_utc": "2025-09-03T23:59:59Z",
+  "edition_id": "2025-preseason",
+  "kind": "ranking-judgment/1",
+  "ordering_rule": "Editorial judgment over the frozen preseason evidence: cutoff rosters, the 2025 draft, the offseason transaction log, three seasons of results, and the league's own chat. The precommitted arithmetic baseline (LeagueState.standings(season=2024): wins desc, then points_for desc, then roster_id asc, over all admitted 2024 games) is stated per position as baseline_rank; every departure carries a reason bound to cited facts.",
+  "positions": [
+    {
+      "baseline_rank": 1,
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:274648de6cc063d0302eca2009428127c792adae32e290dc1d9b7137c3298d44",
+            "fact:662f9d3faea6516c0264fe8d165a4ff65fbec0dad0930ccbef4e9a64d3e353a1",
+            "fact:adc22e4a37f35edc08c547eeb6b5cb326b2ae7da80541deaf8c7e20a526e6b32",
+            "fact:b7d077127a60af99db529fb9106b2b203ea93251ed90294dff5c6bca2bcee58e"
+          ],
+          "picks": [
+            {
+              "pick_no": 12,
+              "player": "12489",
+              "round": 1
+            },
+            {
+              "pick_no": 24,
+              "player": "12521",
+              "round": 2
+            },
+            {
+              "pick_no": 60,
+              "player": "12715",
+              "round": 5
+            },
+            {
+              "pick_no": 72,
+              "player": "12713",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:65bee83e6bfd4ab60a21567f077ef03d8f936a4ebd407d198a5de4c34b5dfb91",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 1,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:0277ff4979e3f1d0e931c0575919e00b2d85853b6cccecbe6fd6fd2502ba9f46",
+            "fact:087599ff76fe65f563f00da37b340bd8c324730e3a4874c7ecb0ca509c15d2e1",
+            "fact:24e57c466a46854e3e5f4af3822e976a64395fe29f102931d41d121e65329422",
+            "fact:28066ca478e058263aea89af6236719f3b02717fe0a17115d4e02557991ac74a",
+            "fact:3253c4ba1f82dc93c6cb13f77be0874348648277d299eb00ef632cf47cda9b69",
+            "fact:36d3e191fae75b3aee059fbbcaa1c51f7a4ff1dbe1b6f4472e460fb017f391ce",
+            "fact:3ea851d3bcface5f912859022cfd70d5a4ddf08062d3bd98e18b94fd43ea3084",
+            "fact:66ba2fe502cb9dd6b33403e8af9f9cc4ed6e90ef8363caca1fb689cbe294b162",
+            "fact:6c06c4549170b25c79269742444599dc31f2a3f0584b469dec6313935dbce2d6",
+            "fact:7e62b05fbc478addded5ac012de2faf1c5f50a8bee1f550756d4b01247a44947",
+            "fact:82c90c1013469211247360f57e6eede2320a39bb0f3e44dcae070adf7b96fa0f",
+            "fact:a52e129dfd8b3bafedbeaeafdbbd1f6ca773291d63de428749dc494613a8682d",
+            "fact:cd66689ac08f947a4bfbbb8180e1083c35a7928d3103305fd708adb416547697",
+            "fact:d76521a9c251b20fc4a4f3e3906d2f0207c236d8771feb27aa48ac0c30d1933e",
+            "fact:ea029b0515074a32e1874513f703ac8520c77b7400dca0310a6dcac720ebdf34",
+            "fact:fc8d0dd00dec3471810cc083c4403900c7e1cb841580d5b01e532591abd399a9"
+          ],
+          "games": 16,
+          "losses": 3,
+          "points_for": 2477.14,
+          "season": 2024,
+          "wins": 13
+        },
+        "week_result": {}
+      },
+      "owner_id": "575194626101170176",
+      "points_against": 2166.02,
+      "points_for": 2477.14,
+      "rank": 1,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:0277ff4979e3f1d0e931c0575919e00b2d85853b6cccecbe6fd6fd2502ba9f46",
+              "fact:087599ff76fe65f563f00da37b340bd8c324730e3a4874c7ecb0ca509c15d2e1",
+              "fact:24e57c466a46854e3e5f4af3822e976a64395fe29f102931d41d121e65329422",
+              "fact:28066ca478e058263aea89af6236719f3b02717fe0a17115d4e02557991ac74a",
+              "fact:3253c4ba1f82dc93c6cb13f77be0874348648277d299eb00ef632cf47cda9b69",
+              "fact:36d3e191fae75b3aee059fbbcaa1c51f7a4ff1dbe1b6f4472e460fb017f391ce",
+              "fact:3ea851d3bcface5f912859022cfd70d5a4ddf08062d3bd98e18b94fd43ea3084",
+              "fact:66ba2fe502cb9dd6b33403e8af9f9cc4ed6e90ef8363caca1fb689cbe294b162",
+              "fact:6c06c4549170b25c79269742444599dc31f2a3f0584b469dec6313935dbce2d6",
+              "fact:7e62b05fbc478addded5ac012de2faf1c5f50a8bee1f550756d4b01247a44947",
+              "fact:82c90c1013469211247360f57e6eede2320a39bb0f3e44dcae070adf7b96fa0f",
+              "fact:a52e129dfd8b3bafedbeaeafdbbd1f6ca773291d63de428749dc494613a8682d",
+              "fact:cd66689ac08f947a4bfbbb8180e1083c35a7928d3103305fd708adb416547697",
+              "fact:d76521a9c251b20fc4a4f3e3906d2f0207c236d8771feb27aa48ac0c30d1933e",
+              "fact:ea029b0515074a32e1874513f703ac8520c77b7400dca0310a6dcac720ebdf34",
+              "fact:fc8d0dd00dec3471810cc083c4403900c7e1cb841580d5b01e532591abd399a9"
+            ],
+            "family": "prior_season",
+            "note": "13-3 over 16 games in 2024, #1 by the all-games measure; won the title game 182.28-176.58 over roster 11"
+          },
+          {
+            "fact_ids": [
+              "fact:5e8b95b0bedb1857cd707e33c91d75dc7b34ceefeb6b99b68c86cd883a61576b",
+              "fact:31774bb04a26be8f30ab62a9513767368cc2ad3c8005bb43289e27fc6cdbaf82"
+            ],
+            "family": "chat",
+            "note": "reigning champ; Parsons lands next to his Packers stack days before cutoff"
+          },
+          {
+            "fact_ids": [
+              "fact:b7d077127a60af99db529fb9106b2b203ea93251ed90294dff5c6bca2bcee58e",
+              "fact:274648de6cc063d0302eca2009428127c792adae32e290dc1d9b7137c3298d44"
+            ],
+            "family": "draft",
+            "note": "RJ Harvey at 1.12 behind Jonathan Taylor and Najee Harris"
+          }
+        ]
+      },
+      "record": "13-3",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "2",
+      "team_name": "Kittler on the Roof"
+    },
+    {
+      "baseline_rank": 2,
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:24a07c1f781584c809e14a587dc262d141c297328d980c274ab96d598108c2da",
+            "fact:538e61a4bbfbe0d09065df4081a111ad4918835faf2fcc7ce9460cda2b813e7a",
+            "fact:7f46bfee83387f10900763a2f2e37deeb88cf8384caea9bf94d40b49f716b304",
+            "fact:9938940ae9229f8a8188a7c43f5233156d8b43cbd1fb6fa9fa5a31721a6aaa01",
+            "fact:d791e903eeb5a6fdd0a912c254e4dad7b2e4c915b0f72a0d9bcec26bd6690e0b"
+          ],
+          "picks": [
+            {
+              "pick_no": 4,
+              "player": "12530",
+              "round": 1
+            },
+            {
+              "pick_no": 34,
+              "player": "12506",
+              "round": 3
+            },
+            {
+              "pick_no": 50,
+              "player": "12462",
+              "round": 5
+            },
+            {
+              "pick_no": 58,
+              "player": "12568",
+              "round": 5
+            },
+            {
+              "pick_no": 70,
+              "player": "12516",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:895436ee5665fb0d240a2a058a40ccb0c8f25a3d04502ec4eaa32c9207674d23",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 2,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:1d645ef1578b2175d421c1bdf4a33a0c22864764360a8e9779dbe25ecce537f1",
+            "fact:37bd4e2966150f70f355c594c95e5c9469aa3b069c928924fe7a7aedf3e4060d",
+            "fact:425ff252c4707bcda283a88b56fdfc828311d9390d0cd685d3f22f0c96ef26c6",
+            "fact:4953e1ee88c222c5fc7d938527ff616d72c23bf7aed908636c6693af0e3c9e89",
+            "fact:63760e111ad818e8cde7cca141b9eece98a5aaee5ed4c7393ce99c5f891c7929",
+            "fact:66ba2fe502cb9dd6b33403e8af9f9cc4ed6e90ef8363caca1fb689cbe294b162",
+            "fact:749217c018c211bd131dc4ea837c73549360334a370904a79a60969d56415e26",
+            "fact:76c3e27eba2888214907abc959f10a2f0234ec443faca46b927263e085cee825",
+            "fact:9e34cdd89abd10f12a01f3ed682e1a3d3f6fad89283b7f41700996905c2acce4",
+            "fact:b2761fa5b8932ef48fa203de1ef3693aa059460c51de5553a964469bf62fc982",
+            "fact:b33b2dfe2264a4115ca5a8244e282693e6bf0e1c72b3bcd672ee91888bacbc7e",
+            "fact:c740da513394754a7dace212dd3db15f1533960462e414b2040341b11628771d",
+            "fact:cd3b331c335bcd1eaf1ce1a70e09c9381291ed8e5aac3044d44e128868aa823b",
+            "fact:d24f3704435f4eb972c58a5e8904c2b09246145a94d328e61aa03118e5653451",
+            "fact:f18241574503b9163bce8563480d997975496b43ade35fd7de2a21f56780b9e4",
+            "fact:fb37a5c81b27868ee6bb797dd2c5975121986ebb22d7daf56acd313da4f0f34a",
+            "fact:fc8d0dd00dec3471810cc083c4403900c7e1cb841580d5b01e532591abd399a9"
+          ],
+          "games": 17,
+          "losses": 5,
+          "points_for": 2535.52,
+          "season": 2024,
+          "wins": 12
+        },
+        "week_result": {}
+      },
+      "owner_id": "792563831732838400",
+      "points_against": 2303.68,
+      "points_for": 2535.52,
+      "rank": 2,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:66324137e55444ce1a3ea4199863767568fd894884e00ec1fbf07cd66b8002ac",
+              "fact:ff63295c71a800c8bd456e594c413f245259a7b2c3618d8c3a41f54afb159ea1",
+              "fact:1e254eba084f11d0eb1096ba4a3a8cfa5278db90ed7d68795413530b5bb89beb"
+            ],
+            "family": "chat",
+            "note": "the stated all-in, on the record since March"
+          },
+          {
+            "fact_ids": [
+              "fact:538e61a4bbfbe0d09065df4081a111ad4918835faf2fcc7ce9460cda2b813e7a",
+              "fact:9938940ae9229f8a8188a7c43f5233156d8b43cbd1fb6fa9fa5a31721a6aaa01"
+            ],
+            "family": "draft",
+            "note": "Hunter at 1.04, the offseason's defining swing"
+          },
+          {
+            "fact_ids": [
+              "fact:41a2348355cba6f4e1f6c8b8590fc2906a8b77659e38eb29c33d1647f8988339",
+              "fact:3b680576f738d95b9da6e8ddf5f54b8414ecd75bd3cf0a090a094bec3a7788cf",
+              "fact:41a2ec7dc3d4d4e4dac3fe2b4fb315c0a7dde5208ec3df28512b98926a35814b"
+            ],
+            "family": "transactions",
+            "note": "Chuba Hubbard trade, Jerome Ford trade on cutoff eve, Isaiah Bond add"
+          },
+          {
+            "fact_ids": [
+              "fact:1d645ef1578b2175d421c1bdf4a33a0c22864764360a8e9779dbe25ecce537f1",
+              "fact:37bd4e2966150f70f355c594c95e5c9469aa3b069c928924fe7a7aedf3e4060d",
+              "fact:425ff252c4707bcda283a88b56fdfc828311d9390d0cd685d3f22f0c96ef26c6",
+              "fact:4953e1ee88c222c5fc7d938527ff616d72c23bf7aed908636c6693af0e3c9e89",
+              "fact:63760e111ad818e8cde7cca141b9eece98a5aaee5ed4c7393ce99c5f891c7929",
+              "fact:66ba2fe502cb9dd6b33403e8af9f9cc4ed6e90ef8363caca1fb689cbe294b162",
+              "fact:749217c018c211bd131dc4ea837c73549360334a370904a79a60969d56415e26",
+              "fact:76c3e27eba2888214907abc959f10a2f0234ec443faca46b927263e085cee825",
+              "fact:9e34cdd89abd10f12a01f3ed682e1a3d3f6fad89283b7f41700996905c2acce4",
+              "fact:b2761fa5b8932ef48fa203de1ef3693aa059460c51de5553a964469bf62fc982",
+              "fact:b33b2dfe2264a4115ca5a8244e282693e6bf0e1c72b3bcd672ee91888bacbc7e",
+              "fact:c740da513394754a7dace212dd3db15f1533960462e414b2040341b11628771d",
+              "fact:cd3b331c335bcd1eaf1ce1a70e09c9381291ed8e5aac3044d44e128868aa823b",
+              "fact:d24f3704435f4eb972c58a5e8904c2b09246145a94d328e61aa03118e5653451",
+              "fact:f18241574503b9163bce8563480d997975496b43ade35fd7de2a21f56780b9e4",
+              "fact:fb37a5c81b27868ee6bb797dd2c5975121986ebb22d7daf56acd313da4f0f34a",
+              "fact:fc8d0dd00dec3471810cc083c4403900c7e1cb841580d5b01e532591abd399a9"
+            ],
+            "family": "prior_season",
+            "note": "12-5, #2 by the all-games measure, third place in 2024"
+          }
+        ]
+      },
+      "record": "12-5",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "8",
+      "team_name": "MHJTIME"
+    },
+    {
+      "baseline_rank": 3,
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:132779de8779902a2c928cbf3b392ed6415257f9edf11a042f6747a9efed43ce",
+            "fact:47aff9bba3d46cd3ad494084040265cfd00c18d2e8f95de7e4463bb450ff834f",
+            "fact:6250b16794cf5158170b4be97f3b751795c5fb96cd5b54053ae6471dbd66c1c7",
+            "fact:638c8603d8585e3e78dae22f7fee5dd1ef4030d1acc13948bbb56d8476326dac",
+            "fact:aae83cb5be9da0b7aa23cada7509a50745c355c39340172ea19f775578688ab2",
+            "fact:e18dd169e2a3c1cc592eb693d7771359a89384a34614678965c93a708938fdfb"
+          ],
+          "picks": [
+            {
+              "pick_no": 9,
+              "player": "12504",
+              "round": 1
+            },
+            {
+              "pick_no": 21,
+              "player": "12498",
+              "round": 2
+            },
+            {
+              "pick_no": 33,
+              "player": "12574",
+              "round": 3
+            },
+            {
+              "pick_no": 45,
+              "player": "12543",
+              "round": 4
+            },
+            {
+              "pick_no": 57,
+              "player": "12540",
+              "round": 5
+            },
+            {
+              "pick_no": 69,
+              "player": "12523",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:d2541e0cb491fee7d2698322c19265e9c7d3502ae516c72363b23123fb6d51f8",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 3,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:260c7a006cbcf98af53a73e340663730e940da92c2ff9566df3b2d194b0ede23",
+            "fact:2dddc3059c57862e01b4976953e30eae9de416db5eb0e448008258c7e2d8d017",
+            "fact:41a90a9aac5154ba12d4fe05dbae107ad08891a4ab3ec0db4e69d01e624fb31f",
+            "fact:4bf6c5c166326163972ee86f107b751be69f392daeecb0fa9d336389653b325e",
+            "fact:5a4d8ca760eecfa537833de42ab60aeead4c89ba3721f962fef2d81eef3ee320",
+            "fact:6541f54cb78608aaef820e3833212950b1acec79e076553817cd8f07c1a0a58c",
+            "fact:760c248107521c3596fb3887a187a764143138352ddd19cc92f8e5cdd1af1708",
+            "fact:82c90c1013469211247360f57e6eede2320a39bb0f3e44dcae070adf7b96fa0f",
+            "fact:8f35d84360d35352a1c791644cb06c0c259b82a7954b820e940c1f204898e975",
+            "fact:90b8a9a4516f54fe837e6e007f6fe21f57a1e60b534ba2c753c35d50d7eebdfb",
+            "fact:9e34cdd89abd10f12a01f3ed682e1a3d3f6fad89283b7f41700996905c2acce4",
+            "fact:b33b2dfe2264a4115ca5a8244e282693e6bf0e1c72b3bcd672ee91888bacbc7e",
+            "fact:cd66689ac08f947a4bfbbb8180e1083c35a7928d3103305fd708adb416547697",
+            "fact:dec24b12be1950db2afa6b4967db73098f4f19eaf957c0efeff04d673f5db53a",
+            "fact:ea78217a50c2efea7d49090850aeee4ad9df05341b57431cf27cab146a36e053",
+            "fact:f37cab903f52a48f303ca2ce90faaa12fd9ed5f97b183c71976049fdccbb48dc",
+            "fact:fbe1630be84920684de4f3c2e078673418ef2c16a0a0e0d72c436b1a132b601c"
+          ],
+          "games": 17,
+          "losses": 6,
+          "points_for": 2628.96,
+          "season": 2024,
+          "wins": 11
+        },
+        "week_result": {}
+      },
+      "owner_id": "861064424906158080",
+      "points_against": 2361.64,
+      "points_for": 2628.96,
+      "rank": 3,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:260c7a006cbcf98af53a73e340663730e940da92c2ff9566df3b2d194b0ede23",
+              "fact:2dddc3059c57862e01b4976953e30eae9de416db5eb0e448008258c7e2d8d017",
+              "fact:41a90a9aac5154ba12d4fe05dbae107ad08891a4ab3ec0db4e69d01e624fb31f",
+              "fact:4bf6c5c166326163972ee86f107b751be69f392daeecb0fa9d336389653b325e",
+              "fact:5a4d8ca760eecfa537833de42ab60aeead4c89ba3721f962fef2d81eef3ee320",
+              "fact:6541f54cb78608aaef820e3833212950b1acec79e076553817cd8f07c1a0a58c",
+              "fact:760c248107521c3596fb3887a187a764143138352ddd19cc92f8e5cdd1af1708",
+              "fact:82c90c1013469211247360f57e6eede2320a39bb0f3e44dcae070adf7b96fa0f",
+              "fact:8f35d84360d35352a1c791644cb06c0c259b82a7954b820e940c1f204898e975",
+              "fact:90b8a9a4516f54fe837e6e007f6fe21f57a1e60b534ba2c753c35d50d7eebdfb",
+              "fact:9e34cdd89abd10f12a01f3ed682e1a3d3f6fad89283b7f41700996905c2acce4",
+              "fact:b33b2dfe2264a4115ca5a8244e282693e6bf0e1c72b3bcd672ee91888bacbc7e",
+              "fact:cd66689ac08f947a4bfbbb8180e1083c35a7928d3103305fd708adb416547697",
+              "fact:dec24b12be1950db2afa6b4967db73098f4f19eaf957c0efeff04d673f5db53a",
+              "fact:ea78217a50c2efea7d49090850aeee4ad9df05341b57431cf27cab146a36e053",
+              "fact:f37cab903f52a48f303ca2ce90faaa12fd9ed5f97b183c71976049fdccbb48dc",
+              "fact:fbe1630be84920684de4f3c2e078673418ef2c16a0a0e0d72c436b1a132b601c"
+            ],
+            "family": "prior_season",
+            "note": "11-6 with 2628.96 PF, the highest scoring total in the league in 2024"
+          },
+          {
+            "fact_ids": [
+              "fact:30df4b9df6430fdf6daf03553634e0d1c036c75a56898c853279eeecaa90b74c",
+              "fact:b8a8bb7a204e94256c2a7e288403746e3b2119e984afc938f4f75fc6be9724bb"
+            ],
+            "family": "chat",
+            "note": "a rival's testimony, and the owner's own QB doubt on cutoff eve"
+          },
+          {
+            "fact_ids": [
+              "fact:638c8603d8585e3e78dae22f7fee5dd1ef4030d1acc13948bbb56d8476326dac",
+              "fact:6250b16794cf5158170b4be97f3b751795c5fb96cd5b54053ae6471dbd66c1c7"
+            ],
+            "family": "draft",
+            "note": "Kaleb Johnson at 1.09, the misclick he chose to keep; Abdul Carter at 3.09"
+          }
+        ]
+      },
+      "record": "11-6",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "10",
+      "team_name": "General Ken-obi"
+    },
+    {
+      "baseline_rank": 4,
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:032b1d5cfd8e016e42bbee26118faea8ee288d56042a72d1dd1f8c4d88f39b85",
+            "fact:362897946c57e6a3fbd278ed1ab3e26f46645a15a97a51a110d6efa5ef76d27c",
+            "fact:4b3d2c55f7c104c4d47e9fba660226950ca55a4c65d31f0c57940f05c12e6c03",
+            "fact:78092dbc8aa722fa4830932124322f25cc25eb2359378ca075ff0146dcf69d85",
+            "fact:a20ec3a5bcb3e22052c4aa3a3e04b7e8a01b4e456886d67f41bd979866389626",
+            "fact:d1be442917abba8cd3c51a3342297a03f9542b1ac6d309ef61835a08a43e0fb9",
+            "fact:fe405c473f1f139b1ad04e7972c770c249aea57209e1c99c808f9cd96e263c12"
+          ],
+          "picks": [
+            {
+              "pick_no": 16,
+              "player": "12547",
+              "round": 2
+            },
+            {
+              "pick_no": 35,
+              "player": "12476",
+              "round": 3
+            },
+            {
+              "pick_no": 36,
+              "player": "12495",
+              "round": 3
+            },
+            {
+              "pick_no": 47,
+              "player": "12510",
+              "round": 4
+            },
+            {
+              "pick_no": 48,
+              "player": "12641",
+              "round": 4
+            },
+            {
+              "pick_no": 59,
+              "player": "12542",
+              "round": 5
+            },
+            {
+              "pick_no": 71,
+              "player": "12486",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:d1ea8e90d62b216eeaf18376327b81750320c6cf13faf31f8d0f91dda92d9d8c",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 4,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:0277ff4979e3f1d0e931c0575919e00b2d85853b6cccecbe6fd6fd2502ba9f46",
+            "fact:2c38051049873bf95e729dc42305da072a0960d972f2550c89c0521a70533dbf",
+            "fact:3c2fb86b1e57859f342aebfc1e506e581fbc0d82db6f40a961335f459363e427",
+            "fact:427652b4e0f49e78c35b9549ff36e7d48caedd06815dab5e96c25a7742f85f8e",
+            "fact:4b7eceb7955cce13d6a13f038eb6f6ad6a00b7d306bca1a940cfe4c855ec39b9",
+            "fact:4bf6c5c166326163972ee86f107b751be69f392daeecb0fa9d336389653b325e",
+            "fact:60ffd0204d0ce30fdac1469927217a38c4a781ae0f9de8c8bc3d4fb34cc80379",
+            "fact:7282ec66148724e6c99a9f5d06e387b8e0d1fac0e02e7dd78a23d8c4eb74e688",
+            "fact:76c3e27eba2888214907abc959f10a2f0234ec443faca46b927263e085cee825",
+            "fact:7763d02d283740e54414be8602271c4cfb93b1606ea64be815106080227e082d",
+            "fact:7e62b05fbc478addded5ac012de2faf1c5f50a8bee1f550756d4b01247a44947",
+            "fact:a7e098f64fe7816767db49ddd0bad588beb2b22b6edb1c9e430bd224eeb107b5",
+            "fact:c1b74e92668e88aab760e04308cd1f9b21d9396a04a56f4d0413bebd5b8ae03c",
+            "fact:c740da513394754a7dace212dd3db15f1533960462e414b2040341b11628771d",
+            "fact:cbb6aba02ec6b9f434ece08005d56971557ff1857a29ffcd70e6500a6ffe122f",
+            "fact:f37cab903f52a48f303ca2ce90faaa12fd9ed5f97b183c71976049fdccbb48dc"
+          ],
+          "games": 16,
+          "losses": 5,
+          "points_for": 2590.08,
+          "season": 2024,
+          "wins": 11
+        },
+        "week_result": {}
+      },
+      "owner_id": "510254202180411392",
+      "points_against": 2404.68,
+      "points_for": 2590.08,
+      "rank": 4,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:0277ff4979e3f1d0e931c0575919e00b2d85853b6cccecbe6fd6fd2502ba9f46",
+              "fact:2c38051049873bf95e729dc42305da072a0960d972f2550c89c0521a70533dbf",
+              "fact:3c2fb86b1e57859f342aebfc1e506e581fbc0d82db6f40a961335f459363e427",
+              "fact:427652b4e0f49e78c35b9549ff36e7d48caedd06815dab5e96c25a7742f85f8e",
+              "fact:4b7eceb7955cce13d6a13f038eb6f6ad6a00b7d306bca1a940cfe4c855ec39b9",
+              "fact:4bf6c5c166326163972ee86f107b751be69f392daeecb0fa9d336389653b325e",
+              "fact:60ffd0204d0ce30fdac1469927217a38c4a781ae0f9de8c8bc3d4fb34cc80379",
+              "fact:7282ec66148724e6c99a9f5d06e387b8e0d1fac0e02e7dd78a23d8c4eb74e688",
+              "fact:76c3e27eba2888214907abc959f10a2f0234ec443faca46b927263e085cee825",
+              "fact:7763d02d283740e54414be8602271c4cfb93b1606ea64be815106080227e082d",
+              "fact:7e62b05fbc478addded5ac012de2faf1c5f50a8bee1f550756d4b01247a44947",
+              "fact:a7e098f64fe7816767db49ddd0bad588beb2b22b6edb1c9e430bd224eeb107b5",
+              "fact:c1b74e92668e88aab760e04308cd1f9b21d9396a04a56f4d0413bebd5b8ae03c",
+              "fact:c740da513394754a7dace212dd3db15f1533960462e414b2040341b11628771d",
+              "fact:cbb6aba02ec6b9f434ece08005d56971557ff1857a29ffcd70e6500a6ffe122f",
+              "fact:f37cab903f52a48f303ca2ce90faaa12fd9ed5f97b183c71976049fdccbb48dc"
+            ],
+            "family": "prior_season",
+            "note": "11-5, #4 by all games; lost the championship game by 5.70"
+          },
+          {
+            "fact_ids": [
+              "fact:5cfb1c35ac852219c56525b274b5356c71b316a30f7116c7b460293f4a9cbb51",
+              "fact:f1a5c271319c7b6f17101579a76de743029dbf8618d8b9f2f1f5da652e59410d",
+              "fact:fa5027134146178124d15df9f83c1ce608e7dae785e1baf9facb956bda5a5c8b"
+            ],
+            "family": "chat",
+            "note": "the window argument, both sides, plus the Waller reclamation"
+          },
+          {
+            "fact_ids": [
+              "fact:f8f20287358320369c48c9abc320cd6d120b63047bec3b04bfffdf11689bcb7b"
+            ],
+            "family": "transactions",
+            "note": "Darren Waller claimed off his un-retirement"
+          }
+        ]
+      },
+      "record": "11-5",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "11",
+      "team_name": "Sleeping Giants"
+    },
+    {
+      "baseline_rank": 5,
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:3e54a0621f902007fae74dcb516ab07de613df6e179600f5552fc97adfebdcc5",
+            "fact:5b1669798629f61ee086f60ff82a3d7b94704d211d85e14969aa7f4b13939201",
+            "fact:62322fca17197d1b3257a153d361def0cf3792516afd2a73e8c772e4b9226b1e",
+            "fact:9befb98dba657f0aafe10c779d8c651c6386b4df8a580cd24694de01f9b4e215",
+            "fact:b200b074e1d5ea46f04fdc60e405a59b52d52e6b534f2af8841093ec40b59e2c",
+            "fact:d644521b8a5060425ee3b89f16bfb7cab3e10ac2fc76612001f2de6db480e442"
+          ],
+          "picks": [
+            {
+              "pick_no": 7,
+              "player": "12512",
+              "round": 1
+            },
+            {
+              "pick_no": 15,
+              "player": "12509",
+              "round": 2
+            },
+            {
+              "pick_no": 29,
+              "player": "12457",
+              "round": 3
+            },
+            {
+              "pick_no": 30,
+              "player": "12469",
+              "round": 3
+            },
+            {
+              "pick_no": 56,
+              "player": "12496",
+              "round": 5
+            },
+            {
+              "pick_no": 68,
+              "player": "12502",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:c58918fb44545b4bd21bff3aa5f7706c0f15cdfe21daa608fed9016798b9e68c",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 5,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:065ee3ba9880d9bf33d6284d9f0a7b94b406875403bb6c437c767f24a61da531",
+            "fact:11211b18a5bd34856dc9de3078ee5319e92d26bd53be6add1f281861d42034bc",
+            "fact:1d645ef1578b2175d421c1bdf4a33a0c22864764360a8e9779dbe25ecce537f1",
+            "fact:28066ca478e058263aea89af6236719f3b02717fe0a17115d4e02557991ac74a",
+            "fact:41a90a9aac5154ba12d4fe05dbae107ad08891a4ab3ec0db4e69d01e624fb31f",
+            "fact:516628882f6363f794db288588b06113210b82cca5ec401ab050fd133c0d2733",
+            "fact:6023a19f8cd47b925fafd030cd1ae55576d7152297e5370295253a736835d47a",
+            "fact:719a7e3794ea79e70b9b02c28118fe755348344548e474ca2c9026a983d5dff7",
+            "fact:7282ec66148724e6c99a9f5d06e387b8e0d1fac0e02e7dd78a23d8c4eb74e688",
+            "fact:846a349dbc9d32aad87b6db228858f36500428b4dd4a8ee344186267da7ec5ab",
+            "fact:a33f28f97debd33345e693463a81a961a8a5e40491976a5c84ae50387b36e0d0",
+            "fact:a4a8f2298f81720673c8f88931c55f5ec5d597277f2eb9a9864c96e3055e9bc5",
+            "fact:c24c64f539042f501888f98bc9fd979a32c15258d3141d84627d766911cf2134",
+            "fact:c90fced288531707d9c347397fd349f7906b597cc31a3f1e75f9a4c943d5d71e",
+            "fact:d7b2b97a4c21252784d4a901f7c38410c087b1a67d009154da1472115bd714b1",
+            "fact:fb37a5c81b27868ee6bb797dd2c5975121986ebb22d7daf56acd313da4f0f34a"
+          ],
+          "games": 16,
+          "losses": 6,
+          "points_for": 2272.76,
+          "season": 2024,
+          "wins": 10
+        },
+        "week_result": {}
+      },
+      "owner_id": "415249306090479616",
+      "points_against": 2166.0,
+      "points_for": 2272.76,
+      "rank": 5,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:aeaa5e0efc5a3bed69522b94101a8f5764e18622536441a4085b3a018aa6cda9",
+              "fact:f2bb589b78ed2df95dc4f9c00bd98babea6c03b34b71122c438bfc37924fc92d"
+            ],
+            "family": "chat",
+            "note": "the namesake suspension, absorbed with a shrug"
+          },
+          {
+            "fact_ids": [
+              "fact:177685fff29b87e81e4e10a80323c5637880057aa082d5d2633eb3a0d44afb4f"
+            ],
+            "family": "transactions",
+            "note": "Pittman acquired from roster 7 during the draft"
+          },
+          {
+            "fact_ids": [
+              "fact:5b1669798629f61ee086f60ff82a3d7b94704d211d85e14969aa7f4b13939201",
+              "fact:62322fca17197d1b3257a153d361def0cf3792516afd2a73e8c772e4b9226b1e"
+            ],
+            "family": "draft",
+            "note": "Judkins at 1.07, Tre Harris at 2.03"
+          },
+          {
+            "fact_ids": [
+              "fact:065ee3ba9880d9bf33d6284d9f0a7b94b406875403bb6c437c767f24a61da531",
+              "fact:11211b18a5bd34856dc9de3078ee5319e92d26bd53be6add1f281861d42034bc",
+              "fact:1d645ef1578b2175d421c1bdf4a33a0c22864764360a8e9779dbe25ecce537f1",
+              "fact:28066ca478e058263aea89af6236719f3b02717fe0a17115d4e02557991ac74a",
+              "fact:41a90a9aac5154ba12d4fe05dbae107ad08891a4ab3ec0db4e69d01e624fb31f",
+              "fact:516628882f6363f794db288588b06113210b82cca5ec401ab050fd133c0d2733",
+              "fact:6023a19f8cd47b925fafd030cd1ae55576d7152297e5370295253a736835d47a",
+              "fact:719a7e3794ea79e70b9b02c28118fe755348344548e474ca2c9026a983d5dff7",
+              "fact:7282ec66148724e6c99a9f5d06e387b8e0d1fac0e02e7dd78a23d8c4eb74e688",
+              "fact:846a349dbc9d32aad87b6db228858f36500428b4dd4a8ee344186267da7ec5ab",
+              "fact:a33f28f97debd33345e693463a81a961a8a5e40491976a5c84ae50387b36e0d0",
+              "fact:a4a8f2298f81720673c8f88931c55f5ec5d597277f2eb9a9864c96e3055e9bc5",
+              "fact:c24c64f539042f501888f98bc9fd979a32c15258d3141d84627d766911cf2134",
+              "fact:c90fced288531707d9c347397fd349f7906b597cc31a3f1e75f9a4c943d5d71e",
+              "fact:d7b2b97a4c21252784d4a901f7c38410c087b1a67d009154da1472115bd714b1",
+              "fact:fb37a5c81b27868ee6bb797dd2c5975121986ebb22d7daf56acd313da4f0f34a"
+            ],
+            "family": "prior_season",
+            "note": "10-6, #5 by all games, a riser two years running"
+          }
+        ]
+      },
+      "record": "10-6",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "6",
+      "team_name": "Rasheeing the Scene"
+    },
+    {
+      "baseline_rank": 6,
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:239dde955a1c800c6f3d354c01db88bd8f70d2507d94a22d7afaf2fd6db0d7af",
+            "fact:913fffb1cf5b1fd588dfea99b73daa356bf7ee7f5d7fbf11b77c38df66a29ecd",
+            "fact:92322a53a1bee59927440d272fc8c1afd3581ebd18a594fd2ddd431f1a2d893f",
+            "fact:98cfab9de13e51e8e7e0b54b7f5d0e9607039189f2d70a39fbd7f320944ea105"
+          ],
+          "picks": [
+            {
+              "pick_no": 38,
+              "player": "12541",
+              "round": 4
+            },
+            {
+              "pick_no": 43,
+              "player": "12493",
+              "round": 4
+            },
+            {
+              "pick_no": 55,
+              "player": "12567",
+              "round": 5
+            },
+            {
+              "pick_no": 67,
+              "player": "12670",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:1c0d3d4edebb11fa4ff3ca628ccbe4a20d6d52151504c3f0e8d2414d102319b6",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 6,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:11211b18a5bd34856dc9de3078ee5319e92d26bd53be6add1f281861d42034bc",
+            "fact:2dddc3059c57862e01b4976953e30eae9de416db5eb0e448008258c7e2d8d017",
+            "fact:49d0f73f1c955248672ca3f41b847a34cff69be292d1c5d0af29de228b5cae2f",
+            "fact:4d6e116b6e600d9df7689f36b56af25a9151fbdaa64b8762308c059a85cb9ea4",
+            "fact:516628882f6363f794db288588b06113210b82cca5ec401ab050fd133c0d2733",
+            "fact:6541f54cb78608aaef820e3833212950b1acec79e076553817cd8f07c1a0a58c",
+            "fact:90b8a9a4516f54fe837e6e007f6fe21f57a1e60b534ba2c753c35d50d7eebdfb",
+            "fact:9b7a71b8a2813587e048809f137240ec1eb23dd079fa89886eaf56f6266a6547",
+            "fact:a1169f707a5fd2a2a4ca1387094f0e8a779830f7d91fbe0e4e5d9b8e4056484c",
+            "fact:a52e129dfd8b3bafedbeaeafdbbd1f6ca773291d63de428749dc494613a8682d",
+            "fact:a54113c2b35abfecfaa899185736b08c07efcd66ae76d0e0028d0efe2d2f07ef",
+            "fact:a7e098f64fe7816767db49ddd0bad588beb2b22b6edb1c9e430bd224eeb107b5",
+            "fact:af0b452eeb6e7d0f8a88ae225f9a19ce88df321543f2c309a1d5461f4157369a",
+            "fact:c0c222c3c28de7cc9e70738ccada4f1a34246388f2ee3b4b8b2965dfa31fb6ed",
+            "fact:cd3b331c335bcd1eaf1ce1a70e09c9381291ed8e5aac3044d44e128868aa823b",
+            "fact:ea029b0515074a32e1874513f703ac8520c77b7400dca0310a6dcac720ebdf34"
+          ],
+          "games": 16,
+          "losses": 9,
+          "points_for": 2468.72,
+          "season": 2024,
+          "wins": 7
+        },
+        "week_result": {}
+      },
+      "owner_id": "510013812276232192",
+      "points_against": 2334.24,
+      "points_for": 2468.72,
+      "rank": 6,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:11211b18a5bd34856dc9de3078ee5319e92d26bd53be6add1f281861d42034bc",
+              "fact:2dddc3059c57862e01b4976953e30eae9de416db5eb0e448008258c7e2d8d017",
+              "fact:49d0f73f1c955248672ca3f41b847a34cff69be292d1c5d0af29de228b5cae2f",
+              "fact:4d6e116b6e600d9df7689f36b56af25a9151fbdaa64b8762308c059a85cb9ea4",
+              "fact:516628882f6363f794db288588b06113210b82cca5ec401ab050fd133c0d2733",
+              "fact:6541f54cb78608aaef820e3833212950b1acec79e076553817cd8f07c1a0a58c",
+              "fact:90b8a9a4516f54fe837e6e007f6fe21f57a1e60b534ba2c753c35d50d7eebdfb",
+              "fact:9b7a71b8a2813587e048809f137240ec1eb23dd079fa89886eaf56f6266a6547",
+              "fact:a1169f707a5fd2a2a4ca1387094f0e8a779830f7d91fbe0e4e5d9b8e4056484c",
+              "fact:a52e129dfd8b3bafedbeaeafdbbd1f6ca773291d63de428749dc494613a8682d",
+              "fact:a54113c2b35abfecfaa899185736b08c07efcd66ae76d0e0028d0efe2d2f07ef",
+              "fact:a7e098f64fe7816767db49ddd0bad588beb2b22b6edb1c9e430bd224eeb107b5",
+              "fact:af0b452eeb6e7d0f8a88ae225f9a19ce88df321543f2c309a1d5461f4157369a",
+              "fact:c0c222c3c28de7cc9e70738ccada4f1a34246388f2ee3b4b8b2965dfa31fb6ed",
+              "fact:cd3b331c335bcd1eaf1ce1a70e09c9381291ed8e5aac3044d44e128868aa823b",
+              "fact:ea029b0515074a32e1874513f703ac8520c77b7400dca0310a6dcac720ebdf34"
+            ],
+            "family": "prior_season",
+            "note": "7-9 with 2468.72 PF, fifth-most points in the league against a losing record"
+          },
+          {
+            "fact_ids": [
+              "fact:5a34cb0a5943d2c610988a23c2b758bf473f67ab2ea1401f10405233f687baf1",
+              "fact:9130b38de314006da27110773e83bdc3633859eea8bdac44989cf72a40b3de79",
+              "fact:312202ada3a0688408e032aca451c150afd31fd666e7165c84ae1e567be8e490"
+            ],
+            "family": "chat",
+            "note": "the stated mission, and the league's counterargument"
+          },
+          {
+            "fact_ids": [
+              "fact:98cfab9de13e51e8e7e0b54b7f5d0e9607039189f2d70a39fbd7f320944ea105",
+              "fact:239dde955a1c800c6f3d354c01db88bd8f70d2507d94a22d7afaf2fd6db0d7af"
+            ],
+            "family": "draft",
+            "note": "a day-three-only class: Thornton 4.02, Gadsden 4.07"
+          }
+        ]
+      },
+      "record": "7-9",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "1",
+      "team_name": "The Boonist Monks"
+    },
+    {
+      "baseline_rank": 7,
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:07ec6dc3515303b2e7cde100eb8409a082d9b23f2cc03dc2df57600f94f479ea",
+            "fact:5bbbda54fc53bd52a9e3bfa73390640cb4e701ccfda91b48912b6bb07b61a7c0",
+            "fact:9ee6f10ac5fecc063f521ac51b09bb2fac3f35dbe1f70081e3dbad8cfb54366e",
+            "fact:b735dacb9e9a8287d9e0f4bf743555c6bdc5e8a686bf7681bd0e33ca3cf5d8d4",
+            "fact:bd61d2689689205cef412fac44b38e14c8689c85e9ac59193dbafff34245bc44",
+            "fact:e410ccadffe5a9221e2aa131d0ca30146483a1979f2a311ddada6092324a0fe6"
+          ],
+          "picks": [
+            {
+              "pick_no": 17,
+              "player": "12522",
+              "round": 2
+            },
+            {
+              "pick_no": 18,
+              "player": "12481",
+              "round": 2
+            },
+            {
+              "pick_no": 31,
+              "player": "12471",
+              "round": 3
+            },
+            {
+              "pick_no": 42,
+              "player": "12497",
+              "round": 4
+            },
+            {
+              "pick_no": 54,
+              "player": "12520",
+              "round": 5
+            },
+            {
+              "pick_no": 66,
+              "player": "12738",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:3bb3afa83ff0d84ae8bdf0f8b0a4894ea2c4649f70d10b42586d22f2f2a74744",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 7,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:087599ff76fe65f563f00da37b340bd8c324730e3a4874c7ecb0ca509c15d2e1",
+            "fact:0ab64924f5d3771b19ad0eb5ce8dc627757b7f4d66b47aaab3d889dca0bafad3",
+            "fact:105fa94d5d3daced92a10617b64e5da9f08184261196258f540d761b6f53da40",
+            "fact:3fcd6165b1a4c6d653ef1646a024666a49db6daac0f222d9d8684ce38f60ff25",
+            "fact:425ff252c4707bcda283a88b56fdfc828311d9390d0cd685d3f22f0c96ef26c6",
+            "fact:45041f0755025a070b99423ba95fe011bd9b0fbb38d5e87c94a00ae31604776d",
+            "fact:4d21b3dfb80cfe3107ece4ac259b4f0c485d89423a590dc8d42931ef48f006c4",
+            "fact:60ffd0204d0ce30fdac1469927217a38c4a781ae0f9de8c8bc3d4fb34cc80379",
+            "fact:846a349dbc9d32aad87b6db228858f36500428b4dd4a8ee344186267da7ec5ab",
+            "fact:8f35d84360d35352a1c791644cb06c0c259b82a7954b820e940c1f204898e975",
+            "fact:92e87123d356523b420f6f0b6958d3faff26cce27435d49d593408aee5ff9e7e",
+            "fact:a54113c2b35abfecfaa899185736b08c07efcd66ae76d0e0028d0efe2d2f07ef",
+            "fact:b83c61f8851db22a7b3b7a11fd1567a55a4e5b6fc3048a6fa1e8673e275156b6",
+            "fact:c90fced288531707d9c347397fd349f7906b597cc31a3f1e75f9a4c943d5d71e",
+            "fact:ca54b17badc8dc86aaa6572570f202b0b9ab23d99f0c89596a973be655379c89",
+            "fact:d1ddf765b12919e210a075d5d3cdaf92a656d4aba417b19a0bc121c954e1e96c"
+          ],
+          "games": 16,
+          "losses": 9,
+          "points_for": 2301.74,
+          "season": 2024,
+          "wins": 7
+        },
+        "week_result": {}
+      },
+      "owner_id": "510215233736572928",
+      "points_against": 2334.14,
+      "points_for": 2301.74,
+      "rank": 7,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:087599ff76fe65f563f00da37b340bd8c324730e3a4874c7ecb0ca509c15d2e1",
+              "fact:0ab64924f5d3771b19ad0eb5ce8dc627757b7f4d66b47aaab3d889dca0bafad3",
+              "fact:105fa94d5d3daced92a10617b64e5da9f08184261196258f540d761b6f53da40",
+              "fact:3fcd6165b1a4c6d653ef1646a024666a49db6daac0f222d9d8684ce38f60ff25",
+              "fact:425ff252c4707bcda283a88b56fdfc828311d9390d0cd685d3f22f0c96ef26c6",
+              "fact:45041f0755025a070b99423ba95fe011bd9b0fbb38d5e87c94a00ae31604776d",
+              "fact:4d21b3dfb80cfe3107ece4ac259b4f0c485d89423a590dc8d42931ef48f006c4",
+              "fact:60ffd0204d0ce30fdac1469927217a38c4a781ae0f9de8c8bc3d4fb34cc80379",
+              "fact:846a349dbc9d32aad87b6db228858f36500428b4dd4a8ee344186267da7ec5ab",
+              "fact:8f35d84360d35352a1c791644cb06c0c259b82a7954b820e940c1f204898e975",
+              "fact:92e87123d356523b420f6f0b6958d3faff26cce27435d49d593408aee5ff9e7e",
+              "fact:a54113c2b35abfecfaa899185736b08c07efcd66ae76d0e0028d0efe2d2f07ef",
+              "fact:b83c61f8851db22a7b3b7a11fd1567a55a4e5b6fc3048a6fa1e8673e275156b6",
+              "fact:c90fced288531707d9c347397fd349f7906b597cc31a3f1e75f9a4c943d5d71e",
+              "fact:ca54b17badc8dc86aaa6572570f202b0b9ab23d99f0c89596a973be655379c89",
+              "fact:d1ddf765b12919e210a075d5d3cdaf92a656d4aba417b19a0bc121c954e1e96c"
+            ],
+            "family": "prior_season",
+            "note": "7-9, #7 by all games in 2024, two years removed from the 2022 crown"
+          },
+          {
+            "fact_ids": [
+              "fact:0a6ff8dc5deef8de6261cb428692dfde313d3b9acca1fb8634fa1a4b2291a4fc",
+              "fact:55238fb264c6df18d8957d9b5de434e32c2131cc63e592de6cf9ece6d05f7c04"
+            ],
+            "family": "chat",
+            "note": "Mixon news lands before cutoff; the owner's stated Skattebo conviction"
+          },
+          {
+            "fact_ids": [
+              "fact:b735dacb9e9a8287d9e0f4bf743555c6bdc5e8a686bf7681bd0e33ca3cf5d8d4",
+              "fact:e410ccadffe5a9221e2aa131d0ca30146483a1979f2a311ddada6092324a0fe6"
+            ],
+            "family": "draft",
+            "note": "back-to-back Cams at 2.05 and 2.06"
+          }
+        ]
+      },
+      "record": "7-9",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "5",
+      "team_name": "The Legion of Bouz"
+    },
+    {
+      "baseline_rank": 11,
+      "deviation": {
+        "from_baseline_rank": 11,
+        "reason": "The 2024 all-games baseline buries this roster at 11 after a 2-12 regular season, but the 2025 starting core reads Bijan Robinson, Breece Hall, A.J. Brown, Tee Higgins, Tyler Warren and Caleb Williams. That is not an 11th-place group. The consolation-bracket run even paid a compensatory 2.13 that became a free Terrance Ferguson."
+      },
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:25985b391116ef4a9d2a3b15df2e3abff166515d6c89454d65aa2e64dc19e21a",
+            "fact:279fa9716bd3e1ea94694211824570e715c7e0e2cd2205729f7ed4ca957b379e",
+            "fact:4b52fe6c95bddd274c2ed94e439f710ec60595b5f258f9b19fb04585b3cdc159",
+            "fact:90064bfef71b57919521fa62bb05926e86be634eaac105f1327f6694d5501532",
+            "fact:9802d5dd174f51d2bb0573c801946db984e4ca94b53f71bb408f2e1a8c0f4eb3",
+            "fact:a34c133eec075ef0dd9efe273cba325aeffd7a3bcc1930953f4065e9382a0e5f"
+          ],
+          "picks": [
+            {
+              "pick_no": 8,
+              "player": "12501",
+              "round": 1
+            },
+            {
+              "pick_no": 11,
+              "player": "12518",
+              "round": 1
+            },
+            {
+              "pick_no": 20,
+              "player": "12483",
+              "round": 2
+            },
+            {
+              "pick_no": 32,
+              "player": "12535",
+              "round": 3
+            },
+            {
+              "pick_no": 53,
+              "player": "12482",
+              "round": 5
+            },
+            {
+              "pick_no": 65,
+              "player": "12544",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:26b307510558ad9b3bdc0ed0ef2a352f1de788e7f2aa886819b81f4de3024c0f",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 11,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:11db99c9d3ea732e9b542a1dad13e802d63176909a2653aa37932419a5158e98",
+            "fact:3253c4ba1f82dc93c6cb13f77be0874348648277d299eb00ef632cf47cda9b69",
+            "fact:36d3e191fae75b3aee059fbbcaa1c51f7a4ff1dbe1b6f4472e460fb017f391ce",
+            "fact:37bd4e2966150f70f355c594c95e5c9469aa3b069c928924fe7a7aedf3e4060d",
+            "fact:49d0f73f1c955248672ca3f41b847a34cff69be292d1c5d0af29de228b5cae2f",
+            "fact:4d21b3dfb80cfe3107ece4ac259b4f0c485d89423a590dc8d42931ef48f006c4",
+            "fact:587aa04408fbd6f56021d5a2a92618785e8c2936aef49eae5d1066318694e06c",
+            "fact:63f3d9738118527b991c6eb50dd787ec81e53b52c57273b225ba9c6e83160bce",
+            "fact:719a7e3794ea79e70b9b02c28118fe755348344548e474ca2c9026a983d5dff7",
+            "fact:760c248107521c3596fb3887a187a764143138352ddd19cc92f8e5cdd1af1708",
+            "fact:b3acbc21c5c70d081e840a4d574d90d4c1b82465f6b7b3a51c2efae7a732a653",
+            "fact:c0c222c3c28de7cc9e70738ccada4f1a34246388f2ee3b4b8b2965dfa31fb6ed",
+            "fact:cbb6aba02ec6b9f434ece08005d56971557ff1857a29ffcd70e6500a6ffe122f",
+            "fact:d18d324aa824f74bef85ae561d9be6167dee3818a0dd0e70a6d11c46bb50c93d",
+            "fact:d6c418e4438d04aed8fe1c7ba72fc0c9d1ba7d5aee12b511b93635c7046a4e28",
+            "fact:ea78217a50c2efea7d49090850aeee4ad9df05341b57431cf27cab146a36e053",
+            "fact:fc815124f46b2cdca0a8e1279d8359ed59646831b68a5873c93260f897ead950"
+          ],
+          "games": 17,
+          "losses": 12,
+          "points_for": 2356.96,
+          "season": 2024,
+          "wins": 5
+        },
+        "week_result": {}
+      },
+      "owner_id": "575878107617718272",
+      "points_against": 2652.44,
+      "points_for": 2356.96,
+      "rank": 8,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:11db99c9d3ea732e9b542a1dad13e802d63176909a2653aa37932419a5158e98",
+              "fact:3253c4ba1f82dc93c6cb13f77be0874348648277d299eb00ef632cf47cda9b69",
+              "fact:36d3e191fae75b3aee059fbbcaa1c51f7a4ff1dbe1b6f4472e460fb017f391ce",
+              "fact:37bd4e2966150f70f355c594c95e5c9469aa3b069c928924fe7a7aedf3e4060d",
+              "fact:49d0f73f1c955248672ca3f41b847a34cff69be292d1c5d0af29de228b5cae2f",
+              "fact:4d21b3dfb80cfe3107ece4ac259b4f0c485d89423a590dc8d42931ef48f006c4",
+              "fact:587aa04408fbd6f56021d5a2a92618785e8c2936aef49eae5d1066318694e06c",
+              "fact:63f3d9738118527b991c6eb50dd787ec81e53b52c57273b225ba9c6e83160bce",
+              "fact:719a7e3794ea79e70b9b02c28118fe755348344548e474ca2c9026a983d5dff7",
+              "fact:760c248107521c3596fb3887a187a764143138352ddd19cc92f8e5cdd1af1708",
+              "fact:b3acbc21c5c70d081e840a4d574d90d4c1b82465f6b7b3a51c2efae7a732a653",
+              "fact:c0c222c3c28de7cc9e70738ccada4f1a34246388f2ee3b4b8b2965dfa31fb6ed",
+              "fact:cbb6aba02ec6b9f434ece08005d56971557ff1857a29ffcd70e6500a6ffe122f",
+              "fact:d18d324aa824f74bef85ae561d9be6167dee3818a0dd0e70a6d11c46bb50c93d",
+              "fact:d6c418e4438d04aed8fe1c7ba72fc0c9d1ba7d5aee12b511b93635c7046a4e28",
+              "fact:ea78217a50c2efea7d49090850aeee4ad9df05341b57431cf27cab146a36e053",
+              "fact:fc815124f46b2cdca0a8e1279d8359ed59646831b68a5873c93260f897ead950"
+            ],
+            "family": "prior_season",
+            "note": "5-12 by all games in 2024, 11th, with a 2-12 regular season"
+          },
+          {
+            "fact_ids": [
+              "fact:4a8d41d644a419c8ad8c37ea8e3d2e149310d2ebdfba207ff17bbd4c06246b6d",
+              "fact:70ba31027a68e83834e60050e0cb93e77911437797e30699df2225233776b098"
+            ],
+            "family": "chat",
+            "note": "the comp pick, and a draft the owner attacked"
+          },
+          {
+            "fact_ids": [
+              "fact:90064bfef71b57919521fa62bb05926e86be634eaac105f1327f6694d5501532",
+              "fact:279fa9716bd3e1ea94694211824570e715c7e0e2cd2205729f7ed4ca957b379e",
+              "fact:9802d5dd174f51d2bb0573c801946db984e4ca94b53f71bb408f2e1a8c0f4eb3"
+            ],
+            "family": "draft",
+            "note": "Golden 1.08, Warren 1.11, Bech 2.08"
+          },
+          {
+            "fact_ids": [
+              "fact:98da2c85c553a5103b31b40702a3e6891dad578bea6c6ff322b4283712b64762"
+            ],
+            "family": "transactions",
+            "note": "Allgeier bought from roster 7 for depth"
+          }
+        ]
+      },
+      "record": "5-12",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "4",
+      "team_name": "Noble FFT"
+    },
+    {
+      "baseline_rank": 10,
+      "deviation": {
+        "from_baseline_rank": 10,
+        "reason": "One above the baseline's 10th. Three straight basement years priced in the past, and the rebuild finally shipped: Gibbs plus Jeanty at 1.01 is the best young backfield in the league, Egbuka and Loveland arrived in the same 11-pick class, and Herbert is the quarterback. The WR room is rookies and reclamation projects, so the floor stays low. The direction does not."
+      },
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:0c2efb86cfd544ff8f22f6ad92dcf6f5f6dbd1418dd49d4d5617d82423b866a4",
+            "fact:1e36a60db0e48ca52612de4337a87278b4393ff033f2132ff777b30c03d4b5ee",
+            "fact:4d37fa2ccc0f2ad8af3efec12106d6557b3a354bf51db95afe7fa88f7991931d",
+            "fact:6130b9dc758f609c81c7ffc0f242977cfeb33c3326b0feaecb54369080df40f1",
+            "fact:780e231057df18a81b3066aabf634a17cb2b3816ea15c802746493bdd02be77c",
+            "fact:8efa3f97a09e9e581ecc7a2da73b2b45f290fc0cf5b59d86d4159105e3c5684a",
+            "fact:94ee1dca7f9a77aed7490b8dc69b3c6edcf54086c5b1fcea9976062ed6aeedb6",
+            "fact:9d0cb9734aa14e21d7f49b98cd447cf5ae3da513aa7b9afa06de4906c27c7fcf",
+            "fact:bc5db9c4bc75a0b2e49013d3a69769986ceb8e7e8aa586b44f7c3414b8fcc3c9",
+            "fact:e5db9db965a9cef1df6c45a4de0ab0154cf4d6deaf88f2b042ee0795210745b2",
+            "fact:fbf419401bfc5b43a3fb12ffb74f226abe4e25b2d3b5891f4f0f4487bdda8964"
+          ],
+          "picks": [
+            {
+              "pick_no": 1,
+              "player": "12527",
+              "round": 1
+            },
+            {
+              "pick_no": 5,
+              "player": "12514",
+              "round": 1
+            },
+            {
+              "pick_no": 13,
+              "player": "12517",
+              "round": 2
+            },
+            {
+              "pick_no": 19,
+              "player": "12490",
+              "round": 2
+            },
+            {
+              "pick_no": 23,
+              "player": "12536",
+              "round": 2
+            },
+            {
+              "pick_no": 25,
+              "player": "12492",
+              "round": 3
+            },
+            {
+              "pick_no": 37,
+              "player": "12455",
+              "round": 4
+            },
+            {
+              "pick_no": 41,
+              "player": "12467",
+              "round": 4
+            },
+            {
+              "pick_no": 44,
+              "player": "12545",
+              "round": 4
+            },
+            {
+              "pick_no": 46,
+              "player": "12533",
+              "round": 4
+            },
+            {
+              "pick_no": 61,
+              "player": "12634",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:5ca6dc699edf3bc8ab1102077e4c13a05248c8fd68dc1a83501c7c34497f35dd",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 10,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:13876e149736b0e530fce1489907e953a6509aefdab6e6bdfa75dc4cd8a5396b",
+            "fact:2c38051049873bf95e729dc42305da072a0960d972f2550c89c0521a70533dbf",
+            "fact:3ea851d3bcface5f912859022cfd70d5a4ddf08062d3bd98e18b94fd43ea3084",
+            "fact:3f4b11ab0ecc2211cab264545ba595a717e68ab3629f42000a54d6c2c22745b2",
+            "fact:427652b4e0f49e78c35b9549ff36e7d48caedd06815dab5e96c25a7742f85f8e",
+            "fact:63760e111ad818e8cde7cca141b9eece98a5aaee5ed4c7393ce99c5f891c7929",
+            "fact:798cfddbfb97e635d170ad9f6db1165e69b32e47287f00842c2a97e40a51e554",
+            "fact:7b9ff0cb346d72826dcde9711a6922de1be9393b15e7fad77b8caa622d6b2176",
+            "fact:a1169f707a5fd2a2a4ca1387094f0e8a779830f7d91fbe0e4e5d9b8e4056484c",
+            "fact:a33f28f97debd33345e693463a81a961a8a5e40491976a5c84ae50387b36e0d0",
+            "fact:b3acbc21c5c70d081e840a4d574d90d4c1b82465f6b7b3a51c2efae7a732a653",
+            "fact:ca54b17badc8dc86aaa6572570f202b0b9ab23d99f0c89596a973be655379c89",
+            "fact:d18d324aa824f74bef85ae561d9be6167dee3818a0dd0e70a6d11c46bb50c93d",
+            "fact:d1ddf765b12919e210a075d5d3cdaf92a656d4aba417b19a0bc121c954e1e96c",
+            "fact:d24f3704435f4eb972c58a5e8904c2b09246145a94d328e61aa03118e5653451",
+            "fact:df436480c4672b2f0868b4dbf2ead4936127daa3c49de88370a54dddfaf20827",
+            "fact:fbe1630be84920684de4f3c2e078673418ef2c16a0a0e0d72c436b1a132b601c"
+          ],
+          "games": 17,
+          "losses": 11,
+          "points_for": 1965.94,
+          "season": 2024,
+          "wins": 6
+        },
+        "week_result": {}
+      },
+      "owner_id": "792312710317572096",
+      "points_against": 2354.4,
+      "points_for": 1965.94,
+      "rank": 9,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:e5db9db965a9cef1df6c45a4de0ab0154cf4d6deaf88f2b042ee0795210745b2",
+              "fact:bc5db9c4bc75a0b2e49013d3a69769986ceb8e7e8aa586b44f7c3414b8fcc3c9",
+              "fact:780e231057df18a81b3066aabf634a17cb2b3816ea15c802746493bdd02be77c"
+            ],
+            "family": "draft",
+            "note": "an 11-pick class headlined by the 1.01"
+          },
+          {
+            "fact_ids": [
+              "fact:0dd943bbd60e1a3730edc0ecebe875ca7b2bcbe641d04e9f53f8606e78bde02d",
+              "fact:6c94ca36ebd784471d90929e42c069ea889a415955606366bec6522fb3a7d063",
+              "fact:fa7c5c43208210f70f2af18f7593f71f7db153c9235a2a6baf44bf54982c7681"
+            ],
+            "family": "chat",
+            "note": "the owner's moment, and the league's fair question"
+          },
+          {
+            "fact_ids": [
+              "fact:13876e149736b0e530fce1489907e953a6509aefdab6e6bdfa75dc4cd8a5396b",
+              "fact:2c38051049873bf95e729dc42305da072a0960d972f2550c89c0521a70533dbf",
+              "fact:3ea851d3bcface5f912859022cfd70d5a4ddf08062d3bd98e18b94fd43ea3084",
+              "fact:3f4b11ab0ecc2211cab264545ba595a717e68ab3629f42000a54d6c2c22745b2",
+              "fact:427652b4e0f49e78c35b9549ff36e7d48caedd06815dab5e96c25a7742f85f8e",
+              "fact:63760e111ad818e8cde7cca141b9eece98a5aaee5ed4c7393ce99c5f891c7929",
+              "fact:798cfddbfb97e635d170ad9f6db1165e69b32e47287f00842c2a97e40a51e554",
+              "fact:7b9ff0cb346d72826dcde9711a6922de1be9393b15e7fad77b8caa622d6b2176",
+              "fact:a1169f707a5fd2a2a4ca1387094f0e8a779830f7d91fbe0e4e5d9b8e4056484c",
+              "fact:a33f28f97debd33345e693463a81a961a8a5e40491976a5c84ae50387b36e0d0",
+              "fact:b3acbc21c5c70d081e840a4d574d90d4c1b82465f6b7b3a51c2efae7a732a653",
+              "fact:ca54b17badc8dc86aaa6572570f202b0b9ab23d99f0c89596a973be655379c89",
+              "fact:d18d324aa824f74bef85ae561d9be6167dee3818a0dd0e70a6d11c46bb50c93d",
+              "fact:d1ddf765b12919e210a075d5d3cdaf92a656d4aba417b19a0bc121c954e1e96c",
+              "fact:d24f3704435f4eb972c58a5e8904c2b09246145a94d328e61aa03118e5653451",
+              "fact:df436480c4672b2f0868b4dbf2ead4936127daa3c49de88370a54dddfaf20827",
+              "fact:fbe1630be84920684de4f3c2e078673418ef2c16a0a0e0d72c436b1a132b601c"
+            ],
+            "family": "prior_season",
+            "note": "6-11, #10 by all games; the record the roster is escaping"
+          },
+          {
+            "fact_ids": [
+              "fact:177685fff29b87e81e4e10a80323c5637880057aa082d5d2633eb3a0d44afb4f",
+              "fact:98da2c85c553a5103b31b40702a3e6891dad578bea6c6ff322b4283712b64762"
+            ],
+            "family": "transactions",
+            "note": "the teardown: Pittman and Allgeier out for picks"
+          }
+        ]
+      },
+      "record": "6-11",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "7",
+      "team_name": "Chudders Football Team"
+    },
+    {
+      "baseline_rank": 8,
+      "deviation": {
+        "from_baseline_rank": 8,
+        "reason": "Two below the baseline's 8th. The young receiver island is real, with Thomas, McConkey, Odunze and McMillan at 1.03, but the RB room is Jaylen Warren and rookies, the QB room is volume without a hammer, and the July roster purge cut veterans without replacing the backfield. 7-9 flattered the shape of this roster."
+      },
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:721687994385716b3bd410651fe6bb087a442ab0d4271c310a6e186c7a8a3b55",
+            "fact:cc995a4abdc4254f67267fd6dbb0be1d6a9fdfdb93f07700aa145b327ab845aa",
+            "fact:cfcded45ff83d6f51b133db0a9e222e2c3e8eaaca98cd6ba59512b36682ac966",
+            "fact:dba56c9960171f1a6ba7911fe02664de16a8892f88119e44ad3b40d91d9807c0",
+            "fact:f51f07477106ef98ba79b2edf2ff2b0e6cc2f80aa69b61de27fd5615583ad3f9"
+          ],
+          "picks": [
+            {
+              "pick_no": 3,
+              "player": "12526",
+              "round": 1
+            },
+            {
+              "pick_no": 27,
+              "player": "12508",
+              "round": 3
+            },
+            {
+              "pick_no": 39,
+              "player": "12524",
+              "round": 4
+            },
+            {
+              "pick_no": 51,
+              "player": "12473",
+              "round": 5
+            },
+            {
+              "pick_no": 63,
+              "player": "12602",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:a082dd53d50a72899b96159ecf6869265e1ee28e0236391c06d903582daa124c",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 8,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:13876e149736b0e530fce1489907e953a6509aefdab6e6bdfa75dc4cd8a5396b",
+            "fact:1469f74f1d1cc51a271de3153f0e09c0895d5f1a6ac1d9abf962c200cedce10f",
+            "fact:260c7a006cbcf98af53a73e340663730e940da92c2ff9566df3b2d194b0ede23",
+            "fact:45041f0755025a070b99423ba95fe011bd9b0fbb38d5e87c94a00ae31604776d",
+            "fact:4953e1ee88c222c5fc7d938527ff616d72c23bf7aed908636c6693af0e3c9e89",
+            "fact:7763d02d283740e54414be8602271c4cfb93b1606ea64be815106080227e082d",
+            "fact:798cfddbfb97e635d170ad9f6db1165e69b32e47287f00842c2a97e40a51e554",
+            "fact:92e87123d356523b420f6f0b6958d3faff26cce27435d49d593408aee5ff9e7e",
+            "fact:af0b452eeb6e7d0f8a88ae225f9a19ce88df321543f2c309a1d5461f4157369a",
+            "fact:c1b74e92668e88aab760e04308cd1f9b21d9396a04a56f4d0413bebd5b8ae03c",
+            "fact:c24c64f539042f501888f98bc9fd979a32c15258d3141d84627d766911cf2134",
+            "fact:d6c418e4438d04aed8fe1c7ba72fc0c9d1ba7d5aee12b511b93635c7046a4e28",
+            "fact:d76521a9c251b20fc4a4f3e3906d2f0207c236d8771feb27aa48ac0c30d1933e",
+            "fact:f18241574503b9163bce8563480d997975496b43ade35fd7de2a21f56780b9e4",
+            "fact:fc815124f46b2cdca0a8e1279d8359ed59646831b68a5873c93260f897ead950",
+            "fact:fddd3da6874643abbe3ff2fee22ac579e51b3100e7b746ecd8060e0e1224bc1e"
+          ],
+          "games": 16,
+          "losses": 9,
+          "points_for": 2154.06,
+          "season": 2024,
+          "wins": 7
+        },
+        "week_result": {}
+      },
+      "owner_id": "793977545186979840",
+      "points_against": 2297.52,
+      "points_for": 2154.06,
+      "rank": 10,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:88d954e937b54fb10b56fa53c9123e9cf14226772c27a5ca3a72e5805425ba80",
+              "fact:837191f41a3a5b6e60bbed6fee656f244041ea82fe852069ff631c717daedf6e",
+              "fact:2c88e2ce77f22e54399cffc54e361d9186786fd206c39948a269bb639e5efea6"
+            ],
+            "family": "chat",
+            "note": "the league sees the blueprint and the hole"
+          },
+          {
+            "fact_ids": [
+              "fact:f51f07477106ef98ba79b2edf2ff2b0e6cc2f80aa69b61de27fd5615583ad3f9",
+              "fact:cfcded45ff83d6f51b133db0a9e222e2c3e8eaaca98cd6ba59512b36682ac966",
+              "fact:dba56c9960171f1a6ba7911fe02664de16a8892f88119e44ad3b40d91d9807c0"
+            ],
+            "family": "draft",
+            "note": "McMillan 1.03 plus two QB darts"
+          },
+          {
+            "fact_ids": [
+              "fact:13876e149736b0e530fce1489907e953a6509aefdab6e6bdfa75dc4cd8a5396b",
+              "fact:1469f74f1d1cc51a271de3153f0e09c0895d5f1a6ac1d9abf962c200cedce10f",
+              "fact:260c7a006cbcf98af53a73e340663730e940da92c2ff9566df3b2d194b0ede23",
+              "fact:45041f0755025a070b99423ba95fe011bd9b0fbb38d5e87c94a00ae31604776d",
+              "fact:4953e1ee88c222c5fc7d938527ff616d72c23bf7aed908636c6693af0e3c9e89",
+              "fact:7763d02d283740e54414be8602271c4cfb93b1606ea64be815106080227e082d",
+              "fact:798cfddbfb97e635d170ad9f6db1165e69b32e47287f00842c2a97e40a51e554",
+              "fact:92e87123d356523b420f6f0b6958d3faff26cce27435d49d593408aee5ff9e7e",
+              "fact:af0b452eeb6e7d0f8a88ae225f9a19ce88df321543f2c309a1d5461f4157369a",
+              "fact:c1b74e92668e88aab760e04308cd1f9b21d9396a04a56f4d0413bebd5b8ae03c",
+              "fact:c24c64f539042f501888f98bc9fd979a32c15258d3141d84627d766911cf2134",
+              "fact:d6c418e4438d04aed8fe1c7ba72fc0c9d1ba7d5aee12b511b93635c7046a4e28",
+              "fact:d76521a9c251b20fc4a4f3e3906d2f0207c236d8771feb27aa48ac0c30d1933e",
+              "fact:f18241574503b9163bce8563480d997975496b43ade35fd7de2a21f56780b9e4",
+              "fact:fc815124f46b2cdca0a8e1279d8359ed59646831b68a5873c93260f897ead950",
+              "fact:fddd3da6874643abbe3ff2fee22ac579e51b3100e7b746ecd8060e0e1224bc1e"
+            ],
+            "family": "prior_season",
+            "note": "7-9, #8 by all games in 2024"
+          },
+          {
+            "fact_ids": [
+              "fact:55e96380dda70a2f1d91606893fbc8a4bc5c79e9c90252aed8e07cf2be7b54ed",
+              "fact:0c77c5d19e53429d2113ce73eaaa44d69cd65802d2325e51b321e4b6218f2cbe"
+            ],
+            "family": "transactions",
+            "note": "the July purge: Cooks and Edwards cut, nothing added behind them"
+          }
+        ]
+      },
+      "record": "7-9",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "9",
+      "team_name": "Father Time "
+    },
+    {
+      "baseline_rank": 9,
+      "deviation": {
+        "from_baseline_rank": 9,
+        "reason": "Two below the baseline's 9th. Justin Jefferson is the league's best player and the supporting cast is committees and question marks: an aging RB rotation, a QB room of Murray and Tagovailoa, and a third straight losing slide. The clearest assets on the roster are Nate's 2026 1st and 2nd."
+      },
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:4aa6a499774cba777e1d42bda8a46cff48bc43d5d639d18c2ee840c6915cafa6",
+            "fact:79861a06c009e72039a9b586b673b8879264ed0fa87bf650df6e28e0237149b0",
+            "fact:82f0c4f7dbf4f6416efdb1e34154bd012774ec76af84b8781b7d029870ce59d0",
+            "fact:888826273bd08a0d754c91673df0bee238122c2a90d154ce103d52b63665d5b8",
+            "fact:9eb7e7a42666b2c6cb9509a9d99940b58601fb1efa15a581aded10f7920b7334",
+            "fact:dc0b4044e1f8fb5a113a07af37918c4325901645735662fcd7a2ea9f66a599b6",
+            "fact:e8be88543cf0eecd3470c56c660e289004eeecb71635203a666ab29dc986a197"
+          ],
+          "picks": [
+            {
+              "pick_no": 10,
+              "player": "12519",
+              "round": 1
+            },
+            {
+              "pick_no": 22,
+              "player": "12505",
+              "round": 2
+            },
+            {
+              "pick_no": 28,
+              "player": "11569",
+              "round": 3
+            },
+            {
+              "pick_no": 40,
+              "player": "12474",
+              "round": 4
+            },
+            {
+              "pick_no": 49,
+              "player": "12531",
+              "round": 5
+            },
+            {
+              "pick_no": 52,
+              "player": "12534",
+              "round": 5
+            },
+            {
+              "pick_no": 64,
+              "player": "12511",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:d821e999e22cc20572a5b6ff34fb77d84e0ea4897b447e82316fc05d5267d744",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 9,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:065ee3ba9880d9bf33d6284d9f0a7b94b406875403bb6c437c767f24a61da531",
+            "fact:0ab64924f5d3771b19ad0eb5ce8dc627757b7f4d66b47aaab3d889dca0bafad3",
+            "fact:0bcde0521e447463a1a9c1969d46926a06b35a12ab6bb3ef591a71e8cbd1d7a1",
+            "fact:11db99c9d3ea732e9b542a1dad13e802d63176909a2653aa37932419a5158e98",
+            "fact:24e57c466a46854e3e5f4af3822e976a64395fe29f102931d41d121e65329422",
+            "fact:4719d7821b4457bd29ebbe0fddfa49fc73c084e688f52bd344849a5187088a2e",
+            "fact:4b7eceb7955cce13d6a13f038eb6f6ad6a00b7d306bca1a940cfe4c855ec39b9",
+            "fact:4d6e116b6e600d9df7689f36b56af25a9151fbdaa64b8762308c059a85cb9ea4",
+            "fact:587aa04408fbd6f56021d5a2a92618785e8c2936aef49eae5d1066318694e06c",
+            "fact:6023a19f8cd47b925fafd030cd1ae55576d7152297e5370295253a736835d47a",
+            "fact:b2761fa5b8932ef48fa203de1ef3693aa059460c51de5553a964469bf62fc982",
+            "fact:b83c61f8851db22a7b3b7a11fd1567a55a4e5b6fc3048a6fa1e8673e275156b6",
+            "fact:bbcbbe36f6101bf6d730a19284531288cd716b7898b798c82be2067bf9f345ff",
+            "fact:dec24b12be1950db2afa6b4967db73098f4f19eaf957c0efeff04d673f5db53a",
+            "fact:df436480c4672b2f0868b4dbf2ead4936127daa3c49de88370a54dddfaf20827",
+            "fact:fddd3da6874643abbe3ff2fee22ac579e51b3100e7b746ecd8060e0e1224bc1e"
+          ],
+          "games": 16,
+          "losses": 10,
+          "points_for": 2189.32,
+          "season": 2024,
+          "wins": 6
+        },
+        "week_result": {}
+      },
+      "owner_id": "575406354368348160",
+      "points_against": 2328.96,
+      "points_for": 2189.32,
+      "rank": 11,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:065ee3ba9880d9bf33d6284d9f0a7b94b406875403bb6c437c767f24a61da531",
+              "fact:0ab64924f5d3771b19ad0eb5ce8dc627757b7f4d66b47aaab3d889dca0bafad3",
+              "fact:0bcde0521e447463a1a9c1969d46926a06b35a12ab6bb3ef591a71e8cbd1d7a1",
+              "fact:11db99c9d3ea732e9b542a1dad13e802d63176909a2653aa37932419a5158e98",
+              "fact:24e57c466a46854e3e5f4af3822e976a64395fe29f102931d41d121e65329422",
+              "fact:4719d7821b4457bd29ebbe0fddfa49fc73c084e688f52bd344849a5187088a2e",
+              "fact:4b7eceb7955cce13d6a13f038eb6f6ad6a00b7d306bca1a940cfe4c855ec39b9",
+              "fact:4d6e116b6e600d9df7689f36b56af25a9151fbdaa64b8762308c059a85cb9ea4",
+              "fact:587aa04408fbd6f56021d5a2a92618785e8c2936aef49eae5d1066318694e06c",
+              "fact:6023a19f8cd47b925fafd030cd1ae55576d7152297e5370295253a736835d47a",
+              "fact:b2761fa5b8932ef48fa203de1ef3693aa059460c51de5553a964469bf62fc982",
+              "fact:b83c61f8851db22a7b3b7a11fd1567a55a4e5b6fc3048a6fa1e8673e275156b6",
+              "fact:bbcbbe36f6101bf6d730a19284531288cd716b7898b798c82be2067bf9f345ff",
+              "fact:dec24b12be1950db2afa6b4967db73098f4f19eaf957c0efeff04d673f5db53a",
+              "fact:df436480c4672b2f0868b4dbf2ead4936127daa3c49de88370a54dddfaf20827",
+              "fact:fddd3da6874643abbe3ff2fee22ac579e51b3100e7b746ecd8060e0e1224bc1e"
+            ],
+            "family": "prior_season",
+            "note": "6-10, #9 by all games in 2024, third straight decline"
+          },
+          {
+            "fact_ids": [
+              "fact:870093b8280466d3276b946c4af415d28cfc8352b01f3cdf3197ca1fd178968c",
+              "fact:a472f177699fa9c3e252cc58d475f501adb93ff0c3b1574c2d77d180ab9d9587",
+              "fact:13a5a345e845ec3e4d7c7cb0b0646513380362fcd07272dc93e7438f951b5160"
+            ],
+            "family": "chat",
+            "note": "the future-first strategy, and the name that got workshopped at the cutoff"
+          },
+          {
+            "fact_ids": [
+              "fact:9c9a37b1a95d2b5c30d1ba449f53cf6977c14378b73a67193686c5bc1ce401c4"
+            ],
+            "family": "transactions",
+            "note": "Stevenson plus Nate's 2026 1st and 2nd, the offseason's first trade"
+          },
+          {
+            "fact_ids": [
+              "fact:79861a06c009e72039a9b586b673b8879264ed0fa87bf650df6e28e0237149b0",
+              "fact:9eb7e7a42666b2c6cb9509a9d99940b58601fb1efa15a581aded10f7920b7334"
+            ],
+            "family": "draft",
+            "note": "Burden at 1.10, the name-brand pick"
+          }
+        ]
+      },
+      "record": "6-10",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "3",
+      "team_name": "Burden of Etienne-y Woody"
+    },
+    {
+      "baseline_rank": 12,
+      "evidence": {
+        "draft": {
+          "fact_ids": [
+            "fact:08191743d232339bb9d8f4bc07c9d709c4cfeee7cd386bba8fa148303c222162",
+            "fact:8a12f3056a78ce1d5390025d1010a14e57a6f4412bc1bf920b5e6d9d3dba6edd",
+            "fact:be44a6504a3bd179d90176ef7e952eb911bed4ee4b4ddb35b0e5aef7b5387db3",
+            "fact:bf70bb1365499c4bc2f0f2164eb42f726089d070a1b000119bc009e64c16c284",
+            "fact:cc3121ed90e8f38c8f34a565a8dbfa48cbc7c2816673eb994d58d0cdabd1dc4a"
+          ],
+          "picks": [
+            {
+              "pick_no": 2,
+              "player": "12507",
+              "round": 1
+            },
+            {
+              "pick_no": 6,
+              "player": "12529",
+              "round": 1
+            },
+            {
+              "pick_no": 14,
+              "player": "12484",
+              "round": 2
+            },
+            {
+              "pick_no": 26,
+              "player": "12499",
+              "round": 3
+            },
+            {
+              "pick_no": 62,
+              "player": "12539",
+              "round": 6
+            }
+          ]
+        },
+        "identity": {
+          "fact_id": "fact:d8bbc11f5c6302ddd7732b11c88bfcb0e25bf28812ef63c023e64e2a3cd44897",
+          "known_at": "2025-08-02T20:30:09.000000Z"
+        },
+        "prior_season": {
+          "all_games_rank": 12,
+          "basis": "all admitted games including playoffs, not regular season",
+          "fact_ids": [
+            "fact:0bcde0521e447463a1a9c1969d46926a06b35a12ab6bb3ef591a71e8cbd1d7a1",
+            "fact:105fa94d5d3daced92a10617b64e5da9f08184261196258f540d761b6f53da40",
+            "fact:1469f74f1d1cc51a271de3153f0e09c0895d5f1a6ac1d9abf962c200cedce10f",
+            "fact:3c2fb86b1e57859f342aebfc1e506e581fbc0d82db6f40a961335f459363e427",
+            "fact:3f4b11ab0ecc2211cab264545ba595a717e68ab3629f42000a54d6c2c22745b2",
+            "fact:3fcd6165b1a4c6d653ef1646a024666a49db6daac0f222d9d8684ce38f60ff25",
+            "fact:4719d7821b4457bd29ebbe0fddfa49fc73c084e688f52bd344849a5187088a2e",
+            "fact:5a4d8ca760eecfa537833de42ab60aeead4c89ba3721f962fef2d81eef3ee320",
+            "fact:63f3d9738118527b991c6eb50dd787ec81e53b52c57273b225ba9c6e83160bce",
+            "fact:6c06c4549170b25c79269742444599dc31f2a3f0584b469dec6313935dbce2d6",
+            "fact:749217c018c211bd131dc4ea837c73549360334a370904a79a60969d56415e26",
+            "fact:7b9ff0cb346d72826dcde9711a6922de1be9393b15e7fad77b8caa622d6b2176",
+            "fact:9b7a71b8a2813587e048809f137240ec1eb23dd079fa89886eaf56f6266a6547",
+            "fact:a4a8f2298f81720673c8f88931c55f5ec5d597277f2eb9a9864c96e3055e9bc5",
+            "fact:bbcbbe36f6101bf6d730a19284531288cd716b7898b798c82be2067bf9f345ff",
+            "fact:d7b2b97a4c21252784d4a901f7c38410c087b1a67d009154da1472115bd714b1"
+          ],
+          "games": 16,
+          "losses": 13,
+          "points_for": 2027.02,
+          "season": 2024,
+          "wins": 3
+        },
+        "week_result": {}
+      },
+      "owner_id": "865653448849391616",
+      "points_against": 2264.5,
+      "points_for": 2027.02,
+      "rank": 12,
+      "reasoning": {
+        "evidence": [
+          {
+            "fact_ids": [
+              "fact:0bcde0521e447463a1a9c1969d46926a06b35a12ab6bb3ef591a71e8cbd1d7a1",
+              "fact:105fa94d5d3daced92a10617b64e5da9f08184261196258f540d761b6f53da40",
+              "fact:1469f74f1d1cc51a271de3153f0e09c0895d5f1a6ac1d9abf962c200cedce10f",
+              "fact:3c2fb86b1e57859f342aebfc1e506e581fbc0d82db6f40a961335f459363e427",
+              "fact:3f4b11ab0ecc2211cab264545ba595a717e68ab3629f42000a54d6c2c22745b2",
+              "fact:3fcd6165b1a4c6d653ef1646a024666a49db6daac0f222d9d8684ce38f60ff25",
+              "fact:4719d7821b4457bd29ebbe0fddfa49fc73c084e688f52bd344849a5187088a2e",
+              "fact:5a4d8ca760eecfa537833de42ab60aeead4c89ba3721f962fef2d81eef3ee320",
+              "fact:63f3d9738118527b991c6eb50dd787ec81e53b52c57273b225ba9c6e83160bce",
+              "fact:6c06c4549170b25c79269742444599dc31f2a3f0584b469dec6313935dbce2d6",
+              "fact:749217c018c211bd131dc4ea837c73549360334a370904a79a60969d56415e26",
+              "fact:7b9ff0cb346d72826dcde9711a6922de1be9393b15e7fad77b8caa622d6b2176",
+              "fact:9b7a71b8a2813587e048809f137240ec1eb23dd079fa89886eaf56f6266a6547",
+              "fact:a4a8f2298f81720673c8f88931c55f5ec5d597277f2eb9a9864c96e3055e9bc5",
+              "fact:bbcbbe36f6101bf6d730a19284531288cd716b7898b798c82be2067bf9f345ff",
+              "fact:d7b2b97a4c21252784d4a901f7c38410c087b1a67d009154da1472115bd714b1"
+            ],
+            "family": "prior_season",
+            "note": "3-13, #12 by all games in 2024"
+          },
+          {
+            "fact_ids": [
+              "fact:b2c9847ac650773a393cecc85b896a5ec18f068cde0371908d436e670fe0b84a",
+              "fact:5231a1f47af63b484630b24fc636d9a0a46dd33f034b4a4314502e883eeae3dd",
+              "fact:3990e3efa2d9afba572c43317a8f9a1f8ca79c22533f22f6b6266baecf651794"
+            ],
+            "family": "chat",
+            "note": "the auto-picked first rounder, owned with grace"
+          },
+          {
+            "fact_ids": [
+              "fact:08191743d232339bb9d8f4bc07c9d709c4cfeee7cd386bba8fa148303c222162",
+              "fact:be44a6504a3bd179d90176ef7e952eb911bed4ee4b4ddb35b0e5aef7b5387db3",
+              "fact:cc3121ed90e8f38c8f34a565a8dbfa48cbc7c2816673eb994d58d0cdabd1dc4a"
+            ],
+            "family": "draft",
+            "note": "the youth haul: Hampton 1.02, Henderson 1.06"
+          }
+        ]
+      },
+      "record": "3-13",
+      "record_basis": "2024 all admitted games including playoffs (the precommitted record_points basis at preseason)",
+      "roster_id": "12",
+      "team_name": "Ghastly Grayskull Gang"
+    }
+  ],
+  "record_id": "2025-preseason-ranking-judgment.v1",
+  "season": 2025,
+  "state_payload_sha256": "sha256:ee2ec4a9f4e2a24ca9813fe390862c08f99a892f24f735453c0e261986dff5fb",
+  "week": 0,
+  "what_this_ordering_does_not_encode": [
+    "any 2025 result: the season had not started at the cutoff",
+    "certainty: every position is a falsifiable preseason claim the season will grade"
+  ]
+}

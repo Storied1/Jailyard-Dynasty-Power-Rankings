@@ -55,6 +55,12 @@ const LEAGUE_CONFIG = {
     { label: "Power Rankings", href: "power-rankings.html" },
     { label: "Draft", href: "draft.html" },
     { label: "Trades", href: "trades.html" },
+    {
+      label: "Preseason",
+      href: "preseason-2025.html",
+      group: "columns",
+      subtitle: "Three Champions, Twelve Theories",
+    },
   ],
 
   // ─── Fun facts (scrolling ticker on index.html) ────────────
