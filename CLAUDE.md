@@ -51,6 +51,14 @@ date.
 `/review-media N` (if the edition uses media) → `/render-week N` →
 browser-verify → commit. Preseason uses the `-preseason` variants.
 
+**Blake review loop:** a cleared edition is exported as a numbered reading copy
+to `Obsidian Vault/MindPalace/10-Projects/Jailyard Preseason 2025 v{N}.md`.
+Never overwrite an earlier copy. Blake returns notes as a SHA-bound file (a git
+SHA plus the reading copy's SHA-256); rebind and verify every checkable claim
+against live evidence before acting on any of it, and push back with the exact
+evidence where an instruction fails. Craft laws and the review battery live in
+the auto-memory tree, not here.
+
 **Ranking judgment gate:** every published ranking order is backed by a
 judgment record passing `python scripts/verify_ranking_judgment.py --record
 <path>` — G0 structure (exactly 12 positions/ranks/rosters), G1
