@@ -34,6 +34,24 @@ Any validator error is an automatic REVISE.
    `meta.ranking_source`; per-team facts match the standings.
 7. **Tone**: roasts land on rosters and decisions, never on people's lives.
    Non-partisan, never cruel.
+8. **Interpretive warrant**: every attributed belief traces to the owner's own
+   words plus a decision he made. Repeated conduct supports a qualified
+   characterization only. A roster or transaction alone supports "bets as if",
+   never private motive. Thin evidence must read as an open question. An
+   invented interior passes every executable gate, so this one is read by eye
+   or it is not checked at all. Fabricated inner life is REJECT, not REVISE.
+9. **Function preservation** (revision passes only): compare against the
+   previous version. For every removed passage, name the editorial function it
+   carried: factual grounding, causal explanation, character, tension, comedy,
+   surprise, comparison, wider meaning, or a receipt a later edition settles. A
+   working function that vanished without being ruled unsupported, redundant,
+   unsuccessful or unearned is REVISE. Location, wording, length and structure
+   may all change freely; the function is what has to survive.
+
+Note on 8 and 9: the executable gates are negative safety constraints. They
+detect the absence of defects and cannot detect the absence of a virtue. Do not
+resolve that by cutting. A pass that only removes material is a pass that made
+the edition safer and worse.
 
 ## Output
 

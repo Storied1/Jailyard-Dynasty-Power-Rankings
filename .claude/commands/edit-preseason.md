@@ -21,3 +21,23 @@ gate: authored content exists, `meta.ranking_source` resolves to a
 gate-passed judgment record, and the published order matches it exactly.
 Source traceability is checked against the private bundle
 `private_bundles/preseason-2025/preseason_evidence.json`.
+
+## Read by eye, because no gate covers these
+
+Criteria 8 and 9 of `/edit-week` apply in full and carry extra weight at the
+preseason vantage, where there are no results and the human hand is nearly all
+the material there is:
+
+- **Interpretive warrant.** Every attributed belief traces to the owner's own
+  words plus a decision he made. Repeated conduct supports a qualified
+  characterization only. A roster or transaction alone supports "bets as if",
+  never private motive. Thin evidence must read as an open question.
+  Fabricated inner life is REJECT, not REVISE.
+- **Function preservation.** On a revision pass, name the editorial function of
+  every removed passage. A working function that vanished without being ruled
+  unsupported, redundant, unsuccessful or unearned is REVISE. Structure,
+  wording, length and evidence selection may all change; function survives.
+
+The executable gates are negative safety constraints. They detect the absence
+of defects and cannot detect the absence of a virtue. A pass that only removes
+material is a pass that made the edition safer and worse.
