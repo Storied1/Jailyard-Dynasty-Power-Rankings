@@ -1,11 +1,12 @@
 {
   "bundle": {
-    "bytes": 961432,
+    "bytes": 7551927,
     "path": "private_bundles/preseason-2025/preseason_evidence.json",
-    "sha256": "05f77eb5a6ae191122e8c745c84b132e0a5358c75c091b7f2eeab864b1da946a"
+    "sha256": "c2d0f7a331cc7a34cc470ab537a143db81467d1a474285a66317e7fa6320bb07"
   },
+  "chat_window_start_utc": "2023-09-01T00:00:00Z",
   "counts": {
-    "chat_quotes": 1955,
+    "chat_quotes": 19284,
     "draft_picks": 72,
     "historical_games": 294,
     "roster_players": 378,
@@ -18,6 +19,7 @@
   "kind": "preseason-evidence-manifest/1",
   "lineage": {
     "compiled_state": "content/editions/2025-preseason/compiled/",
+    "league_settings": "data/2025/league_settings.json (regenerate: scripts/fetch_league_settings.py)",
     "projection": "scripts/build_preseason_evidence.py",
     "roster_snapshot": "data/2025/fantasy_rosters/week1.json",
     "transaction_log": "data/2025/transactions.json"

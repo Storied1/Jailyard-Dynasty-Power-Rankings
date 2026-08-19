@@ -54,7 +54,14 @@ OUT_PATH = ROOT / "private_bundles" / "preseason-2025" / "preseason_evidence.jso
 MANIFEST_PATH = ROOT / "content" / "preseason-2025" / "preseason_evidence.manifest.json"
 ROSTER_SNAPSHOT = ROOT / "data" / "2025" / "fantasy_rosters" / "week1.json"
 TRANSACTION_LOG = ROOT / "data" / "2025" / "transactions.json"
-CHAT_WINDOW_START = "2025-02-10T00:00:00Z"  # offseason window for quotes
+LEAGUE_SETTINGS = ROOT / "data" / "2025" / "league_settings.json"
+# Projection-time filter on quotes, NOT an admissibility filter. Every fact in the
+# compiled state is already cutoff-verified at admission, so widening this cannot
+# introduce a post-cutoff fact; it only changes how much of the league's own memory
+# the writer is allowed to see. It was "2025-02-10T00:00:00Z", which exposed 1,955
+# of 19,383 admitted chat_message facts and left the writer unable to assert three
+# years of shared league knowledge (craft law 12).
+CHAT_WINDOW_START = "2023-09-01T00:00:00Z"
 REGENERATE_CMD = "python scripts/build_preseason_evidence.py"
 
 
@@ -365,11 +372,13 @@ def build_manifest(evidence, bundle_path=OUT_PATH):
             "bytes": len(raw),
         },
         "counts": _counts(evidence),
+        "chat_window_start_utc": evidence["chat_quotes"]["window_start_utc"],
         "lineage": {
             "compiled_state": "content/editions/2025-preseason/compiled/",
             "projection": "scripts/build_preseason_evidence.py",
             "roster_snapshot": "data/2025/fantasy_rosters/week1.json",
             "transaction_log": "data/2025/transactions.json",
+            "league_settings": "data/2025/league_settings.json (regenerate: scripts/fetch_league_settings.py)",
         },
         "regenerate": REGENERATE_CMD,
     }
@@ -453,6 +462,14 @@ def main():
         action="store_true",
         help="writer preflight: verify the private bundle against the tracked manifest",
     )
+    ap.add_argument(
+        "--chat-window-start",
+        default=CHAT_WINDOW_START,
+        help=(
+            "projection-time lower bound on quotes (default %(default)s). Not an "
+            "admissibility filter: the cutoff is enforced upstream at admission."
+        ),
+    )
     a = ap.parse_args()
 
     if a.verify:
@@ -463,8 +480,11 @@ def main():
     doc = load_compiled_state(a.edition)
     state = rehydrate_state(doc)
     names = _player_names()
-    evidence = project(state.admitted, state.cutoff, names=names)
+    evidence = project(
+        state.admitted, state.cutoff, names=names, chat_window_start=a.chat_window_start
+    )
     evidence["rosters"] = build_rosters_section(state.cutoff, names=names)
+    evidence["league_settings"] = load_json(LEAGUE_SETTINGS, required=True)
     evidence["edition_id"] = a.edition
     evidence["season"] = state.season
     save_json_canonical(OUT_PATH, evidence)

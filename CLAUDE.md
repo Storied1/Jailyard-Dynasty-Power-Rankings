@@ -39,6 +39,11 @@ Power rankings are the recurring spine; each edition develops its own form
 from that week's material (`content/editorial-standard.md`).
 
 **Writer inputs are a positive registry:** `content/writer-inputs.json`.
+`build_preseason_evidence.py`'s `CHAT_WINDOW_START` (also `--chat-window-start`)
+is a PROJECTION filter, not an admissibility filter: admission already enforces
+the cutoff, so widening it cannot leak a post-cutoff fact. It is `2023-09-01`,
+exposing **19,284** of the admitted chat facts; it was `2025-02-10` (1,955) and
+that narrowness, not the prose, was what made six drafts read like an outsider.
 Every fact, quote, and storyline in an edition traces to a registered source
 dated at or before the edition's cutoff. The classes: the week's data packet,
 the sanitized chat context (quotes verbatim), franchise history data, the
@@ -90,6 +95,13 @@ declared.
   roof/temp/wind). `game_context` references these by `game_id`
 - `data/2025/fantasy_rosters/week{1..17}.json` — per-week roster snapshots
   with real starters
+- `data/2025/league_settings.json` — the league's own rules from Sleeper:
+  starting lineup **QB/RB/RB/WR/WR/WR/TE/FLEX/K/DEF/DL/LB/DB** (13), 13 bench,
+  4 taxi, 2 IR, half PPR, full IDP scoring. Registered source class; projected
+  into the preseason bundle as `league_settings`. Regenerate:
+  `python scripts/fetch_league_settings.py --season 2025` (the ONLY network step;
+  the bundle builder reads this file and never fetches). Without it the column
+  asserts lineup math a reader cannot check
 - `data/{year}/draft_picks.json` — Sleeper draft picks per season
 - `data/2025/player_arcs/{player_id}.json` + `_index.json` — cross-season
   player arcs 2022-2025; **regenerate locally only** (inputs include
@@ -236,6 +248,7 @@ heavy lean | upset brewing`. Defined in `shared.py`,
 | `scripts/generate_expanded_week.py`    | `week{N}_data_expanded.json` companions (games map)                  |
 | `scripts/generate_nfl_games.py`        | Per-game NFLGame entities (EPA, injuries) from `data/external/`      |
 | `scripts/fetch_nflreadpy.py`           | nflreadpy caches → `data/external/*.parquet`                         |
+| `scripts/fetch_league_settings.py`     | Sleeper league rules → `data/{season}/league_settings.json`          |
 | `scripts/verify_week_content.py`       | Edition validator (structure, data accuracy, chat, ranking order)    |
 | `scripts/verify_ranking_judgment.py`   | Ranking judgment gate (G0-G5)                                        |
 | `scripts/migration_census.py`          | Zero-post-cutoff-facts census over packets + compiled states         |

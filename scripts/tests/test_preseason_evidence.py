@@ -336,4 +336,7 @@ def test_private_bundle_matches_a_fresh_projection():
     committed.pop("edition_id", None)
     committed.pop("season", None)
     committed.pop("rosters", None)  # roster section is data-file derived
+    committed.pop(
+        "league_settings", None
+    )  # likewise: read from data/2025/league_settings.json
     assert fresh == committed

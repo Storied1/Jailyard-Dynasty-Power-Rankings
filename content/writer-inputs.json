@@ -1,6 +1,7 @@
 {
   "kind": "writer-input-registry/1",
   "rule": "Every fact, quote, and storyline in a published edition traces to a source registered here, dated at or before the edition's cutoff.",
+  "rule_boundary": "The rule binds facts, quotes, and storylines. It does not bind authored expression: original metaphor, parody, coinage, humor, and ordinary allusion carry no source requirement. A checkable outside factual predicate asserted inside one still needs admissible pre-cutoff support. See content/editorial-standard.md for the interpretive-warrant ladder governing attributed belief.",
   "source_classes": [
     {
       "id": "preseason_evidence",
@@ -9,6 +10,14 @@
         "content/preseason-2025/preseason_evidence.manifest.json"
       ],
       "what": "The complete league-data source for the preseason edition, projected from the compiled cutoff-bound edition state: team identities, draft, offseason transactions, historical results, complete cutoff rosters, exact chat quotes with fact_id references. The bundle itself is local private custody (gitignored); the tracked manifest carries edition, cutoff, canonical hash, counts, lineage, and the regeneration command. Writer preflight: python scripts/build_preseason_evidence.py --verify (rejects an absent or hash-mismatched bundle). The preseason writer opens the bundle and contemporaneous coverage, nothing else."
+    },
+    {
+      "id": "league_settings",
+      "paths": [
+        "data/2025/league_settings.json",
+        "(projected into the preseason bundle as `league_settings`)"
+      ],
+      "what": "The league's own rules: starting lineup (QB, RB, RB, WR, WR, WR, TE, FLEX, K, DEF, DL, LB, DB), 13 bench, 4 taxi, 2 IR, and the full Sleeper scoring table including IDP. Fetched from the Sleeper API and corroborated as in force before the cutoff by pre-cutoff league chat (PBU=2, solo tackles, the taxi squad, the FLEX, and the move to position-specific IDP slots). This is what makes a lineup argument checkable by a reader; without it the column asserts roster math it never shows."
     },
     {
       "id": "week_data",
@@ -58,7 +67,7 @@
       "paths": [
         "(external; cite URL + publication date in the edition's source notes)"
       ],
-      "what": "NFL articles, reports, and takes published at or before the edition's cutoff, cited with their publication date. Coverage dated after the cutoff is inadmissible."
+      "what": "Outside coverage published at or before the edition's cutoff, cited with its publication date. Primarily NFL articles, reports and takes, and not limited to them: the wider sports world, and news or cultural events a league member would recognize, are admissible on the same terms whenever they bear on the column. Coverage dated after the cutoff is inadmissible. This class registers checkable outside FACTS; the writer's own analogies and allusions are authored expression and need no entry here (see rule_boundary)."
     }
   ]
 }
