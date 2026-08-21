@@ -20,6 +20,12 @@
       "what": "The league's own rules: starting lineup (QB, RB, RB, WR, WR, WR, TE, FLEX, K, DEF, DL, LB, DB), 13 bench, 4 taxi, 2 IR, and the full Sleeper scoring table including IDP. Fetched from the Sleeper API and corroborated as in force before the cutoff by pre-cutoff league chat (PBU=2, solo tackles, the taxi squad, the FLEX, and the move to position-specific IDP slots). This is what makes a lineup argument checkable by a reader; without it the column asserts roster math it never shows."
     },
     {
+      "id": "league_exemplars",
+      "read_as": "form",
+      "paths": ["(projected into the preseason bundle as `league_exemplars`)"],
+      "what": "The league's own power-ranking editions, 2023-2024: eight complete columns written by Karim, Ben, Zach, Patrick, Oscar, Nate and Matt, in five distinct established styles. Read as FORM, not as facts to restate. The Jailyard column is joining a genre these twelve people already run on a rotating weekly author, and a house voice that ignores it reads as an outsider however well written (craft law 28). These are ordinary admitted chat_message facts selected by an explicit fact_id allowlist in scripts/build_preseason_evidence.py, so they carry no special temporal status and quoting their text goes through the ordinary verbatim-quote path like any other chat message."
+    },
+    {
       "id": "week_data",
       "paths": [
         "content/weeks/week{N}_data.json",

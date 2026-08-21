@@ -12,6 +12,10 @@
       "type": "string",
       "minLength": 1
     },
+    "rule_boundary": {
+      "type": "string",
+      "minLength": 1
+    },
     "source_classes": {
       "type": "array",
       "minItems": 1,
@@ -27,6 +31,10 @@
           "what": {
             "type": "string",
             "minLength": 1
+          },
+          "read_as": {
+            "description": "How the writer consumes this class. Default 'facts': the registry rule binds it, and anything drawn from it must trace and date. 'form' means the class is read for register, structure and rhythm rather than for assertions; quoting its text still goes through the ordinary verbatim path.",
+            "enum": ["facts", "form"]
           },
           "paths": {
             "type": "array",

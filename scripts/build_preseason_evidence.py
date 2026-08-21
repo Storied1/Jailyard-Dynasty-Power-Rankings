@@ -9,6 +9,12 @@ carrying its source reference and an instant at or before the edition
 cutoff. It contains facts only -- no framing, no suggestions, no treatment
 of any kind.
 
+One section is facts read for a different purpose: `league_exemplars` names,
+by fact_id, the eight power-ranking editions the league wrote for itself in
+2023-2024. They are ordinary admitted chat_message facts and carry no special
+temporal status; the key exists so the writer sees the genre it is joining
+rather than only the fact mine it is drawing from.
+
 The tracked public surface is the manifest
 content/preseason-2025/preseason_evidence.manifest.json: edition, cutoff,
 the bundle's canonical sha256, aggregate counts, lineage, and the
@@ -62,7 +68,62 @@ LEAGUE_SETTINGS = ROOT / "data" / "2025" / "league_settings.json"
 # of 19,383 admitted chat_message facts and left the writer unable to assert three
 # years of shared league knowledge (craft law 12).
 CHAT_WINDOW_START = "2023-09-01T00:00:00Z"
+
+# The league's own power-ranking editions, projected as FORM rather than as facts.
+# These are ordinary chat_message facts, already admitted and already inside
+# CHAT_WINDOW_START; naming them here changes no fact and no temporal guarantee. It
+# exists because a writer handed 19,284 quotes as a fact mine never sees that these
+# twelve people have written this exact column since 2023, in five established
+# styles, well. A house voice that ignores them reads as an outsider however good
+# the prose (craft law 28); content/editorial-standard.md promises "the voice is the
+# league's own" and nothing implemented that sentence until this key existed.
+#
+# Selection is an explicit allowlist, never a heuristic. Length-plus-keyword filters
+# false-positive on Patrick's CA lemon-law post and Nate's three rule-change
+# writeups, and a numbered-list filter misses Zach's epistolary entirely because it
+# has no numbered lines. Both sweeps were run; these eight are the whole population.
+LEAGUE_EXEMPLARS = (
+    # fact_id, what it is -- the form the column inherits
+    (
+        "fact:a222e87d609e4c8907632cacfcef41f617398b5cd67bd055ae338f2e8a5c7db3",
+        "Karim 2023-10-04: thematic conceit, every team a kind of trash",
+    ),
+    (
+        "fact:0583262cb0563dcdf7a80aa9fc40b555376eac561c6a7159f84e2c2f236162c2",
+        "Ben 2023-10-11: Reason for Hope / Reason for Despair, per team",
+    ),
+    (
+        "fact:e940cca27ec21ff6cc74a23c122270dc0d8f3079deb3a324101b26818c113701",
+        "Zach 2023-10-21: mock-epistolary address to the league",
+    ),
+    (
+        "fact:cfcb9b6169f77ad28a886e570b8be59ac802fd374210c45be3adf6f801ba933d",
+        "Patrick 2023-10-31: dual ranking, present rank plus 5-year dynasty rank",
+    ),
+    (
+        "fact:5803831f56467003851572dc89cdd899d19f70a0131808f3c515b28e5eb8a601",
+        "Oscar 2023-11-07: D&D power levels, colossal trash golem to lich king",
+    ),
+    (
+        "fact:c9bc89fbd69ff738d2d29f4b9d8f65cdfd9120ce97101410bdaf054f95308584",
+        "Nate 2023-11-26: contenders/pretenders tiering, Thanksgiving Leftovers",
+    ),
+    (
+        "fact:dddb48d46e90458a36fcd0b5eb4f54c97f37c54cd98119c9df51194d88057f45",
+        "Matt 2023-12-10: seasonal theme, each team an ornament",
+    ),
+    (
+        "fact:4258acd27eed1811fa69db749ef6a8a74a0dabb736f88d97b8e5813be61e0e0d",
+        "Oscar 2024-11-14: the short, tired, still-funny version",
+    ),
+)
 REGENERATE_CMD = "python scripts/build_preseason_evidence.py"
+
+
+class ExemplarResolutionError(ValueError):
+    """An allowlisted league exemplar did not resolve to an admitted fact.
+    Fails the build rather than silently shipping the writer a thinner form
+    surface than the manifest advertises."""
 
 
 class RosterRewindError(ValueError):
@@ -303,6 +364,32 @@ def project(facts, cutoff, names=None, chat_window_start=CHAT_WINDOW_START):
         )
     quotes.sort(key=lambda q: (q["timestamp_utc"], q["fact_id"]))
 
+    # Form surface. Selected by fact_id from the SAME admitted chat facts, and
+    # deliberately not filtered by chat_window_start: these are a curated set, not a
+    # window projection, so narrowing the window must never silently amputate them.
+    # They also remain in chat_quotes.messages, where the verbatim-quote audit
+    # expects every quotable span to resolve; the duplication is intentional.
+    want = {fid: note for fid, note in LEAGUE_EXEMPLARS}
+    exemplars = []
+    for f in (x for x in admitted if x.fact_type == "chat_message"):
+        if f.fact_id not in want:
+            continue
+        p = f.payload
+        who = team_by_wa.get(p.get("sender"), {})
+        exemplars.append(
+            {
+                "timestamp_utc": p.get("timestamp_utc"),
+                "author": p.get("sender"),
+                "author_display": who.get("display_name"),
+                "author_roster_id": who.get("roster_id"),
+                "author_team": who.get("team_name"),
+                "form": want[f.fact_id],
+                "text": p.get("text"),
+                "fact_id": f.fact_id,
+            }
+        )
+    exemplars.sort(key=lambda e: (e["timestamp_utc"] or "", e["fact_id"]))
+
     return {
         "kind": "preseason-evidence/1",
         "cutoff_utc": cutoff,
@@ -313,6 +400,15 @@ def project(facts, cutoff, names=None, chat_window_start=CHAT_WINDOW_START):
         "chat_quotes": {
             "window_start_utc": chat_window_start,
             "messages": quotes,
+        },
+        "league_exemplars": {
+            "what_this_is": (
+                "The league's own power-ranking editions, 2023-2024. Read as FORM, "
+                "not as facts to restate: the column inherits a genre these twelve "
+                "people already established rather than inventing one. Quoting any "
+                "of this text goes through the ordinary verbatim-quote path."
+            ),
+            "editions": exemplars,
         },
     }
 
@@ -352,6 +448,7 @@ def _counts(evidence):
         "transactions": len(evidence["transactions"]),
         "historical_games": len(evidence["historical_results"]["games"]),
         "chat_quotes": len(evidence["chat_quotes"]["messages"]),
+        "league_exemplars": len(evidence["league_exemplars"]["editions"]),
         "roster_teams": len(rosters),
         "roster_players": sum(t["count"] for t in rosters),
     }
@@ -414,6 +511,7 @@ def check_manifest_public(manifest):
         "transactions",
         "historical_games",
         "chat_quotes",
+        "league_exemplars",
         "roster_teams",
         "roster_players",
     ):
@@ -483,6 +581,17 @@ def main():
     evidence = project(
         state.admitted, state.cutoff, names=names, chat_window_start=a.chat_window_start
     )
+    # Fail closed on the real data. project() stays total so the planted-fact tests
+    # can call it with synthetic inputs; the population check belongs here, where
+    # the compiled state is the thing being asserted against.
+    got = {e["fact_id"] for e in evidence["league_exemplars"]["editions"]}
+    missing = [fid for fid, _ in LEAGUE_EXEMPLARS if fid not in got]
+    if missing:
+        raise ExemplarResolutionError(
+            f"{len(missing)} of {len(LEAGUE_EXEMPLARS)} league exemplars did not "
+            f"resolve to an admitted chat_message fact in {a.edition}: "
+            + ", ".join(missing)
+        )
     evidence["rosters"] = build_rosters_section(state.cutoff, names=names)
     evidence["league_settings"] = load_json(LEAGUE_SETTINGS, required=True)
     evidence["edition_id"] = a.edition
@@ -493,7 +602,8 @@ def main():
     print(
         f"{OUT_PATH}  (teams={c['teams']}, picks={c['draft_picks']}, "
         f"transactions={c['transactions']}, games={c['historical_games']}, "
-        f"quotes={c['chat_quotes']}, roster_players={c['roster_players']})"
+        f"quotes={c['chat_quotes']}, exemplars={c['league_exemplars']}, "
+        f"roster_players={c['roster_players']})"
     )
     print(f"{MANIFEST_PATH}  (tracked public manifest)")
     return 0

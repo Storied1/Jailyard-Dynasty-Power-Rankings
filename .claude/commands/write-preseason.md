@@ -22,6 +22,38 @@ canonical hash, counts, lineage). An absent or hash-mismatched bundle is a
 hard stop: regenerate with `python scripts/build_preseason_evidence.py`,
 never write from memory or a stale copy.
 
+## Form (read this before writing a word)
+
+**This league has written this column since 2023 and it is good.** Eight
+complete editions by seven different owners sit in the bundle under
+`league_exemplars`. Read them first.
+
+What is already established, which means the column is joining a genre and not
+inventing one:
+
+- **Karim** (2023-10-04): a thematic conceit carried across all twelve.
+- **Ben** (2023-10-11): Reason for Hope / Reason for Despair, per team.
+- **Zach** (2023-10-21): mock-epistolary, addressed to the league directly.
+- **Patrick** (2023-10-31): dual ranking, present rank plus five-year dynasty.
+- **Oscar** (2023-11-07): D&D power levels, "colossal trash golem" to "lich king".
+- **Blake** (2023-11-26): Thanksgiving metaphors under contender tiers (the bundle's
+  `form:` label misattributes this one to Nate; `author_display` is correct).
+- **Matt** (2023-12-10): seasonal theme, each team an ornament.
+- **Oscar** (2024-11-14): the short, tired, still-funny version.
+
+A house voice that ignores five established in-league styles reads as an
+outsider however well written (craft law 28). Note what they all do that a
+careful outsider would not: they insult their own teams, they assume every
+reader knows every roster, they never explain a nickname, and they are short
+where the team is boring.
+
+**Inheritance is not imitation.** Do not rotate through their gimmicks or
+impersonate an owner. Read them the way a new columnist reads the back issues:
+for register, pacing, how much knowledge to assume, and where the laugh sits.
+`league_exemplars` is registered `read_as: "form"`, so it is not a fact source.
+Quoting an exemplar's text is still an ordinary verbatim chat quote and traces
+like any other.
+
 ## Sources
 
 The preseason writer reads exactly these:

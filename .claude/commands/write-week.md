@@ -4,6 +4,40 @@ Produce `content/weeks/week${WEEK}_content.json`: this week's edition of The
 Jailyard column. The product bar is `content/editorial-standard.md`; read it
 first, every time.
 
+## Form (read this before writing a word)
+
+**This league has written this column since 2023 and it is good.** Eight
+complete editions by seven different owners, including the site's own narrator, sit in the preseason bundle under
+`league_exemplars` (`private_bundles/preseason-2025/preseason_evidence.json`).
+All eight are from 2023-2024, before every 2025 cutoff, so they are admissible
+for every week. Read them first.
+
+What is already established, which means the column is joining a genre and not
+inventing one:
+
+- **Karim** (2023-10-04): a thematic conceit carried across all twelve.
+- **Ben** (2023-10-11): Reason for Hope / Reason for Despair, per team.
+- **Zach** (2023-10-21): mock-epistolary, addressed to the league directly.
+- **Patrick** (2023-10-31): dual ranking, present rank plus five-year dynasty.
+- **Oscar** (2023-11-07): D&D power levels, "colossal trash golem" to "lich king".
+- **Blake** (2023-11-26): Thanksgiving metaphors under contender tiers (the bundle's
+  `form:` label misattributes this one to Nate; `author_display` is correct).
+- **Matt** (2023-12-10): seasonal theme, each team an ornament.
+- **Oscar** (2024-11-14): the short, tired, still-funny version.
+
+A house voice that ignores five established in-league styles reads as an
+outsider however well written (craft law 28). Note what they all do that a
+careful outsider would not: they insult their own teams, they assume every
+reader knows every roster, they never explain a nickname, and they are short
+where the team is boring.
+
+**Inheritance is not imitation.** Do not rotate through their gimmicks or
+impersonate an owner. Read them the way a new columnist reads the back issues:
+for register, pacing, how much knowledge to assume, and where the laugh sits.
+`league_exemplars` is registered `read_as: "form"`, so it is not a fact source.
+Quoting an exemplar's text is still an ordinary verbatim chat quote and traces
+like any other.
+
 ## Sources
 
 `content/writer-inputs.json` is the complete registry of admissible sources.

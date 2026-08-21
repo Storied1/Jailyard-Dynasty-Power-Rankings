@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from scripts.build_preseason_evidence import (
+    LEAGUE_EXEMPLARS,
     MANIFEST_PATH,
     OUT_PATH,
     RosterRewindError,
@@ -270,6 +271,58 @@ def test_private_bundle_shape():
     assert rosters["derivation"]["method"] == "week1_snapshot_rewind"
     assert len(rosters["teams"]) == 12
     assert all(t["count"] == len(t["players"]) for t in rosters["teams"])
+
+
+def test_league_exemplars_survive_a_narrowed_chat_window():
+    """The curated form surface is NOT a window projection. Narrowing
+    chat_window_start must drop the message from chat_quotes and keep it in
+    league_exemplars. This is craft law 27 as a regression guard: the window was
+    built to block the future and silently amputated the past instead, and the
+    census only ever checks one direction, so nothing else would catch it."""
+    fid = LEAGUE_EXEMPLARS[0][0]
+    old = _chat("2023-10-04T12:57:13Z", sender="Karim", fid=fid)
+    out = project([old], CUTOFF, chat_window_start="2025-02-10T00:00:00Z")
+    assert out["chat_quotes"]["messages"] == [], "window filter should drop it"
+    editions = out["league_exemplars"]["editions"]
+    assert [e["fact_id"] for e in editions] == [fid]
+    assert editions[0]["form"] == LEAGUE_EXEMPLARS[0][1]
+
+
+def test_absent_exemplar_leaves_the_population_short():
+    """The precondition main() fails closed on: an allowlisted id that resolves
+    to nothing simply does not appear, so the count is the thing to assert."""
+    out = project([_chat("2024-01-01T00:00:00Z", fid="fact:not-an-exemplar")], CUTOFF)
+    assert out["league_exemplars"]["editions"] == []
+
+
+@_needs_bundle
+def test_every_league_exemplar_resolves_in_the_bundle():
+    """All eight of the league's own power-ranking editions reached the writer.
+    Two independent sweeps (length > 1200 chars, and >= 5 numbered list lines)
+    agreed this is the whole population; Zach's epistolary has no numbered lines
+    and only the first sweep finds it, which is why the allowlist is explicit."""
+    doc = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    editions = doc["league_exemplars"]["editions"]
+    assert {e["fact_id"] for e in editions} == {fid for fid, _ in LEAGUE_EXEMPLARS}
+    assert len(editions) == 8
+    for e in editions:
+        assert e["text"] and len(e["text"]) > 1000, e["fact_id"]
+        assert e["form"], e["fact_id"]
+        assert e["author_team"], e["fact_id"]
+        assert e["timestamp_utc"] <= "2025-09-03T23:59:59.999999Z"
+    # Seven distinct authors: the column inherits a rotating-author tradition,
+    # not one man's gimmick. Oscar wrote two of the eight.
+    assert len({e["author"] for e in editions}) == 7
+
+
+@_needs_bundle
+def test_exemplars_are_also_quotable_through_the_ordinary_path():
+    """Duplication with chat_quotes is intentional: the verbatim-quote audit
+    resolves spans against chat_quotes.messages, so an exemplar quoted in prose
+    must still be findable there."""
+    doc = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    quoted = {q["fact_id"] for q in doc["chat_quotes"]["messages"]}
+    assert {fid for fid, _ in LEAGUE_EXEMPLARS} <= quoted
 
 
 @_needs_bundle
