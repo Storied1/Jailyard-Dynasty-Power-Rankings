@@ -59,7 +59,7 @@ const LEAGUE_CONFIG = {
       label: "Preseason",
       href: "preseason-2025.html",
       group: "columns",
-      subtitle: "Three Champions, Twelve Theories",
+      subtitle: "The Standings Are Lying",
     },
   ],
 

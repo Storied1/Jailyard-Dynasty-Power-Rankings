@@ -1,398 +1,701 @@
 {
   "meta": {
-    "season": 2025,
-    "type": "preseason",
-    "edition": "preseason-2025",
-    "title": "Preseason 2025",
-    "headline": "Three Champions, Twelve Theories",
-    "subtitle": "Nobody here has ever won it twice. Ben is the third to try.",
     "cutoff_utc": "2025-09-03T23:59:59.000000Z",
+    "edition": "preseason-2025",
+    "headline": "The Standings Are Lying",
     "ranking_source": "content/preseason-2025/preseason_ranking_judgment.json",
-    "threads": [
-      {
-        "id": "kittler-repeat",
-        "status": "opened",
-        "title": "The First Repeat",
-        "note": "Ben has played in all three finals and won the last one. Karim and Blake both came back as champion and were gone by the end of December."
-      },
-      {
-        "id": "nate-all-in-2025",
-        "status": "opened",
-        "title": "Elite Everywhere Else",
-        "note": "Nate paid his 2026 first, his 2026 second and Rhamondre Stevenson for the 1.04. If the backfield fails there is nothing premium left to fix it with."
-      },
-      {
-        "id": "thunter-experiment",
-        "status": "opened",
-        "title": "The Travis Hunter Problem",
-        "note": "A player Sleeper lists at both DB and WR, in a league that starts a DB. Nate called 1,400 rookie receiving yards on the eve of the season; Brent called Charles Woodson."
-      },
-      {
-        "id": "kenobi-qb-room",
-        "status": "opened",
-        "title": "Four Quarterbacks, No Answer",
-        "note": "Blake's roster posted the highest season total in the league and still has not solved the position. Richardson lost his job in August."
-      },
-      {
-        "id": "giants-window",
-        "status": "opened",
-        "title": "The Exit Plan",
-        "note": "Zach has already named the condition under which he sells: a bad first five weeks."
-      },
-      {
-        "id": "rice-clock",
-        "status": "opened",
-        "title": "Six Weeks",
-        "note": "Patrick's best receiver is suspended until October after losing 2024 to a knee. What his record looks like when Rice returns is the season."
-      },
-      {
-        "id": "brent-third-time",
-        "status": "opened",
-        "title": "3rd Times the Charm",
-        "note": "Second most productive offense across the fourteen weeks that set the standings, and a 7-7 record to show for it. Eliminated by Blake in consecutive Decembers."
-      },
-      {
-        "id": "noble-conversion",
-        "status": "opened",
-        "title": "The Noble Conversion",
-        "note": "Thirty-six players, seven tight ends, and tenth in scoring across the weeks that counted. Whether Kevin ever trades surplus for a lineup decides his season."
-      },
-      {
-        "id": "chudders-direction",
-        "status": "opened",
-        "title": "Two Backs and a Prayer",
-        "note": "Gibbs and Jeanty will score. The receivers are rookies. Matt has said out loud that he fears finishing in the middle."
-      },
-      {
-        "id": "btj-vs-tet-board-bet",
-        "status": "opened",
-        "title": "The Burger Position",
-        "note": "David passed on Hunter because he did not want two Jaguars, and said Brian Thomas keeps Jacksonville. He has not moved off it since."
-      },
-      {
-        "id": "harlow-paper",
-        "status": "opened",
-        "title": "The Best Paper in the League",
-        "note": "Harlow holds Nate's 2026 first and second. Neither one scores a point in 2025."
-      },
-      {
-        "id": "time-curse",
-        "status": "opened",
-        "title": "The __TIME Curse",
-        "note": "No team name carrying the suffix has ever touched the trophy. Cease-and-desist enforcement continues."
-      }
-    ],
+    "season": 2025,
     "source_notes": [
       {
-        "claim": "Rashee Rice was suspended for the first six games of the 2025 season.",
-        "source": "The Washington Post, \"Chiefs wide receiver Rashee Rice is suspended six games\"",
-        "url": "https://www.washingtonpost.com/sports/2025/08/27/rashee-rice-suspension/",
-        "published": "2025-08-27"
+        "claim": "Green Bay acquired Micah Parsons from Dallas for Kenny Clark and first-round picks in 2026 and 2027, and Parsons signed a four-year deal worth 188 million dollars with 136 million guaranteed, the largest for a non-quarterback in NFL history.",
+        "published": "2025-08-28",
+        "source": "NFL.com, \"Cowboys trading Micah Parsons to Packers for two first-round picks, DL Kenny Clark\"",
+        "url": "https://www.nfl.com/news/micah-parsons-packers-cowboys-trade"
       },
       {
-        "claim": "Rashee Rice's 2024 season ended after four games because of a knee injury requiring surgery.",
-        "source": "Yahoo Sports, \"Rashee Rice suspension: Fantasy football impact of Chiefs WR being out for first six games of 2025\"",
-        "url": "https://sports.yahoo.com/fantasy/article/rashee-rice-suspension-fantasy-football-impact-of-chiefs-wr-being-out-for-first-six-games-of-2025-170337179.html",
-        "published": "2025-08-27"
+        "claim": "The Dallas Mavericks traded Luka Doncic to the Los Angeles Lakers in February 2025.",
+        "published": "2025-02-02",
+        "source": "ESPN, \"Mavericks trade Luka Doncic to Lakers for Anthony Davis in stunner\"",
+        "url": "https://www.espn.com/nba/story/_/id/43659380/mavericks-trade-luka-doncic-lakers-anthony-davis-stunner"
       },
       {
-        "claim": "George Pickens was traded from the Steelers to the Cowboys in May 2025.",
-        "source": "UPI, \"Dallas Cowboys trade for Pittsburgh Steelers wide receiver George Pickens, draft pick\"",
-        "url": "https://www.upi.com/Sports_News/NFL/2025/05/07/Dallas-Cowboys-trade-Pittsburgh-Steelers-George-Pickens/8261746620826/",
-        "published": "2025-05-07"
+        "claim": "Rashee Rice was suspended six games under the personal conduct policy in August 2025, after pleading guilty to two third-degree felonies from a March 2024 Dallas highway crash, with 30 days in jail as a probation condition.",
+        "published": "2025-08-27",
+        "source": "ESPN, \"Why Rashee Rice accepted his six-game suspension now, and how Chiefs will have to cope\"",
+        "url": "https://www.espn.com/nfl/story/_/id/46088297/kansas-city-chiefs-rashee-rice-suspensionsuspended-six-games-reaction"
       },
       {
-        "claim": "The Cowboys traded Micah Parsons to the Packers on August 28, 2025, for Kenny Clark and two first-round picks.",
-        "source": "Packers News, \"Green Bay Packers trade for Dallas Cowboys star Micah Parsons, give up Kenny Clark and 2 first-round picks\"",
-        "url": "https://www.packersnews.com/story/sports/nfl/packers/2025/08/28/packers-trade-for-dallas-cowboys-star-micah-parsons/85874212007/",
-        "published": "2025-08-28"
+        "claim": "Quinshon Judkins was arrested on a battery and domestic violence charge in July 2025, did not report to Browns training camp, and remained unsigned.",
+        "published": "2025-07-13",
+        "source": "Field Level Media, \"Browns RB Quinshon Judkins arrested on battery, domestic violence charge\"",
+        "url": "https://fieldlevelmedia.com/news/browns-rb-quinshon-judkins-arrested-on-battery-domestic-violence-charge/"
       },
       {
-        "claim": "The Mavericks traded Luka Doncic to the Lakers in February 2025.",
-        "source": "ESPN, \"Luka Doncic to Lakers, Anthony Davis to Mavs in 3-team trade\"",
-        "url": "https://www.espn.com/nba/story/_/id/43659380/sources-mavericks-trading-doncic-lakers-anthony-davis",
-        "published": "2025-02-02"
+        "claim": "The Broward State Attorney's Office declined to prosecute Quinshon Judkins in August 2025, and he remained unsigned by Cleveland as of September 1, 2025.",
+        "published": "2025-09-01",
+        "source": "CBS Sports, \"Browns RB Quinshon Judkins will not face charge after July arrest\" (2025-08-14) and BrownsZone, \"Dylan Sampson determined to keep proving his size doesn't matter\"",
+        "url": "https://www.brownszone.com/2025/09/01/dylan-sampson-determined-to-keep-proving-his-size-doesnt-matter/"
       },
       {
-        "claim": "The Packers' proposal to ban the tush push failed at the NFL's May 2025 league meeting.",
-        "source": "NPR, \"The 'tush push' lives on. NFL teams vote to keep the controversial play\"",
-        "url": "https://www.npr.org/2025/05/21/nx-s1-5406206/nfl-tush-push-ban-owners-vote-football",
-        "published": "2025-05-21"
+        "claim": "Indianapolis named Daniel Jones its starting quarterback for 2025 on August 19, ending the competition with Anthony Richardson.",
+        "published": "2025-08-19",
+        "source": "NFL.com, \"Colts name Daniel Jones starting QB over Anthony Richardson for Week 1\"",
+        "url": "https://www.nfl.com/news/colts-naming-daniel-jones-as-starting-qb-over-anthony-richardson"
       },
       {
-        "claim": "Browns rookie Quinshon Judkins was arrested July 12, 2025, in Fort Lauderdale on a misdemeanor domestic violence and battery charge.",
-        "source": "ESPN, \"Browns' Quinshon Judkins arrested on domestic violence, battery charge\"",
-        "url": "https://www.espn.com/nfl/story/_/id/45727275/browns-quinshon-judkins-arrested-battery-domestic-violence-charge-florida",
-        "published": "2025-07-12"
+        "claim": "Najee Harris sustained a superficial eye injury in a Fourth of July fireworks accident and began Chargers training camp on the active/non-football injury list, while first-round rookie Omarion Hampton took the lead-back runway through camp.",
+        "published": "2025-07-16",
+        "source": "NFL.com, \"Chargers RB Najee Harris (eye) placed on active/non-football injury list to begin training camp\"",
+        "url": "https://www.nfl.com/news/chargers-rb-najee-harris-eye-active-non-football-injury-list"
       },
       {
-        "claim": "Prosecutors declined to pursue a formal charge against Quinshon Judkins in August 2025.",
-        "source": "ESPN, \"Browns' Quinshon Judkins won't face formal battery charge\"",
-        "url": "https://www.espn.com/nfl/story/_/id/45980655/browns-quinshon-judkins-face-formal-battery-charge",
-        "published": "2025-08-14"
+        "claim": "The Chargers drafted Omarion Hampton 22nd overall, and offensive coordinator Greg Roman praised his hole-finding in camp while planning a rotational backfield.",
+        "published": "2025-07-08",
+        "source": "Chargers.com, \"Chargers 2025 Training Camp Preview: Can the Run Game Become Among the Best in the NFL?\"",
+        "url": "https://www.chargers.com/news/training-camp-preview-running-backs-najee-harris-omarion-hampton"
       },
       {
-        "claim": "Joe Mixon's foot injury put him on the Texans' reserve non-football injury list to open the season, with Nick Chubb in line to start Week 1.",
-        "source": "NBC Sports Pro Football Talk, \"Joe Mixon will open the regular season on the non-football injury list\"",
-        "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/joe-mixon-will-open-the-regular-season-on-the-non-football-injury-list",
-        "published": "2025-08-25"
+        "claim": "Seattle signed Cooper Kupp to a three-year contract in March 2025.",
+        "published": "2025-03-14",
+        "source": "Seahawks.com, \"Seahawks Sign Wide Receiver Cooper Kupp\"",
+        "url": "https://www.seahawks.com/video/seahawks-agree-to-terms-with-wide-receiver-cooper-kupp-2025-free-agency"
       },
       {
-        "claim": "The Jaguars ran Travis Hunter at both wide receiver and cornerback through training camp, alternating snaps in team drills.",
-        "source": "ESPN, \"Jaguars WR/CB Travis Hunter is impressing at training camp\"",
-        "url": "https://www.espn.com/nfl/story/_/id/45900102/jacksonville-jaguars-receiver-travis-hunter-two-way-player-first-two-weeks-training-camp",
-        "published": "2025-08-05"
+        "claim": "New England signed Stefon Diggs to a three-year deal worth up to 69 million dollars at age 31 coming off a torn ACL, and he was cleared for the first day of Patriots training camp, where Drake Maye's first team rep of camp was a completion to him.",
+        "published": "2025-07-23",
+        "source": "ESPN, \"Sources: Stefon Diggs agrees to 3-year, $69M deal with Patriots\" (2025-03-25) and NBC Sports Boston, \"Patriots training camp recap: Stefon Diggs makes presence felt on Day 1\"",
+        "url": "https://www.nbcsportsboston.com/nfl/new-england-patriots/live-updates-training-camp-day-1-stefon-diggs-drake-maye-mike-vrabel/721137/"
       },
       {
-        "claim": "Jordan Addison was suspended for the first three games of the 2025 season under the NFL's substances of abuse policy.",
+        "claim": "Seattle traded DK Metcalf to Pittsburgh for a 2025 second-round pick and Metcalf signed a five-year extension averaging 30 million dollars per year.",
+        "published": "2025-03-09",
+        "source": "ESPN, \"Sources: Seahawks trading star WR DK Metcalf to Steelers\"",
+        "url": "https://www.espn.com/nfl/story/_/id/44184542/sources-seahawks-trading-star-wr-dk-metcalf-steelers"
+      },
+      {
+        "claim": "San Francisco traded Deebo Samuel to Washington for a 2025 fifth-round pick.",
+        "published": "2025-03-01",
+        "source": "CBS Sports, \"Commanders trading for Deebo Samuel\"",
+        "url": "https://www.cbssports.com/nfl/news/commanders-trading-for-deebo-samuel-49ers-reach-agreement-to-send-receiver-to-washington-for-nfl-draft-pick/"
+      },
+      {
+        "claim": "Pittsburgh traded George Pickens to Dallas in May 2025, pairing him with CeeDee Lamb in his contract year.",
+        "published": "2025-05-07",
+        "source": "ESPN, \"Sources: Cowboys nearing trade for Steelers WR George Pickens\"",
+        "url": "https://africa.espn.com/nfl/story/_/id/45036163/sources-cowboys-nearing-trade-steelers-wr-george-pickens"
+      },
+      {
+        "claim": "Aaron Rodgers signed a one-year contract with Pittsburgh worth 13.65 million dollars in June 2025, entering his age-41 season as the Steelers' starter.",
+        "published": "2025-06-07",
+        "source": "ESPN, \"Sources: QB Rodgers, Steelers agree to one-year, $13.65M deal\"",
+        "url": "https://africa.espn.com/nfl/story/_/id/45470407/sources-qb-rodgers-steelers-signs-one-year-1365m-deal"
+      },
+      {
+        "claim": "Houston signed Nick Chubb to a one-year deal worth 2.5 million dollars, and after Joe Mixon was placed on the reserve/non-football injury list on August 25, ruling him out at least four games, Chubb emerged as the Texans' primary back.",
+        "published": "2025-08-25",
+        "source": "ESPN, \"RB Nick Chubb signs 1-year, $2.5M deal with Texans\" (2025-06-23) and ESPN, \"Texans RB Joe Mixon (ankle) to miss at least first 4 games\"",
+        "url": "https://www.espn.com/nfl/story/_/id/46073147/texans-rb-joe-mixon-ankle-miss-least-first-four-games"
+      },
+      {
+        "claim": "Cincinnati signed Tee Higgins to a four-year extension worth 115 million dollars and Ja'Marr Chase to a four-year extension worth 161 million dollars in March 2025, Chase's deal briefly the largest for a non-quarterback in NFL history.",
+        "published": "2025-03-16",
+        "source": "NFL.com, \"Bengals agree to terms with WRs Ja'Marr Chase, Tee Higgins on four-year contract extensions\"",
+        "url": "https://www.nfl.com/news/bengals-agree-to-terms-with-wrs-ja-marr-chase-tee-higgins-on-four-year-contract-extensions"
+      },
+      {
+        "claim": "Brandon Aiyuk was moved to the reserve/PUP list on August 26, ruling him out at least the first four games of 2025, with Kyle Shanahan pointing to Week 6 as the realistic debut.",
+        "published": "2025-08-26",
+        "source": "CBS Sports, \"49ers' Brandon Aiyuk: Shifts to reserve/PUP list\"",
+        "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-shifts-to-reservepup-list/"
+      },
+      {
+        "claim": "Washington traded Brian Robinson to San Francisco for a 2026 sixth-round pick on August 22, 2025, sending him to a backfield headlined by Christian McCaffrey.",
+        "published": "2025-08-22",
+        "source": "ESPN, \"Sources: Commanders trading Brian Robinson to 49ers for pick\"",
+        "url": "https://www.espn.com/nfl/story/_/id/46050509/sources-commanders-trading-brian-robinson-49ers-pick"
+      },
+      {
+        "claim": "Christian McCaffrey played four games in 2024, was fully cleared for 2025 training camp, and the 49ers ran scripted rest days with Kyle Shanahan saying they must protect him from himself.",
+        "published": "2025-07-27",
+        "source": "ESPN, \"49ers limit Christian McCaffrey's camp reps to keep him healthy\"",
+        "url": "https://www.espn.com/nfl/story/_/id/45837914/49ers-limit-christian-mccaffrey-camp-reps-keep-healthy"
+      },
+      {
+        "claim": "Las Vegas selected Ashton Jeanty with the sixth overall pick of the 2025 NFL Draft, and his preseason debut went for minus one yard on three carries, drawing comparisons to Ja'Marr Chase's ugly first preseason.",
+        "published": "2025-08-08",
+        "source": "CBS Sports, \"Seahawks troll Ashton Jeanty as Raiders RB rushes for negative yardage in preseason debut\"",
+        "url": "https://www.cbssports.com/nfl/news/seahawks-troll-ashton-jeanty-as-raiders-rb-rushes-for-negative-yardage-in-preseason-debut"
+      },
+      {
+        "claim": "Cleveland traded up to select Shedeur Sanders at pick 144 in the fifth round, after five other quarterbacks had been drafted, and Kevin Stefanski named 40-year-old Joe Flacco the Week 1 starter on August 18.",
+        "published": "2025-08-18",
+        "source": "NFL.com, \"2025 NFL Draft: Browns trade up to select Colorado QB Shedeur Sanders\" (2025-04-26) and ClevelandBrowns.com, \"Joe Flacco named starting quarterback for beginning of 2025 season\"",
+        "url": "https://www.clevelandbrowns.com/news/joe-flacco-named-starting-quarterback"
+      },
+      {
+        "claim": "Baltimore signed Derrick Henry to a two-year, 30 million dollar extension in May 2025, the largest deal in NFL history for a running back over 30, after he ran for 1,921 yards at age 30.",
+        "published": "2025-05-14",
+        "source": "ESPN, \"RB Derrick Henry agrees to two-year, $30M extension with Ravens\"",
+        "url": "https://www.espn.com/nfl/story/_/id/45146544/rb-derrick-henry-agrees-two-year-30m-extension-ravens"
+      },
+      {
+        "claim": "The Rams signed Kyren Williams to a three-year extension worth up to 33 million dollars on August 5, 2025, after back-to-back 1,100-yard seasons.",
+        "published": "2025-08-05",
+        "source": "The Washington Post (AP), \"Rams RB Kyren Williams agrees to 3-year contract extension worth up to $33 million\"",
+        "url": "https://www.washingtonpost.com/sports/nfl/2025/08/05/rams-kyren-williams-extension/ff9d436e-721f-11f0-84e0-485bb531abeb_story.html"
+      },
+      {
+        "claim": "Josh Jacobs opened Packers training camp in July 2025 saying he is sick until he gets that trophy.",
+        "published": "2025-07-23",
+        "source": "WSAW, \"Matthew Golden steals the show as Packers begin training camp\"",
+        "url": "https://www.wsaw.com/2025/07/23/matthew-golden-steals-show-packers-begin-training-camp/"
+      },
+      {
+        "claim": "Mike Evans enters 2025 with eleven straight 1,000-yard seasons, tied with Jerry Rice for the longest streak ever, and Rice personally gave him his blessing to break it.",
+        "published": "2025-07-04",
+        "source": "ESPN, \"Jerry Rice gives Bucs WR Mike Evans blessing to break 1,000-yard record\"",
+        "url": "https://www.espn.com/nfl/story/_/id/45618132/tampa-bay-buccaneers-mike-evans-jerry-rice-talk-1000-yard-record"
+      },
+      {
+        "claim": "Jordan Addison was suspended three games for violating the NFL's substances-of-abuse policy, missing Weeks 1 through 3 of 2025.",
+        "published": "2025-08-05",
         "source": "ESPN, \"Vikings WR Jordan Addison suspended 3 games by NFL\"",
-        "url": "https://www.espn.com/nfl/story/_/id/45909344/vikings-wr-jordan-addison-suspended-3-games-nfl",
-        "published": "2025-08-05"
+        "url": "https://www.espn.com/nfl/story/_/id/45909344/vikings-wr-jordan-addison-suspended-3-games-nfl"
       },
       {
-        "claim": "Miami traded tight end Jonnu Smith to the Pittsburgh Steelers on June 30, 2025.",
-        "source": "CBS Sports, \"Jalen Ramsey traded to Steelers, Dolphins receive Minkah Fitzpatrick in blockbuster deal\"",
-        "url": "https://www.cbssports.com/nfl/news/jalen-ramsey-traded-to-steelers-dolphins-receive-minkah-fitzpatrick-in-blockbuster-deal",
-        "published": "2025-06-30"
+        "claim": "Darren Waller unretired and was traded from the Giants to Miami on July 1, 2025.",
+        "published": "2025-07-01",
+        "source": "ESPN, \"Darren Waller unretiring; Dolphins acquire TE in trade\"",
+        "url": "https://africa.espn.com/nfl/story/_/id/45631064/darren-waller-unretiring-dolphins-acquire-te-trade"
       },
       {
-        "claim": "Darren Waller came out of retirement on July 1, 2025, and was traded from the Giants to the Dolphins, one day after Miami traded Jonnu Smith.",
-        "source": "ESPN, \"Darren Waller unretiring as Dolphins acquire TE in trade\"",
-        "url": "https://www.espn.com/nfl/story/_/id/45631064/darren-waller-unretiring-dolphins-acquire-te-trade",
-        "published": "2025-07-01"
+        "claim": "Philadelphia signed Saquon Barkley to a two-year extension in March 2025, the first 20-million-per-year running back in NFL history, after a 2,005-yard rushing season.",
+        "published": "2025-03-04",
+        "source": "NFL.com, \"Eagles signing RB Saquon Barkley to two-year contract extension worth $41.2 million\"",
+        "url": "https://www.nfl.com/news/eagles-saquon-barkley-sign-rb-two-year-contract-extension-41-million"
       },
       {
-        "claim": "The Colts named Daniel Jones their starting quarterback over Anthony Richardson on August 19, 2025.",
-        "source": "ESPN, \"Colts name Daniel Jones starting QB over Anthony Richardson\"",
-        "url": "https://www.espn.com/nfl/story/_/id/46015804/sources-colts-name-daniel-jones-starting-qb-anthony-richardson",
-        "published": "2025-08-19"
+        "claim": "Liam Coen, Jacksonville's new head coach, said in June 2025 that Trevor Lawrence's footwork had dramatically improved and that he was operating the offense at a high level.",
+        "published": "2025-06-05",
+        "source": "Jaguars.com, \"Jaguars Head Coach Liam Coen Sees Major Progress in Trevor Lawrence Ahead of Year 5\"",
+        "url": "https://www.jaguars.com/news/k000300-jaguars-head-coach-liam-coen-sees-major-progress-in-trevor-lawrence-ahead-of-year-5"
       },
       {
-        "claim": "Ja'Marr Chase entered 2025 as the consensus first overall pick in fantasy drafts.",
-        "source": "Sports Illustrated, \"Fantasy Football's Undisputed No. 1 Pick: Ja'Marr Chase\"",
-        "url": "https://www.si.com/onsi/fantasy/nfl/fantasy-football-undisputed-no-1-pick-ja-marr-chase",
-        "published": "2025-06-16"
+        "claim": "J.J. McCarthy entered 2025 as Minnesota's starter, having missed his entire rookie season with a torn meniscus, only the second first-round quarterback since 2015 not to start a game as a rookie.",
+        "published": "2025-07-14",
+        "source": "Vikings.com, \"2025 Vikings Training Camp Preview: Quarterbacks\"",
+        "url": "https://www.vikings.com/news/quarterbacks-jj-mccarthy-sam-howell-brett-rypien-max-brosmer"
       },
       {
-        "claim": "Emeka Egbuka drew praise from Buccaneers coaches for his route running in 2025 training camp.",
-        "source": "Buccaneers.com, \"Training Camp Takeaways: Emergence of Emeka Egbuka and Tez Johnson, Antoine Winfield Jr. Splash Plays and More\"",
-        "url": "https://www.buccaneers.com/news/training-camp-takeaways-emergence-emeka-egbuka-and-tez-johnson-antoine-winfield-jr-splash-plays-more",
-        "published": "2025-07-25"
+        "claim": "In Travis Hunter's preseason debut on August 9, 2025, he played 10 snaps at wide receiver with the starters and 8 at cornerback with the second team.",
+        "published": "2025-08-09",
+        "source": "The Washington Post, \"Travis Hunter plays offense and defense in pro debut as Jaguars lose to Steelers in preseason\"",
+        "url": "https://www.washingtonpost.com/sports/nfl/2025/08/09/steelers-jaguars-score/"
       },
       {
-        "claim": "Christian McCaffrey was limited to four games in 2024 by calf/Achilles and PCL injuries.",
-        "source": "CBS Sports, \"Christian McCaffrey says he feels 'great' at 49ers minicamp as he returns from injury-plagued 2024 season\"",
-        "url": "https://www.cbssports.com/nfl/news/christian-mccaffrey-says-he-feels-great-at-49ers-minicamp-as-he-returns-from-injury-plagued-2024-season/",
-        "published": "2025-06-11"
+        "claim": "NFL owners voted 22-10 against banning the tush push at the May 2025 spring league meeting, short of the 24 votes needed.",
+        "published": "2025-05-21",
+        "source": "NFL.com, \"NFL owners vote against banning tush push play at Spring League Meeting\"",
+        "url": "https://www.nfl.com/news/nfl-owners-vote-against-banning-tush-push-play-at-spring-league-meeting"
       },
       {
-        "claim": "Saquon Barkley rushed for 2,005 yards in 2024.",
-        "source": "CBS Sports, \"Saquon Barkley surpasses 2,000 rushing yards: Eagles star becomes ninth RB to reach rare season milestone\"",
-        "url": "https://www.cbssports.com/nfl/news/saquon-barkley-surpasses-2000-rushing-yards-eagles-star-becomes-ninth-rb-to-reach-rare-season-milestone/",
-        "published": "2024-12-29"
+        "claim": "Carolina signed Chuba Hubbard to a four-year extension in November 2024 and signed Rico Dowdle, coming off a thousand-yard season in Dallas, in March 2025 free agency.",
+        "published": "2025-03-13",
+        "source": "NFL.com, \"Panthers RB Chuba Hubbard agrees to four-year, $33.2M contract extension\" (2024-11) and ESPN, \"Sources: Free agent Rico Dowdle, Panthers agree to deal\"",
+        "url": "https://africa.espn.com/nfl/story/_/id/44226070/sources-free-agent-rico-dowdle-panthers-agree-deal"
       },
       {
-        "claim": "Bijan Robinson entered 2025 drafts as the top-ranked fantasy running back.",
-        "source": "Yahoo Sports, \"Bijan Robinson's Fantasy Football Outlook For 2025 NFL Season\"",
-        "url": "https://sports.yahoo.com/article/bijan-robinson-fantasy-football-outlook-215435586.html",
-        "published": "2025-08-03"
+        "claim": "Jerome Ford took a pay cut to stay in Cleveland in May 2025 after the Browns drafted two rookie running backs ahead of him.",
+        "published": "2025-05-12",
+        "source": "Pro Football Rumors, \"RB Jerome Ford Agrees To Browns Pay Cut\"",
+        "url": "https://www.profootballrumors.com/2025/05/rb-jerome-ford-agrees-to-browns-pay-cut"
       },
       {
-        "claim": "Derrick Henry rushed for 1,921 yards and 16 touchdowns in 2024, his first season in Baltimore, at age 30.",
-        "source": "NBC Sports, \"Derrick Henry fantasy football preview 2025: Stats, season outlook, predictions\"",
-        "url": "https://www.nbcsports.com/2025-fantasy-football-player-previews/news/derrick-henry-fantasy-football-preview-2025-stats-season-outlook-predictions",
-        "published": "2025-08-05"
+        "claim": "Marvin Harrison Jr. bulked from 209 to 220 pounds for his second season and acknowledged noticing that other rookie receivers out-produced him.",
+        "published": "2025-07-23",
+        "source": "AZCardinals.com, \"Built up to 220 pounds and more relaxed, Cardinals WR Marvin Harrison Jr. confident in Year 2 jump\"",
+        "url": "https://www.azcardinals.com/news/cardinals-wr-marvin-harrison-jr-in-year-2-no-comparison"
       },
       {
-        "claim": "Ashton Jeanty entered 2025 controlling the Raiders' early-down carries, with Raheem Mostert projected only for third-down work.",
-        "source": "NBC Sports, \"Ashton Jeanty fantasy football preview 2025: Stats, season outlook, predictions\"",
-        "url": "https://www.nbcsports.com/2025-fantasy-football-player-previews/news/ashton-jeanty-fantasy-football-preview-2025-stats-season-outlook-predictions",
-        "published": "2025-08-11"
+        "claim": "Malik Nabers called his August back injury a minor thing and was on track for Week 1 without limitations.",
+        "published": "2025-08-27",
+        "source": "ESPN, \"Giants WR Malik Nabers says back injury was 'a minor thing'\"",
+        "url": "https://www.espn.com/nfl/story/_/id/46090251/giants-wr-malik-nabers-says-back-injury-was-minor-thing"
       },
       {
-        "claim": "Travis Kelce's 2024 ended his run of 1,000-yard seasons and left him fifth among tight ends in PPR scoring.",
-        "source": "Sports Illustrated, \"Can Chiefs TE Travis Kelce Bounce Back In 2025 Fantasy Football After A Down Year?\"",
-        "url": "https://www.si.com/onsi/fantasy/nfl/kansas-city-chiefs-te-travis-kelce-bounce-back-2025-fantasy-football",
-        "published": "2025-07-14"
+        "claim": "Buffalo signed Josh Allen, the reigning MVP, to a six-year extension in March 2025 with a record 250 million dollars guaranteed.",
+        "published": "2025-03-14",
+        "source": "Buffalo Rumblings, \"Josh Allen contract details and salary cap information\"",
+        "url": "https://www.buffalorumblings.com/2025/3/14/24385707/josh-allen-contract-details-and-salary-cap-information-2025-yearly-breakdown"
       },
       {
-        "claim": "Jaxon Smith-Njigba caught 100 passes for 1,130 yards in 2024 and became Seattle's clear top target for 2025 after DK Metcalf was traded and Tyler Lockett released.",
-        "source": "CBS Sports, \"Fantasy Football fallout: D.K. Metcalf requests trade, Seahawks cut Tyler Lockett, Jaxon Smith-Njigba a WR1?\"",
-        "url": "https://www.cbssports.com/fantasy/football/news/fantasy-football-fallout-seahawks-to-trade-d-k-metcalf-cut-tyler-lockett-is-jaxon-smith-njigba-a-wr1/",
-        "published": "2025-03-06"
+        "claim": "Ben Johnson, hired as Bears head coach after running Detroit's top scoring offense, called Caleb Williams really locked in after a strong August preseason outing.",
+        "published": "2025-08-17",
+        "source": "NFL.com, \"Ben Johnson praises 'locked in' Caleb Williams after positive preseason outing\"",
+        "url": "https://www.nfl.com/news/ben-johnson-praises-locked-in-caleb-williams-after-positive-preseason-outing"
       },
       {
-        "claim": "Jacksonville traded up from No. 5 to No. 2 to take Travis Hunter, sending Cleveland the No. 36 and No. 126 picks and the Jaguars' 2026 first-round pick, and said it would start him at receiver while working him in on defense.",
-        "source": "ESPN, \"Jaguars trade up to No. 2, pick Travis Hunter in NFL draft\"",
-        "url": "https://www.espn.com/nfl/story/_/id/44841310/jaguars-trade-no-2-pick-travis-hunter-nfl-draft",
-        "published": "2025-04-24"
+        "claim": "San Francisco signed Brock Purdy to a five-year, 265 million dollar extension on May 16, 2025.",
+        "published": "2025-05-16",
+        "source": "The Washington Post, \"Brock Purdy agrees to $265 million contract extension with 49ers\"",
+        "url": "https://www.washingtonpost.com/sports/2025/05/16/brock-purdy-49ers-extension/"
       },
       {
-        "claim": "As of late August 2025 Quinshon Judkins was the only player from the 2025 NFL draft class who had not signed a rookie contract, with the league still investigating and the Browns and player apart on guaranteed money.",
-        "source": "NBC Sports Pro Football Talk, \"Browns have no update on status of unsigned second-round pick Quinshon Judkins\"",
-        "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/browns-have-no-update-on-status-of-unsigned-second-round-pick-quinshon-judkins",
-        "published": "2025-08-23"
+        "claim": "The Jets signed Garrett Wilson to a four-year, 130 million dollar extension in July 2025, and Justin Fields is his quarterback under new coach Aaron Glenn.",
+        "published": "2025-07-14",
+        "source": "NBC Sports PFT, \"Jets, Garrett Wilson agree to four-year contract extension\"",
+        "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/jets-garrett-wilson-agree-to-four-year-contract-extension"
       },
       {
-        "claim": "Washington traded Brian Robinson Jr. to San Francisco on August 22, 2025 for a 2026 sixth-round pick after he fell out of favor, leaving Austin Ekeler, seventh-round rookie Jacory Croskey-Merritt and Chris Rodriguez Jr. in the backfield.",
-        "source": "The Baltimore Sun, \"Commanders trade RB Brian Robinson Jr. to 49ers for draft pick\"",
-        "url": "https://www.baltimoresun.com/2025/08/22/commanders-49ers-trade-brian-robinson/",
-        "published": "2025-08-22"
+        "claim": "San Francisco signed George Kittle to a four-year, 76.4 million dollar extension in April 2025, the tight end record at signing.",
+        "published": "2025-04-29",
+        "source": "ESPN, \"49ers TE George Kittle signs extension through 2029 season\"",
+        "url": "https://www.espn.com/nfl/story/_/id/44915439/49ers-te-george-kittle-says-signed-4-year-764m-extension"
       },
       {
-        "claim": "The Rams released Cooper Kupp on March 12, 2025 after failing to trade him at the $20 million he was owed for 2025, and Seattle signed him to a three-year, $45 million deal.",
-        "source": "ESPN, \"Source: WR Cooper Kupp joins Seahawks on 3-year, $45M deal\"",
-        "url": "https://www.espn.com/nfl/story/_/id/44254640/sources-wr-cooper-kupp-join-seahawks-3-year-deal",
-        "published": "2025-03-14"
+        "claim": "Arizona signed Trey McBride to a four-year, 76 million dollar extension in April 2025, the highest-paid tight end in NFL history at signing.",
+        "published": "2025-04-03",
+        "source": "AZFamily, \"Report: Cardinals' Trey McBride becomes highest-paid tight end in NFL history\"",
+        "url": "https://www.azfamily.com/2025/04/03/report-cardinals-trey-mcbride-becomes-highest-paid-tight-end-nfl-history/"
+      },
+      {
+        "claim": "Justin Jefferson strained a hamstring early in Vikings camp, returned to practice August 18, and was projected back for Week 1.",
+        "published": "2025-08-18",
+        "source": "SI, \"Justin Jefferson Returning to Vikings Practice Ahead of Preseason Finale\"",
+        "url": "https://www.si.com/nfl/justin-jefferson-returning-to-vikings-practice"
+      },
+      {
+        "claim": "PFF's 2025 Cardinals preview quantified Kyler Murray's inconsistency: six games graded above 73.0 producing five wins, eleven below it producing eight losses, and rated James Conner's rushing second in the NFL since 2023 entering his age-30 season.",
+        "published": "2025-08-01",
+        "source": "PFF, \"2025 NFL Preview: Arizona Cardinals\"",
+        "url": "https://www.pff.com/news/nfl-preview-arizona-cardinals-2025"
+      },
+      {
+        "claim": "Brock Bowers set the all-time rookie reception record with 112 catches and made first-team All-Pro as a 2024 rookie.",
+        "published": "2025-01-10",
+        "source": "SI, \"Raiders Rookie Brock Bowers Catches All-Pro Honor\"",
+        "url": "https://www.si.com/nfl/raiders/news/breaking-raiders-rookie-brock-bowers-catches-all-pro-honor-01jh8m2fz9k1"
+      },
+      {
+        "claim": "Tank Dell suffered a dislocated kneecap, torn ACL and additional knee damage in Week 16 of 2024, with serious doubt about his availability for the start of 2025.",
+        "published": "2024-12-23",
+        "source": "SI, \"DeMeco Ryans Confirms Tank Dell Ruled Out for Season With Gruesome Knee Injuries\"",
+        "url": "https://www.si.com/nfl/demeco-ryans-confirms-tank-dell-ruled-out-gruesome-knee-injuries"
+      },
+      {
+        "claim": "Baker Mayfield called rookie Emeka Egbuka an absolute stud in camp, and with Chris Godwin recovering and Jalen McMillan on injured reserve, Tampa Bay planned to lean on Mike Evans and Egbuka early.",
+        "published": "2025-08-19",
+        "source": "Pewter Report, \"Baker Mayfield: 'Emeka Egbuka Is An Absolute Stud'\" (2025-07-25) and SI, \"Buccaneers to Place WR Jalen McMillan on IR to Start 2025 Season\"",
+        "url": "https://www.si.com/nfl/buccaneers-jalen-mcmillan-injury-update"
+      },
+      {
+        "claim": "Detroit's new offensive coordinator John Morton planned to put Jahmyr Gibbs and David Montgomery on the field together after Ben Johnson left for Chicago.",
+        "published": "2025-07-28",
+        "source": "Yahoo Sports, \"Will Lions put Jahmyr Gibbs and David Montgomery on the field together? Here's what John Morton said\"",
+        "url": "https://sports.yahoo.com/article/lions-put-jahmyr-gibbs-david-135941803.html"
+      },
+      {
+        "claim": "Washington's rookie Jacory Croskey-Merritt was a camp standout and scored a 27-yard preseason touchdown, but the Commanders' first post-trade depth chart listed him fourth behind Austin Ekeler, Jeremy McNichols and Chris Rodriguez.",
+        "published": "2025-09-03",
+        "source": "Commanders.com, \"Croskey-Merritt fits the bill as Washington's exciting new RB\" (2025-08-21) and NBC Sports PFT, \"Austin Ekeler tops first post-Brian Robinson backfield depth chart in Washington\"",
+        "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/austin-ekeler-tops-first-post-brian-robinson-backfield-depth-chart-in-washington"
+      },
+      {
+        "claim": "TreVeyon Henderson impressed in his first Patriots camp as a pass catcher, with offensive coordinator Josh McDaniels exploring flexing him out wide.",
+        "published": "2025-07-26",
+        "source": "Patriots.com, \"Rookies TreVeyon Henderson and Kyle Williams Discuss Their First NFL Training Camps\"",
+        "url": "https://www.patriots.com/news/rookies-treveyon-henderson-and-kyle-williams-discuss-their-first-nfl-training-camps"
+      },
+      {
+        "claim": "With Rashee Rice suspended, Kansas City's stated plan was more two-tight-end sets with Xavier Worthy and Tyquan Thornton as the deep threats.",
+        "published": "2025-08-27",
+        "source": "ESPN, \"Why Rashee Rice accepted his six-game suspension now, and how Chiefs will have to cope\"",
+        "url": "https://www.espn.com/nfl/story/_/id/46088297/kansas-city-chiefs-rashee-rice-suspensionsuspended-six-games-reaction"
+      },
+      {
+        "claim": "Carolina drafted Tetairoa McMillan eighth overall as the big, sure-handed target Bryce Young needed.",
+        "published": "2025-07-22",
+        "source": "ESPN, \"Carolina Panthers training camp preview: Bryce Young, Tetairoa McMillan\"",
+        "url": "https://africa.espn.com/nfl/story/_/id/45689171/nfl-carolina-panthers-training-camp-preview-bryce-young-tetairoa-mcmillan"
+      },
+      {
+        "claim": "Brian Thomas Jr. finished his rookie year with 87 catches for 1,282 yards and ten touchdowns.",
+        "published": "2025-07-24",
+        "source": "SI Jaguar Report, \"Liam Coen training camp: Brian Thomas Jr.\"",
+        "url": "https://www.si.com/nfl/jaguars/jacksonville-liam-coen-training-camp-brian-thomas-jr-travis-hunter"
+      },
+      {
+        "claim": "Rome Odunze was Caleb Williams's go-to receiver in mid-August two-minute drills at Bears camp.",
+        "published": "2025-08-14",
+        "source": "ChicagoBears.com, \"Bears training camp report: Thursday, Aug. 14\"",
+        "url": "https://www.chicagobears.com/news/chicago-bears-training-camp-caleb-williams-rome-odunze-august-14-2025"
+      },
+      {
+        "claim": "Jaylen Warren was extended through 2027 and entered the season as Pittsburgh's clear lead back after Najee Harris left for the Chargers.",
+        "published": "2025-09-01",
+        "source": "SteelerNation, \"Steelers' Jaylen Warren Gets Honest About Rookie Kaleb Johnson Threatening His Spot\"",
+        "url": "https://www.steelernation.com/2025/09/01/steelers-jaylen-warren-honest-kaleb-johnson"
+      },
+      {
+        "claim": "Rookie Jaxson Dart threw for 372 yards with three touchdowns and no interceptions in the 2025 preseason and was listed as the Giants' QB2 ahead of Jameis Winston on September 2.",
+        "published": "2025-09-02",
+        "source": "ESPN, \"Rookie Jaxson Dart listed ahead of Jameis Winston as Giants' QB2\"",
+        "url": "https://www.espn.com/nfl/story/_/id/46137733/rookie-jaxson-dart-unofficially-listed-giants-qb2"
+      },
+      {
+        "claim": "Cam Skattebo missed early camp with a hamstring injury, debuted August 21, and was listed third on the Giants' running back depth chart.",
+        "published": "2025-08-21",
+        "source": "Arizona Sports, \"Cam Skattebo makes preseason debut with the New York Giants\"",
+        "url": "https://arizonasports.com/nfl/cam-skattebo-16"
+      },
+      {
+        "claim": "Buffalo signed James Cook to a four-year, 48 million dollar extension in August 2025, ending his hold-in, after he tied for the NFL lead with 16 rushing touchdowns in 2024.",
+        "published": "2025-08-13",
+        "source": "ESPN, \"James Cook, Bills reach 4-year, $48M extension\"",
+        "url": "https://www.espn.com/nfl/story/_/id/45963843/james-cook-bills-reach-4-year-48m-extension-rb-hold-in"
+      },
+      {
+        "claim": "Travis Kelce reportedly lost about 25 pounds entering his age-36 season after a career-worst 2024, and his engagement to Taylor Swift was announced August 26, 2025.",
+        "published": "2025-08-26",
+        "source": "Bleacher Report, \"Chiefs' Travis Kelce Reportedly Lost 'About 25 Pounds'\" (2025-06-14) and CNN, \"Taylor Swift and Travis Kelce announce engagement\"",
+        "url": "https://www.cnn.com/2025/08/26/entertainment/taylor-swift-travis-kelce-engagement"
+      },
+      {
+        "claim": "Jaxon Smith-Njigba entered 2025 as Seattle's unquestioned number one receiver after a Pro Bowl 2024, with Sam Darnold arriving as the starter.",
+        "published": "2025-07-14",
+        "source": "Seahawks.com, \"Top 2025 Training Camp Storylines: Who Steps Up In A New-Look WR Corps Behind Jaxon Smith-Njigba & Cooper Kupp?\"",
+        "url": "https://www.seahawks.com/news/top-2025-training-camp-storylines-who-steps-up-in-a-new-look-wr-corps-behind-jaxon-smith-njigba-cooper-kupp"
+      },
+      {
+        "claim": "De'Von Achane strained a calf in joint practices and was held out preventatively in the week of August 18.",
+        "published": "2025-08-18",
+        "source": "ESPN, \"Dolphins RB De'Von Achane (calf) unlikely to practice this week\"",
+        "url": "https://www.espn.com/nfl/story/_/id/46010058/dolphins-rb-devon-achane-calf-unlikely-practice-week"
+      },
+      {
+        "claim": "Ladd McConkey broke the Chargers' rookie receiving records in 2024, and Keenan Allen returned to the Chargers on a one-year deal in August 2025.",
+        "published": "2025-08-05",
+        "source": "NFL.com, \"WR Keenan Allen returning to Chargers on one-year, $8.5 million contract\"",
+        "url": "https://www.nfl.com/news/wr-keenan-allen-returning-to-chargers-on-one-year-8-5-million-contract"
+      },
+      {
+        "claim": "Baltimore signed DeAndre Hopkins to a one-year contract worth five million dollars.",
+        "published": "2025-03-11",
+        "source": "ESPN, \"Sources: Free agent DeAndre Hopkins, Ravens agree to deal\"",
+        "url": "https://www.espn.com/nfl/story/_/id/44211629/sources-free-agent-deandre-hopkins-ravens-agree-deal"
+      },
+      {
+        "claim": "Seattle signed Sam Darnold to a three-year, 100.5 million dollar contract in March 2025 after his 35-touchdown season in Minnesota.",
+        "published": "2025-03-10",
+        "source": "NFL.com, \"Seahawks signing QB Sam Darnold to 3-year, $100.5 million contract\"",
+        "url": "https://www.nfl.com/news/seahawks-signing-qb-sam-darnold-to-3-year-100-million-contract"
+      },
+      {
+        "claim": "Seattle traded Geno Smith to the Raiders for a third-round pick on March 7, 2025.",
+        "published": "2025-03-07",
+        "source": "The Spokesman-Review, \"Seahawks trade Geno Smith to Raiders for third-round pick\"",
+        "url": "https://www.spokesman.com/stories/2025/mar/07/seahawks-trade-geno-smith-to-raiders-for-third-rou/"
+      },
+      {
+        "claim": "In late August 2025 Lamar Jackson was the MVP favorite at +450 with Joe Burrow second at +600, and Cincinnati's offensive line had rated among the league's worst for four straight years.",
+        "published": "2025-08-20",
+        "source": "ESPN Betting, \"2025 AFC North division betting preview\"",
+        "url": "https://www.espn.com/espn/betting/story/_/id/45956321/2025-afc-north-division-betting-preview-favorites-odds-standings-rankings-props-analysis"
+      },
+      {
+        "claim": "Jets coach Aaron Glenn committed to Breece Hall in August 2025 and emphatically shut down trade talk.",
+        "published": "2025-08-19",
+        "source": "NFL.com, \"Aaron Glenn wants to utilize Jets' three good running backs, not open to trading Breece Hall\"",
+        "url": "https://www.nfl.com/news/jets-aaron-glenn-utilize-three-good-running-backs-not-trading-breece-hall"
+      },
+      {
+        "claim": "Bijan Robinson totaled 1,887 yards from scrimmage in 2024, and Atlanta's stated 2025 focus was more explosive plays.",
+        "published": "2025-06-19",
+        "source": "AtlantaFalcons.com, \"Training camp preview: A look at the Falcons' RB position\"",
+        "url": "https://www.atlantafalcons.com/news/2025-training-camp-preview-falcons-running-backs"
+      },
+      {
+        "claim": "Rookie Tyler Warren was targeted heavily by both Colts quarterbacks through early training camp as a reliable safety valve.",
+        "published": "2025-08-01",
+        "source": "The Washington Post (AP), \"Rookie tight end Tyler Warren is starting to find his fit at Indianapolis Colts training camp\"",
+        "url": "https://www.washingtonpost.com/sports/nfl/2025/08/01/indianapolis-colts-training-camp/f0408b16-6ef4-11f0-aab6-8141d7095676_story.html"
+      },
+      {
+        "claim": "Tyreek Hill had two offseason wrist procedures in 2025, with his camp expecting him ready for training camp.",
+        "published": "2025-05-07",
+        "source": "CBS Sports, \"Dolphins' Tyreek Hill has second wrist surgery of offseason\"",
+        "url": "https://www.cbssports.com/nfl/news/dolphins-tyreek-hill-has-second-wrist-surgery-of-offseason-wr-has-screws-removed-as-part-of-plan-per-report/"
+      },
+      {
+        "claim": "Puka Nacua entered 2025 with Davante Adams arriving as the Rams' other starting receiver after Cooper Kupp's release.",
+        "published": "2025-07-23",
+        "source": "Fox News, \"Expect shiftier Puka Nacua as he takes larger role with Rams in Year 3\"",
+        "url": "https://www.foxnews.com/sports/expect-shiftier-puka-nacua-he-takes-larger-role-rams-year-3.print"
+      },
+      {
+        "claim": "Michael Penix Jr. entered his second training camp locked in as Atlanta's starting quarterback.",
+        "published": "2025-07-21",
+        "source": "SI Fantasy, \"Atlanta Falcons 2025 Training Camp Preview: Will Michael Penix Jr. Elevate Drake London And Kyle Pitts?\"",
+        "url": "https://www.si.com/onsi/fantasy/nfl/atlanta-falcons-2025-training-camp-preview-will-michael-penix-jr-elevate-drake-london-kyle-pitts"
+      },
+      {
+        "claim": "Ben Johnson planned to lean on two-tight-end sets in Chicago, having run 12 personnel at the NFL's third-highest rate in Detroit in 2024.",
+        "published": "2025-08-21",
+        "source": "ESPN, \"Why tight ends Colston Loveland and Cole Kmet could be just what Caleb Williams needs\"",
+        "url": "https://www.espn.com/nfl/story/_/id/46022899/chicago-bears-colston-loveland-cole-kmet-2025-outlook"
+      },
+      {
+        "claim": "Isiah Pacheco entered 2025 in a crowded four-man Kansas City backfield with Kareem Hunt, Elijah Mitchell and rookie Brashard Smith.",
+        "published": "2025-06-27",
+        "source": "Chiefs.com, \"Pre-Camp Breakdown: Breaking Down the Chiefs Running Backs\"",
+        "url": "https://www.chiefs.com/news/pre-camp-breakdown-breaking-down-the-chiefs-running-backs"
+      },
+      {
+        "claim": "A.J. Brown entered 2025 as a three-time All-Pro and Super Bowl LIX champion.",
+        "published": "2025-07-03",
+        "source": "PhiladelphiaEagles.com, \"Eagles 2025 Training Camp Position Preview: Wide Receiver\"",
+        "url": "https://www.philadelphiaeagles.com/news/eagles-2025-training-camp-position-preview-wide-receiver-aj-brown-devonta-smith"
+      },
+      {
+        "claim": "Justin Herbert entered 2025 in his second consecutive year in Greg Roman's offense.",
+        "published": "2025-07-01",
+        "source": "Chargers.com, \"Chargers 2025 Training Camp Preview: How Justin Herbert Can Lead Offense to Another Level in Year 2 of Same System\"",
+        "url": "https://www.chargers.com/news/training-camp-preview-2025-justin-herbert"
+      },
+      {
+        "claim": "Bucky Irving publicly endorsed new Buccaneers offensive coordinator Josh Grizzard, who had worked closely with him as pass-game coordinator during his rookie year.",
+        "published": "2025-06-13",
+        "source": "SI Bucs, \"Tampa Bay Buccaneers star playmakers endorse new OC Josh Grizzard\"",
+        "url": "https://www.si.com/nfl/buccaneers/onsi/news/tampa-bay-buccaneers-star-playmakers-endorse-new-oc-josh-grizzard-mike-evans-bucky-irving-2025"
       }
-    ]
+    ],
+    "subtitle": "Season four in four tiers, from the guy who trusts the points.",
+    "threads": [
+      {
+        "id": "zach-blessed",
+        "note": "The column ranked Zach first and picked him to win the title in writing. By the league's own jinx theology, a public blessing from Blake is an attack. The season grades both the pick and the spell.",
+        "status": "opened",
+        "title": "The Blessing"
+      },
+      {
+        "id": "kittler-repeat",
+        "note": "Three champions in three seasons and nobody twice. Ben is the third man to carry a title into a new year, ranked sixth by his own leaguemate. The column's call is that he does not repeat.",
+        "status": "opened",
+        "title": "The Repeat"
+      },
+      {
+        "id": "db-slot-rules",
+        "note": "Kevin established in February that Sleeper counts a two-way player's receiving production in the DB slot. Nate spent the 1.04 on it. Ben raised deleting the slot outright. The NFL's owners kept the tush push by two votes in May; this league's version is still unscheduled.",
+        "status": "opened",
+        "title": "The DB Slot"
+      },
+      {
+        "id": "hunter-breakeven",
+        "note": "Zach and Harlow agreed a starting DB is worth about ten points a week. Harlow then set Hunter's bar at 15+. Kevin's independent break-even, four catches for sixty yards and 0.4 touchdowns, comes to 10.4 and matches the agreed baseline. The season settles which number was right.",
+        "status": "opened",
+        "title": "Ten Points, Not Fifteen"
+      },
+      {
+        "id": "brent-never",
+        "note": "Brent has run this league since it started and never won it. Over the fourteen weeks that decided the 2024 standings he outscored every team except Zach and finished 7-9. The column ranked him third on the roster Patrick called the league's oldest back in 2023.",
+        "status": "opened",
+        "title": "The Commissioner's Ring"
+      },
+      {
+        "id": "kevin-playoffs",
+        "note": "The column ranked Kevin fifth off a 5-12 season and put the playoff call on the record. His records have run under his rosters for three straight years.",
+        "status": "opened",
+        "title": "Noble Makes the Playoffs"
+      },
+      {
+        "id": "father-time-qbs",
+        "note": "David rosters five quarterbacks in a league that starts one and does not answer trade texts. The column's call: he does not trade a single one before the deadline, and it costs him a playoff spot.",
+        "status": "opened",
+        "title": "Father Time Collects Quarterbacks"
+      },
+      {
+        "id": "harlow-short",
+        "note": "Harlow holds Nate's 2026 first and second, the league's only genuine short position on the guarantee. The column ranked him twelfth and called its own ranking wrong, on the record: Harlow finishes ahead of David.",
+        "status": "opened",
+        "title": "The Short Position"
+      },
+      {
+        "id": "chudders-arrival",
+        "note": "Three years of accumulated capital became eleven picks and the first overall. The column's calls: Chudders is not last, and wins more games than in any season in franchise history.",
+        "status": "opened",
+        "title": "Chudders Cashes In"
+      },
+      {
+        "id": "blake-qbs",
+        "note": "The columnist's four-quarterback room already lost one job before kickoff. His own call, against himself: at least two of the four are not starting NFL games by Thanksgiving.",
+        "status": "opened",
+        "title": "The Quarterback Tax"
+      },
+      {
+        "id": "richardson-receipt",
+        "note": "Nate called the Anthony Richardson pick bad in September 2023 and said it would stay true all year. Indianapolis handed the job to Daniel Jones on August 19. Settled, and conceded in print.",
+        "status": "settled",
+        "title": "The Richardson Receipt"
+      },
+      {
+        "id": "tank-precedent",
+        "note": "The November 2023 tank has never been ruled on because there is no rule. In December 2024 Nate told the room about the all-natural first-year tank job in his Ohio league. The precedent is alive and the man is proud of the craft.",
+        "status": "opened",
+        "title": "No Rule Against It"
+      }
+    ],
+    "title": "Preseason 2025",
+    "type": "preseason"
   },
+  "rankings": [
+    {
+      "blurb": "Tier one is two teams and I own the other one, so let me get the conflict of interest out of the way: I ran the numbers every way I know how this summer and they cannot separate Zach and me, and I am religiously barred from picking myself. So Zach is first, and I mean it, and he is going to hate that I mean it.\n\nHere is what the standings never told you. Over the fourteen weeks that decided the 2024 season, Zach outscored all of us. Not most of us. All of us. Then he lost the final by 5.70 points on a Monday night when his title chances came down to Kaden Ellis against George Kittle, and he handled it better than any of us would have. \"I doomed myself when I pulled Brian burns for deforest Buckner. I put my giant to sleep. You deserve this Ben\". The same night, before the trophy was even engraved, he posted \"I’ve got 4 top 15 RBs and need picks and youth at WR. Open to trades. Let the offseason begin!\" The man grieves in trade ads.\n\nThen he ran the whole thing back, and the league he plays in cooperated. Baltimore handed Derrick Henry a two-year extension in May, the biggest ever given a back past thirty, after Henry put up 1,921 yards at age thirty. The Rams extended Kyren Williams in August off back-to-back 1,100-yard seasons. Josh Jacobs opened Packers camp announcing \"I'm sick\" about not having a trophy. Jalen Hurts is coming off a Super Bowl. Mike Evans needs one more thousand-yard season to pass Jerry Rice, and Rice personally blessed the attempt. Zach's answer, \"Henrys gonna go til he’s 40 tho\", reads like a joke and doubles as the franchise thesis, and every NFL front office that touched his roster this offseason co-signed it.\n\nThe warts are real. Cooper Kupp is in Seattle now catching balls from Sam Darnold, which is also Zach's stack, on purpose, because he cannot help himself. Jordan Addison opens the year suspended three games. The whole build is old enough that a fire sale tomorrow would fetch almost nothing, which is a problem for 2027 and irrelevant to the only question this column ranks on.\n\nSo here is the call, and Zach will recognize it for exactly what it is. Sleeping Giants wins the 2025 title. In writing. On the record. You were destined, buddy.",
+      "owner": "Zach",
+      "rank": 1,
+      "record_2024": "11-5",
+      "team_name": "Sleeping Giants"
+    },
+    {
+      "blurb": "Writing this capsule is a trap and everyone reading it knows why. Zach put my tell, the reverse jinx, on the record back in 2023, so if I talk this roster up I am bragging on my own site, and if I talk it down the room files it as spellwork. There is no version of this paragraph I win. So I will just do the audit.\n\nThe case for: I won the 2023 title, only Zach and Brent outscored me across the fourteen weeks that decided last season, and the wideout room runs six deep. CeeDee Lamb just got handed George Pickens as a running mate, which Dallas paid Pittsburgh real draft capital for in May. Saquon Barkley signed the first twenty-million-a-year running back contract in history off a 2,005-yard season. That is the floor.\n\nThe case against has kept its job for three seasons: the quarterbacks. There are four of them, and the season already benched one. Indianapolis gave Daniel Jones the job on August 19, which closes a receipt Nate opened in September 2023 when he wrote \"Richardson was a bad draft pick. That will be true all year.\" It stayed true for two more years. He was right, I was wrong, and my own verdict is already on the record: \"The Anthony Richardson gamble was a bust\". What remains is Trevor Lawrence learning a new offense under a coach who at least loves his footwork, Drake Maye in year two with Stefon Diggs, and J.J. McCarthy, who has not yet started an NFL game. That quarterback room has a running tab, and December 2024 collected twice inside eight days: the semifinal, then the third-place game, by 17.70 points combined.\n\nThe quarterbacks were not even my worst self-inflicted wound of that season. My son was born in week nine, I left a ruled-out defensive back in my lineup five days later, and Brent, on learning why, announced he would prey on my weakness. Our commissioner, everybody.\n\nSecond and not third because six startable wideouts plus Barkley clear tier two on depth alone, whatever the quarterbacks do. The call, since I am only allowed to make them against myself: at least two of my four quarterbacks are not starting NFL games by Thanksgiving. If the ones still standing give me twenty starts of league-average play, this ranking was a coward's ranking. I am at peace with that.",
+      "owner": "Blake",
+      "rank": 2,
+      "record_2024": "11-6",
+      "team_name": "General Ken-obi"
+    },
+    {
+      "blurb": "Tier two is the win-now wing: two teams built to take the trophy this year specifically, for opposite reasons, with opposite bills coming due.\n\nStart with the fact nobody says to Brent's face because it sounds like flattery: over the fourteen weeks that set the 2024 standings, the commissioner outscored everybody except Zach. More than me. More than the champion. He went 7-9 anyway, a year after riding nearly the same spine to 12-4, and if you can reconcile those two seasons, the standings have a bridge to sell you. Patrick called for this collapse in writing back in 2023, the oldest roster in the league, a future that \"seems inevitable and will be enjoyable for the rest of us\", and two years later the collapse is still in the mail. Brent's rebuttal never changes: \"It gets younger every year\".\n\nIt does not, and he knows it does not, and I rank him third anyway because the points keep being real. \"There’s barely anyone in my starting lineup that I didn’t trade for\" is the most honest self-scout in league history. Lamar Jackson closed August as the MVP favorite. Jaxon Smith-Njigba is the entire Seattle passing game now that the Seahawks handed him the room and a new quarterback. Buffalo just paid James Cook off sixteen rushing touchdowns. Even the punchlines are aging into assets: Nick Chubb, whom Zach declared washed in the middle of the championship game while Brent calmly filed \"Chubb is my rb 4\", signed in Houston for cheap and walked into the starting job the day Joe Mixon hit the reserve list. The man's fourth running back is now an NFL starter.\n\nAnd Travis Kelce turns thirty-six on a roster whose owner has bet against time longer than anyone here. Kelce spent the offseason losing twenty-five pounds and getting engaged to the most famous person alive. If the farewell tour has one great season in it, it happens now, in front of every camera on earth.\n\nThis roster's resale value is the lowest in the league, and Brent would sign that deal again tomorrow. He gave us the investment thesis himself, in writing: \"Live for the now!\" The call: Brent outscores his record again, makes the final, and the ring conversation gets very quiet and very serious around Thanksgiving.",
+      "owner": "Brent",
+      "rank": 3,
+      "record_2024": "7-9",
+      "team_name": "The Boonist Monks"
+    },
+    {
+      "blurb": "The guarantee is the season's premise, so let us price it honestly. It went up on a March night, and Kevin's curse landed before the room went to bed: \"You just officially jinxed yourself with the fantasy gods.\" Between the boast and the curse sits Nate's entire year. And this page's thesis cuts against the favorite too: across the fourteen weeks that decided last season, his scoring ranked fifth while his record tied for second best. Some of that 12-5 was schedule.\n\nThe receivers justify the volume. Ja'Marr Chase signed for 161 million in March, briefly the richest non-quarterback deal ever. Malik Nabers shrugged off an August back scare as a minor thing and was full-go for Week 1. Marvin Harrison spent the offseason getting to 220 pounds and admitting out loud that he noticed Nabers and Thomas out-producing him as rookies, which is exactly the sentence you want from a former 1.01 with something to prove. Trey McBride got paid like the best tight end alive in April. Jayden Daniels throws to all of it. Add Hunter, more on him below, and this is the best collection of pass catchers ever assembled here.\n\nNow the backfield, which is a museum of one man's coping mechanisms. Chuba Hubbard is extended and real, and Carolina still went out and signed Rico Dowdle behind him. Brian Robinson, the player Nate literally named his franchise after in the BROBTIME years, got traded to San Francisco in August to stand behind Christian McCaffrey, and Nate greeted it the only way he knows: \"Dont forget we are 1 cmc calf strain away from.... BROBTIME.\" Then, two nights before kickoff, he bought Jerome Ford out of my bench. Ford is a Brown who took a pay cut in May after Cleveland drafted two rookies ahead of him. That is the room: three depth charts' worth of maybes, in a league that starts two backs and a flex.\n\nAnd the bill from March is still outstanding: the 1.04 that became Hunter cost him his 2026 first and second, and Harlow is holding both. If this season misses, it misses in public, twice.\n\nThe call: Nate leads the league in receiving production and finishes exactly where I have him, one rung off the tier he guaranteed. Trophy or crater was always the design. The difference in December is a hamstring.",
+      "owner": "Nate",
+      "rank": 4,
+      "record_2024": "12-5",
+      "team_name": "MHJTIME"
+    },
+    {
+      "blurb": "Tier three runs from here through Karim, and I want to be straight about what it is: six teams the math cannot tell apart. I ordered these six every way I could think of and got a different answer every time. The order below is my judgment, and I expect to be yelled at, which is the point of publishing.\n\nKevin at five off a 5-12 season is the rank I will defend the hardest. This is the roster the standings have been slandering for years, and the room knows it even while it laughs. Bijan Robinson is coming off 1,887 total yards and Atlanta spent the offseason saying the word explosive. Breece Hall's new coach shut down trade talk in August with an emphatic on-record refusal. A.J. Brown is a three-time All-Pro fresh off a Super Bowl. Tee Higgins got 115 million to stay the best second receiver alive. Tyler Warren, the rookie tight end, spent Colts camp as the safety valve for both quarterbacks. And Caleb Williams gets Ben Johnson, the man who ran Detroit's offense, telling reporters in August that his quarterback was locked in. That is one calendar year of NFL front offices investing in Kevin's starting lineup, one franchise at a time.\n\nThere is also this, and I checked it twice because I did not believe it. A week before kickoff, Dallas traded Micah Parsons to Green Bay, where he signed the largest non-quarterback contract in NFL history. We start a linebacker. Parsons is Kevin's linebacker. The room's entire live reaction was two messages. David surfaced to declare \"Jerry Jones is my favorite 49ers supporter!\", Ben answered \"Love that guy\", and the chat moved on. Nobody mentioned that the best defensive player of his generation had just become the highest-paid defender alive while sitting on Kevin's roster, where he has been all along. That is the Kevin experience in miniature: the joke goes by, and the quiet man in the corner is holding the punchline. Somewhere in the middle of all this he also started a hot sauce company, announced in April to \"Friends and league members (and Nate)\", a salutation that is its own scouting report.\n\nThe call: Kevin makes the playoffs from fifth, and the man who wrote \"Rice for Mclaurin will haunt me the rest of my days\" finally gets a December that owes him nothing.",
+      "owner": "Kevin",
+      "rank": 5,
+      "record_2024": "5-12",
+      "team_name": "Noble FFT"
+    },
+    {
+      "blurb": "Yes. Sixth. The defending champion, sixth. I will now show my work, because Ben has earned the respect of being argued with instead of crowned.\n\nThe championship was real and the final was a classic, 182.28 to 176.58, the closest title game we have ever played, settled by his franchise namesake on a Monday night. \"All comes down to my team’s namesake to take me to the promised land. Wouldn’t have it any other way.\" Then \"Finallllllyyyy!\", then a superstitious little question about the payout he had been too scared to ask all night, then the updated tally, with Karim's asterisk lovingly preserved. Nobody has ever won this league more quietly or more completely.\n\nBut the column's one job is next season, and the numbers under the crown are ordinary. Three teams outscored Ben across the fourteen weeks that decided the 2024 standings. He wrote his own scouting report two years ago, \"Im just extremely skilled at getting incredibly lucky\", and I remind you he meant it as analysis. The champion's offseason was the same as every Ben offseason, which is to say nearly silent. Joe Burrow opens the year second in MVP odds behind an offensive line Vegas politely calls a problem. Jonathan Taylor now takes handoffs from Daniel Jones. Puka Nacua gets Davante Adams across from him and a bigger role. Garrett Wilson got 130 million from the Jets and Justin Fields at the same time. George Kittle got extended at thirty-one, which matters to a franchise literally named after him. It is a good roster. It was a good roster last year. Good rosters finish sixth when the schedule stops doing favors.\n\nAnd history is against him in a way this league has felt personally. Karim carried a title into 2023, earned a first-round bye, and still lost twice in December. I carried one into 2024 and did the exact same thing. Nobody has repeated. Standing still after winning is either supreme confidence or a man who knows his luck is a skill and dares not touch anything.\n\nThe call, same as it was before I liked him this much: Ben does not repeat. The only man to play in all three finals gets to be furious about this ranking from inside the playoffs, which is exactly how he would want it.",
+      "owner": "Ben",
+      "rank": 6,
+      "record_2024": "13-3",
+      "team_name": "Kittler on the Roof"
+    },
+    {
+      "blurb": "Patrick invented this column's format two years ago, when he ranked all twelve of us twice, once for the present and once for the future, and I am stealing it because he was right: they are different questions. His team is the proof. Present, seventh. Future, top three and maybe better.\n\nThe patient man is holding damaged goods this September. Quinshon Judkins went at 1.07 on the draft's second night, and the arrest hit the chat twenty hours later, the slow-draft nightmare the league had voted for arriving right on schedule. As I write this the charge has been declined and the contract still has not been signed. Then Rashee Rice's six-game suspension landed in August, complete with a guilty plea and thirty days of jail attached. Patrick's live reaction remains the driest thing typed all summer: \"omg Rashee Rice was suspended no way I had no idea that was possible I am 100% shocked\". Those are his two most interesting assets and neither is available in September.\n\nHe can afford the wait because he already paid for the lesson. He told us in 2023 about his other dynasty league, all-in for two years, top dog both regular seasons, no title, complete shambles. That kind of tuition buys a man his patience.\n\nMeanwhile the load-bearing pieces are outstanding. Josh Allen is the reigning MVP with a quarter-billion guaranteed, purchased, per the man himself, so he could stop rooting for the Chargers: \"Big motivating factor for me was to cut ties with chargers\". A man bought the best quarterback in football as a divorce settlement from his own fanbase. De'Von Achane's August calf strain was handled with kid gloves. Bucky Irving's new coordinator is the guy who coached him up as a rookie. The stable runs five deep behind them.\n\nThe call: Patrick is above .500 the week Rice comes back. If he is, the six weeks of waiting were the cheapest contention window anyone here has ever bought. If he is not, fifth in the 2024 standings was this team's ceiling and the shambles found him anyway.",
+      "owner": "Patrick",
+      "rank": 7,
+      "record_2024": "10-6",
+      "team_name": "Rasheeing the Scene"
+    },
+    {
+      "blurb": "I have argued myself into every rank from second to tenth for this team, which has never happened to me before and tells you more about Chudders than the eight does.\n\nThe haul is real. Eleven picks, headlined by Ashton Jeanty at the 1.01, who went sixth overall to the Raiders and was handed a backfield. Emeka Egbuka at 1.05, whom Baker Mayfield spent camp calling an absolute stud while injuries cleared Tampa Bay's receiver room for him. Colston Loveland at 2.01, the tenth pick in the NFL draft, walking into a Ben Johnson offense that lives in two-tight-end sets. Jahmyr Gibbs was already here, and Detroit's new coordinator says the plan is Gibbs and Montgomery on the field together. Justin Herbert gets a second straight year in the same offense. That is a genuinely frightening core, and outside the quarterback none of it is older than twenty-three.\n\nThe case for eight instead of five is that rookies miss, and Matt knows it better than anyone, because the league watched Jeanty's preseason debut go for minus one yard on three carries and reacted the way we react to everything Chudders. The case for eight instead of eleven is that this rebuild has already survived its darkest timeline. Two last-place scoring seasons in three years bought this draft class. His July self-portrait as the Kevin Costner of this draft was a bit that keeps getting truer.\n\nOne receipt to carry into the season: Nate has been short Jacory Croskey-Merritt since August, telling Matt to be \"sell sell selling JCM aka BiLL\", and Washington's first September depth chart listed Bill fourth even after they traded Brian Robinson away to clear the room. Somebody is going to be very right by October.\n\nTwo calls, because this team finally deserves the respect of real ones. Chudders is not last. And Chudders wins more games than in any season in franchise history, which sounds grand until you remember the record to beat is six.",
+      "owner": "Matt",
+      "rank": 8,
+      "record_2024": "6-11",
+      "team_name": "Chudders Football Team"
+    },
+    {
+      "blurb": "Oscar's roster is a garage sale of other franchises' decisions, and I mean that with admiration. Seattle sold DK Metcalf to Pittsburgh for a second-round pick; he immediately signed for 150 million and gets Aaron Rodgers at forty-one. San Francisco sold Deebo Samuel to Washington for a fifth. Kansas City's suspension problem just made Xavier Worthy the deep threat of the defending AFC champions for six weeks, a development Oscar prepared for years ago with the finest scouting note ever filed here: \"Extremely valuable scouting note you won’t get anywhere else: Xavier worthy is fast\". Buying what other teams quit on is a real strategy with one failure mode, which is that sometimes they quit because the player is cooked, and you cannot tell from the receipt. Tank Dell's knee is the grim version of that sentence.\n\nBut the spine of this team, for the first time, is stuff Oscar drafted himself. Omarion Hampton went 1.02 here and 22nd overall to the Chargers, where the veteran ahead of him opened camp on the injury list because of a fireworks accident, of all the ways to inherit a job. TreVeyon Henderson arrived at 1.06 while Oscar was in a work fire drill, courtesy of the clock, and the accidental prize aged well fast: New England's coordinator spent camp flexing Henderson out wide to hunt matchups. Brock Bowers caught 112 balls as a rookie, the most by any rookie ever at any position. That is a first-team All-Pro and two first-round backs, none of it secondhand.\n\nThe quarterback room is C.J. Stroud, Justin Fields and Michael Penix, and Oscar has already picked his faith: \"It’s finally his year.  Penix about to pop off\" is the official religion of a 3-13 franchise, and Atlanta at least agrees enough to have Penix locked in as the starter.\n\nThe call: Oscar finishes ahead of at least two teams ranked above him on this page, and he will be the first to remind me which two.",
+      "owner": "Oscar",
+      "rank": 9,
+      "record_2024": "3-13",
+      "team_name": "Ghastly Grayskull Gang"
+    },
+    {
+      "blurb": "Karim owns the two loudest single data points in league history and the widest gap between best case and likely case on this page.\n\nData point one: the 2022 banner, which is real no matter how many asterisks Ben glues to it. Data point two: week eleven of last season, when he hung 248.26 on Kevin, the highest score any of us has ever posted. It was so undeniable that both keepers of the league's records stood down on the spot. Zach: \"Congrats Karim. No asterisk there. Just an all time week\". Ben, of all people: \"Even I will admit there's no asterisk on that monster week 🫡\". Karim's acceptance speech, naturally: \"From hence forth I am forever the weekly champion\". Ben's contribution was to muse that his own team would have found a way to put up 249 had he been the opponent that week, and Zach priced the miracle exactly: \"Probably 248.27\". One hundredth more than required. The entire Ben religion in a decimal.\n\nHe also collected the offseason's only cease-and-desist. He drafted Cam Skattebo the day after Nate traded away the chance, floated \"Shall I change my team name to #SKATTABOTIME?!?!\", and then pushed his luck with #THORTONTIME until Nate's lawyers, per Nate, got involved. The suffix is Nate's registered trademark from the BROBTIME years, which is exactly why Karim keeps borrowing it.\n\nThe roster that produced that night still photographs like a contender. Amon-Ra St. Brown, pried out of Oscar in the November trade that reset both franchises. Mahomes, whose offense spends October without Rashee Rice and openly plans to go deep more. Waddle, due a bounce-back with Tyreek's wrist rebuilt. And Christian McCaffrey, fully cleared in July after playing four games last year, managed all camp on scripted rest days by a coaching staff that says out loud it must protect him from himself. San Francisco was worried enough about the room behind him to trade for Brian Robinson in August.\n\nThat last sentence is the whole ranking. When McCaffrey plays, this team's ceiling is the record book, see above. The floor is 2024, when the ceiling appeared for exactly one November evening and the rest was a 7-9 shrug. Tenth is what a medical file is worth. \"Champs don’t calculate\" is the counterargument and honestly it has won before.\n\nThe call: fifteen McCaffrey games makes this ranking look three spots too low, and Karim gets to say so all winter, from the UK, with interest.",
+      "owner": "Karim",
+      "rank": 10,
+      "record_2024": "7-9",
+      "team_name": "The Legion of Bouz"
+    },
+    {
+      "blurb": "Tier four is two franchises whose best season is not this one, and they know it.\n\nThe joke wrote itself in 2023: the team was named Father Time because it was genuinely old, second oldest in the league by Patrick's audit, and its signature move was overpaying for Brock Purdy, which Karim graded as \"a Purdy pile of trash\". Two years later the man they mocked for buying Purdy watched San Francisco hand the same quarterback 265 million dollars in May. David is a 49ers fan. He has never once said I told you so, which somehow makes it worse for everyone. The man types like he is signing documents. \"Ooo I guess I Win; sorry Karim\" is his idea of trash talk, semicolon included.\n\nNow look at the roster. Brian Thomas Jr. put up 87 catches and 1,282 yards as a rookie. Ladd McConkey broke Keenan Allen's Chargers rookie records. Rome Odunze spent August as Caleb Williams's two-minute-drill security blanket. Tetairoa McMillan went eighth overall to Carolina as exactly the big target Bryce Young was missing. The oldest-named franchise in the league quietly assembled the youngest great receiver collection any of us has ever held, and Zach called the strategy in real time: \"Burgers got the blueprint quietly over there. Stacking young wideouts for 2-3 years\". Brent's version was blunter: \"Burger is wide receiver island\".\n\nThe island has no bridge. Three running backs, total, in a league that starts two plus a flex. Nate is running the same wideout-rich, backfield-poor experiment seven spots up this page, and the gap between them is instructive: Nate's receivers are finished products with a proven quarterback attached, and Nate answers the phone. The best of David's three backs, Jaylen Warren, at least enters the year as Pittsburgh's lead back for the first time. Five quarterbacks for one slot, including two rookies from the same class, one of whom, Jaxson Dart, torched the preseason and got named QB2 in New York while Shedeur Sanders sat fourth string behind a forty-year-old. The surplus is the most obviously tradeable thing in the league, owned by the one man who does not answer the phone. Patrick has tried. Nate has tried. The island does not take calls.\n\nThe call: David does not trade a single quarterback before the deadline, and it costs him a playoff spot. The fortune still lands in 2027, right on schedule, and he will greet it with a semicolon.",
+      "owner": "David",
+      "rank": 11,
+      "record_2024": "7-9",
+      "team_name": "Father Time"
+    },
+    {
+      "blurb": "Twelfth, by a hair, and it is the first ranking on this page I would trade back.\n\nStart with what Harlow actually is, because the team name, a three-way pun on his rookie haul of Luther Burden, Trevor Etienne and Woody Marks, undersells him: the most rigorous evaluator in this league. He sets numeric bars. He once accepted a trade he did not even want just to see if the other man would honor his own offer. When a rule the league had voted in earlier that season was used to force his hand in a lost December, he pointed out, correctly, that he was the one soaking in everyone else's mess, \"I’m just sitting downstream drinking in the sewer water of your tanking ramifications\", then said \"But I’m an honorable person and will do it\", and complied. The man's process is cleaner than his luck.\n\nAnd the luck has been biblical. He was the March seller who handed Nate the 1.04 for a package fronted by Rhamondre Stevenson, and his stated price tells you he was playing a longer game: \"Mondre was a throw in, next years 1st was the cornerstone for me\". Kevin scored the bout in real time, \"Congrats Harlow, you’ve won the trade\", and here is the thing: if the guarantee craters, Kevin is right forever. Harlow holds Nate's 2026 first and second. He is the only man in this league with a genuine short position on the season's loudest bet, and shorts pay best in a crash.\n\nThe 2025 lineup is why he is down here anyway. Justin Jefferson, the best player on the roster, spent camp nursing a hamstring and gets a first-time starter at quarterback. Brandon Aiyuk opens on the reserve list until at least October. George Pickens is the upside swing, freshly moved to Dallas across from CeeDee Lamb in a contract year. The backs are James Conner, entering his age-thirty season off genuinely elite tackle-breaking numbers, and Isiah Pacheco in a four-man Kansas City room. The quarterbacks are Kyler Murray, who gave Arizona six games of genuinely high-level play last year and won five of them, against eleven lesser ones that produced eight losses, and Tua. It is a roster of real names one year early or one year late, which has been Harlow's whole story here.\n\nThe call, against my own order: Harlow finishes ahead of David, and I spend the winter explaining why I ranked the short position last.",
+      "owner": "Harlow",
+      "rank": 12,
+      "record_2024": "6-10",
+      "team_name": "Burden of Etienne-y Woody"
+    }
+  ],
   "sections": [
     {
       "id": "cold-open",
-      "title": "Season Four",
-      "placement": "before_rankings",
       "paragraphs": [
-        "Three seasons, three champions, and Ben in all three finals. Karim took the first one off him 154.62 to 95.38. Blake took the second 163.86 to 149.56. Last December he finally got one, 182.28 to 176.58 over Zach, the closest final this league has held.",
-        "Nobody here has won it twice, and it has not been for want of chances. Karim came back the next season and was knocked out in December. Blake came back last season and lost twice in December, the semifinal and then the third place game. Ben walks in third to try it.",
-        "What he is defending against no longer resembles itself. Zach rosters thirteen receivers, four of whom were first round fantasy picks once and mostly will not be again. David rosters three running backs and four defenses. Nate paid his 2026 first, his 2026 second and Rhamondre Stevenson for one rookie who plays two positions, and Jacksonville paid roughly the same freight for the actual player. Matt has Jahmyr Gibbs and Ashton Jeanty and a receiving corps of rookies. Kevin has thirty six players, seven of them tight ends, and a lineup starts one. Ben has to beat all of that with a roster he barely touched.",
-        "The summer that produced these teams was not, for the most part, spent on them. Kevin launched a hot sauce company in April and Patrick opened a law practice the same month. Brent spent a weekend at a festival and filed reviews. Karim answered the board hours late from another time zone, and Oscar lost a first round pick outright to a work emergency. The decisions below were made in the gaps."
-      ]
+        "This league has always written its own power rankings. Karim graded us all by type of garbage. Ben gave every team a Reason for Hope and a Reason for Despair. Zach addressed his like a will. Patrick ranked every roster twice, now and five years out. Oscar handed out power levels from sacko to lich king. I buried all twelve of us in Thanksgiving metaphors in 2023, a piece of writing I would pay real money to un-publish. The tradition survived me. Now it lives here.",
+        "So, season four. Three seasons, three champions, none of them twice. Ben finally broke through last December in the closest final we have ever played, 182.28 to 176.58 over Zach, and became the third man to try defending a title, after Karim could not and I could not. The offseason that followed produced 182 transactions, an eleven-day rookie draft, one arrest, one motion against the commissioner that never found a second, and one cease-and-desist letter over a hashtag. Dues are $250 now, collected on the honor system, and Matt has already told us where the money goes: \"I accepted long ago that all our dues were used to purchase SOL\".",
+        "Here is what I finally understood this summer, after three years of squinting at our standings: they are lying to us. Brent went 7-9 last season while outscoring everybody but Zach across the fourteen weeks that decided the year. Kevin went 5-12 with a starting lineup the NFL spent the whole offseason extending and building around. Ben went 13-3 while three of us outscored him. Our records are the points plus a coin flip, and I am done ranking the coin.",
+        "So this year the rankings come in four tiers, because pretending I can order the middle of this league is exactly the kind of confidence the last three seasons have punished. Where the future disagrees with the present, I will say so out loud, an idea I stole from Patrick's 2023 edition, the way everything good here eventually gets stolen. The scoreboard for the order itself is the only one that matters: who is most likely to win this season.",
+        "And over all of it hangs one sentence, typed into the chat on a March night by a man who had just paid his 2026 first, his 2026 second and a starting running back for the right to chase it: \"do yall understand im about to win a Jailyard fantasy football championship in 2025?\" Kevin cursed it the same night. The rest of us get eighteen weeks to find out whether the fantasy gods take the case.",
+        "Positions below. Several will look stupid by Halloween. That is the job."
+      ],
+      "placement": "before_rankings",
+      "title": "Season Four"
     },
     {
       "id": "draft-diary",
-      "title": "Eleven Days in July",
-      "placement": "after_rankings",
       "paragraphs": [
-        "The league voted to run its first slow draft, twelve hours a pick, and then found out what a twelve hour clock actually does. It makes waiting worth something. Blake said so out loud while the room complained about his pace: “I’m def taking every minute. I still have to start my research”. Nobody was persuaded. Matt had been ready since January, having diagnosed himself in April (“im so over prepped its probably detrimental”) and described his July with total accuracy: “I'm literally Kevin Costner in Draft Day right now”. Brent narrated the delay live: “Most anti climatic start to a draft in history”.",
-        "What the clock did first was redistribute sleep. Matt, holding the 1.01 and unable to do anything with it, filed the grievance on behalf of everyone at the front of the order: “Karim and Brent sleeping peacefully. Meanwhile those of us with action in 1st haven’t slept for days”.",
-        "Then Patrick took Quinshon Judkins at 1.07 and, a day later, the Browns rookie was arrested in Florida on a misdemeanor domestic violence battery charge. Waiting stopped being a personality trait. Zach saw it immediately: “Ooooff. That’s the risk of starting the draft so early”. Blake, on the clock at that exact moment, spoke for everyone still holding a pick: “Yeah you guys suck for doing this”, and later put the principle plainly: “Never know when the next story like Judkins will hit the wire”. Nine days of draft were left, and every owner in it had just watched a first round pick change value overnight.",
-        "Then Patrick took Quinshon Judkins at 1.07 and, a day later, the Browns rookie was arrested in Florida on a misdemeanor domestic violence battery charge. Waiting stopped being a personality trait. Zach saw it immediately: “Ooooff. That’s the risk of starting the draft so early”. Blake, on the clock at that exact moment, spoke for everyone still holding a pick: “Yeah you guys suck for doing this”, and later put the principle plainly: “Never know when the next story like Judkins will hit the wire”. Nine days of draft were left, and every owner in it had just watched a first round pick change value overnight.\n\nThe man who took it hardest owned none of it. Nate is the league’s only Browns fan. “Unreal. Fucking browns”, he typed, which is the entire history of that franchise, and David offered the only consolation available: “Least you get a new stadium…”.",
-        "The clock collected from everyone else too. Oscar lost the 1.06 outright when a work emergency ran his twelve hours out and the auto draft chose for him. Three picks later Blake, the format’s loudest defender, fat fingered Kaleb Johnson at 1.09, asked for it back, studied the board while the room argued about whether he could have it, and withdrew the request: “Actually looking at everyone, I’m good”.",
-        "The only rule the format could not enforce was the one the league invented itself. Kevin held the compensatory 2.13 that goes to the winner of the losers bracket and made the mistake of naming his target out loud, which is how Matt came to set the protocol in one line: “okay so we all just dont pick ferguson”. Zach called the ending two days early (“This is gonna get dicey when someone accidentally autodrafts Ferguson”) and was wrong about a single word. David took Terrance Ferguson on purpose, in the open, without comment. Kevin’s alarm was immediate (“Violation!”) and his incident report was better: the culprit “Sprinted that pick to the podium”. A commissioner then reversed a draft pick by decree inside ninety minutes, and the league spent part of an afternoon adjudicating the ownership of a tight end, and awarded him to Kevin, who now rosters seven of them."
-      ]
+        "The league voted for its first slow draft, twelve hours a pick, and I treated the clock as a feature. My reasoning eventually went on the record: \"It's supposed to be a slow draft and every minute you can delay a pick is advantageous. Never know when the next story like Judkins will hit the wire\". By the time I typed that, the strategy already had its body count, and the body was Patrick's.",
+        "The wire went off on the third night, hours after Patrick's 1.07 was already locked. Oscar posted it first: Quinshon Judkins, arrested, unsigned, Cleveland. Patrick had drafted him roughly twenty hours earlier and signed off with \"Now I can go to bed\". Zach said the quiet part for everyone: \"Ooooff. That’s the risk of starting the draft so early\". Karim reposted the same story at his London breakfast, hours stale, and Brent filed it under \"Typical British behavior\". Nate, campaigning as ever against the men who burn the full clock, turned the arrest into an argument: \"Browns didn't have the luxury of waiting until week 1 of the nfl season to decide on judkins. Same in dynasty.\" Patrick's epilogue came in August when prosecutors declined the case: \"Thank god my top pick is not a criminal, probably just a huge piece of shit of a guy.\" The contract, as I write this, remains unsigned.",
+        "Matt owned the 1.01 and had been on the clock in spirit all offseason. \"I'm literally Kevin Costner in Draft Day right now\", he announced, fielding calls, while Harlow coached the room from the cheap seats: \"Lowball his ass\". Matt took Jeanty. Oscar took Omarion Hampton at 1.02 on purpose, a distinction that matters because at 1.06 he was in a work fire drill and the clock took TreVeyon Henderson for him. His scouting report on his own auto-pick is the most honest sentence in draft history: \"Wasn’t the guy I would have taken but probably going to be my best player now\". David, surveying all of this from the island, asked the only question that needed asking: \"Are we getting another auto draft?\"",
+        "I would like to skip the next part but the record is the record. At 1.09 I fat-fingered Kaleb Johnson, demanded an undo, studied the board while the league enjoyed itself, and issued the greatest walk-back in draft history: \"Actually looking at everyone, I’m good\". The misclick made the pick. Analytics.",
+        "Then came the Ferguson Violation. Kevin's consolation-bracket prize, a compensatory 2.13, had no slot on the Sleeper board, so he called his pick out loud, \"Rams tight end t ferguson\", and the room agreed to work around it. Matt set the protocol: \"okay so we all just dont pick ferguson\". Zach saw the future: \"This is gonna get dicey when someone accidentally autodrafts Ferguson\". He was wrong only about the accidentally. David, the quietest man in the league, read the board, understood precisely what was sitting on it, and took Terrance Ferguson on purpose. Kevin's scouting desk: \"Sprinted that pick to the podium\". Karim went straight to sentencing: \"Fine him!\" Brent reversed the pick by hand, with no rule to cite, because there is no rule. It remains the only ruling in league history that moved a player from one roster to another. Nate's response arrived the following evening: a formal motion to challenge Brent for the commissionership in 2026, which needed two seconds to reach a vote and collected zero, plus one \"Nay\" from Kevin an hour after the point was moot.",
+        "Eleven days, seventy-two picks, one arrest, zero friendships forfeited. Matt's wife met Patrick Surtain at a conference mid-draft and Matt had her scout his own pick in person, which is the most Chudders sentence ever written and also, technically, the league's first field report."
+      ],
+      "placement": "after_rankings",
+      "title": "Eleven Days in July"
     },
     {
       "id": "hunter-hearing",
-      "title": "The Travis Hunter Problem",
-      "placement": "after_rankings",
       "paragraphs": [
-        "This league starts a defensive back, and the defensive back is the cheapest thing in the lineup. Travis Hunter arrived in Jacksonville promising to play both ways, and through training camp the Jaguars held to it, running him at receiver and at cornerback in the same practices. Sleeper, facing a player without a precedent, listed him at both DB and WR. So a real NFL receiver might be startable at the position nobody wants to spend on, and Nate paid the 1.04 to find out what that is worth.",
-        "The objections were good. Karim went straight to the invoice: “You just used a first on a db Nate”. Brent found the only precedent available, and it is the right one: “Yeah this 6’1 195 lb kid is gonna play both ways in the nfl”, then “When Charles Woodson couldn’t”. Harlow did the arithmetic in public, because decent defensive backs already produce like second receivers: “He needs to average 15+ to be better than good DB IDP’s”. And Kevin found the detail that decides it, since tackles are the one defensive category a corner can produce every week: “He intentionally avoids tackling.” Interceptions and breakups still pay, and this league gives two points for a breakup, but they arrive in clusters nobody can schedule. Take the tackles away and the receiving line has to carry all of it.",
-        "Nate’s response to being outnumbered was to go find a witness who agreed with him. He consulted the most agreeable expert available and reported back: “ChatGPT doesn't lie. I told it I can use thunters offensive stats in my db slot....” Ben, who is not in the habit of correcting anyone, made an exception: “I’m actually mostly with you on Hunter’s value, but just for the record, ChatGPT lies all the time lol”. Kevin added the footnote: “It’s also very sycophantic”. Nate switched engines. Kevin updated the threat assessment accordingly: “Uh oh, Nate’s weaponizing Grok. Mail him the trophy now Ben”.",
-        "What should worry the eleven teams that passed is who quietly agrees with him. Zach crossed over completely (“I hate to say it but I’m with Nate on this one”), proposed abolishing the DB slot for next season in the same breath, and admitted he intends to buy the player eventually anyway. Ben, who had already explained the mechanic more clearly than its owner (“He also doesn’t need to play much on defense to still be classified as a DB.”), sketched the endgame without raising his voice: “But we can also always just collude against Nate and get rid of the db spot if it becomes too much of a cheat code”. The reigning champion thinks Nate might be right, and thinks the answer to that is a rule change. Nate’s own last word, filed on kickoff eve off a Jaguars post, was less measured: “OMG THUNTER going for 1400+yds as a rookie WR this year!!!!”"
-      ]
+        "The best argument this league produced all year happened on a Friday afternoon in July, and one piece of history explains the heat: nobody in this league has ever traded a kicker, a defense, or an IDP player. Not once. Those slots have no market because the waiver wire restocks them for free every Sunday morning, which is correct pricing. Then Jacksonville drafted a first-round talent Sleeper tags as both WR and DB, the one player those slots have ever produced that another owner might genuinely covet, and the room had to invent a price in real time.",
+        "Kevin found the door in February, five months before anyone walked through it: \"Sleeper will count Travis hunter’s offensive stats when he’s in the DB slot. Official\" He even filed the definitive scouting line: \"He’ll be Jalen Ramsey but with the talent Jalen Ramsey thought Jalen Ramsey had\". Then July came, Nate spent the 1.04 on the loophole Kevin had posted, and Kevin spent the rest of the summer arguing against acting on his own discovery, which deserves some kind of award.",
+        "The afternoon itself produced actual analysis. Brent asked the right question: \"If he doesn’t play much at db then what’s his value as a db on ur roster\". Zach answered with a number: \"You have a DB who gets 10 points a game on offense\". Harlow confirmed the baseline, \"10 points is pretty standard for a DB\", and Brent, who concedes more gracefully than his reputation allows, gave it an \"Ah that’s fair\". Ten points. Three men agreed, out loud, on what an ordinary starting DB hands you for free.",
+        "Then Harlow set the bar at \"He needs to average 15+ to be better than good DB IDP’s\", half again the number he had just called standard, and nobody flagged the gap. Nobody except Kevin, who did the arithmetic instead of the vibes: \"He needs to average 4-60-0.4tds to be worth it as a DB play\". Run that line through our scoring and it lands at 10.4, almost exactly the baseline Zach and Harlow had named. The sharpest skeptic in the league asked the pick to clear a bar it never needed to clear, and the man who got the number right spent the whole afternoon on the other side of the trade. Kevin's real objection is the one that survives: \"He doesn’t tackle either. So no points from that. Only INTs\". Tackles are the one thing a cornerback produces every single week. Nate sold a floor to buy a ceiling, which, to be fair, is the same trade he makes everywhere.",
+        "The first evidence is already in, in miniature. In Hunter's preseason debut, Jacksonville played him ten snaps at receiver with the starters and eight at corner with the backups. The experiment is live, on television, weekly.",
+        "And then the conversation stopped being about football, which is when it got interesting. Ben, the sitting champion, put the endgame in writing: \"we can also always just collude against Nate and get rid of the db spot if it becomes too much of a cheat code\". Nate's reply was the most honest thing he said all summer: \"However I didn't calculate yall turning on me and getting rid of db slots!\" If that sounds far-fetched, consider that the actual NFL spent this spring trying to do the identical thing to Philadelphia. The Packers proposed banning the tush push, a legal play that one team is simply better at than everyone else, and in May the owners fell two votes short of outlawing it. Legislating away another man's edge is a grand old football tradition. Nate is one bad December and eleven votes from finding out how it feels.",
+        "For the record, the argument was also conducted with expert witnesses. Nate consulted the most agreeable authority available: \"ChatGPT doesn't lie. I told it I can use thunters offensive stats in my db slot....\" Ben, concurring in part: \"ChatGPT lies all the time lol\". Kevin, footnote for the ages: \"It’s also very sycophantic\". The season will not resolve which of them is right about the machines. It will absolutely resolve who was right about the corner."
+      ],
+      "placement": "after_rankings",
+      "title": "What a Defensive Back Is Worth"
     },
     {
-      "id": "superlatives",
-      "title": "The Offseason Trophy Case",
+      "id": "the-tank",
+      "paragraphs": [
+        "Every running joke in this league eventually routes back to November 2023, and most of us now tell it in shorthand. Here it is in full one time, because season four cannot be understood without it.",
+        "Nate was 3-5 with his season slipping. He drew David that week. He benched his starters. Zach called it live: \"Solid intentional tank by Nate against burger this week. May have just earned himself the number 2 pick\". Patrick, who does not raise his voice, raised it: \"Oh, snap, when people said Nate was tanking today, I didn’t think he was actually doing it\", followed by the institutionalist's objection, \"Obvious reason #2 why tanking sucks. It inequitably impacts playoff and playoff seeding races\". Kevin filed the coldest line in league history: \"Last season we tanked with class\". Oscar made it permanent in his power rankings with \"a curse upon BRO\". And Ben wrote the whole constitutional crisis: \"No one's saying you broke any rules. We just hate what you're doing and are going to make new rules to prevent it.\"",
+        "Nate's defense is still on the record and he has never withdrawn a word: \"Team chudders started Jaylin Hyatt. Father time started zeke eliot. All backups. I can keep going. I'm not tanking. Im starting the same caliber of players most managers are starting weekly. I feel you should be able to decide your own starting roster week to week.\"",
+        "The forgotten hinge of the whole affair is Brent. The emergency vote came down to the commissioner, the loudest anti-tanking voice in the room, and he voted no, against his own side, on principle, then threatened the defendant in the same breath: \"I’m voting no, but @Sacko stop tanking now, play your best line up or I’ll let them to vote to boot you. I don’t want to have this conversation again.\" The rules that eventually did pass were built by the aggrieved: Kevin hand-built the max-points rule that now sets our draft order, and then watched it grind him personally through an unlucky 2024. There is a lesson in there about writing laws while angry.",
+        "The epilogue arrived thirteen months later and almost nobody clocked it. On the night Ben won the title, Nate cheerfully told the room about his other league: \"I started a dynasty league with my ohio friends, and purposely didnt draft any rbs besides for a few rookies. It was an all natural 1st year tank job to get Jeanty. Could win that league for the next 5+ years in a row.\" The man who swore for a year that he never tanked here described his tank there the way a chef describes a signature dish. Karim spoke for the room: \"Lolz the master tanker\".",
+        "Two years on, the defendant is ranked fourth in this column, owns the best receiving corps we have ever seen, and has tried, so far without finding a single second, to put the commissionership of the man who spared him up for a vote. Nothing was forgiven, nothing was ruled on, and the place would be unrecognizable without him."
+      ],
       "placement": "after_rankings",
-      "items": [
-        {
-          "label": "Failed Coup of the Summer",
-          "text": "Nate went 3-13 in 2023 and this league has never accepted that it was an accident. Mid draft this July, when he objected that Brent was table talking during someone else’s pick, the reply skipped the rules entirely: “Just like there was no rule on you tanking”. That is the man who moved to replace the commissioner.\n\nThe motion had a March prequel, and the prequel is the better story. Nate wanted the draft board updated and said so at length. What he did not know was where the commissioner was standing. Brent replied that the message was “what employees who are ineffective at using their time do”, mentioned that he was “currently in Berlin trying to grow my business”, invited Nate to calm down, and pointed out that the vote he was demanding had already passed in a document Nate had been shared on three times. Nate changed careers on the spot: “I thought the vote passed to draft earlier. And didn't know you were in Berlin. Goodluck with the bizniz!”\n\nBy July it was a formal motion: “Lets all remind ourselves he works for us. I motion to challenge Brent in 2026 for commissioner! I need 2 seconds to put it to a vote. Who wants change?!!” Kevin voted “Nay”. Zach filed him under “#insurrectionist” and offered a consolation post: “I’m down to appoint you to some sort of deep state admin role”. The motion died for want of a second."
-        },
-        {
-          "label": "Longest Negotiation",
-          "text": "Matt and Kevin closed a Tyler Allgeier deal during round one of the draft, ending a discussion that began sometime in a previous geological era. Matt: “must be the longest trade negotiation in history”. Kevin: “Years of foreplay finally culminating”."
-        }
-      ]
+      "title": "The Tank"
     },
     {
       "id": "kickoff-eve",
-      "title": "Thursday",
-      "placement": "after_rankings",
       "paragraphs": [
-        "Two men have carried a title into a new season here and neither kept it. The third spent his summer auditioning kickers and marveling that the rookie draft had grown a round. Depending on which of the eleven teams behind him you ask, that is either the most reassuring fact of the preseason or the most alarming one.",
-        "Most of this page has told you something. Nate has filed his championship in advance, the way he filed the Cavs in seven, so the record will show he called it. Zach has published the date he starts selling. Matt has named the outcome that would hurt worse than losing. David has said “Tet all day” and gone back to his cartoon. Harlow has bought two years of somebody else’s bad luck and has to sit with it. Even the champion left one thing on the record, and it was a projection about somebody else’s rookie. That is a season’s worth of receipts, and the man holding the trophy wrote almost none of them.",
-        "On Sunday, in Jacksonville, a rookie who spent all of training camp lining up on both sides of the ball will do whatever the Jaguars have actually decided to do with him, and in one lineup in this league he will be sitting in the defensive back slot. Whatever number comes out of that slot is the first real thing anybody learns this year. Everything else here is still an argument."
-      ]
-    }
-  ],
-  "rankings": [
-    {
-      "rank": 1,
-      "team_name": "Kittler on the Roof",
-      "owner": "Ben",
-      "record_2024": "13-3",
-      "blurb": "Start with what he did. He stacked Tucker Kraft, Elijah Arroyo and Thomas Fidone behind George Kittle, who turns thirty two in October. He cycled through four kickers and settled on Matt Gay. That is the offseason.\n\nWhat he did not do is longer. He did not add a running back, and carries five, fewer than any other contender. He did not trade a receiver, though Joe Burrow throws to Puka Nacua and Garrett Wilson and somebody would have paid. He did not answer the two month argument about Travis Hunter except once, in a single measured paragraph, before going quiet again: “I think there’s a pretty decent chance he’s able to put up wr2 numbers out of a DB spot for a couple years, but one way or another that won’t be something that happens long into his career.” He did not react when the league added a round to the rookie draft, beyond noticing it had happened: “I forgot we added a 6th round. Y'all are a bunch of maniacs lol.” When somebody floated setting dues by height, he found the only angle that concerned him: “I'm ok with this if it means I pay less in buy ins”.\n\nOver the fourteen weeks that set the standings, three teams outscored him: Zach, Brent and Blake, the last of them by eighteen points across the whole stretch. He then beat Zach in the final by 5.70, having beaten Nate by twenty one to get there, and answered the winter by changing nothing. The case for him is that the margins were his and he kept the roster that produced them. The case against is that a five point final is not a repeatable process, and he has not added anything that would widen it.\n\nOne subject moves him. In May, Green Bay’s proposal to ban the tush push, the play Zach’s quarterback is built on, died at the league meeting, and Ben filed a disclosure: “My attempt, as part owner of the packers, to sabotage Zach’s team sadly failed.” In February Dallas sent Luka Doncic to Los Angeles. On August 28 Dallas so thoroughly mishandled Micah Parsons that the best pass rusher alive became a Packer for Kenny Clark and two firsts. Zach sent him the news. “First Luka and now this. Dallas has been very good to me this year.”\n\nHe is the only man here defending a title, and he spent the summer conducting himself like a man whose season was somebody else’s problem."
-    },
-    {
-      "rank": 2,
-      "team_name": "MHJTIME",
-      "owner": "Nate",
-      "record_2024": "12-5",
-      "blurb": "Nate files things. Not opinions exactly, filings, entered into the record with the date attached so that later somebody can look them up.\n\nFebruary, mid argument about basketball, apropos of nothing: “Cavs in 7 vs Boston. Just documenting it now so I can refer back.”\n\nMarch, told the commissioner had not updated the draft board, he worked the order out himself, posted all twelve slots off reverse max points and playoff finish, conceded in the same breath that it was not final, and clarified the reporting structure on his way out: Brent “works for us”.\n\nAlso March, deep in an NBA thread and feeling good: “do yall understand im about to win a Jailyard fantasy football championship in 2025?”\n\nThe roster mostly backs him. Ja’Marr Chase went into 2025 as the consensus first pick in fantasy drafts, Malik Nabers and Marvin Harrison line up beside him, Jayden Daniels runs it and Trey McBride plays tight end. That is the highest ceiling anybody here can field. It cost his 2026 first, his 2026 second and Rhamondre Stevenson, all of it for the 1.04 and Travis Hunter, and Harlow is holding the paper.\n\nWhich leaves the backfield, and the backfield is where the filings stop and the scrambling starts. Chuba Hubbard came over from Zach mid draft. Zach reviewed it in four: “Your backfield is trash”. Nate answered with what became the season’s thesis and its problem at once: “I just need avg rb play.” then “Elite everywhere else.”\n\nSo August was an audition. He dropped Chris Rodriguez, bought him back, and announced him: “Chris Rodriguez is the guy. Rb1 for the commies. I might have saved my ass.” Brent watched the whole cycle and summed it up: “Nate you are like a paper in the wind my man”. Then Washington actually settled it, and settled it against him. On August 22 the Commanders traded Brian Robinson, whom Nate already owned, to San Francisco for a 2026 sixth, having quietly moved him out of the plan; the job went to Austin Ekeler and a seventh round rookie named Jacory Croskey-Merritt. On the eve of the season he went to Blake and traded for Jerome Ford.\n\nFour answers at one position in three weeks, from the one owner who cannot go buy a real one, because everybody holding a running back is chasing him. He may lead this league in scoring and lose in the first week of December to a hamstring, and the file will be right where he left it."
-    },
-    {
-      "rank": 3,
-      "team_name": "General Ken-obi",
-      "owner": "Blake",
-      "record_2024": "11-6",
-      "blurb": "Blake scored 2,152.26 over the fourteen weeks that set the standings, third behind Zach and Brent, and then finished the year with the largest raw total in the league because he was still playing in January. What it bought was a third seed and two December losses, the semifinal to Zach and the third place game to Nate, by a combined 17.70 points.\n\nThe skill players are not the argument. CeeDee Lamb, Nico Collins, Drake London, Chris Olave, Jameson Williams and DJ Moore would start anywhere here, and Saquon Barkley, coming off 2,005 rushing yards, sits in front of Kenneth Walker and Chase Brown. The quarterbacks are. Drake Maye, J.J. McCarthy, Trevor Lawrence, Anthony Richardson: four unproven answers to the one question every team above him has already settled, and in August Indianapolis removed one of them by handing the job to Daniel Jones.\n\nHe buried it himself: “The Anthony Richardson gamble was a bust”. Read it as habit. He talks his own roster down all year and finishes in the money anyway, and the last message of the entire offseason was him doing it again to a different quarterback he owns: “As a TLaw owner, I’m very skeptical”. Pointed at somebody else’s team the same instinct turns into a joke, as when Geno Smith landed in Las Vegas with the coach who once traded him away: “Geno showed Pete Carroll he could love again after his breakup with Russell .”\n\nHe rosters eight running backs and ten receivers in a league where four teams are drowning in backs and two of them need receiving help. Every piece required to fix the quarterback room has been sitting on his own bench all summer. The one trade he did make was to send Jerome Ford to the team ranked above him on the eve of the season, which is a transaction, not a repair. Third is where the deepest collection of skill players in the league sits behind a coin flip."
-    },
-    {
-      "rank": 4,
-      "team_name": "Sleeping Giants",
-      "owner": "Zach",
-      "record_2024": "11-5",
-      "blurb": "Zach lost the title game by 5.70 and ran the same team back. No team scored more per game, and it starts with Derrick Henry, Josh Jacobs and Kyren Williams, three backs who carry their offenses, with Jalen Hurts in front of them.\n\nThen there are the receivers, and the honest way to describe that room is to describe what the actual NFL did with those men this year. Cooper Kupp was owed twenty million, and when the Rams could not find a trade partner at that number they released him outright in March; Seattle took him home for three years and forty five million. Jordan Addison is suspended for the first three games. Mike Evans, Stefon Diggs, Keenan Allen and DeAndre Hopkins were all first round fantasy picks once. Zach keeps thirteen of them, which is what a man does when he refuses to be the one who sold the year they came back.\n\nThen there is the tight end sequence. Miami traded Jonnu Smith to Pittsburgh at the end of June, taking Zach’s starter with it, and he took the loss philosophically: “There’s no such thing as a secure TE”. The next day Darren Waller came out of retirement and was traded to Miami to fill the hole Jonnu left. Zach signed him off the free agent list within hours and was selling him as literature half an hour after that: “He was in a dark place after the injury and divorce man. This is his second coming”. He replaced his own tight end with the man hired to replace his own tight end, and then marketed the replacement as a resurrection.\n\nHe has also published his exit, which nobody else here has done. In late August he hung a sign on the roster (“I’ve got league winner RBs”) and named the trigger: “If things go south first 5 weeks for me record wise, someone can solidify their run to the chip”.\n\nTell him the backfield is old and he does not argue the actuary’s side. He argues the other one: “Henrys gonna go til he’s 40 tho and Kyrens only 24”. Henry ran for 1,921 yards and 16 touchdowns at thirty last season, which is not supposed to happen, and Zach has decided that a thing which already happened is a thing that happens. If he is right he wins the title he lost by six points. If he is wrong he becomes the most important seller in the league by Halloween, at a price he set in August."
-    },
-    {
-      "rank": 5,
-      "team_name": "Rasheeing the Scene",
-      "owner": "Patrick",
-      "record_2024": "10-6",
-      "blurb": "By the fourth week of August, Patrick’s first round rookie was the only player from the entire 2025 draft class who had not signed a contract.\n\nQuinshon Judkins went at 1.07 in July. A day later he was arrested in Florida. In August prosecutors declined to pursue the charge, and Patrick, who does this for a living, drew the line his profession requires and refused to extend it: “Thank god my top pick is not a criminal, probably just a huge piece of shit of a guy.”, and then, asked whether a suspension was coming anyway, “Certainly a possibility a la Zeke. But not an inevitability.” He was right to hedge. The league kept investigating, Cleveland and the player fought over guaranteed money, and by late August the Browns had no update to give and Judkins had no contract.\n\nThe other catch wears the team name. Rashee Rice lost 2024 to a knee injury after four games, and on August 27 the NFL suspended him for the first six of 2025, so Patrick’s best receiver will have played roughly a quarter of a season across two years by the time he returns. His entire response: “omg Rashee Rice was suspended no way I had no idea that was possible I am 100% shocked”.\n\nAnd he is still fifth, because everything underneath the mess is built correctly. 7-10, then 8-8, then 10-6, without ever raising his voice. Josh Allen is the most valuable asset anybody here owns. Behind him are ten running backs, which elsewhere on this page is a symptom and here is not, because De’Von Achane, Bucky Irving, Travis Etienne and Trey Benson will all start NFL games. On August 22, the same afternoon Washington traded Brian Robinson away and handed its backfield to Austin Ekeler and a seventh round rookie, Patrick posted the whole shuffle and already owned the right side of it: “Ekler and baby Commanders rbs”. The second ranked team spent the following fortnight chasing that same backfield in circles.\n\nHe has a stated rule, “Best WR available. That’s it.”, and because a Chargers fan saying that about a Chargers player invites a certain suspicion, he offered the test himself: “I’ll prove it. I’ll trade you my two chargers, dicker the kicker and Tre Harris, for raider Brock Bowers, the Chargers hated rival”. He put his own fandom up as collateral to settle an argument about process, in a thread nobody was going to remember.\n\nBrent needs two years of young players to mature. Patrick needs to still be in the race in week seven."
-    },
-    {
-      "rank": 6,
-      "team_name": "The Boonist Monks",
-      "owner": "Brent",
-      "record_2024": "7-9",
-      "blurb": "Across the fourteen weeks that set the standings, Brent’s offense was the second most productive in the league. He went 7-7 in them, scraped into the bracket, and was gone in a week, beaten by Blake by 4.18 points for the second December running. He has been on the record about the sequel since March: “3rd times the charm”.\n\nThe reputation is that the roster is old and the famous names carry it. Travis Kelce’s 2024 ended his run of thousand yard seasons and left him fifth among tight ends. Alvin Kamara, Tyreek Hill, Nick Chubb and Adam Thielen complete the impression. Nate has been saying it for two years. For two years Brent has answered the same way: “It gets younger every year”.\n\nHe is closer to right than the joke allows. Jaxon Smith-Njigba caught 100 passes last season and then inherited the entire Seattle target share when DK Metcalf was traded and Tyler Lockett released. Zay Flowers and James Cook are ascending. Lamar Jackson is the best quarterback on any roster here. Terry McLaurin’s holdout ended in late August, which Zach flagged the same day as a “Big day for @Brent Boone”.\n\nThe live fight is Chubb. Houston put Joe Mixon on the non football injury list and named Chubb the week one starter. Nate, who had tried to buy Chubb in July out of pure affection (“because I love him. my favorite brown of all time. and hes good value”) and been refused, spent kickoff eve declaring him finished. Brent answered with the incredulity he uses when he is confident: “Sure buddy. That’s why he got named starter. Because nfl teams with championship aspirations start vets with bad knees over young talent”.\n\nHis philosophy arrived the same night in two consecutive messages: “The future is fucked bro” and “Live for the now!” Read the summer and it stops sounding like a rationale for an old roster. In February he reviewed the championship halftime show like a man with a beat (“Kendrick’s lyricism is unmatched”), then volunteered, with nobody having asked about the other performer, “I honestly couldn’t tell you the name of one JLO song”. In April he was at a festival sending back dispatches, Zedd “was one of the most unreal shows I’ve ever seen in my life”, Gaga’s “show was fucking insane”, dinner at a Nobu pop up with the stage still in view. He is also the commissioner, which puts the league’s future in the hands of the man least interested in his own.\n\nA roster of thirty year olds is not a mistake he made. It is the same sentence he says about everything. He needs one more year of the young half arriving faster than the old half leaves."
-    },
-    {
-      "rank": 7,
-      "team_name": "The Legion of Bouz",
-      "owner": "Karim",
-      "record_2024": "7-9",
-      "blurb": "In July, Karim renamed nothing and simply floated “#TyroneTracyTime” about his own running back. Nothing happened. A day later he pushed: “Shall I change my team name to #SKATTABOTIME?!?!” Still nothing. In August he tried it on a rookie who belonged to Brent, “#THORTONTIME”, and finally drew the response he had been fishing for since the spring, because Nate’s franchise is MHJTIME and Nate treats the suffix as property: “Karim my lawyers are sending over a cease and desist notice to your organization”. Oscar, who practices law, offered to defend him free. Karim did not need it. He beat the claim by translating the infringing element into Spanish: “#THORTONTIEMPO!”\n\nThe roster is a health bet. Christian McCaffrey played four games in 2024. Upright, a lineup with Amon-Ra St. Brown, DeVonta Smith, Jaylen Waddle and Patrick Mahomes is a contender, and the best of those came from Oscar’s rebuild for the picks Oscar then turned into running backs, a single trade that shaped both ends of this list. Not upright, the cover is an aging Aaron Jones and a Joe Mixon already on the shelf, and the season is over by Halloween.\n\nSo he bought both halves of the New York Giants backfield, Tyrone Tracy and then Cam Skattebo, which is why his one public prediction covers them jointly: “Tracy and Skatt finish as RB2s in 2025. First hot take!” Owning a committee is the only honest way to bet on one of its members.\n\nGetting Skattebo required reversing himself in public. Nate, mid draft, said he was targeting Skattebo so the two would not collide, and Karim said he had no interest. Karim then spent back to back picks on Cam Ward and Cam Skattebo. Nate called him a jabroni. Karim conceded everything (“Haha this is all true”), offered one procedural defense (“But we agreed to give everyone 12 hrs to pick”), and then supplied the motive nobody had asked for: “It’s cos I been watch Skattabo highlights all day”.\n\nHe plays this league from the United Kingdom, which made July expensive. Two of his trades came apart and had to be redone. Oscar reconstructed a typical day without malice: “You had back to back picks and then picked the guy highest ranked in the system hours later and trade fuck up after lol”. Karim’s own account arrived at an hour when nobody else was awake: “Just woke up”. Pressed on an error, he produced the defense of a man with a life: “It’s alright us dads don’t get much time for accuracy #tradegate”.\n\nThere is a title in this roster and a top four pick in it, and almost nothing in between."
-    },
-    {
-      "rank": 8,
-      "team_name": "Noble FFT",
-      "owner": "Kevin",
-      "record_2024": "5-12",
-      "blurb": "The names say contender. Bijan Robinson went into 2025 drafts as the top ranked back. Breece Hall is behind him. A.J. Brown and Tee Higgins are outside. Tyler Warren is at tight end, Caleb Williams at quarterback, and Micah Parsons, who just cost Green Bay two first round picks in real football, plays defense for him.\n\nThe scoring says otherwise. Across the fourteen weeks that decided last season Kevin finished tenth in points and went 2-12. The season total that looks respectable looks that way because he played three extra games in the consolation bracket.\n\nThe gap is on the roster sheet. Thirty six players, six more than the smallest roster in the league. Seven tight ends. Twelve receivers. Two kickers. A lineup starts one tight end.\n\nHe acquires and does not release. In July a commissioner spent part of an afternoon awarding him a seventh tight end over the objection of the owner who had drafted the player. Two of his own picks went up for sale in the same small-hours sitting, “Pick 7 is open for trade!” and then “Pick 8 is available for trade!” Another morning of offers was greeted the way other men greet a birthday: “I love waking up to trade offers so let’s keep it going 3 days in a row”.\n\nHe knows. Mid draft he named it himself, in the vocabulary of appetite: “All this deal making has me calling people for real world business deals just to get my fix lol”. That is not a figure of speech from an idle man. In April he launched a company, and the announcement carried the year’s finest piece of punctuation: “Friends and league members (and Nate), I started a hot sauce company.” Ben, who speaks about once a season, surfaced to report that the pitch had merely “Mostly had me at” the friendship and definitely had him at “hot sauce”. Brent supplied the scouting report, “He’s been snorting hot sauce and watching film”, and Kevin pled guilty: “Scouting department of Noble FFT never sleeps”.\n\nNobody here is better at finding a good player and nobody is worse at deciding which good players he does not need. Contenders will trade for tight ends and receivers in October, which puts him one phone call from a bracket he has never reached, and the phone call requires him to give something up."
-    },
-    {
-      "rank": 9,
-      "team_name": "Chudders Football Team",
-      "owner": "Matt",
-      "record_2024": "6-11",
-      "blurb": "Gibbs and Jeanty will score points. Jahmyr Gibbs is the kind of back most rebuilds never get to keep, and Ashton Jeanty walked into a Las Vegas backfield he controlled on early downs from the day he arrived. Emeka Egbuka had Tampa Bay’s coaches talking about his route running by late July. Justin Herbert is the only man here with a resume, and behind that group the receivers are rookies and dart throws.\n\nNone of that is the interesting part. Hours after the draft closed, Matt named a fear better than being bad: “I’m mildly concerned I’ll be midling enough to not be at the top next year. I think I need another year of high picks”, and then, in case that was too subtle, “Or perhaps be stuck in mediocrity”.\n\nHe has finished last in scoring in two of the last three seasons without losing a night’s sleep. Seven wins would cost him one."
-    },
-    {
-      "rank": 10,
-      "team_name": "Father Time ",
-      "owner": "David",
-      "record_2024": "7-9",
-      "blurb": "David has the best young receivers in the league and cannot build a lineup around them. Brian Thomas, Ladd McConkey, Rome Odunze and Tetairoa McMillan are four players any team here would take. Behind them are three running backs, the fewest by a distance, plus five quarterbacks and four defenses on a roster that starts one of each.\n\nOn draft night he held 1.03 with Travis Hunter available and took McMillan. He gave two reasons and then stopped talking.\n\nThe first was portfolio: “Fair, I dont want two jags is why i passes”. He already owned Brian Thomas, and Jacksonville had just spent its 2026 first, plus the 36th and 126th picks, moving up three spots to take Hunter, which is a lot of new mouths for one quarterback.\n\nThe second was a matchup he could see: “All fair, I just liked the size difference between Tet and Young. Gonna be hard to over throw someone that big”.\n\nThen: “Burgers have been cooked and finished”. The surname is Hamburger and the league shortened it to Burger years ago, which is the only reason a team called Father Time rosters the youngest receiver corps in football.\n\nZach saw the plan (“Burgers got the blueprint quietly over there. Stacking young wideouts for 2-3 years”) and Brent named it: “Burger is wide receiver island”. The island has no bridge. Those quarterbacks and defenses are exactly what a team with three running backs should be trading. Patrick spent the summer trying (“I’m trying to trade him RBs for some of those WRs right now, but dude is MIA”). Nate offered a 2027 first for Shedeur Sanders and got silence.\n\nHe is not, however, uninterested. He defended the McMillan pick at length on draft night, and the one subject outside football that ever got him going arrived in late July: “Anyone watch the new south park yet?”, then “Its so fucking funny”, then “Im dying!! I dont want to spoil it. Anyone who hasnt, its 30 mins of must see”. On August 28, with the chat filling up over Parsons, he posted once and left: “Jerry Jones is my favorite 49ers supporter!”\n\nOn the eve of the season, told Hunter changes Jacksonville, he restated his position without moving: “Tet all day”. He may be right about every part of it. None of it scores a point in 2025."
-    },
-    {
-      "rank": 11,
-      "team_name": "Burden of Etienne-y Woody",
-      "owner": "Harlow",
-      "record_2024": "6-10",
-      "blurb": "In March, Nate needed the 1.04 and Harlow owned it. The price was Nate’s 2026 first, his 2026 second and Rhamondre Stevenson, and Harlow explained it like a man who had run the model: “Mondre was a throw in, next years 1st was the cornerstone for me”. Kevin scored it that night, and wrapped the compliment in a curse: “You just officially jinxed yourself with the fantasy gods. Congrats Harlow, you’ve won the trade”.\n\nThe league has called it free money ever since. It is not.\n\nHarlow only wins if Nate’s next two years go badly. If Hunter becomes what Nate says he is, and Nate finishes where he expects to, those picks convey late and Harlow will have sold the best player in the deal for two lottery tickets bought at the top of the market. He has purchased a rival’s misery and has to wait two seasons to learn whether it arrives.\n\nA real front office made the same wager on the same player and paid a similar bill. Jacksonville sent the 36th pick, the 126th pick and its own 2026 first to Cleveland to climb three spots and take Hunter second overall, then said it would start him at receiver and work him onto defense gradually. Two organizations mortgaged the same future year on one man who has never played a regular season snap. Only one of them gets to keep him.\n\nWhat Harlow fields in the meantime is thin. Justin Jefferson is a genuine cornerstone and George Pickens moved to Dallas in May, which could give him two brand name receivers before Luther Burden catches a pass. Behind that it is committees: eleven running backs, more than anyone in the league, and almost none who will start a week that matters. That is the lineup, and that is why he is eleventh.\n\nHe reads players better than his record shows. He did the arithmetic on Hunter while everyone else traded opinions, he scouted Devin Neal off tape (“He was by far the best player on that KU team”), and he spent a sixth on Will Howard as a cheap swing at a starting job. On the last day of the draft he proposed that somebody grade the league’s old drafts in hindsight and volunteered for the job: “Would be fun to have written draft recaps, look backs, and grades like 2-3 years later”. A man holding a rival’s first round pick would like the record kept on everybody. Of course he would."
-    },
-    {
-      "rank": 12,
-      "team_name": "Ghastly Grayskull Gang",
-      "owner": "Oscar",
-      "record_2024": "3-13",
-      "blurb": "Oscar sees this league more clearly than anyone in it.\n\nOn draft night he handicapped a rookie tight end’s target competition without breaking stride, “Loveland will be good, he’s just like 1 of 5 first rounders catching passes in that offense.”, which is the whole Chicago problem. Watching the championship game in February he read the football through the halftime show: “This game is like Kendrick v Drake tho so pretty fitting”. When Nate spent a morning needling Brent, Oscar closed the file on a two year feud: “Damn Kamara selling real estate in NOLA while Boone lives rent free in Nate’s head”. When Nate threatened Karim with lawyers, Oscar, who actually practices law, volunteered to defend him for nothing.\n\nHis own team he cannot see at all.\n\nHe went 3-13 and finished eleventh in scoring. He had already sold Amon-Ra St. Brown to Karim (“For the record I got two first rd picks and Tank Bigsby for Amon Ra”) and what that bought him was the 1.06, Tank Bigsby and a 2026 first. He took Omarion Hampton at 1.02 off his own reverse-standings slot, then spent the Amon-Ra pick on TreVeyon Henderson while a work emergency ran his clock out and the auto draft made the selection for him. His summary was accurate and faintly stunned: “Just like that I became a running back team”.\n\nTen backs now. No lineup in football starts more than three. Ten works for Patrick seven spots up because Patrick’s ten include four men who will start NFL games; Oscar’s are mostly waiting for somebody else’s job to open, and waiting is not a season. The talent underneath is real and arriving faster here than anywhere else. Brock Bowers is one of the best young players in this league at any position, DK Metcalf and Xavier Worthy have ceilings, and the picks keep coming.\n\nTwelfth is arithmetic. The way out is a trade with one of the three teams sitting on the same problem, and of those four he is the one already saying it out loud, having sentenced himself for the autodraft without waiting for a hearing: “I’ll take it this is my L and disrespectful to the league”."
+        "The last message of our offseason was mine, on September 3, and I stand by it: \"Is Trevor Lawrence really going to be able to support two WR1s? As a TLaw owner, I’m very skeptical\". I own Trevor Lawrence. Nate owns Travis Hunter, one of the two receivers in question. So the final word of the offseason was one man publicly shorting another man's investment while appearing to fret about his own.",
+        "So here is the table as the lights come up. Zach has the points and my blessing, which he must now survive. Brent has never had a better roster or less time. Nate has a guarantee, four receivers, and a prayer at running back. Kevin has the league's quietest great roster and a linebacker who just became the highest-paid defender alive. Ben has the crown and three years of history saying nobody keeps it. Patrick is waiting out a suspension on purpose. Matt finally has a team. Oscar has other people's discards and his own two first-rounders. Karim has one medical file between himself and the record book. David has 2027 on layaway. Harlow is short the guarantee and long the receipts.",
+        "The games start Thursday. Good luck this season, everyone. You all look terrifying."
+      ],
+      "placement": "after_rankings",
+      "title": "Thursday"
     }
   ]
 }
