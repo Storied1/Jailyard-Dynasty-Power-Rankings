@@ -1,12 +1,13 @@
 {
-  "generated_at": "2026-09-06 10:04:30",
+  "generated_at": "2026-09-13 10:54:59",
   "seasons": [
     2022,
     2023,
     2024,
-    2025
+    2025,
+    2026
   ],
-  "total_games": 392,
+  "total_games": 398,
   "franchise_map": {
     "510013812276232192": {
       "username": "GauchoTrain",
@@ -18,7 +19,7 @@
     },
     "575406354368348160": {
       "username": "kharlow",
-      "team_name": "Burden of Etienne-y Woody"
+      "team_name": "House of Harlow"
     },
     "575878107617718272": {
       "username": "kevobucks",
@@ -67,12 +68,12 @@
       "owner_id": "510215233736572928"
     },
     "lowest_winning_score": {
-      "points": 72.42,
-      "team": "Noble FFT",
-      "opponent": "MHJTIME",
-      "season": 2023,
-      "week": 14,
-      "owner_id": "575878107617718272"
+      "points": 14.82,
+      "team": "General Ken-obi",
+      "opponent": "Sleeping Giants",
+      "season": 2026,
+      "week": 1,
+      "owner_id": "861064424906158080"
     },
     "biggest_blowout": {
       "margin": 113.32,
@@ -90,11 +91,11 @@
       "week": 14
     },
     "lowest_combined": {
-      "points": 138.78,
-      "teams": "Noble FFT vs MHJTIME",
-      "score": "72.4-66.4",
-      "season": 2023,
-      "week": 14
+      "points": 20.22,
+      "teams": "General Ken-obi vs Sleeping Giants",
+      "score": "14.8-5.4",
+      "season": 2026,
+      "week": 1
     },
     "longest_win_streak": {
       "count": 11,
@@ -108,18 +109,18 @@
     }
   },
   "elo_current": {
-    "510013812276232192": 1599.6,
-    "575194626101170176": 1488.2,
-    "575406354368348160": 1323.5,
-    "575878107617718272": 1454.8,
-    "510215233736572928": 1604.3,
-    "415249306090479616": 1626.0,
-    "792312710317572096": 1402.1,
-    "792563831732838400": 1585.7,
-    "793977545186979840": 1329.9,
-    "861064424906158080": 1700.2,
-    "510254202180411392": 1561.1,
-    "865653448849391616": 1324.5
+    "510013812276232192": 1595.8,
+    "575194626101170176": 1512.0,
+    "575406354368348160": 1376.3,
+    "575878107617718272": 1450.5,
+    "510215233736572928": 1597.3,
+    "415249306090479616": 1580.7,
+    "792312710317572096": 1395.0,
+    "792563831732838400": 1550.8,
+    "793977545186979840": 1377.2,
+    "861064424906158080": 1680.9,
+    "510254202180411392": 1541.2,
+    "865653448849391616": 1342.2
   },
   "elo_history": {
     "510013812276232192": [
@@ -442,6 +443,11 @@
         "season": 2025,
         "week": 16,
         "elo": 1599.6
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1595.8
       }
     ],
     "575194626101170176": [
@@ -769,6 +775,11 @@
         "season": 2025,
         "week": 17,
         "elo": 1488.2
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1512.0
       }
     ],
     "575406354368348160": [
@@ -1096,6 +1107,11 @@
         "season": 2025,
         "week": 16,
         "elo": 1323.5
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1376.3
       }
     ],
     "575878107617718272": [
@@ -1423,6 +1439,11 @@
         "season": 2025,
         "week": 17,
         "elo": 1454.8
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1450.5
       }
     ],
     "510215233736572928": [
@@ -1755,6 +1776,11 @@
         "season": 2025,
         "week": 17,
         "elo": 1604.3
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1597.3
       }
     ],
     "415249306090479616": [
@@ -2082,6 +2108,11 @@
         "season": 2025,
         "week": 17,
         "elo": 1626.0
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1580.7
       }
     ],
     "792312710317572096": [
@@ -2414,6 +2445,11 @@
         "season": 2025,
         "week": 17,
         "elo": 1402.1
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1395.0
       }
     ],
     "792563831732838400": [
@@ -2746,6 +2782,11 @@
         "season": 2025,
         "week": 17,
         "elo": 1585.7
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1550.8
       }
     ],
     "793977545186979840": [
@@ -3073,6 +3114,11 @@
         "season": 2025,
         "week": 16,
         "elo": 1329.9
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1377.2
       }
     ],
     "861064424906158080": [
@@ -3405,6 +3451,11 @@
         "season": 2025,
         "week": 17,
         "elo": 1700.2
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1680.9
       }
     ],
     "510254202180411392": [
@@ -3727,6 +3778,11 @@
         "season": 2025,
         "week": 16,
         "elo": 1561.1
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1541.2
       }
     ],
     "865653448849391616": [
@@ -4064,6 +4120,11 @@
         "season": 2025,
         "week": 17,
         "elo": 1324.5
+      },
+      {
+        "season": 2026,
+        "week": 1,
+        "elo": 1342.2
       }
     ]
   },
@@ -4645,10 +4706,10 @@
       ]
     },
     "510013812276232192|575878107617718272": {
-      "wins": 4,
+      "wins": 5,
       "losses": 2,
-      "pf": 947.82,
-      "pa": 853.74,
+      "pf": 974.12,
+      "pa": 857.84,
       "games": [
         {
           "season": 2022,
@@ -4685,14 +4746,20 @@
           "week": 7,
           "pts": 145.28,
           "opp_pts": 153.08
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 26.3,
+          "opp_pts": 4.1
         }
       ]
     },
     "575878107617718272|510013812276232192": {
       "wins": 2,
-      "losses": 4,
-      "pf": 853.74,
-      "pa": 947.82,
+      "losses": 5,
+      "pf": 857.84,
+      "pa": 974.12,
       "games": [
         {
           "season": 2022,
@@ -4729,6 +4796,12 @@
           "week": 7,
           "pts": 153.08,
           "opp_pts": 145.28
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 4.1,
+          "opp_pts": 26.3
         }
       ]
     },
@@ -4809,9 +4882,9 @@
       ]
     },
     "510215233736572928|865653448849391616": {
-      "wins": 7,
+      "wins": 8,
       "losses": 1,
-      "pf": 1183.94,
+      "pf": 1219.3400000000001,
       "pa": 1009.8399999999999,
       "games": [
         {
@@ -4861,14 +4934,20 @@
           "week": 13,
           "pts": 145.54,
           "opp_pts": 130.04
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 35.4,
+          "opp_pts": 0
         }
       ]
     },
     "865653448849391616|510215233736572928": {
       "wins": 1,
-      "losses": 7,
+      "losses": 8,
       "pf": 1009.8399999999999,
-      "pa": 1183.94,
+      "pa": 1219.3400000000001,
       "games": [
         {
           "season": 2022,
@@ -4917,6 +4996,12 @@
           "week": 13,
           "pts": 130.04,
           "opp_pts": 145.54
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 0,
+          "opp_pts": 35.4
         }
       ]
     },
@@ -5034,9 +5119,9 @@
     },
     "792312710317572096|793977545186979840": {
       "wins": 1,
-      "losses": 5,
-      "pf": 653.9399999999999,
-      "pa": 811.56,
+      "losses": 6,
+      "pf": 655.9399999999999,
+      "pa": 840.4599999999999,
       "games": [
         {
           "season": 2022,
@@ -5073,14 +5158,20 @@
           "week": 9,
           "pts": 120.9,
           "opp_pts": 137.52
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 2.0,
+          "opp_pts": 28.9
         }
       ]
     },
     "793977545186979840|792312710317572096": {
-      "wins": 5,
+      "wins": 6,
       "losses": 1,
-      "pf": 811.56,
-      "pa": 653.9399999999999,
+      "pf": 840.4599999999999,
+      "pa": 655.9399999999999,
       "games": [
         {
           "season": 2022,
@@ -5117,14 +5208,20 @@
           "week": 9,
           "pts": 137.52,
           "opp_pts": 120.9
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 28.9,
+          "opp_pts": 2.0
         }
       ]
     },
     "861064424906158080|510254202180411392": {
-      "wins": 5,
+      "wins": 6,
       "losses": 2,
-      "pf": 1041.28,
-      "pa": 971.46,
+      "pf": 1056.1,
+      "pa": 976.86,
       "games": [
         {
           "season": 2022,
@@ -5167,14 +5264,20 @@
           "week": 13,
           "pts": 139.58,
           "opp_pts": 120.6
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 14.82,
+          "opp_pts": 5.4
         }
       ]
     },
     "510254202180411392|861064424906158080": {
       "wins": 2,
-      "losses": 5,
-      "pf": 971.46,
-      "pa": 1041.28,
+      "losses": 6,
+      "pf": 976.86,
+      "pa": 1056.1,
       "games": [
         {
           "season": 2022,
@@ -5217,6 +5320,12 @@
           "week": 13,
           "pts": 120.6,
           "opp_pts": 139.58
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 5.4,
+          "opp_pts": 14.82
         }
       ]
     },
@@ -6477,9 +6586,9 @@
       ]
     },
     "575406354368348160|415249306090479616": {
-      "wins": 1,
+      "wins": 2,
       "losses": 4,
-      "pf": 597.3,
+      "pf": 617.8,
       "pa": 775.5,
       "games": [
         {
@@ -6511,14 +6620,20 @@
           "week": 8,
           "pts": 111.32,
           "opp_pts": 169.82
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 20.5,
+          "opp_pts": 0
         }
       ]
     },
     "415249306090479616|575406354368348160": {
       "wins": 4,
-      "losses": 1,
+      "losses": 2,
       "pf": 775.5,
-      "pa": 597.3,
+      "pa": 617.8,
       "games": [
         {
           "season": 2022,
@@ -6549,6 +6664,12 @@
           "week": 8,
           "pts": 169.82,
           "opp_pts": 111.32
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 0,
+          "opp_pts": 20.5
         }
       ]
     },
@@ -8381,9 +8502,9 @@
       ]
     },
     "575194626101170176|792563831732838400": {
-      "wins": 4,
+      "wins": 5,
       "losses": 2,
-      "pf": 801.54,
+      "pf": 826.4399999999999,
       "pa": 747.28,
       "games": [
         {
@@ -8421,14 +8542,20 @@
           "week": 6,
           "pts": 107.74,
           "opp_pts": 140.94
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 24.9,
+          "opp_pts": 0
         }
       ]
     },
     "792563831732838400|575194626101170176": {
       "wins": 2,
-      "losses": 4,
+      "losses": 5,
       "pf": 747.28,
-      "pa": 801.54,
+      "pa": 826.4399999999999,
       "games": [
         {
           "season": 2022,
@@ -8465,6 +8592,12 @@
           "week": 6,
           "pts": 140.94,
           "opp_pts": 107.74
+        },
+        {
+          "season": 2026,
+          "week": 1,
+          "pts": 0,
+          "opp_pts": 24.9
         }
       ]
     },
@@ -9834,7 +9967,7 @@
       "owner_id": "510013812276232192",
       "username": "GauchoTrain",
       "team_name": "The Boonist Monks",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 34,
         "losses": 22,
@@ -9842,7 +9975,7 @@
         "pf": 8193.0,
         "pa": 7480.5
       },
-      "playoff_appearances": 4,
+      "playoff_appearances": 5,
       "championships": 0,
       "finals": 0,
       "season_results": [
@@ -9877,9 +10010,17 @@
           "ties": 0,
           "pf": 2068.1,
           "pa": 1825.5
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1599.6,
+      "current_elo": 1595.8,
       "peak_elo": 1619.9,
       "best_win_streak": 6
     },
@@ -9887,7 +10028,7 @@
       "owner_id": "575194626101170176",
       "username": "bchodos",
       "team_name": "Kittler on the Roof",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 33,
         "losses": 23,
@@ -9895,7 +10036,7 @@
         "pf": 7791.4,
         "pa": 7572.0
       },
-      "playoff_appearances": 3,
+      "playoff_appearances": 4,
       "championships": 1,
       "finals": 3,
       "season_results": [
@@ -9930,17 +10071,25 @@
           "ties": 0,
           "pf": 1884.7,
           "pa": 2114.7
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1488.2,
+      "current_elo": 1512.0,
       "peak_elo": 1690.4,
       "best_win_streak": 7
     },
     "575406354368348160": {
       "owner_id": "575406354368348160",
       "username": "kharlow",
-      "team_name": "Burden of Etienne-y Woody",
-      "seasons_played": 4,
+      "team_name": "House of Harlow",
+      "seasons_played": 5,
       "all_time": {
         "wins": 23,
         "losses": 33,
@@ -9983,9 +10132,17 @@
           "ties": 0,
           "pf": 1736.7,
           "pa": 2170.7
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1323.5,
+      "current_elo": 1376.3,
       "peak_elo": 1590.8,
       "best_win_streak": 5
     },
@@ -9993,7 +10150,7 @@
       "owner_id": "575878107617718272",
       "username": "kevobucks",
       "team_name": "Noble FFT",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 17,
         "losses": 39,
@@ -10001,7 +10158,7 @@
         "pf": 7195.8,
         "pa": 7856.3
       },
-      "playoff_appearances": 0,
+      "playoff_appearances": 1,
       "championships": 0,
       "finals": 0,
       "season_results": [
@@ -10036,9 +10193,17 @@
           "ties": 0,
           "pf": 1843.1,
           "pa": 1816.2
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1454.8,
+      "current_elo": 1450.5,
       "peak_elo": 1491.2,
       "best_win_streak": 3
     },
@@ -10046,7 +10211,7 @@
       "owner_id": "510215233736572928",
       "username": "KidBouzie",
       "team_name": "The Legion of Bouz",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 36,
         "losses": 20,
@@ -10054,7 +10219,7 @@
         "pf": 8155.3,
         "pa": 7592.2
       },
-      "playoff_appearances": 3,
+      "playoff_appearances": 4,
       "championships": 1,
       "finals": 1,
       "season_results": [
@@ -10089,9 +10254,17 @@
           "ties": 0,
           "pf": 2124.7,
           "pa": 1799.8
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1604.3,
+      "current_elo": 1597.3,
       "peak_elo": 1638.9,
       "best_win_streak": 8
     },
@@ -10099,7 +10272,7 @@
       "owner_id": "415249306090479616",
       "username": "ToreroGaucho",
       "team_name": "Rasheeing the Scene",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 32,
         "losses": 24,
@@ -10142,9 +10315,17 @@
           "ties": 0,
           "pf": 2097.4,
           "pa": 1956.0
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1626.0,
+      "current_elo": 1580.7,
       "peak_elo": 1647.7,
       "best_win_streak": 7
     },
@@ -10152,7 +10333,7 @@
       "owner_id": "792312710317572096",
       "username": "Chudders",
       "team_name": "Chudders Football Team",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 15,
         "losses": 41,
@@ -10195,9 +10376,17 @@
           "ties": 0,
           "pf": 1757.6,
           "pa": 1982.2
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1402.1,
+      "current_elo": 1395.0,
       "peak_elo": 1516.0,
       "best_win_streak": 2
     },
@@ -10205,7 +10394,7 @@
       "owner_id": "792563831732838400",
       "username": "rango_",
       "team_name": "MHJTIME",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 29,
         "losses": 27,
@@ -10248,9 +10437,17 @@
           "ties": 0,
           "pf": 2145.9,
           "pa": 1893.5
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1585.7,
+      "current_elo": 1550.8,
       "peak_elo": 1621.0,
       "best_win_streak": 6
     },
@@ -10258,7 +10455,7 @@
       "owner_id": "793977545186979840",
       "username": "Redrumsregrub",
       "team_name": "Father Time ",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 21,
         "losses": 35,
@@ -10301,9 +10498,17 @@
           "ties": 0,
           "pf": 1699.2,
           "pa": 1951.2
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1329.9,
+      "current_elo": 1377.2,
       "peak_elo": 1567.4,
       "best_win_streak": 4
     },
@@ -10311,7 +10516,7 @@
       "owner_id": "861064424906158080",
       "username": "bLaker24",
       "team_name": "General Ken-obi",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 36,
         "losses": 20,
@@ -10319,7 +10524,7 @@
         "pf": 8015.6,
         "pa": 7273.8
       },
-      "playoff_appearances": 3,
+      "playoff_appearances": 4,
       "championships": 2,
       "finals": 2,
       "season_results": [
@@ -10354,9 +10559,17 @@
           "ties": 0,
           "pf": 2030.1,
           "pa": 1751.9
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1700.2,
+      "current_elo": 1680.9,
       "peak_elo": 1700.2,
       "best_win_streak": 7
     },
@@ -10364,7 +10577,7 @@
       "owner_id": "510254202180411392",
       "username": "zbcowan",
       "team_name": "Sleeping Giants",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 39,
         "losses": 17,
@@ -10407,9 +10620,17 @@
           "ties": 0,
           "pf": 1933.0,
           "pa": 1826.7
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1561.1,
+      "current_elo": 1541.2,
       "peak_elo": 1672.1,
       "best_win_streak": 11
     },
@@ -10417,7 +10638,7 @@
       "owner_id": "865653448849391616",
       "username": "GrayskullXX",
       "team_name": "Ghastly Grayskull Gang",
-      "seasons_played": 4,
+      "seasons_played": 5,
       "all_time": {
         "wins": 21,
         "losses": 35,
@@ -10425,7 +10646,7 @@
         "pf": 7184.3,
         "pa": 7827.3
       },
-      "playoff_appearances": 0,
+      "playoff_appearances": 1,
       "championships": 0,
       "finals": 0,
       "season_results": [
@@ -10460,9 +10681,17 @@
           "ties": 0,
           "pf": 1789.5,
           "pa": 2021.4
+        },
+        {
+          "season": 2026,
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "pf": 0.0,
+          "pa": 0.0
         }
       ],
-      "current_elo": 1324.5,
+      "current_elo": 1342.2,
       "peak_elo": 1519.5,
       "best_win_streak": 5
     }
