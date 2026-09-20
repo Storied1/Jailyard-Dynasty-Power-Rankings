@@ -12,10 +12,10 @@
       "team_name": "The Boonist Monks",
       "final_record": {
         "wins": 0,
-        "losses": 0,
+        "losses": 1,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 156.86,
+        "fpts_against": 215.86
       }
     },
     "2": {
@@ -24,11 +24,11 @@
       "username": "bchodos",
       "team_name": "Kittler on the Roof",
       "final_record": {
-        "wins": 0,
+        "wins": 1,
         "losses": 0,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 144.66,
+        "fpts_against": 140.36
       }
     },
     "3": {
@@ -37,11 +37,11 @@
       "username": "kharlow",
       "team_name": "House of Harlow",
       "final_record": {
-        "wins": 0,
+        "wins": 1,
         "losses": 0,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 156.4,
+        "fpts_against": 130.16
       }
     },
     "4": {
@@ -50,11 +50,11 @@
       "username": "kevobucks",
       "team_name": "Noble FFT",
       "final_record": {
-        "wins": 0,
+        "wins": 1,
         "losses": 0,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 215.86,
+        "fpts_against": 156.86
       }
     },
     "5": {
@@ -63,11 +63,11 @@
       "username": "KidBouzie",
       "team_name": "The Legion of Bouz",
       "final_record": {
-        "wins": 0,
+        "wins": 1,
         "losses": 0,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 155.1,
+        "fpts_against": 104.08
       }
     },
     "6": {
@@ -77,10 +77,10 @@
       "team_name": "Rasheeing the Scene",
       "final_record": {
         "wins": 0,
-        "losses": 0,
+        "losses": 1,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 130.16,
+        "fpts_against": 156.4
       }
     },
     "7": {
@@ -90,10 +90,10 @@
       "team_name": "Chudders Football Team",
       "final_record": {
         "wins": 0,
-        "losses": 0,
+        "losses": 1,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 143.26,
+        "fpts_against": 143.5
       }
     },
     "8": {
@@ -103,10 +103,10 @@
       "team_name": "MHJTIME",
       "final_record": {
         "wins": 0,
-        "losses": 0,
+        "losses": 1,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 140.36,
+        "fpts_against": 144.66
       }
     },
     "9": {
@@ -115,11 +115,11 @@
       "username": "Redrumsregrub",
       "team_name": "Father Time ",
       "final_record": {
-        "wins": 0,
+        "wins": 1,
         "losses": 0,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 143.5,
+        "fpts_against": 143.26
       }
     },
     "10": {
@@ -128,11 +128,11 @@
       "username": "bLaker24",
       "team_name": "General Ken-obi",
       "final_record": {
-        "wins": 0,
+        "wins": 1,
         "losses": 0,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 132.12,
+        "fpts_against": 116.02
       }
     },
     "11": {
@@ -142,10 +142,10 @@
       "team_name": "Sleeping Giants",
       "final_record": {
         "wins": 0,
-        "losses": 0,
+        "losses": 1,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 116.02,
+        "fpts_against": 132.12
       }
     },
     "12": {
@@ -155,10 +155,10 @@
       "team_name": "Ghastly Grayskull Gang",
       "final_record": {
         "wins": 0,
-        "losses": 0,
+        "losses": 1,
         "ties": 0,
-        "fpts": 0.0,
-        "fpts_against": 0.0
+        "fpts": 104.08,
+        "fpts_against": 155.1
       }
     }
   },
@@ -171,9 +171,25 @@
           "matchup_id": 1,
           "team1": {
             "roster_id": 1,
-            "points": 26.3,
+            "points": 156.86,
             "projected": 0,
             "top_starters": [
+              {
+                "pid": "5892",
+                "name": "David Montgomery",
+                "position": "RB",
+                "team": "HOU",
+                "points": 27.4,
+                "projected": 0
+              },
+              {
+                "pid": "4881",
+                "name": "Lamar Jackson",
+                "position": "QB",
+                "team": "BAL",
+                "points": 24.96,
+                "projected": 0
+              },
               {
                 "pid": "9488",
                 "name": "Jaxon Smith-Njigba",
@@ -183,11 +199,839 @@
                 "projected": 0
               },
               {
-                "pid": "2133",
-                "name": "Davante Adams",
+                "pid": "7588",
+                "name": "Javonte Williams",
+                "position": "RB",
+                "team": "DAL",
+                "points": 21.7,
+                "projected": 0
+              },
+              {
+                "pid": "11786",
+                "name": "Cam Little",
+                "position": "K",
+                "team": "JAX",
+                "points": 12.7,
+                "projected": 0
+              }
+            ]
+          },
+          "team2": {
+            "roster_id": 4,
+            "points": 215.86,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "11560",
+                "name": "Caleb Williams",
+                "position": "QB",
+                "team": "CHI",
+                "points": 37.26,
+                "projected": 0
+              },
+              {
+                "pid": "6790",
+                "name": "D'Andre Swift",
+                "position": "RB",
+                "team": "CHI",
+                "points": 31.9,
+                "projected": 0
+              },
+              {
+                "pid": "9509",
+                "name": "Bijan Robinson",
+                "position": "RB",
+                "team": "ATL",
+                "points": 25.3,
+                "projected": 0
+              },
+              {
+                "pid": "9997",
+                "name": "Zay Flowers",
                 "position": "WR",
+                "team": "BAL",
+                "points": 23.5,
+                "projected": 0
+              },
+              {
+                "pid": "8155",
+                "name": "Breece Hall",
+                "position": "RB",
+                "team": "NYJ",
+                "points": 18.8,
+                "projected": 0
+              }
+            ]
+          },
+          "winner": 4
+        },
+        {
+          "matchup_id": 5,
+          "team1": {
+            "roster_id": 2,
+            "points": 144.66,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "8167",
+                "name": "Christian Watson",
+                "position": "WR",
+                "team": "GB",
+                "points": 29.7,
+                "projected": 0
+              },
+              {
+                "pid": "6813",
+                "name": "Jonathan Taylor",
+                "position": "RB",
+                "team": "IND",
+                "points": 23.6,
+                "projected": 0
+              },
+              {
+                "pid": "6770",
+                "name": "Joe Burrow",
+                "position": "QB",
+                "team": "CIN",
+                "points": 15.16,
+                "projected": 0
+              },
+              {
+                "pid": "11687",
+                "name": "Edgerrin Cooper",
+                "position": "LB",
+                "team": "GB",
+                "points": 14.5,
+                "projected": 0
+              },
+              {
+                "pid": "8150",
+                "name": "Kyren Williams",
+                "position": "RB",
                 "team": "LAR",
-                "points": 4.1,
+                "points": 14.0,
+                "projected": 0
+              }
+            ]
+          },
+          "team2": {
+            "roster_id": 8,
+            "points": 140.36,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "3198",
+                "name": "Derrick Henry",
+                "position": "RB",
+                "team": "BAL",
+                "points": 34.8,
+                "projected": 0
+              },
+              {
+                "pid": "8130",
+                "name": "Trey McBride",
+                "position": "TE",
+                "team": "ARI",
+                "points": 20.0,
+                "projected": 0
+              },
+              {
+                "pid": "11566",
+                "name": "Jayden Daniels",
+                "position": "QB",
+                "team": "WAS",
+                "points": 17.66,
+                "projected": 0
+              },
+              {
+                "pid": "JAX",
+                "name": "Jacksonville Jaguars",
+                "position": "DEF",
+                "team": "JAX",
+                "points": 17.0,
+                "projected": 0
+              },
+              {
+                "pid": "6217",
+                "name": "Blake Cashman",
+                "position": "LB",
+                "team": "MIN",
+                "points": 13.5,
+                "projected": 0
+              }
+            ]
+          },
+          "winner": 2
+        },
+        {
+          "matchup_id": 3,
+          "team1": {
+            "roster_id": 3,
+            "points": 156.4,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "6794",
+                "name": "Justin Jefferson",
+                "position": "WR",
+                "team": "MIN",
+                "points": 27.2,
+                "projected": 0
+              },
+              {
+                "pid": "12508",
+                "name": "Jaxson Dart",
+                "position": "QB",
+                "team": "NYG",
+                "points": 25.6,
+                "projected": 0
+              },
+              {
+                "pid": "12711",
+                "name": "Tyler Loop",
+                "position": "K",
+                "team": "BAL",
+                "points": 15.2,
+                "projected": 0
+              },
+              {
+                "pid": "MIN",
+                "name": "Minnesota Vikings",
+                "position": "DEF",
+                "team": "MIN",
+                "points": 14.0,
+                "projected": 0
+              },
+              {
+                "pid": "13287",
+                "name": "Jeremiyah Love",
+                "position": "RB",
+                "team": "ARI",
+                "points": 12.0,
+                "projected": 0
+              }
+            ]
+          },
+          "team2": {
+            "roster_id": 6,
+            "points": 130.16,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "4984",
+                "name": "Josh Allen",
+                "position": "QB",
+                "team": "BUF",
+                "points": 34.66,
+                "projected": 0
+              },
+              {
+                "pid": "11584",
+                "name": "Bucky Irving",
+                "position": "RB",
+                "team": "TB",
+                "points": 16.8,
+                "projected": 0
+              },
+              {
+                "pid": "5844",
+                "name": "T.J. Hockenson",
+                "position": "TE",
+                "team": "MIN",
+                "points": 12.6,
+                "projected": 0
+              },
+              {
+                "pid": "7543",
+                "name": "Travis Etienne",
+                "position": "RB",
+                "team": "NO",
+                "points": 11.3,
+                "projected": 0
+              },
+              {
+                "pid": "10229",
+                "name": "Rashee Rice",
+                "position": "WR",
+                "team": "KC",
+                "points": 8.9,
+                "projected": 0
+              }
+            ]
+          },
+          "winner": 3
+        },
+        {
+          "matchup_id": 4,
+          "team1": {
+            "roster_id": 5,
+            "points": 155.1,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "4070",
+                "name": "T.J. Watt",
+                "position": "LB",
+                "team": "PIT",
+                "points": 29.0,
+                "projected": 0
+              },
+              {
+                "pid": "7547",
+                "name": "Amon-Ra St. Brown",
+                "position": "WR",
+                "team": "DET",
+                "points": 23.7,
+                "projected": 0
+              },
+              {
+                "pid": "3294",
+                "name": "Dak Prescott",
+                "position": "QB",
+                "team": "DAL",
+                "points": 15.4,
+                "projected": 0
+              },
+              {
+                "pid": "6183",
+                "name": "Andrew Van Ginkel",
+                "position": "LB",
+                "team": "MIN",
+                "points": 14.0,
+                "projected": 0
+              },
+              {
+                "pid": "12481",
+                "name": "Cam Skattebo",
+                "position": "RB",
+                "team": "NYG",
+                "points": 13.1,
+                "projected": 0
+              }
+            ]
+          },
+          "team2": {
+            "roster_id": 12,
+            "points": 104.08,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "6804",
+                "name": "Jordan Love",
+                "position": "QB",
+                "team": "GB",
+                "points": 20.48,
+                "projected": 0
+              },
+              {
+                "pid": "PIT",
+                "name": "Pittsburgh Steelers",
+                "position": "DEF",
+                "team": "PIT",
+                "points": 20.0,
+                "projected": 0
+              },
+              {
+                "pid": "13376",
+                "name": "Caleb Downs",
+                "position": "DB",
+                "team": "DAL",
+                "points": 11.5,
+                "projected": 0
+              },
+              {
+                "pid": "12507",
+                "name": "Omarion Hampton",
+                "position": "RB",
+                "team": "LAC",
+                "points": 8.3,
+                "projected": 0
+              },
+              {
+                "pid": "11792",
+                "name": "Will Reichard",
+                "position": "K",
+                "team": "MIN",
+                "points": 7.8,
+                "projected": 0
+              }
+            ]
+          },
+          "winner": 5
+        },
+        {
+          "matchup_id": 6,
+          "team1": {
+            "roster_id": 7,
+            "points": 143.26,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "9221",
+                "name": "Jahmyr Gibbs",
+                "position": "RB",
+                "team": "DET",
+                "points": 31.1,
+                "projected": 0
+              },
+              {
+                "pid": "12527",
+                "name": "Ashton Jeanty",
+                "position": "RB",
+                "team": "LV",
+                "points": 29.7,
+                "projected": 0
+              },
+              {
+                "pid": "9487",
+                "name": "Parker Washington",
+                "position": "WR",
+                "team": "JAX",
+                "points": 16.8,
+                "projected": 0
+              },
+              {
+                "pid": "6815",
+                "name": "Zack Baun",
+                "position": "LB",
+                "team": "PHI",
+                "points": 15.5,
+                "projected": 0
+              },
+              {
+                "pid": "6797",
+                "name": "Justin Herbert",
+                "position": "QB",
+                "team": "LAC",
+                "points": 14.26,
+                "projected": 0
+              }
+            ]
+          },
+          "team2": {
+            "roster_id": 9,
+            "points": 143.5,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "8183",
+                "name": "Brock Purdy",
+                "position": "QB",
+                "team": "SF",
+                "points": 22.1,
+                "projected": 0
+              },
+              {
+                "pid": "7839",
+                "name": "Evan McPherson",
+                "position": "K",
+                "team": "CIN",
+                "points": 20.5,
+                "projected": 0
+              },
+              {
+                "pid": "8289",
+                "name": "Aidan Hutchinson",
+                "position": "DL",
+                "team": "DET",
+                "points": 18.5,
+                "projected": 0
+              },
+              {
+                "pid": "11635",
+                "name": "Ladd McConkey",
+                "position": "WR",
+                "team": "LAC",
+                "points": 16.7,
+                "projected": 0
+              },
+              {
+                "pid": "4960",
+                "name": "Roquan Smith",
+                "position": "LB",
+                "team": "BAL",
+                "points": 16.0,
+                "projected": 0
+              }
+            ]
+          },
+          "winner": 9
+        },
+        {
+          "matchup_id": 2,
+          "team1": {
+            "roster_id": 10,
+            "points": 132.12,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "8151",
+                "name": "Kenneth Walker",
+                "position": "RB",
+                "team": "KC",
+                "points": 32.6,
+                "projected": 0
+              },
+              {
+                "pid": "7569",
+                "name": "Nico Collins",
+                "position": "WR",
+                "team": "HOU",
+                "points": 17.7,
+                "projected": 0
+              },
+              {
+                "pid": "9224",
+                "name": "Chase Brown",
+                "position": "RB",
+                "team": "CIN",
+                "points": 16.3,
+                "projected": 0
+              },
+              {
+                "pid": "6786",
+                "name": "CeeDee Lamb",
+                "position": "WR",
+                "team": "DAL",
+                "points": 12.9,
+                "projected": 0
+              },
+              {
+                "pid": "11564",
+                "name": "Drake Maye",
+                "position": "QB",
+                "team": "NE",
+                "points": 12.82,
+                "projected": 0
+              }
+            ]
+          },
+          "team2": {
+            "roster_id": 11,
+            "points": 116.02,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "6904",
+                "name": "Jalen Hurts",
+                "position": "QB",
+                "team": "PHI",
+                "points": 24.72,
+                "projected": 0
+              },
+              {
+                "pid": "5022",
+                "name": "Dallas Goedert",
+                "position": "TE",
+                "team": "PHI",
+                "points": 21.7,
+                "projected": 0
+              },
+              {
+                "pid": "13545",
+                "name": "Trey Smack",
+                "position": "K",
+                "team": "GB",
+                "points": 13.2,
+                "projected": 0
+              },
+              {
+                "pid": "12578",
+                "name": "Carson Schwesinger",
+                "position": "LB",
+                "team": "CLE",
+                "points": 9.5,
+                "projected": 0
+              },
+              {
+                "pid": "TB",
+                "name": "Tampa Bay Buccaneers",
+                "position": "DEF",
+                "team": "TB",
+                "points": 9.0,
+                "projected": 0
+              }
+            ]
+          },
+          "winner": 10
+        }
+      ],
+      "standings": [
+        {
+          "roster_id": 4,
+          "wins": 1,
+          "losses": 0,
+          "ties": 0,
+          "pf": 215.86,
+          "pa": 156.86,
+          "power_score": 1.2533,
+          "week_points": 215.86,
+          "power_rank": 1
+        },
+        {
+          "roster_id": 3,
+          "wins": 1,
+          "losses": 0,
+          "ties": 0,
+          "pf": 156.4,
+          "pa": 130.16,
+          "power_score": 1.0297,
+          "week_points": 156.4,
+          "power_rank": 2
+        },
+        {
+          "roster_id": 5,
+          "wins": 1,
+          "losses": 0,
+          "ties": 0,
+          "pf": 155.1,
+          "pa": 104.08,
+          "power_score": 1.0072,
+          "week_points": 155.1,
+          "power_rank": 3
+        },
+        {
+          "roster_id": 2,
+          "wins": 1,
+          "losses": 0,
+          "ties": 0,
+          "pf": 144.66,
+          "pa": 140.36,
+          "power_score": 0.9962,
+          "week_points": 144.66,
+          "power_rank": 4
+        },
+        {
+          "roster_id": 9,
+          "wins": 1,
+          "losses": 0,
+          "ties": 0,
+          "pf": 143.5,
+          "pa": 143.26,
+          "power_score": 0.9942,
+          "week_points": 143.5,
+          "power_rank": 5
+        },
+        {
+          "roster_id": 10,
+          "wins": 1,
+          "losses": 0,
+          "ties": 0,
+          "pf": 132.12,
+          "pa": 116.02,
+          "power_score": 0.9361,
+          "week_points": 132.12,
+          "power_rank": 6
+        },
+        {
+          "roster_id": 1,
+          "wins": 0,
+          "losses": 1,
+          "ties": 0,
+          "pf": 156.86,
+          "pa": 215.86,
+          "power_score": 0.6904,
+          "week_points": 156.86,
+          "power_rank": 7
+        },
+        {
+          "roster_id": 7,
+          "wins": 0,
+          "losses": 1,
+          "ties": 0,
+          "pf": 143.26,
+          "pa": 143.5,
+          "power_score": 0.5935,
+          "week_points": 143.26,
+          "power_rank": 8
+        },
+        {
+          "roster_id": 8,
+          "wins": 0,
+          "losses": 1,
+          "ties": 0,
+          "pf": 140.36,
+          "pa": 144.66,
+          "power_score": 0.5843,
+          "week_points": 140.36,
+          "power_rank": 9
+        },
+        {
+          "roster_id": 6,
+          "wins": 0,
+          "losses": 1,
+          "ties": 0,
+          "pf": 130.16,
+          "pa": 156.4,
+          "power_score": 0.5572,
+          "week_points": 130.16,
+          "power_rank": 10
+        },
+        {
+          "roster_id": 11,
+          "wins": 0,
+          "losses": 1,
+          "ties": 0,
+          "pf": 116.02,
+          "pa": 132.12,
+          "power_score": 0.4916,
+          "week_points": 116.02,
+          "power_rank": 11
+        },
+        {
+          "roster_id": 12,
+          "wins": 0,
+          "losses": 1,
+          "ties": 0,
+          "pf": 104.08,
+          "pa": 155.1,
+          "power_score": 0.4663,
+          "week_points": 104.08,
+          "power_rank": 12
+        }
+      ],
+      "top_performers": [
+        {
+          "pid": "11560",
+          "name": "Caleb Williams",
+          "position": "QB",
+          "team": "CHI",
+          "points": 37.26,
+          "roster_id": 4
+        },
+        {
+          "pid": "3198",
+          "name": "Derrick Henry",
+          "position": "RB",
+          "team": "BAL",
+          "points": 34.8,
+          "roster_id": 8
+        },
+        {
+          "pid": "4984",
+          "name": "Josh Allen",
+          "position": "QB",
+          "team": "BUF",
+          "points": 34.66,
+          "roster_id": 6
+        },
+        {
+          "pid": "8151",
+          "name": "Kenneth Walker",
+          "position": "RB",
+          "team": "KC",
+          "points": 32.6,
+          "roster_id": 10
+        },
+        {
+          "pid": "6790",
+          "name": "D'Andre Swift",
+          "position": "RB",
+          "team": "CHI",
+          "points": 31.9,
+          "roster_id": 4
+        },
+        {
+          "pid": "9221",
+          "name": "Jahmyr Gibbs",
+          "position": "RB",
+          "team": "DET",
+          "points": 31.1,
+          "roster_id": 7
+        },
+        {
+          "pid": "8167",
+          "name": "Christian Watson",
+          "position": "WR",
+          "team": "GB",
+          "points": 29.7,
+          "roster_id": 2
+        },
+        {
+          "pid": "12527",
+          "name": "Ashton Jeanty",
+          "position": "RB",
+          "team": "LV",
+          "points": 29.7,
+          "roster_id": 7
+        },
+        {
+          "pid": "4070",
+          "name": "T.J. Watt",
+          "position": "LB",
+          "team": "PIT",
+          "points": 29.0,
+          "roster_id": 5
+        },
+        {
+          "pid": "5892",
+          "name": "David Montgomery",
+          "position": "RB",
+          "team": "HOU",
+          "points": 27.4,
+          "roster_id": 1
+        }
+      ],
+      "bottom_performers": [
+        {
+          "pid": "HOU",
+          "name": "Houston Texans",
+          "position": "DEF",
+          "team": "HOU",
+          "points": 1.0,
+          "roster_id": 2
+        },
+        {
+          "pid": "GB",
+          "name": "Green Bay Packers",
+          "position": "DEF",
+          "team": "GB",
+          "points": 1.0,
+          "roster_id": 7
+        },
+        {
+          "pid": "7526",
+          "name": "Jaylen Waddle",
+          "position": "WR",
+          "team": "DEN",
+          "points": 0.7,
+          "roster_id": 5
+        }
+      ],
+      "highest_scorer": {
+        "roster_id": 4,
+        "points": 215.86
+      },
+      "lowest_scorer": {
+        "roster_id": 12,
+        "points": 104.08
+      }
+    },
+    {
+      "week": 2,
+      "is_playoff": false,
+      "matchups": [
+        {
+          "matchup_id": 1,
+          "team1": {
+            "roster_id": 1,
+            "points": 25.4,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "8138",
+                "name": "James Cook",
+                "position": "RB",
+                "team": "BUF",
+                "points": 20.4,
+                "projected": 0
+              },
+              {
+                "pid": "10880",
+                "name": "Jack Campbell",
+                "position": "LB",
+                "team": "DET",
+                "points": 5.0,
                 "projected": 0
               },
               {
@@ -199,65 +1043,65 @@
                 "projected": 0
               },
               {
-                "pid": "8138",
-                "name": "James Cook",
-                "position": "RB",
-                "team": "BUF",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
                 "pid": "7588",
                 "name": "Javonte Williams",
                 "position": "RB",
                 "team": "DAL",
                 "points": 0.0,
                 "projected": 0
+              },
+              {
+                "pid": "9488",
+                "name": "Jaxon Smith-Njigba",
+                "position": "WR",
+                "team": "SEA",
+                "points": 0.0,
+                "projected": 0
               }
             ]
           },
           "team2": {
-            "roster_id": 4,
-            "points": 4.1,
+            "roster_id": 10,
+            "points": -0.1,
             "projected": 0,
             "top_starters": [
               {
-                "pid": "5859",
-                "name": "A.J. Brown",
-                "position": "WR",
-                "team": "NE",
-                "points": 4.1,
-                "projected": 0
-              },
-              {
-                "pid": "11560",
-                "name": "Caleb Williams",
+                "pid": "7523",
+                "name": "Trevor Lawrence",
                 "position": "QB",
-                "team": "CHI",
+                "team": "JAX",
                 "points": 0.0,
                 "projected": 0
               },
               {
-                "pid": "9509",
-                "name": "Bijan Robinson",
+                "pid": "8151",
+                "name": "Kenneth Walker",
                 "position": "RB",
-                "team": "ATL",
+                "team": "KC",
                 "points": 0.0,
                 "projected": 0
               },
               {
-                "pid": "8155",
-                "name": "Breece Hall",
+                "pid": "4866",
+                "name": "Saquon Barkley",
                 "position": "RB",
-                "team": "NYJ",
+                "team": "PHI",
                 "points": 0.0,
                 "projected": 0
               },
               {
-                "pid": "6801",
-                "name": "Tee Higgins",
+                "pid": "6786",
+                "name": "CeeDee Lamb",
                 "position": "WR",
-                "team": "CIN",
+                "team": "DAL",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "8144",
+                "name": "Chris Olave",
+                "position": "WR",
+                "team": "NO",
                 "points": 0.0,
                 "projected": 0
               }
@@ -269,25 +1113,9 @@
           "matchup_id": 5,
           "team1": {
             "roster_id": 2,
-            "points": 24.9,
+            "points": 0,
             "projected": 0,
             "top_starters": [
-              {
-                "pid": "8150",
-                "name": "Kyren Williams",
-                "position": "RB",
-                "team": "LAR",
-                "points": 14.0,
-                "projected": 0
-              },
-              {
-                "pid": "9493",
-                "name": "Puka Nacua",
-                "position": "WR",
-                "team": "LAR",
-                "points": 10.9,
-                "projected": 0
-              },
               {
                 "pid": "6770",
                 "name": "Joe Burrow",
@@ -305,6 +1133,22 @@
                 "projected": 0
               },
               {
+                "pid": "8150",
+                "name": "Kyren Williams",
+                "position": "RB",
+                "team": "LAR",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "9493",
+                "name": "Puka Nacua",
+                "position": "WR",
+                "team": "LAR",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
                 "pid": "8146",
                 "name": "Garrett Wilson",
                 "position": "WR",
@@ -315,75 +1159,67 @@
             ]
           },
           "team2": {
-            "roster_id": 8,
-            "points": 0,
+            "roster_id": 7,
+            "points": 27.4,
             "projected": 0,
             "top_starters": [
               {
-                "pid": "11566",
-                "name": "Jayden Daniels",
+                "pid": "9221",
+                "name": "Jahmyr Gibbs",
+                "position": "RB",
+                "team": "DET",
+                "points": 20.3,
+                "projected": 0
+              },
+              {
+                "pid": "11539",
+                "name": "Jake Bates",
+                "position": "K",
+                "team": "DET",
+                "points": 7.1,
+                "projected": 0
+              },
+              {
+                "pid": "12545",
+                "name": "Tyler Shough",
                 "position": "QB",
-                "team": "WAS",
+                "team": "NO",
                 "points": 0.0,
                 "projected": 0
               },
               {
-                "pid": "3198",
-                "name": "Derrick Henry",
+                "pid": "12527",
+                "name": "Ashton Jeanty",
                 "position": "RB",
-                "team": "BAL",
+                "team": "LV",
                 "points": 0.0,
                 "projected": 0
               },
               {
-                "pid": "12512",
-                "name": "Quinshon Judkins",
-                "position": "RB",
-                "team": "CLE",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "7564",
-                "name": "Ja'Marr Chase",
+                "pid": "12514",
+                "name": "Emeka Egbuka",
                 "position": "WR",
-                "team": "CIN",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "11632",
-                "name": "Malik Nabers",
-                "position": "WR",
-                "team": "NYG",
+                "team": "TB",
                 "points": 0.0,
                 "projected": 0
               }
             ]
           },
-          "winner": 2
+          "winner": 7
         },
         {
-          "matchup_id": 3,
+          "matchup_id": 4,
           "team1": {
             "roster_id": 3,
-            "points": 20.5,
+            "points": 19.0,
             "projected": 0,
             "top_starters": [
               {
-                "pid": "7611",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
-                "team": "NE",
-                "points": 12.0,
-                "projected": 0
-              },
-              {
-                "pid": "5816",
-                "name": "Nick Bosa",
-                "position": "DE",
-                "team": "SF",
-                "points": 8.5,
+                "pid": "10236",
+                "name": "Dalton Kincaid",
+                "position": "TE",
+                "team": "BUF",
+                "points": 19.0,
                 "projected": 0
               },
               {
@@ -403,108 +1239,18 @@
                 "projected": 0
               },
               {
+                "pid": "7611",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
+                "team": "NE",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
                 "pid": "6794",
                 "name": "Justin Jefferson",
                 "position": "WR",
                 "team": "MIN",
-                "points": 0.0,
-                "projected": 0
-              }
-            ]
-          },
-          "team2": {
-            "roster_id": 6,
-            "points": 0,
-            "projected": 0,
-            "top_starters": [
-              {
-                "pid": "4984",
-                "name": "Josh Allen",
-                "position": "QB",
-                "team": "BUF",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "9226",
-                "name": "De'Von Achane",
-                "position": "RB",
-                "team": "MIA",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "7543",
-                "name": "Travis Etienne",
-                "position": "RB",
-                "team": "NO",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "10229",
-                "name": "Rashee Rice",
-                "position": "WR",
-                "team": "KC",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "9500",
-                "name": "Josh Downs",
-                "position": "WR",
-                "team": "IND",
-                "points": 0.0,
-                "projected": 0
-              }
-            ]
-          },
-          "winner": 3
-        },
-        {
-          "matchup_id": 4,
-          "team1": {
-            "roster_id": 5,
-            "points": 35.4,
-            "projected": 0,
-            "top_starters": [
-              {
-                "pid": "SEA",
-                "name": "Seattle Seahawks",
-                "position": "DEF",
-                "team": "SEA",
-                "points": 13.0,
-                "projected": 0
-              },
-              {
-                "pid": "4034",
-                "name": "Christian McCaffrey",
-                "position": "RB",
-                "team": "SF",
-                "points": 11.3,
-                "projected": 0
-              },
-              {
-                "pid": "2747",
-                "name": "Jason Myers",
-                "position": "K",
-                "team": "SEA",
-                "points": 7.0,
-                "projected": 0
-              },
-              {
-                "pid": "3214",
-                "name": "Hunter Henry",
-                "position": "TE",
-                "team": "NE",
-                "points": 4.1,
-                "projected": 0
-              },
-              {
-                "pid": "3294",
-                "name": "Dak Prescott",
-                "position": "QB",
-                "team": "DAL",
                 "points": 0.0,
                 "projected": 0
               }
@@ -557,150 +1303,52 @@
               }
             ]
           },
-          "winner": 5
-        },
-        {
-          "matchup_id": 6,
-          "team1": {
-            "roster_id": 7,
-            "points": 2.0,
-            "projected": 0,
-            "top_starters": [
-              {
-                "pid": "7136",
-                "name": "Kam Curl",
-                "position": "DB",
-                "team": "LAR",
-                "points": 2.0,
-                "projected": 0
-              },
-              {
-                "pid": "6797",
-                "name": "Justin Herbert",
-                "position": "QB",
-                "team": "LAC",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "9221",
-                "name": "Jahmyr Gibbs",
-                "position": "RB",
-                "team": "DET",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "12527",
-                "name": "Ashton Jeanty",
-                "position": "RB",
-                "team": "LV",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "12514",
-                "name": "Emeka Egbuka",
-                "position": "WR",
-                "team": "TB",
-                "points": 0.0,
-                "projected": 0
-              }
-            ]
-          },
-          "team2": {
-            "roster_id": 9,
-            "points": 28.9,
-            "projected": 0,
-            "top_starters": [
-              {
-                "pid": "8183",
-                "name": "Brock Purdy",
-                "position": "QB",
-                "team": "SF",
-                "points": 22.1,
-                "projected": 0
-              },
-              {
-                "pid": "13286",
-                "name": "Jadarian Price",
-                "position": "RB",
-                "team": "SEA",
-                "points": 6.8,
-                "projected": 0
-              },
-              {
-                "pid": "8228",
-                "name": "Jaylen Warren",
-                "position": "RB",
-                "team": "PIT",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "12526",
-                "name": "Tetairoa McMillan",
-                "position": "WR",
-                "team": "CAR",
-                "points": 0.0,
-                "projected": 0
-              },
-              {
-                "pid": "11631",
-                "name": "Brian Thomas",
-                "position": "WR",
-                "team": "JAX",
-                "points": 0.0,
-                "projected": 0
-              }
-            ]
-          },
-          "winner": 9
+          "winner": 3
         },
         {
           "matchup_id": 2,
           "team1": {
-            "roster_id": 10,
-            "points": 14.82,
+            "roster_id": 4,
+            "points": 0,
             "projected": 0,
             "top_starters": [
               {
-                "pid": "11564",
-                "name": "Drake Maye",
+                "pid": "11560",
+                "name": "Caleb Williams",
                 "position": "QB",
-                "team": "NE",
-                "points": 12.82,
-                "projected": 0
-              },
-              {
-                "pid": "LAR",
-                "name": "Los Angeles Rams",
-                "position": "DEF",
-                "team": "LAR",
-                "points": 2.0,
-                "projected": 0
-              },
-              {
-                "pid": "4866",
-                "name": "Saquon Barkley",
-                "position": "RB",
-                "team": "PHI",
+                "team": "CHI",
                 "points": 0.0,
                 "projected": 0
               },
               {
-                "pid": "8151",
-                "name": "Kenneth Walker",
+                "pid": "9509",
+                "name": "Bijan Robinson",
                 "position": "RB",
-                "team": "KC",
+                "team": "ATL",
                 "points": 0.0,
                 "projected": 0
               },
               {
-                "pid": "6786",
-                "name": "CeeDee Lamb",
+                "pid": "8155",
+                "name": "Breece Hall",
+                "position": "RB",
+                "team": "NYJ",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "12501",
+                "name": "Matthew Golden",
                 "position": "WR",
-                "team": "DAL",
+                "team": "GB",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "6801",
+                "name": "Tee Higgins",
+                "position": "WR",
+                "team": "CIN",
                 "points": 0.0,
                 "projected": 0
               }
@@ -708,15 +1356,15 @@
           },
           "team2": {
             "roster_id": 11,
-            "points": 5.4,
+            "points": 5.3,
             "projected": 0,
             "top_starters": [
               {
-                "pid": "11586",
-                "name": "Blake Corum",
-                "position": "RB",
-                "team": "LAR",
-                "points": 5.4,
+                "pid": "8134",
+                "name": "Khalil Shakir",
+                "position": "WR",
+                "team": "BUF",
+                "points": 5.3,
                 "projected": 0
               },
               {
@@ -736,275 +1384,463 @@
                 "projected": 0
               },
               {
+                "pid": "11586",
+                "name": "Blake Corum",
+                "position": "RB",
+                "team": "LAR",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
                 "pid": "11620",
                 "name": "Rome Odunze",
                 "position": "WR",
                 "team": "CHI",
                 "points": 0.0,
                 "projected": 0
+              }
+            ]
+          },
+          "winner": 11
+        },
+        {
+          "matchup_id": 3,
+          "team1": {
+            "roster_id": 5,
+            "points": 30.7,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "7547",
+                "name": "Amon-Ra St. Brown",
+                "position": "WR",
+                "team": "DET",
+                "points": 30.7,
+                "projected": 0
               },
               {
-                "pid": "9756",
-                "name": "Jordan Addison",
+                "pid": "3294",
+                "name": "Dak Prescott",
+                "position": "QB",
+                "team": "DAL",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "4034",
+                "name": "Christian McCaffrey",
+                "position": "RB",
+                "team": "SF",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "12481",
+                "name": "Cam Skattebo",
+                "position": "RB",
+                "team": "NYG",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "7525",
+                "name": "DeVonta Smith",
                 "position": "WR",
-                "team": "MIN",
+                "team": "PHI",
                 "points": 0.0,
                 "projected": 0
               }
             ]
           },
-          "winner": 10
+          "team2": {
+            "roster_id": 6,
+            "points": 39.82,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "4984",
+                "name": "Josh Allen",
+                "position": "QB",
+                "team": "BUF",
+                "points": 39.82,
+                "projected": 0
+              },
+              {
+                "pid": "9226",
+                "name": "De'Von Achane",
+                "position": "RB",
+                "team": "MIA",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "7543",
+                "name": "Travis Etienne",
+                "position": "RB",
+                "team": "NO",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "10229",
+                "name": "Rashee Rice",
+                "position": "WR",
+                "team": "KC",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "11834",
+                "name": "Devaughn Vele",
+                "position": "WR",
+                "team": "NO",
+                "points": 0.0,
+                "projected": 0
+              }
+            ]
+          },
+          "winner": 6
+        },
+        {
+          "matchup_id": 6,
+          "team1": {
+            "roster_id": 8,
+            "points": 0,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "11566",
+                "name": "Jayden Daniels",
+                "position": "QB",
+                "team": "WAS",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "3198",
+                "name": "Derrick Henry",
+                "position": "RB",
+                "team": "BAL",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "7594",
+                "name": "Chuba Hubbard",
+                "position": "RB",
+                "team": "CAR",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "7564",
+                "name": "Ja'Marr Chase",
+                "position": "WR",
+                "team": "CIN",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "11632",
+                "name": "Malik Nabers",
+                "position": "WR",
+                "team": "NYG",
+                "points": 0.0,
+                "projected": 0
+              }
+            ]
+          },
+          "team2": {
+            "roster_id": 9,
+            "points": 11.5,
+            "projected": 0,
+            "top_starters": [
+              {
+                "pid": "8289",
+                "name": "Aidan Hutchinson",
+                "position": "DL",
+                "team": "DET",
+                "points": 11.5,
+                "projected": 0
+              },
+              {
+                "pid": "8183",
+                "name": "Brock Purdy",
+                "position": "QB",
+                "team": "SF",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "8228",
+                "name": "Jaylen Warren",
+                "position": "RB",
+                "team": "PIT",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "13286",
+                "name": "Jadarian Price",
+                "position": "RB",
+                "team": "SEA",
+                "points": 0.0,
+                "projected": 0
+              },
+              {
+                "pid": "12526",
+                "name": "Tetairoa McMillan",
+                "position": "WR",
+                "team": "CAR",
+                "points": 0.0,
+                "projected": 0
+              }
+            ]
+          },
+          "winner": 9
         }
       ],
       "standings": [
         {
-          "roster_id": 5,
-          "wins": 1,
+          "roster_id": 3,
+          "wins": 2,
           "losses": 0,
           "ties": 0,
-          "pf": 35.4,
-          "pa": 0,
-          "power_score": 1.7085,
-          "week_points": 35.4,
+          "pf": 175.4,
+          "pa": 130.16,
+          "power_score": 1.037,
+          "week_points": 19.0,
           "power_rank": 1
         },
         {
-          "roster_id": 9,
+          "roster_id": 4,
           "wins": 1,
+          "losses": 1,
+          "ties": 0,
+          "pf": 215.86,
+          "pa": 162.16000000000003,
+          "power_score": 0.9852,
+          "week_points": 0,
+          "power_rank": 2
+        },
+        {
+          "roster_id": 9,
+          "wins": 2,
           "losses": 0,
           "ties": 0,
-          "pf": 28.9,
-          "pa": 2.0,
-          "power_score": 1.483,
-          "week_points": 28.9,
-          "power_rank": 2
+          "pf": 155.0,
+          "pa": 143.26,
+          "power_score": 0.9807,
+          "week_points": 11.5,
+          "power_rank": 3
         },
         {
           "roster_id": 1,
           "wins": 1,
-          "losses": 0,
+          "losses": 1,
           "ties": 0,
-          "pf": 26.3,
-          "pa": 4.1,
-          "power_score": 1.4025,
-          "week_points": 26.3,
-          "power_rank": 3
+          "pf": 182.26000000000002,
+          "pa": 215.76000000000002,
+          "power_score": 0.9128,
+          "week_points": 25.4,
+          "power_rank": 4
+        },
+        {
+          "roster_id": 5,
+          "wins": 1,
+          "losses": 1,
+          "ties": 0,
+          "pf": 185.79999999999998,
+          "pa": 143.9,
+          "power_score": 0.8785,
+          "week_points": 30.7,
+          "power_rank": 5
+        },
+        {
+          "roster_id": 6,
+          "wins": 1,
+          "losses": 1,
+          "ties": 0,
+          "pf": 169.98,
+          "pa": 187.1,
+          "power_score": 0.8558,
+          "week_points": 39.82,
+          "power_rank": 6
+        },
+        {
+          "roster_id": 7,
+          "wins": 1,
+          "losses": 1,
+          "ties": 0,
+          "pf": 170.66,
+          "pa": 143.5,
+          "power_score": 0.8304,
+          "week_points": 27.4,
+          "power_rank": 7
         },
         {
           "roster_id": 2,
           "wins": 1,
-          "losses": 0,
+          "losses": 1,
           "ties": 0,
-          "pf": 24.9,
-          "pa": 0,
-          "power_score": 1.3204,
-          "week_points": 24.9,
-          "power_rank": 4
-        },
-        {
-          "roster_id": 3,
-          "wins": 1,
-          "losses": 0,
-          "ties": 0,
-          "pf": 20.5,
-          "pa": 0,
-          "power_score": 1.1578,
-          "week_points": 20.5,
-          "power_rank": 5
+          "pf": 144.66,
+          "pa": 167.76000000000002,
+          "power_score": 0.7635,
+          "week_points": 0,
+          "power_rank": 8
         },
         {
           "roster_id": 10,
           "wins": 1,
-          "losses": 0,
-          "ties": 0,
-          "pf": 14.82,
-          "pa": 5.4,
-          "power_score": 0.9877,
-          "week_points": 14.82,
-          "power_rank": 6
-        },
-        {
-          "roster_id": 4,
-          "wins": 0,
           "losses": 1,
           "ties": 0,
-          "pf": 4.1,
-          "pa": 26.3,
-          "power_score": 0.346,
-          "week_points": 4.1,
-          "power_rank": 7
-        },
-        {
-          "roster_id": 11,
-          "wins": 0,
-          "losses": 1,
-          "ties": 0,
-          "pf": 5.4,
-          "pa": 14.82,
-          "power_score": 0.3092,
-          "week_points": 5.4,
-          "power_rank": 8
-        },
-        {
-          "roster_id": 7,
-          "wins": 0,
-          "losses": 1,
-          "ties": 0,
-          "pf": 2.0,
-          "pa": 28.9,
-          "power_score": 0.2876,
-          "week_points": 2.0,
+          "pf": 132.02,
+          "pa": 141.42,
+          "power_score": 0.7069,
+          "week_points": -0.1,
           "power_rank": 9
         },
         {
-          "roster_id": 12,
-          "wins": 0,
+          "roster_id": 11,
+          "wins": 1,
           "losses": 1,
           "ties": 0,
-          "pf": 0,
-          "pa": 35.4,
-          "power_score": 0.2617,
-          "week_points": 0,
+          "pf": 121.32,
+          "pa": 132.12,
+          "power_score": 0.6672,
+          "week_points": 5.3,
           "power_rank": 10
         },
         {
           "roster_id": 8,
           "wins": 0,
-          "losses": 1,
+          "losses": 2,
           "ties": 0,
-          "pf": 0,
-          "pa": 24.9,
-          "power_score": 0.1841,
+          "pf": 140.36,
+          "pa": 156.16,
+          "power_score": 0.5426,
           "week_points": 0,
           "power_rank": 11
         },
         {
-          "roster_id": 6,
+          "roster_id": 12,
           "wins": 0,
-          "losses": 1,
+          "losses": 2,
           "ties": 0,
-          "pf": 0,
-          "pa": 20.5,
-          "power_score": 0.1516,
+          "pf": 104.08,
+          "pa": 174.1,
+          "power_score": 0.4392,
           "week_points": 0,
           "power_rank": 12
         }
       ],
       "top_performers": [
         {
-          "pid": "9488",
-          "name": "Jaxon Smith-Njigba",
+          "pid": "4984",
+          "name": "Josh Allen",
+          "position": "QB",
+          "team": "BUF",
+          "points": 39.82,
+          "roster_id": 6
+        },
+        {
+          "pid": "7547",
+          "name": "Amon-Ra St. Brown",
           "position": "WR",
-          "team": "SEA",
-          "points": 22.2,
+          "team": "DET",
+          "points": 30.7,
+          "roster_id": 5
+        },
+        {
+          "pid": "8138",
+          "name": "James Cook",
+          "position": "RB",
+          "team": "BUF",
+          "points": 20.4,
           "roster_id": 1
         },
         {
-          "pid": "8183",
-          "name": "Brock Purdy",
-          "position": "QB",
-          "team": "SF",
-          "points": 22.1,
+          "pid": "9221",
+          "name": "Jahmyr Gibbs",
+          "position": "RB",
+          "team": "DET",
+          "points": 20.3,
+          "roster_id": 7
+        },
+        {
+          "pid": "10236",
+          "name": "Dalton Kincaid",
+          "position": "TE",
+          "team": "BUF",
+          "points": 19.0,
+          "roster_id": 3
+        },
+        {
+          "pid": "8289",
+          "name": "Aidan Hutchinson",
+          "position": "DL",
+          "team": "DET",
+          "points": 11.5,
           "roster_id": 9
         },
         {
-          "pid": "8150",
-          "name": "Kyren Williams",
-          "position": "RB",
-          "team": "LAR",
-          "points": 14.0,
-          "roster_id": 2
-        },
-        {
-          "pid": "SEA",
-          "name": "Seattle Seahawks",
-          "position": "DEF",
-          "team": "SEA",
-          "points": 13.0,
-          "roster_id": 5
-        },
-        {
-          "pid": "11564",
-          "name": "Drake Maye",
-          "position": "QB",
-          "team": "NE",
-          "points": 12.82,
-          "roster_id": 10
-        },
-        {
-          "pid": "7611",
-          "name": "Rhamondre Stevenson",
-          "position": "RB",
-          "team": "NE",
-          "points": 12.0,
-          "roster_id": 3
-        },
-        {
-          "pid": "4034",
-          "name": "Christian McCaffrey",
-          "position": "RB",
-          "team": "SF",
-          "points": 11.3,
-          "roster_id": 5
-        },
-        {
-          "pid": "9493",
-          "name": "Puka Nacua",
-          "position": "WR",
-          "team": "LAR",
-          "points": 10.9,
-          "roster_id": 2
-        },
-        {
-          "pid": "5816",
-          "name": "Nick Bosa",
-          "position": "DE",
-          "team": "SF",
-          "points": 8.5,
-          "roster_id": 3
-        },
-        {
-          "pid": "2747",
-          "name": "Jason Myers",
+          "pid": "11539",
+          "name": "Jake Bates",
           "position": "K",
-          "team": "SEA",
-          "points": 7.0,
-          "roster_id": 5
+          "team": "DET",
+          "points": 7.1,
+          "roster_id": 7
+        },
+        {
+          "pid": "8134",
+          "name": "Khalil Shakir",
+          "position": "WR",
+          "team": "BUF",
+          "points": 5.3,
+          "roster_id": 11
+        },
+        {
+          "pid": "10880",
+          "name": "Jack Campbell",
+          "position": "LB",
+          "team": "DET",
+          "points": 5.0,
+          "roster_id": 1
         }
       ],
       "bottom_performers": [
         {
-          "pid": "3214",
-          "name": "Hunter Henry",
-          "position": "TE",
-          "team": "NE",
-          "points": 4.1,
-          "roster_id": 5
-        },
-        {
-          "pid": "7136",
-          "name": "Kam Curl",
-          "position": "DB",
-          "team": "LAR",
-          "points": 2.0,
+          "pid": "11539",
+          "name": "Jake Bates",
+          "position": "K",
+          "team": "DET",
+          "points": 7.1,
           "roster_id": 7
         },
         {
-          "pid": "LAR",
-          "name": "Los Angeles Rams",
-          "position": "DEF",
-          "team": "LAR",
-          "points": 2.0,
-          "roster_id": 10
+          "pid": "8134",
+          "name": "Khalil Shakir",
+          "position": "WR",
+          "team": "BUF",
+          "points": 5.3,
+          "roster_id": 11
+        },
+        {
+          "pid": "10880",
+          "name": "Jack Campbell",
+          "position": "LB",
+          "team": "DET",
+          "points": 5.0,
+          "roster_id": 1
         }
       ],
       "highest_scorer": {
-        "roster_id": 5,
-        "points": 35.4
+        "roster_id": 6,
+        "points": 39.82
       },
       "lowest_scorer": {
-        "roster_id": 8,
-        "points": 0
+        "roster_id": 10,
+        "points": -0.1
       }
     }
   ],
@@ -1016,22 +1852,22 @@
         "l": null,
         "w": null,
         "t1": 2,
-        "t2": 4
+        "t2": 9
       },
       {
         "m": 2,
         "r": 1,
         "l": null,
         "w": null,
-        "t1": 12,
-        "t2": 1
+        "t1": 10,
+        "t2": 5
       },
       {
         "m": 3,
         "r": 2,
         "l": null,
         "w": null,
-        "t1": 10,
+        "t1": 4,
         "t2": null,
         "t2_from": {
           "w": 1
@@ -1042,7 +1878,7 @@
         "r": 2,
         "l": null,
         "w": null,
-        "t1": 5,
+        "t1": 3,
         "t2": null,
         "t2_from": {
           "w": 2
@@ -1101,22 +1937,22 @@
         "l": null,
         "w": null,
         "t1": 6,
-        "t2": 8
+        "t2": 11
       },
       {
         "m": 2,
         "r": 1,
         "l": null,
         "w": null,
-        "t1": 7,
-        "t2": 11
+        "t1": 12,
+        "t2": 8
       },
       {
         "m": 3,
         "r": 2,
         "l": null,
         "w": null,
-        "t1": 9,
+        "t1": 1,
         "t2": null,
         "t2_from": {
           "w": 1
@@ -1127,7 +1963,7 @@
         "r": 2,
         "l": null,
         "w": null,
-        "t1": 3,
+        "t1": 7,
         "t2": null,
         "t2_from": {
           "w": 2
